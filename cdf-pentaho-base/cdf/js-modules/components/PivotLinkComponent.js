@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
-  function($, BaseComponent) {
+define(['./PivotLinkComponent.ext', '../lib/jquery', './BaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
+  function(PivotLinkComponentExt, $, BaseComponent) {
 
   var PivotLinkComponent = BaseComponent.extend({
     update: function() {
@@ -35,7 +35,7 @@ define(['../lib/jquery', './BaseComponent', '../lib/jquery.fancybox', '../lib/jq
 
   {
     openPivotLink: function(object) {
-      var url = wd.cdf.endpoints.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
+      var url = PivotLinkComponentExt.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
       var qd = object.pivotDefinition;
       var parameters = [];
       for (p in qd) {

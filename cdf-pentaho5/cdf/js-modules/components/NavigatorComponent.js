@@ -11,14 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.tooltip'],
-  function($, NavigatorBaseComponent) {
+define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.tooltip'],
+  function(DashboardExt, $, NavigatorBaseComponent) {
 
   var NavigatorComponent = NavigatorBaseComponent.extend({
     update : function() {
       var myself = this;
       if(NavigatorBaseComponent.navigatorResponse == -1) {
-        $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
+        $.getJSON(DashboardExt.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
           myself.processNavigatorResponse(json);
         });
       } else {
@@ -98,7 +98,8 @@ define(['../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.tooltip'],
           s += "<li><a "+ classString +" title=\"" + file.title + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
 
         } else {
-          s += "<li><a "+ classString +" title=\"" + file.title + "\" onClick=\"return false;\" href=\"" +wd.cdf.endpoints.getRenderHTML() + "?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+          s += "<li><a "+ classString +" title=\"" + file.title + "\" onClick=\"return false;\" href=\"" +
+            DashboardExt.getRenderHTML() + "?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
         }
 
         var files = file.folders || [];

@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', './PrptComponent', '../lib/jquery', '../lib/jquery.impromptu'],
-  function(wd, PrptComponent, $) {
+define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', '../lib/jquery.impromptu'],
+  function(SchedulePrptComponentExt, PrptComponent, $) {
 
   var SchedulePrptComponent = PrptComponent.extend({
     visible: false,
@@ -598,7 +598,7 @@ define(['../wd', './PrptComponent', '../lib/jquery', '../lib/jquery.impromptu'],
           async: false
         });
         $.ajax({
-          url: wd.cdf.endpoints.getScheduledJob(),
+          url: SchedulePrptComponentExt.getScheduledJob(),
           type: "POST",
           data: JSON.stringify(parameters),
           contentType: "application/json",
@@ -621,7 +621,7 @@ define(['../wd', './PrptComponent', '../lib/jquery', '../lib/jquery.impromptu'],
       var validEmailConfig = false;
       $.ajax({
         type: "GET",
-        url: wd.cdf.endpoints.getEmailConfig() + "/isValid",
+        url: SchedulePrptComponentExt.getEmailConfig() + "/isValid",
         success: function(data) {
           validEmailConfig = data;
         }

@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../Logger', '../lib/jquery', './BaseComponent', '../dashboard/Utils'],
-  function(wd, Logger, $, BaseComponent, Utils) {
+define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent', '../dashboard/Utils'],
+  function(XactionComponentExt, Logger, $, BaseComponent, Utils) {
     
   (function(){
       var script   = document.createElement("script");
@@ -191,10 +191,10 @@ define(['../wd', '../Logger', '../lib/jquery', './BaseComponent', '../dashboard/
       obj.geometry = timePlotTimeGeometry;
 
       var allData = undefined;
-      var timePlotEventSourceUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction", null, cd);
+      var timePlotEventSourceUrl = XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction", null, cd);
       var myself = this;
       if(cd.events && cd.events.show == true) {
-        var eventUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction", null, cd.events);
+        var eventUrl = XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction", null, cd.events);
         timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
           timeplot.loadJSON(eventUrl,eventSource2,function(data){
             data.events = myself.filterEvents(data.events, range);

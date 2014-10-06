@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
+define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent'],
+  function(XactionComponentExt, $, BaseComponent) {
 
   var XactionComponent = BaseComponent.extend({
     update: function() {
@@ -43,7 +44,7 @@ define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
                                   " height=\"100%\"" +
                                   " width=\"100%\" />";
           var iframe = $(xactionIFrameHTML);
-          var url = wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution) + "&wrapper=false";
+          var url = XactionComponentExt.getCdfXaction(this.path, this.action, this.solution) + "&wrapper=false";
           // Add args
           var p = new Array(this.parameters.length);
           for(var i = 0, len = p.length; i < len; i++) {

@@ -12,7 +12,7 @@
  */
 
  define(['./Dashboard', '../Logger', '../lib/jquery', '../lib/underscore', './Dashboard.storage.ext'],
-     function (Dashboard, Logger, $, _, ext) {
+     function(Dashboard, Logger, $, _, ext) {
 
     /**
      * A module representing a extension to Dashboard module for storage.
@@ -25,7 +25,7 @@
        *
        * @private
        */
-      _initStorage: function(){
+      _initStorage: function() {
         var myself = this;
         myself.storage = {};
         myself.initialStorage = {};
@@ -36,7 +36,7 @@
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(ext.getStorage(args.action), args, function(json){
+        $.getJSON(ext.getStorage(args.action), args, function(json) {
           $.extend(myself.storage,json);
           $.extend(myself.initialStorage,json);
         });
@@ -45,10 +45,10 @@
       /**
        * Requests the storage object and stores it in storage object
        */
-      loadStorage: function(){
+      loadStorage: function() {
         var myself = this;
         // Don't do anything for anonymousUser.
-        if( this.context && this.context.user === "anonymousUser") {
+        if(this.context && this.context.user === "anonymousUser") {
           return;
         }
 
@@ -58,7 +58,7 @@
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(ext.getStorage( args.action ), args, function(json) {
+        $.getJSON(ext.getStorage(args.action), args, function(json) {
           $.extend(myself.storage,json);
         });
       },
@@ -66,9 +66,9 @@
       /**
        * Saves the storage in the server, based on the storage object
        */
-      saveStorage: function(){
+      saveStorage: function() {
         // Don't do anything for anonymousUser
-        if( this.context && this.context.user === "anonymousUser") {
+        if(this.context && this.context.user === "anonymousUser") {
           return;
         }
 
@@ -79,8 +79,8 @@
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(ext.getStorage( args.action ), args, function(json) {
-          if(json.result != true){
+        $.getJSON(ext.getStorage(args.action), args, function(json) {
+          if(json.result != true) {
             Logger.log("Error saving storage",'error');
           }
         });
@@ -89,11 +89,11 @@
       /**
        * Cleans the storage object in the client and places a request to clean it in the server
        */
-      cleanStorage: function(){
+      cleanStorage: function() {
         this.storage = {};
 
         // Don't do noting for anonymousUser
-        if( this.context && this.context.user === "anonymousUser") {
+        if(this.context && this.context.user === "anonymousUser") {
           return;
         }
 
@@ -103,7 +103,7 @@
         };
 
         $.getJSON(ext.getStorage( args.action ), args, function(json) {
-          if(json.result != true){
+          if(json.result != true) {
             Logger.log("Error deleting storage", 'error');
           }
         });

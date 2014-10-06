@@ -11,12 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard.ext'], function(e) {
-  var ext = {
+define(['./Dashboard.ext'], function(DashboardExt) {
+
+  var DashboardContextExt = {
     getContext: function() {
-      return e.getCdfBase() + "/context/get";
+      return DashboardExt.getCdfBase() + "/context/get";
     }
   };
 
-  return ext;
+  return DashboardContextExt;
 });

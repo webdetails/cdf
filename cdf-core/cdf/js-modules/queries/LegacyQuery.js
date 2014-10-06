@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../lib/jquery', '../dashboard/Utils'],
-  function(wd, BaseQuery, Dashboard, _, $, Utils) {
+define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../lib/jquery', '../dashboard/Utils'],
+  function(XactionComponentExt, BaseQuery, Dashboard, _, $, Utils) {
 
   function makeMetadataElement(idx, name, type) {
     return { "colIndex" : idx || 0, "colType" : type || "String" , "colName" : name || "Name" };
@@ -22,8 +22,8 @@ define(['../wd', './BaseQuery', '../dashboard/Dashboard.query', '../lib/undersco
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions" , "jtable.xaction"),
-      queryDef:{}
+      url: XactionComponentExt.getCdfXaction("pentaho-cdf/actions" , "jtable.xaction"),
+      queryDef: {}
     },
     interfaces:{
       lastResultSet:{

@@ -11,12 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/dashboard/Dashboard.storage.ext', ['./Dashboard.ext'], function(e) {
-  var ext = {
-    getStorage: function ( action ) {
+define('cdf/dashboard/Dashboard.storage.ext', ['./Dashboard.ext'],
+  function(DashboardExt) {
+
+  var DashboardStorageExt = {
+    getStorage: function(action) {
       return "";
     }
   };
 
-  return ext;
+  return DashboardStorageExt;
 });

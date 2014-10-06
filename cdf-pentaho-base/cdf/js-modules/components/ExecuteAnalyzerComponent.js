@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './AnalyzerComponent', '../lib/jquery.fancybox'],
-  function($, AnalyzerComponent) {
+define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', '../lib/jquery.fancybox'],
+  function(AnalyzerComponentExt, $, AnalyzerComponent) {
 
   var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
     
@@ -61,7 +61,7 @@ define(['../lib/jquery', './AnalyzerComponent', '../lib/jquery.fancybox'],
 
       $.fancybox({
         type: "iframe",
-        href: wd.cdf.endpoints.getAnalyzer( path, callVar, parameters),
+        href: AnalyzerComponentExt.getAnalyzer(path, callVar, parameters),
         width: $(window).width(),
         height: $(window).height() - 50
       });

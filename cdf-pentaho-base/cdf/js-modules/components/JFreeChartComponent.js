@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../Logger', '../lib/jquery', './BaseComponent', '../lib/captify'],
-  function(wd, Logger, $, BaseComponent) {
+define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', '../lib/jquery', './BaseComponent', '../lib/captify'],
+  function(JFreeChartComponentExt, DashboardExt, Logger, $, BaseComponent) {
 
   var JFreeChartComponent = BaseComponent.extend({
     update : function() {
@@ -111,11 +111,11 @@ define(['../wd', '../Logger', '../lib/jquery', './BaseComponent', '../lib/captif
           action: xactionFile,
           exportType: type
         },cd);
-        myself.dashboard.post(wd.cdf.endpoints.getExport() ,obj);
+        myself.dashboard.post(DashboardExt.getExport() ,obj);
       };
 
       var cd = myself.chartDefinition;
-      var captionOptions = $.extend(wd.helpers.jfreechartHelper.getCaption(cd, myself, exportFile, cdfComponent), cd.caption);
+      var captionOptions = $.extend(JFreeChartComponentExt.getCaption(cd, myself, exportFile, cdfComponent), cd.caption);
 
       var captionId = myself.htmlObject + 'caption';
       var caption = $('<div id="' + captionId + '" ></div>');

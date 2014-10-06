@@ -11,14 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils', '../Logger'],
-  function (BaseQuery, Dashboard, _, Utils, Logger) {
+define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils', '../Logger'],
+  function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger) {
 
   var cdaQueryOpts = {
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      //  url: wd.cdf.endpoints.getDoQuery(),
+      url: CdaQueryExt.getDoQuery(),
       file: '',
       id: '',
       outputIdx: '1',
@@ -118,7 +118,7 @@ define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../
         .done(function(uuid) {
           var _exportIframe = $('<iframe style="display:none">');
           _exportIframe.detach();
-          _exportIframe[0].src = wd.cdf.endpoints.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );
+          _exportIframe[0].src = CdaQueryExt.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );
           _exportIframe.appendTo($('body')); })
         .fail(function(jqXHR,textStatus,errorThrown) {
           Logger.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });

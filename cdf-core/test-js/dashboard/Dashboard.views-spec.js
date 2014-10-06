@@ -11,15 +11,46 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard"], function (Dashboard) {
-  describe("The CDF views", function () {
-    it("Correctly calls the initViews", function () {
-      var dashboard = new Dashboard();
-      setTimeout(function () {
+define(["cdf/Dashboard", 'cdf/lib/jquery'], function(Dashboard, $) {
+
+  /**
+   * ## The CDF views
+   */
+  describe("The CDF views", function() {
+
+    var dashboard = new Dashboard();
+
+    /**
+     * ## The CDF views # Correctly calls the initViews
+     */
+    it("Correctly calls the initViews", function(done) {
+      setTimeout(function() {
         expect(dashboard._initViews).toBeDefined();
         expect(dashboard.viewParameters).toEqual({});
-        expect(dashboard.view).toEqual({});
+        expect(dashboard.view).toEqual(undefined);
+        done();
       }, 100);
+    });
+
+    /**
+     * ## The CDF views # Sets the view object according to server response
+     */
+    it("Sets the view object according to server response", function(done) {
+      var serverResponse = {
+        test: 1
+      };
+
+      spyOn($, "getJSON").and.callFake(function(json) {
+        dashboard.view = serverResponse;
+      });
+
+      dashboard._initViews();
+
+      setTimeout(function() {
+        expect(dashboard.view).toEqual(serverResponse);
+        done();
+      }, 100);
+      
     });
   });
 });

@@ -15,36 +15,37 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
   var TextInputComponent = BaseComponent.extend({
     update: function() {
-      var value;
       var myself = this;
-      var selectHTML = "<input type='text' id='" + myself.name +
-        "' name='"  + myself.name +
-        "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
+      var name = myself.name;
+
+      var selectHTML = "<input type='text' id='" + name +
+        "' name='"  + name + "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
         (myself.size ? ("' size='" + myself.size) : "") +
         (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") + "'>";
 
       myself.placeholder().html(selectHTML);
 
-      $("#" + myself.name)
+      var el = $("#" + name);
+
+      el
         .change(function() {
-          if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) {
-            return;
-          }
-          myself.dashboard.processChange(myself.name);
+          if(myself.dashboard.getParameterValue(myself.parameter) === el.val()) {  return; }
+          myself.dashboard.processChange(name);
         })
         .keyup(function(ev) {
           if(ev.keyCode == 13) {
-            if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) {
+            if(myself.dashboard.getParameterValue(myself.parameter) === el.val()) {
               return;
             }
-            myself.dashboard.processChange(myself.name);
+            myself.dashboard.processChange(name);
           }
         });
 
       myself._doAutoFocus();
     },
+
     getValue : function() {
-      return $("#"+this.name).val();
+      return $("#" + this.name).val();
     }
   });
 

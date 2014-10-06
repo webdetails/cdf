@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../lib/jquery', './JFreeChartComponent'],
-  function(wd, $, JFreeChartComponent) {
+define(['./JFreeChartComponent.ext', '../lib/jquery', './JFreeChartComponent'],
+  function(JFreeChartComponentExt, $, JFreeChartComponent) {
 
   var OpenFlashChartComponent = JFreeChartComponent.extend({
 
@@ -25,7 +25,7 @@ define(['../wd', '../lib/jquery', './JFreeChartComponent'],
       this.dashboard.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML) {
 
         if(jXML != null) {
-          var result = wd.helpers.jfreechartHelper.getOpenFlashChart(jXML.find("ExecuteActivityResponse:first-child").text());
+          var result = JFreeChartComponentExt.getOpenFlashChart(jXML.find("ExecuteActivityResponse:first-child").text());
           getDataFuntion = result.match(/getData.*\(\)/gi);
           $("#"+myself.htmlObject).html(result);
         }

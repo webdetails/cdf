@@ -11,16 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([], function() {
-  var ext = {
+define(['../Encoder'], function(Encoder) {
+  var DashboardExt = {
     pluginName: "pentaho-cdf",
+    samplesBasePath: "/public/plugin-samples/",
 
     /**
      *
      * @param plugin
      * @returns {string}
      */
-    getPluginBase: function( plugin ) {
+    getPluginBase: function(plugin) {
       return CONTEXT_PATH + "plugin/" + plugin + "/api";
     },
 
@@ -28,7 +29,7 @@ define([], function() {
      *
      * @returns {string}
      */
-    getCdfBase: function () {
+    getCdfBase: function() {
       return this.getPluginBase( this.pluginName );
     },
 
@@ -39,19 +40,123 @@ define([], function() {
      *
      * @returns {string} the file path
      */
-    getFilePathFromUrl: function(){
+    getFilePathFromUrl: function() {
       var filePath = window.location.pathname;
-      if(filePath.indexOf("/:") == -1){
+      if(filePath.indexOf("/:") == -1) {
         filePath = decodeURIComponent(window.location.pathname);
       }
-      if(filePath.indexOf("/:") > 0){
+      if(filePath.indexOf("/:") > 0) {
         var regExp = filePath.match("(/:)(.*)(/)");
-        if(regExp[2]){
+        if(regExp[2]) {
           return "/"+regExp[2].replace(new RegExp(":", "g"), "/");
         }
       }
+    },
+
+    /**
+     * Returns a URL parameter for cache-busting porpuses.
+     *
+     * @returns {string} the timestamp parameter of an URL
+     */
+    getTimestamp: function() {
+      return "ts=" + new Date().getTime();
+    },
+
+    /**
+     * Returns the full path to an explicit action.
+     *
+     * @returns {string} the full path
+     */
+    getFullPath: function(path, action) {
+
+      path = path || "";
+      action = action || "";
+
+      var fullPath = path.indexOf(this.pluginName) == 0 ? (this.samplesBasePath + path) : path;
+      fullPath = fullPath + (action ? "/" + action : "").replace(/\/\//g, '/');
+
+      return fullPath;
+    },
+
+    /**
+     * Builds a full path based on the properties of the options parameter provided.
+     *
+     * @param {object} options An object with solution, path or action properties for path building.
+     * @returns {string} the full path
+     */
+    composePath: function(options) {
+      var clean = function(segment) {
+        if(segment.charAt(0) == "/") {
+          segment = segment.substring(1, segment.length);
+        }
+        if(segment.charAt(segment.length - 1) == "/") {
+          segment = segment.substring(0, segment.length - 1);
+        }
+        return segment
+      };
+      var fullPath = "/";
+      if(options.solution) {
+        fullPath += clean(options.solution) + "/";
+      }
+      if(options.path) {
+        fullPath += clean(options.path);
+      }
+      if(options.action) {
+        fullPath += "/" + clean(options.action);
+      }
+      return fullPath;
+    },
+
+
+
+
+    /* ToDo: Documentation */
+
+    getSettings: function(action, key) {
+      if(key) {
+        return this.getCdfBase() + "/settings/" + action + "?" + $.param({key: key});
+      } else {
+        return this.getCdfBase() + "/settings/" + action;
+      }
+    },
+
+    getServiceAction: function(method, solution, path, action) { 
+
+      var arr = {};
+      arr.wrapper = false;
+      arr.action = action;
+      arr.url = Encoder.encode(
+        CONTEXT_PATH + "api/repos/{0}/generatedContent",
+        Encoder.encodeRepositoryPath(this.getFullPath(path, action))
+      );
+
+      return arr; 
+    },
+
+    getStaticResource: function(resource) {
+      return this.getCdfBase() + "/resources/" + resource;
+    },
+
+    getCaptifyZoom: function() {
+      return this.getStaticResource("js/lib/captify/zoom.html");
+    },
+
+    getExport: function() {
+      return this.getCdfBase() + "/Export";
+    },
+
+    getPluginEndpoint: function(plugin, endpoint) {
+      return this.getPluginBase(plugin) + "/" + endpoint;
+    },
+
+    getJSONSolution: function() {
+      return this.getCdfBase() + "/getJSONSolution";
+    },
+
+    getRenderHTML: function() {
+      return this.getCdfBase() + "/RenderHtml";
     }
   };
 
-  return ext;
+  return DashboardExt;
 });

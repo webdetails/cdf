@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../lib/mustache', "../lib/underscore", "../lib/backbone", './BaseComponent', '../Logger', '../lib/jquery'],
-  function(wd, Mustache, _, Backbone, BaseComponent, Logger, $) {
+define(['../lib/mustache', "../lib/underscore", "../lib/backbone", './BaseComponent', '../Logger', '../lib/jquery', './CommentsComponent.ext'],
+  function(Mustache, _, Backbone, BaseComponent, Logger, $, ext) {
 
   var CommentsComponent = BaseComponent.extend({
   
@@ -107,7 +107,7 @@ define(['../wd', '../lib/mustache', "../lib/underscore", "../lib/backbone", './B
           options = options || {};
           var ajaxOpts = {
             type: 'GET',
-            url: wd.cdf.endpoints.getComments(operation),
+            url: ext.getComments(operation),
             success: function(data) {
               myself.requestResponse(data, operation, collection, callback);
             },
@@ -341,7 +341,7 @@ define(['../wd', '../lib/mustache', "../lib/underscore", "../lib/backbone", './B
           if(paginate.activePageNumber > 0) {
             $('.navigatePrevious').removeClass("disabled");
           }
-          if((paginate.activePageNumber+1) < Math.ceil(myself.options.queyResult.length/paginate.pageCommentsSize)) {
+          if((paginate.activePageNumber + 1) < Math.ceil(myself.options.queyResult.length / paginate.pageCommentsSize)) {
             $('.navigateNext').removeClass("disabled");
           }
         },
@@ -416,7 +416,6 @@ define(['../wd', '../lib/mustache', "../lib/underscore", "../lib/backbone", './B
     *****/
   
     update: function() {
-  
       // Set page start and length for pagination
       this.paginateActive = (typeof this.paginate == 'undefined') ? true : this.paginate;
       this.pageCommentsSize = (typeof this.pageCommentsSize == 'undefined') ? 10 : this.pageCommentsSize;
@@ -436,6 +435,7 @@ define(['../wd', '../lib/mustache', "../lib/underscore", "../lib/backbone", './B
         Logger.log("Fatal - no page definition passed","error");
         return;
       }
+
       options = {
         htmlObject: this.htmlObject,
         page: this.page,

@@ -12,7 +12,9 @@
  */
 
 
-define(['./Dashboard', './Dashboard.ext', './Dashboard.context.ext'], function(Dashboard, DashboardExt, ContextExt) {
+define(['../lib/jquery', './Dashboard', './Dashboard.ext', './Dashboard.context.ext'],
+  function($, Dashboard, DashboardExt, DashboardContextExt) {
+  
   /**
    * A module representing a extension to Dashboard module for i18n.
    * @module Dashboard.i18n
@@ -23,7 +25,7 @@ define(['./Dashboard', './Dashboard.ext', './Dashboard.context.ext'], function(D
      *
      * @private
      */
-    _initContext: function(){
+    _initContext: function() {
       var myself = this;
       this.context = {};
 
@@ -33,10 +35,10 @@ define(['./Dashboard', './Dashboard.ext', './Dashboard.context.ext'], function(D
         ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
       };
 
-      $.getJSON(ContextExt.getContext(), args, function(json){
+      $.getJSON(DashboardContextExt.getContext(), args, function(json) {
         $.extend(myself.context,json);
       });
-    }
 
+    }
   });
 });

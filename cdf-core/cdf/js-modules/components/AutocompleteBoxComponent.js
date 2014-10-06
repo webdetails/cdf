@@ -100,7 +100,7 @@ define(['./QueryComponent', './BaseComponent', '../lib/jquery.ui.autobox.ext'],
 
       var opt = {
         list: function() {
-          var val = myself.textbox.val();
+          var val = myself._getTextBoxValue();
           if(val.length >= myself.minTextLenght
             && !(val == '' //nothing to search
               || val == myself.searchedWord
