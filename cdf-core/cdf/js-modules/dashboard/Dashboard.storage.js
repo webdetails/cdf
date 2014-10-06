@@ -10,22 +10,38 @@
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
- define(['./Dashboard', '../Logger'], function (Dashboard, Logger) {
+
+ define(['./Dashboard', '../Logger', '../lib/jquery', '../lib/underscore', './Dashboard.storage.ext'],
+     function (Dashboard, Logger, $, _, ext) {
 
     /**
      * A module representing a extension to Dashboard module for storage.
      * @module Dashboard.storage
      */
     Dashboard.implement({
-    
+
       /**
        * Method used by the Dashboard constructor for storage initialization
        *
        * @private
        */
       _initStorage: function(){
-        this.storage = {};
+        var myself = this;
+        myself.storage = {};
+        myself.initialStorage = {};
+
+        var args = {
+          user: this.context.user,
+          action: "read",
+          ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+        };
+
+        $.getJSON(ext.getStorage(args.action), args, function(json){
+          $.extend(myself.storage,json);
+          $.extend(myself.initialStorage,json);
+        });
       },
+
       /**
        * Requests the storage object and stores it in storage object
        */
@@ -35,64 +51,64 @@
         if( this.context && this.context.user === "anonymousUser") {
           return;
         }
-    
+
         var args = {
+          user: this.context.user,
           action: "read",
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
-    
-        $.getJSON(wd.cdf.endpoints.getStorage( args.action ), args, function(json) {
+
+        $.getJSON(ext.getStorage( args.action ), args, function(json) {
           $.extend(myself.storage,json);
         });
       },
-    
+
       /**
        * Saves the storage in the server, based on the storage object
        */
       saveStorage: function(){
-        var myself = this;
         // Don't do anything for anonymousUser
         if( this.context && this.context.user === "anonymousUser") {
           return;
         }
-    
+
         var args = {
+          user: this.context.user,
           action: "store",
           storageValue: JSON.stringify(this.storage),
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
-    
-        $.getJSON(wd.cdf.endpoints.getStorage( args.action ), args, function(json) {
+
+        $.getJSON(ext.getStorage( args.action ), args, function(json) {
           if(json.result != true){
             Logger.log("Error saving storage",'error');
           }
         });
       },
-    
+
       /**
        * Cleans the storage object in the client and places a request to clean it in the server
        */
       cleanStorage: function(){
-        var myself = this;
         this.storage = {};
-    
+
         // Don't do noting for anonymousUser
         if( this.context && this.context.user === "anonymousUser") {
           return;
         }
-    
+
         var args = {
+          user: this.context.user,
           action: "delete"
         };
-    
-        $.getJSON(wd.cdf.endpoints.getStorage( args.action ), args, function(json) {
+
+        $.getJSON(ext.getStorage( args.action ), args, function(json) {
           if(json.result != true){
             Logger.log("Error deleting storage", 'error');
           }
         });
       }
-    
     });
-    
-    
+
+
 });

@@ -136,17 +136,17 @@ public class CdfHtmlRenderer {
     //getHeaders( dashboardContent, parameterMap, out ); TODO: review headers
     out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
     // Add context
-    try {
-      ContextEngine.generateContext( out, parameterMap, inactiveInterval );
-    } catch ( Exception e ) {
-      logger.error( "Error generating cdf context.", e );
-    }
+    //try {
+    //  ContextEngine.generateContext( out, parameterMap, inactiveInterval );
+    //} catch ( Exception e ) {
+    //  logger.error( "Error generating cdf context.", e );
+    //}
     // Add storage
-    try {
-      generateStorage( out, user );
-    } catch ( Exception e ) {
-      logger.error( "Error in cdf storage.", e );
-    }
+    //try {
+    //  generateStorage( out, user );
+    //} catch ( Exception e ) {
+    //  logger.error( "Error in cdf storage.", e );
+    //}
 
     out.write( "<div id=\"dashboardContent\">".getBytes( CharsetHelper.getEncoding() ) );
 

@@ -32,7 +32,7 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
   
       _.extend(this, Backbone.Events);
   
-      configurePlugins();
+      _configurePlugins();
   
       //TODO: when we start including the webcontext from the server we must review this part
       if (!(typeof(CONTEXT_PATH) == 'undefined')) {
@@ -49,20 +49,18 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
       //wd.cdf.endpoints.webAppPath = this.webAppPath; TODO: review
   
       //this.CDF_BASE_PATH = wd.cdf.endpoints.getCdfBase(); TODO: review
-  
-      //initial storage
-      this.initialStorage = {};
-  
-      callIfAvailable(this._initStorage);
-      callIfAvailable(this._initViews);
-      callIfAvailable(this._initParameters);
-      callIfAvailable(this._initBookmarkables);
-      callIfAvailable(this._initI18n);
-      callIfAvailable(this._initComponents);
-      callIfAvailable(this._initLifecycle);
-      callIfAvailable(this._initNotifications);
-      callIfAvailable(this._initQuery);
-      callIfAvailable(this._initAddIns);        
+
+      _callIfAvailable(this._initContext);
+      _callIfAvailable(this._initStorage);
+      _callIfAvailable(this._initViews);
+      _callIfAvailable(this._initParameters);
+      _callIfAvailable(this._initBookmarkables);
+      _callIfAvailable(this._initI18n);
+      _callIfAvailable(this._initComponents);
+      _callIfAvailable(this._initLifecycle);
+      _callIfAvailable(this._initNotifications);
+      _callIfAvailable(this._initQuery);
+      _callIfAvailable(this._initAddIns);
   
       this.refreshEngine = new RefreshEngine(this);
   
@@ -71,7 +69,7 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
        *
        * @private
        */
-      function callIfAvailable(func) {
+      function _callIfAvailable(func) {
         if(typeof func == "function") {
           func.apply(myself);
         } else {
@@ -84,7 +82,7 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
        *
        * @private
        */
-      function configurePlugins() {
+      function _configurePlugins() {
         var myself = this;
   
         if(typeof $ == 'function') {

@@ -13,6 +13,7 @@
   <bean id="xcdf" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
   <bean id="xcdf.mobile" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
   <bean id="storage" class="org.pentaho.cdf.storage.StorageApi"/>
+  <bean id="context" class="org.pentaho.cdf.context.ContextApi"/>
   <bean id="comments" class="org.pentaho.cdf.comments.CommentsApi"/>
   <bean id="settings" class="org.pentaho.cdf.settings.SettingsApi"/>
   <bean id="cdfResources" class="org.pentaho.cdf.ResourcesApi"/>
