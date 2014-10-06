@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
+define(['./AnalyzerComponent.ext', '../lib/jquery', './BaseComponent'],
+  function(AnalyzerComponentExt, $, BaseComponent) {
 
   var AnalyzerComponent = BaseComponent.extend({
     update: function() {
@@ -30,7 +31,7 @@ define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
       var callVar = this.isEditMode() ? "editor" : "viewer";
 
       $.extend( options, { ts: new Date().getTime() } );
-      var url = wd.cdf.endpoints.getAnalyzer( pathSegments, callVar, options );
+      var url = AnalyzerComponentExt.getAnalyzer( pathSegments, callVar, options );
 
       var iframe = this.generateIframe( url );
       $( "#" + this.htmlObject ).html( iframe );

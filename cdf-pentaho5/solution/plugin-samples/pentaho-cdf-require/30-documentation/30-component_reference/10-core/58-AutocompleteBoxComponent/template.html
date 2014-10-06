@@ -131,7 +131,7 @@
           return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
             "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
             "(Left([Customers].CurrentMember.Name, Len(\"" +
-              dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")) = \"" +
+            dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \"" +
               dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")),100.0,[Measures].[Sales]) ON ROWS "+
             "from [SteelWheelsSales]";
         }
@@ -156,7 +156,7 @@
         if(!this.dashboard.getParameterValue(this.parameter)) {
           this.dashboard.setParameter(this.parameter, "");
         }
-        var inputValue = $("#autoboxInput").val();
+        var inputValue = this._getTextBoxValue();
         if(this.dashboard.getParameterValue(this.parameter) != inputValue) {
           this.dashboard.setParameter(this.parameter, inputValue);
           this.dashboard.update(this);

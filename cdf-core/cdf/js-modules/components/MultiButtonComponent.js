@@ -11,15 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/Utils'],
-  function(wd, $, ToggleButtonBaseComponent, Utils) {
+define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/Utils'],
+  function(MultiButtonComponentExt, $, ToggleButtonBaseComponent, Utils) {
 
   var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     indexes: [],//used as static
     draw: function(myArray) {
       this.cachedArray = myArray;
       var myself = this;
-      var cssWrapperClass = wd.helpers.inputHelper.getCssWrapperClass(myself.verticalOrientation);
+      var cssWrapperClass = MultiButtonComponentExt.getCssWrapperClass(myself.verticalOrientation);
       var selectHTML = "";
       var firstVal;
 
@@ -34,7 +34,7 @@ define(['../wd', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/U
       for(var i = 0, len = myArray.length; i < len; i++) {
         var value = myArray[i][valIdx],
           label = myArray[i][lblIdx],
-          classes = cssWrapperClass + wd.helpers.inputHelper.getExtraCss(i,len,myself.verticalOrientation),
+          classes = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i,len,myself.verticalOrientation),
           selector;
 
         value = (value == null ? null : value.replace('"','&quot;'));
@@ -125,14 +125,14 @@ define(['../wd', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/U
       }
 
       // set up hovering
-      $("." + wd.helpers.inputHelper.getToggleButtonClass() ).hover(function() {
-        $(myself).addClass(wd.helpers.inputHelper.getToggleButtonHoveringClass());
+      $("." + MultiButtonComponentExt.getToggleButtonClass()).hover(function() {
+        $(myself).addClass(MultiButtonComponentExt.getToggleButtonHoveringClass());
       }, function() {
-        $(myself).removeClass(wd.helpers.inputHelper.getToggleButtonHoveringClass());
+        $(myself).removeClass(MultiButtonComponentExt.getToggleButtonHoveringClass());
       });
       // set up hovering when inner button is hovered
-      $("." + wd.helpers.inputHelper.getToggleButtonClass() + " button").hover(function() {
-        $(myself).parent().addClass(wd.helpers.inputHelper.getToggleButtonHoveringClass());
+      $("." + MultiButtonComponentExt.getToggleButtonClass() + " button").hover(function() {
+        $(myself).parent().addClass(MultiButtonComponentExt.getToggleButtonHoveringClass());
       }, function() {
         // don't remove it, since it's inside the outer div it will handle that
       });
@@ -167,8 +167,8 @@ define(['../wd', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/U
     // This method should be broken up so the UI state code is reusable outside of event processing
     clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly) {
 
-      var cssWrapperClass= wd.helpers.inputHelper.getUnselectedCss(verticalOrientation);
-      var cssWrapperClassSelected= wd.helpers.inputHelper.getSelectedCss(verticalOrientation);
+      var cssWrapperClass= MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
+      var cssWrapperClassSelected= MultiButtonComponentExt.getSelectedCss(verticalOrientation);
 
       var buttons = $("#" + htmlObject + " button");
       if(isMultiple) {//toggle button
@@ -187,15 +187,15 @@ define(['../wd', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/U
           }
         }
         if(disable) {
-          buttons[index].parentNode.className = cssWrapperClass + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
+          buttons[index].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
         } else {
-          buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
+          buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
           this.indexes[name].push(index);
         }
       } else {//de-select old, select new
         this.clearSelections(htmlObject, name, verticalOrientation);
         this.indexes[name] = index;
-        buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
+        buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
       }
       if(!updateUIOnly) {
         this.callAjaxAfterRender(this, name);
@@ -204,9 +204,9 @@ define(['../wd', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/U
 
     clearSelections: function(htmlObject, name, verticalOrientation) {
       var buttons = $("#" + htmlObject + " button");
-      var cssWrapperClass = wd.helpers.inputHelper.getUnselectedCss(verticalOrientation);
+      var cssWrapperClass = MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
       for(var i = 0; i < buttons.length; i++) {
-        buttons[i].parentNode.className = cssWrapperClass + wd.helpers.inputHelper.getExtraCss(i,buttons.length,verticalOrientation);
+        buttons[i].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i,buttons.length,verticalOrientation);
       }
 
       this.indexes[name] = [];

@@ -16,24 +16,27 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
   var TextareaInputComponent = BaseComponent.extend({
     update: function() {
       var myself = this;
-      var selectHTML = "<textarea id='" + myself.name +
-        "' name='" + myself.name +
+      var name = myself.name;
+
+      var selectHTML = "<textarea id='" + name + "' name='" + name +
         (myself.numRows ? ("' rows='" + myself.numRows) : "") +
         (myself.numColumns ? ("' cols='" + myself.numColumns) : "") +
-        "'>" +
-        myself.dashboard.getParameterValue(myself.parameter) +
-        '</textarea>';
+        "'>" + myself.dashboard.getParameterValue(myself.parameter) + '</textarea>';
 
       myself.placeholder().html(selectHTML);
 
-      $("#" + myself.name)
-        .change(function() {
-          if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) return;
-          myself.dashboard.processChange(myself.name);
-        });
+      var el = $("#" + name);
+
+      el.change(function() {
+        if(myself.dashboard.getParameterValue(myself.parameter) === el.val()) {
+          return;
+        }
+        myself.dashboard.processChange(name);
+      });
     },
-    getValue : function() {
-      return $("#"+this.name).val();
+
+    getValue: function() {
+      return $("#" + this.name).val();
     }
   });
 

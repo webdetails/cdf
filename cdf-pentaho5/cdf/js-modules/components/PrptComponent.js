@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../Logger', '../lib/jquery', './BaseComponent'],
-  function(wd, Logger, $, BaseComponent) {
+define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
+  function(PrptComponentExt, Logger, $, BaseComponent) {
 
   var PrptComponent = BaseComponent.extend({
     getIframeName: function() {
@@ -76,7 +76,7 @@ define(['../wd', '../Logger', '../lib/jquery', './BaseComponent'],
           Logger.log("showParameters not supported with IFrame = False");
         }
         var requestType = this.usePost ? "POST" : "GET";
-        var url = wd.cdf.endpoints.getReport(pathSegments, "report", {ts: new Date().getTime()});
+        var url = PrptComponentExt.getReport(pathSegments, "report", {ts: new Date().getTime()});
         $.each(reportOptions, function(key, value) {
           if(params[key] == undefined) {
             params[key] = value;
@@ -115,11 +115,11 @@ define(['../wd', '../Logger', '../lib/jquery', './BaseComponent'],
               params[key] = value;
             }
           });
-          var url = wd.cdf.endpoints.getReport(pathSegments, callVar, {ts: new Date().getTime()});
+          var url = PrptComponentExt.getReport(pathSegments, callVar, {ts: new Date().getTime()});
           this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
         } else {
           $.extend( options, {ts: new Date().getTime()});
-          var url = wd.cdf.endpoints.getReport( pathSegments, callVar, options );
+          var url = PrptComponentExt.getReport( pathSegments, callVar, options );
           if(options.showParameters && this.autoResize) {
             Logger.log('PrptComponent: autoResize disabled because showParameters=true');
             this.autoResize = false;

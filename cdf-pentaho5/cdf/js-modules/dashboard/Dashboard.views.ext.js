@@ -11,23 +11,25 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard.ext'], function(e) {
-  var ext = {
+define(['./Dashboard.ext'], function(DashboardExt) {
+
+  var DashboardViewsExt = {
     getView: function() {
-      return e.getCdfBase() + "/views/get";
+      return DashboardExt.getCdfBase() + "/views/get";
     },
-    getViewIdFromUrl: function(){
+
+    getViewIdFromUrl: function() {
       var url = window.location.search;
-      if(url.indexOf("viewId") == -1){
+      if(url.indexOf("viewId") == -1) {
         return "";
       } else {
-        var regExp = url.match("(viewId=)(.*)(?=&)");
-        if(regExp[2]){
-          return regExp[2];
+        var regExp = url.match("[?|&]viewId=([^&\s]+)");
+        if(regExp[1]) {
+          return regExp[1];
         }
       }
     }
   };
 
-  return ext;
+  return DashboardViewsExt;
 });

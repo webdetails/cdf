@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../lib/jquery', './PrptComponent', '../lib/jquery.fancybox'],
-  function(wd, $, PrptComponent) {
+define(['./PrptComponent.ext', '../lib/jquery', './PrptComponent', '../lib/jquery.fancybox'],
+  function(PrptComponentExt, $, PrptComponent) {
 
   var ExecutePrptComponent = PrptComponent.extend({
     visible: false,
@@ -60,7 +60,7 @@ define(['../wd', '../lib/jquery', './PrptComponent', '../lib/jquery.fancybox'],
       $.extend( parameters, {ts: new Date().getTime()});
       $.fancybox({
         type: "iframe",
-        href: wd.cdf.endpoints.getReport( path, "viewer", parameters ),
+        href: PrptComponentExt.getReport( path, "viewer", parameters ),
         width: $(window).width(),
         height: $(window).height() - 50
       });

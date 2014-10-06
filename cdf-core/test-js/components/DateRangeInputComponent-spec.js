@@ -11,20 +11,22 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard', 'cdf/components/DateRangeInputComponent'], function(Dashboard, DateRangeInputComponent) {
+define(['cdf/Dashboard', 'cdf/components/DateRangeInputComponent', 'cdf/lib/jquery'],
+  function(Dashboard, DateRangeInputComponent, $) {
+
   /**
    * ## The Date Range Input Component
    */
   describe("The Date Range Input Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.addParameter("startDate", "2009-01-01");
+    dashboard.addParameter("endDate", "2009-03-01");
 
-    //myDashboard.addParameter("startDate", "2009-01-01");
-    //myDashboard.addParameter("endDate", "2009-03-01");
+    dashboard.init();
 
-    var dateRangeInputComponent = window.DateRangeInputComponent = new DateRangeInputComponent(myDashboard, {
+    var dateRangeInputComponent = new DateRangeInputComponent(dashboard, {
       name: "dateRangeInputComponent",
       type: "dateRangeInputComponent",
       htmlObject: 'dateRangeInputComponent',
@@ -33,20 +35,23 @@ define(['cdf/Dashboard', 'cdf/components/DateRangeInputComponent'], function(Das
       inputSeparator: "<br />",
       executeAtStart: true,
       tooltip: "Click me to select a date",
-      postChange: function(date1, date2){
+      postChange: function(date1, date2) {
         alert("You chose from " + date1 + " to " + date2 );
       }
     });
 
-    myDashboard.addComponent(dateRangeInputComponent);
+    dashboard.addComponent(dateRangeInputComponent);
 
     /**
      * ## The Date Range Input Component # Update Called
      */
     it("Update Called", function(done) {
       spyOn(dateRangeInputComponent, 'update').and.callThrough();
-      myDashboard.update(dateRangeInputComponent);
-      setTimeout(function(){
+      var doc = jQuery('<input/>');
+      spyOn(doc, 'offset').and.returnValue({});
+      spyOn(dateRangeInputComponent, 'placeholder').and.returnValue(doc);
+      dashboard.update(dateRangeInputComponent);
+      setTimeout(function() {
         expect(dateRangeInputComponent.update).toHaveBeenCalled();
         done();
       }, 100);

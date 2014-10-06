@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
-  function($, BaseComponent) {
+define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
+  function(XactionComponentExt, $, BaseComponent) {
 
   var JpivotComponent = BaseComponent.extend({
     update: function() {
@@ -31,7 +31,7 @@ define(['../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
         var value = this.dashboard.getParameterValue(this.parameters[i][1]);
         params[key] = value;
       }
-      jpivotHTML += wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution, params);
+      jpivotHTML += XactionComponentExt.getCdfXaction(this.path, this.action, this.solution, params);
       // Close IFrame
       jpivotHTML += "\"></iframe>";
       $("#" + this.htmlObject).html(jpivotHTML);

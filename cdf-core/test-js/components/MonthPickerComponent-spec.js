@@ -11,22 +11,24 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/MonthPickerComponent"], function(Dashboard, $, MonthPickerComponent) {
+define(["cdf/Dashboard", "cdf/components/MonthPickerComponent"],
+  function(Dashboard, MonthPickerComponent) {
+
   /**
    * ## The Month Picker Component
    */
   describe("The Month Picker Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.addParameter("input", "2009-01-01");
 
-    myDashboard.addParameter("input", "2009-01-01");
+    dashboard.init();
 
     var d = new Date();
     d.setYear(2006);
 
-    var monthPickerComponent = window.MonthPickerComponent = new MonthPickerComponent(myDashboard, {
+    var monthPickerComponent = new MonthPickerComponent(dashboard, {
       name: "monthPickerComponent",
       type: "monthPickerComponent",
       htmlObject: 'monthPickerComponent',
@@ -36,20 +38,20 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/MonthPickerComponent"
       initialDate: d,
       executeAtStart: true,
       tooltip: "Click me to select a month",
-      postChange: function(date){
+      postChange: function(date) {
         alert("You chose: " + date);
       }
     });
 
-    myDashboard.addComponent(monthPickerComponent);
+    dashboard.addComponent(monthPickerComponent);
 
     /**
      * ## The Month Picker Component # Update Called
      */
     it("Update Called", function(done) {
       spyOn(monthPickerComponent, 'update').and.callThrough();
-      myDashboard.update(monthPickerComponent);
-      setTimeout(function(){
+      dashboard.update(monthPickerComponent);
+      setTimeout(function() {
         expect(monthPickerComponent.update).toHaveBeenCalled();
         done();
       }, 100);

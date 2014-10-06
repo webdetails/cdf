@@ -11,22 +11,24 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'], function(Dashboard, $, DateInputComponent) {
+define(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'],
+  function(Dashboard, $, DateInputComponent) {
+
   /**
    * ## The Date Input Component
    */
   describe("The Date Input Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.addParameter('dateInputTestParameter', "2009-01-01");
+
+    dashboard.init();
 
     var onOpen = false;
     var onClose = false;
 
-    myDashboard.addParameter('dateInputTestParameter', "2009-01-01");
-
-    var dateInputComponent = window.DateInputComponent = new DateInputComponent(myDashboard, {
+    var dateInputComponent = new DateInputComponent(dashboard, {
       name: "dateInputComponent",
       type: "dateInputComponent",
       htmlObject: 'dateInputComponent',
@@ -34,24 +36,20 @@ define(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'],
       dateFormat: "yy-mm-dd",
       startDate: "2006-05-31",
       endDate: "TODAY",
-      onOpenEvent: function() {
-        onOpen = true;
-      },
-      onCloseEvent: function() {
-        onClose = true;
-      },
+      onOpenEvent: function() { onOpen = true; },
+      onCloseEvent: function() { onClose = true; },
       executeAtStart: true
     });
 
-    myDashboard.addComponent(dateInputComponent);
+    dashboard.addComponent(dateInputComponent);
 
     /**
      * ## The Date Input Component # Update Called
      */
     it("Update Called", function(done) {
       spyOn(dateInputComponent, 'update').and.callThrough();
-      myDashboard.update(dateInputComponent);
-      setTimeout(function(){
+      dashboard.update(dateInputComponent);
+      setTimeout(function() {
         expect(dateInputComponent.update).toHaveBeenCalled();
         done();
       }, 100);
@@ -62,11 +60,11 @@ define(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'],
      */
     it("Trigger onOpenEvent and onCloseEvent called", function(done) {
       spyOn(dateInputComponent, 'update').and.callThrough();
-      myDashboard.update(dateInputComponent);
+      dashboard.update(dateInputComponent);
       dateInputComponent.triggerOnOpen();
       dateInputComponent.triggerOnClose();
 
-      setTimeout(function(){
+      setTimeout(function() {
         expect(dateInputComponent.update).toHaveBeenCalled();
         expect(onOpen).toBeTruthy();
         expect(onClose).toBeTruthy();

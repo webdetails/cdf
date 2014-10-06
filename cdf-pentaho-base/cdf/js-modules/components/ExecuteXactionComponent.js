@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../wd', '../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
-  function(wd, $, BaseComponent) {
+define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
+  function(XactionComponentExt, $, BaseComponent) {
 
   var ExecuteXactionComponent = BaseComponent.extend({
     visible: false,
@@ -41,7 +41,7 @@ define(['../wd', '../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
       });
     },
     executeXAction: function() {
-      var url = wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution) + "&";
+      var url = XactionComponentExt.getCdfXaction(this.path, this.action, this.solution) + "&";
       var p = new Array(this.parameters.length);
       var parameters = [];
       for(var i = 0, len = p.length; i < len; i++) {

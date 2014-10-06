@@ -11,14 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './NavigatorBaseComponent'],
-  function($, NavigatorBaseComponent) {
+define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent'],
+  function(DashboardExt, $, NavigatorBaseComponent) {
 
   var PageTitleComponent = NavigatorBaseComponent.extend({
     update : function() {
       var myself = this;
       if( NavigatorBaseComponent.navigatorResponse == -1 ){
-        $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()), function(json){
+        $.getJSON(DashboardExt.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()), function(json){
           myself.processPageTitleResponse(json);
         });
       }

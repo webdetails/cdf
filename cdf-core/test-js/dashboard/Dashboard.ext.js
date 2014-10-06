@@ -12,8 +12,9 @@
  */
 
 define('cdf/dashboard/Dashboard.ext', [], function() {
-  var ext = {
+  var DashboardExt = {
     pluginName: "pentaho-cdf",
+    samplesBasePath: "/public/plugin-samples/",
 
     getPluginBase: function( plugin ) {
       return "";
@@ -25,8 +26,52 @@ define('cdf/dashboard/Dashboard.ext', [], function() {
 
     getFilePathFromUrl: function() {
       return "";
+    },
+
+    getTimestamp: function() {
+      return "ts=" + new Date().getTime();
+    },
+
+    getFullPath: function(path, action) {
+      return "";
+    },
+
+    composePath: function(options) {
+      return "";
+    },
+
+    getSettings: function(action, key) {
+      return "";
+    },
+
+    getServiceAction: function(method, solution, path, action) { 
+      return ""; 
+    },
+
+    getStaticResource: function(resource) {
+      return "";
+    },
+
+    getCaptifyZoom: function() {
+      return "";
+    },
+
+    getExport: function() {
+      return "";
+    },
+
+    getPluginEndpoint: function(plugin, endpoint) {
+      return "";
+    },
+
+    getJSONSolution: function() {
+      return "";
+    },
+
+    getRenderHTML: function() {
+      return "";
     }
   };
 
-  return ext;
+  return DashboardExt;
 });

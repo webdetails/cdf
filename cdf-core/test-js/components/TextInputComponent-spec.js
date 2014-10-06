@@ -11,36 +11,41 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/TextInputComponent"], function(Dashboard, TextInputComponent) {
+define(["cdf/Dashboard", "cdf/components/TextInputComponent"],
+  function(Dashboard, TextInputComponent) {
+
   /**
    * ## The Text Input Component
    */
   describe("The Text Input Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
+    
+    dashboard.addParameter("input", "");
 
-    myDashboard.init();
+    dashboard.init();
 
-    var textInputComponent = window.TextInputComponent = new TextInputComponent(myDashboard, {
+    var textInputComponent = new TextInputComponent(dashboard, {
       name: "textInputComponent",
       type: "textInputComponent",
-      htmlObject: 'textInputComponent',
-      listeners:[],
-      expression: function(){
-        return "My text generated in " + new Date()
-      },
-      executeAtStart: true
+      parameters:[],
+      parameter: "input",
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      postChange: function() {
+        alert("you typed: " + this.dashboard.getParameterValue(this.parameter));
+      }
     });
 
-    myDashboard.addComponent(textInputComponent);
+    dashboard.addComponent(textInputComponent);
 
     /**
      * ## The Text Input Component # Update Called
      */
-    it("Update Called", function(done){
+    it("Update Called", function(done) {
       spyOn(textInputComponent, 'update').and.callThrough();
-      myDashboard.update(textInputComponent);
-      setTimeout(function(){
+      dashboard.update(textInputComponent);
+      setTimeout(function() {
         expect(textInputComponent.update).toHaveBeenCalled();
         done();
       }, 100);

@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
-  function($, NavigatorBaseComponent) {
+define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
+  function(DashboardExt, $, NavigatorBaseComponent) {
 
   var ContentListComponent = NavigatorBaseComponent.extend({
     update : function() {
@@ -25,7 +25,7 @@ define(['../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.fancybox', '
 
     draw: function(path) {
       var myself = this;
-      $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentList" + (path != "" ? "&path=" + path : ""), function(json) {
+      $.getJSON(DashboardExt.getJSONSolution() + "?mode=contentList" + (path != "" ? "&path=" + path : ""), function(json) {
         myself.processContentListResponse(json,path);
       });
     },

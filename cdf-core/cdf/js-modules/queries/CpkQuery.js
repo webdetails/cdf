@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'],
-  function(BaseQuery, Dashboard, _, Utils) {
+define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'],
+  function(DashboardExt, BaseQuery, Dashboard, _, Utils) {
 
   var CpkEndpointsOpts = {
     name: "cpk",
@@ -35,7 +35,7 @@ define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
         this.setOption('pluginId' , opts.pluginId);
         this.setOption('endpoint' , opts.endpoint);
-        this.setOption('url', wd.cdf.endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
+        this.setOption('url', DashboardExt.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
       }
       this.setOption('kettleOutput', opts.kettleOutput);
       this.setOption('stepName', opts.stepName);

@@ -12,8 +12,8 @@
  */
 
 
-define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
-  function(Dashboard, Logger, $, wd) {
+define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dashboard.ext', './Dashboard', '../Logger', '../lib/jquery'],
+  function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
   Dashboard.implement({
 
@@ -83,7 +83,7 @@ define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
     pentahoServiceAction : function(serviceMethod, returntype, solution, path, action, params, func) {
       // execute an Action Sequence on the server
     
-      var arr = wd.cdf.endpoints.getServiceAction(serviceMethod, solution, path , action);
+      var arr = DashboardExt.getServiceAction(serviceMethod, solution, path , action);
       var url = arr.url;
       delete arr.url;
     
@@ -157,7 +157,7 @@ define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
         key: name,
         value: JSON.stringify(object)
       };
-      $.post(wd.cdf.endpoints.getSettings("set", null), data, function(){});
+      $.post(DashboardExt.getSettings("set", null), data, function(){});
     },
     
     getSettingsValue : function(key,value) {
@@ -166,7 +166,7 @@ define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
         value = json;
       };
     
-      $.getJSON(wd.cdf.endpoints.getSettings("get", key), callback);
+      $.getJSON(DashboardExt.getSettings("get", key), callback);
     },
     
     fetchData : function(cd, params, callback) {
@@ -177,7 +177,7 @@ define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
           cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
         }
     
-        $.post(wd.cdf.endpoints.getDoQuery(), cd,
+        $.post(CdaQueryExt.getDoQuery(), cd,
           function(json) {
             callback(json);
           },'json').error(this.handleServerError);
@@ -187,7 +187,7 @@ define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
     
         var xactionFile = (cd.queryType == 'cda') ? "jtable-cda.xaction" : "jtable.xaction";
     
-        $.post(wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
+        $.post(XactionComponentExt.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
           function(result) {
             callback(result.values);
           },'json');

@@ -115,8 +115,8 @@ define(['./BaseComponent', '../lib/underscore', '../lib/jquery', '../Logger'],
           this.postExec();
           this.showTooltip();
         } catch(e) {
-          this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e );
-          Logger.log(e,"error");
+          this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
+          Logger.log(e, "error");
         } finally {
           if(!silent) {
             this.unblock();

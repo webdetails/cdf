@@ -11,36 +11,38 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/TextComponent"], function(Dashboard, TextComponent) {
+define(["cdf/Dashboard", "cdf/components/TextComponent"],
+  function(Dashboard, TextComponent) {
+
   /**
    * ## The Text Component
    */
   describe("The Text Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
-    var textComponent = window.TextComponent = new TextComponent(myDashboard, {
+    var textComponent = new TextComponent(dashboard, {
       name: "textComponent",
       type: "textComponent",
       htmlObject: 'textComponent',
       listeners:[],
-      expression: function(){
-        return "My text generated in " + new Date()
+      expression: function() {
+        return "My text generated in " + new Date();
       },
       executeAtStart: true
     });
 
-    myDashboard.addComponent(textComponent);
+    dashboard.addComponent(textComponent);
 
     /**
      * ## The Text Component # Update Called
      */
-    it("Update Called", function(done){
+    it("Update Called", function(done) {
       spyOn(textComponent, 'update').and.callThrough();
-      myDashboard.update(textComponent);
-      setTimeout(function(){
+      dashboard.update(textComponent);
+      setTimeout(function() {
         expect(textComponent.update).toHaveBeenCalled();
         done();
       }, 100);
@@ -49,10 +51,10 @@ define(["cdf/Dashboard", "cdf/components/TextComponent"], function(Dashboard, Te
     /**
      * ## The Text Component # Calls expression when update is called
      */
-    it("Calls expression when update is called", function(done){
+    it("Calls expression when update is called", function(done) {
       spyOn(textComponent, 'expression');
-      myDashboard.update(textComponent);
-      setTimeout(function(){
+      dashboard.update(textComponent);
+      setTimeout(function() {
         expect(textComponent.expression).toHaveBeenCalled();
         done();
       }, 100);

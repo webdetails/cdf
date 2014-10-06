@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Dashboard.views.ext'], function (Dashboard, ext) {
+define(['./Dashboard', './Dashboard.views.ext'], function(Dashboard, DashboardViewsExt) {
     /**
      * A module representing a extension to Dashboard module for views.
      * @module Dashboard.views
@@ -32,11 +32,11 @@ define(['./Dashboard', './Dashboard.views.ext'], function (Dashboard, ext) {
        *
        * @private
        */
-      _initViews: function(){
+      _initViews: function() {
         this.viewParameters = {};
         this.view = undefined;
 
-        var viewId = ext.getViewIdFromUrl();
+        var viewId = DashboardViewsExt.getViewIdFromUrl();
 
         if(viewId != "") {
           var args = {
@@ -45,7 +45,7 @@ define(['./Dashboard', './Dashboard.views.ext'], function (Dashboard, ext) {
             ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
           };
 
-          $.getJSON(ext.getView(), args, function(json){
+          $.getJSON(DashboardViewsExt.getView(), args, function(json) {
             this.view = json;
           });
         }
@@ -60,13 +60,13 @@ define(['./Dashboard', './Dashboard.views.ext'], function (Dashboard, ext) {
        */
       restoreView: function() {
         var p, params;
-        if(!this.view) return;
+        if(!this.view) { return; }
         /*
          *  So now we have to decode that mess.
          */
         params = JSON.parse(Base64.decode(this.view.params));
         for(p in params) {
-          if (params.hasOwnProperty(p)) {
+          if(params.hasOwnProperty(p)) {
             this.setParameter(p,params[p]);
           }
         }
