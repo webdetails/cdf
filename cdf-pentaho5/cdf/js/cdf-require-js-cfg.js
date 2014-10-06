@@ -29,6 +29,7 @@ requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.jdMenu',
 	'cdf/jquery.positionBy',
 	'cdf/jquery.tooltip',
+    'cdf/uriQueryParser/jquery-queryParser.js',
 
 	'cdf/simile/ajax/scripts/json',
 	'cdf/json',
@@ -126,6 +127,8 @@ requireCfg['shim']['cdf/jquery.jdMenu']          = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.positionBy']      = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.sparkline']       = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.tooltip']         = ['cdf/jquery'];
+requireCfg['shim']['cdf/uriQueryParser/jquery-queryParser.js']         = ['cdf/jquery'];
+
 
 requireCfg['shim']['cdf/simile/ajax/scripts/json'] = ['cdf/simile/ajax/simile-ajax-api'];
 
