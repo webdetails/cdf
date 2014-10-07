@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Encoder'], function(Encoder) {
+define(['common-ui/util/URLEncoder'], function(Encoder) {
   var DashboardExt = {
     pluginName: "pentaho-cdf",
     samplesBasePath: "/public/plugin-samples/",

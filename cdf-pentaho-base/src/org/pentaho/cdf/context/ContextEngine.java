@@ -64,8 +64,9 @@ public class ContextEngine {
   private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n" +
     "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
   private static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, paths: {}, shim: {}};\n\n";
-  private static final String CDF_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
-  private static final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
+  private static final String CDF_CORE_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
+  private static final String CDF_CORE_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
+  private static final String CDF_PENTAHO_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
   private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
   private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
@@ -438,9 +439,11 @@ public class ContextEngine {
 
     output.append( "// injecting document writes to append the cdf require files\n" );
     output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_PATH + "'></script>\");\n" );
+      "FULLY_QUALIFIED_URL + \"" + CDF_CORE_PATH + "'></script>\");\n" );
     output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_LIB_PATH + "'></script>\");\n" );
+      "FULLY_QUALIFIED_URL + \"" + CDF_CORE_LIB_PATH + "'></script>\");\n" );
+    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
+      "FULLY_QUALIFIED_URL + \"" + CDF_PENTAHO_PATH + "'></script>\");\n" );
     output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
       "FULLY_QUALIFIED_URL + \"" + REQUIRE_PATH + "'></script>\");\n" );
     output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +

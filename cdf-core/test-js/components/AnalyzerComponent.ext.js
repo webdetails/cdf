@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/components/AnalyzerComponent.ext', ['../dashboard/Dashboard.ext', '../Encoder'],
+define('cdf/components/AnalyzerComponent.ext', ['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
   function(DashboardExt, Encoder) {
 
   var AnalyzerComponentExt = {
