@@ -12,12 +12,13 @@
  */
 
 define([
-      './Dashboard',
-      './lib/bootstrap/bootstrap',
-      'css!./lib/bootstrap/css/bootstrap.min',
-      'css!./lib/bootstrap/font-awesome/css/font-awesome.min'],
+  './Dashboard',
+  './lib/bootstrap',
+  'css!cdf/lib/font-awesome/css/font-awesome.css',
+  './lib/html5shiv',
+  './lib/respond'],
 
-    function (Dashboard) {
-      return Dashboard;
-    }
+  function (Dashboard) {
+    return Dashboard;
+  }
 );

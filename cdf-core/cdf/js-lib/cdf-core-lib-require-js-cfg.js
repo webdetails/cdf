@@ -184,10 +184,24 @@
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 
   /*
-   * Dashboard types shims
+   * Dashboard types shims (Bootstrap)
    */
+
+  //HTML5 Shiv 3.7.2 (IE8)
+  requirePaths['cdf/lib/html5shiv'] = prefix + '/html5shiv/html5shiv';
+
+  //Respond.js v1.4.0 (IE8, load after bootstrap.css)
+  requirePaths['cdf/lib/respond'] = prefix + '/respond/respond';
+  requireShims['cdf/lib/respond'] = [
+    'cdf/lib/bootstrap'
+  ];
+
   //bootstrap 3.1.1
-  requirePaths['cdf/lib/bootstrap/bootstrap'] = prefix + '/bootstrap/js/bootstrap';
-  requireShims['cdf/lib/bootstrap/bootstrap'] = ['cdf/Dashboard'];
+  requirePaths['cdf/lib/bootstrap'] = prefix + '/Bootstrap/js/bootstrap';
+  requireShims['cdf/lib/bootstrap'] = [
+    'css!cdf/lib/Bootstrap/css/bootstrap.css'
+  ];
+
+  // Font Awesome 4.0.3 (CSS only)
 
 })();
