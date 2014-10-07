@@ -147,17 +147,19 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
       XcdfRenderer renderer = new XcdfRenderer();
 
-      boolean success = renderer.determineDashboardTemplating( xcdfFilePath, defaultTemplate );
+      boolean success = renderer.determineDashboardTemplating( xcdfFilePath, defaultTemplate )
+        && renderer.determineRequireDashboard( xcdfFilePath );
 
       if ( success ) {
 
         String templatePath = Util.joinPath( FilenameUtils.getPath( xcdfFilePath ), renderer.getTemplate() );
 
         if ( !StringUtils.isEmpty( defaultTemplate ) ) { // If style defined in URL parameter 'template'
-          renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, renderer.getMessagesBaseFilename() );
+          renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, renderer.getMessagesBaseFilename(),
+            renderer.getIsRequire());
         } else { // use style provided via .xcdf or default
           renderHtmlDashboard( out, xcdfFilePath, templatePath, renderer.getStyle(),
-            renderer.getMessagesBaseFilename() );
+            renderer.getMessagesBaseFilename(), renderer.getIsRequire() );
         }
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
@@ -178,7 +180,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
   public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
                                    String defaultTemplate,
-                                   String dashboardsMessagesBaseFilename ) throws Exception {
+                                   String dashboardsMessagesBaseFilename) throws Exception {
+    renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, false );
+  }
+
+  public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
+                                   String defaultTemplate,
+                                   String dashboardsMessagesBaseFilename, boolean isRequire ) throws Exception {
 
     HttpServletRequest request = getRequest();
 
@@ -192,7 +200,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     int inactiveInterval = request.getSession().getMaxInactiveInterval();
     renderer
       .execute( out, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, paramMap, userSession.getName(),
-        inactiveInterval );
+        inactiveInterval, isRequire );
   }
 
   public String getPluginName() {

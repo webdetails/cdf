@@ -24,6 +24,7 @@
 
   <!-- Global properties -->
   <property name='js.dir' value='cdf' />
+  <property name='js-legacy.dir' value='${js.dir}/js'/>
   <property name='js-modules.dir' value='${js.dir}/js-modules'/>
   <property name='js-lib.dir' value='${js.dir}/js-lib'/>
 
@@ -35,18 +36,22 @@
 
   <property name='core.dir' value='../cdf-core' description="Name of core dir"/>
   <property name='core-js.dir' value='${core.dir}/${js-modules.dir}'/>
+  <property name='core-js-legacy.dir' value='${core.dir}/${js-legacy.dir}'/>
   <property name='core-js-lib.dir' value='${core.dir}/${js-lib.dir}'/>
   <property name='core-resource.dir' value='${core.dir}/${resource.dir}'/>
 
   <property name='pentaho-base.dir' value='../cdf-pentaho-base' description="Name of pentaho base dir"/>
   <property name='pentaho-base-src.dir' value='${pentaho-base.dir}/src'/>
+  <property name='pentaho-base-test-src.dir' value='${pentaho-base.dir}/test-src'/>
   <property name='pentaho-base-js.dir' value='${pentaho-base.dir}/${js-modules.dir}'/>
+  <property name='pentaho-base-js-legacy.dir' value='${pentaho-base.dir}/${js-legacy.dir}'/>
   <property name='pentaho-base-js-lib.dir' value='${pentaho-base.dir}/${js-lib.dir}'/>
   <property name='pentaho-base-resource.dir' value='${pentaho-base.dir}/${resource.dir}'/>
 
   <property name='pentaho.dir' value='.' description="Name of pentaho dir"/>
   <property name='pentaho-src.dir' value='${pentaho.dir}/src' description="Name of pentaho src dir"/>
   <property name='pentaho-js.dir' value='${pentaho.dir}/${js-modules.dir}'/>
+  <property name='pentaho-js-legacy.dir' value='${pentaho.dir}/${js-legacy.dir}'/>
   <property name='pentaho-js-lib.dir' value='${pentaho.dir}/${js-lib.dir}'/>
   <property name='pentaho-resource.dir' value='${pentaho.dir}/${resource.dir}'/>
 
@@ -60,6 +65,11 @@
   <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
   <property name="plugin.samples.zipfile" value="${plugin.artifact.id}-samples-${project.revision}.zip"/>
   <property name="plugin.solution.zipfile" value="${plugin.artifact.id}-solution-${project.revision}.zip"/>
+
+  <property name='stage-resources.path' value='${stage.dir}/${plugin.name}/${resources.properties.name}'/>
+  <property name='core-resources.path' value='${core-resource.dir}/${resources.properties.name}'/>
+  <property name='base-resources.path' value='${pentaho-base-resource.dir}/${resources.properties.name}'/>
+  <property name='resources.path' value='${resource.dir}/${resources.properties.name}'/>
 
   <property name="js.module.script.namespace" value="cdf"/>
   <property name="js.module.script.dir" value="cdf/js"/>
@@ -94,6 +104,67 @@
       <src path="${src.dir}"/>
       <src path="${pentaho-base-src.dir}"/>
     </javac>
+  </target>
+
+  <!-- subfloor test override -->
+
+  <target name="test" depends="compile,compile-tests, init-test-reports" description="Compiles and runs unit tests">
+    <junit maxmemory="${junit.maxmemory}"
+           dir="${junit.base.dir}"
+           fork="yes"
+           forkmode="${junit.forkmode}"
+           failureProperty="test.failed"
+           haltonfailure="${junit.haltonfailure}"
+           haltonerror="${junit.haltonerror}"
+           printsummary="yes">
+      <sysproperty key="java.awt.headless" value="${headless.unittest}" />
+
+      <syspropertyset>
+        <propertyref prefix="junit.sysprop." />
+        <mapper type="glob" from="junit.sysprop.*" to="*"/>
+      </syspropertyset>
+
+      <classpath refid="test.classpath" />
+      <formatter type="xml" />
+      <test name="${testcase}" todir="${testreports.xml.dir}" if="testcase" />
+      <batchtest fork="yes" todir="${testreports.xml.dir}" unless="testcase">
+        <fileset dir="${testsrc.dir}" casesensitive="yes">
+          <include name="**/*Test.java" />
+        </fileset>
+        <fileset dir="${pentaho-base-test-src.dir}" casesensitive="yes" >
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <junitreport todir="${testreports.html.dir}">
+      <fileset dir="${testreports.xml.dir}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${testreports.html.dir}" />
+    </junitreport>
+  </target>
+
+  <target name="compile-tests" depends="init-tests">
+    <javac destdir="${testclasses.dir}"
+           debug="true"
+           optimize="false"
+           source="${javac.source}"
+           target="${javac.target}"
+           fork="true"
+           encoding="UTF-8">
+      <src path="${testsrc.dir}" />
+      <src path="${pentaho-base-test-src.dir}" />
+      <classpath refid="test.classpath" />
+    </javac>
+
+    <!-- Copy the non-java files from the source directory to the test classes directory
+-->
+    <copy todir="${testclasses.dir}">
+      <fileset dir="${testsrc.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
   </target>
 
   <target name="dist" depends="clean-dist,resolve,resolve-js,jar,dist-plugin,dist-samples"/>
@@ -137,6 +208,11 @@
       <fileset dir="bin/js-source/compressed/cdf">
         <exclude name="**/*-require-js-cfg.js*"/>
       </fileset>
+    </copy>
+
+    <!-- handle legacy js -->
+    <copy todir="${stage.dir}/${plugin.name}/js/legacy" overwrite="true">
+      <fileset dir="bin/js-source/legacy/"/>
     </copy>
 
     <!-- handle extra resources -->
@@ -219,7 +295,8 @@
 
   </target>
 
-  <target name="dist-js" depends="install-antcontrib, check-pentaho-js-build-downloaded">
+  <target name="dist-js" depends="install-antcontrib, check-pentaho-js-build-downloaded"
+          description="Creates the js distribution for js">
     <delete dir="${js.build.output.dir}"/>
     <delete dir="${js.module.script.agg.dir}"/>
     <echo message="js.module.script.agg.dir: ${js.module.script.agg.dir}"/>
@@ -288,6 +365,147 @@
       <zipfileset dir="${bin.dir}/js-source" includes="**/*"/>
     </zip>
 
+    <antcall target="dist-legacy-js" />
+    <antcall target="write-resources" />
+
+
+  </target>
+
+  <target name="dist-legacy-js" description="Creates the js distribution for the legacy js">
+    <!-- cdf-core/cdf/js -->
+    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/legacy" overwrite="true">
+      <fileset dir='${core-js-legacy.dir}'>
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- cdf-core/cdf/js-lib -->
+    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/legacy/lib" overwrite="true">
+      <fileset dir='${core-js-lib.dir}'>
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- cdf-pentaho-base/cdf/js -->
+    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/legacy" overwrite="true">
+      <fileset dir='${pentaho-base-js-legacy.dir}'>
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- cdf-pentaho/cdf/js -->
+    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/legacy" overwrite="true">
+      <fileset dir='${pentaho-js-legacy.dir}'>
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy ccc build -->
+    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/legacy/lib/CCC" >
+      <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
+    </copy>
+
+    <!-- rename ccc files -->
+    <move file="${bin.dir}/js-source/${js.module.script.namespace}/legacy/lib/CCC/pvc.js"
+          tofile="${bin.dir}/js-source/${js.module.script.namespace}/legacy/lib/CCC/pvc-d1.0.js"/>
+
+    <antcall target="replace-static-resource-labels">
+      <param name="base.js.path" value="${bin.dir}/js-source/${js.module.script.namespace}/legacy" />
+    </antcall>
+
+  </target>
+
+  <target name="write-resources">
+    <!-- cdf-core/resource/resources.properties -->
+    <property file="${core-resources.path}"/>
+    <!-- cdf-pentaho-base/resource/resources.properties -->
+    <property file="${base-resources.path}"/>
+    <!-- cdf-pentaho5/resource/resources.properties -->
+    <property file="${resources.path}"/>
+
+    <!-- JS files need to maintain the original order -->
+    <!-- cdf-core property core-scripts-1 -->
+    <for list='${core-scripts-1}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-pentaho property pentaho-scripts-1 -->
+    <for list='${pentaho-scripts-1}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-core property core-scripts-2 -->
+    <for list='${core-scripts-2}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-pentaho property pentaho-scripts-2 -->
+    <for list='${pentaho-scripts-2}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-core property core-scripts-3 -->
+    <for list='${core-scripts-3}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-pentaho-base property pentaho-base-scripts -->
+    <for list='${pentaho-base-scripts}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-pentaho property pentaho-scripts-3 -->
+    <for list='${pentaho-scripts-3}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="script" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+
+    <!-- CSS files have no order enforced -->
+    <!-- cdf-core property core-styles -->
+    <for list='${core-styles}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="link" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-pentaho-base property pentaho-base-styles -->
+    <for list='${pentaho-base-styles}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="link" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
+    <!-- cdf-pentaho property pentaho-styles -->
+    <for list='${pentaho-styles}' param='filename'>
+      <sequential>
+        <propertyfile file="${stage-resources.path}">
+          <entry key="link" operation="+" value="@{filename},"/>
+        </propertyfile>
+      </sequential>
+    </for>
   </target>
 
   <!--=======================================================================
@@ -336,11 +554,11 @@
     <property name="base.js.path" value=""/>
 
     <!-- modifications needed for core-refator components/ccc.js -->
-    <!-- TODO: review ccc dep
+    <!-- TODO: review ccc dep -->
       <replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_HEADER@" value="${cdf.ccc.require.header}" />
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_PUBLISHED_GLOBALLY@" value="${cdf.ccc.published.globally}" />
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_VAR_DECLARATION@" value="${cdf.ccc.var.declaration}" />
-    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />  -->
+    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />
 
   </target>
 

@@ -211,7 +211,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     } else if ( urlPath.equals( STORAGE ) ) {
       processStorage( requestParams, out );
     } else if ( urlPath.equals( CONTEXT ) ) {
-      ContextEngine
+      ContextEngine.getInstance()
         .generateContext( out, Parameter.asHashMap( request ), request.getSession().getMaxInactiveInterval() );
     } else if ( urlPath.equals( CLEAR_CACHE ) ) {
       clearCache( out );
@@ -287,11 +287,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     try {
       XcdfRenderer renderer = new XcdfRenderer();
 
-      boolean success = renderer.determineDashboardTemplating( solution, path, action, template );
+      boolean success = renderer.determineDashboardTemplating( solution, path, action, template )
+        && renderer.determineRequireDashboard( solution, path, action );
 
       if ( success ) {
         renderHtmlDashboard( out, solution, path, renderer.getTemplate(), renderer.getStyle(), renderer
-          .getMessagesBaseFilename() );
+          .getMessagesBaseFilename(), renderer.getIsRequire() );
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
 
@@ -387,7 +388,14 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   public void renderHtmlDashboard( final OutputStream out, final String solution, final String path,
-                                   String templateName, String template, String dashboardsMessagesBaseFilename )
+                                  String templateName, String template, String dashboardsMessagesBaseFilename )
+    throws Exception {
+    renderHtmlDashboard( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, false );
+  }
+
+  public void renderHtmlDashboard( final OutputStream out, final String solution, final String path,
+                                   String templateName, String template, String dashboardsMessagesBaseFilename,
+                                   boolean isRequire )
     throws Exception {
 
     HttpServletRequest request =
@@ -395,7 +403,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
     renderer.execute( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, Parameter
-      .asHashMap( request ), userSession.getName(), request.getSession().getMaxInactiveInterval() );
+      .asHashMap( request ), userSession.getName(), request.getSession().getMaxInactiveInterval(), isRequire );
   }
 
   private void exportFile( final IParameterProvider requestParams, final OutputStream output ) {

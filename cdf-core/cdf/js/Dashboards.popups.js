@@ -25,14 +25,13 @@ wd.cdf = wd.cdf || {};
 wd.cdf.popups = wd.cdf.popups || {};
 
 wd.cdf.popups.okPopup = {
-  template: Mustache.compile(
-              "<div class='cdfPopup'>" +
-              "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
-              "  <div class='cdfPopupBody'>" +
-              "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
-              "    <div class='cdfPopupButton'>{{{button}}}</div>" +
-              "  </div>" +
-              "</div>"),
+  template: "<div class='cdfPopup'>" +
+            "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
+            "  <div class='cdfPopupBody'>" +
+            "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
+            "    <div class='cdfPopupButton'>{{{button}}}</div>" +
+            "  </div>" +
+            "</div>",
   defaults:{
     header: "Title",
     desc:"Description Text",
@@ -60,7 +59,7 @@ wd.cdf.popups.okPopup = {
         .appendTo('body');
       this.firstRender = false;
     };
-    this.$el.empty().html( this.template( opts ) );
+    this.$el.empty().html( Mustache.render(this.template, opts ) );
     this.$el.find('.cdfPopupButton').click( function (){
       opts.callback();
       myself.hide();
@@ -79,14 +78,13 @@ wd.cdf.popups.okPopup = {
 wd.cdf.notifications = wd.cdf.notifications || {};
 
 wd.cdf.notifications.component = {
-  template: Mustache.compile(
-              "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
-              "  <div class='cdfNotificationBody'>" +
-              "    <div class='cdfNotificationImg'>&nbsp;</div>" +
-              "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
-              "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
-              "  </div>" +
-              "</div>" ),
+  template: "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
+            "  <div class='cdfNotificationBody'>" +
+            "    <div class='cdfNotificationImg'>&nbsp;</div>" +
+            "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
+            "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
+            "  </div>" +
+            "</div>",
   defaults:{
     title: "Component Error",
     desc: "Error processing component."
@@ -94,20 +92,19 @@ wd.cdf.notifications.component = {
   render: function (ph, newOpts){
     var opts = _.extend( {}, this.defaults, newOpts);
     opts.isSmallComponent = ( $(ph).width() < 300 );
-    $(ph).empty().html( this.template( opts ) );
+    $(ph).empty().html( Mustache.render(this.template, opts ) );
     var $nt = $(ph).find('.cdfNotification');
     $nt.css({'line-height': $nt.height() + 'px' });
   }
 };
 
 wd.cdf.notifications.growl = {
-  template: Mustache.compile(
-              "<div class='cdfNotification growl'>" +
-              "  <div class='cdfNotificationBody'>" +
-              "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
-              "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
-              "  </div>" +
-              "</div>" ),
+  template: "<div class='cdfNotification growl'>" +
+            "  <div class='cdfNotificationBody'>" +
+            "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
+            "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
+            "  </div>" +
+            "</div>",
   defaults:{
     title: 'Title',
     desc: 'Default CDF notification.',
@@ -123,7 +120,7 @@ wd.cdf.notifications.growl = {
   },
   render: function (newOpts){
     var opts = _.extend( {}, this.defaults, newOpts),
-        $m = $( this.template( opts )),
+        $m = $( Mustache.render( this.template, opts )),
         myself = this;
     opts.message = $m;
     var outerUnblock = opts.onUnblock;
