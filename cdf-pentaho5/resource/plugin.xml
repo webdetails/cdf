@@ -23,6 +23,7 @@
 
     <external-resources>
       <file context="requirejs">content/pentaho-cdf/js/cdf-core-require-js-cfg.js</file>
+      <file context="requirejs">content/pentaho-cdf/js/cdf-pentaho-require-js-cfg.js</file>
       <file context="requirejs">content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js</file>
     </external-resources>
 </plugin>

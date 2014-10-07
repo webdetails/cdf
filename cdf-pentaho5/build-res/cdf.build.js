@@ -15,7 +15,9 @@
   },
 
   paths: {
-    requireLib: 'require'
+    requireLib: 'require',
+    'common-ui': '../../js-lib/expanded/common-ui',
+    'dojo': '../../js-lib/expanded/common-ui/dojo/dojo'
   },
 
   mainConfigFile: 'requireCfg.js',

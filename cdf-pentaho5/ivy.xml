@@ -73,6 +73,9 @@
     <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
       <artifact name="ccc" type="zip" ext="zip"/>
     </dependency>
+    <dependency org="pentaho" name="common-ui" rev="${dependency.common-ui.revision}" conf="js->default" transitive="false" changing="true">
+      <artifact name="common-ui" type="js" ext="zip" m:classifier="js"/>
+    </dependency>
 
 
   </dependencies>
