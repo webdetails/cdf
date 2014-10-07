@@ -29,7 +29,6 @@ requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.jdMenu',
 	'cdf/jquery.positionBy',
 	'cdf/jquery.tooltip',
-    'cdf/uriQueryParser/jquery-queryParser.js',
 
 	'cdf/simile/ajax/scripts/json',
 	'cdf/json',
@@ -67,6 +66,7 @@ requireCfg['shim']['cdf/Dashboards.Main'] = [
     'cdf/mustache', 
     'cdf/lib/shims',
     'cdf/jquery.blockUI',
+    'cdf/uriQueryParser/jquery-queryParser.js',    
     'cdf/Dashboards.Startup',
     'cdf/cdf-base'
 ];
