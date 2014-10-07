@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.io.StringWriter;
 
@@ -49,6 +50,7 @@ import org.pentaho.platform.engine.security.SecurityParameterProvider;
 import pt.webdetails.cpf.InterPluginCall;
 import pt.webdetails.cpf.repository.api.IContentAccessFactory;
 import pt.webdetails.cpf.repository.api.IReadAccess;
+import pt.webdetails.cpf.repository.api.IUserContentAccess;
 import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.PluginIOUtils;
 import pt.webdetails.cpf.utils.XmlDom4JUtils;
@@ -69,9 +71,7 @@ public class ContextEngine {
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
-  private final static boolean APPLY_LEGACY_DASHBOARD_CONTEXT = Boolean.valueOf(
-    StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
-      .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ), "false" ) );
+  private static boolean legacyDashboardContext;
   private static ContextEngine instance;
   private static String CONFIG_FILE = "dashboardContext.xml";
 
@@ -81,6 +81,13 @@ public class ContextEngine {
   protected IPentahoSession userSession;
 
   public ContextEngine() {
+    legacyDashboardContext = Boolean.valueOf(
+      StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
+        .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ), "false" ) );
+  }
+
+  public ContextEngine( boolean legacy ) {
+    legacyDashboardContext = legacy;
   }
 
   public static synchronized ContextEngine getInstance() {
@@ -98,7 +105,7 @@ public class ContextEngine {
     }
   }
 
-  public static void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
+  public void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
     throws Exception {
 
     String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
@@ -114,8 +121,7 @@ public class ContextEngine {
       fullPath = RepositoryHelper.joinPaths( fullPath, action );
     }
 
-    String dashboardContext =
-      ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap, inactiveInterval );
+    String dashboardContext = getContext( fullPath, viewId, action, paramMap, inactiveInterval );
 
     if ( StringUtils.isEmpty( dashboardContext ) ) {
       logger.error( "empty dashboardContext" );
@@ -151,14 +157,14 @@ public class ContextEngine {
       buildContextDates( contextObj );
 
       contextObj.put( "user", username );
-      contextObj.put( "locale", CdfEngine.getEnvironment().getLocale() );
+      contextObj.put( "locale", getLocale() );
 
       buildContextPaths( contextObj, path, parameters );
 
-      SecurityParameterProvider securityParams = new SecurityParameterProvider( getUserSession() );
+      SecurityParameterProvider securityParams = getSecurityParams();
       contextObj.put( "roles", securityParams.getParameter( "principalRoles" ) );
 
-      if ( APPLY_LEGACY_DASHBOARD_CONTEXT ) {
+      if ( getLegacyStructure() ) {
         buildLegacyStructure( contextObj, path, securityParams );
       }
 
@@ -176,7 +182,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextSessionTimeout( final JSONObject contextObj, int inactiveInterval )
+  protected JSONObject buildContextSessionTimeout( final JSONObject contextObj, int inactiveInterval )
     throws JSONException {
     if ( getUserSession().isAuthenticated() ) {
       contextObj.put( "sessionTimeout", inactiveInterval );
@@ -184,7 +190,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
+  protected JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
                                         Map<String, String> parameters ) throws JSONException {
     contextObj.put( "path", dashboardPath );
 
@@ -195,7 +201,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextDates( final JSONObject contextObj ) throws JSONException {
+  protected JSONObject buildContextDates( final JSONObject contextObj ) throws JSONException {
     Calendar cal = Calendar.getInstance();
 
     long utcTime = cal.getTimeInMillis();
@@ -205,7 +211,7 @@ public class ContextEngine {
   }
 
   // Maintain backward compatibility. This is a configurable option via plugin's settings.xml
-  private JSONObject buildLegacyStructure( final JSONObject contextObj, String path,
+  protected JSONObject buildLegacyStructure( final JSONObject contextObj, String path,
                                            SecurityParameterProvider securityParams )
     throws JSONException {
 
@@ -267,7 +273,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextConfig( final JSONObject contextObj, String fullPath, Document config, String user )
+  protected JSONObject buildContextConfig( final JSONObject contextObj, String fullPath, Document config, String user )
     throws JSONException {
     contextObj.put( "queryData", processAutoIncludes( fullPath, config ) );
     contextObj.put( "sessionAttributes", processSessionAttributes( config, user ) );
@@ -275,7 +281,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private String buildContextScript( JSONObject contextObj, String viewId, String action, String user )
+  protected String buildContextScript( JSONObject contextObj, String viewId, String action, String user )
     throws JSONException {
     final StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
@@ -298,7 +304,7 @@ public class ContextEngine {
     return s.toString();
   }
 
-  private JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
+  protected JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
     throws JSONException {
     for ( String param : params.values() ) {
       if ( param.startsWith( PREFIX_PARAMETER ) ) {
@@ -354,7 +360,7 @@ public class ContextEngine {
     return queryOutput;
   }
 
-  private String getStorage() {
+  protected String getStorage() {
     try {
       return StorageEngine.getInstance().read( getUserSession().getName() ).toString( 2 );
     } catch ( Exception e ) {
@@ -366,18 +372,17 @@ public class ContextEngine {
   /**
    * will add a json entry for each data access id in the cda queries applicable to currents dashboard.
    */
-  private JSONObject processAutoIncludes( String dashboardPath, Document config ) {
+  protected JSONObject processAutoIncludes( String dashboardPath, Document config ) {
     JSONObject queries = new JSONObject();
     /* Bail out immediately if CDA isn' available */
-    if ( !( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists() ) {
+    if ( !cdaExists() ) {
       logger.warn( "Couldn't find CDA. Skipping auto-includes" );
       return queries;
     }
 
     /* Bail out if cdf/includes folder does not exists */
-    IReadAccess autoIncludesFolder = CdfEngine.getUserContentReader( null );
-    if ( !autoIncludesFolder.fileExists(
-      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ) {
+    IReadAccess autoIncludesFolder = getUserContentAccess( null );
+    if ( !autoIncludesFolder.fileExists( getPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ) {
       return queries;
     }
 
@@ -385,25 +390,23 @@ public class ContextEngine {
     for ( AutoInclude autoInclude : autoIncludes ) {
       if ( autoInclude.canInclude( dashboardPath ) ) {
         String cdaPath = autoInclude.getCdaPath();
-        CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
+        addCdaQuery( queries, cdaPath );
       }
     }
     return queries;
   }
 
-  private List<AutoInclude> getAutoIncludes( Document config ) {
+  protected List<AutoInclude> getAutoIncludes( Document config ) {
     synchronized( autoIncludesLock ) {
       if ( autoIncludes == null ) {
-        IReadAccess cdaRoot =
-          CdfEngine.getUserContentReader( CdfEngine.getEnvironment().getCdfPluginRepositoryDir()
-            + CdfConstants.INCLUDES_DIR );
-        autoIncludes = AutoInclude.buildAutoIncludeList( config, cdaRoot );
+        IReadAccess cdaRoot = getUserContentAccess( getPluginRepositoryDir() + CdfConstants.INCLUDES_DIR );
+        autoIncludes = buildAutoIncludeList( config, cdaRoot );
       }
       return autoIncludes;
     }
   }
 
-  private Document getConfigFile() {
+  protected Document getConfigFile() {
 
     try {
       IContentAccessFactory factory = CdfEngine.getEnvironment().getContentAccessFactory();
@@ -445,4 +448,38 @@ public class ContextEngine {
 
     return output.toString();
   }
+
+  protected boolean cdaExists( ) {
+    return ( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists();
+  }
+
+  protected IUserContentAccess getUserContentAccess( String path) {
+    return CdfEngine.getUserContentReader( path );
+  }
+
+  protected String getPluginRepositoryDir() {
+    return CdfEngine.getEnvironment().getCdfPluginRepositoryDir();
+  }
+
+  protected void addCdaQuery( final JSONObject queries, String cdaPath ) {
+    CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
+  }
+
+  protected List<AutoInclude> buildAutoIncludeList( Document config, IReadAccess cdaRoot) {
+    return AutoInclude.buildAutoIncludeList( config, cdaRoot );
+  }
+
+  protected Locale getLocale() {
+    return CdfEngine.getEnvironment().getLocale();
+  }
+
+  protected SecurityParameterProvider getSecurityParams() {
+    return new SecurityParameterProvider( getUserSession() );
+  }
+
+  protected boolean getLegacyStructure() {
+    return legacyDashboardContext;
+  }
+
+
 }
