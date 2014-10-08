@@ -23,8 +23,10 @@ define(["cdf/Dashboard", "cdf/components/TableComponent"],
 
     myDashboard.init();
 
-    var MetaLayerHome2 = {
-      topTenCustomerDefinition: {
+    var tableComponent = new TableComponent(myDashboard, {
+      name: "tableComponent",
+      type: "tableComponent",
+      chartDefinition: {
         colHeaders: ["Customers","Sales"],
         colTypes: ['string','numeric'],
         colFormats: [null,'%.0f'],
@@ -38,13 +40,7 @@ define(["cdf/Dashboard", "cdf/components/TableComponent"],
             " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
             " ON ROWS from [SteelWheelsSales]";
         }
-      }
-    };
-
-    var tableComponent = new TableComponent(myDashboard, {
-      name: "tableComponent",
-      type: "tableComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      },
       htmlObject: "sampleObject",
       executeAtStart: true
     });

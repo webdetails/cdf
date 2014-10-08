@@ -11,16 +11,24 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/TimePlotComponent"],
-  function(Dashboard, TimePlotComponent) {
+define(["cdf/Dashboard", "cdf/components/TimePlotComponent", "cdf/lib/jquery"],
+  function(Dashboard, TimePlotComponent, $) {
+
+  //$.getScript("/base/test-res/cdf/js-lib/simile/timeplot/timeplot-api.js").done(function(script, textStatus) { console.log("timeplot loaded!!!"); });
 
   /**
    * ## The Time Plot Component
    */
   describe("The Time Plot Component #", function() {
 
-    var MetaLayer = {
-      timePlotDefinition: {
+    var myDashboard = new Dashboard();
+
+    myDashboard.init();
+
+    var timePlotComponent = new TimePlotComponent(myDashboard, {
+      name: "timePlotComponent",
+      type: "timePlotComponent",
+      chartDefinition: {
         width: 500,
         height: 300,
         title: "Total order income",
@@ -35,19 +43,9 @@ define(["cdf/Dashboard", "cdf/components/TimePlotComponent"],
         dots: false,
         showValues: true,
         fill: true
-      }
-    };
-
-    var myDashboard = new Dashboard();
-
-    myDashboard.init();
-
-    var timePlotComponent = new TimePlotComponent(myDashboard, {
-        name: "timePlotComponent",
-        type: "timePlotComponent",
-        chartDefinition: MetaLayer.timePlotDefinition,
-        htmlObject: "sampleObject",
-        executeAtStart: true
+      },
+      htmlObject: "sampleObject",
+      executeAtStart: true
     });
 
     myDashboard.addComponent(timePlotComponent);

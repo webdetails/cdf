@@ -23,8 +23,10 @@ define(["cdf/Dashboard", "cdf/components/JFreeChartComponent"],
 
     myDashboard.init();
 
-    var MetaLayerHome2 = {
-      topTenCustomerDefinition: {
+    var topTenCustomers = new JFreeChartComponent(myDashboard, {
+      name: "topTenCustomers",
+      type: "jFreeChartComponent",
+      chartDefinition: {
         width: 500,
         height: 300,
         chartType: "BarChart",
@@ -50,13 +52,7 @@ define(["cdf/Dashboard", "cdf/components/JFreeChartComponent"],
             " ON ROWS from [SteelWheelsSales]";
           return query;
         }
-      }
-    };
-
-    var topTenCustomers = new JFreeChartComponent(myDashboard, {
-      name: "topTenCustomers",
-      type: "jFreeChartComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      },
       htmlObject: "sampleObject",
       executeAtStart: true
     });

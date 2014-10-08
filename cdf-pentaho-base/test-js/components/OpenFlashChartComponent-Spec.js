@@ -23,8 +23,10 @@ define(["cdf/Dashboard", "cdf/components/OpenFlashChartComponent"],
 
     myDashboard.init();
 
-    var MetaLayerHome2 = {
-      topTenCustomerDefinition: {
+    var openFlashChartComponent = new OpenFlashChartComponent(myDashboard, {
+      name: "openFlashChartComponent",
+      type: "openFlashChartComponent",
+      chartDefinition: {
         width: "500",
         height: "500",
         chartType: "PieChart",
@@ -44,13 +46,7 @@ define(["cdf/Dashboard", "cdf/components/OpenFlashChartComponent"],
             " NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales])" +  
             " ON ROWS from [SteelWheelsSales]";
         }
-      }
-    };
-
-    var openFlashChartComponent = new OpenFlashChartComponent(myDashboard, {
-      name: "openFlashChartComponent",
-      type: "openFlashChartComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      },
       htmlObject: "sampleObject",
       executeAtStart: true
     });

@@ -34,11 +34,17 @@
   /*
    * component shim for Dashboard
    */
-  requireShims['cdf/components/ExecutePrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SchedulePrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ContentListComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/NavigatorComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PageTitleComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/AnalyzerComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/DialComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/ExecuteAnalyzerComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/ExecuteXactionComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/JFreeChartComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/JPivotComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/OpenFlashChartComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/PivotLinkComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/TableComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/TimePlotComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/TrafficComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/XactionComponent'] = ['cdf/Dashboard'];
 
 })();

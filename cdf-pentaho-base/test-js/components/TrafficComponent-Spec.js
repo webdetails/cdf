@@ -19,8 +19,14 @@ define(["cdf/Dashboard", "cdf/components/TrafficComponent"],
    */
   describe("The Traffic Component #", function() {
 
-    var MetaLayer =  {
-      trafficDefinition : {
+    var myDashboard = new Dashboard();
+
+    myDashboard.init();
+
+    var trafficComponent = new TrafficComponent(myDashboard, {
+      name: "trafficComponent",
+      type: "trafficComponent",
+      trafficDefinition: {
         queryType: 'mdx',
         jndi: "SampleData",
         title: "Check current budget",
@@ -33,17 +39,7 @@ define(["cdf/Dashboard", "cdf/components/TrafficComponent"],
             " from [Quadrant Analysis]";
           return query;
         }
-      }
-    };
-
-    var myDashboard = new Dashboard();
-
-    myDashboard.init();
-
-    var trafficComponent = new TrafficComponent(myDashboard, {
-      name: "trafficComponent",
-      type: "trafficComponent",
-      trafficDefinition: MetaLayer.trafficDefinition,
+      },
       htmlObject: "sampleObject",
       executeAtStart: true
     });

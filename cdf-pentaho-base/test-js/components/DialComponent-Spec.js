@@ -23,8 +23,10 @@ define(["cdf/Dashboard", "cdf/components/DialComponent"],
 
     myDashboard.init();
 
-    var MetaLayer =  {
-      dialChartDefinition: {
+    var dialComponent = new DialComponent(myDashboard, {
+      name: "dialComponent",
+      type: "dialComponent",
+      chartDefinition: {
         width: 400,
         height: 200,
         chartType: "DialChart",
@@ -40,13 +42,7 @@ define(["cdf/Dashboard", "cdf/components/DialComponent"],
             " from [Quadrant Analysis]";
           return query;
         }
-      }
-    };
-
-    var dialComponent = new DialComponent(myDashboard, {
-      name: "dialComponent",
-      type: "dialComponent",
-      chartDefinition: MetaLayer.dialChartDefinition,
+      },
       htmlObject: "sampleObject",
       executeAtStart: true
     });
