@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/ManagedFreeformComponent"], function(Dashboard, $, _, FreeformComponent) {
+define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/ManagedFreeformComponent"],
+  function(Dashboard, $, _, FreeformComponent) {
 
     /**
      * ## The CDF framework
@@ -133,8 +134,5 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components
        setTimeout(dataToValidate, 500);
       })
     });
-
-
-
 
 });

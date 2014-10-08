@@ -23,10 +23,29 @@ define(["cdf/Dashboard", "cdf/components/TableComponent"],
 
     myDashboard.init();
 
+    var MetaLayerHome2 = {
+      topTenCustomerDefinition: {
+        colHeaders: ["Customers","Sales"],
+        colTypes: ['string','numeric'],
+        colFormats: [null,'%.0f'],
+        colWidths: ['500px',null],
+        queryType: 'mdx',
+        displayLength: 10,
+        catalog: 'mondrian:/SteelWheels',
+        jndi: "SampleData",
+        query: function(){
+          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
+            " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
+            " ON ROWS from [SteelWheelsSales]";
+        }
+      }
+    };
+
     var tableComponent = new TableComponent(myDashboard, {
       name: "tableComponent",
       type: "tableComponent",
-      htmlObject: 'sampleObject',
+      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      htmlObject: "sampleObject",
       executeAtStart: true
     });
 
@@ -37,6 +56,9 @@ define(["cdf/Dashboard", "cdf/components/TableComponent"],
      */
     it("Update Called", function(done) {
       spyOn(tableComponent, 'update').and.callThrough();
+      spyOn($, 'ajax').and.callFake(function(options) {
+          options.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","912294.1100000001"],["Mini Gifts Distributors Ltd.","654858.0600000002"],["Australian Collectors, Co.","200995.41000000006"],["Muscle Machine Inc","197736.93999999997"],["La Rochelle Gifts","180124.90000000008"],["Down Under Souveniers, Inc","174139.77000000002"],["Dragon Souveniers, Ltd.","172989.68000000008"],["Land of Toys Inc.","164069.43999999997"],["The Sharp Gifts Warehouse","160010.27000000005"],["Kelly\'s Gift Shop","158344.79"]]}');
+        });
       myDashboard.update(tableComponent);
       setTimeout(function() {
         expect(tableComponent.update).toHaveBeenCalled();

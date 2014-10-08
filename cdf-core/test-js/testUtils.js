@@ -1,1 +1,1 @@
-var webAppPath = "dummy";
+var SESSION_NAME = "dummy";

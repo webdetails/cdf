@@ -23,6 +23,36 @@ define(["cdf/Dashboard", "cdf/components/JFreeChartComponent"],
 
     myDashboard.init();
 
+    var MetaLayerHome2 = {
+      topTenCustomerDefinition: {
+        width: 500,
+        height: 300,
+        chartType: "BarChart",
+        datasetType: "CategoryDataset",
+        is3d: false,
+        byRow: false,
+        isStacked: false,
+        includeLegend: false,
+        caption:{},
+        domainLabelRotation: 0,
+        backgroundColor: "#F3F3F3",
+        title: "Top 10 Customers",
+        parameterName: "PRODUCTLINE",
+        urlTemplate: "javascript:require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {" +
+          " alert(\"You clicked \" + Utf8Encoder.encode_prepare(\"{PRODUCTLINE}\")); })",
+        orientation: 'horizontal',
+        queryType: 'mdx',
+        catalog: 'mondrian:/SteelWheels',
+        jndi: "SampleData",
+        query: function() {
+          var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+            " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +  
+            " ON ROWS from [SteelWheelsSales]";
+          return query;
+        }
+      }
+    };
+
     var topTenCustomers = new JFreeChartComponent(myDashboard, {
       name: "topTenCustomers",
       type: "jFreeChartComponent",

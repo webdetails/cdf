@@ -23,9 +23,34 @@ define(["cdf/Dashboard", "cdf/components/OpenFlashChartComponent"],
 
     myDashboard.init();
 
+    var MetaLayerHome2 = {
+      topTenCustomerDefinition: {
+        width: "500",
+        height: "500",
+        chartType: "PieChart",
+        datasetType: "CategoryDataset",
+        is3d: "true",
+        isStacked: false,
+        includeLegend: false,
+        title: "Top 10 Customers",
+        parameterName: "PRODUCTLINE",
+        urlTemplate: "alert('You clicked ' + encode_prepare('{PRODUCTLINE}'))",
+        orientation: 'horizontal',
+        queryType: 'mdx',
+        catalog: 'mondrian:/SteelWheels',
+        jndi: "SampleData",
+        query: function() {
+          return "select NON EMPTY [Measures].[Sales] ON COLUMNS," +
+            " NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales])" +  
+            " ON ROWS from [SteelWheelsSales]";
+        }
+      }
+    };
+
     var openFlashChartComponent = new OpenFlashChartComponent(myDashboard, {
       name: "openFlashChartComponent",
       type: "openFlashChartComponent",
+      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
       htmlObject: "sampleObject",
       executeAtStart: true
     });

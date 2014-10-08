@@ -84,18 +84,18 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       }
 
     }
-    Dashboards.error("Fatal: path " + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()) + " not found in navigation object");
+    Dashboards.error("Fatal: path " + (NavigatorBaseComponent.path || Dashboards.getPathParameter()) + " not found in navigation object");
     return;
   },
   getParentSolution : function(){
-    if ( (NavigatorBaseComponent.path || this.dashboard.getPathParameter()).length>0){
+    if ( (NavigatorBaseComponent.path || Dashboards.getPathParameter()).length>0){
       return NavigatorBaseComponent.solution;
     } else {
       return "";
     }
   },
   getParentPath : function(){
-    var path = NavigatorBaseComponent.path || this.dashboard.getPathParameter();
+    var path = NavigatorBaseComponent.path || Dashboards.getPathParameter();
     var index = path.lastIndexOf("/");
     if (index==-1){
       return "";
@@ -228,7 +228,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 var ContentListComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
-    var path = this.mode != 4  ? (NavigatorBaseComponent.path || this.dashboard.getPathParameter()) : NavigatorBaseComponent.getParentPath();
+    var path = this.mode != 4  ? (NavigatorBaseComponent.path || Dashboards.getPathParameter()) : NavigatorBaseComponent.getParentPath();
     myself.draw(path);
   },
   draw: function(path){
@@ -253,7 +253,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
     var container = $("<ul></ul>").attr("id","contentList-"+this.name).appendTo("#"+this.htmlObject);
 
     // We need to append the parent dir
-    if( this.mode != 1 && this.mode != 4 && (NavigatorBaseComponent.path || this.dashboard.getPathParameter())){
+    if( this.mode != 1 && this.mode != 4 && (NavigatorBaseComponent.path || Dashboards.getPathParameter())){
       var parentDir =  {
         name: "Up",
         title:"Up",
@@ -339,7 +339,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()), function(json){
+      $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || Dashboards.getPathParameter()), function(json){
         myself.processPageTitleResponse(json);
       });
     }

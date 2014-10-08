@@ -23,9 +23,30 @@ define(["cdf/Dashboard", "cdf/components/DialComponent"],
 
     myDashboard.init();
 
+    var MetaLayer =  {
+      dialChartDefinition: {
+        width: 400,
+        height: 200,
+        chartType: "DialChart",
+        queryType: 'mdx',
+        jndi: "SampleData",
+        title: "Check current budget",
+        catalog: "mondrian:/SampleData",
+        colors: ["#F16C3A","#FFFF00","#B0D837"],
+        intervals: [7000000,70000000,150000000],
+        query: function() {
+          var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
+            " NON EMPTY ([Department].[All Departments]) ON ROWS " +
+            " from [Quadrant Analysis]";
+          return query;
+        }
+      }
+    };
+
     var dialComponent = new DialComponent(myDashboard, {
       name: "dialComponent",
       type: "dialComponent",
+      chartDefinition: MetaLayer.dialChartDefinition,
       htmlObject: "sampleObject",
       executeAtStart: true
     });

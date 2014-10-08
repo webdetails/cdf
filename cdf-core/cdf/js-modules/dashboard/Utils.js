@@ -25,7 +25,7 @@ define(['../lib/underscore'], function (_) {
       var regexNumericTags = /&#([0-9][0-9]?[0-9]?[0-9]?);/;
       var regexAlphabeticTags = /&([a-zA-Z]+);/;
       var regexHexTags = /&#x[A-F0-9][A-F0-9];/;
-      if(regexNumericTags.test(input) || regexAlphabeticTags.test(input) || regexHexTags.test(input)){
+      if(regexNumericTags.test(input) || regexAlphabeticTags.test(input) || regexHexTags.test(input)) {
         return input;
       }
       
@@ -35,40 +35,41 @@ define(['../lib/underscore'], function (_) {
       .replace(/>/g,"&gt;")
       .replace(/'/g,"&#39;")
       .replace(/"/g,"&#34;");
+
       return escaped;
     };
     
     
-    utils.getPathParameter = function ( url ) {  
+    utils.getPathParameter = function(url) {  
     
-      url = ( url || window.location.pathname );
+      url = (url || window.location.pathname);
       url = decodeURIComponent(url);
     
-      var pathRegex = url.match( "/:(.[^/]+)(.*)/" );
+      var pathRegex = url.match("/:(.[^/]+)(.*)/");
       
-      if( pathRegex.length > 1 ){ 
-          return (":" + pathRegex[1]).replace(/:/g, "/"); 
+      if(pathRegex && pathRegex.length > 1) { 
+        return (":" + pathRegex[1]).replace(/:/g, "/"); 
       }
     };
     
-    utils.getQueryParameter = function ( parameterName ) {
+    utils.getQueryParameter = function(parameterName) {
       // Add "=" to the parameter name (i.e. parameterName=value)
       var queryString = window.location.search.substring(1);
       var parameterName = parameterName + "=";
-      if ( queryString.length > 0 ) {
+      if(queryString.length > 0) {
         // Find the beginning of the string
-        var begin = queryString.indexOf ( parameterName );
+        var begin = queryString.indexOf (parameterName);
         // If the parameter name is not found, skip it, otherwise return the value
-        if ( begin != -1 ) {
+        if(begin != -1) {
           // Add the length (integer) to the beginning
           begin += parameterName.length;
           // Multiple parameters are separated by the "&" sign
-          var end = queryString.indexOf ( "&" , begin );
-          if ( end == -1 ) {
+          var end = queryString.indexOf ("&" , begin);
+          if(end == -1) {
             end = queryString.length
           }
           // Return the string
-          return decodeURIComponent ( queryString.substring ( begin, end ) );
+          return decodeURIComponent(queryString.substring(begin, end));
         }
       }
       // Return "" if no parameter has been found
@@ -77,18 +78,20 @@ define(['../lib/underscore'], function (_) {
 
       
     // Conversion functions
-    function _pa2obj (pArray) {
+    function _pa2obj(pArray) {
         var obj = {};
-        for (var p in pArray) if (pArray.hasOwnProperty(p)) {
+        for(var p in pArray) {
+          if(pArray.hasOwnProperty(p)) {
             var prop = pArray[p];
             obj[prop[0]] = prop[1];
+          }
         }
         return obj;
     };
     
     function _obj2pa (obj) {
         var pArray = [];
-        for (var key in obj) if (obj.hasOwnProperty(key)) {
+        for(var key in obj) if (obj.hasOwnProperty(key)) {
           pArray.push([key,obj[key]]);
         }
         return pArray;
@@ -97,29 +100,28 @@ define(['../lib/underscore'], function (_) {
     utils.propertiesArrayToObject = function(pArray) {
         // Mantra 1: "Order matters!"
         // Mantra 2: "Arrays are Objects!"
-        return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;  
+        return (_.isArray(pArray) && _pa2obj(pArray)) || (_.isObject(pArray) && pArray) || undefined;  
     };
     
     utils.objectToPropertiesArray = function(obj) {
         // Mantra 1: "Order matters!"
         // Mantra 2: "Arrays are Objects!"
-        return ( _.isArray(obj) && obj) || ( _.isObject(obj) && _obj2pa(obj)) || undefined;
+        return (_.isArray(obj) && obj) || (_.isObject(obj) && _obj2pa(obj)) || undefined;
     };
     
 
 
-    utils.getURLParameters = function (sURL)
-    {
-      if (sURL.indexOf("?") > 0){
+    utils.getURLParameters = function(sURL) {
+      if(sURL.indexOf("?") > 0){
     
         var arrParams = sURL.split("?");
         var arrURLParams = arrParams[1].split("&");
         var arrParam = [];
     
-        for (var i=0;i<arrURLParams.length;i++){
+        for(var i=0;i<arrURLParams.length;i++) {
           var sParam =  arrURLParams[i].split("=");
     
-          if (sParam[0].indexOf("param",0) == 0){
+          if(sParam[0].indexOf("param",0) == 0) {
             var parameter = [sParam[0].substring(5,sParam[0].length),unescape(sParam[1])];
             arrParam.push(parameter);
           }
@@ -130,19 +132,20 @@ define(['../lib/underscore'], function (_) {
       return arrParam;
     };
     
-    utils.toFormatedString = function (value) {
+    utils.toFormatedString = function(value) {
       value += '';
       var x = value.split('.');
       var x1 = x[0];
       var x2 = x.length > 1 ? '.' + x[1] : '';
       var rgx = /(\d+)(\d{3})/;
-      while (rgx.test(x1))
+      while(rgx.test(x1)) {
         x1 = x1.replace(rgx, '$1' + ',' + '$2');
+      }
       return x1 + x2;
     };
     
     //quote csv values in a way compatible with CSVTokenizer
-    utils.doCsvQuoting = function (value, separator, alwaysEscape){
+    utils.doCsvQuoting = function(value, separator, alwaysEscape) {
       var QUOTE_CHAR = '"';
       if(separator == null) {
         return value;
@@ -150,11 +153,11 @@ define(['../lib/underscore'], function (_) {
       if(value == null) {
         return null;
       }
-      if(value.indexOf(QUOTE_CHAR) >= 0){
+      if(value.indexOf(QUOTE_CHAR) >= 0) {
         //double them
         value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
       }
-      if(alwaysEscape || value.indexOf(separator) >= 0){
+      if(alwaysEscape || value.indexOf(separator) >= 0) {
         //quote value
         value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
       }
@@ -162,20 +165,20 @@ define(['../lib/underscore'], function (_) {
     };
 
 
-    utils.ev =  function(o){
-        return typeof o == 'function'?o():o
+    utils.ev =  function(o) {
+      return typeof o == 'function'?o():o
     };
 
 
 
-    utils.post = function(url,obj){
+    utils.post = function(url,obj) {
     
       var form = '<form action="' + url + '" method="post">';
-      for(var o in obj){
+      for(var o in obj) {
     
-        var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
+        var v = (typeof obj[o] == 'function') ? obj[o]() : obj[o];
     
-        if (typeof v == 'string') {
+        if(typeof v == 'string') {
           v = v.replace(/"/g , "\'")
         }
     
@@ -189,15 +192,15 @@ define(['../lib/underscore'], function (_) {
     
       var c = obj instanceof Array ? [] : {};
     
-      for (var i in obj) {
+      for(var i in obj) {
         var prop = obj[i];
     
-        if (typeof prop == 'object') {
+        if(typeof prop == 'object') {
           if (prop instanceof Array) {
             c[i] = [];
     
-            for (var j = 0; j < prop.length; j++) {
-              if (typeof prop[j] != 'object') {
+            for(var j = 0; j < prop.length; j++) {
+              if(typeof prop[j] != 'object') {
                 c[i].push(prop[j]);
               } else {
                 c[i].push(this.clone(prop[j]));
@@ -214,14 +217,15 @@ define(['../lib/underscore'], function (_) {
       return c;
     };
 
-    utils.addArgs = function(url){
-      if(url != undefined)
+    utils.addArgs = function(url) {
+      if(url != undefined) {
         this.args = getURLParameters(url);
+      }
     };
     
-    utils.getArgValue = function(key){
-      for (i=0;i<this.args.length;i++){
-        if(this.args[i][0] == key){
+    utils.getArgValue = function(key) {
+      for (i=0;i<this.args.length;i++) {
+        if(this.args[i][0] == key) {
           return this.args[i][1];
         }
       }
@@ -283,7 +287,7 @@ define(['../lib/underscore'], function (_) {
           var v0 = valSpec[0];
           var value, label, id = undefined; // must reset on each iteration
     
-          if (valSpec.length > 1) {
+          if(valSpec.length > 1) {
             if(valueAsId) { id = v0; }
             label = "" + valSpec[1];
             value = (valueAsId || v0 == null) ? label : ("" + v0);
@@ -341,7 +345,7 @@ define(['../lib/underscore'], function (_) {
      */
     utils.normalizeValue = function(value) {
       if(value === '' || value == null) { return null; }
-      if(this.isArray(value) && !value.length) return null;
+      if(this.isArray(value) && !value.length) { return null; }
       return value;
     };
     
@@ -355,8 +359,7 @@ define(['../lib/underscore'], function (_) {
     utils.isArray = function(value) {
       // An array or array like?
       return !!value &&
-             ((value instanceof Array) ||
-              (typeof value === 'object' && value.join && value.length != null));
+        ((value instanceof Array) || (typeof value === 'object' && value.join && value.length != null));
     };
     
     /**
@@ -426,10 +429,6 @@ define(['../lib/underscore'], function (_) {
     
         return "rgb(" + rgb.join(",") + ")";
     };
-
-
-
-
 
     return utils;
 

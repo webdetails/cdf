@@ -19,28 +19,31 @@ define(['./PrptComponent.ext', '../lib/jquery', './PrptComponent', '../lib/jquer
     update: function() {
       // 2 modes of working; if it's a div, create a button inside it
       var myself = this;
-      var o = $("#" + this.htmlObject);
-      if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
-        // create a button
-        o = $("<button/>").appendTo(o.empty());
-        if(o[0].tagName == "DIV") {
-          o.wrap("<span/>");
+      var o = myself.placeholder();
+      if( o.length > 0) {
+        if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
+          // create a button
+          o = $("<button/>").appendTo(o.empty());
+          if(o[0].tagName == "DIV") {
+            o.wrap("<span/>");
+          }
+          if(this.label != undefined) {
+            o.text(this.label);
+          }
+          o.button();
         }
-        if(this.label != undefined) {
-          o.text(this.label);
-        }
-        o.button();
+        o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+        o.bind("click", function() {
+          var success = (typeof myself.preChange == 'undefined') ? true : myself.preChange();
+          if(success) {
+            myself.executePrptComponent();
+          }
+          if(typeof myself.postChange != 'undefined') {
+            myself.postChange();
+          }
+        });
       }
-      o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-      o.bind("click", function() {
-        var success = (typeof myself.preChange == 'undefined') ? true : myself.preChange();
-        if(success) {
-          myself.executePrptComponent();
-        }
-        if(typeof myself.postChange != 'undefined') {
-          myself.postChange();
-        }
-      });
+
     },
     executePrptComponent: function() {
       var parameters = this.getOptions();

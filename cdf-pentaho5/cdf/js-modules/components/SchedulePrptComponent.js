@@ -19,8 +19,8 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', '../l
     update: function() {
       // 2 modes of working; if it's a div, create a button inside it
       var myself = this;
-      var o = $("#" + this.htmlObject);
-      if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
+      var o = this.placeholder();
+      if(o[0] && $.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
         // create a button
         o = $("<button/>").appendTo(o.empty());
         if(o[0].tagName == "DIV") {

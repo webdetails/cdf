@@ -11,8 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var SESSION_NAME = "dummy";
-
 define(["cdf/Dashboard", 'cdf/lib/jquery'], function(Dashboard, $) {
 
   /**
