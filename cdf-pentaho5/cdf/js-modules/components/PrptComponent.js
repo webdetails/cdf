@@ -138,7 +138,9 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
             }
             myself.stopLoading();
           });
-          iframe[0].contentWindow.location = url;
+          if(iframe[0]) {
+            iframe[0].contentWindow.location = url;
+          }
         }
         if(downloadMode) {
           // if call prompts a download window we'll never know when it's done
@@ -169,7 +171,8 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
         options['accept-page'] = -1;
       }
       // update options with report parameters
-      for(var i = 0; i < this.parameters.length; i++) {
+      var L = this.parameters ? this.parameters.length : 0;
+      for(var i = 0; i < L; i++) {
         // param: [<prptParam>, <dashParam>, <default>]
         var param = this.parameters[i];
         var value = this.dashboard.getParameterValue(param[1]);
@@ -190,7 +193,8 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
         options['accept-page'] = -1;
       }
       // update options with report parameters
-      for(var i = 0; i < this.parameters.length; i++) {
+      var L = this.parameters ? this.parameters.length : 0;
+      for(var i = 0; i < L; i++) {
         // param: [<prptParam>, <dashParam>, <default>]
         var param = this.parameters[i];
         var value = this.dashboard.getParameterValue(param[1]);

@@ -18,12 +18,13 @@
 (function() {
   var requirePaths = requireCfg.paths,
       requireShims = requireCfg.shim;
+
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(typeof CONTEXT_PATH !== "undefined"){ // production vs debug
-    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
-  } else if(typeof KARMA_RUN !== "undefined") { // test
+  if(typeof KARMA_RUN !== "undefined") { // test
     requirePaths['cdf'] = 'cdf/js-modules';
+  } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
+    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
     requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
@@ -33,33 +34,11 @@
   /*
    * component shim for Dashboard
    */
-
-
   requireShims['cdf/components/ExecutePrptComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/PrptComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/SchedulePrptComponent'] = ['cdf/Dashboard'];
-  /*
-  //Pentaho 4
-  requireShims['cdf/components/JPivotComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PivotLinkComponent'] = ['cdf/Dashboard']
-  //navigation
   requireShims['cdf/components/ContentListComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/NavigatorComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/PageTitleComponent'] = ['cdf/Dashboard'];
-  //other
-  requireShims['cdf/components/ActionComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/BaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/FreeformComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/InputBaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ManagedFreeformComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MdxQueryGroupComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/QueryComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SelectBaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ToggleButtonComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/UnmanagedComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/NavigatorBaseComponent'] = ['cdf/Dashboard'];
-  //map
-  //ToDo
-  */
 
 })();

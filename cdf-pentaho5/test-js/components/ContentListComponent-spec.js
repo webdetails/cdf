@@ -11,36 +11,37 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/JFreeChartComponent"],
-  function(Dashboard, JFreeChartComponent) {
-  
+define(["cdf/Dashboard", "cdf/components/ContentListComponent"],
+  function(Dashboard, ContentListComponent) {
+
   /**
-   * ## The JFreeChart Component
+   * ## The Content List Component
    */
-  describe("The JFreeChart Component #", function() {
+  describe("The Content List Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
-    var topTenCustomers = new JFreeChartComponent(myDashboard, {
-      name: "topTenCustomers",
-      type: "jFreeChartComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+    var contentListComponent = new ContentListComponent(dashboard, {
+      name: "folderContentComponent",
+      type: "contentList",
+      listeners:[],
       htmlObject: "sampleObject",
-      executeAtStart: true
+      executeAtStart: true,
+      mode: "3"
     });
 
-    myDashboard.addComponent(topTenCustomers);
+    dashboard.addComponent(contentListComponent);
 
     /**
-     * ## The JFreeChart Component # Update Called
+     * ## The Content List Component # Update Called
      */
     it("Update Called", function(done) {
-      spyOn(topTenCustomers, 'update').and.callThrough();
-      myDashboard.update(topTenCustomers);
+      spyOn(contentListComponent, 'update').and.callThrough();
+      dashboard.update(contentListComponent);
       setTimeout(function() {
-        expect(topTenCustomers.update).toHaveBeenCalled();
+        expect(contentListComponent.update).toHaveBeenCalled();
         done();
       }, 100);
     });

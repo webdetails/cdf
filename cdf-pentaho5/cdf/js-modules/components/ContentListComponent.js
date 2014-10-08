@@ -11,14 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
-  function(DashboardExt, $, NavigatorBaseComponent) {
+define(['../dashboard/Dashboard.ext', '../dashboard/Utils', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
+  function(DashboardExt, Utils, $, NavigatorBaseComponent) {
 
   var ContentListComponent = NavigatorBaseComponent.extend({
     update : function() {
       var myself = this;
       var path = this.mode != 4
-        ? (NavigatorBaseComponent.path || this.dashboard.getPathParameter())
+        ? (NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path))
         : NavigatorBaseComponent.getParentPath();
       myself.draw(path);
     },
@@ -38,17 +38,17 @@ define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent
       $("#"+this.htmlObject).empty();
       var files = json.content || [];
       files.sort(function(a,b) {
-        var _a = (a.type=="FOLDER"?"000":"") + a.name;
-        var _b = (b.type=="FOLDER"?"000":"") + b.name;
+        var _a = (a.type == "FOLDER"?"000":"") + a.name;
+        var _b = (b.type == "FOLDER"?"000":"") + b.name;
         return _a > _b
       });
       // Create the outmost ul
-      var container = $("<ul></ul>").attr("id","contentList-"+this.name).appendTo("#"+this.htmlObject);
+      var container = $("<ul></ul>").attr("id","contentList-" + this.name).appendTo("#" + this.htmlObject);
 
       // We need to append the parent dir
       if(this.mode != 1
         && this.mode != 4
-        && (NavigatorBaseComponent.path || this.dashboard.getPathParameter())) {
+        && (NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path))) {
 
         var parentDir =  {
           name: "Up",
@@ -71,11 +71,11 @@ define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent
         // 2 - Folders only
         // 3 - Files and folders
 
-        if(myself.mode==1 && this.type == "FOLDER") {
+        if(myself.mode == 1 && this.type == "FOLDER") {
           return true; // skip
         }
 
-        if(myself.mode==2 && this.type != "FOLDER") {
+        if(myself.mode == 2 && this.type != "FOLDER") {
           return true; // skip
         }
 
@@ -83,44 +83,56 @@ define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent
           var cls = "";
           var target = "";
           var href = "";
-          var template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
-             NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
+          var template = (NavigatorBaseComponent.template != undefined &&
+            NavigatorBaseComponent.template.length != undefined && 
+            NavigatorBaseComponent.template.length > 0)
+            ? "&template=" + NavigatorBaseComponent.template : "";
           var anchor;
       
           if(this.type=="FOLDER") {
             cls = "folder";
 
-            anchor = $("<a></a>").attr("target",target).attr("title",this.description).attr("parentPath",val.path).text(this.title).click(function(){
-              myself.draw($(this).attr("parentPath"));
-            })
-          } else{
+            anchor = $("<a></a>")
+              .attr("target", target)
+              .attr("title", this.description)
+              .attr("parentPath", val.path)
+              .text(this.title).click(function() {
+                myself.draw($(this).attr("parentPath"));
+              });
+          } else {
+            var path = CONTEXT_PATH;
             if(this.url != undefined) {
               //cls = "folder";
               cls = "action greybox";
-              href=webAppPath + this.url;
+              href = (path.substring(path.length - 1) == '/')
+                ? path.substring(0, path.length - 1) + this.url 
+                : path + this.url;
             } else {
               cls = "action greybox";
-              href = webAppPath + this.link;
+              href = (path.substring(path.length - 1) == '/')
+                ? path.substring(0, path.length - 1) + this.link 
+                : path + this.link;
             }
 
             anchor = $("<a></a>")
-              .attr("target",target)
-              .attr("title",this.description)
+              .attr("target", target)
+              .attr("title", this.description)
               .text(this.title)
-              .attr("href",href);
+              .attr("href", href);
           }   
-          $("<li></li>").attr("class",cls).appendTo(container).append(anchor);   
+          $("<li></li>")
+            .attr("class", cls)
+            .appendTo(container)
+            .append(anchor);   
         }
 
       });
 
-      $('#contentList-'+this.name + ' a').tooltip({
-        showURL: false
-      });
+      $('#contentList-' + this.name + ' a').tooltip({ showURL: false });
       $("li.greybox a").click(function() {
         var t = this.title || this.innerHTML || this.href;
         //$(window).scrollTop(0);
-        var _href = this.href.replace(/'/g,"&#39;");
+        var _href = this.href.replace(/'/g, "&#39;");
         $.fancybox({
           type:"iframe",
           href:_href,

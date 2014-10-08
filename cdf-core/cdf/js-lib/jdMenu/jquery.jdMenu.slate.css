@@ -1,6 +1,6 @@
 ul.jd_menu_slate {
 	height: 2em;
-	background: #073c4c url('../resources/style/images/x3.gif') top left repeat-x;
+	background: #073c4c url('./images/x3.gif') top left repeat-x;
 	/*background-color: #007788;*/
 	/*border: 1px solid #70777D;*/
 	border-top: 1px solid #70777D;
@@ -13,7 +13,7 @@ ul.jd_menu_vertical {
 	height: auto;
 	clear: both;
 	background-color: #007788;
-	background: #007788 url('../resources/style/images/x3.gif') top left repeat-x;
+	background: #007788 url('./images/x3.gif') top left repeat-x;
 }
 
 ul.jd_menu_vertical {
@@ -53,7 +53,7 @@ ul.jd_menu_slate li.jd_menu_hover_menubar {
 	border-right: 1px solid #70777D;
 	color: #FFF;
 	/*background-color: #007788;*/
-	background: #073c4c url('../resources/style/images/x4.gif') top left repeat-x;	
+	background: #073c4c url('./images/x4.gif') top left repeat-x;	
 }
 
 ul.jd_menu_vertical li.jd_menu_active_menubar,
@@ -67,13 +67,13 @@ ul.jd_menu_vertical li.jd_menu_hover_menubar {
 
 ul.jd_menu_slate ul {
 	/*background: #007788;*/
-	background: #073c4c url('../resources/style/images/x3.gif') top left repeat-x;
+	background: #073c4c url('./images/x3.gif') top left repeat-x;
 	border: 1px solid #70777D;
 }
 ul.jd_menu_slate ul li {
 	padding: 3px 10px 3px 4px;
 	/*background: #007788;*/
-	background: #073c4c url('../resources/style/images/x3.gif') top left repeat-x;
+	background: #073c4c url('./images/x3.gif') top left repeat-x;
 	border: none;
 	color: white;
 }

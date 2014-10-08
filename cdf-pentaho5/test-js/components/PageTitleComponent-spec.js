@@ -11,35 +11,36 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/DialComponent"],
-  function(Dashboard, DialComponent) {
-    
+define(["cdf/Dashboard", "cdf/components/PageTitleComponent"],
+  function(Dashboard, PageTitleComponent) {
+
   /**
-   * ## The Dial Component
+   * ## The Page Title Component
    */
-  describe("The Dial Component #", function() {
+  describe("The Pentaho Reporting Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
-    var dialComponent = new DialComponent(myDashboard, {
-      name: "dialComponent",
-      type: "dialComponent",
+    var pageTitleComponent = new PageTitleComponent(dashboard, {
+      name: "titleComponent",
+      type: "pageTitle",
+      listeners:[],
       htmlObject: "sampleObject",
       executeAtStart: true
     });
 
-    myDashboard.addComponent(dialComponent);
+    dashboard.addComponent(pageTitleComponent);
 
     /**
-     * ## The Dial Component # Update Called
+     * ## The Page Title Component # Update Called
      */
     it("Update Called", function(done) {
-      spyOn(dialComponent, 'update').and.callThrough();
-      myDashboard.update(dialComponent);
+      spyOn(pageTitleComponent, 'update').and.callThrough();
+      dashboard.update(pageTitleComponent);
       setTimeout(function() {
-        expect(dialComponent.update).toHaveBeenCalled();
+        expect(pageTitleComponent.update).toHaveBeenCalled();
         done();
       }, 100);
     });

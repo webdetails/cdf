@@ -45,15 +45,15 @@ define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashb
     getSuccessHandler: function(callback) {
       var myself = this;
       return function(json) {
-        try{
+        try {
           myself.setOption('lastResultSet' , json);
-        }catch(e){
+        } catch(e) {
           if(this.async){
             // async + legacy errors while parsing json response aren't caught
             var msg = Dashboard.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
             Dashboard.error(msg);
             json = {"metadata":[msg],"values":[]};
-          }else{
+          } else {
             //exceptions while parsing json response are
             //already being caught+handled in updateLifecyle()
             throw e;

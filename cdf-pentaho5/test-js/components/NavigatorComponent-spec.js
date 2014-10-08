@@ -11,35 +11,38 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/OpenFlashChartComponent"],
-  function(Dashboard, OpenFlashChartComponent) {
+define(["cdf/Dashboard", "cdf/components/NavigatorComponent"],
+  function(Dashboard, NavigatorComponent) {
 
   /**
-   * ## The Open Flash Chart Component
+   * ## The Navigator Component
    */
-  describe("The Open Flash Chart Component #", function() {
+  describe("The Navigator Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
-    var openFlashChartComponent = new OpenFlashChartComponent(myDashboard, {
-      name: "openFlashChartComponent",
-      type: "openFlashChartComponent",
+    var navigatorComponent = new NavigatorComponent(dashboard, {
+      name: "navigatorMenu",
+      type: "navigator",
+      listeners:[],
       htmlObject: "sampleObject",
-      executeAtStart: true
+      executeAtStart: true,
+      mode: "horizontal",
+      includeSolutions: true
     });
 
-    myDashboard.addComponent(openFlashChartComponent);
+    dashboard.addComponent(navigatorComponent);
 
     /**
-     * ## The Open Flash Chart Component # Update Called
+     * ## The Navigator Component # Update Called
      */
     it("Update Called", function(done) {
-      spyOn(openFlashChartComponent, 'update').and.callThrough();
-      myDashboard.update(openFlashChartComponent);
+      spyOn(navigatorComponent, 'update').and.callThrough();
+      dashboard.update(navigatorComponent);
       setTimeout(function() {
-        expect(openFlashChartComponent.update).toHaveBeenCalled();
+        expect(navigatorComponent.update).toHaveBeenCalled();
         done();
       }, 100);
     });

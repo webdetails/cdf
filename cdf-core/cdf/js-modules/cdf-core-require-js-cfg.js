@@ -18,12 +18,13 @@
 (function() {
   var requirePaths = requireCfg.paths,
       requireShims = requireCfg.shim;
+
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(typeof CONTEXT_PATH !== "undefined"){ // production vs debug
-    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
-  } else if(typeof KARMA_RUN !== "undefined") { // test
+  if(typeof KARMA_RUN !== "undefined") { // test
     requirePaths['cdf'] = 'cdf/js-modules';
+  } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
+    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
     requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
@@ -41,13 +42,14 @@
   requireShims['cdf/components/DateInputComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/DateRangeInputComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/MonthPickerComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/OpenFlashChartComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/AutocompleteBoxComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/CheckComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/CommentsComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/MultiButtonComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/RadioComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/SelectMultiComponent'] = ['cdf/Dashboard'];
+  
+  /* pentaho-base
   requireShims['cdf/components/AnalyzerComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/DialComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/ExecuteAnalyzerComponent'] = ['cdf/Dashboard'];
@@ -57,21 +59,27 @@
   requireShims['cdf/components/TimePlotComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/TrafficComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/XactionComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/OpenFlashChartComponent'] = ['cdf/Dashboard'];
+  
+  requireShims['cdf/components/JPivotComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/PivotLinkComponent'] = ['cdf/Dashboard']
+  */
+  
+  /* cdf-pentaho / cdf-pentaho5
   requireShims['cdf/components/ExecutePrptComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/PrptComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/SchedulePrptComponent'] = ['cdf/Dashboard'];
-  /*
-  //Pentaho 4
-  requireShims['cdf/components/JPivotComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PivotLinkComponent'] = ['cdf/Dashboard']
-  //navigation
+  */
+
+  /* navigation
   requireShims['cdf/components/ContentListComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/NavigatorComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/PageTitleComponent'] = ['cdf/Dashboard'];
-  //other
+  */ 
+
+  /* other
   requireShims['cdf/components/ActionComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/BaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/FreeformComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/FreeformComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/InputBaseComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/ManagedFreeformComponent'] = ['cdf/Dashboard'];
@@ -81,9 +89,10 @@
   requireShims['cdf/components/ToggleButtonComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/UnmanagedComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/NavigatorBaseComponent'] = ['cdf/Dashboard'];
-  //map
-  //ToDo
   */
-;
+
+  /* map
+  // ToDo
+  */
 
 })();

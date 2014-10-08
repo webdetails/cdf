@@ -46,6 +46,7 @@ define(["cdf/Dashboard", "cdf/components/ExecutePrptComponent"],
      */
     it("Update Called", function(done) {
       spyOn(executeTopTenCustomers, 'update').and.callThrough();
+      spyOn(executeTopTenCustomers, 'placeholder').and.returnValue($("<div/>"));
       myDashboard.update(executeTopTenCustomers);
       setTimeout(function() {
         expect(executeTopTenCustomers.update).toHaveBeenCalled();

@@ -11,14 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.tooltip'],
+define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.tooltip', '../lib/jquery.jdMenu'],
   function(DashboardExt, $, NavigatorBaseComponent) {
 
   var NavigatorComponent = NavigatorBaseComponent.extend({
     update : function() {
       var myself = this;
       if(NavigatorBaseComponent.navigatorResponse == -1) {
-        $.getJSON(DashboardExt.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
+        $.getJSON(DashboardExt.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json) {
           myself.processNavigatorResponse(json);
         });
       } else {
@@ -30,13 +30,12 @@ define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent
 
       var files = this.includeSolutions?json.solution.folders[0].folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
 
-      files.sort(function(a,b){
-        return a.name>b.name
-      });
+      files.sort(function(a,b) { return a.name > b.name; });
+
       var ret = this.generateMenuFromArray(files, 0);
       $("#"+this.htmlObject).html(ret);
 
-      $(function(){
+      $(function() {
         $('ul.jd_menu').jdMenu({
           activateDelay: 50,
           showDelay: 50,
@@ -83,19 +82,24 @@ define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent
     generateMenuFromFile : function(file, depth) {
 
       var s = "";
+      var webAppPath = this.dashboard.webAppPath;
       if(file.visible == true) {
 
         var classString = NavigatorBaseComponent.isAncestor(file.solution, file.path)?"class=\"ancestor\"":"";
 
         var _path = "";
         if(file.path.length>0) {
-          _path="path="+file.path;
+          _path="path=" + file.path;
         }
 
         var _template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
             NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
         if(file.link != undefined) {
-          s += "<li><a "+ classString +" title=\"" + file.title + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
+          s += "<li><a "+ classString +" title=\"" + file.title + "\"  href=\"" +
+          ((webAppPath.substring(webAppPath.length - 1) == '/')
+            ? webAppPath.substring(0, webAppPath.length - 1) + file.link 
+            : webAppPath + file.link) +
+          "\">" + file.title + "</a>";
 
         } else {
           s += "<li><a "+ classString +" title=\"" + file.title + "\" onClick=\"return false;\" href=\"" +

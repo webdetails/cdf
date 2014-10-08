@@ -55,6 +55,12 @@
   <property name='pentaho-js-lib.dir' value='${pentaho.dir}/${js-lib.dir}'/>
   <property name='pentaho-resource.dir' value='${pentaho.dir}/${resource.dir}'/>
 
+  <property name='pentaho-test-res.dir' value='${pentaho.dir}/test-res' description='Resources for Karma tests' />
+  <property name='pentaho-test-res-js-modules.dir' value='${pentaho-test-res.dir}/cdf/js-modules' description='Modules for Karma tests' />
+  <property name='pentaho-test-res-js-lib.dir' value='${pentaho-test-res.dir}/cdf/js-lib' description='Libs for Karma tests' />
+  <property name='pentaho-test-js.dir' value='${pentaho.dir}/test-js' description='Karma tests dir' />
+  <property name='js.requireCfg-raw' value='${pentaho-test-res.dir}/requireCfg-raw.js' />
+
   <property name="plugin.name" value="pentaho-cdf" description="Name of the plugin"/>
   <property name="bin.dir" value="bin"/>
   <property name="stage.dir" value="${bin.dir}/stage" description="Name of the resource directory"/>
@@ -158,8 +164,7 @@
       <classpath refid="test.classpath" />
     </javac>
 
-    <!-- Copy the non-java files from the source directory to the test classes directory
--->
+    <!-- Copy the non-java files from the source directory to the test classes directory -->
     <copy todir="${testclasses.dir}">
       <fileset dir="${testsrc.dir}">
         <exclude name="**/*.java" />
@@ -570,5 +575,89 @@
       <param name="publish.pomFile" value="samples-pom.xml"/>
       <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}"/>
     </antcall>
+  </target>
+
+  <target name="test-js" depends="install-antcontrib, npm-install">
+
+    <!-- -->
+    <echo message="Copying js source"/>
+    <delete file="${pentaho-test-res.dir}"/>
+    <copy todir='${pentaho-test-res-js-modules.dir}'>
+      <fileset dir='${core-js.dir}'/>
+      <fileset dir='${pentaho-base-js.dir}'/>
+      <fileset dir="${pentaho-js.dir}" />
+      <fileset dir="${pentaho-test-js.dir}" />
+    </copy>
+    <copy todir='${pentaho-test-res-js-lib.dir}'>
+      <fileset dir='${core-js-lib.dir}'/>
+    </copy>
+
+    <!-- compile the require file -->
+    <echo message="Collecting RequireJS Configurations"/>
+    <delete file="${js.requireCfg-raw}"/>
+    <echo message="var requireCfg={paths:{},shim:{}};" file="${js.requireCfg-raw}" append="false"/>
+    <concat destfile="${js.requireCfg-raw}" append="true" force="yes">
+      <fileset dir="${pentaho-test-res.dir}" casesensitive="yes">
+        <include name="**/*-require-js-cfg.js"/>
+      </fileset>
+    </concat>
+
+    <!-- Check to see if karma is on the PATH -->
+    <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
+    <available file="karma.cmd" filepath="${nodemodules.local.dir.bin}" property="karma-is-available-windows"/>
+
+    <if>
+      <isset property="isWindows"/>
+      <then>
+        <if>
+          <not>
+            <isset property="karma-is-available-windows"/>
+          </not>
+          <then>
+            <echo message="${nodemodules.local.dir.bin}"/>
+            <fail>karma.cmd is not available on the '${nodemodules.local.dir.bin}'. Unit tests could not be run.</fail>
+          </then>
+        </if>
+      </then>
+      <else>
+        <if>
+          <not>
+            <isset property="karma-is-available"/>
+          </not>
+          <then>
+            <fail>karma is not available on the PATH. Unit tests could not be run.</fail>
+          </then>
+        </if>
+      </else>
+    </if>
+    <if>
+      <available file="${js.karma.ci.config}"/>
+      <then>
+        <if>
+          <isset property="isWindows"/>
+          <then>
+            <!-- we have karma available, use it to run the tests -->
+            <exec executable="${nodemodules.local.dir.bin}\karma.cmd">
+              <arg value="start"/>
+              <arg value="${js.karma.ci.config}"/>
+              <!-- if we are running via ant, then assume we must 'single-run' -->
+              <arg value="--single-run"/>
+            </exec>
+          </then>
+          <else>
+            <!-- we have karma available, use it to run the tests -->
+            <exec executable="karma">
+              <arg value="start"/>
+              <arg value="${js.karma.ci.config}"/>
+              <!-- if we are running via ant, then assume we must 'single-run' -->
+              <arg value="--single-run"/>
+            </exec>
+          </else>
+        </if>
+      </then>
+      <else>
+        <fail>There is no karma configuration file available (looking for: ${js.karma.ci.config})</fail>
+      </else>
+    </if>
   </target>
 </project>

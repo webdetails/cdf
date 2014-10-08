@@ -11,14 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', './BaseComponent'], function(Logger, BaseComponent) {
+define(['../dashboard/Utils', '../Logger', './BaseComponent'],
+  function(Utils, Logger, BaseComponent) {
 
-  var NavigatorBaseComponent = BaseComponent.extend({},{
-    path: this.dashboard.getQueryParameter("path"),
+  var NavigatorBaseComponent = BaseComponent.extend({}, {
+    path: Utils.getQueryParameter("path"),
 
-    solution: this.dashboard.getQueryParameter("solution"),
+    solution: Utils.getQueryParameter("solution"),
 
-    template: this.dashboard.getQueryParameter("template"),
+    template: Utils.getQueryParameter("template"),
 
     navigatorResponse : -1,
 
@@ -60,7 +61,7 @@ define(['../Logger', './BaseComponent'], function(Logger, BaseComponent) {
 
       }
       if(found == 0) {
-        Logger.error("Fatal: Solution " + solution +" not found in navigation object");
+        Logger.error("Fatal: Solution " + solution + " not found in navigation object");
         return;
       }
     },
@@ -90,12 +91,12 @@ define(['../Logger', './BaseComponent'], function(Logger, BaseComponent) {
         }
 
       }
-      Logger.error("Fatal: path " + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()) + " not found in navigation object");
+      Logger.error("Fatal: path " + (NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path)) + " not found in navigation object");
       return;
     },
 
     getParentSolution : function() {
-      if((NavigatorBaseComponent.path || this.dashboard.getPathParameter()).length>0) {
+      if((NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path)).length>0) {
         return NavigatorBaseComponent.solution;
       } else {
         return "";
@@ -103,12 +104,12 @@ define(['../Logger', './BaseComponent'], function(Logger, BaseComponent) {
     },
 
     getParentPath : function() {
-      var path = NavigatorBaseComponent.path || this.dashboard.getPathParameter();
+      var path = NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path);
       var index = path.lastIndexOf("/");
-      if(index==-1) {
+      if(index == -1) {
         return "";
       }
-      var parentPath = path.substring(0, path.lastIndexOf("/"));
+      var parentPath = path.substring(0, index);
       return parentPath;
     },
 

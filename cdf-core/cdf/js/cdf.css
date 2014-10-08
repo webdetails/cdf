@@ -679,7 +679,7 @@ div.scheduler  label {
  * Block UI
  **/
 .blockUIDefaultImg {
-  background-image: url('../resources/style/images/processing_transparent.gif');
+  background-image: url('../../resources/style/images/processing_transparent.gif');
   padding: 0px;
   height:32px;
   width:32px;

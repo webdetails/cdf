@@ -23,10 +23,10 @@
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   var prefix = "";
-  if(typeof CONTEXT_PATH !== "undefined"){ // production vs debug
-    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
-  } else if(typeof KARMA_RUN !== "undefined") { // test
+  if(typeof KARMA_RUN !== "undefined") { // test
     prefix = requirePaths['cdf/lib'] = 'cdf/js-lib';
+  } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
+    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
     prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js/lib' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
@@ -45,11 +45,11 @@
   ];
 
   //jquery.blockUI 2.66.0
-  requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/jquery/jquery.blockUI";
+  requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/blockUI/jquery.blockUI";
   requireShims['cdf/lib/jquery.blockUI'] = ['cdf/lib/jquery'];
 
   //jquery.tooltip 1.3
-  requirePaths['cdf/lib/jquery.tooltip'] = prefix + "/jquery/jquery.tooltip";
+  requirePaths['cdf/lib/jquery.tooltip'] = prefix + "/tooltip/jquery.tooltip";
   requireShims['cdf/lib/jquery.tooltip'] = [
     'cdf/lib/jquery',
     'css!cdf/lib/jquery.tooltip'
@@ -130,6 +130,26 @@
   requireShims['cdf/lib/captify'] = [
     'cdf/lib/jquery',
     'css!cdf/lib/captify.css'
+  ];
+
+  // bgiframe 2.1.1
+  requirePaths['cdf/lib/jquery.bgiframe'] = prefix + "/bgiframe/jquery.bgiframe";
+  requireShims['cdf/lib/jquery.bgiframe'] = [
+    'cdf/lib/jquery'
+  ];
+  // positionBy 1.0.7 (2008-01-29)
+  requirePaths['cdf/lib/jquery.positionBy'] = prefix + "/positionBy/jquery.positionBy";
+  requireShims['cdf/lib/jquery.positionBy'] = [
+    'cdf/lib/jquery'
+  ];
+  // jdMenu 1.4.1 (2008-03-31)
+  requirePaths['cdf/lib/jquery.jdMenu'] = prefix + "/jdMenu/jquery.jdMenu";
+  requireShims['cdf/lib/jquery.jdMenu'] = [
+    'cdf/lib/jquery',
+    'cdf/lib/jquery.bgiframe',
+    'cdf/lib/jquery.positionBy',
+    'css!cdf/lib/jdMenu/jquery.jdMenu.css',
+    'css!cdf/lib/jdMenu/jquery.jdMenu.slate.css'
   ];
 
   //shims
