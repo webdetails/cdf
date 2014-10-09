@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -198,58 +199,58 @@
     <h3>Sample</h3>
 
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
         <div id="sampleObject"></div>
+        <br/>
       </div>
-    </div>
-  </div>
-</div>
 
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
-
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/OpenFlashChartComponent'],
-    function(Dashboard, OpenFlashChartComponent) {
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/OpenFlashChartComponent'],
+  function(Dashboard, OpenFlashChartComponent) {
 
     var dashboard = new Dashboard();
 
-    var MetaLayerHome2 = {
-      topTenCustomerDefinition: {
-        width: "500",
-        height: "500",
-        chartType: "PieChart",
-        datasetType: "CategoryDataset",
-        is3d: "true",
-        isStacked: false,
-        includeLegend: false,
-        title: "Top 10 Customers",
-        parameterName: "PRODUCTLINE",
-        urlTemplate: "alert('You clicked ' + encode_prepare('{PRODUCTLINE}'))",
-        orientation: 'horizontal',
-        queryType: 'mdx',
-        catalog: 'mondrian:/SteelWheels',
-        jndi: "SampleData",
-        query: function() {
-          return "select NON EMPTY [Measures].[Sales] ON COLUMNS," +
-            " NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales])" +  
-            " ON ROWS from [SteelWheelsSales]";
-        }
+    var topTenCustomerDefinition = {
+      width: "500",
+      height: "500",
+      chartType: "PieChart",
+      datasetType: "CategoryDataset",
+      is3d: "true",
+      isStacked: false,
+      includeLegend: false,
+      title: "Top 10 Customers",
+      parameterName: "PRODUCTLINE",
+      urlTemplate: "alert('You clicked ' + encode_prepare('{PRODUCTLINE}'))",
+      orientation: 'horizontal',
+      queryType: 'mdx',
+      catalog: 'mondrian:/SteelWheels',
+      jndi: "SampleData",
+      query: function() {
+        return "select NON EMPTY [Measures].[Sales] ON COLUMNS," +
+        " NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales])" +
+        " ON ROWS from [SteelWheelsSales]";
       }
     };
 
     dashboard.addComponent(new OpenFlashChartComponent(dashboard, {
       name: "topTenCustomers",
       type: "openFlashChartComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      chartDefinition: topTenCustomerDefinition,
       htmlObject: "sampleObject",
       executeAtStart: true
     }));
     dashboard.init();
-  });
-</script>
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>
+

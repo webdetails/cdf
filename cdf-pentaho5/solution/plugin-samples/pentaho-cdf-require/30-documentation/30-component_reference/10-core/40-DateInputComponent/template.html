@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -82,24 +83,19 @@
     <h3>Sample</h3>
 
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
-        <div style="font-size: 9pt" id="sampleObject"></div>
+        <div id="sampleObject"></div>
+        <br/>
       </div>
-    </div>
-  </div>
-</div>
 
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
-
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'],
-    function(Dashboard, DateInputComponent) {
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'],
+  function(Dashboard, DateInputComponent) {
 
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "");
@@ -120,5 +116,11 @@
       }
     }));
     dashboard.init();
-  });
-</script>
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

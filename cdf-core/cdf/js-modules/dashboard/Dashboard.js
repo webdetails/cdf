@@ -12,7 +12,7 @@
  */
 
 define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib/underscore', '../lib/backbone',
-      '../lib/shims', 'css!../lib/cdf.css'],
+      '../lib/shims', 'css!../lib/cdf.css', '../lib/modernizr'],
     function(Base, $, Logger, RefreshEngine, _, Backbone) {
 
   /**

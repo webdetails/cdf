@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -301,69 +302,68 @@
     <h3>Sample</h3>
 
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
         <div id="sampleObject"></div>
+        <br/>
       </div>
-    </div>
-  </div>
-</div>
 
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+//Used for callbacks from child windows
+var dashboard;
 
-  //Used for callbacks from child windows
-  var dashboard;
-
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/JFreeChartComponent'/*, 'cdf/dashboard/Utf8Encoder'*/],
-    function(Dashboard, JFreeChartComponent) {
+require(['cdf/Dashboard.Blueprint', 'cdf/components/JFreeChartComponent'/*, 'cdf/dashboard/Utf8Encoder'*/],
+  function(Dashboard, JFreeChartComponent) {
 
     //var dashboard = new Dashboard();
     dashboard = new Dashboard();
 
-    var MetaLayerHome2 = {
-      topTenCustomerDefinition: {
-        width: 500,
-        height: 300,
-        chartType: "BarChart",
-        datasetType: "CategoryDataset",
-        is3d: false,
-        byRow: false,
-        isStacked: false,
-        includeLegend: false,
-        caption:{},
-        domainLabelRotation: 0,
-        backgroundColor: "#F3F3F3",
-        title: "Top 10 Customers",
-        parameterName: "PRODUCTLINE",
-        urlTemplate: "javascript:require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {" +
-          " alert(\"You clicked \" + Utf8Encoder.encode_prepare(\"{PRODUCTLINE}\")); })",
-        orientation: 'horizontal',
-        queryType: 'mdx',
-        catalog: 'mondrian:/SteelWheels',
-        jndi: "SampleData",
-        query: function() {
-          var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-            " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +  
-            " ON ROWS from [SteelWheelsSales]";
-          return query;
-        }
+    topTenCustomerDefinition = {
+      width: 500,
+      height: 300,
+      chartType: "BarChart",
+      datasetType: "CategoryDataset",
+      is3d: false,
+      byRow: false,
+      isStacked: false,
+      includeLegend: false,
+      caption:{},
+      domainLabelRotation: 0,
+      backgroundColor: "#F3F3F3",
+      title: "Top 10 Customers",
+      parameterName: "PRODUCTLINE",
+      urlTemplate: "javascript:require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {" +
+      " alert(\"You clicked \" + Utf8Encoder.encode_prepare(\"{PRODUCTLINE}\")); })",
+      orientation: 'horizontal',
+      queryType: 'mdx',
+      catalog: 'mondrian:/SteelWheels',
+      jndi: "SampleData",
+      query: function() {
+        var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+        " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
+        " ON ROWS from [SteelWheelsSales]";
+        return query;
       }
     };
 
     dashboard.addComponent(new JFreeChartComponent(dashboard, {
       name: "topTenCustomers",
       type: "jFreeChartComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      chartDefinition: topTenCustomerDefinition,
       htmlObject: "sampleObject",
       executeAtStart: true
     }));
 
     dashboard.init();
-  });
-</script>
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

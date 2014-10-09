@@ -6,30 +6,27 @@
   <meta name="keywords" content="" />
   <meta name="description" content="" />
   <link rel="stylesheet" type="text/css" href="resources/style/template.css"/>
-  <script language="javascript" type="text/javascript" src="webcontext.js?context=cdf"></script>
 </head>
 <body>
 <script language="javascript" type="text/javascript">
-  /*
-   * this is currently using the common-ui loaded jquery. No problem with that
-   */
-  $(function(){
-    var zPad = function(s,n){
-      return (new Array(n+1).join('0')+s).substr(-Math.max(n,s.toString().length));
-    };
+  require(['cdf/lib/jquery'], function($){
+    $(function(){
+      var zPad = function(s,n){
+        return (new Array(n+1).join('0')+s).substr(-Math.max(n,s.toString().length));
+      };
 
-    $("#content h2").each(function(i){
-      var h = $(this);
-      h.find("span.h2Num").remove();
-      $("<span/>").text(h.text()).appendTo(h.empty());
-      $("<span/>").addClass("h2Num h2Num"+(i%2==0?"Even":"Odd")).text(zPad(i+1,2)).prependTo(h);
-      h.css("vertical-align",i%2==0?"top":"bottom");
-      h.add(h.nextUntil("h2")).wrapAll($("<div/>").addClass("webdetailsBoxShadow"));
-    })
+      $("#content h2").each(function(i){
+        var h = $(this);
+        h.find("span.h2Num").remove();
+        $("<span/>").text(h.text()).appendTo(h.empty());
+        $("<span/>").addClass("h2Num h2Num"+(i%2==0?"Even":"Odd")).text(zPad(i+1,2)).prependTo(h);
+        h.css("vertical-align",i%2==0?"top":"bottom");
+        h.add(h.nextUntil("h2")).wrapAll($("<div/>").addClass("webdetailsBoxShadow"));
+      });
+    });
   });
-
 </script>
-<script language="javascript">
+<!--<script language="javascript">
 
   isAdmin = "{isAdmin}";
   isLoggedIn = "{isLoggedIn}";
@@ -46,7 +43,7 @@
       }
     });
     Dashboards.setI18nSupport('#{LANGUAGE_CODE}', jQuery.i18n);
-  }
+  };
 
   $(document).ready(function(){
     // Initialize jquery.i18n plugin - load message files
@@ -54,7 +51,7 @@
     loadMessageBundles(userLocale);
   });
 
-</script>
+</script>-->
 
 
 <div class="webdetailsWrapper">

@@ -12,7 +12,7 @@
  */
 
 
-define(['./Dashboard', './Popups','../Logger', '../lib/underscore', '../lib/jquery', '../lib/jquery.ui', '../lib/jquery.blockUI'],
+define(['./Dashboard', './Popups','../Logger', '../lib/underscore', '../lib/jquery', '../lib/jquery.blockUI'],
   function(Dashboard, Popups, Logger, _, $) {
 
   /**

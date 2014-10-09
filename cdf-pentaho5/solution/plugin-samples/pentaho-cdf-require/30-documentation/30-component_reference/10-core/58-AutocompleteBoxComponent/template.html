@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -97,44 +98,36 @@
     </dl>
 
     <h3>Sample</h3>
-
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
         <div id="sampleObject"></div>
         <div id="sampleObjectResult"></div>
+        <br/>
       </div>
-    </div>
-  </div>
-</div>
 
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
-
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/AutocompleteBoxComponent', 'cdf/lib/jquery'],
-    function(Dashboard, AutocompleteBoxComponent, $) {
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/AutocompleteBoxComponent'],
+  function(Dashboard, AutocompleteBoxComponent) {
 
     var dashboard = new Dashboard();
     dashboard.addParameter("clients", "");
 
-    MetaLayerHome2 = {
-      clientSelectorDefinition: {
-        queryType: 'mdx',
-        jndi: "SampleData",
-        catalog: "mondrian:/SteelWheels",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-            "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
-            "(Left([Customers].CurrentMember.Name, Len(\"" +
-            dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \"" +
-              dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")),100.0,[Measures].[Sales]) ON ROWS "+
-            "from [SteelWheelsSales]";
-        }
+    var clientSelectorDefinition = {
+      queryType: 'mdx',
+      jndi: "SampleData",
+      catalog: "mondrian:/SteelWheels",
+      query: function() {
+        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+        "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
+        "(Left([Customers].CurrentMember.Name, Len(\"" +
+        dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \"" +
+        dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")),100.0,[Measures].[Sales]) ON ROWS "+
+        "from [SteelWheelsSales]";
       }
     };
 
@@ -142,7 +135,7 @@
       name: "autocompleteBox",
       type: "autocompleteBox",
       matchType: "fromStart",
-      queryDefinition: MetaLayerHome2.clientSelectorDefinition,
+      queryDefinition: clientSelectorDefinition,
       selectMulti: true,
       showApplyButton: true,
       minTextLenght: 0,
@@ -164,5 +157,11 @@
       }
     }));
     dashboard.init();
-  });
-</script>
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

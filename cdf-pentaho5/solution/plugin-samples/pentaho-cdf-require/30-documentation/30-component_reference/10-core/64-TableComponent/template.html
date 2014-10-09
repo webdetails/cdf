@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -158,21 +159,21 @@
         Example:
           <pre>
             oLanguage:{
-            "sProcessing": "A processar...",
-            "sLengthMenu": "Mostrar _MENU_ registos",
-            "sZeroRecords": "Não foram encontrados resultados",
-            "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
-            "sInfoEmpty": "Mostrando de 0 até 0 de 0 registros",
-            "sInfoFiltered": "(filtrado de _MAX_ registos no total)",
-            "sInfoPostFix": "",
-            "sSearch": "Procurar:",
-            "sUrl": "",
-            "oPaginate": {
-            "sFirst": "Primeiro",
-            "sPrevious": "Anterior",
-            "sNext": "Seguinte",
-            "sLast": "Último"
-            }
+              "sProcessing": "A processar...",
+              "sLengthMenu": "Mostrar _MENU_ registos",
+              "sZeroRecords": "Não foram encontrados resultados",
+              "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
+              "sInfoEmpty": "Mostrando de 0 até 0 de 0 registros",
+              "sInfoFiltered": "(filtrado de _MAX_ registos no total)",
+              "sInfoPostFix": "",
+              "sSearch": "Procurar:",
+              "sUrl": "",
+              "oPaginate": {
+                "sFirst": "Primeiro",
+                "sPrevious": "Anterior",
+                "sNext": "Seguinte",
+                "sLast": "Último"
+              }
             }
           </pre>
       </dd>
@@ -192,52 +193,52 @@
     <h3>Sample</h3>
 
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
         <div id="sampleObject"></div>
+        <br/>
       </div>
-    </div>
-  </div>
-</div>
 
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
-
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/TableComponent'],
-    function(Dashboard, TableComponent) {
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/TableComponent'],
+  function(Dashboard, TableComponent) {
 
     var dashboard = new Dashboard();
 
-    var MetaLayerHome2 = {
-      topTenCustomerDefinition: {
-        colHeaders: ["Customers","Sales"],
-        colTypes: ['string','numeric'],
-        colFormats: [null,'%.0f'],
-        colWidths: ['500px',null],
-        queryType: 'mdx',
-        displayLength: 10,
-        catalog: 'mondrian:/SteelWheels',
-        jndi: "SampleData",
-        query: function(){
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-            " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
-            " ON ROWS from [SteelWheelsSales]";
+    var topTenCustomerDefinition = {
+      colHeaders: ["Customers","Sales"],
+      colTypes: ['string','numeric'],
+      colFormats: [null,'%.0f'],
+      colWidths: ['500px',null],
+      queryType: 'mdx',
+      displayLength: 10,
+      catalog: 'mondrian:/SteelWheels',
+      jndi: "SampleData",
+      query: function(){
+        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
+          " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
+          " ON ROWS from [SteelWheelsSales]";
         }
-      }
-    };
+      };
 
     dashboard.addComponent(new TableComponent(dashboard, {
       name: "topTenCustomers",
       type: "tableComponent",
-      chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+      chartDefinition: topTenCustomerDefinition,
       htmlObject: "sampleObject",
       executeAtStart: true
     }));
     dashboard.init();
-  });
-</script>
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+
+  </div>
+</div>

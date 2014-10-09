@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', '../lib/jquery', './BaseComponent', '../lib/captify'],
+define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', '../lib/jquery', './BaseComponent', '../lib/captify', 'css!./JFreeChartComponent'],
   function(JFreeChartComponentExt, DashboardExt, Logger, $, BaseComponent) {
 
   var JFreeChartComponent = BaseComponent.extend({
