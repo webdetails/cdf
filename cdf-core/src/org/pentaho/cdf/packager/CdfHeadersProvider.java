@@ -45,6 +45,8 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
   // special case for conditional include
   private static final String SUFFIX_IE8_STYLE = ".ie8link";
   private static final String SUFFIX_IE8_SCRIPT = ".ie8script";
+  private static final String SUFFIX_IE8_SCRIPT_AFTER_STYLE = ".ie8scriptAfterLink";
+  private static final String SUFFIX_IE8_SCRIPT_BEFORE_SCRIPT = ".ie8scriptBeforeScript";
 
   // these are always loaded first
   private static final String BASE_SCRIPTS_PROPERTY = "script";
@@ -140,12 +142,22 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         switch ( pkg.getType() ) {
           case JS:
             for ( String name : componentTypes ) {
+              tmp = name.concat( SUFFIX_IE8_SCRIPT_BEFORE_SCRIPT );
+              if (  extraProperties.containsKey( tmp ) ) {
+                String[] value = extraProperties.getProperty( tmp ).split( "," );
+                filePaths.addAll( Arrays.asList( value ) );
+              }
               tmp = name.concat( SUFFIX_SCRIPT );
               if (  extraProperties.containsKey( tmp ) ) {
                 String[] value = extraProperties.getProperty( tmp ).split( "," );
                 filePaths.addAll( Arrays.asList( value ) );
               }
               tmp = name.concat( SUFFIX_IE8_SCRIPT );
+              if (  extraProperties.containsKey( tmp ) ) {
+                String[] value = extraProperties.getProperty( tmp ).split( "," );
+                filePaths.addAll( Arrays.asList( value ) );
+              }
+              tmp = name.concat( SUFFIX_IE8_SCRIPT_AFTER_STYLE );
               if (  extraProperties.containsKey( tmp ) ) {
                 String[] value = extraProperties.getProperty( tmp ).split( "," );
                 filePaths.addAll( Arrays.asList( value ) );
@@ -275,7 +287,9 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
 
   private void addCustomDependencies( PathSet pathSet, Properties properties ) {
     for ( String name : properties.stringPropertyNames() ) {
-      if ( name.endsWith( SUFFIX_SCRIPT ) ) {
+      if ( name.endsWith( SUFFIX_IE8_SCRIPT_BEFORE_SCRIPT ) ) {
+        pathSet.ie8ScriptsBeforeScripts.addAll( getProperty( properties, name ) );
+      } else if ( name.endsWith( SUFFIX_SCRIPT ) ) {
         pathSet.scripts.addAll( getProperty( properties, name ) );
       } else if ( name.endsWith( SUFFIX_IE8_SCRIPT ) ) {
         pathSet.ie8Scripts.addAll( getProperty( properties, name ) );
@@ -283,12 +297,15 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         pathSet.styles.addAll( getProperty( properties, name ) );
       } else if ( name.endsWith( SUFFIX_IE8_STYLE ) ) {
         pathSet.ie8Styles.addAll( getProperty( properties, name ) );
+      } else if ( name.endsWith( SUFFIX_IE8_SCRIPT_AFTER_STYLE ) ) {
+        pathSet.ie8ScriptsAfterStyles.addAll( getProperty( properties, name ) );
       } else if ( !name.equals( BASE_SCRIPTS_PROPERTY ) && !name.equals( BASE_STYLES_PROPERTY ) ) {
         // no default
         getLog().error(
             String.format( "Type of include property '%s' not recognized. Property name must end in one of ( '%s' )",
-                name, StringUtils.join( new String[] { SUFFIX_SCRIPT, SUFFIX_STYLE,
-                                                       SUFFIX_IE8_STYLE, SUFFIX_IE8_SCRIPT }, "', '" ) ) );
+                name, StringUtils.join( new String[] { SUFFIX_SCRIPT, SUFFIX_STYLE, SUFFIX_IE8_STYLE,
+                                                       SUFFIX_IE8_SCRIPT, SUFFIX_IE8_SCRIPT_AFTER_STYLE,
+                                                       SUFFIX_IE8_SCRIPT_BEFORE_SCRIPT }, "', '" ) ) );
       }
     }
   }
@@ -297,6 +314,12 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     List<StaticDependenciesPackage> dependencies = new ArrayList<StaticDependenciesPackage>();
     PathOrigin origin = getDefaultOrigin();
     final String PKG_NAME = "cdf-%s-%s-includes";
+    if ( !pathSet.ie8ScriptsBeforeScripts.isEmpty() ) {
+      String name = String.format( PKG_NAME, pkgBaseName, "ie8scriptBeforeScript" );
+      dependencies
+        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+          origin, pathSet.ie8ScriptsBeforeScripts ) );
+    }
     if ( !pathSet.scripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "script" );
       dependencies.add( createDependencyPackage( name, PackageType.JS, origin, pathSet.scripts ) );
@@ -316,6 +339,12 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
       dependencies
           .add( new IE8Dependencies( name, PackageType.CSS, getContentAccess(), getUrlProvider(),
             origin, pathSet.ie8Styles ) );
+    }
+    if ( !pathSet.ie8ScriptsAfterStyles.isEmpty() ) {
+      String name = String.format( PKG_NAME, pkgBaseName, "ie8scriptAfterLink" );
+      dependencies
+        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+          origin, pathSet.ie8ScriptsAfterStyles ) );
     }
     return dependencies;
   }
@@ -352,10 +381,12 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
   }
 
   private static class PathSet {
+    public List<String> ie8ScriptsBeforeScripts = new ArrayList<String>();
     public List<String> scripts = new ArrayList<String>();
     public List<String> styles = new ArrayList<String>();
     public List<String> ie8Styles = new ArrayList<String>();
     public List<String> ie8Scripts = new ArrayList<String>();
+    public List<String> ie8ScriptsAfterStyles = new ArrayList<String>();
   }
 
   private static class AbsolutizingStringFilter implements StringFilter {
