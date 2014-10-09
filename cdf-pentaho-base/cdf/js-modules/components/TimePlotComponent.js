@@ -13,13 +13,6 @@
 
 define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent', '../dashboard/Utils'],
   function(XactionComponentExt, Logger, $, BaseComponent, Utils) {
-    
-  (function(){
-      var script   = document.createElement("script");
-      script.type  = "text/javascript";
-      script.src   = "/pentaho/api/repos/pentaho-cdf/js/lib/simile/timeplot/timeplot-api.js";    // use this for linked script
-      document.head.appendChild(script);
-  })();
 
   var TimePlotComponent = BaseComponent.extend({
 

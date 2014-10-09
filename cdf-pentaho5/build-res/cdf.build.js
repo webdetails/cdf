@@ -39,9 +39,13 @@
 
   preserveLicenseComments: false,
 
-  generateSourceMaps: true,
+  generateSourceMaps: false,
 
   separateCSS: true,
+
+  /*enforceDefine: true,
+
+  wrapShim: true,*/
 
   modules: [{
     name: "cdf/Dashboard",
@@ -51,9 +55,16 @@
     ],
     exclude: [
         'cdf/cdf-core-require-js-cfg',
+        'cdf/cdf-pentaho-base-require-js-cfg',
+        'cdf/cdf-pentaho-require-js-cfg',
         'cdf/lib/cdf-core-lib-require-js-cfg',
         'cdf/lib/require-css/normalize', // according to https://github.com/guybedford/require-css#basic-usage
-        'css!cdf/Dashboard'
+        'css!cdf/Dashboard',
+        //exclude core included jquery libs otherwise we will not able to use them without load issues
+        'cdf/lib/jquery',
+        'cdf/lib/jquery.ui',
+        'cdf/lib/jquery.blockUI',
+        'cdf/lib/jquery.tooltip'
     ]
   }]
 })

@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -97,43 +98,44 @@
     <h3>Sample</h3>
 
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
         <div id="sampleObject"></div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectMultiComponent'],
+  function(Dashboard, SelectMultiComponent) {
+
+  var dashboard = new Dashboard();
+  dashboard.addParameter("region", "");
+
+  dashboard.addComponent(new SelectMultiComponent(dashboard, {
+    name: "selectMultiComponent",
+    type: "selectMultiComponent",
+    parameters:[],
+    path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+    parameter:"region",
+    size: "5",
+    valueAsId: true,
+    isMultiple: true,
+    htmlObject: "sampleObject",
+    executeAtStart: true,
+    postChange: function() {
+      alert("you chose: " + this.dashboard.getParameterValue(this.parameter));
+    }
+  }));
+  dashboard.init();
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
       </div>
     </div>
   </div>
 </div>
-
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
-
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectMultiComponent'],
-    function(Dashboard, SelectMultiComponent) {
-
-    var dashboard = new Dashboard();
-    //dashboard.addParameter("region", "");
-
-    dashboard.addComponent(new SelectMultiComponent(dashboard, {
-      name: "selectMultiComponent",
-      type: "selectMultiComponent",
-      parameters:[],
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
-      parameter:"region",
-      size: "5",
-      valueAsId: true,
-      isMultiple: true,
-      htmlObject: "sampleObject",
-      executeAtStart: true,
-      postChange: function() {
-        alert("you chose: " + this.dashboard.getParameterValue(this.parameter));
-      }
-    }));
-    dashboard.init();
-  });
-</script>

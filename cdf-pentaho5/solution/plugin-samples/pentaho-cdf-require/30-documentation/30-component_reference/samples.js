@@ -11,16 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/components/PivotLinkComponent.ext', [],
-  function() {
+require(['cdf/lib/jquery', 'cdf/lib/jquery.ui'], function($){
+  $("#tryMe").click(function(){
+    eval($('#samplecode').val());
+    $("#example").tabs("select",0);
+  });
 
-  var PivotLinkComponentExt = {
-
-    getPivot: function(solution, path, action) { 
-      return "dummy";
-    }
-
-  };
-
-  return PivotLinkComponentExt;
+  $("#example").tabs();
+  eval($('#samplecode').val());
+  $("#example").tabs("select",0);
 });

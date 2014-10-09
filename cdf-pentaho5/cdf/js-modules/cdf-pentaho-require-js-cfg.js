@@ -12,7 +12,7 @@
  */
 
 /**
- * Configuration file for cdf core
+ * Configuration file for cdf pentaho
  */
 
 (function() {
@@ -20,15 +20,16 @@
       requireShims = requireCfg.shim;
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
+  var prefix = "";
 
   if(typeof KARMA_RUN !== "undefined") { // test
-    requirePaths['cdf'] = 'cdf/js-modules';
+    prefix = requirePaths['cdf'] = 'cdf/js-modules';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
-    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    prefix = requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
-    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    prefix = requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
-    requirePaths['cdf'] = "cdf";
+    prefix = requirePaths['cdf'] = "cdf";
   }
 
   /*

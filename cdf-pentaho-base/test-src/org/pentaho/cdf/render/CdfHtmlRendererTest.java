@@ -71,17 +71,35 @@ public class CdfHtmlRendererTest extends TestCase {
     doNothing().when( cdfHtmlRenderer ).generateStorage( any( OutputStream.class ), anyString() );
 
     cdfHtmlRenderer.execute( outputStream, basicFile, style, messages, parameterMap, user, inactiveInterval,
-      /*isRequire*/true );
+      /*isRequire*/true, /*loadTheme*/false );
 
     verify( cdfHtmlRenderer, times( 0 ) ).getHeadersInternal( anyString(), any( HashMap.class ), any( OutputStream.class ) );
     verify( cdfHtmlRenderer, times( 0 ) ).generateContext( any( OutputStream.class ), any( HashMap.class ), anyInt() );
     verify( cdfHtmlRenderer, times( 0 ) ).generateStorage( any( OutputStream.class ), anyString() );
+    verify( cdfHtmlRenderer, times( 1 ) ).getWebContextHeader( any( OutputStream.class ), anyBoolean() );
 
     cdfHtmlRenderer.execute( outputStream, basicFile, style, messages, parameterMap, user, inactiveInterval,
-      /*isRequire*/false );
+      /*isRequire*/false, /*loadTheme*/false );
 
     verify( cdfHtmlRenderer, times( 1 ) ).getHeadersInternal( anyString(), any( HashMap.class ), any( OutputStream.class ) );
     verify( cdfHtmlRenderer, times( 1 ) ).generateContext( any( OutputStream.class ), any( HashMap.class ), anyInt() );
     verify( cdfHtmlRenderer, times( 1 ) ).generateStorage( any( OutputStream.class ), anyString() );
+    verify( cdfHtmlRenderer, times( 1 ) ).getWebContextHeader( any( OutputStream.class ), anyBoolean() );
+
+    cdfHtmlRenderer.execute( outputStream, basicFile, style, messages, parameterMap, user, inactiveInterval,
+      /*isRequire*/true, /*loadTheme*/true );
+
+    verify( cdfHtmlRenderer, times( 1 ) ).getHeadersInternal( anyString(), any( HashMap.class ), any( OutputStream.class ) );
+    verify( cdfHtmlRenderer, times( 1 ) ).generateContext( any( OutputStream.class ), any( HashMap.class ), anyInt() );
+    verify( cdfHtmlRenderer, times( 1 ) ).generateStorage( any( OutputStream.class ), anyString() );
+    verify( cdfHtmlRenderer, times( 2 ) ).getWebContextHeader( any( OutputStream.class ), anyBoolean() );
+
+    cdfHtmlRenderer.execute( outputStream, basicFile, style, messages, parameterMap, user, inactiveInterval,
+      /*isRequire*/false, /*loadTheme*/true );
+
+    verify( cdfHtmlRenderer, times( 2 ) ).getHeadersInternal( anyString(), any( HashMap.class ), any( OutputStream.class ) );
+    verify( cdfHtmlRenderer, times( 2 ) ).generateContext( any( OutputStream.class ), any( HashMap.class ), anyInt() );
+    verify( cdfHtmlRenderer, times( 2 ) ).generateStorage( any( OutputStream.class ), anyString() );
+    verify( cdfHtmlRenderer, times( 2 ) ).getWebContextHeader( any( OutputStream.class ), anyBoolean() );
   }
 }

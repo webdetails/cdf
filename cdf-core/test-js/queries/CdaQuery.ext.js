@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/queries/CdaQuery.ext', [], function(e) {
+define('cdf/queries/CdaQuery.ext', [], function() {
 
   var CdaQueryExt = {
     getDoQuery: function() {

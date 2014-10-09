@@ -1,3 +1,4 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 <div class="shadow">
 
   <div class="contents">
@@ -82,39 +83,32 @@
     <h3>Sample</h3>
 
     <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
       <div id="sample">
         <div id="sampleObject"></div>
+        <br/>
       </div>
-    </div>
-  </div>
-</div>
 
-<script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/TrafficComponent'],
+  function(Dashboard, TrafficComponent) {
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/TrafficComponent'],
-    function(Dashboard, TrafficComponent) {
-
-    var MetaLayer =  {
-      trafficDefinition: {
-        queryType: 'mdx',
-        jndi: "SampleData",
-        title: "Check current budget",
-        catalog: "mondrian:/SampleData",
-        intervals: [70000000,150000000],
-        showValue: true,
-        query: function() {
-          var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-            " NON EMPTY ([Department].[All Departments]) ON ROWS " +
-            " from [Quadrant Analysis]";
-          return query;
-        }
+    var trafficDefinition = {
+      queryType: 'mdx',
+      jndi: "SampleData",
+      title: "Check current budget",
+      catalog: "mondrian:/SampleData",
+      intervals: [70000000,150000000],
+      showValue: true,
+      query: function() {
+        var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
+        " NON EMPTY ([Department].[All Departments]) ON ROWS " +
+        " from [Quadrant Analysis]";
+        return query;
       }
     };
 
@@ -123,10 +117,17 @@
     dashboard.addComponent(new TrafficComponent(dashboard, {
       name: "trafficComponent",
       type: "trafficComponent",
-      trafficDefinition: MetaLayer.trafficDefinition,
+      trafficDefinition: trafficDefinition,
       htmlObject: "sampleObject",
       executeAtStart: true
     }));
     dashboard.init();
-  });
-</script>
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+
+  </div>
+</div>

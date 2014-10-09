@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../components/UnmanagedComponent', '../lib/jquery.tooltip'],
-  function(Dashboard, Logger, _, $, UnmanagedComponent) {
+define(['./Dashboard', '../Logger', '../lib/underscore', '../components/UnmanagedComponent', '../lib/jquery', '../lib/jquery.tooltip'],
+  function(Dashboard, Logger, _, UnmanagedComponent, $) {
 
   /**
    * A module representing a extension to Dashboard module for lifecycle.

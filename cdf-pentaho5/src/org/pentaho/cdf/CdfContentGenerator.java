@@ -42,6 +42,7 @@ import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
+import org.pentaho.platform.engine.services.runtime.ParameterManager;
 import pt.webdetails.cpf.SimpleContentGenerator;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.audit.CpfAuditHelper;
@@ -63,6 +64,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     String filePath = "";
     String template = "";
+    boolean loadTheme = false;
 
     logger.info( "[Timing] CDF content generator took over: "
       + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
@@ -77,6 +79,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
         filePath = getPathParameterAsString( Parameter.PATH, null );
         template = getRequestParameterAsString( Parameter.TEMPLATE, null );
+        loadTheme = new Boolean( getRequestParameterAsString( Parameter.LOAD_THEME, "false" ) );
 
         Object parameter = getRequest();
 
@@ -129,7 +132,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       }
 
       if ( getRequestParameters() != null ) {
-        renderXcdfDashboard( out, getRequestParameters(), FilenameUtils.separatorsToUnix( filePath ), template );
+        renderXcdfDashboard( out, getRequestParameters(), FilenameUtils.separatorsToUnix( filePath ), template,
+          loadTheme );
       }
 
     } catch ( Exception e ) {
@@ -138,7 +142,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   public void renderXcdfDashboard( final OutputStream out, final IParameterProvider requestParams, String xcdfFilePath,
-                                   String defaultTemplate ) throws Exception {
+                                   String defaultTemplate, boolean loadTheme ) throws Exception {
     long start = System.currentTimeMillis();
 
     UUID uuid =
@@ -156,10 +160,10 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
         if ( !StringUtils.isEmpty( defaultTemplate ) ) { // If style defined in URL parameter 'template'
           renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, renderer.getMessagesBaseFilename(),
-            renderer.getIsRequire());
+            renderer.getIsRequire(), loadTheme );
         } else { // use style provided via .xcdf or default
           renderHtmlDashboard( out, xcdfFilePath, templatePath, renderer.getStyle(),
-            renderer.getMessagesBaseFilename(), renderer.getIsRequire() );
+            renderer.getMessagesBaseFilename(), renderer.getIsRequire(), loadTheme );
         }
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
@@ -181,12 +185,14 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
                                    String defaultTemplate,
                                    String dashboardsMessagesBaseFilename) throws Exception {
-    renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, false );
+    renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, false,
+      false );
   }
 
   public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
                                    String defaultTemplate,
-                                   String dashboardsMessagesBaseFilename, boolean isRequire ) throws Exception {
+                                   String dashboardsMessagesBaseFilename, boolean isRequire, boolean loadTheme )
+    throws Exception {
 
     HttpServletRequest request = getRequest();
 
@@ -200,7 +206,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     int inactiveInterval = request.getSession().getMaxInactiveInterval();
     renderer
       .execute( out, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, paramMap, userSession.getName(),
-        inactiveInterval, isRequire );
+        inactiveInterval, isRequire, loadTheme );
   }
 
   public String getPluginName() {

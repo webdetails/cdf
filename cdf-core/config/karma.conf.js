@@ -18,6 +18,7 @@ module.exports = function(config) {
       { pattern: 'cdf/js-modules/**/*.css', included: false },
       { pattern: 'cdf/js-modules/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
+      'test-js/testUtils.js',
       { pattern: 'test-js/**/*.js', included: false },
       'config/context.js',
       'build-res/requireCfg-raw.js',

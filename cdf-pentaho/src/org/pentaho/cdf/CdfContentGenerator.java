@@ -281,6 +281,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     final String path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
     final String template = requestParams.getStringParameter( Parameter.TEMPLATE, null ); //$NON-NLS-1$
     final String action = requestParams.getStringParameter( Parameter.ACTION, null ); //$NON-NLS-1$
+    boolean loadTheme = new Boolean( requestParams.getStringParameter( Parameter.LOAD_THEME, null ) );
 
     UUID uuid = CpfAuditHelper.startAudit( PLUGIN_ID, action, getObjectName(), this.userSession, this, requestParams );
 
@@ -292,7 +293,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
       if ( success ) {
         renderHtmlDashboard( out, solution, path, renderer.getTemplate(), renderer.getStyle(), renderer
-          .getMessagesBaseFilename(), renderer.getIsRequire() );
+          .getMessagesBaseFilename(), renderer.getIsRequire(), loadTheme );
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
 
@@ -390,12 +391,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public void renderHtmlDashboard( final OutputStream out, final String solution, final String path,
                                   String templateName, String template, String dashboardsMessagesBaseFilename )
     throws Exception {
-    renderHtmlDashboard( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, false );
+    renderHtmlDashboard( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, false, false );
   }
 
   public void renderHtmlDashboard( final OutputStream out, final String solution, final String path,
                                    String templateName, String template, String dashboardsMessagesBaseFilename,
-                                   boolean isRequire )
+                                   boolean isRequire, boolean loadTheme )
     throws Exception {
 
     HttpServletRequest request =
@@ -403,7 +404,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
     renderer.execute( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, Parameter
-      .asHashMap( request ), userSession.getName(), request.getSession().getMaxInactiveInterval(), isRequire );
+      .asHashMap( request ), userSession.getName(), request.getSession().getMaxInactiveInterval(), isRequire,
+      loadTheme );
   }
 
   private void exportFile( final IParameterProvider requestParams, final OutputStream output ) {

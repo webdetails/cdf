@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', '../lib/jquery', '../lib/underscore', './UnmanagedComponent', '../lib/jquery.tooltip'],
-  function(Logger, $, _, UnmanagedComponent) {
+define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery', '../lib/jquery.tooltip', 'css!./TrafficComponent'],
+  function(Logger, _, UnmanagedComponent, $) {
 
   var TrafficComponent = UnmanagedComponent.extend({
     trafficLight: function(result, xaction) {
@@ -42,7 +42,7 @@ define(['../Logger', '../lib/jquery', '../lib/underscore', './UnmanagedComponent
             delay:0,
             track: true,
             fade: 250
-          }
+          };
           $htmlObject.attr("title",tooltip + ((this._tooltip != undefined) ? this._tooltip : ""));
         }
         $htmlObject.tooltip(tooltipOpts);
@@ -99,7 +99,7 @@ define(['../Logger', '../lib/jquery', '../lib/underscore', './UnmanagedComponent
       if(intervals == undefined) {
         cd.intervals = [-1,1];
       }
-      this.doQuery();    
+      this.doQuery();
     }
   });
 

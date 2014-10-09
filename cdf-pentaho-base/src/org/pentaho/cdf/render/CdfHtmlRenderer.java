@@ -51,40 +51,43 @@ public class CdfHtmlRenderer {
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
                        String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap,
-                       String user, int inactiveInterval )
-    throws Exception {
+                       String user, int inactiveInterval ) throws Exception {
 
-    execute( out, solution, path, templateName, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, false );
+    execute( out, solution, path, templateName, style, dashboardsMessagesBaseFilename, parameterMap, user,
+      inactiveInterval, false, false );
   }
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
                        String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap,
-                       String user, int inactiveInterval, boolean isRequire ) throws Exception {
+                       String user, int inactiveInterval, boolean isRequire, boolean loadTheme ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, isRequire );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval,
+      isRequire, loadTheme );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
                        String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
                        int inactiveInterval ) throws Exception {
 
-    execute( out, style, templatePath, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, false );
+    execute( out, style, templatePath, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, false,
+      false );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
                        String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
-                       int inactiveInterval, boolean isRequire ) throws Exception {
+                       int inactiveInterval, boolean isRequire, boolean loadTheme ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( templatePath );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, isRequire );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval,
+      isRequire, loadTheme );
   }
 
   public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String style,
                        String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
-                       int inactiveInterval, boolean isRequire ) throws Exception {
+                       int inactiveInterval, boolean isRequire, boolean loadTheme ) throws Exception {
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
@@ -146,9 +149,10 @@ public class CdfHtmlRenderer {
     // final Hashtable addedFiles = new Hashtable();
 
     out.write( intro.substring( 0, headIndex + 6 ).getBytes( CharsetHelper.getEncoding() ) );
-    // Concat libraries to html head content
-    if ( !isRequire ) {
+    if ( !isRequire ) { // Concat libraries to html head content
       getHeadersInternal( dashboardContent, parameterMap, out );
+    } else { // add the webcontext dependency checking if webcontext should load pentaho active theme
+      getWebContextHeader( out, loadTheme );
     }
     out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
 
@@ -173,6 +177,12 @@ public class CdfHtmlRenderer {
     out.write( dashboardContent.getBytes( CharsetHelper.getEncoding() ) );
     out.write( "</div>".getBytes( CharsetHelper.getEncoding() ) );
     out.write( footer.getBytes( CharsetHelper.getEncoding() ) );
+  }
+
+  protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {
+    String webcontext = "<script language=\"javascript\" type=\"text/javascript\" src=\"webcontext" +
+      ".js?context=cdf" + ( loadTheme ? "" : "&requireJsOnly=true" ) + "\"></script>";
+    out.write( webcontext.getBytes( CharsetHelper.getEncoding() ) );
   }
 
   public boolean matchComponent( int keyIndex, final String key, final String content ) {

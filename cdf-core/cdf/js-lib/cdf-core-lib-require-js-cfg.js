@@ -33,6 +33,9 @@
     prefix = requirePaths['cdf/lib'] = "cdf/lib";
   }
 
+  //modernizr 2.8.3
+  requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
+
   //jquery 1.7.1
   requirePaths['jquery'] = prefix + "/jquery/jquery";
   requirePaths['cdf/lib/jquery'] = prefix + "/jquery/cdf-jquery";
@@ -46,7 +49,10 @@
 
   //jquery.blockUI 2.66.0
   requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/blockUI/jquery.blockUI";
-  requireShims['cdf/lib/jquery.blockUI'] = ['cdf/lib/jquery'];
+  requireShims['cdf/lib/jquery.blockUI'] = [
+    'cdf/lib/jquery',
+    'cdf/lib/jquery.ui'
+  ];
 
   //jquery.tooltip 1.3
   requirePaths['cdf/lib/jquery.tooltip'] = prefix + "/tooltip/jquery.tooltip";
