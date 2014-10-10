@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard'], function(Dashboard) {
+define(['./Dashboard', './Dashboard.ext', '../lib/underscore', '../lib/cdf.jquery.i18n'],
+    function(Dashboard, DashboardExt, _, $) {
   /**
    * A module representing a extension to Dashboard module for i18n.
    * @module Dashboard.i18n
@@ -21,13 +22,33 @@ define(['./Dashboard'], function(Dashboard) {
     /**
      * Method used by the Dashboard constructor for i18n initialization
      * Reference to current language code . Used in every place where jquery
-     * plugins used in CDF hasm native internationalization support (ex: Datepicker)
+     * plugins used in CDF has native internationalization support (ex: Datepicker)
      *
      * @private
      */
     _initI18n: function() {
-      this.i18nCurrentLanguageCode = null;
-      this.i18nSupport = null;  // Reference to i18n objects
+      var myself = this;
+      myself.i18nCurrentLanguageCode = undefined;
+      myself.i18nSupport = {};  // Reference to i18n objects
+
+      //gets localization from templates
+      $.i18n.properties({
+        name: 'Messages',
+        path: DashboardExt.getStaticResource("resources/languages/"),
+        mode: 'map',
+        language: SESSION_LOCALE,
+        callback: function(){
+          $.i18n.properties({
+            name: 'Messages',
+            mode: 'map',
+            type: 'GET',
+            language: SESSION_LOCALE,
+            callback: function(){
+              myself.setI18nSupport(SESSION_LOCALE, $.i18n);
+            }
+          });
+        }
+      });
     },
   
     /**
@@ -35,11 +56,8 @@ define(['./Dashboard'], function(Dashboard) {
      * @param i18nRef
      */
     setI18nSupport: function(lc, i18nRef) {
-      // Update global reference to i18n objects if needed
-      if (i18nRef !== "undefined" && lc !== "undefined") {
-        this.i18nCurrentLanguageCode = lc;
-        this.i18nSupport = i18nRef;
-      }
+      this.i18nCurrentLanguageCode = lc;
+      _.extend(this.i18nSupport, i18nRef);
     }
   
   });

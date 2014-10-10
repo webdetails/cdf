@@ -108,7 +108,7 @@ function loadAndParseFile(filename, language, mode) {
         dataType:   'text',
         success:    function(data, status) {
                        var parsed = '';
-                       var parameters = data.split( /\n/ );
+                       var parameters = data != undefined ? data.split( /\n/ ) : []; //add if due to tests
                        var regPlaceHolder = /(\{\d+\})/g;
                        var regRepPlaceHolder = /\{(\d+)\}/g;
                        var unicodeRE = /(\\u.{4})/ig;

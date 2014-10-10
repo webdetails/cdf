@@ -19,6 +19,8 @@
   var requirePaths = requireCfg.paths,
       requireShims = requireCfg.shim;
 
+  requireCfg.urlArgs = "ts=" + (new Date()).getTime();
+
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   if(typeof KARMA_RUN !== "undefined") { // test
