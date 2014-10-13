@@ -545,7 +545,7 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       render: function(){
-        this.$el.append(myself.dataTemplates.comments(this.attributes));
+        this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));//myself.dataTemplates.comments(this.attributes));
         return this.$el;
       },
 
@@ -609,8 +609,8 @@ var CommentsComponent = BaseComponent.extend({
         _(this.collection.models).each(function(comment){
           $commentsElem.append(this.renderSingeComment(comment));
         }, this);
-        var $add = $(myself.dataTemplates.addComments(myself.options.permissions));
-        var $paginate = $(myself.dataTemplates.paginateComments(myself.options.paginate));
+        var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));//myself.dataTemplates.addComments(myself.options.permissions));
+        var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));//myself.dataTemplates.paginateComments(myself.options.paginate));
         this.$el.empty().append($commentsElem, $add, $paginate)
         $renderElem.append(this.$el);
         this.updateNavigateButtons();
@@ -666,7 +666,8 @@ var CommentsComponent = BaseComponent.extend({
         var paginate = myself.options.paginate;
         myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-        $('.tipsy').remove();
+        $('div.navigateRefreshChild:first').remove();
+        $('div.navigateRefresh:first').stop();
       },
 
       updateNavigateButtons: function() {
@@ -685,21 +686,30 @@ var CommentsComponent = BaseComponent.extend({
         if (myself.options.queyResult.length > 0) {
           var lastCommentDate = myself.options.queyResult[0].createdOn;
           var callback = function(data) {
-            if (data.result.length > 0) {
-              if (!!(data.result[0].createdOn==lastCommentDate)) {
+            if(data.result.length > 0) {
+              if(!!(data.result[0].createdOn == lastCommentDate)) {
               } else {
-                var tipsyOptions = {
-                  html: true,
-                  fade: true,
-                  trigger: 'manual',
-                  className: 'commentsComponentTipsy',
-                  title: function () {
-                    return 'New comments, please refresh!';
-                  }
-                }
-                $('.commentComponent .navigateRefresh').attr('title','New comments, please refresh!').tipsy(tipsyOptions);
-                $('.commentComponent .navigateRefresh').tipsy('show');
+                var parent = $('div.navigateRefresh:first');
+                if(!($('div.navigateRefreshChild:first').length)) {
+                  var div = $("<div>")
+                    .attr('class', 'navigateRefreshChild')
+                    .css('position', 'absolute')
+                    //.css('background','#3baae3')
+                    .html('New comments, please refresh!')
+                    .hide();
 
+                  parent.prepend(div);
+                  var parentPosition = parent.position();
+
+                  div
+                    .offset({ top: parentPosition.top-25, left: parentPosition.left-50})
+                    .toggle("slide");
+
+                  div.click(function() {
+                    myself.commentsCollection.trigger('commentsUpdateNotification');
+                  }); 
+                }
+                parent.effect('highlight', {color: '#363936'}, 2000);         
               }
             }
           }
@@ -721,17 +731,9 @@ var CommentsComponent = BaseComponent.extend({
 
     });
 
-    myself.compileTemplates = function() {
-      myself.dataTemplates = myself.dataTemplates || {};
-      _(myself.defaults.dataTemplates).each(function(value, key) {
-        myself.dataTemplates[key] = Mustache.compile(value);
-      });
-    };
-
     myself.start = function(options) {
       myself.options = options;
       myself.defaults = _.extend({}, myself.defaults, options.defaults);
-      myself.compileTemplates();
 
       myself.commentsCollection = new myself.CommentsCollection();
       myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
