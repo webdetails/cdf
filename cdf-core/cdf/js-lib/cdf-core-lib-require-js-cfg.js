@@ -162,6 +162,18 @@
   requirePaths['cdf/lib/cdf.jquery.i18n'] = prefix + "/i18n/cdf.jquery.i18n";
   requirePaths['cdf/lib/jquery.i18n'] = prefix + "/i18n/jquery.i18n.properties";
 
+  // OpenLayers 2.13.1
+  requirePaths['cdf/lib/OpenLayers'] = prefix + "/OpenMap/OpenLayers/OpenLayers";
+  requireShims['cdf/lib/OpenLayers'] = {exports: 'OpenLayers'};
+  requireShims['cdf/lib/jquery.jdMenu'] = [
+    'css!cdf/lib/OpenMap/OpenLayers/theme/default/style.css'
+  ];
+  // OpenStreetMap
+  requirePaths['cdf/lib/OpenStreetMap'] = prefix + "/OpenStreetMap";
+  requireShims['cdf/lib/OpenStreetMap'] = [
+    'cdf/lib/OpenLayers'
+  ];
+
   //shims
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 

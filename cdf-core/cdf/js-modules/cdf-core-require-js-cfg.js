@@ -50,35 +50,9 @@
   requireShims['cdf/components/MultiButtonComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/RadioComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/SelectMultiComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/MapComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/MapBubbleComponent'] = ['cdf/Dashboard'];
   
-  /* pentaho-base
-  requireShims['cdf/components/AnalyzerComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/DialComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ExecuteAnalyzerComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ExecuteXactionComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/JFreeChartComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TableComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TimePlotComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TrafficComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/XactionComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/OpenFlashChartComponent'] = ['cdf/Dashboard'];
-  
-  requireShims['cdf/components/JPivotComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PivotLinkComponent'] = ['cdf/Dashboard']
-  */
-  
-  /* cdf-pentaho / cdf-pentaho5
-  requireShims['cdf/components/ExecutePrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SchedulePrptComponent'] = ['cdf/Dashboard'];
-  */
-
-  /* navigation
-  requireShims['cdf/components/ContentListComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/NavigatorComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PageTitleComponent'] = ['cdf/Dashboard'];
-  */ 
-
   /* other
   requireShims['cdf/components/ActionComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/BaseComponent'] = ['cdf/Dashboard'];
@@ -91,10 +65,7 @@
   requireShims['cdf/components/ToggleButtonComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/UnmanagedComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/NavigatorBaseComponent'] = ['cdf/Dashboard'];
-  */
-
-  /* map
-  // ToDo
+  requireShims['cdf/components/MapBaseComponent'] = ['cdf/Dashboard'];
   */
 
 })();
