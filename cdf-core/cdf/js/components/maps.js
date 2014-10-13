@@ -281,7 +281,7 @@ var MapComponent = BaseComponent.extend({
     var p = new Array(this.parameters.length);
     for (var i = 0, len = p.length; i < len; i++) {
       var key = this.parameters[i][0];
-      var value = this.dashboard.getParameterValue(myself.parameters[i][1]);
+      var value = this.dashboard.getParameterValue(this.parameters[i][1]);
       p[i] = [key, value];
     }
 
@@ -322,21 +322,12 @@ var MapBubbleComponent = BaseComponent.extend({
   update : function() {
     DashboardsMap.selectedPointDetails = null;
     for(var i = 0; i < DashboardsMap.data.length; i++) {
-      if(this.dashboard.getParameterValue("selectedPoint")  == DashboardsMap.data[i][0]) {
+      if(this.dashboard.getParameterValue("selectedPoint") == DashboardsMap.data[i][0]) {
         DashboardsMap.selectedPointDetails = DashboardsMap.data[i][3];
         break;
       }
 
     }
-    var parameters = this.dashboard.clone(DashboardsMap.selectedPointDetails);
-    if(myself.parameters != undefined) {
-      var p = new Array(this.parameters.length);
-      for(var i= 0, len = p.length; i < len; i++){
-        var key = this.parameters[i][0];
-        var value = this.dashboard.getParameterValue(this.parameters[i][1]);
-        parameters.push([key,value]);
-      }
-    }
-    DashboardsMap.updateInfoWindow(this.dashboard.pentahoAction(this.solution, this.path, this.action, parameters ,null));
+    DashboardsMap.updateInfoWindow(this.dashboard.pentahoAction(this.solution, this.path, this.action, DashboardsMap.selectedPointDetails ,null));
   }
 });
