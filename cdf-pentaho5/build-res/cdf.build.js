@@ -43,10 +43,6 @@
 
   separateCSS: true,
 
-  /*enforceDefine: true,
-
-  wrapShim: true,*/
-
   modules: [{
     name: "cdf/Dashboard",
     create: true,
@@ -64,7 +60,8 @@
         'cdf/lib/jquery',
         'cdf/lib/jquery.ui',
         'cdf/lib/jquery.blockUI',
-        'cdf/lib/jquery.tooltip'
+        'cdf/lib/jquery.tooltip',
+        'cdf/lib/jquery.i18n'
     ]
   }]
 })

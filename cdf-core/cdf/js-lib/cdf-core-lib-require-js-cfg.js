@@ -158,6 +158,10 @@
     'css!cdf/lib/jdMenu/jquery.jdMenu.slate.css'
   ];
 
+  //jquery i18n
+  requirePaths['cdf/lib/cdf.jquery.i18n'] = prefix + "/i18n/cdf.jquery.i18n";
+  requirePaths['cdf/lib/jquery.i18n'] = prefix + "/i18n/jquery.i18n.properties";
+
   //shims
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 

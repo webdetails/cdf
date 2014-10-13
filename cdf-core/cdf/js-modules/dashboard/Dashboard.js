@@ -88,7 +88,6 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
         if(typeof $ == 'function') {
           //ajax
           $.ajaxSetup({
-            type: "POST",
             async: false,
             traditional: true,
             scriptCharset: "utf-8",
