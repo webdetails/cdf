@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../dashboard/Utils', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.fancybox', '../lib/jquery.tooltip'],
-  function(DashboardExt, Utils, $, NavigatorBaseComponent) {
+define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComponent', '../lib/jquery', '../lib/jquery.fancybox'],
+  function(DashboardExt, Utils, NavigatorBaseComponent, $) {
 
   var ContentListComponent = NavigatorBaseComponent.extend({
     update : function() {

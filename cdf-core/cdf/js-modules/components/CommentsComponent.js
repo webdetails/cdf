@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./CommentsComponent.ext', '../lib/mustache', "../lib/underscore", "../lib/backbone", './BaseComponent', '../Logger', '../lib/jquery', '../lib/jquery.tooltip'],
+define(['./CommentsComponent.ext', '../lib/mustache', "../lib/underscore", "../lib/backbone", './BaseComponent', '../Logger', '../lib/jquery'],
   function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
   var CommentsComponent = BaseComponent.extend({
@@ -331,7 +331,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "../lib/underscore", "../l
           var paginate = myself.options.paginate;
           myself.options.paginate.activePageNumber = 0;
           myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-          $('div.navigateRefreshChild:first').remove();
+          $('div.navigateRefreshPopup:first').remove();
           $('div.navigateRefresh:first').stop();
         },
   
@@ -354,27 +354,29 @@ define(['./CommentsComponent.ext', '../lib/mustache', "../lib/underscore", "../l
               if(data.result.length > 0) {
                 if(!!(data.result[0].createdOn == lastCommentDate)) {
                 } else {
-                  var parent = $('div.navigateRefresh:first');
-                  if(!($('div.navigateRefreshChild:first').length)) {
-                    var div = $("<div>")
-                      .attr('class', 'navigateRefreshChild')
+                  var refreshBtn = $('div.navigateRefresh:first');
+                  if(!($('div.navigateRefreshPopup:first').length)) {
+                    var popup = $("<div>")
+                      .attr('class', 'navigateRefreshPopup')
                       .css('position', 'absolute')
-                      //.css('background','#3baae3')
                       .html('New comments, please refresh!')
                       .hide();
 
-                    parent.prepend(div);
-                    var parentPosition = parent.position();
+                    refreshBtn.prepend(popup);
+                    var refreshBtnPos = refreshBtn.position();
 
-                    div
-                      .offset({ top: parentPosition.top-25, left: parentPosition.left-50})
-                      .toggle("slide");
+                    popup
+                      .offset({
+                        top: refreshBtnPos.top - (popup.height() + refreshBtn.height() / 2),
+                        left: refreshBtnPos.left + refreshBtn.width() / 2 - popup.width() / 2})
+                      .toggle("bounce", {times: 3}, "slow");
 
-                    div.click(function() {
-                      myself.commentsCollection.trigger('commentsUpdateNotification');
-                    }); 
+                    var btnHighlighter = setInterval(function() {
+                      refreshBtn.effect('highlight', {color: '#c0c0c0'}, 2000);
+                    }, 4000);
+
+                    refreshBtn.on('click', function() { clearInterval(btnHighlighter); });
                   }
-                  parent.effect('highlight', {color: '#363936'}, 2000);
                 }
               }
             }
