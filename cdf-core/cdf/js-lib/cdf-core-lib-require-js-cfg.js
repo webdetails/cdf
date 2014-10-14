@@ -109,7 +109,7 @@
   requirePaths['cdf/lib/datatables'] = prefix + '/dataTables/cdf-datatables';
   requireShims['cdf/lib/datatables'] = [
     'cdf/lib/jquery',
-    'css!cdf/lib/dataTables/css/jquery.dataTables.css'
+    'css!cdf/lib/dataTables/css/jquery.dataTables'
   ];
 
   //autobox 0.7.0
@@ -117,10 +117,10 @@
   requireShims['cdf/lib/jquery.ui.autobox'] = [
     'cdf/lib/jquery',
     'cdf/lib/jquery.ui',
-    'css!cdf/lib/autobox/jquery.ui.autobox.css'
+    'css!cdf/lib/autobox/jquery.ui.autobox'
   ];
-  requirePaths['cdf/lib/jquery.ui.autobox.templating'] = prefix + '/autobox/jquery.templating';
-  requireShims['cdf/lib/jquery.ui.autobox.templating'] = [
+  requirePaths['cdf/lib/jquery.templating'] = prefix + '/autobox/jquery.templating';
+  requireShims['cdf/lib/jquery.templating'] = [
     'cdf/lib/jquery'
   ];
   requirePaths['cdf/lib/jquery.ui.autobox.ext'] = prefix + '/autobox/jquery.ui.autobox.ext';
@@ -128,14 +128,14 @@
     'cdf/lib/jquery',
     'cdf/lib/jquery.ui',
     'cdf/lib/jquery.ui.autobox',
-    'cdf/lib/jquery.ui.autobox.templating'
+    'cdf/lib/jquery.templating'
   ];
 
   //captify
   requirePaths['cdf/lib/captify'] = prefix + "/captify/captify";
   requireShims['cdf/lib/captify'] = [
     'cdf/lib/jquery',
-    'css!cdf/lib/captify.css'
+    'css!cdf/lib/captify'
   ];
 
   // bgiframe 2.1.1
@@ -154,8 +154,8 @@
     'cdf/lib/jquery',
     'cdf/lib/jquery.bgiframe',
     'cdf/lib/jquery.positionBy',
-    'css!cdf/lib/jdMenu/jquery.jdMenu.css',
-    'css!cdf/lib/jdMenu/jquery.jdMenu.slate.css'
+    'css!cdf/lib/jquery.jdMenu',
+    'css!cdf/lib/jdMenu/jquery.jdMenu.slate'
   ];
 
   //jquery i18n
@@ -164,10 +164,10 @@
 
   // OpenLayers 2.13.1
   requirePaths['cdf/lib/OpenLayers'] = prefix + "/OpenMap/OpenLayers/OpenLayers";
-  requireShims['cdf/lib/OpenLayers'] = {exports: 'OpenLayers'};
-  requireShims['cdf/lib/jquery.jdMenu'] = [
-    'css!cdf/lib/OpenMap/OpenLayers/theme/default/style.css'
-  ];
+  requireShims['cdf/lib/OpenLayers'] = {
+    exports: 'OpenLayers',
+    deps: ['css!cdf/lib/OpenMap/OpenLayers/theme/default/style']
+  };
   // OpenStreetMap
   requirePaths['cdf/lib/OpenStreetMap'] = prefix + "/OpenStreetMap";
   requireShims['cdf/lib/OpenStreetMap'] = [

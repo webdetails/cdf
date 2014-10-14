@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../lib/jquery', './NavigatorBaseComponent', '../lib/jquery.tooltip', '../lib/jquery.jdMenu'],
-  function(DashboardExt, $, NavigatorBaseComponent) {
+define(['../dashboard/Dashboard.ext','./NavigatorBaseComponent', '../lib/jquery', '../lib/jquery.jdMenu'],
+  function(DashboardExt, NavigatorBaseComponent, $) {
 
   var NavigatorComponent = NavigatorBaseComponent.extend({
     update : function() {
