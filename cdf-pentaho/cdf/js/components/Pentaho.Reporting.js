@@ -158,6 +158,9 @@ var PrptComponent = BaseComponent.extend({
             if (value == null && param.length == 3) {
                 value = param[2];
             }
+            if ( typeof value == 'function' ) {
+                value = value();
+            }
             options[param[0]] = value;
         }
         return options;
@@ -181,6 +184,9 @@ var PrptComponent = BaseComponent.extend({
        if(value == null && param.length == 3) {
          value = param[2];
        }
+       if ( typeof value == 'function' ) {
+            value = value();
+        }
        options[param[0]] = value;
      }
  
