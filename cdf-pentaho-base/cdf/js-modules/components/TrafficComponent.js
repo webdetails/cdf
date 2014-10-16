@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery'],
+define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery', 'css!./TrafficComponent'],
   function(Logger, _, UnmanagedComponent, $) {
 
   var TrafficComponent = UnmanagedComponent.extend({

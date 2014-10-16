@@ -669,7 +669,7 @@ div.scheduler  label {
  * Dashboards.Legacy.js
  **/
 .errorMessageTable .errorIcon {
-  background-image: url('../resources/style/images/error.png');
+  background-image: url('../../resources/style/images/error.png');
   height:16px;
   width:16px;
   display:inline-block;
@@ -695,18 +695,18 @@ div.scheduler  label {
  * TrafficComponent
  **/
 .trafficGreen {
-  background-image: url('../resources/style/images/traffic_green.png');
+  background-image: url('../../resources/style/images/traffic_green.png');
   width: 28px;
   height: 39px;
 }
 .trafficYellow {
-  background-image: url('../resources/style/images/traffic_yellow.png');
+  background-image: url('../../resources/style/images/traffic_yellow.png');
   width: 28px;
   height: 39px;
 
 }
 .trafficRed {
-  background-image: url('../resources/style/images/traffic_red.png');
+  background-image: url('../../resources/style/images/traffic_red.png');
   width: 28px;
   height: 39px;
 }
@@ -714,32 +714,32 @@ div.scheduler  label {
  * JFreeChartComponent
  **/
 .jfExcelIcon {
-  background-image: url('../resources/style/images/excel_icon.png');
+  background-image: url('../../resources/style/images/excel_icon.png');
   width:34px;
   height:32px;
 }
 .jfPieIcon {
-  background-image: url('../resources/style/images/pie_icon.png');
+  background-image: url('../../resources/style/images/pie_icon.png');
   width:32px;
   height:32px;
 }
 .jfBarIcon {
-  background-image: url('../resources/style/images/bar_icon.png');
+  background-image: url('../../resources/style/images/bar_icon.png');
   width:32px;
   height:32px;
 }
 .jfCsvIcon {
-  background-image: url('../resources/style/images/csv_icon.gif');
+  background-image: url('../../resources/style/images/csv_icon.gif');
   width:32px;
   height:32px;
 }
 .jfMagnifyIcon {
-  background-image: url('../resources/style/images/magnify.png');
+  background-image: url('../../resources/style/images/magnify.png');
   width:32px;
   height:32px;
 }
 .jfTableIcon {
-  background-image: url('../resources/style/images/table.png');
+  background-image: url('../../resources/style/images/table.png');
   width:32px;
   height:32px;
 }

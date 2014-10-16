@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -23,21 +23,20 @@ MetaLayerCharts = {
   selectedRegionMeasure: "[Region].[All Regions]",
   departmentMeasure: "[Department].[All Departments]",
 
-  pieChartClicked: function (value) {
-    if (value == "All Regions") {
+  pieChartClicked: function(value) {
+    if(value == "All Regions") {
       MetaLayerCharts.regionsMeasure = "[Region].[All Regions].Children";
       dashboard.fireChange("MetaLayerCharts.regionsMeasure", MetaLayerCharts.regionsMeasure);
-    }
-    else {
+    } else {
       MetaLayerCharts.selectedRegionMeasure = "[Region].[All Regions].[" + value + "]";
       dashboard.fireChange("MetaLayerCharts.selectedRegionMeasure", MetaLayerCharts.selectedRegionMeasure);
     }
   },
 
-  barChartClicked: function (value) {
+  barChartClicked: function(value) {
 
     MetaLayerCharts.departmentMeasure = "[Department].[All Departments].[" + value + "]";
-    dashboard.fireChange("MetaLayerCharts.departmentMeasure", dashboard.encode_prepare(MetaLayerCharts.departmentMeasure));
+    dashboard.fireChange("MetaLayerCharts.departmentMeasure", MetaLayerCharts.departmentMeasure);
   },
 
   pieChartDefinition: {
@@ -52,17 +51,17 @@ MetaLayerCharts = {
     queryType: 'mdx',
     jndi: "SampleData",
     catalog: "mondrian:/SampleData",
-    urlTemplate: "javascript:MetaLayerCharts.pieChartClicked( encode_prepare('{region}') )",
+    urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) { MetaLayerCharts.pieChartClicked( Utf8Encoder.encode_prepare('{region}') ) })",
     parameterName: "region",
     titleKey: "chartsamples.piechart.title",
-    query: function () {
+    query: function() {
 
       var query = "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
-          " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
-          " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
-          " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
-          " NON EMPTY ( " + MetaLayerCharts.regionsMeasure + " ) ON ROWS " +
-          " from [Quadrant Analysis]";
+        " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
+        " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
+        " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
+        " NON EMPTY ( " + MetaLayerCharts.regionsMeasure + " ) ON ROWS " +
+        " from [Quadrant Analysis]";
 
       return query;
     }
@@ -81,17 +80,17 @@ MetaLayerCharts = {
     jndi: "SampleData",
     catalog: "mondrian:/SampleData",
     titleKey: "chartsamples.barchart.title",
-    urlTemplate: "javascript:MetaLayerCharts.barChartClicked('{department}')",
+    urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {MetaLayerCharts.barChartClicked( Utf8Encoder.encode_prepare('{department}') ) })",
     parameterName: "department",
-    query: function () {
+    query: function() {
 
       var query = "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
-          " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
-          " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
-          " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
-          " NON EMPTY ([Department].[All Departments].Children ) ON ROWS " +
-          " from [Quadrant Analysis]" +
-          " where (" + MetaLayerCharts.selectedRegionMeasure + ")";
+        " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
+        " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
+        " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
+        " NON EMPTY ([Department].[All Departments].Children ) ON ROWS " +
+        " from [Quadrant Analysis]" +
+        " where (" + MetaLayerCharts.selectedRegionMeasure + ")";
 
       return query;
     }
@@ -110,11 +109,11 @@ MetaLayerCharts = {
     intervals: [7000000, 70000000, 150000000],
     includeLegend: true,
 
-    query: function () {
+    query: function() {
 
       var query = " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-          " NON EMPTY (" + MetaLayerCharts.departmentMeasure + " ) ON ROWS " +
-          " from [Quadrant Analysis]";
+        " NON EMPTY (" + MetaLayerCharts.departmentMeasure + " ) ON ROWS " +
+        " from [Quadrant Analysis]";
 
       return query;
     }

@@ -6,9 +6,9 @@
 	<small>
 		<br/>
 		Overall Sales:
-		<img src="js/OpenMap/OpenLayers/img/marker.png"/>  - sales &lt; 1M; 
-		<img src="js/OpenMap/OpenLayers/img/marker-gold.png"/>  - sales between 1M and 2M; 
-		<img src="js/OpenMap/OpenLayers/img/marker-green.png"/>  - sales &gt; 2M; 
+		<img src="js/lib/OpenMap/OpenLayers/img/marker.png"/>  - sales &lt; 1M; 
+		<img src="js/lib/OpenMap/OpenLayers/img/marker-gold.png"/>  - sales between 1M and 2M; 
+		<img src="js/lib/OpenMap/OpenLayers/img/marker-green.png"/>  - sales &gt; 2M; 
 	</small>
 
 	<h2 class="title">Product Line and Territory analysis</h2>
@@ -174,7 +174,7 @@ name: "map",
 	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 	  preExecution:function(){},
 	  postExecution:function(){},
-	  markers: ["js/OpenMap/OpenLayers/img/marker-green.png","js/OpenMap/OpenLayers/img/marker-gold.png","js/OpenMap/OpenLayers/img/marker.png"]
+	  markers: ["js/lib/OpenMap/OpenLayers/img/marker-green.png","js/lib/OpenMap/OpenLayers/img/marker-gold.png","js/lib/OpenMap/OpenLayers/img/marker.png"]
 }
 
 
