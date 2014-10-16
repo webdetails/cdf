@@ -11,16 +11,21 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var evaluateCode = function(cleanComponents) {
-  // Clean dashboard components or else they would be added
-  if(cleanComponents) {
-    dash.components = [];
-  }
-  try {
-    eval($('#samplecode').val());
-  } catch(e) {
-    dash.log(e, 'exception');
-    return;
-  }
-  tabs.tabs("select",0);
-};
+.trafficGreen {
+  background-image: url('images/TrafficComponent/traffic_green.png');
+  width: 28px;
+  height: 39px;
+}
+
+.trafficYellow {
+  background-image: url('images/TrafficComponent/traffic_yellow.png');
+  width: 28px;
+  height: 39px;
+
+}
+
+.trafficRed {
+  background-image: url('images/TrafficComponent/traffic_red.png');
+  width: 28px;
+  height: 39px;
+}
