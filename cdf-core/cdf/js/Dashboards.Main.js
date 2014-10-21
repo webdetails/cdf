@@ -1016,7 +1016,7 @@ Dashboards.othersAwaitExecution = function( tiers , current ) {
 
     return false; // no other components await execution
 
-  } else if( componentsToUpdate.priority > current.priority ) {
+  } else if( parseInt( componentsToUpdate.priority ) > parseInt( current.priority ) ) {
 
     // recall: 1 - utmost priority , 999999 - lowest priority
     // those who await execution are lower in priority that the current component
@@ -1080,7 +1080,7 @@ Dashboards.updateAll = function(components) {
     if( othersAwaitExecution ){ 
       var tiers = this.updating.tiers;
       tiers[updating.priority] = _.difference( tiers[updating.priority], updating.components );
-      var toUpdate = this.getFirstTier( tiers ); 
+      toUpdate.components = _.union( tiers[updating.priority] , this.getFirstTier( tiers ).components );
     }
 
     this.updating.current = toUpdate;
