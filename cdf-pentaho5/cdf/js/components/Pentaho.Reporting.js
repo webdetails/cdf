@@ -849,9 +849,9 @@ var SchedulePrptComponent = PrptComponent.extend({
                 '<input id= "endByIn" type="text" style="width:187px;"></form>' +
                 '</div>';
         var rangeOfRecurrenceOnce = '<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
-        var mailQuestion = '<div id="mailQuestionDiv">' + '<label>Would you like to email a copy when the schedule runs?</label>' +
-                '<input type="radio" name="mailRadio" value="no" id="mailRadioNo" checked onClick=\'$("#mailInfoDiv").hide(350)\'>No</input>' +
-                '<input type="radio" name="mailRadio" value="yes" id="mailRadioYes" onClick=\'$("#mailInfoDiv").show(350)\'>Yes</input>' +
+        var mailQuestion = '<div id="mailQuestionDiv">' + '<label>Would you like to email a copy when the schedule runs?</label><br>' +
+                '<input type="radio" name="mailRadio" value="no" id="mailRadioNo" checked onClick=\'$("#mailInfoDiv").hide(350)\'>&nbsp;No&nbsp;&nbsp;</input>' +
+                '<input type="radio" name="mailRadio" value="yes" id="mailRadioYes" onClick=\'$("#mailInfoDiv").show(350)\'>&nbsp;Yes&nbsp;&nbsp;</input>' +
                 '</div>';
         var mailInfo = '<div id="mailInfoDiv" style="display:none">' +
                 '<label>To: (Use a semi-colon or comma to separate multiple email adresses.)</label>' +
@@ -861,7 +861,7 @@ var SchedulePrptComponent = PrptComponent.extend({
                 '<label>Attachment Name:</label>' +
                 '<form><input id="attachmentNameInput" style="width:100%" type="text" value="' + $('#nameIn').val() + '"></input></form>' +
                 '<label>Message (optional)</label>' +
-                '<textArea id="messageInput" type="text" rows="4"></textArea>' +
+                '<textarea id="messageInput" type="text" rows="4" style="width:100%"></textarea>' +
                 '</div>';
         scheduleRequest = function(sendMail) {
             var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
@@ -928,10 +928,10 @@ var SchedulePrptComponent = PrptComponent.extend({
                 },
                 submit: function(e, v, m, f) {
                     sharedUuid = guid();
-                    if (e == -1) {
+                    if (v == -1) {
                         $.prompt.close();
                     }
-                    else if (e == 1) {
+                    else if (v == 1) {
                         setParameters();
                         if (error) {
                             parameters = {};
@@ -955,11 +955,11 @@ var SchedulePrptComponent = PrptComponent.extend({
                     "Ok": 1
                 },
                 submit: function(e, v, m, f) {
-                    if (e == -1) {
+                    if (v == -1) {
                         $.prompt.goToState('basicState');
                         return false;
                     }
-                    else if (e == 1) {
+                    else if (v == 1) {
                         if ($("#mailRadioNo").is(':checked')) {
                             return scheduleRequest();
                         } else if ($("#mailRadioYes").is(':checked')) {
