@@ -56,21 +56,6 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
     $.extend($.fn.dataTableExt.oSort, {
 
       /*
-       * text sorting
-       */
-      "string-asc": function(a, b) {
-        var x = a.toLowerCase();
-        var y = b.toLowerCase();
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-      },
-
-      "string-desc": function(a, b) {
-        var x = a.toLowerCase();
-        var y = b.toLowerCase();
-        return ((x < y) ? 1 : ((x > y) ? -1 : 0));
-      },
-
-      /*
        * html sorting (ignore html tags)
        */
       "html-asc": function(a, b) {
