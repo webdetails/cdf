@@ -14,7 +14,7 @@
 define([
   'cdf/jquery',
   'cdf/jquery.ui',
-  'cdf/jquery-impromptu.3.1',
+  'cdf/jquery-impromptu',
   'cdf/jquery.bgiframe',
   'cdf/jquery.blockUI',
   'cdf/jquery.corner',

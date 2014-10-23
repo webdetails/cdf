@@ -260,7 +260,10 @@
      
      setInitialValue: function(htmlObject, initialValue, name){ 
       var selectedPH = $('#' + htmlObject + ' .autobox-input');
-      var input = $('input#' + inputId);
+
+      // CDF-271, jQuery 1.9.1 has a stricter selector syntax http://api.jquery.com/category/selectors/
+      var input = inputId ? $('input#' + inputId) : $('input');
+      
       if($.isArray(initialValue)){
         for(var i =0; i <initialValue.length;i++){
           selectedPH.append(addBox(this, input, initialValue[i], name));

@@ -322,10 +322,12 @@ var ContentListComponent = NavigatorBaseComponent.extend({
     $("li.greybox a").click(function(){
       var t = this.title || this.innerHTML || this.href;
       //$(window).scrollTop(0);
-      var _href = this.href.replace(/'/g,"&#39;");
+      /* CDF-271, updated to fancybox 2.1.5 */
+      //var _href = this.href.replace(/'/g, "&#39;");
       $.fancybox({
         type:"iframe",
-        href:_href,
+        //href: _href,
+        href: this.href,
         width: $(window).width(),
         height:$(window).height()
       });
