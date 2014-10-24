@@ -518,7 +518,8 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
 
       // We'll create an Array to keep track of the open expandable rows.
       myself.dataTable.anOpen = [];
-
+      myself.dataTable.expandParentObj = undefined;
+      myself.dataTable.expandClone = undefined;
 
       myself.ph.find ('table').bind('click',function(e) {
         if(typeof cd.clickAction === 'function' || myself.expandOnClick) { 
@@ -564,21 +565,17 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
       }
 
       var obj = event.target.closest("tr"),
-          a = event.target.closest("a");
+        a = event.target.closest("a");
 
       if(a.hasClass('info')) {
         return;
       } else {
         var row = obj.get(0),
-            value = event.series,
-            htmlContent = $("#" + detailContainerObj).html(),
-            anOpen = myself.dataTable.anOpen,
-            i = $.inArray(row, anOpen);
+          anOpen = myself.dataTable.anOpen,
+          i = $.inArray(row, anOpen);
         
         if(obj.hasClass(activeclass)) {
-          obj.removeClass(activeclass);
-          myself.dataTable.fnClose( row );
-          anOpen.splice(i,1);
+          myself.detachFromRow(row, i, activeclass);
 
           $(myself.expandParameters).each(function f(i, elt) {
             Dashboards.setParameter(elt[1], "");
@@ -586,16 +583,12 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
 
         } else {
           // Closes all open expandable rows .
-          for(var j=0; j < anOpen.length; j++) {
-            $(anOpen[j]).removeClass(activeclass);
-            myself.dataTable.fnClose( anOpen[j]);
-            anOpen.splice(j ,1);
+          for(var j = 0; j < anOpen.length; j++) {
+            myself.detachFromRow(anOpen[j], j, activeclass);
           }
           obj.addClass(activeclass);
 
-          anOpen.push(row);
-          // Since the switch to async, we need to open it first
-          myself.dataTable.fnOpen( row, htmlContent, activeclass);
+          myself.attachToRow(row, activeclass);
 
           //Read parameters and fire changes
           var results = myself.queryState.lastResults();
@@ -610,7 +603,7 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
             }
           });
           if(firstChange !== null) {
-            Dashboards.fireChange( firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)]);
+            Dashboards.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)]);
           }
 
         };
@@ -622,6 +615,53 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
           return;
         }
       );
+    },
+
+    attachToRow: function(row, activeClass) {
+      var myself = this;
+
+      myself.dataTable.anOpen.push(row);
+      myself.dataTable.fnOpen(row, "", activeClass);
+
+      var containerId = "#" + myself.expandContainerObject;
+      var expandObj = $(containerId);
+      var expandPlace = $(row).next().children().empty();
+
+      myself.dataTable.expandParentObj = expandObj.parent();
+      myself.dataTable.expandClone = expandObj.clone(true);
+
+      expandObj.appendTo(expandPlace).show();
+
+      //register click event so that every row is properly closed when table page is changed
+      $(".dataTables_wrapper div.dataTables_paginate :not(span, .ui-state-disabled, .disabled)")
+        .click(function() {
+          var anOpen = myself.dataTable.anOpen;
+          for(var j = 0; j < anOpen.length; j++) {
+            myself.detachFromRow(anOpen[j], j, activeClass, true);
+          }
+        });
+    },
+
+    detachFromRow: function(row, index, activeClass, pageChange) {
+      var myself = this;
+
+      pageChange = pageChange || false;
+      var expandedSelector = "td." + activeClass + " > *";
+      var dataToDetach = pageChange
+        ? myself.dataTable.expandClone
+        : $(row).next().find(expandedSelector).hide();
+
+      //place expanded object in is previous place, so events can be triggered properly
+      detachTo = myself.dataTable.expandParentObj || $('body div.container');
+      dataToDetach.appendTo(detachTo);
+
+      //close expanded table row
+      $(row).removeClass(activeClass);
+      myself.dataTable.fnClose(row);
+      myself.dataTable.anOpen.splice(index, 1);
+
+      //event just needs to trigger when row is expanded
+      $(".dataTables_wrapper div.dataTables_paginate").off('click');
     }
   },
   {
