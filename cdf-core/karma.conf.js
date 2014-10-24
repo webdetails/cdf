@@ -41,6 +41,7 @@ module.exports = function(config) {
       'cdf/js/components/core.js',
       'cdf/js/components/input.js',
       'cdf/js/queries/coreQueries.js',
+      'cdf/js/components/simpleautocomplete.js',
       '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
       '../cdf-pentaho-base/cdf/js/components/VisualizationApiComponent.js',
       'test-js/lib/test-components.js',

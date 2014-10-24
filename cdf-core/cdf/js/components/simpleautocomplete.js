@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,12 +13,12 @@
 
 var SimpleAutoCompleteComponent = BaseComponent.extend({
 
-    ph: undefined,
-    completionCallback: undefined,
+  ph: undefined,
+  completionCallback: undefined,
 
-    update: function() {
-      var myself = this;
-      if(this.ph == undefined) {
+  update: function() {
+    var myself = this;
+    if(this.ph == undefined) {
       this.ph = $("#" + this.htmlObject).empty();
       this.input = $("<input type='text'>").appendTo(this.ph);
       this.query = Dashboards.getQuery(this.queryDefinition);
@@ -33,37 +33,44 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
           Dashboards.processChange(myself.name);
         }
       });
-}
-    },
-
-    handleQuery: function(callback) {
-      var myself = this;
-      return function(values) {
-        if(typeof myself.postFetch == "function") {
-          var changedValues = myself.postFetch(values);
-          values = changedValues || values;
-        };
-        var results = values.resultset.map(function(e){return e[0];});
-        callback(results);
-      }
-    },
-
-    triggerQuery: function(term,callback){
-      var params = $.extend([],this.parameters);
-      var termVal = "'" + term+ "'";
-      if(this.searchParam){
-        params.push([this.searchParam, termVal]);
-      }
-      else if (params.length > 0){
-        this.parameters[0][1] = termVal;
-      }
-      if(term.length >= this.minTextLength) {
-        this.query.fetchData(params,this.handleQuery(callback));
-      } else {
-        callback([]);
-      }
-    },
-    getValue: function() {
-      return this.input.val();
     }
+  },
+
+  getList: function( values ) {
+    if( typeof this.postFetch == "function" ) {
+      var changedValues = this.postFetch( values );
+      values = changedValues || values;
+    }
+    return values.resultset.map( function(e){ return e[0]; } );
+  },
+
+  handleQuery: function( callback ) {
+    var myself = this;
+    return function( values ) {
+      var list = myself.getList( values );
+      callback( list );
+    };
+  },
+
+  triggerQuery: function( term, callback ) {
+    var params = $.extend( [], this.parameters );
+    var searchParam = this.searchParam || "searchBox";
+
+    if ( searchParam == "searchBox" ) {
+      this.query.setSearchPattern( term );
+    } else {
+      params.push( [this.searchParam, term] );
+    }
+
+    if ( term.length >= this.minTextLength ) {
+      this.query.fetchData( params, this.handleQuery( callback ) );
+    } else {
+      callback([]);
+    }
+  },
+
+  getValue: function() {
+    return this.input.val();
+  }
+
 });
