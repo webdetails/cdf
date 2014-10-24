@@ -176,8 +176,8 @@ define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', 
           });
           bDetails.css("left",bDetails.position().left + $(chart[1]).width() - bDetails.width() - 5);
           bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height() );
-          //Append map after image
-          $(chart[1]).append(chart[0]);
+          // Use UNIQUE ids (chart[0] vs chart[1])
+          chart[0].id = chart[0].id + "Map";
         }
 
         for(o in captionOptions) {
