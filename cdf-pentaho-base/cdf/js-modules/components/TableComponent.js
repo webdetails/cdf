@@ -332,7 +332,7 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
       query.setSortBy(sort.join(","));
       query.setPageSize(parseInt(p("length")));
       query.setPageStartingAt(p("start"));
-      query.setSearchPattern(p("search") ? p("search") : "");
+      query.setSearchPattern(p("search") ? p("search").value : "");
       query.fetchData(function(d) {
         if(myself.postFetch){
           var mod = myself.postFetch(d,dataTable);
