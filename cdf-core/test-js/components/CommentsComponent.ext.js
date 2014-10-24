@@ -13,7 +13,7 @@
 
 define('cdf/components/CommentsComponent.ext', [], function() {
 
-  var ext = {
+  var CommentsComponentExt = {
 
     getComments: function(action) { 
 
@@ -36,6 +36,6 @@ define('cdf/components/CommentsComponent.ext', [], function() {
     }
   };
 
-  return ext;
+  return CommentsComponentExt;
 });
 
