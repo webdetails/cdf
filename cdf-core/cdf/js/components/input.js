@@ -565,23 +565,36 @@ if($.datepicker) {
 var DateInputComponent = BaseComponent.extend({
   update: function(){
     var myself = this;
-    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
+    var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
 
     var startDate, endDate;
 
-    if(this.startDate == 'TODAY') startDate = new Date();
-    else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
+    if(myself.startDate == 'TODAY') startDate = new Date();
+    else if(myself.startDate) startDate = $.datepicker.parseDate( format, myself.startDate);
 
-    if(this.endDate == 'TODAY') endDate = new Date();
-    else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
+    if(myself.endDate == 'TODAY') endDate = new Date();
+    else if(myself.endDate) endDate = $.datepicker.parseDate( format, myself.endDate);
+
+    //onOpen and onClose events
+    myself.on('onOpen:dateInput', myself.onOpenEvent);
+    myself.on('onClose:dateInput', myself.onCloseEvent);
 
     //ToDo: stretch interval to catch defaultValue?..
-    //myself.dashboard.getParameterValue(this.parameter))
+    //myself.dashboard.getParameterValue(myself.parameter))
 
-    this.placeholder().html($("<input/>").attr("id", myself.name).attr("value", this.dashboard.getParameterValue(this.parameter)).css("width", "80px"));
+    myself.placeholder().html($("<input/>")
+      .attr("id", myself.name)
+      .attr("value", myself.dashboard.getParameterValue(myself.parameter))
+      .css("width", "80px"));
 
     $(function(){
       myself.placeholder("input").datepicker({
+        beforeShow: function() {
+          myself.triggerOnOpen();
+        },
+        onClose: function() {
+          myself.triggerOnClose();
+        },
         dateFormat: format,
         changeMonth: true,
         changeYear: true,
@@ -606,6 +619,17 @@ var DateInputComponent = BaseComponent.extend({
       myself._doAutoFocus();
     });
   },
+
+  triggerOnOpen: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", true);
+    this.trigger('onOpen:dateInput');
+  },
+
+  triggerOnClose: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", false);
+    this.trigger('onClose:dateInput');
+  },
+
   getValue : function() {
     if (typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
       return $("#" + this.name + "_hidden").val();
