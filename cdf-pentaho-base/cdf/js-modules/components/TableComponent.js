@@ -566,38 +566,52 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
       var obj = event.target.closest("tr"),
           a = event.target.closest("a");
 
-      if(a.hasClass ('info')) {
+      if(a.hasClass('info')) {
         return;
       } else {
         var row = obj.get(0),
             value = event.series,
             htmlContent = $("#" + detailContainerObj).html(),
             anOpen = myself.dataTable.anOpen,
-            i = $.inArray( row, anOpen );
+            i = $.inArray(row, anOpen);
         
         if(obj.hasClass(activeclass)) {
           obj.removeClass(activeclass);
           myself.dataTable.fnClose( row );
           anOpen.splice(i,1);
 
+          $(myself.expandParameters).each(function f(i, elt) {
+            Dashboards.setParameter(elt[1], "");
+          });
+
         } else {
           // Closes all open expandable rows .
           for(var j=0; j < anOpen.length; j++) {
             $(anOpen[j]).removeClass(activeclass);
-            myself.dataTable.fnClose( anOpen[j] );
+            myself.dataTable.fnClose( anOpen[j]);
             anOpen.splice(j ,1);
           }
           obj.addClass(activeclass);
 
-          anOpen.push( row );
+          anOpen.push(row);
           // Since the switch to async, we need to open it first
-          myself.dataTable.fnOpen( row, htmlContent, activeclass );
+          myself.dataTable.fnOpen( row, htmlContent, activeclass);
 
           //Read parameters and fire changes
           var results = myself.queryState.lastResults();
+          var firstChange = null;
+
           $(myself.expandParameters).each(function f(i, elt) {
-            myself.dashboard.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+            //skips the first expandParameter that was updated and calls Dashboards.setParameter for the all others
+            if(!firstChange && Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)]) {
+              firstChange = elt;
+            } else {
+              Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+            }
           });
+          if(firstChange !== null) {
+            Dashboards.fireChange( firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)]);
+          }
 
         };
       };
