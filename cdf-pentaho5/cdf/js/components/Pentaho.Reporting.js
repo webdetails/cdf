@@ -25,6 +25,11 @@ var PrptComponent = BaseComponent.extend({
     getIframe: function() {
         return '<iframe name="' + this.getIframeName() + '" style="width:100%;height:100%;border:0px" frameborder="0"/>';
     },
+    setIframeUrl: function( iframe, url ) {
+        if(iframe[0]) {
+            iframe[0].contentWindow.location = url;
+        }
+    },
     /*************************************************************************
      * We really shouldn't mess around with the CDF running call counter,
      * but if we don't do so in this case, the report will count as "finished"
@@ -34,13 +39,13 @@ var PrptComponent = BaseComponent.extend({
     startLoading: function() {
         if (!this.loading) {
             this.loading = true;
-          this.dashboard.incrementRunningCalls();
+            this.dashboard.incrementRunningCalls();
         }
     },
     stopLoading: function() {
         if (this.loading) {
             this.loading = false;
-          this.dashboard.decrementRunningCalls();
+            this.dashboard.decrementRunningCalls();
         }
     },
     /*************************************************************************/
@@ -145,7 +150,7 @@ var PrptComponent = BaseComponent.extend({
                     }
                     myself.stopLoading();
                 });
-                iframe[0].contentWindow.location = url;
+                this.setIframeUrl(iframe, url);
             }
             if (downloadMode) {
                 // if call prompts a download window we'll never know when it's done
@@ -183,6 +188,9 @@ var PrptComponent = BaseComponent.extend({
             if (value == null && param.length == 3) {
                 value = param[2];
             }
+            if ( typeof value == 'function' ) {
+                value = value();
+            }
             options[param[0]] = value;
         }
         return options;
@@ -203,6 +211,9 @@ var PrptComponent = BaseComponent.extend({
             var value = this.dashboard.getParameterValue(param[1]);
             if (value == null && param.length == 3) {
                 value = param[2];
+            }
+            if ( typeof value == 'function' ) {
+                value = value();
             }
             options[param[0]] = value;
         }

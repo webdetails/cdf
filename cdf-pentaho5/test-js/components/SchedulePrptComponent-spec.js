@@ -11,35 +11,35 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/PrptComponent"],
-  function(Dashboard, PrptComponent) {
+define(["cdf/Dashboard", "cdf/components/SchedulePrptComponent"],
+  function(Dashboard, SchedulePrptComponent) {
 
   /**
-   * ## The Pentaho Reporting Component
+   * ## The Schedule Pentaho Reporting Component
    */
-  describe("The Pentaho Reporting Component #", function() {
+  describe("The Schedule Pentaho Reporting Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
-    var prptComponent = new PrptComponent(myDashboard, {
-      name: "prptComponent",
-      type: "prptComponent",
+    var schedulePrpt = new SchedulePrptComponent(dashboard, {
+      name: "schedulePrpt",
+      type: "schedulePrpt",
       htmlObject: "sampleObject",
       executeAtStart: true
     });
 
-    myDashboard.addComponent(prptComponent);
+    dashboard.addComponent(schedulePrpt);
 
     /**
-     * ## The Pentaho Reporting Component # Update Called
+     * ## The Schedule Pentaho Reporting Component # Update Called
      */
     it("Update Called", function(done) {
-      spyOn(prptComponent, 'update').and.callThrough();
-      myDashboard.update(prptComponent);
+      spyOn(schedulePrpt, 'update').and.callThrough();
+      dashboard.update(schedulePrpt);
       setTimeout(function() {
-        expect(prptComponent.update).toHaveBeenCalled();
+        expect(schedulePrpt.update).toHaveBeenCalled();
         done();
       }, 100);
     });
