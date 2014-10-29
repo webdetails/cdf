@@ -24,28 +24,31 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
         value = result[0][0];
       }
       var greenClass = "img trafficGreen", yellowClass = "img trafficYellow", redClass = "img trafficRed";
-      var i = $( "<div>" ).attr("class",value<=cd.intervals[0]? redClass : ( value>=cd.intervals[1] ? greenClass : yellowClass));
-      var $htmlObject = $('#'+this.htmlObject);
+      var i = $("<div>").attr( "class", (value <= cd.intervals[0] ? redClass : (value >= cd.intervals[1] ? greenClass : yellowClass)));
+      var $htmlObject = $('#' + this.htmlObject);
       $htmlObject.html(i);
       if(cd.showValue != undefined && cd.showValue == true) {
-        var tooltip = "Value: " + value + " <br /><div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt;  <div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; <div align='middle' class='" + greenClass + "'/> <br/>" + (tooltip != undefined?tooltip:"");
-        var tooltipOpts = {};
-        if($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
-          tooltipOpts = {
+        var tooltip = "Value: " + value + " <br />" +
+          "<div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt; " +
+          "<div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; " +
+          "<div align='middle' class='" + greenClass + "'/>" +
+          (tooltip != undefined ? "<br/>" + tooltip : "");
+        if ($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
+          $htmlObject.tooltip({
             delay: 0,
             html: true,
             title: tooltip,
             placement: "auto top"
-          }
+          });
         } else {
-          tooltipOpts = {
-            delay:0,
+          $htmlObject.tooltip({
+            delay: 0,
             track: true,
-            fade: 250
-          };
-          $htmlObject.attr("title",tooltip + ((this._tooltip != undefined) ? this._tooltip : ""));
+            fade: 250,
+            content: tooltip
+          });
+          $htmlObject.attr("title", tooltip);
         }
-        $htmlObject.tooltip(tooltipOpts);
       }
     },
     doQuery : function() {

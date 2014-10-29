@@ -810,9 +810,9 @@ var SchedulePrptComponent = PrptComponent.extend({
         },
         submit: function (e, v, m, f) {
           sharedUuid = guid();
-          if (e == -1) {
+          if (v == -1) {
             $.prompt.close();
-          } else if (e == 1) {
+          } else if (v == 1) {
             setParameters();
             if (error) {
               parameters = {};

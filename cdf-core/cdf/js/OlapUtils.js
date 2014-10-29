@@ -146,9 +146,7 @@ OlapUtils.fireMdxGroupAction = function(mdxQueryGroup,idx,param1, param2, param3
 	var msg = "Available conditions: <br/> <ul>" ;
 	$.each(buttonsHash, function(key,value){msg+="<li>" + OlapUtils.buttonsDescription[key] + "</li>"});
 	msg += "</ul>";
-	$.prompt(msg
-		,{buttons: buttonsHash, callback: OlapUtils.mdxQueryGroupActionCallback }
-	);
+	$.prompt(msg, {buttons: buttonsHash, submit: OlapUtils.mdxQueryGroupActionCallback});
 
 }
 
@@ -734,7 +732,7 @@ OlapUtils.mdxQueryGroup.prototype.removeFilter = function(key,value){
 	Dashboards.decrementRunningCalls();
 }
 
-OlapUtils.mdxQueryGroupActionCallback = function(value,m){
+OlapUtils.mdxQueryGroupActionCallback = function(e,value,m){
 
 	if (value == "cancel")
 		return;  // do nothing.

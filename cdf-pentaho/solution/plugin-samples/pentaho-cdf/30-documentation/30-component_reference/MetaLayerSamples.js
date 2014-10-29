@@ -23,5 +23,5 @@ var evaluateCode = function (cleanComponents) {
     this.dashboard.log(e, 'exception');
     return;
   }
-  tabs.tabs("select", 0);
+  tabs.tabs("option", "active", 0);
 };

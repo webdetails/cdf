@@ -70,14 +70,14 @@
           .bind('click', function(e) {
               li.remove();
               e.preventDefault();
-        if(!opt.multiSelection)
-        opt.processAutoBoxChange(input,opt);
-        else if(opt.processElementChange!= undefined)
-        opt.processAutoBoxElement();
-      
-        if(opt.multiSelection && opt.applyButton != false)
-         opt.showApplyButton();
-        
+			  if(!opt.multiSelection)
+				opt.processAutoBoxChange(input,opt);
+			  else if(opt.processElementChange!= undefined)
+				opt.processAutoBoxElement();
+			
+			  if(opt.multiSelection && opt.applyButton != false)
+				 opt.showApplyButton();
+				
           }))
       .append($('<input type="hidden" />')
           .attr('name', name)
@@ -91,7 +91,7 @@
       if(text.length > 0)
       {
         /* CDF-100 Avoid inserting duplicate values */
-        if(opt.addTextElements && ($(".bit-box:contains('"+text+"')").length == 0)){
+        if(opt.addTextElements && ($(".bit-box:contains('"+text+"')").length==0)){
           var li;
           if(opt.multiSelection != true){
             count = 0;
@@ -113,31 +113,31 @@
         }
       }
     }
-  
-  function getCurrentValsHash(input,opt){//return the currently selected values as a hash
-    if(opt.addTextElements){
-        var vals=input.parent().parent().find('li');
-        var hash={};
-        for(var i=0; i<vals.length; ++i){
-          var s=vals[i].innerHTML.match(/^[^<]+/);
-          if(s){ 
+	
+	function getCurrentValsHash(input,opt){//return the currently selected values as a hash
+		if(opt.addTextElements){
+	      var vals=input.parent().parent().find('li');
+	      var hash={};
+	      for(var i=0; i<vals.length; ++i){
+	        var s=vals[i].innerHTML.match(/^[^<]+/);
+	        if(s){ 
           if(!opt.multiSelection) 
             hash[s]=true; 
           else
             hash[s[0]]=true; 
           }
-        }
-        return hash;
+	      }
+	      return hash;
+		}
+		else
+			return opt.selectedValues;
     }
-    else
-      return opt.selectedValues;
-    }
-  
-  
+	
+	
   $.fn.autoboxMode=function(multiSelection,container, input, size, opt){
     var original=input.val(); var selected=-1; var self=this;
-    
-    
+		
+		
 
     $.data(document.body, "autoboxMode", true);
 
@@ -147,51 +147,51 @@
       input.val(original);
     });
 
-  
+	
     $("body").bind("activate.autobox", function(e, k){
       // Try hitting return to activate autobox and then hitting it again on blank input
       // to close it.  w/o checking the active object first this input.trigger() will barf.
       if(active && active[0] && $.data(active[0], "originalObject")){
-      var hash = getCurrentValsHash(input,opt);
-      if(valueMatched)
-      if(hash == null || hash[input.val()] != true){
-        var value = $.data(active[0], "originalObject").text;
-        if(!opt.multiSelection || (active[0].childNodes[0].checked || k == KEY.RETURN))
-          addText(opt,input,value, opt.name);
-        if(!opt.multiSelection)
-          opt.processAutoBoxChange(input,opt);
-        else if(opt.processElementChange!= undefined)
-          opt.processAutoBoxElement();
-      }
-      
-      if(!opt.multiSelection || k == KEY.RETURN){       
-        $("body").trigger("off.autobox");
-      }
+			var hash = getCurrentValsHash(input,opt);
+			if(valueMatched)
+			if(hash == null || hash[input.val()] != true){
+				var value = $.data(active[0], "originalObject").text;
+				if(!opt.multiSelection || (active[0].childNodes[0].checked || k == KEY.RETURN))
+					addText(opt,input,value, opt.name);
+				if(!opt.multiSelection)
+					opt.processAutoBoxChange(input,opt);
+				else if(opt.processElementChange!= undefined)
+					opt.processAutoBoxElement();
+			}
+			
+			if(!opt.multiSelection || k == KEY.RETURN){				
+				$("body").trigger("off.autobox");
+			}
       }
       else if(input.val()){ 
-    var hash = getCurrentValsHash(input,opt);
-    if(!valueMatched){
-      var aux = $(opt.list).filter(function(){valueMatched = this.text == input.val() ? true : valueMatched;});
-    }
-    if(valueMatched)
-      if(hash == null || hash[input.val()] != true){
-        addText(opt,input, input.val(), opt.name);
-        if(!opt.multiSelection)
-          opt.processAutoBoxChange(input,opt);
-        else if(opt.processElementChange!= undefined)
-          opt.processAutoBoxElement();
-        $("body").trigger("off.autobox");
-      }
-    }
-    //active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
+		var hash = getCurrentValsHash(input,opt);
+		if(!valueMatched){
+			var aux = $(opt.list).filter(function(){valueMatched = this.text == input.val() ? true : valueMatched;});
+		}
+		if(valueMatched)
+			if(hash == null || hash[input.val()] != true){
+				addText(opt,input, input.val(), opt.name);
+				if(!opt.multiSelection)
+					opt.processAutoBoxChange(input,opt);
+				else if(opt.processElementChange!= undefined)
+					opt.processAutoBoxElement();
+				$("body").trigger("off.autobox");
+			}
+	  }
+		//active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
     });
-  
-  
-  
-   $("body").bind("click", function(e) {
-    if(e.target.id != inputId && e.target.id != "listElement" && e.target.id != "listElementCheckBox")
-      $("body").trigger("cancel.autobox");
-   });
+	
+	
+	
+	 $("body").bind("click", function(e) {
+		if(e.target.id != inputId && e.target.id != "listElement" && e.target.id != "listElementCheckBox")
+			$("body").trigger("cancel.autobox");
+	 });
 
     $("body").bind("off.autobox", function(e, reset){
       container.remove();
@@ -202,17 +202,17 @@
 
     // If a click bubbles all the way up to the window, close the autobox
     /* $(window).bind("click.autobox", function(){
-     if(!opt.multiSelection)
-      $("body").trigger("cancel.autobox");
-  });*/
+	   if(!opt.multiSelection)
+			$("body").trigger("cancel.autobox");
+	});*/
 
     function select(){
       active=$("> *", container).removeClass("active").slice(selected, selected + 1).addClass("active");
       input.trigger("itemSelected.autobox", [$.data(active[0], "originalObject")]);
       input.val(opt.insertText($.data(active[0], "originalObject")));
-    valueMatched = true;
+	  valueMatched = true;
     };
-  
+	
     container.mouseover(function(e){
       // If you hover over the container, but not its children, return
       if(e.target == container[0])return;
@@ -220,21 +220,21 @@
       selected=$("> *", container).index($(e.target).is('li') ? $(e.target)[0] : $(e.target).parents('li')[0]);
       select();
     }).bind("click.autobox", function(e){
-    if(opt.multiSelection && e.target.childNodes.length > 0) 
-     e.target.childNodes[0].checked = true;
-    $("body").trigger("activate.autobox");
+	  if(opt.multiSelection && e.target.childNodes.length > 0) 
+		 e.target.childNodes[0].checked = true;
+	  $("body").trigger("activate.autobox");
       $.data(document.body, "suppressKey", false);
     });
-  
+	
     input
       .bind("keydown.autobox", function(e){
         var k=e.which || e.keyCode;
         if(k == KEY.ESC){ $("body").trigger("cancel.autobox"); }
         else if(k == KEY.RETURN){ $("body").trigger("activate.autobox",[k]); e.preventDefault(); }
         else if(k == KEY.UP || k == KEY.TAB || k == KEY.DOWN){
-     
+		 
           switch(k){
-     
+		 
             case KEY.DOWN:
             case KEY.TAB:
               selected=selected >= size - 1 ? 0 : selected + 1; break;
@@ -260,7 +260,10 @@
      
      setInitialValue: function(htmlObject, initialValue, name){ 
       var selectedPH = $('#' + htmlObject + ' .autobox-input');
-      var input = $('input#' + inputId);
+
+      // CDF-271, jQuery 1.9.1 has a stricter selector syntax http://api.jquery.com/category/selectors/
+      var input = inputId ? $('input#' + inputId) : $('input');
+      
       if($.isArray(initialValue)){
         for(var i =0; i <initialValue.length;i++){
           selectedPH.append(addBox(this, input, initialValue[i], name));
@@ -290,9 +293,9 @@
           return "<li id=\"listElement\">" +  "<input " + (opt.selectedValues[value] ? 'checked="yes"' : "") + "\" id=\"listElementCheckBox\" name=\"" + value + "\" value=\"" +value+ "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
         }
       },
-  
+	
     insertText: function(str){ return unescape(escape(str.text)); },
-    minTextLenght: 0,
+	  minTextLenght: 0,
     match: function(typed){ 
       if (opt.matchType == "fromStart"){
         this.typed = typed;
@@ -317,98 +320,98 @@
     wrapper: '<ul ' + (opt.scrollHeight != undefined ? 'style="height:' + opt.scrollHeight + 'px;"' : '')  + 'class="autobox-list"></ul>',
 
     resizable: {},
-    
-    emptyValues: function(){
-      return (this.input.parent().parent().find('li').length == 1);
+		
+		emptyValues: function(){
+			return (this.input.parent().parent().find('li').length == 1);
     },
-    
-    removeValue: function(value) {
-      if(opt.addTextElements) {
-        var vals = this.input.parent().find('li');
+
+    removeValue: function(value){
+      if(opt.addTextElements){
+        var vals=this.input.parent().find('li');
         var values = new Array();
-        for(var i = 0; i < vals.length; ++i) {
+        for(var i=0; i<vals.length; ++i){
           /* CDF-100 process &amp; and other encodings in string */
           var v = vals[i].firstChild.nodeValue.match(/^[^<]+/);  
-          if(v != null && value == v) {
+          if(v!= null && value == v ){
             $(vals[i]).remove();
-            if(this.multiSelection && this.applyButton && this.emptyValues()) {
+            if(this.multiSelection && this.applyButton && this.emptyValues()){
               this.hideApplyButton();
             }
             return;
           }
         }
-      } else if(this.selectedValues[value]) {
+      }else if(this.selectedValues[value]){
         delete this.selectedValues[value];
       }
     },
-    
+
     getSelectedValues: function(){
-      var values = new Array();
-      if(opt.addTextElements){
-        var vals= this.input.parent().parent().find('li');
-        for(var i=0,j=0; i<vals.length; ++i){
+			var values = new Array();
+			if(opt.addTextElements){
+			  var vals= this.input.parent().parent().find('li');
+			  for(var i=0,j=0; i<vals.length; ++i){
           var value = vals[i].innerHTML.match(/^[^<]+/);
           if(value!= null){
             values[j] = value[0];j++;
           }
-        }
-      }
-      else{
-        for(v in opt.selectedValues){
-          values.push(v);
-        }
-      }
-      
-      return values;
-    },
-    
-    valueAlreadySelected: function(value){
-      var vals= this.input.parent().parent().find('li');
-      var values = new Array();
-      for(var i=0,j=0; i<vals.length; ++i){
-        var v = vals[i].innerHTML.match(/^[^<]+/);
-        if(v!= null && v == value){
-          return true;
-        }
-      }
-      return false;
-    },
-    
-    processAutoBoxChange: function processAutoBoxChange(){
-      if(this.multiSelection == true){
-        var selectedValues = this.getSelectedValues();
-        this.processChange(this.parent,selectedValues);
-      }
-      else {
-        this.processChange(this.parent,this.getSelectedValues());
-      }
-      
-      this.input.val("");
-    },
-    
-    processAutoBoxElement: function processAutoBoxChange(){
-      this.processElementChange(this.getSelectedValues());
-    },
-    
-    showApplyButton: function showApplyButton(){
-        if(this.applyButton.is(":hidden")){
-          this.applyButton.css("left",this.applyButton.parent().width());
-          this.applyButton.fadeIn('normal');
-          var tooltip = this.applyButton.buttonApplyMessage;
-          tooltip.css("left",this.applyButton.offset().left+5);
-          tooltip.css("top",this.applyButton.offset().top+20);
-          tooltip.fadeIn('normal', function(){
-            tooltip.fadeOut(4000)});
-        }
-        
-        //this.applyButton.buttonApplyMessage.fadeOut(4000);
-    },
-  
-    hideApplyButton: function hideApplyButton(){
-      this.applyButton.fadeOut("fast");
-      this.applyButton.buttonApplyMessage.fadeOut("fast");
-    }
-    
+			  }
+			}
+			else{
+				for(v in opt.selectedValues){
+					values.push(v);
+				}
+			}
+			
+			return values;
+		},
+		
+		valueAlreadySelected: function(value){
+			var vals= this.input.parent().parent().find('li');
+			var values = new Array();
+			for(var i=0,j=0; i<vals.length; ++i){
+				var v = vals[i].innerHTML.match(/^[^<]+/);
+				if(v!= null && v == value){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		processAutoBoxChange: function processAutoBoxChange(){
+			if(this.multiSelection == true){
+				var selectedValues = this.getSelectedValues();
+				this.processChange(this.parent,selectedValues);
+			}
+			else {
+				this.processChange(this.parent,this.getSelectedValues());
+			}
+			
+			this.input.val("");
+		},
+		
+		processAutoBoxElement: function processAutoBoxChange(){
+			this.processElementChange(this.getSelectedValues());
+		},
+		
+		showApplyButton: function showApplyButton(){
+				if(this.applyButton.is(":hidden")){
+					this.applyButton.css("left",this.applyButton.parent().width());
+					this.applyButton.fadeIn('normal');
+					var tooltip = this.applyButton.buttonApplyMessage;
+					tooltip.css("left",this.applyButton.offset().left+5);
+					tooltip.css("top",this.applyButton.offset().top+20);
+					tooltip.fadeIn('normal', function(){
+						tooltip.fadeOut(4000)});
+				}
+				
+				//this.applyButton.buttonApplyMessage.fadeOut(4000);
+		},
+	
+		hideApplyButton: function hideApplyButton(){
+			this.applyButton.fadeOut("fast");
+			this.applyButton.buttonApplyMessage.fadeOut("fast");
+		}
+		
     }, opt);
 
     if($.ui.autobox.ext){
@@ -470,7 +473,7 @@
       }
       if($.data(document.body, "autoboxMode") && k < 32 && k != KEY.BS && k != KEY.DEL) return false;
       else if(k == KEY.RETURN){
-        if(input.val()){  
+        if(input.val()){ 	
           var hash = getCurrentValsHash(input,opt);
           if(hash == null || hash[input.val()] != true){
             if(opt.checkValue == false){
@@ -498,7 +501,7 @@
               else {
                 addText(opt,input, "", opt.name);
               }
-            } 
+            }	
           }else
             addText(opt,input, "", opt.name);
         }
@@ -523,10 +526,10 @@
         list=$(list)
           .filter(function(){
             /* CDF-100 fixed bug in IE8, unresponsive behaviour when this.text is undefined */
-            if(this.text && ($(".bit-box:contains('" + this.text + "')").length == 0)) {
+            if (this.text && ($(".bit-box:contains('"+this.text+"')").length==0)){
               valueMatched = this.text.replace(/^\s*|\s*$/g,'') == self.val().replace(/^\s*|\s*$/g,'') ? true : valueMatched;
-              return opt.match.call(this, self.val());
-            } else {
+              return  opt.match.call(this, self.val());
+            }else{
               return false;
             }
           })
@@ -572,27 +575,27 @@
         $("body").trigger("off.autobox");
         opt.processAutoBoxChange($(button.parent().children()[0]),opt);
        });
-     
-     button.attr("title","Click it to Apply");
-     button.hide();
-     
-     var buttonApplyMessage =$('<div class="applybutton" >' + opt.tooltipMessage + '</div>');
-     buttonApplyMessage.hide();
-     
-     button.buttonApplyMessage = buttonApplyMessage;
-    
-     
-     return [button,buttonApplyMessage];
-  }
-    
-   
+	   
+	   button.attr("title","Click it to Apply");
+	   button.hide();
+	   
+	   var buttonApplyMessage =$('<div class="applybutton" >' + opt.tooltipMessage + '</div>');
+	   buttonApplyMessage.hide();
+	   
+	   button.buttonApplyMessage = buttonApplyMessage;
+	  
+	   
+	   return [button,buttonApplyMessage];
+	}
+	  
+	 
     function createHolder(self){
       
       var input=createInput();
       opt.input = input;
       var applyButton;
       if(opt.applyButton != false){
-        applyButton = createApplyButton();
+        applyButton	= createApplyButton();
         opt.applyButton = applyButton[0];
       }
       
@@ -632,7 +635,7 @@
       createHolder(self);
       opt.name=opt.parent.name;
     });
-  
+	
     return opt;
   };
 

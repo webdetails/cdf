@@ -48,7 +48,12 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
           async: true,
           data: params,
           complete: function(XMLHttpRequest, textStatus) {
-            func(XMLHttpRequest.responseXML);
+            /* CDF-271 jQuery 1.9.1 bug #13388 */
+            if(typeof XMLHttpRequest.responseXML == "undefined") {
+              func(jQuery.parseXML(XMLHttpRequest.responseText));
+            } else {
+              func(XMLHttpRequest.responseXML);
+            }
           },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
             Logger.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
@@ -69,7 +74,12 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
     
       });
       if(returnType == 'xml') {
-        return result.responseXML;
+        /* CDF-271 jQuery 1.9.1 bug #13388 */
+        if(typeof result.responseXML == "undefined") {
+          return jQuery.parseXML(result.responseText);
+        } else {
+          return result.responseXML;
+        }
       } else {
         return result.responseText;
       }
