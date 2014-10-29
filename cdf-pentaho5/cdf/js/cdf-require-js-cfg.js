@@ -18,7 +18,7 @@ if(typeof CONTEXT_PATH != "undefined") { // production
 }
 
 requireCfg['shim']['cdf/cdf-module'] = [
-  'cdf/jquery-migrate-1.2.1',
+  'cdf/lib/jquery-migrate-1.2.1',
   'cdf/lib/jquery/jquery.ui',
   'cdf/lib/impromptu/jquery-impromptu',
   'cdf/lib/jquery-ui-datepicker-i18n',
