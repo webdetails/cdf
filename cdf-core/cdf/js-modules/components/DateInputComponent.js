@@ -11,10 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent'], function ($, BaseComponent) {
+define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
 
   var DateInputComponent = BaseComponent.extend({
-    update: function(){
+    update: function() {
       var myself = this;
       var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
       var startDate, endDate;
@@ -38,8 +38,12 @@ define(['../lib/jquery', './BaseComponent'], function ($, BaseComponent) {
       //ToDo: stretch interval to catch defaultValue?..
       //Dashboards.getParameterValue(myself.parameter))
 
-      myself.placeholder().html($("<input/>").attr("id", myself.name).attr("value", myself.dashboard.getParameterValue(myself.parameter)).css("width", "80px"));
-      $(function(){
+      myself.placeholder().html($("<input/>")
+        .attr("id", myself.name)
+        .attr("value", myself.dashboard.getParameterValue(myself.parameter))
+        .css("width", "80px"));
+
+      $(function() {
         myself.placeholder("input").datepicker({
           beforeShow: function() {
             myself.triggerOnOpen();
@@ -52,7 +56,7 @@ define(['../lib/jquery', './BaseComponent'], function ($, BaseComponent) {
           changeYear: true,
           minDate: startDate,
           maxDate: endDate,
-          onSelect: function(date, input){
+          onSelect: function(date, input) {
             myself.dashboard.processChange(myself.name);
           }
         });
@@ -64,8 +68,8 @@ define(['../lib/jquery', './BaseComponent'], function ($, BaseComponent) {
 
           //Setup alt field and format to keep iso format
           $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
-          $input.datepicker("option", "altField", "#" + myself.name + "_hidden" );
-          $input.datepicker("option", "altFormat", format );
+          $input.datepicker("option", "altField", "#" + myself.name + "_hidden");
+          $input.datepicker("option", "altFormat", format);
         }
         myself._doAutoFocus();
       });
@@ -85,7 +89,7 @@ define(['../lib/jquery', './BaseComponent'], function ($, BaseComponent) {
       if(typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
         return $("#" + this.name + "_hidden").val();
       } else {
-        return $("#"+this.name).val();
+        return $("#" + this.name).val();
       }
     }
   });

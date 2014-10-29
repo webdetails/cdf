@@ -26,6 +26,7 @@ module.exports = function(config) {
       'cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
       
       'cdf/js-lib/jquery/jquery.blockUI.js',
+      'cdf/js-lib/uriQueryParser/jquery-queryParser.js',
       'cdf/js-lib/underscore/underscore.js',
       'cdf/js-lib/underscore/backbone.js',
       'cdf/js-lib/underscore/mustache.js',
@@ -50,7 +51,9 @@ module.exports = function(config) {
       'cdf/js/components/core.js',
       'cdf/js/components/input.js',
       'cdf/js/queries/coreQueries.js',
+      'cdf/js/components/simpleautocomplete.js',
       '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
+      '../cdf-pentaho-base/cdf/js/components/VisualizationAPIComponent.js',
       'test-js/lib/test-components.js',
       'test-js/main.js',
       {pattern: 'test-js/**/*-spec.js', included: false}

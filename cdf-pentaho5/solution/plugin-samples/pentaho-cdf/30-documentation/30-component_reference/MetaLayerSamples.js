@@ -22,5 +22,5 @@ var evaluateCode = function(cleanComponents) {
     dash.log(e, 'exception');
     return;
   }
-  tabs.tabs("select",0);
+  tabs.tabs("option", "active", 0);
 };

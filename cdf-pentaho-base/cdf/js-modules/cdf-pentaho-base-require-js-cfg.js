@@ -46,5 +46,6 @@
   requireShims['cdf/components/TimePlotComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/TrafficComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/XactionComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/VisualizationAPIComponent'] = ['cdf/Dashboard'];
 
 })();

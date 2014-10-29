@@ -24,29 +24,31 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
 
     update : function() {
 
-      var cd = this.chartDefinition;
+      var myself = this;
 
-      this.InitialListeners = this.InitialListeners == undefined
-        ? this.listeners
-        : this.InitialListeners;
-      this.InitialDateRangeInput = this.InitialDateRangeInput == undefined
+      var cd = myself.chartDefinition;
+
+      myself.InitialListeners = myself.InitialListeners == undefined
+        ? myself.listeners
+        : myself.InitialListeners;
+      myself.InitialDateRangeInput = myself.InitialDateRangeInput == undefined
         ? cd.dateRangeInput
-        : this.InitialDateRangeInput;
+        : myself.InitialDateRangeInput;
 
-      if(cd.updateOnDateRangeInputChange != true && this.timeplot!= undefined && cd.dateRangeInput != undefined) {
+      if(cd.updateOnDateRangeInputChange != true && myself.timeplot!= undefined && cd.dateRangeInput != undefined) {
 
-        if(this.updateTimeplot != false && this.timeplot._plots.length > 0) {
+        if(myself.updateTimeplot != false && myself.timeplot._plots.length > 0) {
 
-          var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
+          var lastEventPlot = myself.timeplot._plots[myself.timeplot._plots.length -1];
           if(lastEventPlot._id == "eventPlot") {
 
             lastEventPlot._addSelectEvent(
-              this.dashboard.getParameterValue(this.startDateParameter) + " 00:00:00",
-              this.dashboard.getParameterValue(this.endDateParameter) + " 23:59:59",
+              myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",
+              myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
               lastEventPlot._eventSource,
               "iso8601",
-              this.geometry._earliestDate,
-              this.geometry._latestDate);
+              myself.geometry._earliestDate,
+              myself.geometry._latestDate);
           }
         }
 
@@ -54,16 +56,16 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
 
       }
 
-      if(cd.dateRangeInput != undefined && this.timeplot == undefined) {
-        cd.dateRangeInput = this.dashboard.getComponent(cd.dateRangeInput);
-        this.startDateParameter = cd.dateRangeInput.parameter[0];
-        this.endDateParameter = cd.dateRangeInput.parameter[1];
-        this.listeners = this.listeners == undefined ? [] : this.listeners;
-        this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter);
+      if(cd.dateRangeInput != undefined && myself.timeplot == undefined) {
+        cd.dateRangeInput = myself.dashboard.getComponent(cd.dateRangeInput);
+        myself.startDateParameter = cd.dateRangeInput.parameter[0];
+        myself.endDateParameter = cd.dateRangeInput.parameter[1];
+        myself.listeners = myself.listeners == undefined ? [] : myself.listeners;
+        myself.listeners = myself.listeners.concat(myself.startDateParameter).concat(myself.endDateParameter);
       }
 
-      if(typeof Timeplot != "undefined" && this.dashboard.timePlotColors == undefined) {
-        this.dashboard.timePlotColors = [new Timeplot.Color('#820000'),
+      if(typeof Timeplot != "undefined" && myself.dashboard.timePlotColors == undefined) {
+        myself.dashboard.timePlotColors = [new Timeplot.Color('#820000'),
         new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
         new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
         new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
@@ -93,7 +95,6 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       var eventSource2 = new Timeplot.DefaultEventSource();
       var timePlot;
 
-      var obj = this;
       if(cd == undefined) {
         Logger.log("Fatal - No chart definition passed","error");
         return;
@@ -105,7 +106,7 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       }
 
 
-      var cols = typeof cd['columns']=='function' ? cd['columns']() : cd['columns'];
+      var cols = typeof cd['columns'] == 'function' ? cd['columns']() : cd['columns'];
       if(cols == undefined || cols.length == 0) {
         Logger.log("Fatal - No 'columns' property passed in chartDefinition","error");
         return;
@@ -120,15 +121,15 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       for(var i = 0,j=0; i<cols.length; i++,j++) {
 
         j = j > 7 ? 0 : j;
-        title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + this.dashboard.timePlotColors[j].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+        title.append('<span id="' + myself.name + 'Plot' + i + 'Header" style="color:' + myself.dashboard.timePlotColors[j].toHexString() + '">' + cols[i] + ' &nbsp;&nbsp;</span>');
 
         var plotInfoOpts = {
-          id: obj.name + "Plot" + i,
+          id: myself.name + "Plot" + i,
           name: cols[i],
-          dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
+          dataSource: new Timeplot.ColumnSource(timePlotEventSource, i + 1),
           valueGeometry: timePlotValueGeometry,
           timeGeometry: timePlotTimeGeometry,
-          lineColor: this.dashboard.timePlotColors[j],
+          lineColor: myself.dashboard.timePlotColors[j],
           showValues: cd.showValues,
           hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
           showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
@@ -140,10 +141,10 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
           }
         };
         if(cd.dots == true) {
-          plotInfoOpts.dotColor = this.dashboard.timePlotColors[j];
+          plotInfoOpts.dotColor = myself.dashboard.timePlotColors[j];
         }
         if(cd.fill == true) {
-          plotInfoOpts.fillColor = this.dashboard.timePlotColors[j].transparency(0.5);
+          plotInfoOpts.fillColor = myself.dashboard.timePlotColors[j].transparency(0.5);
         }
         plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
@@ -154,49 +155,48 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       var eventSource2 = undefined;
       var eventSourcePlot = undefined;
       if(cd.dateRangeInput != undefined || (cd.events && cd.events.show == true)) {
-        this.rangeColor = "00FF00";
+        myself.rangeColor = "00FF00";
         eventSource2 = new Timeplot.DefaultEventSource();
         eventSourcePlot = Timeplot.createPlotInfo({
           id: cd.dateRangeInput != undefined ? "eventPlot" : "events",
           eventSource: eventSource2,
           timeGeometry: timePlotTimeGeometry,
           lineColor: "#FF0000",
-          rangeColor: this.rangeColor,
-          getSelectedRegion: function(start,end){
-            myself.updateDateRangeInput(start,end);
+          rangeColor: myself.rangeColor,
+          getSelectedRegion: function(start, end) {
+            myself.updateDateRangeInput(start, end);
           }
         });
         plotInfo.push(eventSourcePlot);
       }
 
-      $("#"+this.htmlObject).html(title);
-      $("#"+this.htmlObject).append("<div class='timeplot'></div>");
+      $("#" + myself.htmlObject).html(title);
+      $("#" + myself.htmlObject).append("<div class='timeplot'></div>");
 
       if(cd.height > 0) {
-        $("#" + this.htmlObject + " > div.timeplot").css("height",cd.height);
+        $("#" + myself.htmlObject + " > div.timeplot").css("height",cd.height);
       }
       if(cd.width > 0) {
-        $("#" + this.htmlObject + " > div.timeplot").css("width",cd.width);
+        $("#" + myself.htmlObject + " > div.timeplot").css("width",cd.width);
       }
 
-      timeplot = Timeplot.create($("#"+this.htmlObject+" > div.timeplot")[0], plotInfo);
-      obj.timeplot = timeplot;
-      obj.geometry = timePlotTimeGeometry;
+      timeplot = Timeplot.create($("#" + myself.htmlObject + " > div.timeplot")[0], plotInfo);
+      myself.timeplot = timeplot;
+      myself.geometry = timePlotTimeGeometry;
 
       var allData = undefined;
       var timePlotEventSourceUrl = XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction", null, cd);
-      var myself = this;
       if(cd.events && cd.events.show == true) {
         var eventUrl = XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction", null, cd.events);
-        timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
-          timeplot.loadJSON(eventUrl,eventSource2,function(data){
+        timeplot.loadText(timePlotEventSourceUrl, ",", timePlotEventSource, null, null, function(range) {
+          timeplot.loadJSON(eventUrl, eventSource2, function(data) {
             data.events = myself.filterEvents(data.events, range);
             if(cd.dateRangeInput) {
-              var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
+              var lastEventPlot =  timeplot._plots[timeplot._plots.length - 1];
               if(lastEventPlot._id == "eventPlot") {
                 lastEventPlot._addSelectEvent(
-                  myself.dashboard.getParameterValue(obj.startDateParameter) + " 00:00:00",
-                  myself.dashboard.getParameterValue(obj.endDateParameter)+ " 23:59:59",
+                  myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",
+                  myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
                   eventSource2,
                   "iso8601",
                   timePlotTimeGeometry._earliestDate,
@@ -206,12 +206,18 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
           })
         });
       } else { 
-        timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
-          if(cd.dateRangeInput){
-            var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
-            if(lastEventPlot._id == "eventPlot")
-              lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(obj.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(obj.endDateParameter)+ " 23:59:59",
-                eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+        timeplot.loadText(timePlotEventSourceUrl, ",", timePlotEventSource, null, null, function() {
+          if(cd.dateRangeInput) {
+            var lastEventPlot =  timeplot._plots[timeplot._plots.length - 1];
+            if(lastEventPlot._id == "eventPlot") {
+              lastEventPlot._addSelectEvent(
+                myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",
+                myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
+                eventSource2,
+                "iso8601",
+                timePlotTimeGeometry._earliestDate,
+                timePlotTimeGeometry._latestDate);
+            }
           }
         });
       }

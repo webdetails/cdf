@@ -12,13 +12,12 @@
 */
 
 
-define(['../lib/underscore'], function (_) {
+define(['../lib/underscore', '../lib/jquery', '../lib/queryParser'], function (_, $) {
 
 
-    var utils = {};
+    var Utils = {};
 
-
-    utils.escapeHtml = function(input) {
+    Utils.escapeHtml = function(input) {
       // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
       // the input is fully escaped. Using http://webdesign.about.com/od/localization/l/blhtmlcodes-ascii.htm 
       // as characters example
@@ -40,7 +39,7 @@ define(['../lib/underscore'], function (_) {
     };
     
     
-    utils.getPathParameter = function(url) {  
+    Utils.getPathParameter = function(url) {  
     
       url = (url || window.location.pathname);
       url = decodeURIComponent(url);
@@ -51,31 +50,20 @@ define(['../lib/underscore'], function (_) {
         return (":" + pathRegex[1]).replace(/:/g, "/"); 
       }
     };
-    
-    utils.getQueryParameter = function(parameterName) {
-      // Add "=" to the parameter name (i.e. parameterName=value)
-      var queryString = window.location.search.substring(1);
-      var parameterName = parameterName + "=";
-      if(queryString.length > 0) {
-        // Find the beginning of the string
-        var begin = queryString.indexOf (parameterName);
-        // If the parameter name is not found, skip it, otherwise return the value
-        if(begin != -1) {
-          // Add the length (integer) to the beginning
-          begin += parameterName.length;
-          // Multiple parameters are separated by the "&" sign
-          var end = queryString.indexOf ("&" , begin);
-          if(end == -1) {
-            end = queryString.length
-          }
-          // Return the string
-          return decodeURIComponent(queryString.substring(begin, end));
-        }
-      }
-      // Return "" if no parameter has been found
-      return "";
+
+    Utils.getLocationSearchString = function() {
+      return window.location.search;
     };
 
+    Utils.urlParams = undefined;
+
+    Utils.getQueryParameter = function(parameterName) {
+      if(Utils.urlParams === undefined) {
+        Utils.urlParams = $.parseQuery(this.getLocationSearchString());
+      }
+
+      return Utils.urlParams[parameterName] || "";
+    };
       
     // Conversion functions
     function _pa2obj(pArray) {
@@ -97,13 +85,13 @@ define(['../lib/underscore'], function (_) {
         return pArray;
     };
     
-    utils.propertiesArrayToObject = function(pArray) {
+    Utils.propertiesArrayToObject = function(pArray) {
         // Mantra 1: "Order matters!"
         // Mantra 2: "Arrays are Objects!"
         return (_.isArray(pArray) && _pa2obj(pArray)) || (_.isObject(pArray) && pArray) || undefined;  
     };
     
-    utils.objectToPropertiesArray = function(obj) {
+    Utils.objectToPropertiesArray = function(obj) {
         // Mantra 1: "Order matters!"
         // Mantra 2: "Arrays are Objects!"
         return (_.isArray(obj) && obj) || (_.isObject(obj) && _obj2pa(obj)) || undefined;
@@ -111,7 +99,7 @@ define(['../lib/underscore'], function (_) {
     
 
 
-    utils.getURLParameters = function(sURL) {
+    Utils.getURLParameters = function(sURL) {
       if(sURL.indexOf("?") > 0){
     
         var arrParams = sURL.split("?");
@@ -132,7 +120,7 @@ define(['../lib/underscore'], function (_) {
       return arrParam;
     };
     
-    utils.toFormatedString = function(value) {
+    Utils.toFormatedString = function(value) {
       value += '';
       var x = value.split('.');
       var x1 = x[0];
@@ -145,7 +133,7 @@ define(['../lib/underscore'], function (_) {
     };
     
     //quote csv values in a way compatible with CSVTokenizer
-    utils.doCsvQuoting = function(value, separator, alwaysEscape) {
+    Utils.doCsvQuoting = function(value, separator, alwaysEscape) {
       var QUOTE_CHAR = '"';
       if(separator == null) {
         return value;
@@ -165,13 +153,13 @@ define(['../lib/underscore'], function (_) {
     };
 
 
-    utils.ev =  function(o) {
+    Utils.ev =  function(o) {
       return typeof o == 'function'?o():o
     };
 
 
 
-    utils.post = function(url,obj) {
+    Utils.post = function(url,obj) {
     
       var form = '<form action="' + url + '" method="post">';
       for(var o in obj) {
@@ -188,7 +176,7 @@ define(['../lib/underscore'], function (_) {
       jQuery(form).appendTo('body').submit().remove();
     };
     
-    utils.clone = function clone(obj) {
+    Utils.clone = function clone(obj) {
     
       var c = obj instanceof Array ? [] : {};
     
@@ -217,13 +205,13 @@ define(['../lib/underscore'], function (_) {
       return c;
     };
 
-    utils.addArgs = function(url) {
+    Utils.addArgs = function(url) {
       if(url != undefined) {
         this.args = getURLParameters(url);
       }
     };
     
-    utils.getArgValue = function(key) {
+    Utils.getArgValue = function(key) {
       for (i=0;i<this.args.length;i++) {
         if(this.args[i][0] == key) {
           return this.args[i][1];
@@ -273,7 +261,7 @@ define(['../lib/underscore'], function (_) {
      * @return {boolean} indicates if the traversal was complete, <tt>true</tt>,
      *   or if explicitly stopped by the traversal function, <tt>false</tt>.
      */
-    utils.eachValuesArray = function(values, opts, f, x) {
+    Utils.eachValuesArray = function(values, opts, f, x) {
       if(typeof opts === 'function') {
         x = f;
         f = opts;
@@ -324,7 +312,7 @@ define(['../lib/underscore'], function (_) {
      *
      * @static
      */
-    utils.parseMultipleValues = function(value) {
+    Utils.parseMultipleValues = function(value) {
       if(value != null && value !== '') {
         // An array or array like?
         if(this.isArray(value)) { return value; }
@@ -343,7 +331,7 @@ define(['../lib/underscore'], function (_) {
      *
      * @static
      */
-    utils.normalizeValue = function(value) {
+    Utils.normalizeValue = function(value) {
       if(value === '' || value == null) { return null; }
       if(this.isArray(value) && !value.length) { return null; }
       return value;
@@ -356,7 +344,7 @@ define(['../lib/underscore'], function (_) {
      *
      * @static
      */
-    utils.isArray = function(value) {
+    Utils.isArray = function(value) {
       // An array or array like?
       return !!value &&
         ((value instanceof Array) || (typeof value === 'object' && value.join && value.length != null));
@@ -370,7 +358,7 @@ define(['../lib/underscore'], function (_) {
      *
      * @static
      */
-    utils.equalValues = function(a, b) {
+    Utils.equalValues = function(a, b) {
       // Identical or both null/undefined?
       a = this.normalizeValue(a);
       b = this.normalizeValue(b);
@@ -399,7 +387,7 @@ define(['../lib/underscore'], function (_) {
      *
      * @static
      */
-    utils.hsvToRgb = function(h, s, v) {
+    Utils.hsvToRgb = function(h, s, v) {
         v = v / 100; // 0 - 1
         s = s / 100; // idem
         
@@ -430,6 +418,6 @@ define(['../lib/underscore'], function (_) {
         return "rgb(" + rgb.join(",") + ")";
     };
 
-    return utils;
+    return Utils;
 
 });

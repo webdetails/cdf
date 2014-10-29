@@ -83,7 +83,8 @@ define(['./BaseComponent', '../lib/underscore', '../lib/jquery', '../Logger'],
         this.placeholder().attr("title",this._tooltip).tooltip({
           delay:0,
           track: true,
-          fade: 250
+          fade: 250,
+          content: this._tooltip
         });
       }
     },

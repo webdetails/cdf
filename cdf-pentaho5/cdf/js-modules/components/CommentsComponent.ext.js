@@ -32,7 +32,7 @@ define('cdf/components/CommentsComponent.ext', ['../dashboard/Dashboard.ext'], f
         endpoint = "add";
       }
 
-      return DashboardExt.getCdfBase() + "/comments/" + endpoint;
+      return DashboardExt.getCdfBase() + "/comments/" + endpoint + "?ts=" + new Date().getTime();
     }
   };
 

@@ -28,7 +28,8 @@ define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', '../lib/
         showURL: false,
         track: true,
         delay: 1000,
-        opacity: 0.5
+        opacity: 0.5,
+        content: title
       });
     }
   },
@@ -41,16 +42,19 @@ define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', '../lib/
       for (p in qd) {
         var key = p;
         var value = typeof qd[p] == 'function' ? qd[p]() : qd[p];
-        //alert("key: " + key + "; Value: " + value);
         parameters.push(key + "=" + encodeURIComponent(value));
       }
       url += parameters.join("&");
-      var _href = url.replace(/'/g, "&#39;");
+      /* CDF-271, updated to fancybox 2.1.5 */
+      //url = url.replace(/'/g, "&#39;");
       $.fancybox({
         type: "iframe",
-        href: _href,
+        href: url,
         width: $(window).width(),
-        height: $(window).height()
+        height: $(window).height(),
+        iframe: {
+          preload: false
+        }
       });
     }
   });

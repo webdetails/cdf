@@ -14,10 +14,10 @@
 require(['cdf/lib/jquery', 'cdf/lib/jquery.ui'], function($){
   $("#tryMe").click(function(){
     eval($('#samplecode').val());
-    $("#example").tabs("select",0);
+    $("#example").tabs("option", "active", 0);
   });
 
   $("#example").tabs();
   eval($('#samplecode').val());
-  $("#example").tabs("select",0);
+  $("#example").tabs("option", "active", 0);
 });

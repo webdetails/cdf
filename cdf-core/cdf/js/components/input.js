@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 var InputBaseComponent = UnmanagedComponent.extend({
   update: function(){
@@ -509,23 +509,33 @@ var TextInputComponent = BaseComponent.extend({
   update: function() {
     var myself = this;
     var name = myself.name;
-    var selectHTML = "<input type='text' id='" + name +
-      "' name='"  + name +
+    var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
       "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
       (myself.size ? ("' size='" + myself.size) : "") +
-      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") +
-      "'>";
+      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") + "'>";
 
     myself.placeholder().html(selectHTML);
 
-    $("#" + name)
-      .change(function() { myself.dashboard.processChange(name); })
-      .keyup(function(ev) { if (ev.keyCode == 13) { myself.dashboard.processChange(name); } });
+    var el = $("#" + name);
+
+    el
+      .change(function() {
+        if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+          myself.dashboard.processChange(name);
+        }
+      })
+      .keyup(function(ev) {
+        if(ev.keyCode == 13 &&
+          myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+
+          myself.dashboard.processChange(name);
+        }
+      });
 
     myself._doAutoFocus();
   },
   getValue : function() {
-    return $("#"+this.name).val();
+    return $("#" + this.name).val();
   }
 });
 
@@ -544,16 +554,18 @@ var TextareaInputComponent = BaseComponent.extend({
 
     myself.placeholder().html(selectHTML);
 
-    $("#" + name)
-      .change(function() { myself.dashboard.processChange(name); })
-      .keyup(function(ev){ if (ev.keyCode == 13) { myself.dashboard.processChange(name); }
+    var el = $("#" + name);
+
+    el.change(function() {
+      if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+        myself.dashboard.processChange(name);
+      }
     });
   },
   getValue : function() {
-    return $("#"+this.name).val();
+    return $("#" + this.name).val();
   }
 });
-
 
 
 // Start by setting a sane i18n default to datepicker
@@ -565,23 +577,36 @@ if($.datepicker) {
 var DateInputComponent = BaseComponent.extend({
   update: function(){
     var myself = this;
-    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
+    var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
 
     var startDate, endDate;
 
-    if(this.startDate == 'TODAY') startDate = new Date();
-    else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
+    if(myself.startDate == 'TODAY') startDate = new Date();
+    else if(myself.startDate) startDate = $.datepicker.parseDate( format, myself.startDate);
 
-    if(this.endDate == 'TODAY') endDate = new Date();
-    else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
+    if(myself.endDate == 'TODAY') endDate = new Date();
+    else if(myself.endDate) endDate = $.datepicker.parseDate( format, myself.endDate);
+
+    //onOpen and onClose events
+    myself.on('onOpen:dateInput', myself.onOpenEvent);
+    myself.on('onClose:dateInput', myself.onCloseEvent);
 
     //ToDo: stretch interval to catch defaultValue?..
-    //myself.dashboard.getParameterValue(this.parameter))
+    //myself.dashboard.getParameterValue(myself.parameter))
 
-    this.placeholder().html($("<input/>").attr("id", myself.name).attr("value", this.dashboard.getParameterValue(this.parameter)).css("width", "80px"));
+    myself.placeholder().html($("<input/>")
+      .attr("id", myself.name)
+      .attr("value", myself.dashboard.getParameterValue(myself.parameter))
+      .css("width", "80px"));
 
     $(function(){
       myself.placeholder("input").datepicker({
+        beforeShow: function() {
+          myself.triggerOnOpen();
+        },
+        onClose: function() {
+          myself.triggerOnClose();
+        },
         dateFormat: format,
         changeMonth: true,
         changeYear: true,
@@ -606,6 +631,17 @@ var DateInputComponent = BaseComponent.extend({
       myself._doAutoFocus();
     });
   },
+
+  triggerOnOpen: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", true);
+    this.trigger('onOpen:dateInput');
+  },
+
+  triggerOnClose: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", false);
+    this.trigger('onClose:dateInput');
+  },
+
   getValue : function() {
     if (typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
       return $("#" + this.name + "_hidden").val();
@@ -619,17 +655,23 @@ var DateInputComponent = BaseComponent.extend({
 var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
+    var inputSeparator = this.inputSeparator = this.inputSeparator || ">";
+
     if (this.singleInput == undefined || this.singleInput == true){
-      dr = $("<input/>").attr("id",this.name).attr("value",this.dashboard.getParameterValue(this.parameter[0]) + " > " + this.dashboard.getParameterValue(this.parameter[1]) ).css("width","170px");
+      dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue()
+          + " " + inputSeparator + " " + this.getEndParamValue() ).css("width","170px");
       this.placeholder().html(dr);
     } else {
-      dr = $("<input/>").attr("id",this.name).attr("value",this.dashboard.getParameterValue(this.parameter[0])).css("width","80px");
+      dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue() ).css("width","80px");
       this.placeholder().html(dr);
-      dr.after($("<input/>").attr("id",this.name + "2").attr("value",this.dashboard.getParameterValue(this.parameter[1])).css("width","80px"));
-      if(this.inputSeparator != undefined){
-        dr.after(this.inputSeparator);
-      }
+      dr.after($("<input/>").attr("id",this.name + "2").attr( "value", this.getEndParamValue() ).css("width","80px"));
+      dr.after(inputSeparator);
     }
+
+    //onOpen and onClose events
+    this.on('onOpen:dateRangeInput', this.onOpenEvent );
+    this.on('onClose:dateRangeInput', this.onCloseEvent );
+
     var offset = dr.offset();
     var myself = this;
     var earliestDate = this.earliestDate != undefined  ?  this.earliestDate : Date.parse('-1years');
@@ -647,17 +689,22 @@ var DateRangeInputComponent = BaseComponent.extend({
 
     var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
 
-    $(function(){
+    $(function() {
       myself.placeholder("input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: format,
+        rangeSplitter: inputSeparator,
         onOpen: function() {
+          myself.triggerOnOpen();
+
           changed = closed = false;
           myself.startValue = null;
           myself.endValue = null;
+
+          myself.addCancelButton();
         },
         onDateSelect: function(rangeA, rangeB) {
           changed = true;
@@ -665,11 +712,84 @@ var DateRangeInputComponent = BaseComponent.extend({
           triggerWhenDone();
         },
         onClose: function() {
+          myself.triggerOnClose();
+
           closed = true;
           triggerWhenDone();
         }
       });
       myself._doAutoFocus();
+
+      if( myself.canClickOutsidePopup ) {
+        $(document).off('click');
+      }
+    });
+  },
+
+  triggerOnOpen: function() {
+    this.placeholder("input").toggleClass("driComponentExpanded", true);
+    this.trigger('onOpen:dateRangeInput');
+  },
+
+  triggerOnClose: function() {
+    this.placeholder("input").toggleClass("driComponentExpanded", false);
+    this.trigger('onClose:dateRangeInput');
+  },
+
+  getStartParamValue: function() {
+    return this.dashboard.getParameterValue(this.parameter[0]);
+  },
+
+  getEndParamValue: function() {
+    return this.dashboard.getParameterValue(this.parameter[1]);
+  },
+
+  addCancelButton: function() {
+    var start = this.getStartParamValue();
+    var end = this.getEndParamValue();
+    var rpPickers = $(".ui-daterangepickercontain .ranges");
+
+    var myself = this;
+    var cancelBtn = jQuery('<button class="btnCancel ui-state-default ui-corner-all">Cancel</button>')
+      .click(function(){
+        var input = myself.placeholder("input");
+        var rangePicker = $(".ui-daterangepickercontain .ui-daterangepicker");
+        var rangeStart = $(".ui-daterangepickercontain .range-start");
+        var rangeEnd = $(".ui-daterangepickercontain .range-end");
+
+        //reset value on input
+        if( myself.singleInput == undefined || myself.singleInput == true ) {
+          input.val( start + " " + myself.inputSeparator + " " + end );
+
+        } else {
+          input.eq(0).val( start );
+          input.eq(1).val( end )
+
+        }
+
+        //set date to initial values
+        rangeStart.data("saveDate", new Date (start) ).restoreDateFromData();
+        rangeEnd.data("saveDate", new Date (end) ).restoreDateFromData();
+
+        //close dateRangeInput Component
+        myself.triggerOnClose();
+        rangePicker.data('state', 'closed');
+        rangePicker.fadeOut(300);
+
+      }).hover(
+      function(){
+        jQuery(this).addClass('ui-state-hover');
+      },
+      function(){
+        jQuery(this).removeClass('ui-state-hover');
+      }
+    ).appendTo(rpPickers);
+
+    //button animation when selecting other list element
+    var ul = $('.ui-daterangepickercontain ul');
+    ul.find("li").click( function() {
+      cancelBtn.hide();
+      setTimeout( function() {cancelBtn.fadeIn();}, 400);
     });
   },
 

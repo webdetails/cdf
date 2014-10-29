@@ -163,8 +163,8 @@ var JFreeChartComponent = BaseComponent.extend({
         });
         bDetails.css("left",bDetails.position().left + $(chart[1]).width() - bDetails.width() - 5);
         bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height() );
-        //Append map after image
-        $(chart[1]).append(chart[0]);
+        // Use UNIQUE ids (chart[0] vs chart[1])
+        chart[0].id = chart[0].id + "Map";
 
       }
       for(o in captionOptions)
@@ -237,37 +237,40 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
 });
 
 var TrafficComponent = UnmanagedComponent.extend({
-  trafficLight: function(result, xaction){
+  trafficLight: function(result, xaction) {
     var cd = this.trafficDefinition;
     var value; 
-    if (xaction) {
+    if(xaction) {
       value = $(result).find("VALUE").text();
     } else {
       value = result[0][0];
     }
     var greenClass = "img trafficGreen", yellowClass = "img trafficYellow", redClass = "img trafficRed";
-    var i = $( "<div>" ).attr( "class",value<=cd.intervals[0]? redClass : ( value>=cd.intervals[1] ? greenClass : yellowClass ) );
-    var $htmlObject = $('#'+this.htmlObject);
+    var i = $("<div>").attr( "class", (value <= cd.intervals[0] ? redClass : (value >= cd.intervals[1] ? greenClass : yellowClass)));
+    var $htmlObject = $('#' + this.htmlObject);
     $htmlObject.html(i);
-    if(cd.showValue != undefined && cd.showValue == true){
-      var tooltip = "Value: " + value + " <br /><div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt;  <div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; <div align='middle' class='" + greenClass + "'/> <br/>" + (tooltip != undefined?tooltip:"");
-     var tooltipOpts = {};
-     if ($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
-      tooltipOpts = {
-        delay: 0,
-        html: true,
-        title: tooltip,
-        placement: "auto top"
+    if(cd.showValue != undefined && cd.showValue == true) {
+      var tooltip = "Value: " + value + " <br />" +
+        "<div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt; " +
+        "<div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; " +
+        "<div align='middle' class='" + greenClass + "'/>" +
+        (tooltip != undefined ? "<br/>" + tooltip : "");
+      if ($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
+        $htmlObject.tooltip({
+          delay: 0,
+          html: true,
+          title: tooltip,
+          placement: "auto top"
+        });
+      } else {
+        $htmlObject.tooltip({
+          delay: 0,
+          track: true,
+          fade: 250,
+          content: tooltip
+        });
+        $htmlObject.attr("title", tooltip);
       }
-     } else {
-      tooltipOpts = {
-        delay:0,
-        track: true,
-        fade: 250
-      }
-      $htmlObject.attr("title",tooltip + ( this._tooltip != undefined? this._tooltip:""));
-     }
-      $htmlObject.tooltip(tooltipOpts);
     }
   },
   doQuery : function() {
@@ -329,19 +332,21 @@ var TimePlotComponent = BaseComponent.extend({
 
   update : function() {
 
-    var cd = this.chartDefinition;
+    var myself = this;
 
-    this.InitialListeners = this.InitialListeners == undefined ? this.listeners : this.InitialListeners;
-    this.InitialDateRangeInput = this.InitialDateRangeInput == undefined ? cd.dateRangeInput : this.InitialDateRangeInput;
+    var cd = myself.chartDefinition;
 
-    if(cd.updateOnDateRangeInputChange != true && this.timeplot!= undefined && cd.dateRangeInput != undefined){
+    myself.InitialListeners = myself.InitialListeners == undefined ? myself.listeners : myself.InitialListeners;
+    myself.InitialDateRangeInput = myself.InitialDateRangeInput == undefined ? cd.dateRangeInput : myself.InitialDateRangeInput;
 
-      if(this.updateTimeplot != false && this.timeplot._plots.length > 0 ){
+    if(cd.updateOnDateRangeInputChange != true && myself.timeplot!= undefined && cd.dateRangeInput != undefined){
 
-        var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
+      if(myself.updateTimeplot != false && myself.timeplot._plots.length > 0 ){
+
+        var lastEventPlot = myself.timeplot._plots[myself.timeplot._plots.length -1];
         if(lastEventPlot._id == "eventPlot")
-          lastEventPlot._addSelectEvent(this.dashboard.getParameterValue(this.startDateParameter)+ " 00:00:00",this.dashboard.getParameterValue(this.endDateParameter)+ " 23:59:59",
-            lastEventPlot._eventSource,"iso8601",this.geometry._earliestDate,this.geometry._latestDate);
+          lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(myself.startDateParameter)+ " 00:00:00",myself.dashboard.getParameterValue(myself.endDateParameter)+ " 23:59:59",
+            lastEventPlot._eventSource,"iso8601",myself.geometry._earliestDate,myself.geometry._latestDate);
       }
 
       return;
@@ -349,16 +354,16 @@ var TimePlotComponent = BaseComponent.extend({
     }
 
 
-    if(cd.dateRangeInput != undefined && this.timeplot == undefined){
-      cd.dateRangeInput = this.dashboard.getComponent(cd.dateRangeInput);
-      this.startDateParameter = cd.dateRangeInput.parameter[0];
-      this.endDateParameter = cd.dateRangeInput.parameter[1];
-      this.listeners = this.listeners == undefined ? [] : this.listeners;
-      this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter);
+    if(cd.dateRangeInput != undefined && myself.timeplot == undefined){
+      cd.dateRangeInput = myself.dashboard.getComponent(cd.dateRangeInput);
+      myself.startDateParameter = cd.dateRangeInput.parameter[0];
+      myself.endDateParameter = cd.dateRangeInput.parameter[1];
+      myself.listeners = myself.listeners == undefined ? [] : myself.listeners;
+      myself.listeners = myself.listeners.concat(myself.startDateParameter).concat(myself.endDateParameter);
     }
 
-    if (typeof Timeplot != "undefined" && this.dashboard.timePlotColors == undefined ){
-      this.dashboard.timePlotColors = [new Timeplot.Color('#820000'),
+    if (typeof Timeplot != "undefined" && myself.dashboard.timePlotColors == undefined ){
+      myself.dashboard.timePlotColors = [new Timeplot.Color('#820000'),
       new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
       new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
       new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
@@ -388,7 +393,6 @@ var TimePlotComponent = BaseComponent.extend({
     var eventSource2 = new Timeplot.DefaultEventSource();
     var timePlot;
 
-    var obj = this;
     if (cd == undefined){
       Dashboards.log("Fatal - No chart definition passed","error");
       return;
@@ -407,23 +411,23 @@ var TimePlotComponent = BaseComponent.extend({
     }
     // Write the title
     var title = $('<div></div>');
-    if(cd.title != undefined){
+    if(cd.title != undefined) {
       title.append('<span style="text-transform: lowercase;">' + cd.title + '&nbsp; &nbsp; &nbsp;</span>');
     }
 
     var plotInfo = [];
-    for(var i = 0,j=0; i<cols.length; i++,j++){
+    for(var i = 0,j=0; i<cols.length; i++,j++) {
 
       j = j > 7 ? 0 : j;
-      title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + this.dashboard.timePlotColors[j].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+      title.append('<span id="' + myself.name + 'Plot' + i + 'Header" style="color:' + myself.dashboard.timePlotColors[j].toHexString() + '">' + cols[i] + ' &nbsp;&nbsp;</span>');
 
       var plotInfoOpts = {
-        id: obj.name + "Plot" + i,
+        id: myself.name + "Plot" + i,
         name: cols[i],
         dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
         valueGeometry: timePlotValueGeometry,
         timeGeometry: timePlotTimeGeometry,
-        lineColor: this.dashboard.timePlotColors[j],
+        lineColor: myself.dashboard.timePlotColors[j],
         showValues: cd.showValues,
         hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
         showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
@@ -434,11 +438,11 @@ var TimePlotComponent = BaseComponent.extend({
           return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";
         }
       };
-      if ( cd.dots == true){
-        plotInfoOpts.dotColor = this.dashboard.timePlotColors[j];
+      if(cd.dots == true) {
+        plotInfoOpts.dotColor = myself.dashboard.timePlotColors[j];
       }
-      if ( cd.fill == true){
-        plotInfoOpts.fillColor = this.dashboard.timePlotColors[j].transparency(0.5);
+      if(cd.fill == true) {
+        plotInfoOpts.fillColor = myself.dashboard.timePlotColors[j].transparency(0.5);
       }
       plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
@@ -448,15 +452,15 @@ var TimePlotComponent = BaseComponent.extend({
     // support for events
     var eventSource2 = undefined;
     var eventSourcePlot = undefined;
-    if(cd.dateRangeInput != undefined || (cd.events && cd.events.show == true)){
-      this.rangeColor = "00FF00";
+    if(cd.dateRangeInput != undefined || (cd.events && cd.events.show == true)) {
+      myself.rangeColor = "00FF00";
       eventSource2 = new Timeplot.DefaultEventSource();
       eventSourcePlot = Timeplot.createPlotInfo({
         id: cd.dateRangeInput != undefined ? "eventPlot" : "events",
         eventSource: eventSource2,
         timeGeometry: timePlotTimeGeometry,
         lineColor: "#FF0000",
-        rangeColor: this.rangeColor,
+        rangeColor: myself.rangeColor,
         getSelectedRegion: function(start,end){
           myself.updateDateRangeInput(start,end);
         }
@@ -464,44 +468,45 @@ var TimePlotComponent = BaseComponent.extend({
       plotInfo.push(eventSourcePlot);
     }
 
-    $("#"+this.htmlObject).html(title);
-    $("#"+this.htmlObject).append("<div class='timeplot'></div>");
+    $("#" + myself.htmlObject).html(title);
+    $("#" + myself.htmlObject).append("<div class='timeplot'></div>");
 
-    if(cd.height > 0){
-      $("#" + this.htmlObject + " > div.timeplot").css("height",cd.height);
+    if(cd.height > 0) {
+      $("#" + myself.htmlObject + " > div.timeplot").css("height",cd.height);
     }
-    if(cd.width > 0){
-      $("#" + this.htmlObject + " > div.timeplot").css("width",cd.width);
+    if(cd.width > 0) {
+      $("#" + myself.htmlObject + " > div.timeplot").css("width",cd.width);
     }
 
-    timeplot = Timeplot.create($("#"+this.htmlObject+" > div.timeplot")[0], plotInfo);
-    obj.timeplot = timeplot;
-    obj.geometry = timePlotTimeGeometry;
+    timeplot = Timeplot.create($("#" + myself.htmlObject + " > div.timeplot")[0], plotInfo);
+    myself.timeplot = timeplot;
+    myself.geometry = timePlotTimeGeometry;
 
     var allData = undefined;
     var timePlotEventSourceUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction", null, cd);
-    var myself = this;
-    if(cd.events && cd.events.show == true){
+    if(cd.events && cd.events.show == true) {
       var eventUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction", null, cd.events);
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
           data.events = myself.filterEvents(data.events, range);
-          if(cd.dateRangeInput){
-            var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
-            if(lastEventPlot._id == "eventPlot")
-              lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(obj.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(obj.endDateParameter)+ " 23:59:59",
+          if(cd.dateRangeInput) {
+            var lastEventPlot =  timeplot._plots[timeplot._plots.length - 1];
+            if(lastEventPlot._id == "eventPlot") {
+              lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
                 eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+            }
           }
         })
       });
     }
     else
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
-        if(cd.dateRangeInput){
-          var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
-          if(lastEventPlot._id == "eventPlot")
-            lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(obj.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(obj.endDateParameter)+ " 23:59:59",
+        if(cd.dateRangeInput) {
+          var lastEventPlot =  timeplot._plots[timeplot._plots.length - 1];
+          if(lastEventPlot._id == "eventPlot") {
+            lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
               eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+          }
         }
       });
   },

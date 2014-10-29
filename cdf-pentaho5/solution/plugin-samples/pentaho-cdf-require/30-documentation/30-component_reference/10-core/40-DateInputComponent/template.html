@@ -59,6 +59,12 @@
       <dt>endDate</dt>
       <dd><i>String - </i>Component will only allow selection of dates before this value. Value is a string containing a date compliant to this component's <i>dateFormat</i>. Special value 'TODAY' will translate to current date whenever the component is updated. Empty by default (no restriction)</dd>
 
+      <dt>onOpenEvent</dt>
+      <dd><i>Function - </i> Function to be called when the 'onOpen' event is triggered</dd>
+
+      <dt>onCloseEvent</dt>
+      <dd><i>Function - </i> Function to be called when the 'onClose' event is triggered</dd>
+
       <dt>executeAtStart</dt>
       <dd>True to execute the component at start, false otherwise</dd>
 
@@ -88,7 +94,7 @@
         <li><a href="#code"><span>Code</span></a></li>
       </ul>
       <div id="sample">
-        <div id="sampleObject"></div>
+        <div style="font-size: 9pt" id="sampleObject"></div>
         <br/>
       </div>
 
@@ -98,7 +104,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'],
   function(Dashboard, DateInputComponent) {
 
     var dashboard = new Dashboard();
-    dashboard.addParameter("input", "");
+    dashboard.addParameter("input", "2009-01-01");
 
     dashboard.addComponent(new DateInputComponent(dashboard, {
       name: "myInput",
@@ -110,6 +116,12 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'],
       startDate: "2006-05-31",
       endDate: "TODAY",
       executeAtStart: true,
+      onOpenEvent: function() {
+        this.placeholder("input").css('border', '2px solid red'); 
+      },
+      onCloseEvent: function() {
+        this.placeholder("input").css('border', '1px solid black'); 
+      },
       tooltip: "Click me to select a date",
       postChange: function() {
         alert("You chose: " + this.dashboard.getParameterValue(this.parameter));

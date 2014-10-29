@@ -140,9 +140,7 @@ define(['./Dashboard'], function (Dashboard) {
         var msg = "Available conditions: <br/> <ul>" ;
         $.each(buttonsHash, function(key,value){msg+="<li>" + OlapUtils.buttonsDescription[key] + "</li>"});
         msg += "</ul>";
-        $.prompt(msg
-            ,{buttons: buttonsHash, callback: OlapUtils.mdxQueryGroupActionCallback }
-        );
+        $.prompt(msg, {buttons: buttonsHash, submit: OlapUtils.mdxQueryGroupActionCallback});
     
     }
 
@@ -728,7 +726,7 @@ define(['./Dashboard'], function (Dashboard) {
         Dashboard.decrementRunningCalls();
     }
     
-    OlapUtils.mdxQueryGroupActionCallback = function(value,m){
+    OlapUtils.mdxQueryGroupActionCallback = function(e,value,m){
     
         if (value == "cancel")
             return;  // do nothing.

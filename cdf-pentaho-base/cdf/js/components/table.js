@@ -298,7 +298,7 @@ var TableComponent = UnmanagedComponent.extend({
     // it'll be called before we have an actual table...
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
-    this.queryState = this.dashboard.getQuery(croppedCd);
+    this.queryState = Dashboards.getQuery(croppedCd);
     this.query = this.queryState; // for analogy with ccc component's name
     // make sure to clean sort options
     var sortBy = this.chartDefinition.sortBy || [],
@@ -333,7 +333,7 @@ var TableComponent = UnmanagedComponent.extend({
     query.setSortBy(sort.join(","));
     query.setPageSize(parseInt(p("length")));
     query.setPageStartingAt(p("start"));
-    query.setSearchPattern(p("search") ? p("search") : "");
+    query.setSearchPattern(p("search") ? p("search").value : "");
     query.fetchData(function(d) {
       if (myself.postFetch){
         var mod = myself.postFetch(d,dataTable);
@@ -518,7 +518,8 @@ var TableComponent = UnmanagedComponent.extend({
 
     // We'll create an Array to keep track of the open expandable rows.
     this.dataTable.anOpen = [];
-
+    this.dataTable.expandParentObj = undefined;
+    this.dataTable.expandClone = undefined;
 
     myself.ph.find ('table').bind('click',function(e) {
       if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
@@ -572,34 +573,40 @@ var TableComponent = UnmanagedComponent.extend({
       return;
     } else {
       var row = obj.get(0),
-          value = event.series,
-          htmlContent = $("#" + detailContainerObj).html(),
           anOpen = myself.dataTable.anOpen,
           i = $.inArray( row, anOpen );
       
       if( obj.hasClass(activeclass) ){
-        obj.removeClass(activeclass);
-        myself.dataTable.fnClose( row );
-        anOpen.splice(i,1);
+        myself.detachFromRow(row, i, activeclass );;
+
+        $(myself.expandParameters).each(function f(i, elt) {
+          Dashboards.setParameter(elt[1], "");
+        });
 
       } else {
         // Closes all open expandable rows .
         for ( var j=0; j < anOpen.length; j++ ) {
-          $(anOpen[j]).removeClass(activeclass);
-          myself.dataTable.fnClose( anOpen[j] );
-          anOpen.splice(j ,1);
+          myself.detachFromRow(anOpen[j], j, activeclass );
         }
         obj.addClass(activeclass);
 
-        anOpen.push( row );
-        // Since the switch to async, we need to open it first
-        myself.dataTable.fnOpen( row, htmlContent, activeclass );
+        myself.attachToRow( row, activeclass );
 
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
+        var firstChange = null;
+
         $(myself.expandParameters).each(function f(i, elt) {
-          myself.dashboard.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+          //skips the first expandParameter that was updated and calls Dashboards.setParameter for the all others
+          if( !firstChange && Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)] ) {
+            firstChange = elt;
+          } else {
+            Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+          }
         });
+        if( firstChange !== null ) {
+          Dashboards.fireChange( firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)] );
+        }
 
       };
     };
@@ -610,7 +617,50 @@ var TableComponent = UnmanagedComponent.extend({
         return;
       }
     );
+  },
+
+  attachToRow: function( row, activeClass) {
+    this.dataTable.anOpen.push( row );
+    this.dataTable.fnOpen( row, "", activeClass );
+
+    var myself = this;
+    var containerId = "#" + this.expandContainerObject;
+    var expandObj = $( containerId );
+    var expandPlace = $(row).next().children().empty();
+
+    this.dataTable.expandParentObj = expandObj.parent();
+    this.dataTable.expandClone = expandObj.clone(true);
+
+    expandObj.appendTo( expandPlace ).show();
+
+    //register click event so that every row is properly closed when table page is changed
+    $(".dataTables_wrapper div.dataTables_paginate :not(span, .ui-state-disabled, .disabled)").click( function() {
+      var anOpen = myself.dataTable.anOpen;
+      for ( var j=0; j < anOpen.length; j++ ) {
+        myself.detachFromRow(anOpen[j], j, activeClass, true );
+      }
+    });
+  },
+
+  detachFromRow: function( row, index, activeClass, pageChange ) {
+    pageChange = pageChange || false;
+    var expandedSelector = "td." + activeClass + " > *";
+    var dataToDetach = pageChange ? this.dataTable.expandClone
+        : $(row).next().find(expandedSelector).hide();
+
+    //place expanded object in is previous place, so events can be triggered properly
+    detachTo = this.dataTable.expandParentObj || $('body div.container');
+    dataToDetach.appendTo(detachTo);
+
+    //close expanded table row
+    $(row).removeClass(activeClass);
+    this.dataTable.fnClose( row );
+    this.dataTable.anOpen.splice(index,1);
+
+    //event just needs to trigger when row is expanded
+    $(".dataTables_wrapper div.dataTables_paginate").off('click');
   }
+
 },
 
 {

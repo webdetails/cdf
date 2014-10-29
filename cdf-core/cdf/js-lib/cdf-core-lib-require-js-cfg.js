@@ -36,15 +36,22 @@
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
 
-  //jquery 1.7.1
+  //jquery 1.9.1
   requirePaths['jquery'] = prefix + "/jquery/jquery";
-  requirePaths['cdf/lib/jquery'] = prefix + "/jquery/cdf-jquery";
+  requirePaths['cdf/lib/jquery.clean'] = prefix + "/jquery/cdf-jquery";
 
-  //jquery.ui 1.8.14
+  //jquery migration tool 1.2.1 (this is needed while the migration to jquery 1.9.1 isn't completely stable)
+  requirePaths['cdf/lib/jquery'] = prefix + "/jquery-migrate-1.2.1";
+  requireShims['cdf/lib/jquery'] = {
+    exports: '$',
+    deps: ['cdf/lib/jquery.clean']
+  };
+
+  //jquery.ui 1.10.4
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jquery/jquery.ui";
   requireShims['cdf/lib/jquery.ui'] = [
     'cdf/lib/jquery',
-    'css!cdf/lib/theme/cupertino/jquery-ui-1.8.custom'
+    'css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom'
   ];
 
   //jquery.blockUI 2.66.0
@@ -54,15 +61,8 @@
     'cdf/lib/jquery.ui'
   ];
 
-  //jquery.tooltip 1.3
-  requirePaths['cdf/lib/jquery.tooltip'] = prefix + "/tooltip/jquery.tooltip";
-  requireShims['cdf/lib/jquery.tooltip'] = [
-    'cdf/lib/jquery',
-    'css!cdf/lib/jquery.tooltip'
-  ];
-
-  //jquery-impromptu 3.1
-  requirePaths['cdf/lib/jquery.impromptu'] = prefix + "/impromptu/jquery-impromptu.3.1";
+  //jquery-impromptu 5.2.4
+  requirePaths['cdf/lib/jquery.impromptu'] = prefix + "/impromptu/jquery-impromptu";
   requireShims['cdf/lib/jquery.impromptu'] = {
     deps: [
       'cdf/lib/jquery',
@@ -70,12 +70,12 @@
     ]
   };
 
-  //jquery.fancybox 1.3.4 11/11/2010
-  requirePaths['cdf/lib/jquery.fancybox'] = prefix + "/fancybox/jquery.fancybox-1.3.4";
+  //jquery.fancybox 2.1.5
+  requirePaths['cdf/lib/jquery.fancybox'] = prefix + "/fancybox/jquery.fancybox";
   requireShims['cdf/lib/jquery.fancybox'] = {
     deps: [
       'cdf/lib/jquery',
-      'css!cdf/lib/fancybox/jquery.fancybox-1.3.4'
+      'css!cdf/lib/fancybox/jquery.fancybox'
     ]
   };
 
@@ -103,7 +103,7 @@
   requirePaths['cdf/lib/Base'] = prefix + "/base/Base";
   requireShims['cdf/lib/Base'] = {exports: 'Base'};
 
-  //datatables 1.10.1-dev
+  //datatables 1.10.1
   // http://datatables.net/forums/discussion/19412/datatables-and-require-js-conflict
   requirePaths['datatables'] = prefix + "/dataTables/js/jquery.dataTables";
   requirePaths['cdf/lib/datatables'] = prefix + '/dataTables/cdf-datatables';
@@ -138,7 +138,7 @@
     'css!cdf/lib/captify'
   ];
 
-  // bgiframe 2.1.1
+  // bgiframe 3.0.1
   requirePaths['cdf/lib/jquery.bgiframe'] = prefix + "/bgiframe/jquery.bgiframe";
   requireShims['cdf/lib/jquery.bgiframe'] = [
     'cdf/lib/jquery'
@@ -174,14 +174,63 @@
     'cdf/lib/OpenLayers'
   ];
 
+  //jQuery uriQueryParser 2013
+  requirePaths['cdf/lib/queryParser'] = prefix + "/uriQueryParser/jquery-queryParser";
+  requireShims['cdf/lib/queryParser'] = [
+    'cdf/lib/jquery'
+  ];
+
+  //jQuery sparkline 2.1.2
+  /*
+  requirePaths['cdf/lib/jquery.sparkline'] = prefix + "/sparkline/jquery.sparkline";
+  requireShims['cdf/lib/jquery.sparkline'] = [
+    'cdf/lib/jquery'
+  ];*/
+
+  //jQuery chosen 1.1.0
+  /*
+  requirePaths['cdf/lib/jquery.chosen'] = prefix + "/chosen/jquery.chosen";
+  requireShims['cdf/lib/jquery.chosen'] = [
+    'cdf/lib/jquery',
+    'css!cdf/lib/chosen/chosen'
+  ];*/
+
+  //jQuery corner 2.13
+  /*
+  requirePaths['cdf/lib/jquery.corner'] = prefix + "/chosen/jquery.corner";
+  requireShims['cdf/lib/jquery.corner'] = [
+    'cdf/lib/jquery'
+  ];*/
+
+  //jQuery eventstack
+  /*
+  requirePaths['cdf/lib/jquery.eventstack'] = prefix + "/eventstack/jquery.eventstack";
+  requireShims['cdf/lib/jquery.eventstack'] = [
+    'cdf/lib/jquery'
+  ];*/
+
   //shims
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 
   /*
-   * Dashboard types shims
+   * Dashboard types shims (Bootstrap)
    */
+
+  //HTML5 Shiv 3.7.2 (IE8)
+  requirePaths['cdf/lib/html5shiv'] = prefix + '/html5shiv/html5shiv';
+
+  //Respond.js v1.4.0 (IE8, load after bootstrap.css)
+  requirePaths['cdf/lib/respond'] = prefix + '/respond/respond';
+  requireShims['cdf/lib/respond'] = [
+    'cdf/lib/bootstrap'
+  ];
+
   //bootstrap 3.1.1
-  requirePaths['cdf/lib/bootstrap/bootstrap'] = prefix + '/bootstrap/js/bootstrap';
-  requireShims['cdf/lib/bootstrap/bootstrap'] = ['cdf/Dashboard'];
+  requirePaths['cdf/lib/bootstrap'] = prefix + '/Bootstrap/js/bootstrap';
+  requireShims['cdf/lib/bootstrap'] = [
+    'css!cdf/lib/Bootstrap/css/bootstrap.css'
+  ];
+
+  // Font Awesome 4.0.3 (CSS only)
 
 })();

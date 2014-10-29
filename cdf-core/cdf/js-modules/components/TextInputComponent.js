@@ -18,8 +18,8 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       var myself = this;
       var name = myself.name;
 
-      var selectHTML = "<input type='text' id='" + name +
-        "' name='"  + name + "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
+      var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
+        "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
         (myself.size ? ("' size='" + myself.size) : "") +
         (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") + "'>";
 
@@ -29,14 +29,14 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
       el
         .change(function() {
-          if(myself.dashboard.getParameterValue(myself.parameter) === el.val()) {  return; }
-          myself.dashboard.processChange(name);
+          if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+            myself.dashboard.processChange(name);
+          }
         })
         .keyup(function(ev) {
-          if(ev.keyCode == 13) {
-            if(myself.dashboard.getParameterValue(myself.parameter) === el.val()) {
-              return;
-            }
+          if(ev.keyCode == 13 &&
+            myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+
             myself.dashboard.processChange(name);
           }
         });

@@ -90,7 +90,8 @@
     function addText(opt,input, text, name){
       if(text.length > 0)
       {
-        if(opt.addTextElements){
+        /* CDF-100 Avoid inserting duplicate values */
+        if(opt.addTextElements && ($(".bit-box:contains('"+text+"')").length==0)){
           var li;
           if(opt.multiSelection != true){
             count = 0;
@@ -259,7 +260,10 @@
      
      setInitialValue: function(htmlObject, initialValue, name){ 
       var selectedPH = $('#' + htmlObject + ' .autobox-input');
-      var input = $('input#' + inputId);
+
+      // CDF-271, jQuery 1.9.1 has a stricter selector syntax http://api.jquery.com/category/selectors/
+      var input = inputId ? $('input#' + inputId) : $('input');
+      
       if($.isArray(initialValue)){
         for(var i =0; i <initialValue.length;i++){
           selectedPH.append(addBox(this, input, initialValue[i], name));
@@ -319,28 +323,29 @@
 		
 		emptyValues: function(){
 			return (this.input.parent().parent().find('li').length == 1);
-		},
-		
-		removeValue: function(value){
-			if(opt.addTextElements){
-			    var vals=this.input.parent().parent().find('li');
-				var values = new Array();
-				for(var i=0; i<vals.length; ++i){
-					var v = vals[i].innerHTML.match(/^[^<]+/);	
-					if(v!= null && value == v ){
-						$(vals[i]).remove();
-						if(this.multiSelection && this.applyButton && this.emptyValues())
-							this.hideApplyButton();
-						return;
-					}
-				}
-			}
-			else if(this.selectedValues[value]){
-				delete this.selectedValues[value];
-			}
-		},
-		
-	 getSelectedValues: function(){
+    },
+
+    removeValue: function(value){
+      if(opt.addTextElements){
+        var vals=this.input.parent().find('li');
+        var values = new Array();
+        for(var i=0; i<vals.length; ++i){
+          /* CDF-100 process &amp; and other encodings in string */
+          var v = vals[i].firstChild.nodeValue.match(/^[^<]+/);  
+          if(v!= null && value == v ){
+            $(vals[i]).remove();
+            if(this.multiSelection && this.applyButton && this.emptyValues()){
+              this.hideApplyButton();
+            }
+            return;
+          }
+        }
+      }else if(this.selectedValues[value]){
+        delete this.selectedValues[value];
+      }
+    },
+
+    getSelectedValues: function(){
 			var values = new Array();
 			if(opt.addTextElements){
 			  var vals= this.input.parent().parent().find('li');
@@ -519,9 +524,14 @@
           list = [];
         }
         list=$(list)
-          .filter(function(){ 
-            valueMatched = this.text.replace(/^\s*|\s*$/g,'') == self.val().replace(/^\s*|\s*$/g,'') ? true : valueMatched;
-            return  opt.match.call(this, self.val()); 
+          .filter(function(){
+            /* CDF-100 fixed bug in IE8, unresponsive behaviour when this.text is undefined */
+            if (this.text && ($(".bit-box:contains('"+this.text+"')").length==0)){
+              valueMatched = this.text.replace(/^\s*|\s*$/g,'') == self.val().replace(/^\s*|\s*$/g,'') ? true : valueMatched;
+              return  opt.match.call(this, self.val());
+            }else{
+              return false;
+            }
           })
           .map(function(){
             var node=$(opt.template(this))[0];

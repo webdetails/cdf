@@ -429,31 +429,6 @@ Dashboard.implement({
       }
     };
 
-    /**
-     *
-     * Given a list of component priority tiers, returns the highest priority
-     * non-empty tier of components awaiting update, or null if no such tier exists.
-     *
-     * @param tiers
-     * @returns {*}
-     * @private
-     */
-    var _getFirstTier = function(tiers) {
-      var keys = _.keys(tiers).sort(function(a,b){
-        return parseInt(a,10) - parseInt(b,10);
-      });
-
-      var tier;
-      for(var i = 0;i < keys.length;i++) {
-        tier = tiers[keys[i]];
-        if(tier.length > 0) {
-          return { priority: keys[i], components: tier.slice() };
-        }
-      }
-      return null;
-    };
-
-
     if(!this.updating) {
       this.updating = {
         tiers: {},
@@ -476,9 +451,19 @@ Dashboard.implement({
     _mergePriorityLists(this.updating.tiers,components);
 
     var updating = this.updating.current;
-    if(updating === null || updating.components.length == 0) {
-      var toUpdate = _getFirstTier(this.updating.tiers);
+    var othersAwaitExecution = false;
+    if(updating === null || updating.components.length == 0
+      || ( othersAwaitExecution = this.othersAwaitExecution( _.clone( this.updating.tiers ) , this.updating.current ) ) ) {
+
+      var toUpdate = this.getFirstTier(this.updating.tiers);
       if(!toUpdate) return;
+
+      if( othersAwaitExecution ){ 
+        var tiers = this.updating.tiers;
+        tiers[updating.priority] = _.difference( tiers[updating.priority], updating.components );
+        toUpdate.components = _.union( tiers[updating.priority] , this.getFirstTier( tiers ).components );
+      }
+
       this.updating.current = toUpdate;
 
       var postExec = function(component,isExecuting) {
@@ -523,8 +508,6 @@ Dashboard.implement({
         this.updateComponent(component);
       }
     }
-
-
 
   },
 
@@ -579,6 +562,30 @@ Dashboard.implement({
     } else {
       this.updateLifecycle(object);
     }
+  },
+
+  /**
+   *
+   * Given a list of component priority tiers, returns the highest priority
+   * non-empty tier of components awaiting update, or null if no such tier exists.
+   *
+   * @param tiers
+   * @returns {*}
+   * @private
+   */
+  getFirstTier: function(tiers) {
+    var keys = _.keys(tiers).sort(function(a,b){
+      return parseInt(a,10) - parseInt(b,10);
+    });
+
+    var tier;
+    for(var i = 0;i < keys.length;i++) {
+      tier = tiers[keys[i]];
+      if(tier.length > 0) {
+        return { priority: keys[i], components: tier.slice() };
+      }
+    }
+    return null;
   },
 
   /**
@@ -660,5 +667,37 @@ Dashboard.implement({
       }
     }
     myself.updateAll(toUpdate);
+  },
+
+  /*
+   * Checks if there are any other components of equal or higher 
+   * priority than the one that is currently being executed
+   */
+  othersAwaitExecution: function( tiers , current ) {
+
+    if( !tiers || !current || !current.components ) {
+      return false;
+    }
+
+    // first thing is to discard 'current.components' from the calculations, as we are only 
+    // interested in checking if there are *other components* that await execution
+    tiers[current.priority] = _.difference( tiers[current.priority], current.components );
+
+    var componentsToUpdate = this.getFirstTier( tiers );
+    
+    if( !componentsToUpdate || !componentsToUpdate.components || componentsToUpdate.components.length == 0  ){ 
+
+      return false; // no other components await execution
+
+    } else if( parseInt( componentsToUpdate.priority ) > parseInt( current.priority ) ) {
+
+      // recall: 1 - utmost priority , 999999 - lowest priority
+      // those who await execution are lower in priority that the current component
+      return false;
+    } 
+
+    // compToUpdate has components with equal or higher priority than the component 
+    // that is currently being executed, that await execution themselves
+    return true;
   }
 });
