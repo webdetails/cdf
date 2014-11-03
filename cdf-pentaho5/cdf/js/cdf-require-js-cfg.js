@@ -59,17 +59,34 @@ requireCfg['shim']['cdf/Dashboards'] = [
     'cdf/Dashboards.RefreshEngine',
     'cdf/Dashboards.Utils'
 ];
-requireCfg['shim']['cdf/Dashboards.Main'] = [
-	'cdf/Base',
-    'cdf/underscore',
-    'cdf/backbone',
-    'cdf/mustache', 
-    'cdf/lib/shims',
-    'cdf/jquery.blockUI',
-    '../pentaho-cdf/js/uriQueryParser/jquery-queryParser.js',    
-    'cdf/Dashboards.Startup',
-    'cdf/cdf-base'
-];
+
+if(typeof CONTEXT_PATH != "undefined"){ // production
+    requireCfg['shim']['cdf/Dashboards.Main'] = [
+        'cdf/Base',
+        'cdf/underscore',
+        'cdf/backbone',
+        'cdf/mustache', 
+        'cdf/lib/shims',
+        'cdf/jquery.blockUI',
+        '../pentaho-cdf/js/uriQueryParser/jquery-queryParser.js', 
+        'cdf/Dashboards.Startup',
+        'cdf/cdf-base'
+    ];
+} else { // build
+    requireCfg['shim']['cdf/Dashboards.Main'] = [
+        'cdf/Base',
+        'cdf/underscore',
+        'cdf/backbone',
+        'cdf/mustache', 
+        'cdf/lib/shims',
+        'cdf/jquery.blockUI',
+        'cdf/uriQueryParser/jquery-queryParser.js',   
+        'cdf/Dashboards.Startup',
+        'cdf/cdf-base'
+    ];
+} 
+
+
 requireCfg['shim']['cdf/cdf-base'] = [
     'cdf/wd'
 ];
@@ -127,7 +144,12 @@ requireCfg['shim']['cdf/jquery.jdMenu']          = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.positionBy']      = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.sparkline']       = ['cdf/jquery'];
 
-requireCfg['shim']['../pentaho-cdf/js/uriQueryParser/jquery-queryParser.js'] = ['cdf/jquery'];
+
+if(typeof CONTEXT_PATH != "undefined"){ // production
+    requireCfg['shim']['../pentaho-cdf/js/uriQueryParser/jquery-queryParser.js'] = ['cdf/jquery'];
+} else { // build
+    requireCfg['shim']['cdf/uriQueryParser/jquery-queryParser.js'] = ['cdf/jquery'];
+}
 
 requireCfg['shim']['cdf/simile/ajax/scripts/json'] = ['cdf/simile/ajax/simile-ajax-api'];
 
