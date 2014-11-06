@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 if(typeof CONTEXT_PATH != "undefined") { // production
   requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
@@ -17,8 +17,9 @@ if(typeof CONTEXT_PATH != "undefined") { // production
   requireCfg['paths']['cdf'] = "cdf";
 }
 
+if(!requireCfg['map']) requireCfg['map'] = {};
+
 requireCfg['shim']['cdf/cdf-module'] = [
-  'cdf/jquery-migrate-1.2.1',
   'cdf/jquery.ui',
   'cdf/jquery-impromptu',
   'cdf/jquery-ui-datepicker-i18n',
@@ -67,7 +68,7 @@ requireCfg['shim']['cdf/Dashboards.Main'] = [
   'cdf/mustache', 
   'cdf/lib/shims',
   'cdf/jquery.blockUI',
-  'cdf/uriQueryParser/jquery-queryParser',   
+  'cdf/uriQueryParser/jquery-queryParser',
   'cdf/Dashboards.Startup',
   'cdf/cdf-base'
 ];
@@ -115,18 +116,25 @@ requireCfg['shim']['cdf/jquery'] = {
   init: function() {
     return $;
   }
-}
+};
+
+// AMD compatible libs already define themselves anonymously, yet depend on 
+// module "jquery", which is defined by jQuery.js
+requireCfg['map']['cdf'] = {
+    'jquery': 'cdf/jquery'
+};
+//requireCfg['shim']['cdf/jquery.blockUI']            = ['cdf/jquery'];
+//requireCfg['shim']['cdf/jquery.bgiframe']           = ['cdf/jquery'];
+//requireCfg['shim']['cdf/jquery.sparkline']          = ['cdf/jquery'];
+
 requireCfg['shim']['cdf/jquery.ui']                 = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-impromptu']          = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-ui-datepicker-i18n'] = ['cdf/jquery.ui'];
-requireCfg['shim']['cdf/jquery.bgiframe']           = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.blockUI']            = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.corner']             = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.eventstack']         = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.i18n.properties']    = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.jdMenu']             = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery.positionBy']         = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.sparkline']          = ['cdf/jquery'];
 
 requireCfg['shim']['cdf/uriQueryParser/jquery-queryParser'] = ['cdf/jquery'];
 

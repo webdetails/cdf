@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 Dashboards.getErrorObj = function (errorCode){
   return Dashboards.ERROR_CODES[errorCode] || {};
@@ -195,6 +195,7 @@ wd.cdf.notifications.component = {
 };
 
 wd.cdf.notifications.growl = {
+  
   template: Mustache.compile(
               "<div class='cdfNotification growl'>" +
               "  <div class='cdfNotificationBody'>" +
@@ -202,37 +203,47 @@ wd.cdf.notifications.growl = {
               "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
               "  </div>" +
               "</div>" ),
-  defaults:{
+
+  defaults: {
     title: 'Title',
     desc: 'Default CDF notification.',
     timeout: 4000,
-    onUnblock: function (){ return true },
-    css: $.extend( {},
-      $.blockUI.defaults.growlCSS,
-      { position: 'absolute' , width: '100%' , top:'10px' } ),
+    onUnblock: function() { return true; },
+    css: {position: 'absolute' , width: '100%' , top:'10px'},
     showOverlay: false,
     fadeIn: 700,
     fadeOut: 1000,
     centerY:false
   },
-  render: function (newOpts){
-    var opts = _.extend( {}, this.defaults, newOpts),
-        $m = $( this.template( opts )),
-        myself = this;
+
+  render: function(newOpts) {
+    var myself = this;
+    
+    if(myself.firstRender) {
+      myself.defaults.css = $.extend({}, $.blockUI.defaults.growlCSS, myself.defaults.css);
+    }
+
+    var opts = _.extend({}, myself.defaults, newOpts),
+      $m = $(myself.template(opts)),
+      outerUnblock = opts.onUnblock;
+
     opts.message = $m;
-    var outerUnblock = opts.onUnblock;
-    opts.onUnblock = function(){
+
+    opts.onUnblock = function() {
       myself.$el.hide();
       outerUnblock.call(this);
     };
-    if (this.firstRender){
-      this.$el = $('<div/>').addClass('cdfNotificationContainer')
+
+    if(myself.firstRender) {
+      myself.$el = $('<div/>').addClass('cdfNotificationContainer')
         .hide()
         .appendTo('body');
-      this.firstRender = false;
+      myself.firstRender = false;
     }
-    this.$el.show().block(opts);
+
+    myself.$el.show().block(opts);
   },
+
   firstRender: true
 };
 
