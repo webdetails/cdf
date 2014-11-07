@@ -34,10 +34,12 @@ define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', '../lib/jq
       o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
       o.bind("click", function() {
         var success = typeof (myself.preChange) == 'undefined' ? true : myself.preChange();
-        if (success) {
+        if(success) {
           myself.executeXAction();
         }
-        typeof (myself.postChange) == 'undefined' ? true : myself.postChange();
+        if(typeof (myself.postChange) != 'undefined') {
+          myself.postChange();
+        }
       });
     },
     executeXAction: function() {

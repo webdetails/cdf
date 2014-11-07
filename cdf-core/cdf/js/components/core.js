@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-*
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 BaseComponent = Base.extend(Backbone.Events).extend({
 
@@ -112,11 +112,11 @@ BaseComponent = Base.extend(Backbone.Events).extend({
   },
   getAddIn: function (slot,addIn) {
     var type = typeof this.type == "function" ? this.type() : this.type;
-    return this.dashboard.getAddIn(type,slot,addIn);
+    return Dashboards.getAddIn(type,slot,addIn);
   },
   hasAddIn: function (slot,addIn) {
     var type = typeof this.type == "function" ? this.type() : this.type;
-    return this.dashboard.hasAddIn(type,slot,addIn);
+    return Dashboards.hasAddIn(type,slot,addIn);
   },
   getValuesArray : function() {
 
@@ -156,7 +156,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
         var p = new Array(this.parameters?this.parameters.length:0);
         for(var i= 0, len = p.length; i < len; i++){
           var key = this.parameters[i][0];
-          var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL" ? this.parameters[i][2] : this.dashboard.getParameterValue(this.parameters[i][1]);
+          var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL" ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
           p[i] = [key,value];
         }
 
@@ -167,9 +167,9 @@ BaseComponent = Base.extend(Backbone.Events).extend({
           $.each(p,function(i,val){
             arr[val[0]]=val[1];
           });
-          jXML = this.dashboard.parseXActionResult(myself, this.dashboard.urlAction(this.url, arr));
+          jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
         } else {
-          jXML = this.dashboard.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+          jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
         }
         //transform the result int a javascript array
         var myArray = this.parseArray(jXML, false);
@@ -242,7 +242,6 @@ BaseComponent = Base.extend(Backbone.Events).extend({
   },
 
   setAddInDefaults: function(slot,addIn,defaults) {
-
     Dashboards.log("BaseComponent.setAddInDefaults was removed. You should call setAddInOptions or Dashboards.setAddInDefaults");
   },
   setAddInOptions: function(slot, addIn,options) {
@@ -295,6 +294,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
   },
 
   getTimerInfo: function(){
+
     return {
       timerStart: this.timerStart,
       timerSplit: this.timerSplit,
@@ -338,13 +338,14 @@ BaseComponent = Base.extend(Backbone.Events).extend({
       var saturationSeed = hash.substr(hash.length-2,2) || 0;
       var valueSeed = hash.substr(hash.length-4,2) || 0;
 
-      this.logColor = this.dashboard.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
+      this.logColor = Dashboards.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
       return this.logColor;
 
     }
 
 
   }
+
 });
 
 
@@ -545,7 +546,7 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       render: function(){
-        this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));//myself.dataTemplates.comments(this.attributes));
+        this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));
         return this.$el;
       },
 
@@ -609,9 +610,9 @@ var CommentsComponent = BaseComponent.extend({
         _(this.collection.models).each(function(comment){
           $commentsElem.append(this.renderSingeComment(comment));
         }, this);
-        var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));//myself.dataTemplates.addComments(myself.options.permissions));
-        var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));//myself.dataTemplates.paginateComments(myself.options.paginate));
-        this.$el.empty().append($commentsElem, $add, $paginate)
+        var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
+        var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
+        this.$el.empty().append($commentsElem, $add, $paginate);
         $renderElem.append(this.$el);
         this.updateNavigateButtons();
       },
@@ -850,7 +851,7 @@ var QueryComponent = BaseComponent.extend({
       }
 
       if (object.resultvar != undefined){
-        object.dashboard.setParameter(object.resultvar, object.result);
+        Dashboards.setParameter(object.resultvar, object.result);
       }
       object.result = values.resultset != undefined ? values.resultset: values;
       if (typeof values.resultset != "undefined"){
@@ -911,7 +912,7 @@ var UnmanagedComponent = BaseComponent.extend({
         ret = typeof ret == "undefined" || ret;
       } catch(e){
         this.error( Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
-        Dashboards.log(e,"error");
+        this.dashboard.log(e,"error");
         ret = false;
       }
     } else {
@@ -980,7 +981,7 @@ var UnmanagedComponent = BaseComponent.extend({
         this.showTooltip();
       } catch(e){
         this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e );
-        Dashboards.log(e,"error");
+        this.dashboard.log(e,"error");
       } finally {
         if(!silent) {
           this.unblock();
@@ -1024,7 +1025,7 @@ var UnmanagedComponent = BaseComponent.extend({
     var handler = this.getSuccessHandler(success, always),
         errorHandler = this.getErrorHandler();
 
-    var query = this.queryState = this.query = this.dashboard.getQuery( queryDef);
+    var query = this.queryState = this.query = Dashboards.getQuery( queryDef);
     var ajaxOptions = {
       async: true
     }
@@ -1150,7 +1151,7 @@ var UnmanagedComponent = BaseComponent.extend({
             success(data);
           } catch(e) {
             this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
-            Dashboards.log(e,"error");
+            this.dashboard.log(e,"error");
           }
         }
         if(typeof always == "function") {
@@ -1162,7 +1163,7 @@ var UnmanagedComponent = BaseComponent.extend({
 
   getErrorHandler: function() {
     return  _.bind(function() {
-      var err = this.dashboard.parseServerError.apply(this, arguments );
+      var err = Dashboards.parseServerError.apply(this, arguments );
       this.error( err.msg, err.error );
     },
     this);
@@ -1171,7 +1172,7 @@ var UnmanagedComponent = BaseComponent.extend({
     ph = ph || (this.htmlObject ? this.placeholder() : undefined);
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
-    this.dashboard.errorNotification( err, ph );
+    Dashboards.errorNotification( err, ph );
   },
 
   /*
@@ -1238,7 +1239,7 @@ var ActionComponent = UnmanagedComponent.extend({
        Each descendant is expected to override this.render()
 
        Notes:
-       - in this.actionParameters, static values should be quoted, in order to survive the "eval" in this.dashboard.getParameterValue
+       - in this.actionParameters, static values should be quoted, in order to survive the "eval" in Dashboards.getParameterValue
 
     */
   },
@@ -1261,11 +1262,11 @@ var ActionComponent = UnmanagedComponent.extend({
        Calls the endpoint, passing any parameters.
        This method is typically bound to the "click" event of the component.
     */
-    var params = this.dashboard.propertiesArrayToObject( this.actionParameters ),
+    var params = Dashboards.propertiesArrayToObject( this.actionParameters ),
         failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function (){},
         successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function (){};
 
-    return this.dashboard.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+    return Dashboards.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
   },
 
   hasAction: function(){
@@ -1275,10 +1276,10 @@ var ActionComponent = UnmanagedComponent.extend({
     if ( ! this.actionDefinition ){
       return false;
     }
-    if (this.dashboard.detectQueryType){
-      return !! this.dashboard.detectQueryType(this.actionDefinition);
+    if (Dashboards.detectQueryType){
+      return !! Dashboards.detectQueryType(this.actionDefinition);
     } else {
-      return !! this.actionDefinition.queryType && this.dashboard.hasQuery(this.actionDefinition.queryType);
+      return !! this.actionDefinition.queryType && Dashboards.hasQuery(this.actionDefinition.queryType);
     }
   }
 });

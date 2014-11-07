@@ -28,8 +28,7 @@ module.exports = function(config) {
 
 
     // list of files to exclude
-    exclude: [],
-
+    exclude: ['test-js/legacy/**/*.js'],
 
     preprocessors: {
         "cdf/js/*.js" : 'coverage'

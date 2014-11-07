@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 var DashboardsMap =  {
 
@@ -281,11 +281,11 @@ var MapComponent = BaseComponent.extend({
     var p = new Array(this.parameters.length);
     for (var i = 0, len = p.length; i < len; i++) {
       var key = this.parameters[i][0];
-      var value = this.dashboard.getParameterValue(this.parameters[i][1]);
+      var value = Dashboards.getParameterValue(this.parameters[i][1]);
       p[i] = [key, value];
     }
 
-    html = this.dashboard.pentahoAction(this.solution, this.path, this.action, p, null);
+    html = Dashboards.pentahoAction(this.solution, this.path, this.action, p, null);
 
     var myArray = this.parseArray(html, true);
     var len = myArray.length;
@@ -322,12 +322,20 @@ var MapBubbleComponent = BaseComponent.extend({
   update : function() {
     DashboardsMap.selectedPointDetails = null;
     for(var i = 0; i < DashboardsMap.data.length; i++) {
-      if(this.dashboard.getParameterValue("selectedPoint") == DashboardsMap.data[i][0]) {
+      if(Dashboards.getParameterValue("selectedPoint") == DashboardsMap.data[i][0]) {
         DashboardsMap.selectedPointDetails = DashboardsMap.data[i][3];
         break;
       }
-
     }
-    DashboardsMap.updateInfoWindow(this.dashboard.pentahoAction(this.solution, this.path, this.action, DashboardsMap.selectedPointDetails ,null));
+    var parameters = Dashboards.clone(DashboardsMap.selectedPointDetails);
+    if(this.parameters != undefined) {
+      var p = new Array(this.parameters.length);
+      for(var i= 0, len = p.length; i < len; i++){
+        var key = this.parameters[i][0];
+        var value = Dashboards.getParameterValue(this.parameters[i][1]);
+        parameters.push([key,value]);
+      }
+    }
+    DashboardsMap.updateInfoWindow(Dashboards.pentahoAction(this.solution, this.path, this.action, parameters, null));
   }
 });

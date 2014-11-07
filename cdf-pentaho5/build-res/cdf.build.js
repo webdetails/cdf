@@ -60,7 +60,6 @@
         'cdf/lib/jquery',
         'cdf/lib/jquery.ui',
         'cdf/lib/jquery.blockUI',
-        'cdf/lib/jquery.tooltip',
         'cdf/lib/jquery.i18n'
     ]
   }]

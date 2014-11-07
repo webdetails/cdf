@@ -28,9 +28,9 @@
   } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
     prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
-    prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js/lib' + (isDebug ? '/lib' : '/compressed/lib');
+    prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
-    prefix = requirePaths['cdf/lib'] = "cdf/lib";
+    prefix = requirePaths['cdf/lib'] = "cdf/js-lib";
   }
 
   //modernizr 2.8.3
@@ -87,13 +87,12 @@
   ];
 
   //underscore 1.6.0
-  requirePaths['underscore'] = prefix + "/underscore/underscore";
-  requirePaths['cdf/lib/underscore'] = requirePaths['underscore'];
+  requirePaths['cdf/lib/underscore'] = prefix + "/underscore/underscore";
   requireShims['cdf/lib/underscore'] = {exports: '_'};
 
   //backbone 1.1.2
-  requirePaths['backbone'] = prefix + "/backbone/backbone";
-  requirePaths['cdf/lib/backbone'] = requirePaths['backbone'];
+  requirePaths['cdf/lib/backbone'] = prefix + "/backbone/backbone";
+  requireShims['cdf/lib/backbone'] = ['cdf/lib/underscore'];
 
   //mustache 0.8.1
   requirePaths['cdf/lib/mustache'] = prefix + "/mustache/mustache";
@@ -120,9 +119,7 @@
     'css!cdf/lib/autobox/jquery.ui.autobox'
   ];
   requirePaths['cdf/lib/jquery.templating'] = prefix + '/autobox/jquery.templating';
-  requireShims['cdf/lib/jquery.templating'] = [
-    'cdf/lib/jquery'
-  ];
+  requireShims['cdf/lib/jquery.templating'] = ['cdf/lib/jquery'];
   requirePaths['cdf/lib/jquery.ui.autobox.ext'] = prefix + '/autobox/jquery.ui.autobox.ext';
   requireShims['cdf/lib/jquery.ui.autobox.ext'] = [
     'cdf/lib/jquery',
@@ -138,17 +135,15 @@
     'css!cdf/lib/captify'
   ];
 
-  // bgiframe 3.0.1
+  //bgiframe 3.0.1
   requirePaths['cdf/lib/jquery.bgiframe'] = prefix + "/bgiframe/jquery.bgiframe";
-  requireShims['cdf/lib/jquery.bgiframe'] = [
-    'cdf/lib/jquery'
-  ];
-  // positionBy 1.0.7 (2008-01-29)
+  requireShims['cdf/lib/jquery.bgiframe'] = ['cdf/lib/jquery'];
+
+  //positionBy 1.0.7 (2008-01-29)
   requirePaths['cdf/lib/jquery.positionBy'] = prefix + "/positionBy/jquery.positionBy";
-  requireShims['cdf/lib/jquery.positionBy'] = [
-    'cdf/lib/jquery'
-  ];
-  // jdMenu 1.4.1 (2008-03-31)
+  requireShims['cdf/lib/jquery.positionBy'] = ['cdf/lib/jquery'];
+
+  //jdMenu 1.4.1 (2008-03-31)
   requirePaths['cdf/lib/jquery.jdMenu'] = prefix + "/jdMenu/jquery.jdMenu";
   requireShims['cdf/lib/jquery.jdMenu'] = [
     'cdf/lib/jquery',
@@ -162,23 +157,20 @@
   requirePaths['cdf/lib/cdf.jquery.i18n'] = prefix + "/i18n/cdf.jquery.i18n";
   requirePaths['cdf/lib/jquery.i18n'] = prefix + "/i18n/jquery.i18n.properties";
 
-  // OpenLayers 2.13.1
+  //OpenLayers 2.13.1
   requirePaths['cdf/lib/OpenLayers'] = prefix + "/OpenMap/OpenLayers/OpenLayers";
   requireShims['cdf/lib/OpenLayers'] = {
     exports: 'OpenLayers',
     deps: ['css!cdf/lib/OpenMap/OpenLayers/theme/default/style']
   };
-  // OpenStreetMap
+
+  //OpenStreetMap
   requirePaths['cdf/lib/OpenStreetMap'] = prefix + "/OpenStreetMap";
-  requireShims['cdf/lib/OpenStreetMap'] = [
-    'cdf/lib/OpenLayers'
-  ];
+  requireShims['cdf/lib/OpenStreetMap'] = ['cdf/lib/OpenLayers'];
 
   //jQuery uriQueryParser 2013
   requirePaths['cdf/lib/queryParser'] = prefix + "/uriQueryParser/jquery-queryParser";
-  requireShims['cdf/lib/queryParser'] = [
-    'cdf/lib/jquery'
-  ];
+  requireShims['cdf/lib/queryParser'] = ['cdf/lib/jquery'];
 
   //jQuery sparkline 2.1.2
   /*
@@ -221,16 +213,12 @@
 
   //Respond.js v1.4.0 (IE8, load after bootstrap.css)
   requirePaths['cdf/lib/respond'] = prefix + '/respond/respond';
-  requireShims['cdf/lib/respond'] = [
-    'cdf/lib/bootstrap'
-  ];
+  requireShims['cdf/lib/respond'] = ['cdf/lib/bootstrap'];
 
   //bootstrap 3.1.1
   requirePaths['cdf/lib/bootstrap'] = prefix + '/Bootstrap/js/bootstrap';
-  requireShims['cdf/lib/bootstrap'] = [
-    'css!cdf/lib/Bootstrap/css/bootstrap.css'
-  ];
+  requireShims['cdf/lib/bootstrap'] = ['css!cdf/lib/Bootstrap/css/bootstrap.css'];
 
-  // Font Awesome 4.0.3 (CSS only)
+  //Font Awesome 4.0.3 (CSS only)
 
 })();

@@ -20,7 +20,7 @@ define(['./PrptComponent.ext', '../lib/jquery', './PrptComponent', '../lib/jquer
       // 2 modes of working; if it's a div, create a button inside it
       var myself = this;
       var o = myself.placeholder();
-      if( o.length > 0) {
+      if(o.length > 0) {
         if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
           // create a button
           o = $("<button/>").appendTo(o.empty());

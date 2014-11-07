@@ -13,56 +13,22 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-   files: [
-      'cdf/js-lib/shims.js',
-      'cdf/js-lib/pen-shim.js',
+    files: [
+      { pattern: 'cdf/js-lib/**/*.css', included: false },
+      { pattern: 'cdf/js-lib/**/*.js', included: false },
+      { pattern: 'cdf/js-modules/**/*.css', included: false },
+      { pattern: 'cdf/js-modules/**/*.js', included: false },
+      { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
-      'cdf/js/wd.js',
-      'cdf/js-lib/json.js',
-      'cdf/js-lib/jquery/jquery.js',
-      'cdf/js-lib/jquery/jquery.ui.js',
-      'cdf/js-lib/autobox/jquery.templating.js',
-      'cdf/js-lib/autobox/jquery.ui.autobox.js',
-      'cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
-      
-      'cdf/js-lib/jquery/jquery.blockUI.js',
-      'cdf/js-lib/uriQueryParser/jquery-queryParser.js',
-      'cdf/js-lib/underscore/underscore.js',
-      'cdf/js-lib/underscore/backbone.js',
-      'cdf/js-lib/underscore/mustache.js',
-
-      'cdf/js-lib/base/Base.js',
-      'cdf/js/Dashboard/Dashboard.js',
-      'cdf/js/Dashboard/Dashboard.bookmarkable.js',
-      'cdf/js/Dashboard/Dashboard.components.js',
-      'cdf/js/Dashboard/Dashboard.i18n.js',
-      'cdf/js/Dashboard/Dashboard.lifecycle.js',
-      'cdf/js/Dashboard/Dashboard.notifications.js',
-      'cdf/js/Dashboard/Dashboard.parameters.js',
-      'cdf/js/Dashboard/Dashboard.storage.js',
-      'cdf/js/Dashboard/Dashboard.views.js',
-      '../cdf-pentaho5/cdf/js/cdf-base.js',
-      'cdf/js/Dashboards.Main.js',
-      'cdf/js/Dashboards.Query.js',
-      'cdf/js/Dashboards.Utils.js',
-      'cdf/js/Dashboards.Legacy.js',
-      'cdf/js/Dashboards.Popups.js',
-      'cdf/js/Dashboards.RefreshEngine.js',
-      'cdf/js/components/core.js',
-      'cdf/js/components/input.js',
-      'cdf/js/queries/coreQueries.js',
-      'cdf/js/components/simpleautocomplete.js',
-      '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
-      '../cdf-pentaho-base/cdf/js/components/VisualizationAPIComponent.js',
-      'test-js/lib/test-components.js',
-      'test-js/main.js',
-      {pattern: 'test-js/**/*-spec.js', included: false}
+      { pattern: 'test-js/**/*-spec.js', included: false },
+      'config/context.js',
+      'build-res/requireCfg-raw.js',
+      'config/require-config.js'
     ],
 
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: ['test-js/legacy/**/*.js'],
 
 
     preprocessors: {
@@ -111,7 +77,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
 
     // Start these browsers, currently available:
@@ -131,6 +97,16 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: true
+    singleRun: true,
+
+    plugins: [
+     'karma-jasmine',
+     'karma-requirejs',
+     'karma-junit-reporter',
+     'karma-html-reporter',
+     'karma-coverage',
+     'karma-phantomjs-launcher',
+     'karma-chrome-launcher'
+    ]
   });
 };

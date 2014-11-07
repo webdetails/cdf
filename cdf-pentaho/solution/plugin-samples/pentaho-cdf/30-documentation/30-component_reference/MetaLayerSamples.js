@@ -14,13 +14,13 @@
 var evaluateCode = function (cleanComponents) {
   // Clean dashboard components or else they would be added
   if (cleanComponents) {
-    this.dashboard.components = [];
+    Dashboards.components = [];
   }
   try {
     eval($('#samplecode').val());
   }
   catch (e) {
-    this.dashboard.log(e, 'exception');
+    Dashboards.log(e, 'exception');
     return;
   }
   tabs.tabs("option", "active", 0);

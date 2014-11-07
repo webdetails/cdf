@@ -30,7 +30,7 @@
                     for(var name in paramDefs) {
                         if(paramDefs.hasOwnProperty(name)) {
                             // Works with eval ...
-                            var value = this.dashboard.getParameterValue(paramDefs[name]);
+                            var value = Dashboards.getParameterValue(paramDefs[name]);
                             if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
                                 // Special case where single element will wrongly be treated as a parseable array by cda
                                 value = doCsvQuoting(value[0],';');
@@ -232,11 +232,11 @@
             var me = this;
 
 
-            this.query = this.dashboard.getQuery(this.chartDefinition);
+            this.query = Dashboards.getQuery(this.chartDefinition);
 
             var sQueryDef = $.extend({}, this.chartDefinition);
             sQueryDef.dataAccessId = sQueryDef.structDatasource;
-            this.sQuery = this.dashboard.getQuery(sQueryDef);
+            this.sQuery = Dashboards.getQuery(sQueryDef);
 
             var executed = false;
             var execComponent = function() {

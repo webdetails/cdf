@@ -1,20 +1,20 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 var CDF_PLUGIN_NAME = "pentaho-cdf";
 var SAMPLES_BASE_PATH = "/public/plugin-samples/";
 
-var wd = wd || {};
+wd = wd || {};
 wd.cdf = wd.cdf || {};
 
 wd.cdf.helper = {
@@ -57,10 +57,8 @@ wd.cdf.helper = {
 
 wd.cdf.endpoints = {
 
-  webAppPath: undefined,
-
   // Dashboards.Startup.js determines webAppPath
-  getWebapp: function () { return this.webAppPath; },
+  getWebapp: function () { return webAppPath; },
 
   getPing: function () { return wd.cdf.endpoints.getCdfBase() + "/ping"; },
 
@@ -95,6 +93,8 @@ wd.cdf.endpoints = {
   getResource: function() { return wd.cdf.endpoints.getCdfBase() + "/getResource"; },
 
   getStaticResource: function( resource ) { return wd.cdf.endpoints.getCdfBase() + "/resources/" + resource; },
+
+  getSimileStaticResource: function( resource ) { return wd.cdf.endpoints.getWebapp() + "/api/repos/pentaho-cdf/js-legacy/lib/" + resource; },
 
   getCdfXaction: function( path, action, solution, params ) {
     if (params){
@@ -160,7 +160,7 @@ wd.cdf.endpoints = {
     }
   },
   
-  getCaptifyZoom: function(){ return wd.cdf.endpoints.getStaticResource("js/lib/captify/zoom.html"); },
+  getCaptifyZoom: function(){ return wd.cdf.endpoints.getStaticResource("js-legacy/lib/captify/zoom.html"); },
 
   getDoQuery: function(){ return wd.cdf.endpoints.getCdaBase() + "/doQuery?"; },
 

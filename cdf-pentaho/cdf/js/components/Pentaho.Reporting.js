@@ -19,13 +19,13 @@
  */
 
 var PrptComponent = BaseComponent.extend({
-  getIframeName: function () {
+  getIframeName: function() {
     return this.htmlObject + '_' + 'prptFrame';
   },
-  getIframe: function () {
+  getIframe: function() {
     return '<iframe name="' + this.getIframeName() + '" style="width:100%;height:100%;border:0px" frameborder="0"/>';
   },
-  setIframeUrl: function( iframe, url ) {
+  setIframeUrl: function(iframe, url) {
     if(iframe[0]) {
       iframe[0].contentWindow.location = url;
     }
@@ -36,27 +36,27 @@ var PrptComponent = BaseComponent.extend({
    * even though nothing has been loaded into the iframe. We'll increment it
    * here,decrement it again from the iframe's onload event.
    */
-  startLoading: function () {
-    if (!this.loading) {
+  startLoading: function() {
+    if(!this.loading) {
       this.loading = true;
-      this.dashboard.incrementRunningCalls();
+      Dashboards.incrementRunningCalls();
     }
   },
-  stopLoading: function () {
-    if (this.loading) {
+  stopLoading: function() {
+    if(this.loading) {
       this.loading = false;
-      this.dashboard.decrementRunningCalls();
+      Dashboards.decrementRunningCalls();
     }
   },
   /*************************************************************************/
-  update: function () {
+  update: function() {
     this.clear();
     var options = this.getOptions(),
         params = this.getParams(),
         reportOptions = this.getReportOptions(),
         reportOptions2 = {};
-    $.each(reportOptions, function (key, value) {
-      if (params[key] != undefined) {
+    $.each(reportOptions, function(key, value) {
+      if(params[key] != undefined) {
         return true;
       } else {
         reportOptions2[key] = value;
@@ -65,21 +65,21 @@ var PrptComponent = BaseComponent.extend({
     reportOptions = reportOptions2;
     var downloadMode = this.downloadMode;
     // if you really must use this component to download stuff
-    if (downloadMode == null) {
+    if(downloadMode == null) {
       var outputTarget = options["output-target"];
       // take a guess
       downloadMode = !((outputTarget.indexOf('html') != -1 &&
-          outputTarget.indexOf('mime-message') == -1)
-          || outputTarget.indexOf('text') != -1);
+        outputTarget.indexOf('mime-message') == -1)
+        || outputTarget.indexOf('text') != -1);
     }
-    if (options["dashboard-mode"]) {
+    if(options["dashboard-mode"]) {
       var url = wd.cdf.endpoints.getPluginBase("reporting");
       var myself = this;
       $.ajax({
         url: url,
         data: options,
         dataType: "html",
-        success: function (resp) {
+        success: function(resp) {
           $("#" + myself.htmlObject).html(resp);
         }
       });
@@ -89,10 +89,10 @@ var PrptComponent = BaseComponent.extend({
       var htmlObj = $('#' + this.htmlObject);
       htmlObj.empty();
       iframe = iframe.appendTo(htmlObj);
-      if (this.autoResize) {
+      if(this.autoResize) {
         // we'll need to reset size before each resize,
         // otherwise we'll get stuck with the size of the biggest report we get
-        if (this._sHeight == null) {
+        if(this._sHeight == null) {
           this._sHeight = htmlObj.height();
           this._sWidth = htmlObj.width();
         } else {
@@ -100,7 +100,7 @@ var PrptComponent = BaseComponent.extend({
           htmlObj.width(this._sWidth);
         }
       }
-      if (this.usePost) {
+      if(this.usePost) {
         var url = wd.cdf.endpoints.getPluginBase("reporting") + "/execute/";
         url += options.solution;
         url += "/" + options.path;
@@ -114,11 +114,11 @@ var PrptComponent = BaseComponent.extend({
         }
         this.startLoading();
         var myself = this;
-        iframe.load(function () {
+        iframe.load(function() {
           var jqBody = $(this.contentWindow.document.body);
           var reportContentFrame = jqBody.find('#reportContent');
-          reportContentFrame.load(function () {
-            if (myself.autoResize) {
+          reportContentFrame.load(function() {
+            if(myself.autoResize) {
               myself._resizeToReportFrame(reportContentFrame[0], htmlObj, options);
             }
             myself.stopLoading();
@@ -126,7 +126,7 @@ var PrptComponent = BaseComponent.extend({
         });
         this.setIframeUrl(iframe, url);
       }
-      if (downloadMode) {
+      if(downloadMode) {
         // if call prompts a download window we'll never know when it's done
         this.stopLoading();
       }
@@ -135,7 +135,7 @@ var PrptComponent = BaseComponent.extend({
   /**
    * report options
    **/
-  getOptions: function () {
+  getOptions: function() {
     var options = {
       paginate: this.paginate || false,
       showParameters: this.showParameters || false,
@@ -147,7 +147,7 @@ var PrptComponent = BaseComponent.extend({
       renderMode: 'REPORT',
       htmlProportionalWidth: false
     };
-    if (this.paginate) {
+    if(this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
       options['accepted-page'] = 0;
     } else {
@@ -155,24 +155,24 @@ var PrptComponent = BaseComponent.extend({
       options['accepted-page'] = -1;
     }
     // update options with report parameters
-    for (var i = 0; i < this.parameters.length; i++) {
+    for(var i = 0; i < this.parameters.length; i++) {
       // param: [<prptParam>, <dashParam>, <default>]
       var param = this.parameters[i];
-      var value = this.dashboard.getParameterValue(param[1]);
-      if (value == null && param.length == 3) {
+      var value = Dashboards.getParameterValue(param[1]);
+      if(value == null && param.length == 3) {
         value = param[2];
       }
-      if ( typeof value == 'function' ) {
+      if(typeof value == 'function') {
         value = value();
       }
       options[param[0]] = value;
     }
     return options;
   },
-  getParams: function () {
+  getParams: function() {
     var options = {};
 
-    if (this.paginate) {
+    if(this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
       options['accepted-page'] = 0;
     } else {
@@ -181,14 +181,14 @@ var PrptComponent = BaseComponent.extend({
     }
 
     // update options with report parameters
-    for (var i = 0; i < this.parameters.length; i++) {
+    for(var i = 0; i < this.parameters.length; i++) {
       // param: [<prptParam>, <dashParam>, <default>]
       var param = this.parameters[i];
-      var value = this.dashboard.getParameterValue(param[1]);
-      if (value == null && param.length == 3) {
+      var value = Dashboards.getParameterValue(param[1]);
+      if(value == null && param.length == 3) {
         value = param[2];
       }
-      if ( typeof value == 'function' ) {
+      if(typeof value == 'function') {
         value = value();
       }
       options[param[0]] = value;
@@ -197,7 +197,7 @@ var PrptComponent = BaseComponent.extend({
     return options;
   },
 
-  getReportOptions: function () {
+  getReportOptions: function() {
     var options = {
       paginate: this.paginate || false,
       showParameters: this.showParameters || false,
@@ -210,7 +210,7 @@ var PrptComponent = BaseComponent.extend({
       htmlProportionalWidth: false
     };
 
-    if (this.paginate) {
+    if(this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
       options['accepted-page'] = 0;
     } else {
@@ -220,7 +220,7 @@ var PrptComponent = BaseComponent.extend({
 
     return options;
   },
-  _postToUrl: function (htmlObj, iframe, path, params, target) {
+  _postToUrl: function(htmlObj, iframe, path, params, target) {
     this.startLoading();
     // use a form to post, response will be set to iframe
     var form = this._getParamsAsForm(document, path, params, this.getIframeName());
@@ -234,33 +234,32 @@ var PrptComponent = BaseComponent.extend({
     });
     form.submit();
   },
-  _resizeToReportFrame: function (iframe, htmlObj, options) {
+  _resizeToReportFrame: function(iframe, htmlObj, options) {
     var outputTarget = options["output-target"];
     // only makes sense for html, but let's keep it open
-    var isHtml = function (outputTarget) {
+    var isHtml = function(outputTarget) {
       return outputTarget.indexOf('html') != -1 &&
           outputTarget.indexOf('mime') == -1;
     };
-    var isText = function (outputTarget) {
+    var isText = function(outputTarget) {
       return outputTarget.indexOf('text') != -1;
     };
-    var isXml = function (outputTarget) {
+    var isXml = function(outputTarget) {
       return outputTarget.indexOf('xml') != -1;
     };
     try {
       var idoc = iframe.contentWindow.document;
-      if (iframe.contentWindow.document) {
+      if(iframe.contentWindow.document) {
         var sized = null;
-        if (isHtml(outputTarget) || isText(outputTarget)) {
+        if(isHtml(outputTarget) || isText(outputTarget)) {
           sized = idoc.body;
-        }
-        else if (isXml(outputTarget)) {
+        } else if(isXml(outputTarget)) {
           // not much point in using this
           sized = idoc.firstChild;
         }
-        if (sized != null) {
+        if(sized != null) {
           var hMargin = 0, wMargin = 0;
-          if (isHtml(outputTarget)) {
+          if(isHtml(outputTarget)) {
             // margins may not be taken into account in scrollHeight|Width
             var jsized = $(sized);
             hMargin = jsized.outerHeight(true) - jsized.outerHeight(false);
@@ -270,20 +269,20 @@ var PrptComponent = BaseComponent.extend({
           htmlObj.width(sized.scrollWidth + wMargin);
         }
       }
-    } catch (e) {
+    } catch(e) {
       Dashboards.log(e);
     }
   },
-  _getParamsAsForm: function (doc, path, params, target) {
+  _getParamsAsForm: function(doc, path, params, target) {
     var form = doc.createElement("form");
     form.setAttribute("method", "post");
     form.setAttribute("action", path);
     form.setAttribute("target", target);
-    for (var key in params) {
-      if (params.hasOwnProperty(key)) {
+    for(var key in params) {
+      if(params.hasOwnProperty(key)) {
         var param = params[key];
-        if ($.isArray(param)) {
-          for (var i = 0; i < param.length; i++) {
+        if($.isArray(param)) {
+          for(var i = 0; i < param.length; i++) {
             var hiddenField = doc.createElement("input");
             hiddenField.setAttribute("type", "hidden");
             hiddenField.setAttribute("name", key);
@@ -309,61 +308,65 @@ var SchedulePrptComponent = PrptComponent.extend({
     // 2 modes of working; if it's a div, create a button inside it
     var myself = this;
     var o = $("#" + this.htmlObject);
-    if ($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
+    if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
       // create a button
       o = $("<button/>").appendTo(o.empty());
-      if (o[0].tagName == "DIV")
+      if(o[0].tagName == "DIV") {
         o.wrap("<span/>");
-      if (this.label != undefined)
+      }
+      if(this.label != undefined) {
         o.text(this.label);
+      }
       o.button();
       o.addClass('scheduler_button');
     }
     o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-    o.bind("click", function () {
+    o.bind("click", function() {
       var success = typeof (myself.preChange) == 'undefined' ? true : myself.preChange();
-      if (success) {
+      if(success) {
         myself.schedulePrptComponent();
       }
       typeof (myself.postChange) == 'undefined' ? true : myself.postChange();
     });
   },
-  schedulePrptComponent: function () {
+  schedulePrptComponent: function() {
     var parameters = {};
     var sharedUuid;
     var error = false;
-    guid = function () {
+    guid = function() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
-          function (c) {
+          function(c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
           });
     };
-    triggerError = function (msg, id) {
+    triggerError = function(msg, id) {
       error = true;
       $(id).css("backgroundColor", "rgb(255,159,159)");//error state color.
       //$(id).css("backgroundColor","rgb(184,245,177)"); Valid state color. aplicable?
       var temp = $(id).val();
       $(id).val(msg);
-      setTimeout(function () {
+      setTimeout(function() {
         $(id).css("backgroundColor", "white");
         $(id).val(temp);
       }, 2000);
 
     };
-    getHour = function () {
+    getHour = function() {
       var hour = $("#hours").val();
-      if ($("#amPm").val() == "pm") {
+      if($("#amPm").val() == "pm") {
         hour = parseInt(hour, 10) + 12;
-        if (hour == 24)
+        if(hour == 24) {
           hour = 12;
+        }
       } else {
-        if (hour == "12")
+        if(hour == "12") {
           hour = 0;
+        }
       }
       return hour;
     };
-    cronThis = function () {
+    cronThis = function() {
       var minute = $("#minutes").val();
       var hour = getHour();
       var choice = $("#recurrId").val();
@@ -371,73 +374,75 @@ var SchedulePrptComponent = PrptComponent.extend({
       var month = "*";
       var dayOfMonth = "?";
       var year = "*";//really necessary?
-      switch (choice) {
+      switch(choice) {
         case "daily":
           dayOfWeek = "mon-fri";
           break;
         case "weekly":
           var i = 0;
-          if ($("#monday").is(":checked")) {
+          if($("#monday").is(":checked")) {
             dayOfWeek += ",mon";
             i++;
           }
-          if ($("#tuesday").is(":checked")) {
+          if($("#tuesday").is(":checked")) {
             dayOfWeek += ",tue";
             i++;
           }
-          if ($("#wednesday").is(":checked")) {
+          if($("#wednesday").is(":checked")) {
             dayOfWeek += ",wed";
             i++;
           }
-          if ($("#thursday").is(":checked")) {
+          if($("#thursday").is(":checked")) {
             dayOfWeek += ",thu";
             i++;
           }
-          if ($("#friday").is(":checked")) {
+          if($("#friday").is(":checked")) {
             dayOfWeek += ",fri";
             i++;
           }
-          if ($("#saturday").is(":checked")) {
+          if($("#saturday").is(":checked")) {
             dayOfWeek += ",sat";
             i++;
           }
-          if ($("#sunday").is(":checked")) {
+          if($("#sunday").is(":checked")) {
             dayOfWeek += ",sun";
             i++;
           }
-          if (i > 0) {
+          if(i > 0) {
             dayOfWeek = dayOfWeek.replace("\?", "");
             dayOfWeek = dayOfWeek.replace(",", "");
           } else {
             $("#errWeek").css("color", "rgb(255,159,159)");
             $("#errorCheckboxes").show();
-            setTimeout(function () {
+            setTimeout(function() {
               $("#errorCheckboxes").hide();
             }, 2000);
             error = true;
           }
           break;
         case "monthly":
-          if ($("#monthRadio").is(":checked")) {
+          if($("#monthRadio").is(":checked")) {
             dayOfMonth = $("#recurrPatternIn").val();
-            if (dayOfMonth < 1)
+            if(dayOfMonth < 1) {
               triggerError(">0", "#recurrPatternIn");
-            else if (dayOfMonth > 31)
+            } else if(dayOfMonth > 31) {
               triggerError("<=31", "#recurrPatternIn");
+            }
           } else {
             dayOfMonth = "?";
             dayOfWeek = $("#monthOpt2Select").val().substring(0, 3) + "#" + $("#monthOpt1Select").val();
           }
           break;
         case "yearly":
-          if ($("#yearRadio").is(":checked")) {
+          if($("#yearRadio").is(":checked")) {
             dayOfWeek = "?";
             month = $("#yearEveryMonth").val();
             dayOfMonth = $("#yearDayMonth").val();
-            if (dayOfMonth < 1)
+            if(dayOfMonth < 1) {
               triggerError(">0", "#yearDayMonth");
-            else if (dayOfMonth > 31)
+            } else if(dayOfMonth > 31) {
               triggerError("<=31", "#yearDayMonth");
+            }
           } else {
             dayOfMonth = "?";
             dayOfWeek = $("#yearOpt2Select").val().substring(0, 3) + "#" + $("#yearOpt1Select").val();
@@ -448,39 +453,42 @@ var SchedulePrptComponent = PrptComponent.extend({
       var builtCron = "0 " + minute + " " + hour + " " + dayOfMonth + " " + month + " " + dayOfWeek + " " + year;
       return builtCron;
     };
-    getUTC = function (exp) {
+    getUTC = function(exp) {
       var arr = exp.split("/");
       return new Date(arr[2], arr[0] - 1, arr[1], 0, 0, 0, 0).getTime();
     };
-    makeSelect = function (min, max, interval, id) {
+    makeSelect = function(min, max, interval, id) {
       var selectHtml = '<select id ="' + id + '">';
-      for (var i = min; i <= max; i += interval) {
-        if (i < 10)
+      for(var i = min; i <= max; i += interval) {
+        if(i < 10) {
           selectHtml += '<option value="' + i + '">0' + i + '</option>';
-        else
+        } else {
           selectHtml += '<option value="' + i + '">' + i + '</option>';
+        }
       }
       selectHtml += '</select>';
       return selectHtml;
     };
-    validateStartDate = function (mili, id) {
+    validateStartDate = function(mili, id) {
       var now = new Date();
-      if (isNaN(mili) || mili < now.getTime())
+      if(isNaN(mili) || mili < now.getTime()) {
         triggerError("Incorrect Date, pick date from calendar", id);
+      }
     };
-    validateEndDate = function (mili, id) {
-      if ($("#endByRadio").is(":checked")) {
+    validateEndDate = function(mili, id) {
+      if($("#endByRadio").is(":checked")) {
         var now = new Date();
         var startDate = $("#rangeStartIn").val();
         var mil = getUTC(startDate);
         if (isNaN(mil)) {
-        } else if (mil > mili)
+        } else if (mil > mili) {
           triggerError("End Date > Start Date", id);
-        else if (isNaN(mili) || mili < now.getTime())
+        } else if (isNaN(mili) || mili < now.getTime()) {
           triggerError("Incorrect Date", id);
+        }
       }
     };
-    startTimeGetter = function () {
+    startTimeGetter = function() {
       var hours = getHour();
       var minutes = $("#minutes").val();
       var mili = (minutes * 60000) + (hours * 3600000);
@@ -489,12 +497,12 @@ var SchedulePrptComponent = PrptComponent.extend({
       validateStartDate(start, "#rangeStartIn");
       return start;
     };
-    endTimeGetter = function () {
+    endTimeGetter = function() {
       var end = getUTC($("#endByIn").val());
       validateEndDate(end, "#endByIn");
       return end;
     };
-    setParameters = function () {
+    setParameters = function() {
       parameters = {
         name: $("#nameIn").val(),
         title: $("#nameIn").val(),
@@ -508,10 +516,11 @@ var SchedulePrptComponent = PrptComponent.extend({
       error = false;
       var choice = $("#recurrId").val();
       var name = $("#nameIn").val();
-      if (name == "")
+      if(name == "") {
         triggerError("You must choose a name", "#nameIn");
+      }
       parameters["name"] = name;
-      switch (choice) {
+      switch(choice) {
         case "once":
           var hours = getHour();
           var minutes = $("#minutes").val();
@@ -527,42 +536,49 @@ var SchedulePrptComponent = PrptComponent.extend({
           var start = startTimeGetter();
           parameters["start-date-time"] = start;
           var repeatSec = $("#recurrPatternInSec").val();
-          if (repeatSec < 1)
+          if(repeatSec < 1) {
             triggerError(">0", "#recurrPatternInSec");
+          }
           parameters["repeat-time-millisecs"] = repeatSec * 1000;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
         case "minutes":
           var start = startTimeGetter();
           parameters["start-date-time"] = start;
           var repeatMin = $("#recurrPatternInMin").val();
-          if (repeatMin < 1)
+          if(repeatMin < 1) {
             triggerError(">0", "#recurrPatternInMin");
+          }
           parameters["repeat-time-millisecs"] = repeatMin * 60000;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
         case "hours":
           var start = startTimeGetter();
           parameters["start-date-time"] = start;
           var repeatHour = $("#recurrPatternInHour").val();
-          if (repeatHour < 1)
+          if(repeatHour < 1) {
             triggerError(">0", "#recurrPatternInHour");
+          }
           parameters["repeat-time-millisecs"] = repeatHour * 3600000;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
         case "daily":
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
-          if ($("#weekDayRadio").is(":checked")) {
-            parameters["cron"] = cronThis();
           }
-          else if ($("#dayRadio").is(":checked")) {
+          if($("#weekDayRadio").is(":checked")) {
+            parameters["cron"] = cronThis();
+          } else if($("#dayRadio").is(":checked")) {
             var repeatDays = $("#recurrPatternInDay").val();
-            if (repeatDays < 1)
+            if (repeatDays < 1) {
               triggerError(">0", "#recurrPatternInDay");
+            }
             parameters["repeat-time-millisecs"] = repeatDays * 86400000;
             var start = startTimeGetter();
             parameters["start-date-time"] = start;
@@ -572,22 +588,25 @@ var SchedulePrptComponent = PrptComponent.extend({
           parameters["cron"] = cronThis();
           var start = startTimeGetter();
           parameters["start-date-time"] = start;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
         case "monthly":
           parameters["cron"] = cronThis();
           var start = startTimeGetter();
           parameters["start-date-time"] = start;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
         case "yearly":
           parameters["cron"] = cronThis();
           var start = startTimeGetter();
           parameters["start-date-time"] = start;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
         case "cron":
           var cronString = $("#cronString").val();
@@ -595,21 +614,23 @@ var SchedulePrptComponent = PrptComponent.extend({
           parameters["cron"] = cronString;
           var start = getUTC($("#rangeStartIn").val());
           parameters["start-date-time"] = start;
-          if ($("#endByRadio").is(":checked"))
+          if($("#endByRadio").is(":checked")) {
             parameters["end-date-time"] = endTimeGetter();
+          }
           break;
       }
     };
-    validateCron = function (cron) {
+    validateCron = function(cron) {
       var arr = cron.split(" ");//7 elements - sec min hour dayOfMonth month dayOfWeek year
-      if (arr.length < 7)
+      if(arr.length < 7) {
         triggerError("Cron Expression too short", "#cronString");
-      else if (arr.length > 7)
+      } else if(arr.length > 7) {
         triggerError("Cron Expression too long", "#cronString");
-      else if ((arr[3] != "?" && arr[3] != "*") && (arr[5] != "?" && arr[5] != "*"))
+      } else if ((arr[3] != "?" && arr[3] != "*") && (arr[5] != "?" && arr[5] != "*")) {
         triggerError("M+W unsuported.(M+? or W+?)", "#cronString");//day of month and day of week not suported at the same time
+      }
     };
-    hideAll = function () {
+    hideAll = function() {
       $("#rangeOfRecurrDiv").hide();
       $("#cronDiv").hide();
       $("#recurrPatternDiv").hide();
@@ -623,10 +644,10 @@ var SchedulePrptComponent = PrptComponent.extend({
       $("#patternMonth").hide();
       $("#patternYear").hide();
     };
-    changeOpts = function () {
+    changeOpts = function() {
       var choice = $("#recurrId").val();
       hideAll();
-      switch (choice) {
+      switch(choice) {
         case "once":
           $("#startTimeDiv").show();
           $("#rangeOfRecurrOnceDiv").show();
@@ -780,7 +801,7 @@ var SchedulePrptComponent = PrptComponent.extend({
     var rangeOfRecurrenceOnce = '<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
     var mailInfo = '<form><span class="dialog-label">To (Email):</span><input id="to" type="text" value=""></form>';
     var fullPage = "";
-    if ($.inArray(this.adminRole ? this.adminRole : "Admin", this.dashboard.context.roles) >= 0) {
+    if($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles) >= 0) {
       fullPage = nameDiv + mailInfo + recurrenceDiv + cronString + startTime + recurrencePattern + rangeOfRecurrence + rangeOfRecurrenceOnce;
     } else {
       //Build selector
@@ -789,8 +810,8 @@ var SchedulePrptComponent = PrptComponent.extend({
       $.ajaxSetup({async: false});
       $.getJSON("getSchedules", {solution: this.solution, path: this.path, action: this.action},
           function (response) {
-            for (var i = 0; i < response.length; i++) {
-              if (response[i]) {
+            for(var i = 0; i < response.length; i++) {
+              if(response[i]) {
                 subscriptionSelector += "<option value='" + response[i].id + "'>" + response[i].name + "</option>";
               }
             }
@@ -808,13 +829,13 @@ var SchedulePrptComponent = PrptComponent.extend({
           "Cancel": -1,
           "Ok": 1
         },
-        submit: function (e, v, m, f) {
+        submit: function(e, v, m, f) {
           sharedUuid = guid();
-          if (v == -1) {
+          if(v == -1) {
             $.prompt.close();
           } else if (v == 1) {
             setParameters();
-            if (error) {
+            if(error) {
               parameters = {};
               return false;
             }
@@ -831,36 +852,37 @@ var SchedulePrptComponent = PrptComponent.extend({
               "output-target": myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page",
               renderMode: "SUBSCRIBE"
             };
-            for (var i = 0; i < myself.parameters.length; i++) {
+            for(var i = 0; i < myself.parameters.length; i++) {
               var param = myself.parameters[i];
               parameters2[param[0]] = param[1];
             }
-            if ($("#to").val().length > 0) {
+            if($("#to").val().length > 0) {
               parameters2.destination = $("#to").val();
             }
             var success = false;
             var x = $.ajaxSettings.async;
             $.ajaxSetup({async: false});
-            if ($.inArray(this.adminRole ? this.adminRole : "Admin", myself.dashboard.context.roles) >= 0) {
+            if($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles) >= 0) {
               $.post("../../SubscriptionAdminService", parameters,
                   function (xml) {
-                    if (xml &&
+                    if(xml &&
                         xml.documentElement &&
                         xml.documentElement.getAttribute('result') === 'OK') {
                       //get schedule id
                       var scheduleId = sharedUuid;
                       $.getJSON("getSchedules", {solution: myself.solution, path: myself.path, action: myself.action},
                           function (response) {
-                            for (var i = 0; i < response.length; i++) {
-                              if (response[i]) {
-                                if (response[i].name == $("#nameIn").val())
+                            for(var i = 0; i < response.length; i++) {
+                              if(response[i]) {
+                                if(response[i].name == $("#nameIn").val()) {
                                   scheduleId = response[i].id;
+                                }
                               }
                             }
                           }, 'text');
                       parameters2["schedule-id"] = scheduleId;
                       $.get("../../content/reporting", parameters2,
-                          function (response) {
+                          function(response) {
                             alert(response);
                             success = response == 'Public Schedule saved/created';
                           }, 'text');
@@ -871,10 +893,10 @@ var SchedulePrptComponent = PrptComponent.extend({
             } else {
               parameters2["schedule-id"] = $("#subscriptionSelector").val();
               $.get("../../content/reporting", parameters2,
-                  function (response) {
-                    alert(response);
-                    success = response == 'Public Schedule saved/created';
-                  }, 'text');
+                function(response) {
+                  alert(response);
+                  success = response == 'Public Schedule saved/created';
+                }, 'text');
             }
             $.ajaxSetup({async: x});
             return success;
@@ -891,7 +913,7 @@ var SchedulePrptComponent = PrptComponent.extend({
     };
     $.prompt(promp, {classes: 'scheduler'});
     $(".scheduler #jqi").css("width", "510px");
-    $(document).ready(function (ev) {
+    $(document).ready(function(ev) {
       $("#startDateIn").datepicker({minDate: 0});
       $("#rangeStartIn").datepicker({minDate: 0});
       $("#endByIn").datepicker({minDate: 0});
@@ -903,43 +925,45 @@ var SchedulePrptComponent = PrptComponent.extend({
 
 var ExecutePrptComponent = PrptComponent.extend({
   visible: false,
-  update: function () {
+  update: function() {
     // 2 modes of working; if it's a div, create a button inside it
     var myself = this;
     var o = $("#" + this.htmlObject);
-    if ($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
+    if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
       // create a button
       o = $("<button/>").appendTo(o.empty());
-      if (o[0].tagName == "DIV") {
+      if(o[0].tagName == "DIV") {
         o.wrap("<span/>");
       }
-      if (this.label != undefined) {
+      if(this.label != undefined) {
         o.text(this.label);
       }
       o.button();
     }
     o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-    o.bind("click", function () {
+    o.bind("click", function() {
       var success = typeof (myself.preChange) == 'undefined' ? true : myself.preChange();
-      if (success) {
+      if(success) {
         myself.executePrptComponent();
       }
-      typeof (myself.postChange) == 'undefined' ? true : myself.postChange();
+      if(typeof (myself.postChange) != 'undefined') {
+        myself.postChange();
+      }
     });
   },
-  executePrptComponent: function () {
+  executePrptComponent: function() {
     var options = this.getOptions();
     var url = wd.cdf.endpoints.getReportViewer();
     var a = [];
-    var encodeArray = function (k, v) {
+    var encodeArray = function(k, v) {
       var arr = [];
-      for (var i = 0; i < v.length; i++) {
+      for(var i = 0; i < v.length; i++) {
         arr.push(encodeURIComponent(k) + '=' + encodeURIComponent(v[i]));
       }
       return arr;
     };
-    $.each(options, function (k, v) {
-      if (typeof v == 'object') {
+    $.each(options, function(k, v) {
+      if(typeof v == 'object') {
         a.push.apply(a, encodeArray(k, v));
       } else {
         a.push(encodeURIComponent(k) + "=" + encodeURIComponent(v));

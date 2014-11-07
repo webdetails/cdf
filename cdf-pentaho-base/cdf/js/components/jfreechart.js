@@ -1,19 +1,19 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 var JFreeChartComponent = BaseComponent.extend({
   update : function() {
-    var xactionFile = (this.chartDefinition.queryType == 'cda')? "jfreechart-cda.xaction" : "jfreechart.xaction";
+    var xactionFile = (this.chartDefinition.queryType == 'cda') ? "jfreechart-cda.xaction" : "jfreechart.xaction";
     this.callPentahoAction(xactionFile);
   },
 
@@ -21,32 +21,35 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var cd = this.chartDefinition;
     // Merge the stuff with a chartOptions element
-    if (cd == undefined){
+    if(cd == undefined){
       Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
 
     // If the user filled titleKey get the title value from language files
-    if (typeof cd.titleKey !== "undefined" && typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
-      cd.title = this.dashboard.i18nSupport.prop(cd.titleKey);
+    if(typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+      cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
     }
 
     //set parameters string if using cda
     var cdaParameterString = null;
-    if(cd.queryType == "cda"){
-      if ($.isArray(this.parameters)){
+    if(cd.queryType == "cda") {
+      if ($.isArray(this.parameters)) {
         var param;
-        for(var i = 0; i < this.parameters.length; i++){
+        for(var i = 0; i < this.parameters.length; i++) {
           param = this.parameters[i];
-          if($.isArray(param) && param.length >= 2){
+          if($.isArray(param) && param.length >= 2) {
             var name = param[0];
             var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 
             if(value){
               value = doCsvQuoting(value, '=');	//quote if needed for '='
             }
-            if(i == 0) cdaParameterString = "";
-            else cdaParameterString += ";";
+            if(i == 0) {
+              cdaParameterString = "";
+            } else {
+              cdaParameterString += ";";
+            }
 
             cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
           }
@@ -58,13 +61,13 @@ var JFreeChartComponent = BaseComponent.extend({
 
     // go through parameters array and update values
     var parameters = [];
-    for(p in cd0){
+    for(p in cd0) {
       var key = p;
       var value = typeof cd0[p]=='function'?cd0[p]():cd0[p];
       // alert("key: " + key + "; Value: " + value);
       parameters.push([key,value]);
     }
-    if(cdaParameterString != null){
+    if(cdaParameterString != null) {
       parameters.push(["cdaParameterString", cdaParameterString]);
     }
 
@@ -76,28 +79,26 @@ var JFreeChartComponent = BaseComponent.extend({
     // increment runningCalls
     var myself = this;
 
-    this.dashboard.incrementRunningCalls();
+    Dashboards.incrementRunningCalls();
 
-    var myself = this;
     // callback async mode
-    this.dashboard.callPentahoAction(myself,"system", "pentaho-cdf/actions", action, this.getParameters(),function(jXML){
+    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", action, myself.getParameters(), function(jXML) {
 
-      if(jXML != null){
-        if(myself.chartDefinition.caption != undefined){
+      if(jXML != null) {
+        if(myself.chartDefinition.caption != undefined) {
           myself.buildCaptionWrapper($(jXML.find("ExecuteActivityResponse:first-child").text()),action);
-        }
-        else {
-          $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+        } else {
+          $('#' + myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
         }
       }
-      myself.dashboard.decrementRunningCalls();
+      Dashboards.decrementRunningCalls();
 
     });
   },
 
-  buildCaptionWrapper: function(chart,cdfComponent){
+  buildCaptionWrapper: function(chart, cdfComponent) {
 
-    var exportFile = function(type,cd){
+    var exportFile = function(type, cd) {
       var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
       var obj = $.extend({
         solution: "system",
@@ -105,7 +106,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      this.dashboard.post(wd.cdf.endpoints.getExport() ,obj);
+      Dashboards.post(wd.cdf.endpoints.getExport() ,obj);
     };
 
     var myself = this;
@@ -119,17 +120,17 @@ var JFreeChartComponent = BaseComponent.extend({
     chart.attr("rel",myself.htmlObject + "caption");
     chart.attr("class","captify");
 
-    for(o in captionOptions){
-      var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show=='function'?captionOptions[o].show():captionOptions[o].show) ? true : false;
+    for(o in captionOptions) {
+      var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show == 'function' ? captionOptions[o].show() : captionOptions[o].show) ? true : false;
 
       if (this.chartDefinition.queryType != "mdx" && captionOptions[o].title == "Details") {
         show = false;
       };
-      if(show){
-        var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon) : undefined;
+      if(show) {
+        var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon == 'function' ? captionOptions[o].icon() : captionOptions[o].icon) : undefined;
         
         var op = icon != undefined ? $('<div id ="' + captionId + o + '" class=" img ' + icon + '"></div>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
-        if(captionOptions[o].oclass != undefined){
+        if(captionOptions[o].oclass != undefined) {
           op.addClass(captionOptions[o].oclass);
         }
         op.attr("title",captionOptions[o].title);
@@ -154,22 +155,24 @@ var JFreeChartComponent = BaseComponent.extend({
     }, cd.caption));
 
     //Add events after captify has finished.
-    bDetails.one('capityFinished',function(e,wrapper){
+    bDetails.one('capityFinished',function(e, wrapper) {
       var chartOffset = chart.offset();
       var bDetailsOffset = bDetails.offset();
-      if(chart.length > 1){
-        bDetails.bind("mouseenter",function(){
+      if(chart.length > 1) {
+        bDetails.bind("mouseenter",function() {
           $("#" + myself.htmlObject + 'image').trigger('detailsClick',[this]);
         });
         bDetails.css("left",bDetails.position().left + $(chart[1]).width() - bDetails.width() - 5);
-        bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height() );
+        bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height());
         // Use UNIQUE ids (chart[0] vs chart[1])
         chart[0].id = chart[0].id + "Map";
 
       }
-      for(o in captionOptions)
-        if(captionOptions[o].callback != undefined)
+      for(o in captionOptions) {
+        if(captionOptions[o].callback != undefined) {
           $("#" + captionId + o).bind("click",captionOptions[o].callback);
+        }
+      }
     });
 
   }
@@ -181,7 +184,7 @@ var DialComponent = JFreeChartComponent.extend({
   update : function() {
 
     var cd = this.chartDefinition;
-    if (cd == undefined){
+    if(cd == undefined) {
       Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
@@ -191,8 +194,8 @@ var DialComponent = JFreeChartComponent.extend({
     var intervals = cd.intervals;
 
     var colors = cd.colors;
-    if(colors != undefined && intervals.length != colors.length){
-      Dashboards.log("Fatal - Number of intervals differs from number of colors","error");
+    if(colors != undefined && intervals.length != colors.length) {
+      Dashboards.log("Fatal - Number of intervals differs from number of colors", "error");
       return;
     }
 
@@ -206,25 +209,25 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
 
   callPentahoAction: function() {
 
-    this.dashboard.incrementRunningCalls();
+    Dashboards.incrementRunningCalls();
 
     var myself = this;
 
-    this.dashboard.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML){
+    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML) {
 
-      if(jXML != null){
-        var result = wd.helpers.jfreechartHelper.getOpenFlashChart( jXML.find("ExecuteActivityResponse:first-child").text() );
+      if(jXML != null) {
+        var result = wd.helpers.jfreechartHelper.getOpenFlashChart(jXML.find("ExecuteActivityResponse:first-child").text());
         getDataFuntion = result.match(/getData.*\(\)/gi);
         $("#"+myself.htmlObject).html(result);
       }
-      myself.dashboard.decrementRunningCalls();
+      Dashboards.decrementRunningCalls();
 
     });
 
     OpenFlashChartComponent.prototype.onClick = function(value) {
-      if(getDataFuntion != null && myself.chartDefinition.urlTemplate != undefined && myself.chartDefinition.parameterName != undefined){
+      if(getDataFuntion != null && myself.chartDefinition.urlTemplate != undefined && myself.chartDefinition.parameterName != undefined) {
         myself.data = myself.data != undefined ? myself.data : eval('(' + eval(getDataFuntion[0]) + ')');
-        if(myself.data.x_axis != undefined){
+        if(myself.data.x_axis != undefined) {
           var urlTemplate = myself.chartDefinition.urlTemplate.replace("{" + myself.chartDefinition.parameterName + "}",myself.data.x_axis.labels.labels[value]);
           eval(urlTemplate);
         }
@@ -255,7 +258,7 @@ var TrafficComponent = UnmanagedComponent.extend({
         "<div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; " +
         "<div align='middle' class='" + greenClass + "'/>" +
         (tooltip != undefined ? "<br/>" + tooltip : "");
-      if ($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
+      if($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
         $htmlObject.tooltip({
           delay: 0,
           html: true,
@@ -275,11 +278,11 @@ var TrafficComponent = UnmanagedComponent.extend({
   },
   doQuery : function() {
     var cd = this.trafficDefinition;
-    if(cd.path && cd.dataAccessId){
-      var handler = _.bind(function(data){
+    if(cd.path && cd.dataAccessId) {
+      var handler = _.bind(function(data) {
         var filtered;
         if(this.valueAsId) {
-          filtered = data.resultset.map(function(e){
+          filtered = data.resultset.map(function(e) {
             return [e[0],e[0]];
           });
         } else {
@@ -292,30 +295,35 @@ var TrafficComponent = UnmanagedComponent.extend({
     } else {
        // go through parameter array and update values
       var parameters = [];
-      for(p in cd){
+      for(p in cd) {
         var key = p;
-        var value = typeof cd[p]=='function'?cd[p]():cd[p];
+        var value = typeof cd[p] == 'function' ? cd[p]() : cd[p];
         // alert("key: " + key + "; Value: " + value);
         parameters.push([key,value]);
       }
       var myself = this;
       var handler = _.bind(function() {
-        Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
-        function(result){
-          myself.trafficLight(result, true);
-        });
+        Dashboards.callPentahoAction(
+          myself,
+          "system",
+          "pentaho-cdf/actions",
+          "traffic.xaction",
+          parameters,
+          function(result) {
+            myself.trafficLight(result, true);
+          });
       },this);
       this.synchronous(handler);
     }
   },
   update : function() {
     var cd = this.trafficDefinition;
-    if (cd == undefined){
+    if(cd == undefined) {
       Dashboards.log("Fatal - No trafficDefinition passed","error");
       return;
     }
     var intervals = cd.intervals;
-    if (intervals == undefined){
+    if(intervals == undefined) {
       cd.intervals = [-1,1];
     }
     this.doQuery();    
@@ -324,7 +332,7 @@ var TrafficComponent = UnmanagedComponent.extend({
 
 var TimePlotComponent = BaseComponent.extend({
 
-  reset: function(){
+  reset: function() {
     this.timeplot = undefined;
     this.chartDefinition.dateRangeInput = this.InitialDateRangeInput;
     this.listeners = this.InitialListeners;
@@ -339,14 +347,20 @@ var TimePlotComponent = BaseComponent.extend({
     myself.InitialListeners = myself.InitialListeners == undefined ? myself.listeners : myself.InitialListeners;
     myself.InitialDateRangeInput = myself.InitialDateRangeInput == undefined ? cd.dateRangeInput : myself.InitialDateRangeInput;
 
-    if(cd.updateOnDateRangeInputChange != true && myself.timeplot!= undefined && cd.dateRangeInput != undefined){
+    if(cd.updateOnDateRangeInputChange != true && myself.timeplot!= undefined && cd.dateRangeInput != undefined) {
 
-      if(myself.updateTimeplot != false && myself.timeplot._plots.length > 0 ){
+      if(myself.updateTimeplot != false && myself.timeplot._plots.length > 0) {
 
         var lastEventPlot = myself.timeplot._plots[myself.timeplot._plots.length -1];
-        if(lastEventPlot._id == "eventPlot")
-          lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(myself.startDateParameter)+ " 00:00:00",myself.dashboard.getParameterValue(myself.endDateParameter)+ " 23:59:59",
-            lastEventPlot._eventSource,"iso8601",myself.geometry._earliestDate,myself.geometry._latestDate);
+        if(lastEventPlot._id == "eventPlot") {
+          lastEventPlot._addSelectEvent(
+            Dashboards.getParameterValue(myself.startDateParameter) + " 00:00:00",
+            Dashboards.getParameterValue(myself.endDateParameter) + " 23:59:59",
+            lastEventPlot._eventSource,
+            "iso8601",
+            myself.geometry._earliestDate,
+            myself.geometry._latestDate);
+        }
       }
 
       return;
@@ -354,16 +368,16 @@ var TimePlotComponent = BaseComponent.extend({
     }
 
 
-    if(cd.dateRangeInput != undefined && myself.timeplot == undefined){
-      cd.dateRangeInput = myself.dashboard.getComponent(cd.dateRangeInput);
+    if(cd.dateRangeInput != undefined && myself.timeplot == undefined) {
+      cd.dateRangeInput = Dashboards.getComponent(cd.dateRangeInput);
       myself.startDateParameter = cd.dateRangeInput.parameter[0];
       myself.endDateParameter = cd.dateRangeInput.parameter[1];
       myself.listeners = myself.listeners == undefined ? [] : myself.listeners;
       myself.listeners = myself.listeners.concat(myself.startDateParameter).concat(myself.endDateParameter);
     }
 
-    if (typeof Timeplot != "undefined" && myself.dashboard.timePlotColors == undefined ){
-      myself.dashboard.timePlotColors = [new Timeplot.Color('#820000'),
+    if(typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined) {
+      Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
       new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
       new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
       new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
@@ -393,19 +407,19 @@ var TimePlotComponent = BaseComponent.extend({
     var eventSource2 = new Timeplot.DefaultEventSource();
     var timePlot;
 
-    if (cd == undefined){
+    if(cd == undefined) {
       Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
 
     // Set default options:
-    if (cd.showValues == undefined){
+    if(cd.showValues == undefined) {
       cd.showValues = true;
     }
 
 
     var cols = typeof cd['columns']=='function'?cd['columns']():cd['columns'];
-    if (cols == undefined || cols.length == 0){
+    if(cols == undefined || cols.length == 0) {
       Dashboards.log("Fatal - No 'columns' property passed in chartDefinition","error");
       return;
     }
@@ -419,7 +433,7 @@ var TimePlotComponent = BaseComponent.extend({
     for(var i = 0,j=0; i<cols.length; i++,j++) {
 
       j = j > 7 ? 0 : j;
-      title.append('<span id="' + myself.name + 'Plot' + i + 'Header" style="color:' + myself.dashboard.timePlotColors[j].toHexString() + '">' + cols[i] + ' &nbsp;&nbsp;</span>');
+      title.append('<span id="' + myself.name + 'Plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[j].toHexString() + '">' + cols[i] + ' &nbsp;&nbsp;</span>');
 
       var plotInfoOpts = {
         id: myself.name + "Plot" + i,
@@ -427,22 +441,22 @@ var TimePlotComponent = BaseComponent.extend({
         dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
         valueGeometry: timePlotValueGeometry,
         timeGeometry: timePlotTimeGeometry,
-        lineColor: myself.dashboard.timePlotColors[j],
+        lineColor: Dashboards.timePlotColors[j],
         showValues: cd.showValues,
         hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
         showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
-        toolTipFormat: function (value,plot){
-          return  plot._name + " = " + toFormatedString(value);
+        toolTipFormat: function (value,plot) {
+          return plot._name + " = " + toFormatedString(value);
         },
-        headerFormat: function (value,plot){
-          return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";
+        headerFormat: function (value,plot) {
+          return plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";
         }
       };
       if(cd.dots == true) {
-        plotInfoOpts.dotColor = myself.dashboard.timePlotColors[j];
+        plotInfoOpts.dotColor = Dashboards.timePlotColors[j];
       }
       if(cd.fill == true) {
-        plotInfoOpts.fillColor = myself.dashboard.timePlotColors[j].transparency(0.5);
+        plotInfoOpts.fillColor = Dashboards.timePlotColors[j].transparency(0.5);
       }
       plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
@@ -461,8 +475,8 @@ var TimePlotComponent = BaseComponent.extend({
         timeGeometry: timePlotTimeGeometry,
         lineColor: "#FF0000",
         rangeColor: myself.rangeColor,
-        getSelectedRegion: function(start,end){
-          myself.updateDateRangeInput(start,end);
+        getSelectedRegion: function(start, end) {
+          myself.updateDateRangeInput(start, end);
         }
       });
       plotInfo.push(eventSourcePlot);
@@ -492,52 +506,62 @@ var TimePlotComponent = BaseComponent.extend({
           if(cd.dateRangeInput) {
             var lastEventPlot =  timeplot._plots[timeplot._plots.length - 1];
             if(lastEventPlot._id == "eventPlot") {
-              lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
-                eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+              lastEventPlot._addSelectEvent(
+                Dashboards.getParameterValue(myself.startDateParameter) + " 00:00:00",
+                Dashboards.getParameterValue(myself.endDateParameter) + " 23:59:59",
+                eventSource2,
+                "iso8601",
+                timePlotTimeGeometry._earliestDate,
+                timePlotTimeGeometry._latestDate);
             }
           }
         })
       });
-    }
-    else
-      timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
+    } else {
+      timeplot.loadText(timePlotEventSourceUrl, ",", timePlotEventSource, null, null, function() {
         if(cd.dateRangeInput) {
           var lastEventPlot =  timeplot._plots[timeplot._plots.length - 1];
           if(lastEventPlot._id == "eventPlot") {
-            lastEventPlot._addSelectEvent(myself.dashboard.getParameterValue(myself.startDateParameter) + " 00:00:00",myself.dashboard.getParameterValue(myself.endDateParameter) + " 23:59:59",
-              eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+            lastEventPlot._addSelectEvent(
+              Dashboards.getParameterValue(myself.startDateParameter) + " 00:00:00",
+              Dashboards.getParameterValue(myself.endDateParameter) + " 23:59:59",
+              eventSource2,
+              "iso8601",
+              timePlotTimeGeometry._earliestDate,
+              timePlotTimeGeometry._latestDate);
           }
         }
       });
+    }
   },
   filterEvents : function (events, range) {
     var result = [];
     var min = MetaLayer.toDateString(new Date(range.earliestDate));
     var max = MetaLayer.toDateString(new Date(range.latestDate));
-    for(i = 0; i < events.length; i++){
-      if(events[i].start >= min && ((events[i].end == undefined && events[i].start <= max) || events[i].end <= max)){
+    for(i = 0; i < events.length; i++) {
+      if(events[i].start >= min && ((events[i].end == undefined && events[i].start <= max) || events[i].end <= max)) {
         result.push(events[i]);
       }
     }
     return result;
   },
-  updateDateRangeInput: function(start,end){
-    var toDateString = function(d){
+  updateDateRangeInput: function(start,end) {
+    var toDateString = function(d) {
       var currentMonth = "0" + (d.getMonth() + 1);
       var currentDay = "0" + (d.getDate());
       return d.getFullYear() + "-" + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-" + (currentDay.substring(currentDay.length-2, currentDay.length));
     };
-    if(this.chartDefinition.dateRangeInput != undefined ){
-      if(start > end){
+    if(this.chartDefinition.dateRangeInput != undefined) {
+      if(start > end) {
         var aux = start;
         start = end;
         end = aux;
       }
-      this.dashboard.setParameter(this.startDateParameter, toDateString(start));
-      this.dashboard.setParameter(this.endDateParameter , toDateString(end));
+      Dashboards.setParameter(this.startDateParameter, toDateString(start));
+      Dashboards.setParameter(this.endDateParameter , toDateString(end));
       this.updateTimeplot = false;
-      this.dashboard.update(this.chartDefinition.dateRangeInput);
-      this.dashboard.fireChange(this.startDateParameter,toDateString(start));
+      Dashboards.update(this.chartDefinition.dateRangeInput);
+      Dashboards.fireChange(this.startDateParameter,toDateString(start));
       this.updateTimeplot = true;
     }
   }

@@ -12,7 +12,7 @@
  */
 
 if(typeof CONTEXT_PATH != "undefined") { // production
-  requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+  requireCfg['paths']['cdf'] = CONTEXT_PATH + 'content/pentaho-cdf/js-legacy';
 } else { // build
   requireCfg['paths']['cdf'] = "cdf";
 }
@@ -37,7 +37,7 @@ requireCfg['shim']['cdf/cdf-module'] = [
 requireCfg['shim']['cdf/CoreComponents'] = [
   'cdf/components/core',
   'cdf/components/ccc',
-  'cdf/components/input'  ,
+  'cdf/components/input',
   'cdf/components/jfreechart',    
   'cdf/components/maps',
   'cdf/components/navigation',
@@ -71,19 +71,19 @@ requireCfg['shim']['cdf/cdf-base'] = [
   'cdf/wd'
 ];
 
-requireCfg['shim']['cdf/lib/backbone/backbone']     = ['cdf/lib/underscore/underscore'];
+requireCfg['shim']['cdf/lib/backbone/backbone']    = ['cdf/lib/underscore/underscore'];
 
-requireCfg['shim']['cdf/Dashboards.Startup']        = ['cdf/lib/shims'];
-requireCfg['shim']['cdf/Dashboards.AddIns']         = ['cdf/Dashboards.Main', 'cdf/Dashboards.Query'];
-requireCfg['shim']['cdf/Dashboards.Bookmarks']      = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Legacy']         = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Notifications']  = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Query']          = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.RefreshEngine']  = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Utils']          = ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Startup']       = ['cdf/lib/shims'];
+requireCfg['shim']['cdf/Dashboards.AddIns']        = ['cdf/Dashboards.Main', 'cdf/Dashboards.Query'];
+requireCfg['shim']['cdf/Dashboards.Bookmarks']     = ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Legacy']        = ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Notifications'] = ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Query']         = ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.RefreshEngine'] = ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Utils']         = ['cdf/Dashboards.Main'];
 
-requireCfg['shim']['cdf/components/core']           = ['cdf/Dashboards'];
-requireCfg['shim']['cdf/components/input']          = [
+requireCfg['shim']['cdf/components/core']          = ['cdf/Dashboards'];
+requireCfg['shim']['cdf/components/input']         = [
   'cdf/components/core',
   'cdf/inputHelper'
 ];
@@ -104,7 +104,7 @@ requireCfg['shim']['cdf/components/Pentaho.JPivot']     = ['cdf/components/core'
 requireCfg['shim']['cdf/components/Pentaho.Reporting']  = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/Pentaho.XAction']    = ['cdf/components/core'];
 
-requireCfg['shim']['cdf/jquery/jquery'] = {
+requireCfg['shim']['cdf/lib/jquery/jquery'] = {
   exports: '$',
   init: function() {
     return $;

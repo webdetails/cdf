@@ -7,6 +7,7 @@ module.exports = function(config) {
     // base path, that will be used to resolve files and exclude
     basePath: '../',
 
+
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
@@ -19,7 +20,7 @@ module.exports = function(config) {
       { pattern: 'cdf/js-modules/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
-      { pattern: 'test-js/**/*.js', included: false },
+      { pattern: 'test-js/**/*-spec.js', included: false },
       'config/context.js',
       'build-res/requireCfg-raw.js',
       'config/require-config.js'
@@ -27,13 +28,13 @@ module.exports = function(config) {
 
 
     // list of files to exclude
-    exclude: [],
+    exclude: ['test-js/legacy/**/*.js'],
 
-
+    /*
     preprocessors: {
         "cdf/js/*.js" : 'coverage'
         
-    },
+    },*/
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -74,7 +75,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
     // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
     autoWatchBatchDelay: 250,
@@ -93,19 +94,20 @@ module.exports = function(config) {
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
-
+    browserNoActivityTimeout: 20000,
+    
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
     singleRun: true,
 
     plugins: [
-     'karma-jasmine',
-     'karma-requirejs',
-     'karma-junit-reporter',
-     'karma-html-reporter',
-     'karma-coverage',
-     'karma-phantomjs-launcher',
-     'karma-chrome-launcher'
+      'karma-jasmine',
+      'karma-requirejs',
+      'karma-junit-reporter',
+      'karma-html-reporter',
+      'karma-coverage',
+      'karma-phantomjs-launcher',
+      'karma-chrome-launcher'
     ]
   });
 };
