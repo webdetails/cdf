@@ -18,7 +18,6 @@ if(typeof CONTEXT_PATH != "undefined") { // production
 }
 
 requireCfg['shim']['cdf/cdf-module'] = [
-  'cdf/lib/jquery-migrate-1.2.1',
   'cdf/lib/jquery/jquery.ui',
   'cdf/lib/impromptu/jquery-impromptu',
   'cdf/lib/jquery-ui-datepicker-i18n',
@@ -56,6 +55,7 @@ requireCfg['shim']['cdf/Dashboards'] = [
   'cdf/Dashboards.RefreshEngine',
   'cdf/Dashboards.Utils'
 ];
+
 requireCfg['shim']['cdf/Dashboards.Main'] = [
   'cdf/lib/base/Base',
   'cdf/lib/underscore/underscore',
@@ -67,9 +67,8 @@ requireCfg['shim']['cdf/Dashboards.Main'] = [
   'cdf/Dashboards.Startup',
   'cdf/cdf-base'
 ];
-requireCfg['shim']['cdf/cdf-base'] = [
-  'cdf/wd'
-];
+
+requireCfg['shim']['cdf/cdf-base'] = ['cdf/wd'];
 
 requireCfg['shim']['cdf/lib/backbone/backbone']    = ['cdf/lib/underscore/underscore'];
 
@@ -111,18 +110,23 @@ requireCfg['shim']['cdf/lib/jquery/jquery'] = {
   }
 }
 
-requireCfg['shim']['cdf/lib/jquery-migrate-1.2.1']         = ['cdf/lib/jquery/jquery'];
+// AMD compatible libs already define themselves anonymously, yet depend on 
+// module "jquery", which is defined by jQuery.js
+requireCfg['map']['cdf'] = {
+    'jquery': 'cdf/lib/jquery/jquery'
+};
+//requireCfg['shim']['cdf/lib/blockUI/jquery.blockUI']     = ['cdf/lib/jquery/jquery'];
+//requireCfg['shim']['cdf/lib/bgiframe/jquery.bgiframe']   = ['cdf/lib/jquery/jquery'];
+//requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline'] = ['cdf/lib/jquery/jquery'];
+
 requireCfg['shim']['cdf/lib/jquery/jquery.ui']             = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/impromptu/jquery-impromptu']   = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/jquery-ui-datepicker-i18n']    = ['cdf/lib/jquery/jquery.ui'];
-requireCfg['shim']['cdf/lib/bgiframe/jquery.bgiframe']     = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/blockUI/jquery.blockUI']       = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/corner/jquery.corner']         = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/eventstack/jquery.eventstack'] = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/i18n/jquery.i18n.properties']  = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/jdMenu/jquery.jdMenu']         = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/positionBy/jquery.positionBy'] = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline']   = ['cdf/lib/jquery/jquery'];
 
 requireCfg['shim']['cdf/lib/uriQueryParser/jquery-queryParser'] = ['cdf/lib/jquery/jquery'];
 

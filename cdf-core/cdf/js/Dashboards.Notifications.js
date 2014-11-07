@@ -17,7 +17,7 @@ Dashboards.getErrorObj = function(errorCode) {
 
 Dashboards.parseServerError = function(resp, txtStatus, error) {
   var out = {};
-  var regexs = [{ match: /Query timeout/ , msg: Dashboards.getErrorObj('QUERY_TIMEOUT').msg  }];
+  var regexs = [{match: /Query timeout/ , msg: Dashboards.getErrorObj('QUERY_TIMEOUT').msg}];
 
   out.error = error;
   out.msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
@@ -36,7 +36,7 @@ Dashboards.parseServerError = function(resp, txtStatus, error) {
 };
 
 Dashboards.handleServerError = function() {
-  var err = Dashboards.parseServerError.apply( this, arguments );
+  var err = Dashboards.parseServerError.apply(this, arguments);
 
   Dashboards.errorNotification(err);
   Dashboards.trigger('cdf cdf:serverError', this);
@@ -71,7 +71,7 @@ Dashboards.loginAlert = function(newOpts) {
       window.location.reload(true);
     }
   };
-  opts = _.extend( {} , opts, newOpts );
+  opts = _.extend({} , opts, newOpts);
 
   wd.cdf.popups.okPopup.show(opts);
   this.trigger('cdf cdf:loginError', this);
@@ -103,7 +103,6 @@ Dashboards.checkServer = function() {
   });
   return retVal;
 };
-
 
 /*
  * Popups (Move somewhere else?)
@@ -161,7 +160,6 @@ wd.cdf.popups.okPopup = {
   firstRender: true
 };
 
-
 /*
  * Error information divs
  *
@@ -184,7 +182,7 @@ wd.cdf.notifications.component = {
     desc: "Error processing component."
   },
   render: function(ph, newOpts) {
-    var opts = _.extend( {}, this.defaults, newOpts);
+    var opts = _.extend({}, this.defaults, newOpts);
     opts.isSmallComponent = ($(ph).width() < 300);
     $(ph).empty().html(Mustache.render(this.template, opts));
     var $nt = $(ph).find('.cdfNotification');
@@ -200,38 +198,48 @@ wd.cdf.notifications.growl = {
     "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
     "  </div>" +
     "</div>",
+
   defaults:{
     title: 'Title',
     desc: 'Default CDF notification.',
     timeout: 4000,
     onUnblock: function() { return true; },
-    css: $.extend(
-      {},
-      $.blockUI.defaults.growlCSS,
-      {position: 'absolute' , width: '100%' , top:'10px'}),
+    css: {position: 'absolute', width: '100%', top:'10px'},
     showOverlay: false,
     fadeIn: 700,
     fadeOut: 1000,
     centerY:false
   },
+
   render: function (newOpts) {
-    var opts = _.extend( {}, this.defaults, newOpts),
-      $m = $(Mustache.render(this.template, opts)),
-      myself = this;
+    var myself = this;
+
+    if(myself.firstRender) {
+      myself.defaults.css = $.extend({}, $.blockUI.defaults.growlCSS, myself.defaults.css);
+    }
+
+    var opts = _.extend({}, myself.defaults, newOpts),
+      $m = $(Mustache.render(myself.template, opts)),
+      outerUnblock = opts.onUnblock;
+
     opts.message = $m;
-    var outerUnblock = opts.onUnblock;
+
     opts.onUnblock = function() {
       myself.$el.hide();
       outerUnblock.call(this);
     };
+
     if(myself.firstRender) {
       myself.$el = $('<div/>')
         .addClass('cdfNotificationContainer')
         .hide()
         .appendTo('body');
+
       myself.firstRender = false;
     }
+
     myself.$el.show().block(opts);
   },
+
   firstRender: true
 };
