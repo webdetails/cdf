@@ -63,7 +63,7 @@ requireCfg['shim']['cdf/Dashboards.Main'] = [
   'cdf/lib/mustache/mustache',
   'cdf/lib/shims',
   'cdf/lib/blockUI/jquery.blockUI',
-  'cdf/lib/uriQueryParser/jquery-queryParser.js',
+  'cdf/lib/uriQueryParser/jquery-queryParser',
   'cdf/Dashboards.Startup',
   'cdf/cdf-base'
 ];
@@ -124,7 +124,7 @@ requireCfg['shim']['cdf/lib/jdMenu/jquery.jdMenu']         = ['cdf/lib/jquery/jq
 requireCfg['shim']['cdf/lib/positionBy/jquery.positionBy'] = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline']   = ['cdf/lib/jquery/jquery'];
 
-requireCfg['shim']['cdf/lib/uriQueryParser/jquery-queryParser.js'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/uriQueryParser/jquery-queryParser'] = ['cdf/lib/jquery/jquery'];
 
 requireCfg['shim']['cdf/lib/simile/ajax/scripts/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
 
