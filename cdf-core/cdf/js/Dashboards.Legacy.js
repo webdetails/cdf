@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 
 Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
@@ -46,7 +46,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
       data: params,
       complete: function (XMLHttpRequest, textStatus) {
         /* CDF-271 jQuery 1.9.1 bug #13388 */
-        if(typeof XMLHttpRequest.responseXML == "undefined") {
+        if (typeof XMLHttpRequest.responseXML == "undefined") {
           func(jQuery.parseXML(XMLHttpRequest.responseText));
         } else {
           func(XMLHttpRequest.responseXML);
@@ -72,7 +72,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
   });
   if (returnType == 'xml') {
     /* CDF-271 jQuery 1.9.1 bug #13388 */
-    if(typeof result.responseXML == "undefined") {
+    if (typeof result.responseXML == "undefined") {
       return jQuery.parseXML(result.responseText);
     } else {
       return result.responseXML;

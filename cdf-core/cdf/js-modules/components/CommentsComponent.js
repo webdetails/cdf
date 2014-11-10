@@ -207,7 +207,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "../lib/underscore", "../l
         },
   
         render: function() {
-          this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));//myself.dataTemplates.comments(this.attributes));
+          this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));
           return this.$el;
         },
   
@@ -274,9 +274,9 @@ define(['./CommentsComponent.ext', '../lib/mustache', "../lib/underscore", "../l
           _(this.collection.models).each(function(comment) {
             $commentsElem.append(this.renderSingeComment(comment));
           }, this);
-          var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));//myself.dataTemplates.addComments(myself.options.permissions));
-          var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));//myself.dataTemplates.paginateComments(myself.options.paginate));
-          this.$el.empty().append($commentsElem, $add, $paginate)
+          var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
+          var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
+          this.$el.empty().append($commentsElem, $add, $paginate);
           $renderElem.append(this.$el);
           this.updateNavigateButtons();
         },

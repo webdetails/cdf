@@ -1,16 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
-
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 Dashboards.escapeHtml = function(input) {
   // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
@@ -58,6 +57,7 @@ Dashboards.getLocationSearchString = function() {
       urlParams = $.parseQuery( queryString );
     }
     return urlParams[parameterName] || "";
+
   };
 
   // Conversion functions
@@ -640,102 +640,6 @@ sprintf = sprintfWrapper.init;
     throw new Error("browser does not support setters");
   }
 })();
-
-
-
-Dashboards.post = function(url,obj){
-
-  var form = '<form action="' + url + '" method="post">';
-  for(var o in obj){
-
-    var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
-
-    if (typeof v == 'string') {
-      v = v.replace(/"/g , "\'")
-    }
-
-    form += '"<input type="hidden" name="' + o + '" value="' + v + '"/>';
-  }
-  form += '</form>';
-  jQuery(form).appendTo('body').submit().remove();
-};
-
-Dashboards.clone = function clone(obj) {
-
-  var c = obj instanceof Array ? [] : {};
-
-  for (var i in obj) {
-    var prop = obj[i];
-
-    if (typeof prop == 'object') {
-      if (prop instanceof Array) {
-        c[i] = [];
-
-        for (var j = 0; j < prop.length; j++) {
-          if (typeof prop[j] != 'object') {
-            c[i].push(prop[j]);
-          } else {
-            c[i].push(this.clone(prop[j]));
-          }
-        }
-      } else {
-        c[i] = this.clone(prop);
-      }
-    } else {
-      c[i] = prop;
-    }
-  }
-
-  return c;
-};
-
-Dashboards.addArgs = function(url){
-  if(url != undefined)
-    this.args = getURLParameters(url);
-};
-
-Dashboards.getArgValue = function(key){
-  for (i=0;i<this.args.length;i++){
-    if(this.args[i][0] == key){
-      return this.args[i][1];
-    }
-  }
-
-  return undefined;
-};
-
-Dashboards.ev = function(o){
-  return typeof o == 'function'?o():o
-};
-
-Dashboards.registerEvent = function (ev, callback) {
-  if (typeof this.events == 'undefined') {
-    this.events = {};
-  }
-  this.events[ev] = callback;
-};
-
-
-
-Dashboards.debug = 1;
-
-Dashboards.syncDebugLevel = function() {
-  var level = 1; // log errors
-  try {
-    var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
-    var url = urlIfHasDebug(window.location.href) ||
-        urlIfHasDebug(window.top.location.href);
-    if(url) {
-      var m = /\bdebugLevel=(\d+)/.exec(url);
-      level = m ? (+m[1]) : 3;
-    }
-  } catch(ex) {
-    // swallow
-  }
-
-  return this.debug = level;
-};
-
 
 
 

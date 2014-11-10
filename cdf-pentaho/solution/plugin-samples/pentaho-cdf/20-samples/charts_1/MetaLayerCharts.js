@@ -26,18 +26,18 @@ MetaLayerCharts = {
   pieChartClicked: function (value) {
     if (value == "All Regions") {
       MetaLayerCharts.regionsMeasure = "[Region].[All Regions].Children";
-      this.dashboard.fireChange("MetaLayerCharts.regionsMeasure", MetaLayerCharts.regionsMeasure);
+      Dashboards.fireChange("MetaLayerCharts.regionsMeasure", MetaLayerCharts.regionsMeasure);
     }
     else {
       MetaLayerCharts.selectedRegionMeasure = "[Region].[All Regions].[" + value + "]";
-      this.dashboard.fireChange("MetaLayerCharts.selectedRegionMeasure", MetaLayerCharts.selectedRegionMeasure);
+      Dashboards.fireChange("MetaLayerCharts.selectedRegionMeasure", MetaLayerCharts.selectedRegionMeasure);
     }
   },
 
   barChartClicked: function (value) {
 
     MetaLayerCharts.departmentMeasure = "[Department].[All Departments].[" + value + "]";
-    this.dashboard.fireChange("MetaLayerCharts.departmentMeasure", encode_prepare(MetaLayerCharts.departmentMeasure));
+    Dashboards.fireChange("MetaLayerCharts.departmentMeasure", encode_prepare(MetaLayerCharts.departmentMeasure));
   },
 
   pieChartDefinition: {

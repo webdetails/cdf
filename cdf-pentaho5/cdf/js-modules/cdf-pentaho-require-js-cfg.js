@@ -35,11 +35,11 @@
   /*
    * component shim for Dashboard
    */
-  requireShims['cdf/components/ExecutePrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PrptComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/ExecutePrptComponent']  = ['cdf/Dashboard'];
+  requireShims['cdf/components/PrptComponent']         = ['cdf/Dashboard'];
   requireShims['cdf/components/SchedulePrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ContentListComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/NavigatorComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PageTitleComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/ContentListComponent']  = ['cdf/Dashboard'];
+  requireShims['cdf/components/NavigatorComponent']    = ['cdf/Dashboard'];
+  requireShims['cdf/components/PageTitleComponent']    = ['cdf/Dashboard'];
 
 })();

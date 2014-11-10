@@ -13,43 +13,69 @@
 
 requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
 requireCfg['shim']['cdf/cdf-module'] = [
-  'cdf/lib/jquery/jquery',
-  'cdf/lib/jquery-migrate-1.2.1',
-  'cdf/lib/jquery/jquery.ui',
-  'cdf/lib/impromptu/jquery-impromptu',
-  'cdf/lib/jquery-ui-datepicker-i18n',
-  'cdf/lib/bgiframe/jquery.bgiframe',
-  'cdf/lib/blockUI/jquery.blockUI',
-  'cdf/lib/corner/jquery.corner',
-  'cdf/lib/eventstack/jquery.eventstack',
-  'cdf/lib/i18n/jquery.i18n.properties',
-  'cdf/lib/jdMenu/jquery.jdMenu',
-  'cdf/lib/positionBy/jquery.positionBy',
-  'cdf/lib/sparkline/jquery.sparkline',
-  'cdf/lib/simile/ajax/simile-ajax-api',
-  'cdf/lib/simile/ajax/scripts/json',
-  'cdf/lib/json',
-  'cdf/lib/underscore/underscore',
-  'cdf/lib/backbone/backbone',
-  'cdf/lib/mustache/mustache',
-  'cdf/lib/base/Base',
+  'cdf/jquery/jquery',
+  'cdf/jquery-migrate-1.2.1',
+  'cdf/jquery/jquery.ui',
+  'cdf/impromptu/jquery-impromptu',
+  'cdf/jquery-ui-datepicker-i18n',
+  'cdf/bgiframe/jquery.bgiframe',
+  'cdf/blockUI/jquery.blockUI',
+  'cdf/corner/jquery.corner',
+  'cdf/eventstack/jquery.eventstack',
+  'cdf/i18n/jquery.i18n.properties',
+  'cdf/jdMenu/jquery.jdMenu',
+  'cdf/positionBy/jquery.positionBy',
+  'cdf/sparkline/jquery.sparkline',
+  'cdf/simile/ajax/simile-ajax-api',
+  'cdf/simile/ajax/scripts/json',
+  'cdf/json',
+  'cdf/underscore/underscore',
+  'cdf/backbone/backbone',
+  'cdf/mustache/mustache',
+  'cdf/base/Base',
   'cdf/Dashboards', 
-  'cdf/lib/shims',
+  'cdf/shims',
   'cdf/lib/CCC/protovis',
   'cdf/lib/CCC/tipsy',
   'cdf/lib/CCC/jquery.tipsy',
   'cdf/lib/CCC/def',
   'cdf/lib/CCC/cdo',
   'cdf/lib/CCC/pvc-d1.0',
-  'cdf/lib/CCC/compatVersion'
+  'cdf/lib/CCC/compatVersion'/*,       This should only be introduced when we migrate to Sugar  
+  'cdf/components/ccc',
+  'cdf/components/core',
+  'cdf/components/input'  ,
+  'cdf/components/jfreechart',    
+  'cdf/components/maps',
+  'cdf/components/navigation',
+  'cdf/components/pentaho',
+  'cdf/components/simpleautocomplete',
+  'cdf/components/table'
+  */
 ];
 
+/* This should only be introduced when we migrate to Sugar
+requireCfg['shim']['cdf/CoreComponents'] = [
+  'cdf/components/core',
+  'cdf/components/ccc',
+  'cdf/components/input'  ,
+  'cdf/components/jfreechart',    
+  'cdf/components/maps',
+  'cdf/components/navigation',
+  'cdf/components/pentaho',
+  'cdf/components/simpleautocomplete',
+  'cdf/components/table'
+];
+*/
+
+requireCfg['shim']['cdf/cdf-base'] = ['cdf/wd'];
+
 requireCfg['shim']['cdf/Dashboards'] = [
-  'cdf/lib/base/Base',
-  'cdf/lib/underscore/underscore',
-  'cdf/lib/backbone/backbone',
-  'cdf/lib/mustache/mustache',
-  'cdf/lib/shims',
+  'cdf/base/Base',
+  'cdf/underscore/underscore',
+  'cdf/backbone/backbone',
+  'cdf/mustache/mustache',
+  'cdf/shims',
   'cdf/Dashboards.Main',
   'cdf/Dashboards.Query',
   'cdf/Dashboards.AddIns',
@@ -60,21 +86,17 @@ requireCfg['shim']['cdf/Dashboards'] = [
   'cdf/Dashboards.Utils'
 ];
 requireCfg['shim']['cdf/Dashboards.Main'] = [
-  'cdf/lib/base/Base',
-  'cdf/lib/underscore/underscore',
-  'cdf/lib/backbone/backbone',
-  'cdf/lib/mustache/mustache',
-  'cdf/lib/shims',
-  'cdf/lib/blockUI/jquery.blockUI',
-  'cdf/lib/uriQueryParser/jquery-queryParser.js',
+  'cdf/base/Base',
+  'cdf/underscore/underscore',
+  'cdf/backbone/backbone',
+  'cdf/mustache/mustache',
+  'cdf/shims',
+  'cdf/blockUI/jquery.blockUI',
+  'cdf/uriQueryParser/jquery-queryParser.js',
   'cdf/Dashboards.Startup',
   'cdf/cdf-base'
 ];
-requireCfg['shim']['cdf/cdf-base'] = [
-    'cdf/wd'
-];
-
-requireCfg['shim']['cdf/Dashboards.Startup']       = ['cdf/lib/shims'];
+requireCfg['shim']['cdf/Dashboards.Startup']       = ['cdf/shims'];
 requireCfg['shim']['cdf/Dashboards.AddIns']        = ['cdf/Dashboards.Main', 'cdf/Dashboards.Query'];
 requireCfg['shim']['cdf/Dashboards.Bookmarks']     = ['cdf/Dashboards.Main'];
 requireCfg['shim']['cdf/Dashboards.Legacy']        = ['cdf/Dashboards.Main'];
@@ -84,13 +106,14 @@ requireCfg['shim']['cdf/Dashboards.RefreshEngine'] = ['cdf/Dashboards.Main'];
 requireCfg['shim']['cdf/Dashboards.Utils']         = ['cdf/Dashboards.Main'];
 
 
-requireCfg['shim']['cdf/lib/underscore/underscore'] = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/backbone/backbone']     = ['cdf/lib/underscore/underscore'];
-requireCfg['shim']['cdf/lib/CCC/compatVersion']     = ['cdf/lib/CCC/pvc-d1.0'];
-requireCfg['shim']['cdf/lib/CCC/pvc-d1.0']          = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/tipsy', 'cdf/lib/CCC/jquery.tipsy', 'cdf/lib/CCC/cdo', 'cdf/lib/CCC/def'];
-requireCfg['shim']['cdf/lib/CCC/cdo']               = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/def'];
-requireCfg['shim']['cdf/lib/CCC/tipsy']             = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/jquery.tipsy'];
-requireCfg['shim']['cdf/lib/CCC/jquery.tipsy']      = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/underscore/underscore'] = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/backbone/backbone']     = ['cdf/underscore/underscore'];
+
+requireCfg['shim']['cdf/lib/CCC/compatVersion'] = ['cdf/lib/CCC/pvc-d1.0'];
+requireCfg['shim']['cdf/lib/CCC/pvc-d1.0']      = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/tipsy', 'cdf/lib/CCC/jquery.tipsy', 'cdf/lib/CCC/cdo', 'cdf/lib/CCC/def'];
+requireCfg['shim']['cdf/lib/CCC/cdo']           = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/def'];
+requireCfg['shim']['cdf/lib/CCC/tipsy']         = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/jquery.tipsy'];
+requireCfg['shim']['cdf/lib/CCC/jquery.tipsy']  = ['cdf/jquery/jquery'];
 
 requireCfg['shim']['cdf/components/core']       = ['cdf/Dashboards'];
 requireCfg['shim']['cdf/components/ccc']        = ['cdf/components/core', 'cdf/lib/CCC/pvc-d1.0'];
@@ -98,7 +121,7 @@ requireCfg['shim']['cdf/components/input']      = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/maps']       = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/navigation'] = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/pentaho']    = [
+requireCfg['shim']['cdf/components/pentaho'] = [
   'cdf/components/core',
   'cdf/components/Pentaho.JPivot',
   'cdf/components/Pentaho.XAction',
@@ -106,26 +129,23 @@ requireCfg['shim']['cdf/components/pentaho']    = [
   'cdf/components/Pentaho.Reporting'
 ];
 requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'];
-
 requireCfg['shim']['cdf/components/table'] = ['cdf/components/core'];
 
-requireCfg['shim']['cdf/lib/jquery-migrate-1.2.1']         = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/jquery/jquery.ui']             = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/impromptu/jquery-impromptu']   = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/jquery-ui-datepicker-i18n']    = ['cdf/lib/jquery/jquery.ui'];
-requireCfg['shim']['cdf/lib/bgiframe/jquery.bgiframe']     = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/blockUI/jquery.blockUI']       = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/corner/jquery.corner']         = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/eventstack/jquery.eventstack'] = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/i18n/jquery.i18n.properties']  = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/jdMenu/jquery.jdMenu']         = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/positionBy/jquery.positionBy'] = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline']   = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/jquery-migrate-1.2.1']         = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/jquery/jquery.ui']             = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/impromptu/jquery-impromptu']   = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/jquery-ui-datepicker-i18n']    = ['cdf/jquery/jquery.ui'];
+requireCfg['shim']['cdf/bgiframe/jquery.bgiframe']     = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/blockUI/jquery.blockUI']       = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/corner/jquery.corner']         = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/eventstack/jquery.eventstack'] = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/i18n/jquery.i18n.properties']  = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/jdMenu/jquery.jdMenu']         = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/positionBy/jquery.positionBy'] = ['cdf/jquery/jquery'];
+requireCfg['shim']['cdf/sparkline/jquery.sparkline']   = ['cdf/jquery/jquery'];
 
-requireCfg['shim']['cdf/lib/uriQueryParser/jquery-queryParser.js'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/uriQueryParser/jquery-queryParser.js'] = ['cdf/jquery/jquery'];
 
-requireCfg['shim']['cdf/lib/simile/ajax/scripts/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
+requireCfg['shim']['cdf/simile/ajax/scripts/json'] = ['cdf/simile/ajax/simile-ajax-api'];
 
-requireCfg['shim']['cdf/lib/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
-
-
+requireCfg['shim']['cdf/json'] = ['cdf/simile/ajax/simile-ajax-api'];

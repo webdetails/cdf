@@ -13,14 +13,14 @@
 
 var VisualizationAPIComponent = UnmanagedComponent.extend({
 
-  update: function () {
+  update: function() {
 
     var render = _.bind(this.render, this);
     this.triggerQuery(this.queryDefinition, render);
 
   },
 
-  render: function (data) {
+  render: function(data) {
 
     var vizDiv = this.placeholder()[0];
     var visualization = this.getVisualization();
@@ -35,20 +35,20 @@ var VisualizationAPIComponent = UnmanagedComponent.extend({
 
   },
 
-  getVizOptions: function () {
+  getVizOptions: function() {
     var options = {};
-    $.each(this.vizOptions, function (i, v) {
-      var key = v[0], value = Dashboards.getParameterValue( v[1] );
+    $.each(this.vizOptions, function(i, v) {
+      var key = v[0], value = Dashboards.getParameterValue(v[1]);
       options[key] = value;
     });
     return options;
   },
 
-  getVisualization: function () {
+  getVisualization: function() {
     return pentaho.visualizations.getById(this.vizId);
   },
 
-  createGoogleDataTable: function (resultJson) {
+  createGoogleDataTable: function(resultJson) {
     return new pentaho.DataTable(resultJson);
   }
 
