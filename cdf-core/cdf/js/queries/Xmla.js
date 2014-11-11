@@ -25,6 +25,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Also available (dual-licensed) under the Apache 2.0 license - http://www.apache.org/licenses/LICENSE-2.0.html
 */
 
 /**
