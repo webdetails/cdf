@@ -30,11 +30,12 @@ define(['./AnalyzerComponent.ext', '../lib/jquery', './BaseComponent'],
 
       var callVar = this.isEditMode() ? "editor" : "viewer";
 
-      $.extend( options, { ts: new Date().getTime() } );
-      var url = AnalyzerComponentExt.getAnalyzer( pathSegments, callVar, options );
+      $.extend(options, {ts: new Date().getTime()});
 
-      var iframe = this.generateIframe( url );
-      $( "#" + this.htmlObject ).html( iframe );
+      var url = AnalyzerComponentExt.getAnalyzer(pathSegments, callVar, options);
+
+      var iframe = this.generateIframe(url);
+      $("#" + this.htmlObject).html(iframe);
 
     },
 

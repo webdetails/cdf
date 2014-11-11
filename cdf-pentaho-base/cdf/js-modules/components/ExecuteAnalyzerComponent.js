@@ -23,10 +23,10 @@ define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', '../l
       if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
         // create a button
         o = $("<button/>").appendTo(o.empty());
-        if(o[0].tagName == "DIV"){
+        if(o[0].tagName == "DIV") {
           o.wrap("<span/>");
         }
-        if(this.label != undefined){
+        if(this.label != undefined) {
           o.text(this.label);
         }
         o.button();
@@ -46,13 +46,13 @@ define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', '../l
       var parameters = this.getOptions();
       var path = {};
       if(parameters.solution) {
-        $.extend( path, {solution: parameters.solution});
+        $.extend(path, {solution: parameters.solution});
       }
       if(parameters.path) {
-        $.extend( path, {path: parameters.path});
+        $.extend(path, {path: parameters.path});
       }
       if(parameters.action) {
-        $.extend( path, {action: parameters.action});
+        $.extend(path, {action: parameters.action});
       }
       delete parameters.solution;
       delete parameters.path;

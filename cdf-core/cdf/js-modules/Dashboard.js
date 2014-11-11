@@ -33,6 +33,7 @@ define([
   './components/UnmanagedComponent',
   'css!./Dashboard'],
   function(Dashboard) {
-    return Dashboard;
-  }
-);
+
+  return Dashboard;
+
+});

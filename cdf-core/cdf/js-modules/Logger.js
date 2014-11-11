@@ -16,34 +16,34 @@ define(function() {
   var logger = {
     loglevels: ['debug', 'info', 'warn', 'error', 'exception'],
     loglevel: 'debug',
-    log: function (m, type){    
+    log: function(m, type) {    
       type = type || "info";
       if(this.loglevels.indexOf(type) < this.loglevels.indexOf(this.loglevel)) {
         return;
       }
       if(typeof console !== "undefined") {                
-          if(type && console[type]) {
-            console[type]("["+ type +"] WD: " + m);
-          } else if (type === 'exception' && !console.exception) {
-            console.error("["+ type +"] WD: "  + (m.stack || m));
-          } else {
-            console.log("WD: " + m);
-          }
+        if(type && console[type]) {
+          console[type]("[" + type + "] WD: " + m);
+        } else if (type === 'exception' && !console.exception) {
+          console.error("[" + type + "] WD: "  + (m.stack || m));
+        } else {
+          console.log("WD: " + m);
+        }
       }
     },
-    debug: function(m){
+    debug: function(m) {
       return this.log(m, "debug");
     },
-    info: function(m){
+    info: function(m) {
       return this.log(m, "info");
     },
-    warn: function(m){
+    warn: function(m) {
       return this.log(m, "warn");
     },
-    error: function(m){
+    error: function(m) {
       return this.log(m, "error");
     },
-    exception: function(m){
+    exception: function(m) {
       return this.log(m, "exception");
     }                       
   };
