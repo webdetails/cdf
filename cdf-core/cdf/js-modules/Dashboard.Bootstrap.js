@@ -17,8 +17,8 @@ define([
   'css!cdf/lib/font-awesome/css/font-awesome.css',
   './lib/html5shiv',
   './lib/respond'],
+  function(Dashboard) {
 
-  function (Dashboard) {
-    return Dashboard;
-  }
-);
+  return Dashboard;
+
+});
