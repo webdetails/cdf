@@ -11,6 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['jquery'], function(jq) {
-  return jq;
+define(['./BaseCccComponent', '../../lib/CCC/pvc'],
+  function(BaseCccComponent, pvc) {
+
+  var CccTreemapChartComponent = BaseCccComponent.extend({
+    cccType: pvc.TreemapChart
+  });
+
+  return CccTreemapChartComponent;
+
 });

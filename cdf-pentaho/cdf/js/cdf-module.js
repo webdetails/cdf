@@ -12,9 +12,9 @@
  */
 
 define([
-  'cdf/jquery/jquery',
+  'cdf/jQuery/jquery',
   'cdf/jquery-migrate-1.2.1',
-  'cdf/jquery/jquery.ui',
+  'cdf/jQuery/jquery.ui',
   'cdf/impromptu/jquery-impromptu',
   'cdf/bgiframe/jquery.bgiframe',
   'cdf/blockUI/jquery.blockUI',

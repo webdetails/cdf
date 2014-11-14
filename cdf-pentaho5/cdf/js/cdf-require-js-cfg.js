@@ -18,7 +18,7 @@ if(typeof CONTEXT_PATH != "undefined") { // production
 }
 
 requireCfg['shim']['cdf/cdf-module'] = [
-  'cdf/lib/jquery/jquery.ui',
+  'cdf/lib/jQuery/jquery.ui',
   'cdf/lib/impromptu/jquery-impromptu',
   'cdf/lib/jquery-ui-datepicker-i18n',
   'cdf/lib/bgiframe/jquery.bgiframe',
@@ -103,7 +103,7 @@ requireCfg['shim']['cdf/components/Pentaho.JPivot']     = ['cdf/components/core'
 requireCfg['shim']['cdf/components/Pentaho.Reporting']  = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/Pentaho.XAction']    = ['cdf/components/core'];
 
-requireCfg['shim']['cdf/lib/jquery/jquery'] = {
+requireCfg['shim']['cdf/lib/jQuery/jquery'] = {
   exports: '$',
   init: function() {
     return $;
@@ -113,22 +113,22 @@ requireCfg['shim']['cdf/lib/jquery/jquery'] = {
 // AMD compatible libs already define themselves anonymously, yet depend on 
 // module "jquery", which is defined by jQuery.js
 requireCfg['map']['cdf'] = {
-    'jquery': 'cdf/lib/jquery/jquery'
+    'jquery': 'cdf/lib/jQuery/jquery'
 };
-//requireCfg['shim']['cdf/lib/blockUI/jquery.blockUI']     = ['cdf/lib/jquery/jquery'];
-//requireCfg['shim']['cdf/lib/bgiframe/jquery.bgiframe']   = ['cdf/lib/jquery/jquery'];
-//requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline'] = ['cdf/lib/jquery/jquery'];
+//requireCfg['shim']['cdf/lib/blockUI/jquery.blockUI']     = ['cdf/lib/jQuery/jquery'];
+//requireCfg['shim']['cdf/lib/bgiframe/jquery.bgiframe']   = ['cdf/lib/jQuery/jquery'];
+//requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline'] = ['cdf/lib/jQuery/jquery'];
 
-requireCfg['shim']['cdf/lib/jquery/jquery.ui']             = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/impromptu/jquery-impromptu']   = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/jquery-ui-datepicker-i18n']    = ['cdf/lib/jquery/jquery.ui'];
-requireCfg['shim']['cdf/lib/corner/jquery.corner']         = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/eventstack/jquery.eventstack'] = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/i18n/jquery.i18n.properties']  = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/jdMenu/jquery.jdMenu']         = ['cdf/lib/jquery/jquery'];
-requireCfg['shim']['cdf/lib/positionBy/jquery.positionBy'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jQuery/jquery.ui']             = ['cdf/lib/jQuery/jquery'];
+requireCfg['shim']['cdf/lib/impromptu/jquery-impromptu']   = ['cdf/lib/jQuery/jquery'];
+requireCfg['shim']['cdf/lib/jquery-ui-datepicker-i18n']    = ['cdf/lib/jQuery/jquery.ui'];
+requireCfg['shim']['cdf/lib/corner/jquery.corner']         = ['cdf/lib/jQuery/jquery'];
+requireCfg['shim']['cdf/lib/eventstack/jquery.eventstack'] = ['cdf/lib/jQuery/jquery'];
+requireCfg['shim']['cdf/lib/i18n/jquery.i18n.properties']  = ['cdf/lib/jQuery/jquery'];
+requireCfg['shim']['cdf/lib/jdMenu/jquery.jdMenu']         = ['cdf/lib/jQuery/jquery'];
+requireCfg['shim']['cdf/lib/positionBy/jquery.positionBy'] = ['cdf/lib/jQuery/jquery'];
 
-requireCfg['shim']['cdf/lib/uriQueryParser/jquery-queryParser'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/uriQueryParser/jquery-queryParser'] = ['cdf/lib/jQuery/jquery'];
 
 requireCfg['shim']['cdf/lib/simile/ajax/scripts/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
 

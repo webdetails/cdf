@@ -7,10 +7,8 @@ module.exports = function(config) {
     // base path, that will be used to resolve files and exclude
     basePath: '../',
 
-
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
-
 
     // list of files / patterns to load in the browser
     files: [
@@ -26,15 +24,12 @@ module.exports = function(config) {
       'config/require-config.js'
     ],
 
-
     // list of files to exclude
     exclude: ['test-js/legacy/**/*.js'],
 
-    /*
     preprocessors: {
         "cdf/js/*.js" : 'coverage'
-        
-    },*/
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -42,8 +37,8 @@ module.exports = function(config) {
 
     //reporter: coverage
     coverageReporter: {
-        type : 'cobertura',
-        dir : 'bin/coverage/reports/'
+      type: 'cobertura',
+      dir: 'bin/test/coverage/reports/'
     },
 
     //reporter: junit
@@ -73,13 +68,11 @@ module.exports = function(config) {
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
     // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
     autoWatchBatchDelay: 250,
-
 
     // Start these browsers, currently available:
     // - Chrome

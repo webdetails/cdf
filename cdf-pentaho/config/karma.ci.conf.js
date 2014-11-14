@@ -7,10 +7,8 @@ module.exports = function(config) {
     // base path, that will be used to resolve files and exclude
     basePath: '../../',
 
-
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
-
 
     // list of files / patterns to load in the browser
     files: [
@@ -19,8 +17,8 @@ module.exports = function(config) {
       'cdf-core/test-js/legacy/testUtils.js',
       'cdf-core/cdf/js/wd.js',
       'cdf-core/cdf/js-lib/json.js',
-      'cdf-core/cdf/js-lib/jquery/jquery.js',
-      'cdf-core/cdf/js-lib/jquery/jquery.ui.js',
+      'cdf-core/cdf/js-lib/jQuery/jquery.js',
+      'cdf-core/cdf/js-lib/jQuery/jquery.ui.js',
       'cdf-core/cdf/js-lib/autobox/jquery.templating.js',
       'cdf-core/cdf/js-lib/autobox/jquery.ui.autobox.js',
       'cdf-core/cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
@@ -48,14 +46,12 @@ module.exports = function(config) {
       {pattern: 'cdf-pentaho/test-js/**/*-spec.js', included: false}
     ],
 
-
     // list of files to exclude
     exclude: [
     ],
 
-
     preprocessors: {
-        "cdf/js/*.js" : 'coverage'
+      "cdf/js/*.js" : 'coverage'
     },
 
     // test results reporter to use
@@ -64,23 +60,23 @@ module.exports = function(config) {
 
     //reporter: coverage
     coverageReporter: {
-        type : 'cobertura',
-        dir : 'bin/coverage/reports/'
+      type: 'cobertura',
+      dir: 'bin/test-legacy/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test/test-results.xml',
+      outputFile: 'bin/test-legacy/test-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test/karma_html',
+      outputDir:    'bin/test-legacy/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
-  //hostname
+    //hostname
     hostname: [
       'localhost'
     ],
@@ -88,19 +84,15 @@ module.exports = function(config) {
     // web server port
     port: 9876,
 
-
     // enable / disable colors in the output (reporters and logs)
     colors: true,
-
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
-
 
     // Start these browsers, currently available:
     // - Chrome
@@ -112,10 +104,8 @@ module.exports = function(config) {
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
     browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
 
-
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
-
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit

@@ -53,6 +53,9 @@
   requireShims['cdf/components/MapComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/MapBubbleComponent'] = ['cdf/Dashboard'];
   requireShims['cdf/components/SimpleAutoCompleteComponent'] = ['cdf/Dashboard'];
+
+  requireShims['cdf/components/ChartComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/ProtovisComponent'] = ['cdf/Dashboard'];
   
   /* other
   requireShims['cdf/components/ActionComponent'] = ['cdf/Dashboard'];

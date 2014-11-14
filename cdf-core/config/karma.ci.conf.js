@@ -7,10 +7,8 @@ module.exports = function(config) {
     // base path, that will be used to resolve files and exclude
     basePath: '../',
 
-
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
-
 
     // list of files / patterns to load in the browser
     files: [
@@ -26,14 +24,12 @@ module.exports = function(config) {
       'config/require-config.js'
     ],
 
-
     // list of files to exclude
     exclude: ['test-js/legacy/**/*.js'],
 
-
     preprocessors: {
-        "cdf/js/*.js" : 'coverage',
-        "cdf/js/components/*.js" : 'coverage'        
+      "cdf/js/*.js" : 'coverage',
+      "cdf/js/components/*.js" : 'coverage'        
     },
 
     // test results reporter to use
@@ -42,8 +38,8 @@ module.exports = function(config) {
 
     //reporter: coverage
     coverageReporter: {
-        type : 'cobertura',
-        dir : 'bin/coverage/reports/'
+      type: 'cobertura',
+      dir: 'bin/test/coverage/reports/'
     },
 
     //reporter: junit
@@ -58,7 +54,7 @@ module.exports = function(config) {
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
-  //hostname
+    //hostname
     hostname: [
       'localhost'
     ],
@@ -66,19 +62,15 @@ module.exports = function(config) {
     // web server port
     port: 9876,
 
-
     // enable / disable colors in the output (reporters and logs)
     colors: true,
-
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
-
 
     // Start these browsers, currently available:
     // - Chrome
@@ -90,23 +82,21 @@ module.exports = function(config) {
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
     browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
 
-
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
-
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
     singleRun: true,
 
     plugins: [
-     'karma-jasmine',
-     'karma-requirejs',
-     'karma-junit-reporter',
-     'karma-html-reporter',
-     'karma-coverage',
-     'karma-phantomjs-launcher',
-     'karma-chrome-launcher'
+      'karma-jasmine',
+      'karma-requirejs',
+      'karma-junit-reporter',
+      'karma-html-reporter',
+      'karma-coverage',
+      'karma-phantomjs-launcher',
+      'karma-chrome-launcher'
     ]
   });
 };
