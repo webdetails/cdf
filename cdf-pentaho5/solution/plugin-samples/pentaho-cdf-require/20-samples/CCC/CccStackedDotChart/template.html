@@ -1,0 +1,122 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><p><div id="titleObject"></div></p></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/ccc/CccStackedDotChart'],
+    function(Dashboard, CccStackedDotChart) {
+
+    var dashboard = new Dashboard();
+
+    var relational_012 = {
+      "resultset": [
+        ["London", "2011-07-03", 72],
+        ["London", "2011-07-10", 50],
+        ["London", "2011-07-17", 20],
+        ["London", "2011-07-24", 23],
+        ["London", "2011-07-31", 72],
+        ["London", "2011-08-02", 50],
+
+        ["Lisbon", "2011-07-03", 60],
+        ["Lisbon", "2011-07-10", 40],
+        ["Lisbon", "2011-07-17", 15],
+        ["Lisbon", "2011-07-24", 3]
+      ],
+      "metadata": [{
+          "colIndex": 0,
+          "colType": "String",
+          "colName": "City"
+        }, {
+          "colIndex": 1,
+          "colType": "String",
+          "colName": "Date"
+        }, {
+          "colIndex": 2,
+          "colType": "Numeric",
+          "colName": "Quantity"
+        }]
+    };
+
+    var render_chart = new CccStackedDotChart(dashboard, {
+      type: "cccStackedDotChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        width:   600,
+        height:  400,
+        margins: {right: '2%'},
+        orientation: 'vertical',
+
+        // Data source
+        crosstabMode: false,
+        timeSeriesFormat: '%Y-%m-%d',
+
+        // Data
+        timeSeries: true,
+
+        // Main plot
+        valuesVisible: true,
+        valuesFont: 'lighter 11px "Open Sans"',
+        plot_fillStyle: '#F7F8F9',
+        dot_shape: 'cross',
+        dot_shapeRadius: 3,
+
+        // Cartesian plots
+        axisLabel_font: 'normal 9px "Open Sans"',
+        baseAxisLabel_textAngle:    -Math.PI/6,
+        baseAxisLabel_textAlign:    'right',
+        baseAxisLabel_textBaseline: 'top',
+
+        // Panels
+        title:         "A Time Series Dot Chart",
+        titleFont:     'lighter 20px "Open Sans"',
+        titlePosition: 'left',
+        titleSize:     {height: '100%'},
+        titleMargins:  '0 10 60 0',
+
+        legend:      true,
+        legendAlign: 'left',
+        legendFont:  'normal 11px "Open Sans"',
+
+        // Chart/Interaction
+        animate:    false,
+        selectable: true,
+
+        // Color axes
+        colors: ['#005CA7', '#FFC20F']
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(relational_012);
+    }
+
+    dashboard.init();
+  });
+</script>

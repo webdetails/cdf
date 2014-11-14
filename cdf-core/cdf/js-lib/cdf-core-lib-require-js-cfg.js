@@ -37,10 +37,17 @@
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
 
   //jquery 1.9.1
-  requirePaths['jquery'] = prefix + "/jquery/jquery";
-  requirePaths['cdf/lib/jquery.clean'] = prefix + "/jquery/cdf-jquery";
+  //requirePaths['jquery'] = prefix + "/jquery/jquery"; //deprecated
+  //requirePaths['cdf/lib/jquery'] = prefix + "/jquery/cdf-jquery"; //deprecated
+  requireCfg.map['*']['cdf/lib/jquery.clean'] = "cdf/lib/jQuery/jquery";
+  requireCfg.map['cdf'] = {
+    'jquery': "cdf/lib/jQuery/jquery"
+  };
+  requireShims['cdf/lib/jQuery/jquery'] = {
+    exports: '$'
+  };
 
-  //jquery migration tool 1.2.1 (this is needed while the migration to jquery 1.9.1 isn't completely stable)
+  //jquery migration tool 1.2.1 (this is helpful while the migration to jquery 1.9.1 isn't completely stable)
   requirePaths['cdf/lib/jquery'] = prefix + "/jquery-migrate-1.2.1";
   requireShims['cdf/lib/jquery'] = {
     exports: '$',
@@ -48,7 +55,7 @@
   };
 
   //jquery.ui 1.10.4
-  requirePaths['cdf/lib/jquery.ui'] = prefix + "/jquery/jquery.ui";
+  requirePaths['cdf/lib/jquery.ui'] = prefix + "/jQuery/jquery.ui";
   requireShims['cdf/lib/jquery.ui'] = [
     'cdf/lib/jquery',
     'css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom'

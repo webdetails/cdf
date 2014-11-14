@@ -364,7 +364,9 @@
     <echo message="Copying js source"/>
     <copy todir='${js.module.script.agg.dir}/cdf'>
       <fileset dir='${core-js.dir}'/>
-      <fileset dir='${pentaho-base-js.dir}'/>
+      <fileset dir='${pentaho-base-js.dir}'>
+         <exclude name="ccc.js"/>
+      </fileset>
       <fileset dir="${pentaho-js.dir}" />
     </copy>
     <copy todir='${js.module.script.agg.dir}/cdf/lib'>
@@ -412,11 +414,11 @@
     <copy todir="${bin.dir}/js-source/compressed/cdf/lib/CCC">
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
-    <move file="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc-d1.0.js"/>
+    <!-- move file="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc-d1.0.js"/ -->
     <copy todir="${bin.dir}/js-source/raw/cdf/lib/CCC">
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
-    <move file="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc-d1.0.js"/>
+    <!-- move file="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc-d1.0.js"/ -->
 
     <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
       <zipfileset dir="${bin.dir}/js-source" includes="**/*"/>
