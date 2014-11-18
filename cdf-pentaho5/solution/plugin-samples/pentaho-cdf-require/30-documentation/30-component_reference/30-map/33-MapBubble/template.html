@@ -70,21 +70,21 @@
         <textarea cols="80" rows="40" id="samplecode">
 
   require(['cdf/Dashboard.Blueprint', 'cdf/components/MapComponent', 'cdf/components/MapBubbleComponent'],
-    function(Dashboard,MapComponent, MapBubbleComponent) {
+    function(Dashboard, MapComponent, MapBubbleComponent) {
 
     dashboard = new Dashboard();
 
-    dashboard.addParameter( "city", "");
-    dashboard.addParameter( "bottomThreshold", 1000000);
-    dashboard.addParameter( "topThreshold", 2000000);
-    dashboard.addParameter( "selectedPoint", "");
+    dashboard.addParameter("city", "");
+    dashboard.addParameter("bottomThreshold", 1000000);
+    dashboard.addParameter("topThreshold", 2000000);
+    dashboard.addParameter("selectedPoint", "");
 
     dashboard.addComponent(new MapBubbleComponent(dashboard, {
       name: "mapBubble",
       type: "mapBubble",
       listeners: ["selectedPoint"],
       path: "/public/plugin-samples/pentaho-cdf-require/30-documentation/30-component_reference/30-map/33-MapBubble/cityDetails.xaction",
-      parameters: [["city","selectedPoint"]],
+      parameters: [["city", "selectedPoint"]],
       executeAtStart: false,
       preExecution:function() {},
       postExecution:function() {}
@@ -93,7 +93,7 @@
     dashboard.addComponent(new MapComponent(dashboard, {
       name: "mapComponent",
       type: "mapComponent",
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetPoints.xaction",
+      path: "/public/plugin-samples/pentaho-cdf-require/20-samples/map_dashboard/GetPoints.xaction",
       parameters: [],
       listeners: [],
       htmlObject: "map",
@@ -101,7 +101,7 @@
       initPosLon: -7.5,
       initPosLat: 39.8,
       initZoom: 1,
-      expression: function() { return "var icon=''; if (value < this.dashboard.getParameterValue('bottomThreshold')){icon = markers[2];} else if (value > this.dashboard.getParameterValue('topThreshold')){icon = markers[0];} else {icon = markers[1];}; icon"; },
+      expression: function() { return "var icon=''; if(value < this.dashboard.getParameterValue('bottomThreshold')) { icon = markers[2]; } else if(value > this.dashboard.getParameterValue('topThreshold')) { icon = markers[0]; } else { icon = markers[1]; } icon"; },
       
       preExecution:function() {},
       postExecution:function() {},

@@ -109,6 +109,7 @@ var DashboardsMap =  {
       var extent = markers.getDataExtent();
       map.zoomToExtent(extent);
     }
+
     if (dataIdx >= this.data.length && dataIdx == 1) {
       map.setCenter(markers.markers[0].lonlat, 4, false, false);
     }

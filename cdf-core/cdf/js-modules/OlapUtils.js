@@ -19,7 +19,8 @@
 
 
 
-define(['./Dashboard'], function (Dashboard) {
+define(['./Dashboard', './Utf8Encoder'],
+    function (Dashboard, Utf8Encoder) {
 
     var OlapUtils = {
 	    mdxGroups: {},
@@ -82,12 +83,12 @@ define(['./Dashboard'], function (Dashboard) {
           cType = Dashboard.ev(param1.chartType);
     
             if(cType == "AreaChart")
-              value = encode_prepare(param3);
+              value = Utf8Encoder.encode_prepare(param3);
             else 
-              value = encode_prepare(param2);
+              value = Utf8Encoder.encode_prepare(param2);
         }
         else
-          value = encode_prepare(param1);
+          value = Utf8Encoder.encode_prepare(param1);
     
     
         var mdxQueryGroup = OlapUtils.mdxGroups[mdxQueryGroup];

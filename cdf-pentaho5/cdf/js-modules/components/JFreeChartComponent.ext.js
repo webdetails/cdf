@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
-  function(DashboardExt, Encoder) {
+define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder',  '../Logger',],
+  function(DashboardExt, Encoder, Logger) {
 
   var JFreeChartComponentExt = {
 
@@ -77,7 +77,7 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
                 var openWindow = window.open(DashboardExt.getCaptifyZoom(), "_blank", 'width=' + (width + 17) + ',height=' + (height + 20));
                 /* Requires disabling popup blockers */
                 if(!openWindow) {
-                  Dashboards.log("Please disable popup blockers and try again.");
+                  Logger.log("Please disable popup blockers and try again.");
                 } else {
                   var maxTries = 10;
                   var loadChart = function() {

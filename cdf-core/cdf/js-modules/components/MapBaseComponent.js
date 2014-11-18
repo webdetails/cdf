@@ -17,7 +17,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
   var MapBaseComponent = BaseComponent.extend({
 
     //
-    // Frome open_maps.js <-------
+    // From open_maps.js <-------
     //
 
     map: null,
@@ -52,7 +52,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     /** 
      * Constructs and sets some inital values and calls show_map.
      *
-     * @param {String}div the id of the div that contains the map
+     * @param {String} div the id of the div that contains the map
      * @param {Float} lon The longitude coordinate.
      * @param {Float} lat The latitude coordinate.
      * @param {Integer} zoom  Zoom level for initial display.
@@ -69,7 +69,6 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       //get the div Object
       oDiv = document.getElementById(map_div);
 
-      // when karma testing there is no div with appropriate id, so for now return
       if(!oDiv) { return; }
       oDiv.innerHTML = "";
       
@@ -131,7 +130,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       }
 
       // add a layer for the markers                                             
-      markers = new OpenLayers.Layer.Markers( "Markers" );
+      markers = new OpenLayers.Layer.Markers("Markers");
       map.addLayer(markers);
       
       //set center and zoomlevel of the map
@@ -232,6 +231,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
 
       //var record = myself.data[idx];
       //var place = record[1];
+
       var data = myself.dashboard.getParameterValue('mapData');
 
       var idx = idx || data.length - 1;
@@ -287,9 +287,10 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
         this.map.addLayer(markers);
       }
       this.cleanMessages();
-      dataIdx = 0;
+      //dataIdx = 0;
       //this.data = new Array();
       this.dashboard.setParameter('mapData', new Array());
+      this.dataIdx = 0;
     },
 
     // this function will be called by our JSON callback
@@ -299,10 +300,10 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       var myself = this;
 
       //var record = myself.data[myself.dataIdx++];
-      var data = this.dashboard.getParameterValue('mapData');
-      var record = data[myself.dataIdx++];
+      var data = myself.dashboard.getParameterValue('mapData');
 
-      var dataIdx = myself.dataIdx;
+      //use stored record if one aleady exists
+      var record = data[myself.dataIdx];
 
       if(jData == null || jData.totalResultsCount == 0) {
         // There was a problem parsing search results
@@ -321,15 +322,22 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
         record[7] = geoname.lat;
         var marker = myself.showMarker(marker, record);
         record[4] = marker;
+
+        //update mapData and dataIdx
+        data[myself.dataIdx] = record;
+        myself.dashboard.setParameter('mapData', data);
+        myself.dataIdx++;
       }
 
-      if(dataIdx >= data.length && dataIdx > 1) {
+      if(myself.dataIdx >= data.length && myself.dataIdx > 0) {
         var extent = markers.getDataExtent();
-        this.map.zoomToExtent(extent);
+        myself.map.zoomToExtent(extent);
       }
-      if(dataIdx >= data.length && dataIdx == 1) {
-        this.map.setCenter(markers.markers[0].lonlat, 4, false, false);
+
+      if(myself.dataIdx >= data.length && myself.dataIdx == 1) {
+        myself.map.setCenter(markers.markers[0].lonlat, 4, false, false);
       }
+
     },
 
     showMarker: function(oldMarker, record) {
