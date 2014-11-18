@@ -105,7 +105,7 @@ territorySelector =
 
 firstChart = 
 {
-  name: "Chart",
+  name: "firstChart",
   type: "xaction",
   solution: "plugin-samples",
   path: dashBoardName,
@@ -120,7 +120,7 @@ firstChart =
 
 secondChart = 
 {
-  name: "Chart",
+  name: "secondChart",
   type: "xaction",
   solution: "plugin-samples",
   path: dashBoardName,
@@ -135,7 +135,7 @@ secondChart =
 
 thirdChart = 
 {
-  name: "Chart",
+  name: "thirdChart",
   type: "xaction",
   solution: "plugin-samples",
   path: dashBoardName,
@@ -181,7 +181,6 @@ name: "map",
 	  initPosLon: -7.5,
 	  initPosLat: 39.8,
 	  initZoom: 1,
-	  expression: function(){return "var icon=''; icon = markers[0]; icon"},
 	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 	  preExecution:function(){},
 	  postExecution:function(){},
