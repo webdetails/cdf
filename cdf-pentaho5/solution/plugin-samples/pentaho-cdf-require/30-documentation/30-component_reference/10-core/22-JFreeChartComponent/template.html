@@ -314,7 +314,7 @@
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
 //Used for callbacks from child windows
-var dashboard;
+window.dashboard = null;
 
 require(['cdf/Dashboard.Blueprint', 'cdf/components/JFreeChartComponent'],
   function(Dashboard, JFreeChartComponent) {
@@ -336,8 +336,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/JFreeChartComponent'],
       backgroundColor: "#F3F3F3",
       title: "Top 10 Customers",
       parameterName: "PRODUCTLINE",
-      urlTemplate: "javascript:require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {" +
-      " alert(\"You clicked \" + Utf8Encoder.encode_prepare(\"{PRODUCTLINE}\")); })",
+      urlTemplate: "javascript:require(['cdf/dashboard/Utf8Encoder'],function(Utf8Encoder){alert('You clicked '+Utf8Encoder.encode_prepare('{PRODUCTLINE}'));})",
       orientation: 'horizontal',
       queryType: 'mdx',
       catalog: 'mondrian:/SteelWheels',

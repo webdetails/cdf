@@ -38,124 +38,122 @@
 </script>
 
 <script language="javascript" type="text/javascript">
-var region="test";
-var dateStart="2007-01-01";
 
-regionSelector = 
-{
+var dashboard = _.extend({}, Dashboards);
+
+dashboard.addParameter('region', 'test');
+dashboard.addParameter('dateStart', '2007-01-01');
+
+regionSelector = {
   name: "regionSelector",
   type: "select",
   path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
-  parameters:[],
-  parameter:"region",
+  parameters: [],
+  parameter: "region",
   valueAsId: true,
   htmlObject: "object_select",
   executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){Dashboards.processChange(this.name);}
+  preExecution: function() {},
+  postExecution: function() {
+    Dashboards.processChange(this.name);
+  }
 }
 
-regionSelectorMulti = 
-{
+regionSelectorMulti = {
   name: "regionSelectorMulti",
   type: "selectMulti",
   path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
   valueAsId: true,
-  parameters:[],
-  parameter:"region",
+  parameters: [],
+  parameter: "region",
   htmlObject: "object_multi",
   size: "4",
   executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){}
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
-regionCheck = 
-{
+regionCheck = {
   name: "regionCheck",
   type: "check",
   path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
-  parameters:[],
-  parameter:"region",
+  parameters: [],
+  parameter: "region",
   htmlObject: "object_check",
   executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){}
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
-regionRadio = 
-{
+regionRadio = {
   name: "regionRadio",
   type: "radio",
   path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
-  parameters:[],
-  parameter:"region",
+  parameters: [],
+  parameter: "region",
   htmlObject: "object_radio",
   executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){}
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
-regionText = 
-{
+regionText = {
   name: "regionText",
   type: "textInput",
-  parameter:"region",
+  parameter: "region",
   htmlObject: "object_textInput",
   executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){}
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
-dateInput = 
-{
+dateInput = {
   name: "dateInput",
   type: "dateInput",
-  parameter:"dateStart",
+  parameter: "dateStart",
   htmlObject: "object_dateInput",
   executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){}
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
-regionVarianceBarChart = 
-{
+regionVarianceBarChart = {
   name: "regionVarianceBarChart",
   type: "xaction",
   path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/RegionVarianceBarChart.xaction",
-  listeners:["region"],
+  listeners: ["region"],
   parameters: [["REGION","region"]],
   htmlObject: "object_2",
   executeAtStart: false,
-  preExecution:function(){},
-  postExecution:function(){}
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
-titleString = 
-{
-  name: "regionVarianceBarChart",
+titleString = {
+  //name: "regionVarianceBarChart",
+  name: "titleString",
   type: "text",
-  listeners:["region","dateStart"],
+  listeners: ["region", "dateStart"],
   htmlObject: "text_object",
   executeAtStart: true,
-  expression: function(){return 'Chosen region: ' + region + '; Start date: ' + dateStart},
-  preExecution:function(){},
-  postExecution:function(){}
+  expression: function() {
+    //return 'Chosen region: ' + region + '; Start date: ' + dateStart;
+    return "Chosen region: " + dashboard.getParameterValue('region') + "; Start date: " + dashboard.getParameterValue('dateStart');
+  },
+  preExecution: function() {},
+  postExecution: function() {}
 }
 
+dashboard.addComponents([
+  regionSelector,
+  regionSelectorMulti,
+  regionCheck,
+  regionRadio,
+  regionText,
+  dateInput,
+  regionVarianceBarChart,
+  titleString]);
 
-var components = [regionSelector, regionSelectorMulti, regionRadio, regionCheck, regionText, regionVarianceBarChart, titleString, dateInput];
-
-
-</script>
-
-<script language="javascript" type="text/javascript">
-
-
-function load(){
-	Dashboards.init(components);
-}
-
-load();
+dashboard.init();
 
 </script>

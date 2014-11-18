@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+  <title>DepartmentVarianceDialChart</title>
+  <version>1</version>
+  <logging-level>DEBUG</logging-level>
+  <documentation> 
+    <author>Ingo Klose</author>  
+    <result-type>none</result-type> 
+    <description>Dial Chart with the headcount variance in percent for the selected region and department</description> 
+  </documentation>
+
+  <inputs> 
+    <REGION type="string"> 
+      <sources> 
+        <request>REGION</request> 
+      </sources>  
+      <default-value><![CDATA[Central]]></default-value> 
+    </REGION>  
+    <DEPARTMENT type="string"> 
+      <sources> 
+        <request>DEPARTMENT</request> 
+      </sources>  
+      <default-value><![CDATA[Sales]]></default-value> 
+    </DEPARTMENT> 
+  </inputs>
+
+  <outputs> 
+    <image-tag type="string"/> 
+  </outputs>
+
+  <resources/>
+  
+  <actions> 
+    <action-definition> 
+      <component-name>SQLLookupRule</component-name>
+      <action-type>Relational</action-type>
+      <action-inputs> 
+        <REGION type="string"/>  
+        <DEPARTMENT type="string"/> 
+      </action-inputs>
+      <action-outputs> 
+        <query-result type="result-set" mapping="query_result"/> 
+      </action-outputs>
+      <component-definition> 
+        <jndi><![CDATA[SampleData]]></jndi>  
+        <live><![CDATA[false]]></live>  
+        <query><![CDATA[select ROUND(( 
+(sum(variance))/ (CAST(sum(budget)AS DECIMAL(10,2))))*100,2) as value, -15 as minimum, 15 as maximum 
+from QUADRANT_ACTUALS
+where region in( {PREPARE:REGION} ) AND department in ({PREPARE:DEPARTMENT})]]></query> 
+      </component-definition> 
+    </action-definition>
+  
+    <action-definition> 
+      <component-name>JavascriptRule</component-name>
+      <action-type>JavaScript</action-type>
+      <action-inputs> 
+        <query_result type="result-set"/> 
+      </action-inputs>
+      <action-outputs> 
+        <variance type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <script><![CDATA[variance = query_result.getValueAt(0,0);]]></script> 
+      </component-definition> 
+    </action-definition>
+  
+    <action-definition> 
+      <component-name>ChartComponent</component-name>
+      <action-type>Dial Chart</action-type>
+      <action-inputs> 
+        <chart-data type="result-set" mapping="query_result"/>  
+        <variance type="string"/> 
+      </action-inputs>
+      <action-outputs> 
+        <image-tag type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <chart-attributes> 
+          <chart-type>DialChart</chart-type>  
+          <border-visible>false</border-visible>  
+          <tick-interval>5</tick-interval>  
+          <value-color>#9999bb</value-color>  
+          <tick-color>#808080</tick-color>  
+          <!--  this is the color of the needle -->  
+          <needle-color>#808080</needle-color>  
+          <plot-background-color>#ffffff</plot-background-color>  
+          <!--  intervals define ranges on the dial that are colored differently from the dial background -->  
+          <interval> 
+            <label>under</label>  
+            <!-- this is the value that the range starts at -->  
+            <minimum>-15</minimum>  
+            <!-- this is the value that the range stops at -->  
+            <maximum>0</maximum>  
+            <!--  this is the color of the range -->  
+            <color>#bb4040</color>  
+            <!--  this is the color of the text for the range value and tick marks -->  
+            <text-color>#bb4040</text-color>  
+            <stroke-width>2</stroke-width> 
+          </interval>  
+          <interval> 
+            <label>under</label>  
+            <minimum>0</minimum>  
+            <maximum>15</maximum>  
+            <color>#40bb40</color>  
+            <text-color>#40bb40</text-color>  
+            <stroke-width>2</stroke-width> 
+          </interval> 
+        </chart-attributes>  
+        <width><![CDATA[150]]></width>  
+        <height><![CDATA[150]]></height>  
+        <title>Headcount Variance ({variance} %)</title>  
+        <by-row>true</by-row> 
+      </component-definition> 
+    </action-definition>
+ 
+  </actions> 
+</action-sequence>

@@ -20,7 +20,7 @@ define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', '../lib/
       // WPG: this assumes name is global name, can I pass in the object directly instead?
       var link = $('<a class="pivotLink"> </a>')
         .html(this.content)
-        .attr("href", "javascript:PivotLinkComponent.openPivotLink(" + this.name + ")")
+        .attr("href", "javascript:require(['cdf/components/PivotLinkComponent'],function(PivotLinkComponent){PivotLinkComponent.openPivotLink(this.dashboard.getComponent('" + this.name + "'));})")
         .attr("title", title);
       $("#" + this.htmlObject).empty();
       $("#" + this.htmlObject).html(link);

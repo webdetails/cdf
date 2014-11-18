@@ -73,7 +73,7 @@ define(['./MapBaseComponent'],
       var p = new Array(this.parameters.length);
       for(var i = 0, len = p.length; i < len; i++) {
         var key = this.parameters[i][0];
-        var value = this.dashboard.getParameterValue(myself.parameters[i][1]);
+        var value = this.dashboard.getParameterValue(this.parameters[i][1]);
         p[i] = [key, value];
       }
 
