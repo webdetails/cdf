@@ -61,9 +61,10 @@ if($.blockUI){
 
 
 
-if (typeof $.SetImpromptuDefaults == 'function') {
-  $.SetImpromptuDefaults({
-    prefix: 'colsJqi',
+//Set impromptu defaults
+if($.prompt && typeof $.prompt.setDefaults == 'function') {
+  $.prompt.setDefaults({
+    prefix: 'jqi',
     show: 'slideDown'
   });
 }

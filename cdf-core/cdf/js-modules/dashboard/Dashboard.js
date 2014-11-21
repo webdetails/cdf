@@ -11,9 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib/underscore', '../lib/backbone',
-      '../lib/shims', 'css!../lib/cdf.css', '../lib/modernizr'],
-    function(Base, $, Logger, RefreshEngine, _, Backbone) {
+define([
+  '../lib/Base',
+  '../Logger',
+  './RefreshEngine',
+  '../lib/underscore',
+  '../lib/backbone',
+  '../lib/jquery',
+  '../lib/jquery.impromptu',
+  '../lib/shims',
+  'css!../lib/cdf.css'],
+  function(Base, Logger, RefreshEngine, _, Backbone, $) {
 
   /**
    * A module representing a Dashboard.
@@ -100,14 +108,14 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
             }
           });
   
-          //SetImpromptuDefaults
-          if(typeof $.SetImpromptuDefaults == 'function') {
-            $.SetImpromptuDefaults({
-              prefix: 'colsJqi',
+          //Set impromptu defaults
+          if($.prompt && typeof $.prompt.setDefaults == 'function') {
+            $.prompt.setDefaults({
+              prefix: 'jqi',
               show: 'slideDown'
             });
           } else {
-            Logger.log("$.SetImpromptuDefaults plugin not loaded!!!!!!!!");
+            Logger.log("$.prompt plugin not loaded!!!!!!!!");
           }
   
           //blockUI
