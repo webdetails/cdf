@@ -186,7 +186,13 @@ var SelectBaseComponent = InputBaseComponent.extend({
     // TODO: shouldn't this be called right after setting the value of select?
     // Before hasChanged firing?
     switch(extPlugin) {
-      case "chosen": ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); break;
+      case "chosen": {
+        var jqBrowser = $.browser;
+        $.browser = "";
+        ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); 
+        $.browser = jqBrowser;
+        break;
+      }
       case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
       case "select2":  {
         var extraOps = this._readExtraOptions() || {};
