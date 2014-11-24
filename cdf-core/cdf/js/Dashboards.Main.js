@@ -1448,8 +1448,17 @@ Dashboards.loadStorage = function(){
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
 
-  $.getJSON(wd.cdf.endpoints.getStorage( args.action ), args, function(json) {
-    $.extend(myself.storage,json);
+  $.ajax({
+    type:'GET',
+    dataType: "json",
+    url: wd.cdf.endpoints.getStorage( args.action ),
+    data: args,
+    async:true,
+    xhrFields: {
+      withCredentials: true
+    }
+  }).done(function(json) {
+    $.extend( myself.storage, json );
   });
 };
 
@@ -1466,11 +1475,21 @@ Dashboards.saveStorage = function(){
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
 
-  $.getJSON(wd.cdf.endpoints.getStorage( args.action ), args, function(json) {
+  $.ajax({
+    type:'GET',
+    dataType: "json",
+    url: wd.cdf.endpoints.getStorage( args.action ),
+    data: args,
+    async:true,
+    xhrFields: {
+      withCredentials: true
+    }
+  }).done(function(json) {
     if(json.result != true){
       myself.log("Error saving storage",'error');
     }
   });
+
 };
 
 Dashboards.cleanStorage = function(){
@@ -1486,10 +1505,20 @@ Dashboards.cleanStorage = function(){
     action: "delete"
   };
 
-  $.getJSON(wd.cdf.endpoints.getStorage( args.action ), args, function(json) {
+  $.ajax({
+    type:'GET',
+    dataType: "json",
+    url: wd.cdf.endpoints.getStorage( args.action ),
+    data: args,
+    async:true,
+    xhrFields: {
+      withCredentials: true
+    }
+  }).done(function(json) {
     if(json.result != true){
       myself.log("Error deleting storage", 'error');
     }
   });
+
 };
 

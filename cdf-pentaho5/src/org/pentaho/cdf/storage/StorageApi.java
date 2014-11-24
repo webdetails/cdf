@@ -3,11 +3,14 @@ package org.pentaho.cdf.storage;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +24,6 @@ import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
 /**
- * 
  * @author rmansoor
  */
 @Path( "/pentaho-cdf/api/storage" )
@@ -33,19 +35,27 @@ public class StorageApi {
   @Path( "/store" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue )
+  public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue,
+                         @Context HttpServletRequest request,
+                         @Context HttpServletResponse response )
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
+    setCorsHeaders( request, response );
     JSONObject json = StorageEngine.getInstance().store( storageValue, getUserName() );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build() : Response.serverError().build();
+
+    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
+      : Response.serverError().build();
   }
 
   @GET
   @Path( "/read" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public String read() throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+  public String read( @Context HttpServletRequest request,
+                      @Context HttpServletResponse response )
+    throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
+    setCorsHeaders( request, response );
     JSONObject json = StorageEngine.getInstance().read( getUserName() );
 
     if ( json != null ) {
@@ -60,12 +70,26 @@ public class StorageApi {
   @Path( "/delete" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public Response delete() throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+  public Response delete( @Context HttpServletRequest request,
+                          @Context HttpServletResponse response )
+    throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+
+    setCorsHeaders( request, response );
     JSONObject json = StorageEngine.getInstance().delete( getUserName() );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build() : Response.serverError().build();
+
+    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
+      : Response.serverError().build();
   }
 
   private String getUserName() {
     return PentahoSessionHolder.getSession().getName();
+  }
+
+  private void setCorsHeaders( HttpServletRequest request, HttpServletResponse response ) {
+    String origin = request.getHeader( "ORIGIN" );
+    if ( origin != null ) {
+      response.setHeader( "Access-Control-Allow-Origin", origin );
+      response.setHeader( "Access-Control-Allow-Credentials", "true" );
+    }
   }
 }
