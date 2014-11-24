@@ -23,7 +23,12 @@ define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib
       id: '',
       outputIdx: '1',
       sortBy: '',
-      ajaxOptions: { },
+      ajaxOptions: {
+        async: true,
+        xhrFields: {
+          withCredentials: true
+        }
+      },
       searchPattern: ''
     },
 
@@ -111,11 +116,13 @@ define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib
       $.ajax({
           type:'POST',
           dataType: 'text',
-          async: false,
+          async: true,
           data: queryDefinition,
-          url: this.getOption('url')
-      })
-        .done(function(uuid) {
+          url: this.getOption('url'),
+          xhrFields: {
+            withCredentials: true
+          }
+      }).done(function(uuid) {
           var _exportIframe = $('<iframe style="display:none">');
           _exportIframe.detach();
           _exportIframe[0].src = CdaQueryExt.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );

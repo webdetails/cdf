@@ -27,7 +27,10 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       ajaxOptions: {
           dataType:'json',
         type:'POST',
-        async: true
+        async: true,
+        xhrFields: {
+          withCredentials: true
+        }
       }
     },
 
