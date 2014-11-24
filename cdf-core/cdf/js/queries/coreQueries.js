@@ -307,9 +307,12 @@
       endpoint: '',
       systemParams: {},
       ajaxOptions: {
-          dataType:'json',
+        dataType:'json',
         type:'POST',
-        async: true
+        async: true,
+        xhrFields: {
+          withCredentials: true
+        }
       }
     },
 
@@ -412,7 +415,12 @@
       id: '',
       outputIdx: '1',
       sortBy: '',
-      ajaxOptions: { },
+      ajaxOptions: {
+        async: true,
+        xhrFields: {
+          withCredentials: true
+        }
+      },
       searchPattern: ''
     },
 
@@ -514,10 +522,13 @@
       $.ajax({
           type:'POST',
           dataType: 'text',
-          async: false,
+          async: true,
           data: queryDefinition,
-          url: this.getOption('url') })
-        .done(function(uuid){
+          url: this.getOption('url'),
+          xhrFields: {
+            withCredentials: true
+          }
+      }).done(function(uuid) {
           var _exportIframe = $('<iframe style="display:none">');
           _exportIframe.detach();
           _exportIframe[0].src = wd.cdf.endpoints.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );
