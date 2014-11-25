@@ -58,8 +58,17 @@
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(ext.getStorage(args.action), args, function(json) {
-          $.extend(myself.storage,json);
+        $.ajax({
+          type:'GET',
+          dataType: "json",
+          url: wd.cdf.endpoints.getStorage( args.action ),
+          data: args,
+          async:true,
+          xhrFields: {
+            withCredentials: true
+          }
+        }).done(function(json) {
+          $.extend( myself.storage, json );
         });
       },
 
@@ -79,8 +88,17 @@
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(ext.getStorage(args.action), args, function(json) {
-          if(json.result != true) {
+        $.ajax({
+          type:'GET',
+          dataType: "json",
+          url: wd.cdf.endpoints.getStorage( args.action ),
+          data: args,
+          async:true,
+          xhrFields: {
+            withCredentials: true
+          }
+        }).done(function(json) {
+          if(json.result != true){
             Logger.log("Error saving storage",'error');
           }
         });
@@ -102,7 +120,16 @@
           action: "delete"
         };
 
-        $.getJSON(ext.getStorage( args.action ), args, function(json) {
+        $.ajax({
+          type:'GET',
+          dataType: "json",
+          url: wd.cdf.endpoints.getStorage( args.action ),
+          data: args,
+          async:true,
+          xhrFields: {
+            withCredentials: true
+          }
+        }).done(function(json) {
           if(json.result != true) {
             Logger.log("Error deleting storage", 'error');
           }
