@@ -33,22 +33,23 @@ define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib
     },
 
     init: function(opts) {
-      if (typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
+      if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
         // CDA-style cd object
-        this.setOption('file' , opts.path );
-        this.setOption( 'id' , opts.dataAccessId );
+        this.setOption('file', opts.path);
+        this.setOption('id', opts.dataAccessId);
+        this.setOption('dashboard', opts.dashboard);
         if(typeof opts.sortBy == 'string' && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
           this.setOption('sortBy', opts.sortBy);
         }
         if(opts.pageSize != null) {
-          this.setOption('pageSize' , opts.pageSize);
+          this.setOption('pageSize', opts.pageSize);
         }
         if(opts.outputIndexId != null) {
-          this.setOption( 'outputIdx' , opts.outputIndexId );
+          this.setOption('outputIdx', opts.outputIndexId);
         }
-        } else {
-          throw 'InvalidQuery';
-        }
+      } else {
+        throw 'InvalidQuery';
+      }
     },
 
     buildQueryDefinition: function(overrides) {
@@ -61,8 +62,9 @@ define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib
       var params = $.extend( {}, cachedParams , overrides);
 
       var dash = this.getOption('dashboard');
+
       _.each( params , function(value, name) {
-        value = dash.getParameterValue(value);
+        value = dash ? dash.getParameterValue(value) : value;
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parseable array by cda
           value = doCsvQuoting(value[0],';');

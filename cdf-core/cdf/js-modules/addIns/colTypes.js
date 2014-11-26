@@ -11,10 +11,9 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/* TODO requirejs: Review usage of Dashboards here to call  Dashboards.i18nSupport */
-/* TODO requirejs: Review usage of datatables */
-/* TODO requirejs: Should Raphael be imported here ? */
-/* TODO requirejs: Should pvc be imported here ? */
+/* TODO requirejs: Review usage of dashboard.i18nSupport in localizedText addin
+   (reference to component or dashboard needs to be passed as a parameter to localizedText's implementation function) */
+
 define([
   '../AddIn',
   '../dashboard/Sprintf',

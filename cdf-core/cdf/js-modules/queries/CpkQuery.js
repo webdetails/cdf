@@ -38,8 +38,9 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
         this.setOption('pluginId' , opts.pluginId);
         this.setOption('endpoint' , opts.endpoint);
-        this.setOption('url', DashboardExt.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
+        this.setOption('url', DashboardExt.getPluginEndpoint(opts.pluginId , opts.endpoint));
       }
+      this.setOption('dashboard', opts.dashboard);
       this.setOption('kettleOutput', opts.kettleOutput);
       this.setOption('stepName', opts.stepName);
       this.setOption('systemParams', opts.systemParams || {} );

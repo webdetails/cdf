@@ -17,7 +17,7 @@ define([
     './UnmanagedComponent',
     '../dashboard/Sprintf',
     '../lib/jquery',
-    '../lib/datatables'], // TODO: load ColTypes and add AddIns in setup() ?
+    '../lib/datatables'],
   function(Logger, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
