@@ -261,7 +261,7 @@ define(["../lib/Base", "../lib/jquery", "../lib/underscore", "../lib/backbone", 
     },
   
     setAddInDefaults: function(slot,addIn,defaults) {
-      Logger.log("BaseComponent.setAddInDefaults was removed. You should call setAddInOptions or Dashboards.setAddInDefaults");
+      Logger.log("BaseComponent.setAddInDefaults was removed. You should call setAddInOptions or dashboard.setAddInDefaults");
     },
 
     setAddInOptions: function(slot, addIn,options) {

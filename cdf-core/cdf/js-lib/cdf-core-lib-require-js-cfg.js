@@ -53,7 +53,7 @@
     exports: '$',
     deps: ['cdf/lib/jquery.clean']
   };
-
+  
   //jquery.ui 1.10.4
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jQuery/jquery.ui";
   requireShims['cdf/lib/jquery.ui'] = [
@@ -163,6 +163,7 @@
   //jquery i18n
   requirePaths['cdf/lib/cdf.jquery.i18n'] = prefix + "/i18n/cdf.jquery.i18n";
   requirePaths['cdf/lib/jquery.i18n'] = prefix + "/i18n/jquery.i18n.properties";
+  requireShims['cdf/lib/jquery.i18n'] = ['cdf/lib/jquery'];
 
   //OpenLayers 2.13.1
   requirePaths['cdf/lib/OpenLayers'] = prefix + "/OpenMap/OpenLayers/OpenLayers";
@@ -180,8 +181,8 @@
   requireShims['cdf/lib/queryParser'] = ['cdf/lib/jquery'];
 
   //jQuery sparkline 2.1.2
-  /*
   requirePaths['cdf/lib/jquery.sparkline'] = prefix + "/sparkline/jquery.sparkline";
+  /*
   requireShims['cdf/lib/jquery.sparkline'] = [
     'cdf/lib/jquery'
   ];*/
@@ -195,11 +196,8 @@
   ];*/
 
   //jQuery corner 2.13
-  /*
-  requirePaths['cdf/lib/jquery.corner'] = prefix + "/chosen/jquery.corner";
-  requireShims['cdf/lib/jquery.corner'] = [
-    'cdf/lib/jquery'
-  ];*/
+  requirePaths['cdf/lib/jquery.corner'] = prefix + "/corner/jquery.corner";
+  requireShims['cdf/lib/jquery.corner'] = ['cdf/lib/jquery'];
 
   //jQuery eventstack
   /*
@@ -227,5 +225,8 @@
   requireShims['cdf/lib/bootstrap'] = ['css!cdf/lib/Bootstrap/css/bootstrap.css'];
 
   //Font Awesome 4.0.3 (CSS only)
+
+  // Raphaël 2.1.2 ( + Eve 0.4.2) AMD compatible
+  requirePaths['cdf/lib/raphael'] = prefix + '/Raphael/raphael';
 
 })();

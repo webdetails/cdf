@@ -11,7 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/underscore', '../lib/jquery', './UnmanagedComponent'],
+define([
+  '../lib/underscore',
+  '../lib/jquery',
+  './UnmanagedComponent',
+  'common-ui/vizapi/DataTable',
+  'common-ui/vizapi/VizController',
+  'common-ui/vizapi/Events'],
   function(_, $, UnmanagedComponent) {
 
   var VisualizationAPIComponent = UnmanagedComponent.extend({

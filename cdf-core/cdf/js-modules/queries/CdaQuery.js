@@ -51,7 +51,7 @@ define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib
         }
     },
 
-    buildQueryDefinition: function(overrides, dashboard) {
+    buildQueryDefinition: function(overrides) {
       overrides = (overrides instanceof Array)
         ? Utils.propertiesArrayToObject(overrides)
         : (overrides || {});
@@ -60,8 +60,9 @@ define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib
       var cachedParams = this.getOption('params');
       var params = $.extend( {}, cachedParams , overrides);
 
+      var dash = this.getOption('dashboard');
       _.each( params , function(value, name) {
-        value = dashboard.getParameterValue(value);
+        value = dash.getParameterValue(value);
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parseable array by cda
           value = doCsvQuoting(value[0],';');

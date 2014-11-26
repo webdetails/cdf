@@ -11,8 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery', '../dashboard/Sprintf', '../lib/datatables'],
-  function(Logger, _, UnmanagedComponent, $, sprintf) {
+define([
+    '../Logger',
+    '../lib/underscore',
+    './UnmanagedComponent',
+    '../dashboard/Sprintf',
+    '../lib/jquery',
+    '../lib/datatables'], // TODO: load ColTypes and add AddIns in setup() ?
+  function(Logger, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
   if($.fn.dataTableExt != undefined) {
@@ -425,17 +431,17 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
      */
     handleAddIns: function(dataTable, td) {
       var cd = this.chartDefinition,
-          position = dataTable.fnGetPosition(td);
-          if(position && typeof position[0] != "number") {
-            return false;
-          }
-          rowIdx = position[0],
-          colIdx = position[2],
-          colType = cd.colTypes[colIdx],
-          addIn = this.getAddIn("colType",colType),
-          state = {},
-          target = $(td),
-          results = this.rawData;
+        position = dataTable.fnGetPosition(td);
+      if(position && typeof position[0] != "number") {
+        return false;
+      }
+      rowIdx = position[0],
+      colIdx = position[2],
+      colType = cd.colTypes[colIdx],
+      addIn = this.getAddIn("colType",colType),
+      state = {},
+      target = $(td),
+      results = this.rawData;
       if(!addIn) {
         return false;
       }
@@ -578,7 +584,7 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
           myself.detachFromRow(row, i, activeclass);
 
           $(myself.expandParameters).each(function f(i, elt) {
-            Dashboards.setParameter(elt[1], "");
+            myself.dashboard.setParameter(elt[1], "");
           });
 
         } else {
@@ -595,15 +601,15 @@ define(['../Logger', '../lib/underscore', './UnmanagedComponent', '../lib/jquery
           var firstChange = null;
 
           $(myself.expandParameters).each(function f(i, elt) {
-            //skips the first expandParameter that was updated and calls Dashboards.setParameter for the all others
-            if(!firstChange && Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)]) {
+            //skips the first expandParameter that was updated and calls myself.dashboard.setParameter for the all others
+            if(!firstChange && myself.dashboard.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)]) {
               firstChange = elt;
             } else {
-              Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+              myself.dashboard.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
             }
           });
           if(firstChange !== null) {
-            Dashboards.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)]);
+            myself.dashboard.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)]);
           }
 
         };

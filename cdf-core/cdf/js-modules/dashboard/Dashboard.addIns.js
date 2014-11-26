@@ -11,18 +11,28 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Container', './Utils'],
-  function(Dashboard, Container, Utils) {
-
+define([
+  '../AddIn',
+  './Dashboard',
+  './Container',
+  './Utils',
+  '../lib/underscore',
+  '../addIns/colTypes'], //While addIns don't move to a lower level (e.g. TableComponent), load colTypes at a higher level
+  function(AddIn, Dashboard, Container, Utils, _, ColTypes) {
 
   var globalAddIns = new Container();
+
+  // TODO: Avoid loading all colType addins globally after CDE's renderer knows wich AddIns it should pre-load REMOVE ASAP !!!
+  _.each(ColTypes, function(val, prop) {
+    globalAddIns.register("Table.colType", val.name, new AddIn(val));
+  });
 
   Dashboard.implement({
       
     _initAddIns: function(){
       this.addIns = Utils.clone(globalAddIns);
     },
-    
+  
   
     //Normalization - Ensure component does not finish with component and capitalize first letter
     normalizeAddInKey : function(key, subKey) {

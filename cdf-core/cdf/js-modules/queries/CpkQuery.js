@@ -51,7 +51,7 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       }
     },
 
-    buildQueryDefinition: function(overrides, dashboard) {
+    buildQueryDefinition: function(overrides) {
       overrides = (overrides instanceof Array) 
         ? Utils.propertiesArrayToObject(overrides)
         : (overrides || {});
@@ -66,8 +66,10 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
 
+      var dash = this.getOption('dashboard');
+
       _.each( params , function (value, name) {
-        value = dashboard ? dashboard.getParameterValue(value) : value;
+        value = dash ? dash.getParameterValue(value) : value;
           if(_.isObject(value)) {
             // kettle does not handle arrays natively,
             // nor does it interpret multiple parameters with the same name as elements of an array,
