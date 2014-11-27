@@ -15,7 +15,8 @@ describe("The prpt Component #", function() {
     usePost:false,
     showParameters: true,
     iframe: true,
-    executeAtStart: true
+    executeAtStart: true,
+    staticValue: "staticValue"
   };
 
   myDashboard.addParameter( 'funcValue', function() { return  optionData.funcValue; } );
@@ -29,7 +30,8 @@ describe("The prpt Component #", function() {
     type: "prpt",
     htmlObject: "placeholder",
     path: optionData.path,
-    parameters: [['funcValue','funcValue'],['value','value'],['funcArray','funcArray'],['array','array']],
+    parameters: [['funcValue','funcValue'],['value','value'],['funcArray','funcArray'],
+      ['array','array'],['staticValue', 'staticValue']],
     paginate: optionData.paginate,
     usePost:optionData.usePost,
     showParameters: optionData.showParameters,
@@ -70,6 +72,7 @@ describe("The prpt Component #", function() {
     expect( options.value ).toEqual( optionData.value );
     expect( options.funcArray ).toEqual( optionData.funcArray );
     expect( options.array ).toEqual( optionData.array );
+    expect( options.staticValue ).toEqual( optionData.staticValue );
     expect( options['output-target'] ).toEqual( 'table/html;page-mode=page' );
     expect( options['accepted-page'] ).toEqual( 0 );
   });
@@ -86,6 +89,7 @@ describe("The prpt Component #", function() {
     expect( params.value ).toEqual( optionData.value );
     expect( params.funcArray ).toEqual( optionData.funcArray );
     expect( params.array ).toEqual( optionData.array );
+    expect( params.staticValue ).toEqual( optionData.staticValue );
   });
 
   /**
