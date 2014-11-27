@@ -178,19 +178,37 @@ var PrptComponent = BaseComponent.extend({
       options["output-target"] = "table/html;page-mode=stream";
       options['accept-page'] = -1;
     }
+
     // update options with report parameters
-    for(var i = 0; i < this.parameters.length; i++) {
+    _.each(this.parameters, function( param, index ) {
       // param: [<prptParam>, <dashParam>, <default>]
-      var param = this.parameters[i];
-      var value = Dashboards.getParameterValue(param[1]);
-      if(value == null && param.length == 3) {
-        value = param[2];
+      var name = param[0];
+      var value = param[1];
+
+      var paramValue;
+      try {
+        paramValue = Dashboards.getParameterValue(value);
+      } catch( e ) {
+        if(!_.isObject(value) || _.isFunction(value)) {
+          printValue = value;
+        } else {
+          printValue = JSON.stringify(value);
+        }
+        Dashboards.log("GetOptions detected static parameter " + name + "=" + printValue + ". " +
+            "The parameter will be used as value instead its value obtained from getParameterValue");
+        paramValue = value;
       }
-      if(typeof value == 'function') {
-        value = value();
+      if (paramValue == null && param.length == 3) {
+        paramValue = param[2];
+      } else if (paramValue === undefined) {
+        paramValue = value;
       }
-      options[param[0]] = value;
-    }
+      if (_.isFunction(paramValue)) {
+        paramValue = paramValue();
+      }
+      options[name] = paramValue;
+    });
+
     return options;
   },
   getParams: function() {
@@ -202,19 +220,35 @@ var PrptComponent = BaseComponent.extend({
       options["output-target"] = "table/html;page-mode=stream";
       options['accept-page'] = -1;
     }
+
     // update options with report parameters
-    for(var i = 0; i < this.parameters.length; i++) {
+    _.each(this.parameters, function( param, index ) {
       // param: [<prptParam>, <dashParam>, <default>]
-      var param = this.parameters[i];
-      var value = Dashboards.getParameterValue(param[1]);
-      if(value == null && param.length == 3) {
-          value = param[2];
+      var name = param[0];
+      var value = param[1];
+      var paramValue;
+      try {
+        paramValue = Dashboards.getParameterValue(value);
+      } catch( e ) {
+        if(!_.isObject(value) || _.isFunction(value)) {
+          printValue = value;
+        } else {
+          printValue = JSON.stringify(value);
+        }
+        Dashboards.log("GetParams detected static parameter " + name + "=" + printValue + ". " +
+            "The parameter will be used as value instead its value obtained from getParameterValue");
+        paramValue = value;
       }
-      if(typeof value == 'function' ) {
-          value = value();
+      if (paramValue == null && param.length == 3) {
+        paramValue = param[2];
+      } else if (paramValue === undefined) {
+        paramValue = value;
       }
-      options[param[0]] = value;
-    }
+      if (_.isFunction(paramValue)) {
+        paramValue = paramValue();
+      }
+      options[name] = paramValue;
+    });
     return options;
   },
   getReportOptions: function() {

@@ -33,7 +33,8 @@ define(["cdf/Dashboard", "cdf/components/PrptComponent"],
       usePost:false,
       showParameters: true,
       iframe: true,
-      executeAtStart: true
+      executeAtStart: true,
+      staticValue: "staticValue"
     };
 
     dashboard.addParameter('funcValue', function() { return  optionData.funcValue; });
@@ -46,7 +47,8 @@ define(["cdf/Dashboard", "cdf/components/PrptComponent"],
       type: "prptComponent",
       htmlObject: "sampleObject",
       path: optionData.path,
-      parameters: [['funcValue','funcValue'],['value','value'],['funcArray','funcArray'],['array','array']],
+      parameters: [['funcValue','funcValue'],['value','value'],['funcArray','funcArray'],
+        ['array','array'],['staticValue', 'staticValue']],
       paginate: optionData.paginate,
       usePost:optionData.usePost,
       showParameters: optionData.showParameters,
@@ -99,6 +101,7 @@ define(["cdf/Dashboard", "cdf/components/PrptComponent"],
       expect(options.value).toEqual(optionData.value);
       expect(options.funcArray).toEqual(optionData.funcArray);
       expect(options.array).toEqual(optionData.array);
+      expect(options.staticValue).toEqual(optionData.staticValue);
       expect(options['output-target']).toEqual('table/html;page-mode=page');
       expect(options['accept-page']).toEqual(0);
     });
@@ -115,6 +118,7 @@ define(["cdf/Dashboard", "cdf/components/PrptComponent"],
       expect(params.value).toEqual(optionData.value);
       expect(params.funcArray).toEqual(optionData.funcArray);
       expect(params.array).toEqual(optionData.array);
+      expect(params.staticValue).toEqual(optionData.staticValue);
     });
 
     /**
