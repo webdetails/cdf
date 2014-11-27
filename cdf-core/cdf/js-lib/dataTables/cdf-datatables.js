@@ -11,6 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./jquery', 'datatables'], function($, datatables) {
+define(['../lib/jquery', 'datatables'], function($, datatables) {
   return datatables;
 });

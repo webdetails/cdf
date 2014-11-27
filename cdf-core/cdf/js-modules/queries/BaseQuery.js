@@ -26,17 +26,17 @@
  *
  * Additionally, the BaseQuery class can be set to something other than the default by using:
  *    Dashboards.setBaseQuery( constructor )
- * but this is a risky operation which considerable implications. Use at your own risk!
+ * but this is a risky operation whith considerable implications. Use at your own risk!
  *
  */
  
  define(['../lib/jquery', '../lib/Base', '../lib/underscore', '../Logger', '../dashboard/OptionsManager', '../dashboard/Dashboard.query'],
-  function($, Base, _, Logger, OptionsManager, dashboardQuery) {
+  function($, Base, _, Logger, OptionsManager, DashboardQuery) {
  
    var BaseQuery = Base.extend({
     name: "baseQuery",
     label: "Base Query",
-    deepProperties: [ 'defaults' , 'interfaces' ],
+    deepProperties: ['defaults' , 'interfaces'],
     defaults: {
       successCallback: function() {
         Logger.log('Query callback not defined. Override.');
@@ -48,22 +48,22 @@
       params: {},
       ajaxOptions: {
         async: false,
-        type:'POST'
+        type: 'POST'
       },
       url: ''
     },
 
     interfaces: {
-      params: { reader:'propertiesObject', validator:'isObjectOrPropertiesArray'},
-      successCallback: { validator:'isFunction'},
-      errorCallback: { validator:'isFunction'},
-      pageSize: { validator:'isPositive'}
+      params: {reader: 'propertiesObject', validator: 'isObjectOrPropertiesArray'},
+      successCallback: {validator: 'isFunction'},
+      errorCallback: {validator: 'isFunction'},
+      pageSize: {validator: 'isPositive'}
 
     },
 
     constructor: function(config) {          
-      this._optionsManager = new OptionsManager( this );
-      this._optionsManager.mixin( this );          
+      this._optionsManager = new OptionsManager(this);
+      this._optionsManager.mixin(this);          
       this.init(config);
     },
 
@@ -85,8 +85,8 @@
     getSuccessHandler: function(callback) {
       var myself = this;
       return function(json) {
-        myself.setOption('lastResultSet' , json);
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet'));
+        myself.setOption('lastResultSet', json);
+        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         callback(clone);
       }
     },
@@ -122,7 +122,7 @@
     },
 
     setAjaxOptions: function(newOptions) {
-      this.setOption('ajaxOptions' , _.extend({}, this.getOption('ajaxOptions') , newOptions));
+      this.setOption('ajaxOptions', _.extend({}, this.getOption('ajaxOptions'), newOptions));
     },
 
     setSortBy: function(sortBy) {
@@ -146,7 +146,7 @@
             * going to change the internal callback
             */
             return this.doQuery(arguments[0]);
-          } else if( !_.isEmpty(arguments[0])
+          } else if(!_.isEmpty(arguments[0])
             && (_.isObject(arguments[0]) || _.isArray(arguments[0]))) {
 
             this.setOption('params' , arguments[0] || {});
@@ -155,23 +155,23 @@
           break;
         case 2:
           if(typeof arguments[0] == "function") {
-            this.setOption( 'successCallback' , arguments[0]);
-            this.setOption('errorCallback'  , arguments[1] );
+            this.setOption('successCallback', arguments[0]);
+            this.setOption('errorCallback', arguments[1]);
             return this.doQuery();
           } else {
-            this.setOption('params' , arguments[0] || {});
-            this.setOption('successCallback' , arguments[1]);
+            this.setOption('params', arguments[0] || {});
+            this.setOption('successCallback', arguments[1]);
             return this.doQuery();
           }
           break;
         default:
           /* We're just going to discard anything over two params */
-          if (params) {
-            this.setOption('params' , params);
+          if(params) {
+            this.setOption('params', params);
           }
 
-          this.setOption('successCallback' , successCallback);
-          this.setOption('errorCallback' , errorCallback);
+          this.setOption('successCallback', successCallback);
+          this.setOption('errorCallback', errorCallback);
           return this.doQuery();
       }
       /* If we haven't hit a return by this time,
@@ -183,7 +183,7 @@
     // Result caching
     lastResults: function() {
       if(this.getOption('lastResultSet') !== null) {
-        return $.extend(true,{}, this.getOption('lastResultSet'));
+        return $.extend(true, {}, this.getOption('lastResultSet'));
       } else {
         throw "NoCachedResults";
       }
@@ -191,7 +191,7 @@
 
     reprocessLastResults: function(outerCallback) {
       if(this.getOption('lastResultSet') !== null) {
-        var clone = $.extend(true,{}, this.getOption('lastResultSet'));
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = outerCallback || this.getOption('successCallback');
         return callback(clone);
       } else {
@@ -201,9 +201,9 @@
 
     reprocessResults: function(outsideCallback) {
       if(this.getOption('lastResultSet') !== null) {
-        var clone = $.extend(true,{}, this.getOption('lastResultSet'));
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = (outsideCallback ? outsideCallback : this.getOption('successCallback'));
-        callback( clone );
+        callback(clone);
       } else {
         throw "NoCachedResults";
       }
@@ -214,7 +214,7 @@
     },
 
     setCallback: function(callback) {
-      this.setOption('successCallback' , callback);
+      this.setOption('successCallback', callback);
     },
 
     setErrorCallback: function(callback) {
@@ -238,7 +238,7 @@
           pageSize = this.getOption('pageSize');
       if(pageSize > 0) {
         page += pageSize;
-        this.setOption('page' , page);
+        this.setOption('page', page);
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPageSize";
@@ -251,10 +251,10 @@
           pageSize = this.getOption('pageSize');
       if(page > pageSize) {
         page -= pageSize;
-        this.setOption('page' , page );
+        this.setOption('page', page );
         return this.doQuery(outsideCallback);
       } else if(_pageSize > 0) {
-        this.setOption('page' , 0);
+        this.setOption('page', 0);
         return this.doQuery(outsideCallback);
       } else {
         throw "AtBeggining";
@@ -268,7 +268,7 @@
       if(targetPage * pageSize == page) {
         return false;
       } else if(typeof targetPage == 'number' && targetPage >= 0) {
-        this.setOption('page' , targetPage * pageSize);
+        this.setOption('page', targetPage * pageSize);
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPage";
@@ -280,7 +280,7 @@
       if(targetPage == this.getOption('page')) {
         return false;
       } else if(typeof targetPage == 'number' && targetPage >= 0) {
-        this.setOption('page' , targetPage);
+        this.setOption('page', targetPage);
       } else {
         throw "InvalidPage";
       }
@@ -304,8 +304,8 @@
       if(pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {
         return false;
       } else if(typeof pageSize == 'number' && pageSize > 0) {
-        this.setOption('page' , 0);
-        this.setOption('pageSize' , pageSize);
+        this.setOption('page', 0);
+        this.setOption('pageSize', pageSize);
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPageSize";
@@ -315,7 +315,7 @@
 
   // Sets the query class that can extended to create new ones.
   // The registered Base needs to have an extend method.
-  dashboardQuery.setBaseQuery(BaseQuery);
+  DashboardQuery.setBaseQuery(BaseQuery);
   
   return BaseQuery;
  

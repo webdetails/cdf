@@ -1,8 +1,14 @@
 <script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<!-- VizController.js, DataTable.js and Events.js are now loaded in the requirejs module VisualizationAPIComponent -->
+<!-- 
 <script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/VizController.js"></script>
 <script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/DataTable.js"></script>
 <script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/Events.js"></script>
+-->
+<!-- ccc/sample/sampleVisualization.js is now loaded in the requirejs block in the end of this sample template -->
+<!--
 <script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/ccc/sample/sampleVisualization.js"></script>
+-->
 
 <div class="shadow">
 
@@ -111,7 +117,10 @@
 
       <div id="code">
         <textarea cols="80" rows="20" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/VisualizationAPIComponent'],
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/VisualizationAPIComponent',
+  'common-ui/vizapi/ccc/sample/sampleVisualization'],
   function(Dashboard, VisualizationAPIComponent) {
 
     var dashboard = new Dashboard();
