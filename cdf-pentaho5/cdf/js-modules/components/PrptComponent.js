@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
-  function(PrptComponentExt, Logger, $, BaseComponent) {
+define(['./PrptComponent.ext', '../Logger', '../lib/jquery', '../lib/underscore', './BaseComponent'],
+  function(PrptComponentExt, Logger, $, _, BaseComponent) {
 
   var PrptComponent = BaseComponent.extend({
     getIframeName: function() {
@@ -173,20 +173,38 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
         options["output-target"] = "table/html;page-mode=stream";
         options['accept-page'] = -1;
       }
+
       // update options with report parameters
-      var L = this.parameters ? this.parameters.length : 0;
-      for(var i = 0; i < L; i++) {
+      var myself = this;
+      _.each(this.parameters, function( param, index ) {
         // param: [<prptParam>, <dashParam>, <default>]
-        var param = this.parameters[i];
-        var value = this.dashboard.getParameterValue(param[1]);
-        if(value == null && param.length == 3) {
-          value = param[2];
+        var name = param[0];
+        var value = param[1];
+
+        var paramValue;
+        try {
+          paramValue = myself.dashboard.getParameterValue(value);
+        } catch( e ) {
+          if(!_.isObject(value) || _.isFunction(value)) {
+            printValue = value;
+          } else {
+            printValue = JSON.stringify(value);
+          }
+          Logger.log("GetOptions detected static parameter " + name + "=" + printValue + ". " +
+              "The parameter will be used as value instead its value obtained from getParameterValue");
+          paramValue = value;
         }
-        if(typeof value == 'function') {
-          value = value();
+        if (paramValue == null && param.length == 3) {
+          paramValue = param[2];
+        } else if (paramValue === undefined) {
+          paramValue = value;
         }
-        options[param[0]] = value;
-      }
+        if (_.isFunction(paramValue)) {
+          paramValue = paramValue();
+        }
+        options[name] = paramValue;
+      });
+
       return options;
     },
     getParams: function() {
@@ -198,20 +216,38 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', './BaseComponent'],
         options["output-target"] = "table/html;page-mode=stream";
         options['accept-page'] = -1;
       }
+
       // update options with report parameters
-      var L = this.parameters ? this.parameters.length : 0;
-      for(var i = 0; i < L; i++) {
+      var myself = this;
+      _.each(this.parameters, function( param, index ) {
         // param: [<prptParam>, <dashParam>, <default>]
-        var param = this.parameters[i];
-        var value = this.dashboard.getParameterValue(param[1]);
-        if(value == null && param.length == 3) {
-          value = param[2];
+        var name = param[0];
+        var value = param[1];
+
+        var paramValue;
+        try {
+          paramValue = myself.dashboard.getParameterValue(value);
+        } catch( e ) {
+          if(!_.isObject(value) || _.isFunction(value)) {
+            printValue = value;
+          } else {
+            printValue = JSON.stringify(value);
+          }
+          Logger.log("GetParams detected static parameter " + name + "=" + printValue + ". " +
+              "The parameter will be used as value instead its value obtained from getParameterValue");
+          paramValue = value;
         }
-        if(typeof value == 'function') {
-          value = value();
+        if (paramValue == null && param.length == 3) {
+          paramValue = param[2];
+        } else if (paramValue === undefined) {
+          paramValue = value;
         }
-        options[param[0]] = value;
-      }
+        if (_.isFunction(paramValue)) {
+          paramValue = paramValue();
+        }
+        options[name] = paramValue;
+      });
+
       return options;
     },
     getReportOptions: function() {
