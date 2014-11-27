@@ -40,7 +40,6 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
         this.setOption('endpoint' , opts.endpoint);
         this.setOption('url', DashboardExt.getPluginEndpoint(opts.pluginId , opts.endpoint));
       }
-      this.setOption('dashboard', opts.dashboard);
       this.setOption('kettleOutput', opts.kettleOutput);
       this.setOption('stepName', opts.stepName);
       this.setOption('systemParams', opts.systemParams || {} );
@@ -65,25 +64,22 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
       var cachedParams = this.getOption('params'),
-          params = $.extend( {}, cachedParams , overrides);
+        params = $.extend( {}, cachedParams , overrides);
 
-      var dash = this.getOption('dashboard');
-
-      _.each( params , function (value, name) {
-        value = dash ? dash.getParameterValue(value) : value;
-          if(_.isObject(value)) {
-            // kettle does not handle arrays natively,
-            // nor does it interpret multiple parameters with the same name as elements of an array,
-            // nor does CPK do any sort of array handling.
-            // A stringify ensures the array is passed as a string, that can be parsed using kettle.
-            value = JSON.stringify(value);
-            // Another option would be to add futher:
-            // value = value.split('],').join(';').split('[').join('').split(']').join('');
-            // which transforms [[0,1],[2,3]] into "0,1;2,3"
-          }
-          if(typeof value == 'function') {
-            value = value();
-          }
+      _.each(params, function(value, name) {
+        if(_.isObject(value)) {
+          // kettle does not handle arrays natively,
+          // nor does it interpret multiple parameters with the same name as elements of an array,
+          // nor does CPK do any sort of array handling.
+          // A stringify ensures the array is passed as a string, that can be parsed using kettle.
+          value = JSON.stringify(value);
+          // Another option would be to add futher:
+          // value = value.split('],').join(';').split('[').join('').split(']').join('');
+          // which transforms [[0,1],[2,3]] into "0,1;2,3"
+        }
+        if(typeof value == 'function') {
+          value = value();
+        }
         queryDefinition['param' + name] = value;
       });
 

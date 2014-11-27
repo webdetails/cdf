@@ -89,8 +89,6 @@ define(['../lib/Base', './Dashboard', './Container', '../lib/underscore', './Uti
                 opts = type;
                 type = opts.queryType || 'cda';
             }
-            
-            opts.dashboard = this;
 
             var query = this.queryFactories.getNew('Query', type, opts);
             return query;

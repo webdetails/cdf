@@ -252,7 +252,20 @@ define([
           var handler = myself.getSuccessHandler(success);
 
           myself.queryState.setAjaxOptions({async:true});
-          myself.queryState.fetchData(myself.parameters == undefined ? [] : myself.parameters, handler);
+          // Query doesn't have access to Dashboard object, send parameter values
+          var params;
+          if(myself.parameters != undefined) {
+            // create a copy of the parameters array
+            params = $.extend(true, [], myself.parameters);
+            // replace the dashboard's parameter name with it's value
+            params = _.map(params, function(param){
+              param[1] = myself.dashboard.getParameterValue(param[1]);
+              return param;
+            });
+          } else {
+            params = [];
+          }
+          myself.queryState.fetchData(params, handler);
         }
       } catch(e) {
         /*
