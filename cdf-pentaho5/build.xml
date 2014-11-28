@@ -70,12 +70,6 @@
   <property name='pentaho-js-lib.dir' value='${pentaho.dir}/${js-lib.dir}'/>
   <property name='pentaho-resource.dir' value='${pentaho.dir}/${resource.dir}'/>
 
-  <property name='pentaho-test-res.dir' value='${pentaho.dir}/test-res' description='Resources for Karma tests' />
-  <property name='pentaho-test-res-js-modules.dir' value='${pentaho-test-res.dir}/cdf/js-modules' description='Modules for Karma tests' />
-  <property name='pentaho-test-res-js-lib.dir' value='${pentaho-test-res.dir}/cdf/js-lib' description='Libs for Karma tests' />
-  <property name='pentaho-test-js.dir' value='${pentaho.dir}/test-js' description='Karma tests dir' />
-  <property name='js.requireCfg-raw' value='${pentaho-test-res.dir}/requireCfg-raw.js' />
-
   <property name="plugin.name" value="pentaho-cdf" description="Name of the plugin"/>
   <property name="bin.dir" value="bin"/>
   <property name="stage.dir" value="${bin.dir}/stage" description="Name of the resource directory"/>
@@ -111,6 +105,11 @@
 
   <property name="build.js.path" value="build-res/cdf.build.js" description="cdf.build.js location"/>
   <property name="rjs.path" value="node_modules/requirejs/bin/r.js" description="r.js location"/>
+
+  <property name='test-js-res.dir' value='${bin.dir}/test-js-res' description='Resources for Karma tests' />
+  <property name='test-js-res.js-modules.dir' value='${test-js-res.dir}/cdf/js-modules' description='Modules for Karma tests' />
+  <property name='test-js-res.js-lib.dir' value='${test-js-res.dir}/cdf/js-lib' description='Libs for Karma tests' />
+  <property name='test-js.dir' value='${pentaho.dir}/test-js' description='Karma tests dir' />
 
   <path id="classpath">
     <fileset dir="${devlib.dir}">
@@ -645,26 +644,18 @@
 
   <target name="run-karma" depends="install-antcontrib, npm-install">
 
-    <!-- -->
-    <echo message="Copying js source"/>
-    <delete dir="${pentaho-test-res.dir}"/>
-    <copy todir='${pentaho-test-res-js-modules.dir}'>
-      <fileset dir='${core-js.dir}'/>
-      <fileset dir='${pentaho-base-js.dir}'/>
-      <fileset dir="${pentaho-js.dir}" />
-      <fileset dir="${pentaho-test-js.dir}" />
-    </copy>
-    <copy todir='${pentaho-test-res-js-lib.dir}'>
-      <fileset dir='${core-js-lib.dir}'/>
-    </copy>
-
     <!-- compile the require file -->
     <echo message="Collecting RequireJS Configurations"/>
-    <delete file="${js.requireCfg-raw}"/>
-    <echo message="var requireCfg={paths:{},shim:{}};" file="${js.requireCfg-raw}" append="false"/>
-    <concat destfile="${js.requireCfg-raw}" append="true" force="yes">
-      <fileset dir="${pentaho-test-res.dir}" casesensitive="yes">
-        <include name="**/*-require-js-cfg.js"/>
+    <delete file="build-res/requireCfg-raw.js"/>
+    <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
+      <fileset dir="../cdf-core/cdf" casesensitive="yes">
+        <include name="*/*-require-js-cfg.js"/>
+      </fileset>
+      <fileset dir="../cdf-pentaho-base/cdf" casesensitive="yes">
+        <include name="*/*-require-js-cfg.js"/>
+      </fileset>
+      <fileset dir="cdf/js-modules" casesensitive="yes">
+        <include name="*-require-js-cfg.js"/>
       </fileset>
     </concat>
 
@@ -727,7 +718,40 @@
     </if>
   </target>
 
-  <target name="test-js-require">
+  <target name="test-js-require" depends="subfloor-js.resolve-js">
+
+    <!-- create test resources dir 'bin/test-js-res/cdf/js-lib' -->
+    <delete dir="${test-js-res.js-lib.dir}"/>
+    <mkdir dir="${test-js-res.js-lib.dir}"/>
+    <!-- create test resources dir 'bin/test-js-res/cdf/js-modules' -->
+    <delete dir="${test-js-res.js-modules.dir}"/>
+    <mkdir dir="${test-js-res.js-modules.dir}"/>
+
+    <!-- copy CDF js libs into bin/test-js-res/cdf/js-lib -->
+    <copy todir="${test-js-res.js-lib.dir}" overwrite="true">
+      <!-- copy core CDF js libs -->
+      <fileset dir="${core-js-lib.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy CDF js amd modules into bin/test-js-res/cdf/js-modules -->
+    <copy todir="${test-js-res.js-modules.dir}" overwrite="true">
+      <!-- copy core CDF js amd modules -->
+      <fileset dir="${core-js.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+      <!-- copy base CDF js amd modules -->
+      <fileset dir="${pentaho-base-js.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+      <!-- copy pentaho5 CDF js amd modules -->
+      <fileset dir="${pentaho-js.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+    </copy>
+
+    <!-- run karma -->
     <antcall target="run-karma"/>
   </target>
 

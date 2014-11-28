@@ -21,3 +21,5 @@ requireCfg = {
   shim: {}
 };
 var KARMA_RUN = true;
+
+requireCfg.paths['cdf/lib/CCC'] = 'js-lib/expanded/ccc/amd';

@@ -10,7 +10,7 @@
     }
   }
 
-  requireCfg['baseUrl'] = 'http://localhost:9876/base/test-res';
+  requireCfg['baseUrl'] = 'http://localhost:9876/base/bin/test-js-res/';
   requirejs.config(requireCfg);
 
   // Ask Require.js to load all test files and start test run

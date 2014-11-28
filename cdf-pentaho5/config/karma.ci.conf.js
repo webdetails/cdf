@@ -12,16 +12,18 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'test-res/cdf/js-lib/**/*.css', included: false },
-      { pattern: 'test-res/cdf/js-lib/**/*.js', included: false },
-      { pattern: 'test-res/cdf/js-modules/**/*.css', included: false },
-      { pattern: 'test-res/cdf/js-modules/**/*.js', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-lib/**/*.css', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-lib/**/*.js', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-modules/**/*.css', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-modules/**/*.js', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.js', included: false },
+      { pattern: 'js-lib/expanded/common-ui/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
       { pattern: 'test-js/**/*.js', included: false },
       { pattern: '../cdf-pentaho-base/test-js/**/*.js', included: false },
       'config/context.js',
-      'test-res/requireCfg-raw.js',
+      'build-res/requireCfg-raw.js',
       'config/require-config.js'
     ],
 
@@ -29,7 +31,7 @@ module.exports = function(config) {
     exclude: ['test-js/legacy/**/*.js'],
 
     preprocessors: {
-      "cdf/js/*.js" : 'coverage'
+      "bin/test-js-res/cdf/js-modules/**/*.js" : 'coverage'
     },
 
     // test results reporter to use
