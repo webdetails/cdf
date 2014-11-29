@@ -16,6 +16,7 @@ module.exports = function(config) {
       { pattern: 'cdf/js-lib/**/*.js', included: false },
       { pattern: 'cdf/js-modules/**/*.css', included: false },
       { pattern: 'cdf/js-modules/**/*.js', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.css', included: false },
       { pattern: 'js-lib/expanded/ccc/amd/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
@@ -70,7 +71,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
     // Start these browsers, currently available:
     // - Chrome
@@ -80,14 +81,14 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
+    browsers: ['Firefox'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false,
+    singleRun: true,
 
     plugins: [
       'karma-jasmine',
@@ -96,7 +97,8 @@ module.exports = function(config) {
       'karma-html-reporter',
       'karma-coverage',
       'karma-phantomjs-launcher',
-      'karma-chrome-launcher'
+      'karma-chrome-launcher',
+      'karma-firefox-launcher'
     ]
   });
 };

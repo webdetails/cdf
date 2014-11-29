@@ -119,7 +119,9 @@ module.exports = function(config) {
       'karma-junit-reporter',
       'karma-html-reporter',
       'karma-coverage',
-      'karma-phantomjs-launcher'
+      'karma-phantomjs-launcher',
+      'karma-chrome-launcher',
+      'karma-firefox-launcher'
     ]
   });
 };

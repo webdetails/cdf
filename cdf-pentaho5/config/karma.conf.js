@@ -16,7 +16,9 @@ module.exports = function(config) {
       { pattern: 'bin/test-js-res/cdf/js-lib/**/*.js', included: false },
       { pattern: 'bin/test-js-res/cdf/js-modules/**/*.css', included: false },
       { pattern: 'bin/test-js-res/cdf/js-modules/**/*.js', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.css', included: false },
       { pattern: 'js-lib/expanded/ccc/amd/*.js', included: false },
+      { pattern: 'js-lib/expanded/common-ui/**/*.css', included: false },
       { pattern: 'js-lib/expanded/common-ui/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
@@ -101,7 +103,8 @@ module.exports = function(config) {
       'karma-html-reporter',
       'karma-coverage',
       'karma-phantomjs-launcher',
-      'karma-chrome-launcher'
+      'karma-chrome-launcher',
+      'karma-firefox-launcher'
     ]
   });
 };
