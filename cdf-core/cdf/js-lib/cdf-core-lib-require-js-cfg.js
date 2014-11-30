@@ -37,8 +37,6 @@
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
 
   //jquery 1.9.1
-  //requirePaths['jquery'] = prefix + "/jquery/jquery"; //deprecated
-  //requirePaths['cdf/lib/jquery'] = prefix + "/jquery/cdf-jquery"; //deprecated
   requireCfg.map['*']['cdf/lib/jquery.clean'] = "cdf/lib/jQuery/jquery";
   requireCfg.map['cdf'] = {
     'jquery': "cdf/lib/jQuery/jquery"

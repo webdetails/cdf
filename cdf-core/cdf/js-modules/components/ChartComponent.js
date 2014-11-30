@@ -15,10 +15,8 @@ define([
     '../dashboard/Utils',
     './UnmanagedComponent',
     './ChartComponent.ext',
-    '../lib/CCC/protovis',
-    '../lib/CCC/pvc', 
     '../lib/jquery'],
-  function(Utils, UnmanagedComponent, ChartComponentExt, pv, pvc, $) {
+  function(Utils, UnmanagedComponent, ChartComponentExt, $) {
 
   var ChartComponent = UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {

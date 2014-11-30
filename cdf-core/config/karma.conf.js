@@ -16,6 +16,8 @@ module.exports = function(config) {
       { pattern: 'cdf/js-lib/**/*.js', included: false },
       { pattern: 'cdf/js-modules/**/*.css', included: false },
       { pattern: 'cdf/js-modules/**/*.js', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.css', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
       { pattern: 'test-js/**/*-spec.js', included: false },
@@ -28,7 +30,7 @@ module.exports = function(config) {
     exclude: ['test-js/legacy/**/*.js'],
 
     preprocessors: {
-        "cdf/js/*.js" : 'coverage'
+      "cdf/js-modules/**/*.js" : 'coverage'
     },
 
     // test results reporter to use
@@ -87,7 +89,7 @@ module.exports = function(config) {
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
-    browserNoActivityTimeout: 20000,
+    //browserNoActivityTimeout: 20000,
     
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
@@ -100,7 +102,8 @@ module.exports = function(config) {
       'karma-html-reporter',
       'karma-coverage',
       'karma-phantomjs-launcher',
-      'karma-chrome-launcher'
+      'karma-chrome-launcher',
+      'karma-firefox-launcher'
     ]
   });
 };

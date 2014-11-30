@@ -12,16 +12,20 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'test-res/cdf/js-lib/**/*.css', included: false },
-      { pattern: 'test-res/cdf/js-lib/**/*.js', included: false },
-      { pattern: 'test-res/cdf/js-modules/**/*.css', included: false },
-      { pattern: 'test-res/cdf/js-modules/**/*.js', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-lib/**/*.css', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-lib/**/*.js', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-modules/**/*.css', included: false },
+      { pattern: 'bin/test-js-res/cdf/js-modules/**/*.js', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.css', included: false },
+      { pattern: 'js-lib/expanded/ccc/amd/*.js', included: false },
+      { pattern: 'js-lib/expanded/common-ui/**/*.css', included: false },
+      { pattern: 'js-lib/expanded/common-ui/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
       'test-js/testUtils.js',
       { pattern: 'test-js/**/*.js', included: false },
       { pattern: '../cdf-pentaho-base/test-js/**/*.js', included: false },
       'config/context.js',
-      'test-res/requireCfg-raw.js',
+      'build-res/requireCfg-raw.js',
       'config/require-config.js'
     ],
 
@@ -29,7 +33,7 @@ module.exports = function(config) {
     exclude: ['test-js/legacy/**/*.js'],
 
     preprocessors: {
-      "cdf/js/*.js" : 'coverage'
+      "bin/test-js-res/cdf/js-modules/**/*.js" : 'coverage'
     },
 
     // test results reporter to use
@@ -70,7 +74,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
     // Start these browsers, currently available:
     // - Chrome
@@ -80,16 +84,16 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
+    browsers: ['Firefox'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
-    browserNoActivityTimeout: 1200000,
+    //browserNoActivityTimeout: 1200000,
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false,
+    singleRun: true,
 
     plugins: [
       'karma-jasmine',
@@ -98,7 +102,8 @@ module.exports = function(config) {
       'karma-html-reporter',
       'karma-coverage',
       'karma-phantomjs-launcher',
-      'karma-chrome-launcher'
+      'karma-chrome-launcher',
+      'karma-firefox-launcher'
     ]
   });
 };
