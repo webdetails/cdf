@@ -11,18 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([
-  './colTypes/cccBulletChart/cccBulletChart',
-  './colTypes/circle/circle',
-  './colTypes/clippedText/clippedText',
-  './colTypes/dataBar/dataBar',
-  './colTypes/formattedText/formattedText',
-  './colTypes/groupHeaders/groupHeaders',
-  './colTypes/hyperlink/hyperlink',
-  './colTypes/localizedText/localizedText',
-  './colTypes/pvSparkline/pvSparkline',
-  './colTypes/sparkline/sparkline',
-  './colTypes/trendArrow/trendArrow'],
-  function() {
+.dataBarContainer {
+  position: relative;
+  width:100%;
+}
 
-});
+.dataBarContainer svg {
+  float:left;
+}
+
+.dataBarContainer .value {
+  position:relative;
+  float:right;
+  z-index:100;
+}
