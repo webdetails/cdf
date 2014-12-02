@@ -43,7 +43,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", localizedText);
+  Dashboard.registerGlobalAddIn("Table", "colType", localizedText);
 
   return localizedText;
 

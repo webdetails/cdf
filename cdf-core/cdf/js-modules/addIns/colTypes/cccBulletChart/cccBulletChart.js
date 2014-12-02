@@ -41,8 +41,8 @@ define([
     },
 
     init: function() {
-      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
-      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+      $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
 
     sort: function() {
@@ -50,7 +50,7 @@ define([
     },
 
     implementation: function(tgt, st, opt) {
-      var chartOptions = $.extend(true,{},opt);
+      var chartOptions = $.extend(true, {}, opt);
       var $tgt = $(tgt);
       var target = $("<span></span>").appendTo($tgt.empty());
       var values = st.value.split(",");
@@ -83,7 +83,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", bullet);
+  Dashboard.registerGlobalAddIn("Table", "colType", bullet);
 
   return bullet;
 

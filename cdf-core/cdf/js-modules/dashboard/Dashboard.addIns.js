@@ -18,48 +18,45 @@ define([
   function(Dashboard, Container, Utils) {
 
   var globalAddIns = new Container();
+  
+  function normalizeAddInKey(key, subKey) {
+    if(key.indexOf('Component', key.length - 'Component'.length) !== -1) {
+      key = key.substring(0, key.length - 'Component'.length);
+    }
+    key = key.charAt(0).toUpperCase() + key.substring(1);  
+    if(subKey) { key += "." + subKey; }  
+    return key;    
+  }
 
-  Dashboard.registerGlobalAddIn = function(type, addIn) {
-    globalAddIns.register(type, addIn.getName(), addIn);
+  Dashboard.registerGlobalAddIn = function(type, subType, addIn) {
+    var type = normalizeAddInKey(type, subType),
+        name = addIn.getName ? addIn.getName() : null;
+    globalAddIns.register(type, name, addIn);
   };
 
   Dashboard.implement({
       
-    _initAddIns: function(){
+    _initAddIns: function() {
       this.addIns = Utils.clone(globalAddIns);
     },
   
-    //Normalization - Ensure component does not finish with component and capitalize first letter
-    normalizeAddInKey : function(key, subKey) {
-      if(key.indexOf('Component', key.length - 'Component'.length) !== -1) {
-        key = key.substring(0, key.length - 'Component'.length);
-      }
-      key = key.charAt(0).toUpperCase() + key.substring(1);
-
-      if(subKey) { key += "." + subKey; }
-  
-      return key;
-    },
-  
-    registerGlobalAddIn : function(type,subType,addIn){
-      var type = this.normalizeAddInKey(type, subType),
-          name = addIn.getName ? addIn.getName() : null;
-      globalAddIns.register(type, name, addIn);
+    registerGlobalAddIn : function(type, subType, addIn) {
+      Dashboard.registerGlobalAddIn(type, subType, addIn);
     },
 
-    registerAddIn : function(type,subType,addIn) {
-      var type = this.normalizeAddInKey(type, subType),
+    registerAddIn : function(type, subType, addIn) {
+      var type = normalizeAddInKey(type, subType),
           name = addIn.getName ? addIn.getName() : null;
       this.addIns.register(type, name, addIn);
     },
   
-    hasAddIn : function(type,subType,addInName) {
-      var type = this.normalizeAddInKey(type, subType);
-      return Boolean(this.addIns && this.addIns.has(type, addInName));
+    hasAddIn : function(type, subType, addInName) {
+      var type = normalizeAddInKey(type, subType);
+      return Boolean(this.addIns && this.addIns.has(type,addInName));
     },
   
-    getAddIn : function(type,subType,addInName) {
-      var type = this.normalizeAddInKey(type, subType);
+    getAddIn : function(type, subType, addInName) {
+      var type = normalizeAddInKey(type, subType);
       try {
         var addIn = this.addIns.get(type, addInName);
         return addIn;
@@ -76,11 +73,11 @@ define([
     },
     
     listAddIns : function(type, subType) {
-      var type = this.normalizeAddInKey(type, subType);
+      var type = normalizeAddInKey(type, subType);
       var addInList = [];
       try {
         return this.addIns.listType(type);
-      } catch (e) {
+      } catch(e) {
         return [];
       }
     }                              

@@ -43,7 +43,7 @@ define([
          * or a string that is a fixed point for conversion
          * to number and back to string.
          */
-        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() != 'NaN' ),
+        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() != 'NaN'),
         trendClass = !isNumeric ? "invalid" : (st.value > opt.thresholds.up ? "up" : st.value < opt.thresholds.down ? "down" : "neutral");
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' ' + qualityClass);
@@ -56,7 +56,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", trendArrow);
+  Dashboard.registerGlobalAddIn("Table", "colType", trendArrow);
 
   return trendArrow;
 

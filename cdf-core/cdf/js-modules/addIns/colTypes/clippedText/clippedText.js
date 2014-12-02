@@ -29,12 +29,12 @@ define([
       style: {}
     },
 
-    init: function(){
+    init: function() {
       $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];
       $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
     
-    implementation: function(tgt, st, opt){
+    implementation: function(tgt, st, opt) {
       var $tgt = $(tgt),
         $container = $("<div>");
 
@@ -44,13 +44,13 @@ define([
       if(opt.useTipsy) {
         $container.tipsy({
           gravity: 's', 
-          html:false
+          html: false
         });
       }
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", clippedText);
+  Dashboard.registerGlobalAddIn("Table", "colType", clippedText);
 
   return clippedText;
 

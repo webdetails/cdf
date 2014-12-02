@@ -39,7 +39,7 @@ define([
       includeValue: false,
       absValue: true,
       valueFormat: function(v, format, st, opt) {
-        return "" + sprintf(format || "%.1f", v) ;
+        return "" + sprintf(format || "%.1f", v);
       }
     },
     init: function() {
@@ -96,7 +96,7 @@ define([
       c.attr({
         fill: opt.backgroundImage ? "url('" + opt.backgroundImage + "')" : "90-" + opt.startColor + "-" + opt.endColor,
         stroke: opt.stroke,
-        title: "Value: "+ st.value
+        title: "Value: " + st.value
       });
 
       if(opt.includeValue) {
@@ -106,7 +106,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", dataBar);
+  Dashboard.registerGlobalAddIn("Table", "colType", dataBar);
 
   return dataBar;
 

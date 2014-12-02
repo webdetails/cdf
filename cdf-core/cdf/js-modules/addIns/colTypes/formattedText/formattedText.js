@@ -38,7 +38,7 @@ define([
     
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", formattedText);
+  Dashboard.registerGlobalAddIn("Table", "colType", formattedText);
 
   return formattedText;
 
