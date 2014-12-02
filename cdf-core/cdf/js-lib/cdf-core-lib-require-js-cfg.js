@@ -30,7 +30,7 @@
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
     prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
-    prefix = requirePaths['cdf/lib'] = "cdf/js-lib";
+    prefix = requirePaths['cdf/lib'] = "cdf/lib";
   }
 
   //modernizr 2.8.3

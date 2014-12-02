@@ -104,7 +104,10 @@
   <property name="js.module.script.agg.dir" value="build-res/cdf-module-scripts" />
 
   <property name="build.js.path" value="build-res/cdf.build.js" description="cdf.build.js location"/>
-  <property name="rjs.path" value="node_modules/requirejs/bin/r.js" description="r.js location"/>
+  <!-- Path for node_modules dir -->
+  <property name="nodemodules.local.dir" value="node_modules"/>
+  <property name="nodemodules.dir" value="${basedir}/${nodemodules.local.dir}" description="Directory with require dependencies to compile."/>
+  <property name="rjs.path" value="${nodemodules.local.dir}/requirejs/bin/r.js" description="r.js location"/>
 
   <property name='test-js-res.dir' value='${bin.dir}/test-js-res' description='Resources for Karma tests' />
   <property name='test-js-res.js-modules.dir' value='${test-js-res.dir}/cdf/js-modules' description='Modules for Karma tests' />
@@ -206,6 +209,15 @@
   <target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
     <delete dir="${runtimelib.dir}"/>
     <delete dir="${dist.dir}"/>
+    <echo message="Deleting... ${nodemodules.dir}"/>
+    <delete dir="${nodemodules.dir}"/>
+    <echo message="Deleting RequireJS Configurations"/>
+    <delete file="build-res/requireCfg-raw.js"/>
+    <delete file="build-res/requireCfg.js"/>
+    <echo message="Deleting... build-res/pentaho-js-build"/>
+    <delete dir="build-res/pentaho-js-build"/>
+    <echo message="Deleting... build-res/pentaho-js-build.zip"/>
+    <delete file="build-res/pentaho-js-build.zip"/>
   </target>
 
   <!--=======================================================================

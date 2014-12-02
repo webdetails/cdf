@@ -11,8 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/components/ChartComponent.ext', ['../dashboard/Dashboard.ext'],
-  function(DashboardExt) {
+define(['../dashboard/Dashboard.ext'], function(DashboardExt) {
 
   var ChartComponentExt = {
 
