@@ -12,7 +12,7 @@
  */
 
  define(['./Dashboard', '../Logger', '../lib/jquery', '../lib/underscore', './Dashboard.storage.ext'],
-     function(Dashboard, Logger, $, _, ext) {
+     function(Dashboard, Logger, $, _, DashboardStorageExt) {
 
     /**
      * A module representing a extension to Dashboard module for storage.
@@ -36,7 +36,7 @@
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(ext.getStorage(args.action), args, function(json) {
+        $.getJSON(DashboardStorageExt.getStorage(args.action), args, function(json) {
           $.extend(myself.storage,json);
           $.extend(myself.initialStorage,json);
         });
@@ -59,16 +59,16 @@
         };
 
         $.ajax({
-          type:'GET',
+          type: 'GET',
           dataType: "json",
-          url: wd.cdf.endpoints.getStorage( args.action ),
+          url: DashboardStorageExt.getStorage(args.action),
           data: args,
-          async:true,
+          async: true,
           xhrFields: {
             withCredentials: true
           }
         }).done(function(json) {
-          $.extend( myself.storage, json );
+          $.extend(myself.storage, json);
         });
       },
 
@@ -89,16 +89,16 @@
         };
 
         $.ajax({
-          type:'GET',
+          type: 'GET',
           dataType: "json",
-          url: wd.cdf.endpoints.getStorage( args.action ),
+          url: DashboardStorageExt.getStorage(args.action),
           data: args,
-          async:true,
+          async: true,
           xhrFields: {
             withCredentials: true
           }
         }).done(function(json) {
-          if(json.result != true){
+          if(json.result != true) {
             Logger.log("Error saving storage",'error');
           }
         });
@@ -121,11 +121,11 @@
         };
 
         $.ajax({
-          type:'GET',
+          type: 'GET',
           dataType: "json",
-          url: wd.cdf.endpoints.getStorage( args.action ),
+          url: DashboardStorageExt.getStorage(args.action),
           data: args,
-          async:true,
+          async: true,
           xhrFields: {
             withCredentials: true
           }
