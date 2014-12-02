@@ -46,6 +46,9 @@ import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
 
 import pt.webdetails.cpf.InterPluginCall;
+import pt.webdetails.cpf.localization.MessageBundlesHelper;
+import pt.webdetails.cpf.repository.api.IBasicFile;
+import pt.webdetails.cpf.repository.api.IBasicFileFilter;
 import pt.webdetails.cpf.repository.api.IContentAccessFactory;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.repository.util.RepositoryHelper;
@@ -381,6 +384,22 @@ public class ContextEngine {
     synchronized( autoIncludesLock ) {
       autoIncludes = null;
       logger.debug( "auto-includes cleared." );
+    }
+
+    if( CdfEngine.getPluginSystemReader( null ).fileExists( MessageBundlesHelper.BASE_CACHE_DIR ) ){
+
+      List<IBasicFile> cacheFiles = CdfEngine.getPluginSystemReader( null ).listFiles( MessageBundlesHelper.BASE_CACHE_DIR,
+        new IBasicFileFilter() {
+          @Override public boolean accept( IBasicFile file ) {
+            return true; // accept everything
+          }
+        });
+
+      if( cacheFiles != null ) {
+        for ( IBasicFile file : cacheFiles ) {
+          CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null ).deleteFile( file.getPath() );
+        }
+      }
     }
   }
 
