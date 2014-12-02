@@ -30,7 +30,8 @@
   <!-- Overriding values in subfloor-js.xml -->
   <!-- Path for node_modules dir -->
   <property name="nodemodules.local.dir" value="node_modules"/>
-  <property name="nodemodules.local.dir.bin" value="node_modules\.bin"/>
+  <property name="nodemodules.local.dir.bin" value="${nodemodules.local.dir}\.bin"/>
+  <property name="nodemodules.dir" value="${basedir}/${nodemodules.local.dir}" description="Directory with require dependencies to compile."/>
 
   <property name="plugin.name" value="pentaho-cdf" description="Name of the plugin"/>
 
@@ -39,7 +40,6 @@
   <property name="samples.stage.dir" value="${bin.dir}/stage-samples" description="Name of the resource directory"/>
   <property name="runtimelib.dir" value="${basedir}/runtime-lib"
             description="Directory that hosts Jar files required to run project source.  (IVY will populate this directory with required jars)"/>
-  <property name="nodemodules.dir" value="${basedir}/node_modules" description="Directory with require dependencies to compile."/>
   
   <!-- Build the project.revision property -->
   <property name="distribution.version" value="${project.stage}-${project.version}"/>
@@ -56,6 +56,11 @@
     <delete dir="${runtimelib.dir}"/>
     <echo message="Deleting... ${nodemodules.dir}"/>
     <delete dir="${nodemodules.dir}"/>
+    <echo message="Deleting RequireJS Configurations"/>
+    <delete file="build-res/requireCfg-raw.js"/>
+    <delete file="build-res/requireCfg.js"/>
+    <echo message="Deleting... build-res"/>
+    <delete dir="build-res"/>
   </target>
 
   <!-- overrides subfloor dist to also cleanup runtime-lib -->

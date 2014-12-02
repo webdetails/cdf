@@ -11,8 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/components/JFreeChartComponent.ext', [],
-  function() {
+define('cdf/components/JFreeChartComponent.ext', [], function() {
 
   var JFreeChartComponentExt = {
 
