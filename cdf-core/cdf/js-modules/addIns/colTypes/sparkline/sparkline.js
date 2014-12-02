@@ -79,7 +79,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", sparkline);
+  Dashboard.registerGlobalAddIn("Table", "colType", sparkline);
 
   return sparkline;
 

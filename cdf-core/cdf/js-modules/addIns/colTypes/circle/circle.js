@@ -55,7 +55,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", circle);
+  Dashboard.registerGlobalAddIn("Table", "colType", circle);
 
   return circle;
 

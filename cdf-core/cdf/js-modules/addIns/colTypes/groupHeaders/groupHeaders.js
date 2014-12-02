@@ -31,8 +31,8 @@ define([
     },
 
     init: function() {
-      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
-      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+      $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
     
     implementation: function(tgt, st, opt) {
@@ -98,7 +98,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", groupHeaders);
+  Dashboard.registerGlobalAddIn("Table", "colType", groupHeaders);
 
   return groupHeaders;
 

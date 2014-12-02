@@ -36,7 +36,7 @@ define([
       $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
     
-    implementation: function(tgt, st, opt){
+    implementation: function(tgt, st, opt) {
       
       var ph = $(tgt);
       var link, label;
@@ -65,7 +65,7 @@ define([
     
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", link);
+  Dashboard.registerGlobalAddIn("Table", "colType", link);
 
   return link;
 

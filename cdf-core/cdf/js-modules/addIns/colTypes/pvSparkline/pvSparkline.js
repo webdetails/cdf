@@ -30,7 +30,7 @@ define([
       width: undefined,
       canvasMargin: 2
     },
-    init: function(){
+    init: function() {
 
       // Register this for datatables sort
       var myself = this;
@@ -71,7 +71,7 @@ define([
         }
         if(opt.trim.type == "both" || opt.trim.type == "left") {
           for (var i = 0; i < data.length; i++) {
-            if($.inArray(data[i].trim(),opt.trim.values)!=-1) {
+            if($.inArray(data[i].trim(),opt.trim.values) != -1) {
               data.splice(i, 1);
             }
           };
@@ -105,7 +105,7 @@ define([
     }
   });
 
-  Dashboard.registerGlobalAddIn("Table.colType", pvSparkline);
+  Dashboard.registerGlobalAddIn("Table", "colType", pvSparkline);
 
   return pvSparkline;
 
