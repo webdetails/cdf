@@ -149,4 +149,9 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
       }
     };
   }
+
+  @Override
+  public String getSystemDir(){
+    return this.SYSTEM_DIR;
+  }
 }

@@ -35,12 +35,14 @@ import org.pentaho.cdf.environment.PentahoCdfEnvironment;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.templater.ITemplater;
 import org.pentaho.cdf.environment.templater.ITemplater.Section;
-import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 
 import pt.webdetails.cpf.Util;
+import pt.webdetails.cpf.localization.MessageBundlesHelper;
 import pt.webdetails.cpf.repository.api.IBasicFile;
+import pt.webdetails.cpf.repository.api.IContentAccessFactory;
+import pt.webdetails.cpf.repository.api.IRWAccess;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.CharsetHelper;
@@ -84,6 +86,9 @@ public class CdfHtmlRenderer {
 
     IBasicFile templateResourceFile = null;
     IReadAccess pluginRepoAccess = CdfEngine.getPluginRepositoryReader( "templates/" );
+    String pluginRepoDir = CdfEngine.getEnvironment().getCdfPluginRepositoryDir();
+    String pluginSystemDir = CdfEngine.getEnvironment().getSystemDir();
+    IContentAccessFactory factory = CdfEngine.getEnvironment().getContentAccessFactory();
 
     if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
       templateResourceFile = pluginRepoAccess.fetchFile( dashboardTemplate );
@@ -102,7 +107,6 @@ public class CdfHtmlRenderer {
     }
 
     // Process i18n on dashboard outer template
-    templateContent = updateUserLanguageKey( templateContent );
     templateContent = processi18nTags( templateContent, i18nTagsList );
     // Process i18n on dashboard outer template - end
 
@@ -115,13 +119,17 @@ public class CdfHtmlRenderer {
 
     // Merge dashboard related message file with global message file and save it in the dashboard cache
     String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ),
-      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() );
+      pluginRepoDir );
     path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
 
-    MessageBundlesHelper mbh =
-      new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
+    IReadAccess access = Util.getAppropriateReadAccess( path, factory, CdfEngine.getEnvironment().getPluginId(),
+      pluginSystemDir , pluginRepoDir );
 
-    intro = replaceIntroParameters( intro, mbh, i18nTagsList, dashboardsMessagesBaseFilename );
+    IRWAccess cdfSystemWriter = CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null );
+    String cdfStaticBaseUrl = CdfEngine.getEnvironment().getPathProvider().getPluginStaticBaseUrl();
+
+    intro = new MessageBundlesHelper( path, access, cdfSystemWriter, CdfEngine.getEnvironment().getLocale(),
+      cdfStaticBaseUrl ).replaceParameters( intro, i18nTagsList );
 
     /*
      * Add cdf libraries
@@ -231,24 +239,6 @@ public class CdfHtmlRenderer {
     // when dynamically generating the selector name. The "." character is not permitted in the
     // selector id name
     return name.replace( ".", "_" );
-  }
-
-  private String replaceIntroParameters( String intro, MessageBundlesHelper mbh, ArrayList<String> i18nTagsList,
-                                         String dashboardsMessagesBaseFilename ) throws Exception {
-    mbh.saveI18NMessageFilesToCache();
-    String messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
-
-    // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
-    if ( dashboardsMessagesBaseFilename == null ) {
-      dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
-    }
-
-    intro = intro.replaceAll( "\\{load\\}", "onload=\"load()\"" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    intro = intro.replaceAll( "\\{body-tag-unload\\}", "" ); //$NON-NLS-1$
-    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET_NAME\\}", dashboardsMessagesBaseFilename ); //$NON-NLS-1$
-    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET_PATH\\}", messageSetPath ); //$NON-NLS-1$
-    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode( i18nTagsList ) ); //$NON-NLS-1$
-    return intro;
   }
 
   private String buildMessageSetCode( ArrayList<String> tagsList ) {
