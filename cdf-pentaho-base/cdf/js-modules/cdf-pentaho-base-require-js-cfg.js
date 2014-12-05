@@ -12,12 +12,12 @@
  */
 
 /**
- * Configuration file for cdf core
+ * Configuration file for cdf base
  */
 
 (function() {
-  var requirePaths = requireCfg.paths,
-      requireShims = requireCfg.shim;
+
+  var requirePaths = requireCfg.paths;
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
@@ -30,22 +30,5 @@
   } else { // build
     requirePaths['cdf'] = "cdf";
   }
-
-  /*
-   * component shim for Dashboard
-   */
-  requireShims['cdf/components/AnalyzerComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/DialComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ExecuteAnalyzerComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ExecuteXactionComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/JFreeChartComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/JPivotComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/OpenFlashChartComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/PivotLinkComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TableComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TimePlotComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TrafficComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/XactionComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/VisualizationAPIComponent'] = ['cdf/Dashboard'];
 
 })();

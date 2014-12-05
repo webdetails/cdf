@@ -12,34 +12,23 @@
  */
 
 /**
- * Configuration file for cdf pentaho
+ * Configuration file for cdf pentaho version 5
  */
 
 (function() {
-  var requirePaths = requireCfg.paths,
-      requireShims = requireCfg.shim;
+
+  var requirePaths = requireCfg.paths;
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
-  var prefix = "";
 
   if(typeof KARMA_RUN !== "undefined") { // test
-    prefix = requirePaths['cdf'] = 'cdf/js-modules';
+    requirePaths['cdf'] = 'cdf/js-modules';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
-    prefix = requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
-    prefix = requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
-    prefix = requirePaths['cdf'] = "cdf";
+    requirePaths['cdf'] = "cdf";
   }
-
-  /*
-   * component shim for Dashboard
-   */
-  requireShims['cdf/components/ExecutePrptComponent']  = ['cdf/Dashboard'];
-  requireShims['cdf/components/PrptComponent']         = ['cdf/Dashboard'];
-  requireShims['cdf/components/SchedulePrptComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ContentListComponent']  = ['cdf/Dashboard'];
-  requireShims['cdf/components/NavigatorComponent']    = ['cdf/Dashboard'];
-  requireShims['cdf/components/PageTitleComponent']    = ['cdf/Dashboard'];
 
 })();

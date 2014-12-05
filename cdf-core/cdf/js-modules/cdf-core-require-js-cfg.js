@@ -16,60 +16,45 @@
  */
 
 (function() {
-  var requirePaths = requireCfg.paths,
-      requireShims = requireCfg.shim;
+
+  var requirePaths = requireCfg.paths;
 
   requireCfg.urlArgs = "ts=" + (new Date()).getTime();
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
+  var prefix;
   if(typeof KARMA_RUN !== "undefined") { // test
-    requirePaths['cdf'] = 'cdf/js-modules';
+    prefix = requirePaths['cdf'] = 'cdf/js-modules';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
-    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    prefix = requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
-    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    prefix = requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
-    requirePaths['cdf'] = "cdf";
+    prefix = requirePaths['cdf'] = "cdf";
   }
 
   /*
-   * component shim for Dashboard
+   * Because CCC components are in a subfolder named "ccc", we need to set each component's path so the
+   * same path prefix ("cdf/components") can be used. Avoid specific path preprocessing (e.g. CDE renderer).
    */
-  requireShims['cdf/components/ButtonComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SelectComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TextComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TextInputComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/TextareaInputComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/DateInputComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/DateRangeInputComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MonthPickerComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/AutocompleteBoxComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/CheckComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/CommentsComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MultiButtonComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/RadioComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SelectMultiComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MapComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MapBubbleComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SimpleAutoCompleteComponent'] = ['cdf/Dashboard'];
-
-  requireShims['cdf/components/ChartComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ProtovisComponent'] = ['cdf/Dashboard'];
-  
-  /* other
-  requireShims['cdf/components/ActionComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/BaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/FreeformComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/InputBaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ManagedFreeformComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MdxQueryGroupComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/QueryComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/SelectBaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/ToggleButtonComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/UnmanagedComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/NavigatorBaseComponent'] = ['cdf/Dashboard'];
-  requireShims['cdf/components/MapBaseComponent'] = ['cdf/Dashboard'];
-  */
+  requirePaths['cdf/components/BaseCccComponent'] = prefix + '/components/ccc/BaseCccComponent';
+  requirePaths['cdf/components/CccAreaChartComponent'] = prefix + '/components/ccc/CccAreaChartComponent';
+  requirePaths['cdf/components/CccBarChartComponent'] = prefix + '/components/ccc/CccBarChartComponent';
+  requirePaths['cdf/components/CccBoxplotChartComponent'] = prefix + '/components/ccc/CccBoxplotChartComponent';
+  requirePaths['cdf/components/CccBulletChartComponent'] = prefix + '/components/ccc/CccBulletChartComponent';
+  requirePaths['cdf/components/CccDotChartComponent'] = prefix + '/components/ccc/CccDotChartComponent';
+  requirePaths['cdf/components/CccHeatGridChartComponent'] = prefix + '/components/ccc/CccHeatGridChartComponent';
+  requirePaths['cdf/components/CccLineChartComponent'] = prefix + '/components/ccc/CccLineChartComponent';
+  requirePaths['cdf/components/CccMetricDotChartComponent'] = prefix + '/components/ccc/CccMetricDotChartComponent';
+  requirePaths['cdf/components/CccMetricLineChartComponent'] = prefix + '/components/ccc/CccMetricLineChartComponent';
+  requirePaths['cdf/components/CccNormalizedBarChartComponent'] = prefix + '/components/ccc/CccNormalizedBarChartComponent';
+  requirePaths['cdf/components/CccParCoordComponent'] = prefix + '/components/ccc/CccParCoordComponent';
+  requirePaths['cdf/components/CccPieChartComponent'] = prefix + '/components/ccc/CccPieChartComponent';
+  requirePaths['cdf/components/CccStackedAreaChartComponent'] = prefix + '/components/ccc/CccStackedAreaChartComponent';
+  requirePaths['cdf/components/CccStackedDotChart'] = prefix + '/components/ccc/CccStackedDotChart';
+  requirePaths['cdf/components/CccStackedLineChartComponent'] = prefix + '/components/ccc/CccStackedLineChartComponent';
+  requirePaths['cdf/components/CccTreemapChartComponent'] = prefix + '/components/ccc/CccTreemapChartComponent';
+  requirePaths['cdf/components/CccWaterfallChartComponent'] = prefix + '/components/ccc/CccWaterfallChartComponent';
 
 })();

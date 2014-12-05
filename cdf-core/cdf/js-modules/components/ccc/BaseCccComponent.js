@@ -12,11 +12,11 @@
  */
 
 define([
-    '../ChartComponent',
-    '../../lib/CCC/pvc',
-    '../../lib/CCC/protovis',
-    '../../lib/modernizr',
-    '../../lib/jquery'
+    './ChartComponent',
+    '../lib/CCC/pvc',
+    '../lib/CCC/protovis',
+    '../lib/modernizr',
+    '../lib/jquery'
   ],
   function(ChartComponent, pvc, pv, Modernizr, $) {
 

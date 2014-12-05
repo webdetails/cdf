@@ -11,6 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+/**
+ * Configuration file for cdf core libs
+ */
+
 (function() {
   if(!requireCfg.map) requireCfg.map = {};
   if(!requireCfg.map['*']) requireCfg.map['*'] = {};
