@@ -5,5 +5,4 @@
 	<description>This dashboard shows a sample of a jFreeChartComponent with internationalization support</description>
 	<icon></icon>
 	<template>template.html</template>
-    <messages>Messages</messages>
 </cdf>
