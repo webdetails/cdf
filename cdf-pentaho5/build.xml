@@ -407,7 +407,7 @@
     </java>
 
     <!-- run js compilation -->
-    <exec command="node">
+    <exec command="node" failonerror="true">
       <arg value="build-res/pentaho-js-build/r.js"/>
       <arg value="-o"/>
       <arg value="${build.js.path}"/>
