@@ -425,4 +425,10 @@
 
     });
 
+    @CDF_CCC_VAR_DECLARATION@ CccSunburstChartComponent = CccComponent.extend({
+
+        cccType: pvc.SunburstChart
+
+    });
+
 @CDF_CCC_REQUIRE_FOOTER@
