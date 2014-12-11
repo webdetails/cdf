@@ -56,5 +56,6 @@
   requirePaths['cdf/components/CccStackedLineChartComponent'] = prefix + '/components/ccc/CccStackedLineChartComponent';
   requirePaths['cdf/components/CccTreemapChartComponent'] = prefix + '/components/ccc/CccTreemapChartComponent';
   requirePaths['cdf/components/CccWaterfallChartComponent'] = prefix + '/components/ccc/CccWaterfallChartComponent';
+  requirePaths['cdf/components/CccSunburstChartComponent'] = prefix + '/components/ccc/CccSunburstChartComponent';
 
 })();
