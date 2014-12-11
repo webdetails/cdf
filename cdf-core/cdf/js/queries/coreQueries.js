@@ -109,6 +109,11 @@
         error: this.getErrorHandler(errorCallback)
       });
 
+      if (!$.ajaxSettings.async && settings.xhrFields && settings.xhrFields.withCredentials) {
+        Dashboards.log("Cross-domain requests are deprecated for synchronous operations.");
+        delete settings.xhrFields.withCredentials;
+      }
+
       $.ajax(settings);
     },
     exportData: function() {
