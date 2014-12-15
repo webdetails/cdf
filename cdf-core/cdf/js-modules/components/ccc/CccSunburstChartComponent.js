@@ -15,7 +15,7 @@ define(['./BaseCccComponent', '../lib/CCC/pvc'],
   function(BaseCccComponent, pvc) {
 
   var CccSunburstChartComponent = BaseCccComponent.extend({
-    cccType: pvc.Sunburst
+    cccType: pvc.SunburstChart
   });
 
   return CccSunburstChartComponent;
