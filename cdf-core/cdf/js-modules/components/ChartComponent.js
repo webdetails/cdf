@@ -15,8 +15,9 @@ define([
     '../dashboard/Utils',
     './UnmanagedComponent',
     './ChartComponent.ext',
+    './CggComponent.ext',
     '../lib/jquery'],
-  function(Utils, UnmanagedComponent, ChartComponentExt, $) {
+  function(Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $) {
 
   var ChartComponent = UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {
@@ -67,7 +68,7 @@ define([
       var urlParams = buildUrlParameters(overrides);
       urlParams.outputType = outputType || 'png';
 
-      var url = ChartComponentExt.getCggDrawUrl() + "?" + $.param(urlParams);
+      var url = CggComponentExt.getCggDrawUrl() + "?" + $.param(urlParams);
 
       var $exportIFrame = $('#cccExportIFrame');
       if(!$exportIFrame.length) {
