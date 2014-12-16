@@ -11,21 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext'], function(DashboardExt) {
+define([], function() {
 
-  var ChartComponentExt = {
+  var CggComponentExt = {
 
-    getCccScriptPath: function(scriptName) {
-      // Dasboards.context path example:
-        // "/public/cde/mine/MySampleDash.wcdf"
-        // Remove the last segment.
-        // TODO: Using the script name without the dashboard name prefix, for backward compatibility.
-        
-        //return Dashboards.context.path.replace(/[^\/]+$/, "") + scriptName + ".js";
-      return DashboardExt.getFilePathFromUrl().replace(/[^\/]+$/, "") + scriptName + ".js";
-    }
+    getCggDrawUrl: function() {
+      return CONTEXT_PATH + "plugin/cgg/api/services/draw";
+    },
+
   };
 
-  return ChartComponentExt;
-
+  return CggComponentExt;
 });
