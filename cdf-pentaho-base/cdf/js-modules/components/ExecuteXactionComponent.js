@@ -58,8 +58,7 @@ define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', '../lib/jq
         }
       }
       url += parameters.join("&");
-      /* CDF-271, updated to fancybox 2.1.5 */
-      //url = url.replace(/'/g, "&#39;");
+      url = url.replace(/'/g, "&#39;");
       $.fancybox({
         type: "iframe",
         href: url,
