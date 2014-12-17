@@ -11,10 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/underscore', './UnmanagedComponent'], function(_, UnmanagedComponent) {
+define(['../lib/underscore', './UnmanagedComponent', '../dashboard/Utils'],
+  function(_, UnmanagedComponent, Utils) {
 
   var ActionComponent = UnmanagedComponent.extend({
-    _docstring: function(){
+    _docstring: function() {
       return "Abstract class for components calling a query/endpoint";
     },
 
@@ -35,7 +36,7 @@ define(['../lib/underscore', './UnmanagedComponent'], function(_, UnmanagedCompo
      *  This method is typically bound to the "click" event of the component.
      */
     triggerAction: function() {
-      var params = this.dashboard.propertiesArrayToObject(this.actionParameters);
+      var params = Utils.propertiesArrayToObject(this.actionParameters);
       var failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function() {};
       var successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function() {};
 
