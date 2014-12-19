@@ -69,7 +69,7 @@
     <dependency org="org.mockito"               name="mockito-all"                            rev="1.8.4"                                                                                       conf="test, default->default"/>
     <dependency org="junit"                     name="junit"                                  rev="4.10"                                                                                        conf="test, default->default"/>
 
-    <!-- js dependencies -->
+    <!-- js dependencies to run tests -->
     <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
       <artifact name="ccc" type="zip" ext="zip"/>
     </dependency>

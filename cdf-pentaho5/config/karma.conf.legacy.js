@@ -1,5 +1,15 @@
-// Karma configuration
-// Generated on Fri Nov 15 2013 00:09:22 GMT+0000 (GMT Standard Time)
+/*!
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 module.exports = function(config) {
   config.set({
@@ -49,9 +59,7 @@ module.exports = function(config) {
     // list of files to exclude
     exclude: [],
 
-    preprocessors: {
-      "cdf-core/cdf/js/*.js" : 'coverage'
-    },
+    preprocessors: {'cdf-core/cdf/js/*.js': 'coverage'},
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -60,18 +68,18 @@ module.exports = function(config) {
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test-legacy/cdf-pentaho5/coverage/reports/'
+      dir: 'bin/test-reports-legacy/cdf-pentaho5/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test-legacy/cdf-pentaho5/test-results.xml',
+      outputFile: 'bin/test-reports-legacy/cdf-pentaho5/test-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test-legacy/cdf-pentaho5/karma_html',
+      outputDir:    'bin/test-reports-legacy/cdf-pentaho5/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
@@ -79,9 +87,7 @@ module.exports = function(config) {
     port: 9876,
 
     //hostname
-    hostname: [
-      'localhost'
-    ],
+    hostname: ['localhost'],
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,
@@ -91,7 +97,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
     // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
     autoWatchBatchDelay: 250,
@@ -104,14 +110,16 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
+    browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
+    //browserNoActivityTimeout: 20000,
+
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: true,
+    singleRun: false,
 
     plugins: [
       'karma-jasmine',
