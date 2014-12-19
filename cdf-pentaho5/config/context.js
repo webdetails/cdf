@@ -20,7 +20,7 @@ requireCfg = {
   paths: {},
   shim: {}
 };
-var KARMA_RUN = true;
+var KARMA_RUN = "cdf";
 
 requireCfg.paths['cdf/lib/CCC'] = '../../js-lib/expanded/ccc/amd';
 requireCfg.paths['common-ui'] = '../../js-lib/expanded/common-ui';
