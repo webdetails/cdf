@@ -22,8 +22,13 @@
   <import file="../build-res/subfloor-js.xml"/>
   <import file="../build-res/subfloor-pkg.xml" id="subfloor-pkg"/>
   
-  <!-- karma config files -->
-  <property name="js.karma.ci.config.legacy" value="config/karma.ci.conf.legacy.js"/>
+  <!-- karma config files and target test dirs -->
+  <property name="js.karma.ci.config.legacy" value="config/karma.ci.conf.legacy.js" />
+  <property name="bin.test-js.dir" value="${bin.dir}/test-js" description='Karma tests js source dir' />
+  <property name="bin.test-js.cdf.dir" value="${bin.test-js.dir}/cdf" description='CDF for Karma tests' />
+  <property name='bin.test-js.cdf.js.dir' value='${bin.test-js.cdf.dir}/js' description='CDF Modules for Karma tests' />
+  <property name='bin.test-js.cdf.js.lib.dir' value='${bin.test-js.cdf.js.dir}/lib' description='CDF libs for Karma tests' />
+  <property name='test-js.dir' value='${pentaho.dir}/test-js' description='Karma tests dir' />
 
   <!-- Global properties -->
   <property name='js.dir' value='cdf' />
@@ -108,11 +113,6 @@
   <property name="nodemodules.local.dir" value="node_modules"/>
   <property name="nodemodules.dir" value="${basedir}/${nodemodules.local.dir}" description="Directory with require dependencies to compile."/>
   <property name="rjs.path" value="${nodemodules.local.dir}/requirejs/bin/r.js" description="r.js location"/>
-
-  <property name='test-js-res.dir' value='${bin.dir}/test-js-res' description='Resources for Karma tests' />
-  <property name='test-js-res.js-modules.dir' value='${test-js-res.dir}/cdf/js-modules' description='Modules for Karma tests' />
-  <property name='test-js-res.js-lib.dir' value='${test-js-res.dir}/cdf/js-lib' description='Libs for Karma tests' />
-  <property name='test-js.dir' value='${pentaho.dir}/test-js' description='Karma tests dir' />
 
   <path id="classpath">
     <fileset dir="${devlib.dir}">
@@ -732,24 +732,12 @@
 
   <target name="test-js-require" depends="subfloor-js.resolve-js">
 
-    <!-- create test resources dir 'bin/test-js-res/cdf/js-lib' -->
-    <delete dir="${test-js-res.js-lib.dir}"/>
-    <mkdir dir="${test-js-res.js-lib.dir}"/>
-    <!-- create test resources dir 'bin/test-js-res/cdf/js-modules' -->
-    <delete dir="${test-js-res.js-modules.dir}"/>
-    <mkdir dir="${test-js-res.js-modules.dir}"/>
-
-    <!-- copy CDF js libs into bin/test-js-res/cdf/js-lib -->
-    <copy todir="${test-js-res.js-lib.dir}" overwrite="true">
-      <!-- copy core CDF js libs -->
-      <fileset dir="${core-js-lib.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy CDF js amd modules into bin/test-js-res/cdf/js-modules -->
-    <copy todir="${test-js-res.js-modules.dir}" overwrite="true">
-      <!-- copy core CDF js amd modules -->
+    <!-- create test js resources dir 'bin/test-js/cdf/js' -->
+    <delete dir="${bin.test-js.cdf.js.dir}"/>
+    <mkdir dir="${bin.test-js.cdf.js.dir}"/>
+    <!-- copy CDF js amd modules into bin/test-js/cdf/js -->
+    <copy todir="${bin.test-js.cdf.js.dir}" overwrite="true">
+      <!-- copy CDF core js amd modules -->
       <fileset dir="${core-js.dir}">
         <exclude name="**/*-require-js-cfg.js*"/>
       </fileset>
@@ -761,6 +749,21 @@
       <fileset dir="${pentaho-js.dir}">
         <exclude name="**/*-require-js-cfg.js*"/>
       </fileset>
+    </copy>
+
+    <!-- create test js resources dir 'bin/test-js/cdf/js/lib' -->
+    <delete dir="${bin.test-js.cdf.js.lib.dir}"/> 
+    <mkdir dir="${bin.test-js.cdf.js.lib.dir}"/>
+    <!-- copy CDF core js libs into bin/test-js/cdf/js/lib -->
+    <copy todir="${bin.test-js.cdf.js.lib.dir}" overwrite="true">
+      <fileset dir="${core-js-lib.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy CCC into bin/test-js/cdf/js/lib/CCC -->
+    <copy todir="${bin.test-js.cdf.js.lib.dir}/CCC" overwrite="true">
+      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
 
     <!-- run karma -->

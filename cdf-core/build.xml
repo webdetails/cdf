@@ -24,8 +24,15 @@
   <property file="../build.properties"
             description="Top level Properties customized for your particular project belong in this file."/>
 
-  <!-- karma config files -->
+  <property name='js-modules.dir' value='${basedir}/cdf/js-modules'/>
+  <property name='js-lib.dir' value='${basedir}/cdf/js-lib'/>
+
+  <!-- karma config files and target test dirs -->
   <property name="js.karma.ci.config.legacy" value="config/karma.ci.conf.legacy.js"/>
+  <property name="bin.test-js.dir" value="${bin.dir}/test-js" description='Karma tests js source dir' />
+  <property name="bin.test-js.cdf.dir" value="${bin.test-js.dir}/cdf" description='CDF for Karma tests' />
+  <property name='bin.test-js.cdf.js.dir' value='${bin.test-js.cdf.dir}/js' description='CDF Modules for Karma tests' />
+  <property name='bin.test-js.cdf.js.lib.dir' value='${bin.test-js.cdf.js.dir}/lib' description='CDF libs for Karma tests' />
 
   <!-- Overriding values in subfloor-js.xml -->
   <!-- Path for node_modules dir -->
@@ -231,6 +238,32 @@
   </target>
 
   <target name="test-js-require" depends="subfloor-js.resolve-js">
+
+    <!-- create test js resources dir 'bin/test-js-res/cdf/js' -->
+    <delete dir="${bin.test-js.cdf.js.dir}"/>
+    <mkdir dir="${bin.test-js.cdf.js.dir}"/>
+    <!-- copy CDF core js amd modules into bin/test-js/cdf/js -->
+    <copy todir="${bin.test-js.cdf.js.dir}" overwrite="true">
+      <fileset dir="${js-modules.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+    </copy>
+
+    <!-- create test js resources dir 'bin/test-js/cdf/js/lib' -->
+    <delete dir="${bin.test-js.cdf.js.lib.dir}"/> 
+    <mkdir dir="${bin.test-js.cdf.js.lib.dir}"/>
+    <!-- copy CDF js libs into bin/test-js/cdf/js/lib -->
+    <copy todir="${bin.test-js.cdf.js.lib.dir}" overwrite="true">
+      <fileset dir="${js-lib.dir}">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy CCC into bin/test-js/cdf/js/lib/CCC -->
+    <copy todir="${bin.test-js.cdf.js.lib.dir}/CCC" overwrite="true">
+      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
+    </copy>
+
     <antcall target="run-karma"/>
   </target>
 

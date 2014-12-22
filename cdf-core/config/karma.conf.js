@@ -1,5 +1,15 @@
-// Karma configuration
-// Generated on Fri Nov 15 2013 00:09:22 GMT+0000 (GMT Standard Time)
+/*!
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 module.exports = function(config) {
   config.set({
@@ -12,16 +22,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'cdf/js-lib/**/*.css', included: false },
-      { pattern: 'cdf/js-lib/**/*.js', included: false },
-      { pattern: 'cdf/js-modules/**/*.css', included: false },
-      { pattern: 'cdf/js-modules/**/*.js', included: false },
-      { pattern: 'js-lib/expanded/ccc/amd/*.css', included: false },
-      { pattern: 'js-lib/expanded/ccc/amd/*.js', included: false },
-      { pattern: 'test-js/**/*.ext.js', included: true },
-      'test-js/testUtils.js',
-      { pattern: 'test-js/**/*-spec.js', included: false },
+      { pattern: 'bin/test-js/cdf/js/**/*.css', included: false },
+      { pattern: 'bin/test-js/cdf/js/**/*.js', included: false },
       'config/context.js',
+      { pattern: 'test-js/**/*.ext.js', included: true },
+      { pattern: 'test-js/**/*-spec.js', included: false },
       'build-res/requireCfg-raw.js',
       'config/require-config.js'
     ],
@@ -29,9 +34,7 @@ module.exports = function(config) {
     // list of files to exclude
     exclude: ['test-js/legacy/**/*.js'],
 
-    preprocessors: {
-      "cdf/js-modules/**/*.js" : 'coverage'
-    },
+    preprocessors: {'bin/test-js/cdf/js/**/*.js': 'coverage'},
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -40,18 +43,18 @@ module.exports = function(config) {
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test/coverage/reports/'
+      dir: 'bin/test-reports/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test/test-results.xml',
+      outputFile: 'bin/test-reports/test-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test/karma_html',
+      outputDir:    'bin/test-reports/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
@@ -71,7 +74,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
     // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
     autoWatchBatchDelay: 250,
@@ -84,7 +87,7 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
+    browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
@@ -93,7 +96,7 @@ module.exports = function(config) {
     
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: true,
+    singleRun: false,
 
     plugins: [
       'karma-jasmine',
