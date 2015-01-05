@@ -1,6 +1,6 @@
 /*
  * requirejs configuration file used to build the compiled/minified CDF js files.
- * Base on https://github.com/jrburke/r.js/blob/master/build/example.build.js
+ * Based on https://github.com/jrburke/r.js/blob/master/build/example.build.js
  */
 
 ({
@@ -151,7 +151,7 @@
 
       //Also combines all the dependencies of the modules listed below
       //and any of their dependencies into one file.
-      include: [ // all new
+      include: [
         'cdf/Dashboard',
 
         'cdf/dashboard/Container',
@@ -172,9 +172,6 @@
         'cdf/dashboard/Popups',
         'cdf/dashboard/Query',
         'cdf/dashboard/RefreshEngine',
-        'cdf/dashboard/Sprintf',
-        'cdf/dashboard/Utf8Encoder',
-        'cdf/dashboard/Utils',
 
         'cdf/Logger',
 
@@ -189,13 +186,13 @@
       //efficient if you define that module optimization entry before using it
       exclude: [
         // CSSs
-        'css!cdf/Dashboard.css',
-        'css!cdf/lib/cdf.css',
-        'css!cdf/lib/blueprint/screen.css',
-        "css!cdf/lib/impromptu/jquery-impromptu.css",
-        "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom.css",
+        'css!cdf/Dashboard',
+        'css!cdf/lib/cdf',
+        'css!cdf/lib/blueprint/screen',
+        "css!cdf/lib/impromptu/jquery-impromptu",
+        "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
         
-        //exclude core included jquery libs otherwise we will not able to use them without load issues
+        //exclude core included jquery libs otherwise we will not be able to use them without load issues
         'cdf/lib/jquery',
         'cdf/lib/jquery.ui',
         'cdf/lib/jquery.blockUI',
@@ -208,8 +205,13 @@
         "cdf/lib/queryParser",
         "cdf/lib/mustache",
         "cdf/lib/cdf.jquery.i18n",
+
+        //files that need to be accessible to other AMD modules (e.g. addIns)
         "cdf/components/BaseComponent",
         "cdf/components/UnmanagedComponent",
+        "cdf/dashboard/Sprintf",
+        "cdf/dashboard/Utils",
+        "cdf/dashboard/Utf8Encoder",
 
         // Extensions might need to be accessed from a context other than Dashboard.Blueprint
         "cdf/components/XactionComponent.ext",
@@ -225,7 +227,7 @@
 
       //Also combines all the dependencies of the modules listed below
       //and any of their dependencies into one file.
-      include: [ // all new
+      include: [
         'cdf/Dashboard',
 
         'cdf/dashboard/Container',
@@ -246,9 +248,6 @@
         'cdf/dashboard/Popups',
         'cdf/dashboard/Query',
         'cdf/dashboard/RefreshEngine',
-        'cdf/dashboard/Sprintf',
-        'cdf/dashboard/Utf8Encoder',
-        'cdf/dashboard/Utils',
 
         'cdf/Logger',
 
@@ -263,31 +262,40 @@
       //efficient if you define that module optimization entry before using it
       exclude: [
         // CSSs
-        'css!cdf/Dashboard.css',
-        'css!cdf/lib/cdf.css',
-        'css!cdf/lib/font-awesome/css/font-awesome.css',
-        'css!cdf/lib/Bootstrap/css/bootstrap',
-        "css!cdf/lib/impromptu/jquery-impromptu.css",
-        "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom.css",
+        "css!cdf/Dashboard",
+        "css!cdf/lib/cdf",
+        "css!cdf/lib/Bootstrap/css/bootstrap",
+        "css!cdf/lib/font-awesome/css/font-awesome",
+        "css!cdf/lib/impromptu/jquery-impromptu",
+        "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
 
-        //exclude core included jquery libs otherwise we will not able to use them without load issues
-        'cdf/lib/jquery',
-        'cdf/lib/jquery.ui',
-        'cdf/lib/jquery.blockUI',
-        'cdf/lib/jquery.impromptu',
-        'cdf/lib/jquery.i18n',
-        'cdf/lib/Base',
+        //exclude core included jquery libs otherwise we will not be able to use them without load issues
+        "cdf/lib/jquery",
+        "cdf/lib/jquery.ui",
+        "cdf/lib/jquery.blockUI",
+        "cdf/lib/jquery.impromptu",
+        "cdf/lib/jquery.i18n",
+        "cdf/lib/Base",
         "cdf/lib/underscore",
         "cdf/lib/backbone",
         "cdf/lib/shims",
         "cdf/lib/queryParser",
         "cdf/lib/mustache",
         "cdf/lib/cdf.jquery.i18n",
-        "cdf/dashboard/Dashboard.ext",
+
+        "cdf/lib/bootstrap",
+        "cdf/lib/html5shiv",
+        "cdf/lib/respond",
+
+        //files that need to be accessible to other AMD modules (e.g. addIns)
         "cdf/components/BaseComponent",
         "cdf/components/UnmanagedComponent",
+        "cdf/dashboard/Sprintf",
+        "cdf/dashboard/Utils",
+        "cdf/dashboard/Utf8Encoder",
 
         // Extensions might need to be accessed from a context other than Dashboard.Bootstrap
+        "cdf/dashboard/Dashboard.ext",
         "cdf/components/XactionComponent.ext",
         "cdf/dashboard/Dashboard.ext",
         "cdf/dashboard/Dashboard.context.ext",
