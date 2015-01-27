@@ -195,7 +195,7 @@
 	    <antcall target="write-properties" />
 	    <!-- copy ccc build -->
         <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC" >
-            <fileset dir="${js.expanded.lib.dir}/ccc/ccc"/>
+            <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
         </copy>
 
         <!-- rename ccc files -->
@@ -467,6 +467,22 @@ excludes="**/Thumbs.db"
                 </propertyfile>
             </sequential>
         </for>
+        <!-- cdf-pentaho/cdf-pentaho5 *optional* property extra-core-scripts-1 -->
+        <if>
+  			<isset property="extra-core-scripts-1" />
+  			<then>
+    			<for list='${extra-core-scripts-1}' param='filename'>
+            		<sequential>
+                		<propertyfile file="${stage-resources.path}">
+                    		<entry key="script" operation="+" value="@{filename},"/>
+                		</propertyfile>
+            		</sequential>
+        		</for>
+  			</then>
+  			<else>
+  				<!-- skip, this is an optional property -->
+  			</else>
+		</if>
         <!-- cdf-core property core-scripts-2 -->
         <for list='${core-scripts-2}' param='filename'>
             <sequential>
@@ -475,6 +491,22 @@ excludes="**/Thumbs.db"
                 </propertyfile>
             </sequential>
         </for>
+        <!-- cdf-pentaho/cdf-pentaho5 *optional* property extra-core-scripts-2 -->
+        <if>
+  			<isset property='extra-core-scripts-2' />
+  			<then>
+    			<for list='${extra-core-scripts-2}' param='filename'>
+            		<sequential>
+                		<propertyfile file="${stage-resources.path}">
+                    		<entry key="script" operation="+" value="@{filename},"/>
+                		</propertyfile>
+            		</sequential>
+        		</for>
+  			</then>
+  			<else>
+  				<!-- skip, this is an optional property -->
+  			</else>
+		</if>
         <!-- cdf-pentaho property pentaho-scripts-1 -->
         <for list='${pentaho-scripts-1}' param='filename'>
             <sequential>
@@ -491,6 +523,22 @@ excludes="**/Thumbs.db"
                 </propertyfile>
             </sequential>
         </for>
+        <!-- cdf-pentaho/cdf-pentaho5 *optional* property extra-core-scripts-3 -->
+        <if>
+  			<isset property='extra-core-scripts-3' />
+  			<then>
+    			<for list='${extra-core-scripts-3}' param='filename'>
+            		<sequential>
+                		<propertyfile file="${stage-resources.path}">
+                    		<entry key="script" operation="+" value="@{filename},"/>
+                		</propertyfile>
+            		</sequential>
+        		</for>
+  			</then>
+  			<else>
+  				<!-- skip, this is an optional property -->
+  			</else>
+		</if>
         <!-- cdf-pentaho-base property pentaho-base-scripts -->
         <for list='${pentaho-base-scripts}' param='filename'>
             <sequential>
