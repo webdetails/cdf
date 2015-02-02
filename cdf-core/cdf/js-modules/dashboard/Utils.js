@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/underscore', '../lib/jquery', '../lib/queryParser'], function(_, $) {
+define(['../Logger', '../lib/underscore', '../lib/CCC/cdo', '../lib/jquery', '../lib/queryParser'],
+    function(Logger, _, cdo, $) {
 
   var Utils = {};
 
@@ -52,14 +53,51 @@ define(['../lib/underscore', '../lib/jquery', '../lib/queryParser'], function(_,
     return window.location.search;
   };
 
-  Utils.urlParams = undefined;
+  var urlParams = undefined;
 
   Utils.getQueryParameter = function(parameterName) {
-    if(Utils.urlParams === undefined) {
-      Utils.urlParams = $.parseQuery(this.getLocationSearchString());
+    if(urlParams === undefined) {
+      urlParams = $.parseQuery(this.getLocationSearchString());
     }
 
-    return Utils.urlParams[parameterName] || "";
+    return urlParams[parameterName] || "";
+  };
+
+  var nForm = undefined;
+
+  /**
+   * Format a number with the given mask using the Dashboard language
+   * or the one that the user specified if it exists
+   *
+   * @param value
+   * @param mask
+   * @param langCode
+   * @returns {string} formatted number
+   */
+  Utils.numberFormat = function (value, mask, langCode) {
+    if(nForm === undefined) {
+      nForm = cdo.format.language().number().createChild();
+    }
+
+    if(langCode != undefined) {
+      if(cdo.format.language(langCode) != undefined) {
+        return cdo.format.language(langCode).number().createChild(mask)(value);
+      } else {
+        Logger.error('There is no format provider for the specified language. Going to use the dashboard current language');
+      }
+    }
+
+    return nForm.mask(mask)(value);
+  };
+
+  /**
+   * Configure a new language that can be used by the formatter
+   *
+   * @param langCode
+   * @param config
+   */
+  Utils.configLanguage = function (langCode, config) {
+    cdo.format.language(langCode, config);
   };
     
   // Conversion functions

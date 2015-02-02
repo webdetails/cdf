@@ -406,8 +406,14 @@
           args="build-res/pentaho-js-build/profileBuilder.js">
     </java>
 
+    <!-- copy CCC to be included during minification -->
+    <copy todir="${js.module.script.agg.dir}/cdf/lib/CCC">
+      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
+    </copy>
+
     <!-- run js compilation -->
     <exec command="node" failonerror="true">
+      <!--copy here -->
       <arg value="build-res/pentaho-js-build/r.js"/>
       <arg value="-o"/>
       <arg value="${build.js.path}"/>
@@ -422,9 +428,6 @@
     </copy>
 
     <!-- copy ccc build -->
-    <copy todir="${bin.dir}/js-source/compressed/cdf/lib/CCC">
-      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
-    </copy>
     <!-- move file="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc-d1.0.js"/ -->
     <copy todir="${bin.dir}/js-source/raw/cdf/lib/CCC">
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>

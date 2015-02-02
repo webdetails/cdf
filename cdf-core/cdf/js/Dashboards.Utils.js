@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -50,6 +50,7 @@ Dashboards.getLocationSearchString = function() {
 
 (function (D) {
   var urlParams = undefined;
+  var nForm = undefined;
 
   D.getQueryParameter = function(parameterName) {
     if ( urlParams === undefined ) {
@@ -58,6 +59,35 @@ Dashboards.getLocationSearchString = function() {
     }
     return urlParams[parameterName] || "";
 
+  };
+
+  /**
+   * Format a number with the given mask using the Dashboard language
+   * or the one that the user specified if it exists
+   *
+   * @param value
+   * @param mask
+   * @param langCode
+   * @returns {string} formatted number
+   */
+  D.numberFormat = function (value, mask, langCode) {
+    if(nForm === undefined) {
+      nForm = cdo.format.language().number().createChild();
+    }
+
+    if(langCode != undefined) {
+      if(cdo.format.language(langCode) != undefined) {
+        return cdo.format.language(langCode).number().createChild(mask)(value);
+      } else {
+        D.error('There is no format provider for the specified language. Going to use the dashboard current language');
+      }
+    }
+
+    return nForm.mask(mask)(value);
+  };
+
+  D.configLanguage = function (langCode, config) {
+    cdo.format.language(langCode, config);
   };
 
   // Conversion functions
