@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-*
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 package org.pentaho.cdf.context;
 
@@ -39,7 +39,7 @@ import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.environment.ICdfEnvironment;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
-import org.pentaho.cdf.views.View;
+import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.cdf.views.ViewsEngine;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -166,11 +166,11 @@ public class ContextEngine {
     logger.warn( "CDF: using legacy structure for Dashboard.context; " +
       "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings.xml" );
 
-    if( securityParams != null ){
+    if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
     }
 
-    if( !StringUtils.isEmpty( path ) ) {
+    if ( !StringUtils.isEmpty( path ) ) {
 
       if ( !contextObj.has( Parameter.FULL_PATH ) ) {
         contextObj.put( Parameter.FULL_PATH, path ); // create fullPath ctx attribute
@@ -232,19 +232,22 @@ public class ContextEngine {
     throws JSONException {
     final StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
-    s.append( "  Dashboards.context = " );
-    s.append( contextObj.toString( 2 ) + "\n" );
-
-    View view = ViewsEngine.getInstance().getView( ( viewId.isEmpty() ? action : viewId ), user );
-    if ( view != null ) {
-      s.append( "Dashboards.view = " );
-      s.append( view.toJSON().toString( 2 ) + "\n" );
+    // append context
+    s.append( "Dashboards.context = " ).append( contextObj.toString( 2 ) ).append( "\n" );
+    // append views
+    if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( user ) ) {
+      JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
+      if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
+        view = ( JSONObject ) view.get( JsonUtil.JsonField.RESULT.getValue() );
+        s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
+      } else {
+        logger.debug( "View not found: " + viewId );
+      }
     }
+    // append storage
     String storage = getStorage();
-    if ( !"".equals( storage ) ) {
-      s.append( "Dashboards.initialStorage = " );
-      s.append( storage );
-      s.append( "\n" );
+    if ( !StringUtils.isEmpty( storage ) ) {
+      s.append( "Dashboards.initialStorage = " ).append( storage ).append( "\n" );
     }
     s.append( "</script>\n" );
 
@@ -400,8 +403,8 @@ public class ContextEngine {
         for ( IBasicFile file : cacheFiles ) {
           CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null ).deleteFile( file.getPath() );
         }
-      }
-    }
+  }
+  }
   }
 
   public static void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
@@ -418,14 +421,14 @@ public class ContextEngine {
     // old xcdf dashboards use solution + path + action
     if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
       fullPath = RepositoryHelper.joinPaths( fullPath, action );
-    }
+  }
 
     String dashboardContext =
       ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap, inactiveInterval );
 
     if ( StringUtils.isEmpty( dashboardContext ) ) {
       logger.error( "empty dashboardContext" );
-    }
+  }
 
     PluginIOUtils.writeOut( out, dashboardContext );
   }
