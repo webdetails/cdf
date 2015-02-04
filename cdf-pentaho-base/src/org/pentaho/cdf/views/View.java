@@ -1,6 +1,6 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
- * 
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
@@ -30,10 +30,6 @@ import pt.webdetails.cpf.persistence.Persistable;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
-/**
- * 
- * @author pdpi
- */
 public class View implements Persistable {
 
   private static final Log logger = LogFactory.getLog( View.class );
@@ -41,7 +37,7 @@ public class View implements Persistable {
   private Map<String, Object> parameters;
   private Map<String, Object> userData;
   private List<String> unboundParams;
-  private String name, viewId, user, description, key;
+  private String name, key, user, description;
   private String solution, path, file;
   private Date timestamp;
 
@@ -93,14 +89,6 @@ public class View implements Persistable {
     this.name = name;
   }
 
-  public String getId() {
-    return viewId;
-  }
-
-  public void setId( String id ) {
-    this.viewId = id;
-  }
-
   public String getUser() {
     return user;
   }
@@ -140,8 +128,7 @@ public class View implements Persistable {
       JSONObject json = new JSONObject();
       json.put( "description", description );
       json.put( "name", name );
-      json.put( "id", viewId );
-      json.put( "key", key );
+      json.put( "id", key );
       json.put( "timestamp", timestamp == null ? 0 : timestamp.getTime() );
       json.put( "user", user );
       json.put( "unbound", new JSONArray( unboundParams ) );
@@ -156,6 +143,7 @@ public class View implements Persistable {
       json.put( "file", file );
       return json;
     } catch ( JSONException e ) {
+      logger.error( e );
       return null;
     }
   }
@@ -164,19 +152,18 @@ public class View implements Persistable {
     try {
       BASE64Decoder base64Decoder = new BASE64Decoder();
 
-      String _description, _name, _id, _key, _user, _solution, _path, _file;
+      String _description, _name, _key, _user, _solution, _path, _file;
       Date _timestamp;
       JSONObject jsonUserData, jsonParams;
       Map<String, Object> _params = new HashMap<String, Object>(), _userData = new HashMap<String, Object>();
       _description = json.optString( "description" );
       _name = json.getString( "name" );
-      _id = json.getString( "id" );
+      _key = json.isNull( "id" ) ? null : json.optString( "id" );
       _timestamp = new Date( json.optLong( "timestamp", 0 ) );
       _user = json.getString( "user" );
-      _key = json.isNull( "key" ) ? null : json.optString( "key" );
-      _solution = json.getString( "solution" );
-      _path = json.getString( "path" );
-      _file = json.getString( "file" );
+      _solution = json.optString( "solution" );
+      _path = json.optString( "path" );
+      _file = json.optString( "file" );
       String p = json.getString( "params" );
       try {
         jsonParams = new JSONObject( new String( base64Decoder.decodeBuffer( p ) ) );
@@ -216,7 +203,6 @@ public class View implements Persistable {
       name = _name;
       user = _user;
       description = _description;
-      viewId = _id;
       key = _key;
       timestamp = _timestamp;
       parameters = _params;
@@ -226,6 +212,7 @@ public class View implements Persistable {
       path = _path;
       file = _file;
     } catch ( JSONException e ) {
+      logger.error( e );
     }
   }
 }
