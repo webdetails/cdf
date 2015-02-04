@@ -1,3 +1,16 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf.utils;
 
 import org.apache.commons.lang.StringUtils;
@@ -8,26 +21,44 @@ import org.json.JSONObject;
 
 public class JsonUtil {
 
-  public static class JsonFields {
-    public static final String STATUS = "status";
-    public static final String MESSAGE = "message";
-    public static final String RESULT_PAYLOAD = "result";
-  }
-
-  public static class JsonResult {
-    public static final String SUCCESS = "sucess";
-    public static final String ERROR = "error";
-  }
-
   private static final Log logger = LogFactory.getLog( JsonUtil.class );
+
+  public enum JsonField {
+    STATUS( "status" ), MESSAGE( "message" ), RESULT( "result" );
+
+    @SuppressWarnings( "unused" )
+    private final String value;
+
+    private JsonField( String field ) {
+      this.value = field;
+    }
+
+    public String getValue() {
+      return this.value;
+    }
+  }
+  public enum JsonStatus {
+    SUCCESS( "success" ), ERROR( "error" );
+
+    @SuppressWarnings( "unused" )
+    private final String value;
+
+    private JsonStatus( String status ) {
+      this.value = status;
+    }
+
+    public String getValue() {
+      return this.value;
+    }
+  }
 
   public static JSONObject makeJsonErrorResponse( String errorMessage, boolean logErrorMessage ) {
     JSONObject json = new JSONObject();
     try {
-      json.put( JsonFields.STATUS, JsonResult.ERROR );
+      json.put( JsonField.STATUS.value, JsonStatus.ERROR.value );
 
       if ( !StringUtils.isEmpty( errorMessage ) ) {
-        json.put( JsonFields.MESSAGE, errorMessage );
+        json.put( JsonField.MESSAGE.value, errorMessage );
         if ( logErrorMessage ) {
           logger.error( errorMessage );
         }
@@ -39,7 +70,7 @@ public class JsonUtil {
   }
 
   public static JSONObject makeJsonSuccessResponse( Object payload ) throws JSONException {
-    if ( payload == null){
+    if ( payload == null) {
       return new JSONObject();
     }
     try {
@@ -47,8 +78,8 @@ public class JsonUtil {
         return new JSONObject( payload.toString() );
       }
       JSONObject json = new JSONObject();
-      json.put( JsonFields.STATUS, JsonResult.SUCCESS );
-      json.put( JsonFields.RESULT_PAYLOAD, payload );
+      json.put( JsonField.STATUS.value, JsonStatus.SUCCESS.value );
+      json.put( JsonField.RESULT.value, payload );
       return json;
     } catch ( JSONException e ) {
       logger.error( e );
@@ -58,7 +89,7 @@ public class JsonUtil {
 
   public static boolean isSuccessResponse( JSONObject json ) {
     try {
-      return json != null && JsonResult.SUCCESS.equals( json.get( JsonFields.STATUS ) );
+      return json != null && JsonStatus.SUCCESS.value.equals( json.get( JsonField.STATUS.value ) );
     } catch ( JSONException e ) {
       logger.error( e );
     }

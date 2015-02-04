@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-*
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 package org.pentaho.cdf.views;
 
@@ -20,8 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.pentaho.cdf.views.View;
-import org.pentaho.cdf.views.ViewsEngine;
+import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import pt.webdetails.cpf.persistence.Filter;
 import pt.webdetails.cpf.persistence.IPersistenceEngine;
@@ -67,14 +66,15 @@ public class ViewsEngineTest {
   }
 
 
-  //Should return null when ISimplePersistence.load fails
+  //Should return error when ISimplePersistence.load fails
   @Test
-  public void testGetViewFailOnLoad() {
+  public void testGetViewFailOnLoad() throws JSONException {
     ISimplePersistence isp = Mockito.mock( ISimplePersistence.class );
     Mockito.when( isp.load( Mockito.eq( View.class ), Mockito.any( Filter.class ) ) )
             .thenThrow( new OCommandExecutionException( "Exception" ) );
     ViewsEngineForTest vet = new ViewsEngineForTest( Mockito.mock( IPersistenceEngine.class ), isp );
-    Assert.assertNull( vet.getView( "x" , vet.getSession().getName() ));
+    Assert.assertEquals( JsonUtil.JsonStatus.ERROR.getValue(), vet.getView( "x", vet.getSession().getName() )
+      .getString( JsonUtil.JsonField.STATUS.getValue() ) );
   }
 
   //Should return error object when ISimplePersistence.load fails
@@ -84,8 +84,8 @@ public class ViewsEngineTest {
     Mockito.when( isp.load( Mockito.eq( View.class ), Mockito.any( Filter.class ) ) )
             .thenThrow( new OCommandExecutionException( "Exception" ) );
     ViewsEngineForTest vet = new ViewsEngineForTest( Mockito.mock( IPersistenceEngine.class ), isp );
-    JSONObject result = vet.listViews( vet.getSession().getName() );
-    Assert.assertNull( result );
+    Assert.assertEquals( JsonUtil.JsonStatus.ERROR.getValue(), vet.listViews( vet.getSession().getName() )
+      .getString( JsonUtil.JsonField.STATUS.getValue() ) );
   }
 
 }
