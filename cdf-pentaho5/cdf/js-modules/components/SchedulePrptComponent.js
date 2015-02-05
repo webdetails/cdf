@@ -608,7 +608,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', '../l
           },
           error: function(response) {
             alert(response.responseText);
-            sucess = false;
+            success = false;
           }
         });
         $.ajaxSetup({
