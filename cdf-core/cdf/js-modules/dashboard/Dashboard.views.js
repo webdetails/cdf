@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -60,14 +60,19 @@ define(['./Dashboard', './Dashboard.views.ext'], function(Dashboard, DashboardVi
        */
       restoreView: function() {
         var p, params;
-        if(!this.view) { return; }
+        if(!this.view || !this.view.params) {return;}
         /*
          *  So now we have to decode that mess.
          */
         params = JSON.parse(Base64.decode(this.view.params));
-        for(p in params) {
-          if(params.hasOwnProperty(p)) {
-            this.setParameter(p,params[p]);
+        if(!params) {return;}
+        if($.isEmptyObject(params)) {
+          this.view.params = params;
+        } else {
+          for(p in params) {
+            if(params.hasOwnProperty(p)) {
+              this.setParameter(p, params[p]);
+            }
           }
         }
       },

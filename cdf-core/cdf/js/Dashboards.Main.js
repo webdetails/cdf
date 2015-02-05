@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -1166,15 +1166,22 @@ Dashboards.mergePriorityLists = function(target,source) {
 
 Dashboards.restoreView = function() {
   var p, params;
-  if(!this.view) return;
+  if(!this.view || !this.view.params) {return;}
   /* Because we're storing the parameters in OrientDB, and as OrientDB has some
    * serious issues when storing nested objects, we're stuck marshalling the
    * parameters into a JSON object and converting that JSON into a Base64 blob
    * before storage. So now we have to decode that mess.
    */
   params = JSON.parse(Base64.decode(this.view.params));
-  for(p in params) if (params.hasOwnProperty(p)) {
-    this.setParameter(p,params[p]);
+  if(!params) {return;}
+  if($.isEmptyObject(params)) {
+    this.view.params = params;
+  } else {
+    for(p in params) {
+      if(params.hasOwnProperty(p)) {
+        this.setParameter(p, params[p]);
+      }
+    }
   }
 };
 
