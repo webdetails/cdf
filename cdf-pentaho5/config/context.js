@@ -20,7 +20,7 @@ var KARMA_RUN = true;
 
 var SESSION_NAME = "dummy";
 var CONTEXT_PATH = "/pentaho/";
-var SESSION_LOCALE = "en";
+var SESSION_LOCALE = "en-US";
 
 // Mock BA server 'pentaho' object
 var pentaho = {

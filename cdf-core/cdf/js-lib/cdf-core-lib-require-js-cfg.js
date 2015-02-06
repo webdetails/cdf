@@ -231,4 +231,10 @@
   // Raphaël 2.1.2 ( + Eve 0.4.2) AMD compatible
   requirePaths['cdf/lib/raphael'] = prefix + '/Raphael/raphael';
 
+  // Base64
+  requirePaths['cdf/lib/base64'] = prefix + '/base64';
+  requireShims['cdf/lib/base64'] = {
+    exports: 'Base64'
+  };
+
 })();

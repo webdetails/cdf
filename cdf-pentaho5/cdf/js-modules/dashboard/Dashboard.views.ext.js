@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -14,8 +14,8 @@
 define(['./Dashboard.ext'], function(DashboardExt) {
 
   var DashboardViewsExt = {
-    getView: function() {
-      return DashboardExt.getCdfBase() + "/views/get";
+    getView: function(viewId) {
+      return DashboardExt.getCdfBase() + "/views/" + viewId;
     },
 
     getViewIdFromUrl: function() {
@@ -23,7 +23,7 @@ define(['./Dashboard.ext'], function(DashboardExt) {
       if(url.indexOf("viewId") == -1) {
         return "";
       } else {
-        var regExp = url.match("[?|&]viewId=([^&\s]+)");
+        var regExp = url.match("[?|&]viewId=([^&]+)");
         if(regExp[1]) {
           return regExp[1];
         }

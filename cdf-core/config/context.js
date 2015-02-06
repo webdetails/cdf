@@ -19,4 +19,4 @@ requireCfg = {
 var KARMA_RUN = true;
 
 var SESSION_NAME = "dummy";
-var SESSION_LOCALE = "en";
+var SESSION_LOCALE = "en-US";
