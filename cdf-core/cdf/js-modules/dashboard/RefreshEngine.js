@@ -39,7 +39,7 @@ define([], function () {
         }
         globalRefreshPeriod = (refreshPeriod >0)? refreshPeriod : NO_REFRESH;
         if(globalRefreshPeriod != NO_REFRESH){
-          globalTimer = setInterval("Dashboards.refreshEngine.fireGlobalRefresh()",globalRefreshPeriod * 1000);//ToDo: cleaner way to call
+          globalTimer = setInterval(dashboard.refreshEngine.fireGlobalRefresh, globalRefreshPeriod * 1000);
         }
       };
     
@@ -88,7 +88,7 @@ define([], function () {
     
       var restartTimer = function(){
         stopTimer();
-        Dashboard.refreshEngine.fireRefresh();
+        dashboard.refreshEngine.fireRefresh();
       };
     
       var getCurrentTime = function (){
@@ -101,12 +101,7 @@ define([], function () {
       };
     
       var refreshComponent = function(component){
-        //if refresh period is too short, progress indicator will stay in user's face
-        //    let(Dashboards.runningCalls = 0){
         dashboard.update(component);
-      //      Dashboards.runningCalls = 0;
-      //      Dashboards.hideProgressIndicator()
-      //    }
       };
     
       var insertInQueue = function(component){
@@ -173,8 +168,7 @@ define([], function () {
             refreshComponent(info.component);
           }
           if(refreshQueue.length > 0){
-            activeTimer = setTimeout("Dashboards.refreshEngine.fireRefresh()", refreshQueue[0].nextRefresh - currentTime );//ToDo: cleaner way to call
-          //activeTimer = setTimeout(this.fireRefresh, refreshQueue[0].nextRefresh - currentTime );
+            activeTimer = setTimeout(this.fireRefresh, refreshQueue[0].nextRefresh - currentTime );
           }
         },
     

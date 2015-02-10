@@ -11,7 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Dashboard.views.ext'], function(Dashboard, DashboardViewsExt) {
+define([
+  './Dashboard',
+  '../lib/base64',
+  './Dashboard.views.ext'],
+  function(Dashboard, Base64, DashboardViewsExt) {
     /**
      * A module representing a extension to Dashboard module for views.
      * @module Dashboard.views
@@ -38,6 +42,8 @@ define(['./Dashboard', './Dashboard.views.ext'], function(Dashboard, DashboardVi
 
         var viewId = DashboardViewsExt.getViewIdFromUrl();
 
+        var myself = this;
+
         if(viewId != "") {
           var args = {
             user: this.context.user,
@@ -45,8 +51,10 @@ define(['./Dashboard', './Dashboard.views.ext'], function(Dashboard, DashboardVi
             ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
           };
 
-          $.getJSON(DashboardViewsExt.getView(), args, function(json) {
-            this.view = json;
+          $.getJSON(DashboardViewsExt.getView(viewId), args, function(response) {
+            if(response && response.status && response.status === "success") {
+              myself.view = response.result;
+            }
           });
         }
 
