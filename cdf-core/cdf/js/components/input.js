@@ -196,7 +196,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
       case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
       case "select2":  {
         var extraOps = this._readExtraOptions() || {};
-        if(!extraOps.dropdownAutoWidth) {
+        if(typeof extraOps.dropdownAutoWidth === "undefined") {
           extraOps.dropdownAutoWidth = true;
         }
         if(!extraOps.width) {
