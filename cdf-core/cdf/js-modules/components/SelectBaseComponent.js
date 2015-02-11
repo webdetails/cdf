@@ -140,10 +140,10 @@ define(['./InputBaseComponent', '../Logger', '../lib/jquery', '../lib/underscore
           $.browser = jqBrowser;
           break;
         }
-        case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
-        case "select2":  {
+        case "hynds": ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
+        case "select2": {
           var extraOps = this._readExtraOptions() || {};
-          if(!extraOps.dropdownAutoWidth) {
+          if(typeof extraOps.dropdownAutoWidth === "undefined") {
             extraOps.dropdownAutoWidth = true;
           }
           if(!extraOps.width) {
