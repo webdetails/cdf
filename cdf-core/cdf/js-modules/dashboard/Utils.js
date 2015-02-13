@@ -63,31 +63,27 @@ define(['../Logger', '../lib/underscore', '../lib/CCC/cdo', '../lib/jquery', '..
     return urlParams[parameterName] || "";
   };
 
-  var nForm = undefined;
+  var formProvider = undefined;
 
   /**
    * Format a number with the given mask using the Dashboard language
-   * or the one that the user specified if it exists
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
    *
    * @param value
    * @param mask
    * @param langCode
    * @returns {string} formatted number
    */
-  Utils.numberFormat = function (value, mask, langCode) {
-    if(nForm === undefined) {
-      nForm = cdo.format.language().number().createChild();
+  Utils.numberFormat = function(value, mask, langCode) {
+    if(formProvider === undefined) {
+      formProvider = cdo.format.language().createChild();
     }
-
     if(langCode != undefined) {
-      if(cdo.format.language(langCode) != undefined) {
-        return cdo.format.language(langCode).number().createChild(mask)(value);
-      } else {
-        Logger.error('There is no format provider for the specified language. Going to use the dashboard current language');
-      }
+      return cdo.format.language(langCode).number().mask(mask)(value);
     }
 
-    return nForm.mask(mask)(value);
+    return formProvider.number().mask(mask)(value);
   };
 
   /**
@@ -96,7 +92,7 @@ define(['../Logger', '../lib/underscore', '../lib/CCC/cdo', '../lib/jquery', '..
    * @param langCode
    * @param config
    */
-  Utils.configLanguage = function (langCode, config) {
+  Utils.configLanguage = function(langCode, config) {
     cdo.format.language(langCode, config);
   };
     
