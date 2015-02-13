@@ -50,7 +50,7 @@ Dashboards.getLocationSearchString = function() {
 
 (function (D) {
   var urlParams = undefined;
-  var nForm = undefined;
+  var formProvider = undefined;
 
   D.getQueryParameter = function(parameterName) {
     if ( urlParams === undefined ) {
@@ -63,7 +63,8 @@ Dashboards.getLocationSearchString = function() {
 
   /**
    * Format a number with the given mask using the Dashboard language
-   * or the one that the user specified if it exists
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
    *
    * @param value
    * @param mask
@@ -71,19 +72,14 @@ Dashboards.getLocationSearchString = function() {
    * @returns {string} formatted number
    */
   D.numberFormat = function(value, mask, langCode) {
-    if(nForm === undefined) {
-      nForm = cdo.format.language().number().createChild();
+    if(formProvider === undefined) {
+      formProvider = cdo.format.language().createChild();
     }
-
     if(langCode != undefined) {
-      if(cdo.format.language(langCode) != undefined) {
-        return cdo.format.language(langCode).number().createChild(mask)(value);
-      } else {
-        D.error('There is no format provider for the specified language. Going to use the dashboard current language');
-      }
+      return cdo.format.language(langCode).number().mask(mask)(value);
     }
 
-    return nForm.mask(mask)(value);
+    return formProvider.number().mask(mask)(value);
   };
 
   D.configLanguage = function(langCode, config) {
