@@ -19,7 +19,10 @@
   if(!requireCfg.map) requireCfg.map = {};
   if(!requireCfg.map['*']) requireCfg.map['*'] = {};
 
+  //RequireJS css! loader plugin 0.1.2
   requireCfg.map['*']['css'] = 'cdf/lib/require-css/css';
+  //RequireJS text! loader plugin 2.0.14
+  requireCfg.map['*']['text'] = 'cdf/lib/require-text/text';
 
   var requirePaths = requireCfg.paths,
       requireShims = requireCfg.shim;
@@ -36,6 +39,12 @@
   } else { // build
     prefix = requirePaths['cdf/lib'] = "cdf/lib";
   }
+
+  // RequireJS amd! loader plugin. Wraps non-amd scripts as amd modules on the fly,
+  // to be used when a shim isn't enough (see plugin prescript and postscript).
+  // Avoid using map (requireCfg.map['*']['amd'] = 'cdf/lib/require-amd/nonamd') because
+  // it produces unexpected behaviours in the configurations accessible inside the plugin.
+  requirePaths['amd'] = prefix + '/require-amd/nonamd';
 
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
