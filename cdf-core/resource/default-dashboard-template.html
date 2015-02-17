@@ -66,6 +66,7 @@ $(document).ready(function(){
   var userLocale = '#{LANGUAGE_CODE}';
   var formProvider = cdo.format.language(userLocale);
   cdo.format.language(formProvider);
+  moment.locale(userLocale);
   loadMessageBundles(userLocale);
 });
     
