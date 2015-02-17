@@ -86,6 +86,16 @@ Dashboards.getLocationSearchString = function() {
     cdo.format.language(langCode, config);
   };
 
+  /**
+   * Format the current date with a given mask
+   *
+   * @param mask
+   * @returns {string} formatted date
+   */
+  D.dateFormat = function(mask) {
+    return moment().format(mask);
+  };
+
   // Conversion functions
   function _pa2obj (pArray) {
     var obj = {};

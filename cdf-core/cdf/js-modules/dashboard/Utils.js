@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', '../lib/underscore', '../lib/CCC/cdo', '../lib/jquery', '../lib/queryParser'],
-    function(Logger, _, cdo, $) {
+define(['../Logger', '../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/jquery', '../lib/queryParser'],
+    function(Logger, _, moment, cdo, $) {
 
   var Utils = {};
 
@@ -94,6 +94,16 @@ define(['../Logger', '../lib/underscore', '../lib/CCC/cdo', '../lib/jquery', '..
    */
   Utils.configLanguage = function(langCode, config) {
     cdo.format.language(langCode, config);
+  };
+
+  /**
+   * Format the current date with a given mask
+   *
+   * @param mask
+   * @returns {string} formatted date
+   */
+  Utils.dateFormat = function(mask) {
+    return moment().format(mask);
   };
     
   // Conversion functions

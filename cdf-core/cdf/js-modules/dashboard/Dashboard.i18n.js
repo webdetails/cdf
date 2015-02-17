@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Dashboard.ext', '../lib/underscore', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
-    function(Dashboard, DashboardExt, _, cdo, $) {
+define(['./Dashboard', './Dashboard.ext', '../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
+    function(Dashboard, DashboardExt, _, moment, cdo, $) {
   /**
    * A module representing a extension to Dashboard module for i18n.
    * @module Dashboard.i18n
@@ -52,6 +52,7 @@ define(['./Dashboard', './Dashboard.ext', '../lib/underscore', '../lib/CCC/cdo',
 
       var formProvider = cdo.format.language(SESSION_LOCALE);
       cdo.format.language(formProvider);
+      moment.locale(SESSION_LOCALE);
     },
   
     /**

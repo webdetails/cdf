@@ -24,8 +24,11 @@
   //RequireJS text! loader plugin 2.0.14
   requireCfg.map['*']['text'] = 'cdf/lib/require-text/text';
 
+  requireCfg.config = requireCfg.config || {};
+
   var requirePaths = requireCfg.paths,
-      requireShims = requireCfg.shim;
+      requireShims = requireCfg.shim,
+      requireConfig = requireCfg.config;
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
@@ -244,6 +247,12 @@
   requirePaths['cdf/lib/base64'] = prefix + '/base64';
   requireShims['cdf/lib/base64'] = {
     exports: 'Base64'
+  };
+
+  // Moment 2.9.0
+  requirePaths['cdf/lib/moment'] = prefix + '/moment/moment';
+  requireConfig['cdf/lib/moment'] = {
+    noGlobal: true
   };
 
 })();
