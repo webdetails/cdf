@@ -196,7 +196,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
       case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
       case "select2":  {
         var extraOps = this._readExtraOptions() || {};
-        if(!extraOps.dropdownAutoWidth) {
+        if(typeof extraOps.dropdownAutoWidth === "undefined") {
           extraOps.dropdownAutoWidth = true;
         }
         if(!extraOps.width) {
@@ -1031,11 +1031,11 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
 
 
-    selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
+    selectHTML += "<ul class='" + ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal") + "'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       //TODO: review the callAjaxAfterRender call because it is calling the lifecycle and should not require the global Dashboards object
-      selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>" +
-          "<label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+      selectHTML += "<li class='" + ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal") + "'>"
+        + "<input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
       isSelected = false;
       for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
@@ -1058,7 +1058,9 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
         }
         selectHTML += " type='checkbox'";
       }
-      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + ((this.separator == undefined || this.separator == null || this.separator == "null")?"":this.separator);
+      selectHTML += "class='" + this.name + "' id='" + this.name + i + "' name='" + this.name + "' value='" + myArray[i][vid]
+        + "' /><label for='" + this.name + i + "'>" + myArray[i][1] + "</label></li>"
+        + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
     }
     selectHTML += "</ul>"
     // update the placeholder

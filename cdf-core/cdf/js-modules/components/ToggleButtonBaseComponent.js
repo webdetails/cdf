@@ -53,14 +53,9 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
 
       var elClass = (myself.verticalOrientation) ? "toggleGroup vertical" : "toggleGroup horizontal";
       var selectHTML = $('<ul/>').attr({class: elClass});
-      //selectHTML += "<ul class='"+ ((myself.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
       for(var i = 0, len = myArray.length; i < len; i++) {
         //TODO: review the callAjaxAfterRender call because it is calling the lifecycle and should not require the global Dashboards object
-        //selectHTML += "<li class='"+ ((myself.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>" +
-        //    "<label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + myself.name + "\")'";
-
         var li = $('<li/>').attr({class: elClass})
-        var label = $("<label/>");
         var input = $("<input/>").click(function() {
           myself.callAjaxAfterRender(myself, myself.name);
         });
@@ -88,15 +83,16 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           //selectHTML += " type='checkbox'";
           input.attr({type: "checkbox"});
         }
-        //selectHTML += "class='" + myself.name +"' name='" + myself.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + ((myself.separator == undefined || myself.separator == null || myself.separator == "null")?"":this.separator);
         input.attr({
           class: myself.name,
           name: myself.name,
+          id: myself.name + i,
           value: myArray[i][vid]
         });
-        input.appendTo(label)
-        label.append("&nbsp;"+myArray[i][1]);
-        label.appendTo(li);
+        input.appendTo(li);
+        li.append($("<label/>")
+          .attr({'for': myself.name + i})
+          .text(myArray[i][1]));
         selectHTML
           .append(li)
           .append((myself.separator == undefined || myself.separator == null || myself.separator == "null") 
