@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -19,9 +19,11 @@
 
   var requirePaths = requireCfg.paths;
 
-  requireCfg.urlArgs = "ts=" + (new Date()).getTime();
-
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
+
+  if(!isDebug) {
+    requireCfg.urlArgs = "ts=" + (new Date()).getTime();
+  }
 
   var prefix;
   if(typeof KARMA_RUN !== "undefined") { // test
