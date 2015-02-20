@@ -87,13 +87,22 @@ define(['../Logger', '../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '..
   };
 
   /**
-   * Configure a new language that can be used by the formatter
+   * Configure a new or existing language by specifying the language code
+   * and a configuration object with the keywords:
+   * - 'number' to configure number's format language
+   * - 'dateLocale' to configure date's format language
    *
    * @param langCode
    * @param config
    */
   Utils.configLanguage = function(langCode, config) {
+    var dateConfig = config.dateLocale || {};
+    var mLocale = moment.locale();
+    delete config.dateLocale;
+
     cdo.format.language(langCode, config);
+    moment.locale(langCode, dateConfig);
+    moment.locale(mLocale);
   };
 
   /**

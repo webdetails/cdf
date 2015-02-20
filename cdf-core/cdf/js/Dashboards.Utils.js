@@ -82,8 +82,23 @@ Dashboards.getLocationSearchString = function() {
     return formProvider.number().mask(mask)(value);
   };
 
+  /**
+   * Configure a new or existing language by specifying the language code
+   * and a configuration object with the keywords:
+   * - 'number' to configure number's format language
+   * - 'dateLocale' to configure date's format language
+   *
+   * @param langCode
+   * @param config
+   */
   D.configLanguage = function(langCode, config) {
+    var dateConfig = config.dateLocale || {};
+    var mLocale = moment.locale();
+    delete config.dateLocale;
+
     cdo.format.language(langCode, config);
+    moment.locale(langCode, dateConfig);
+    moment.locale(mLocale);
   };
 
   /**
