@@ -11,14 +11,9 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([
-  './Dashboard',
-  './lib/bootstrap',
-  'css!cdf/lib/font-awesome/css/font-awesome.css',
-  './lib/html5shiv',
-  './lib/respond'],
-  function(Dashboard) {
+define(['./Dashboard'],
+    function(Dashboard) {
 
-  return Dashboard;
+      return Dashboard;
 
 });
