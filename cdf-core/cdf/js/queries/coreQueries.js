@@ -410,7 +410,6 @@
   // Registering a class will use that class directly when getting new queries.
   Dashboards.registerQuery( "cpk", CpkEndpointsOpts );
 
-
   var cdaQueryOpts = {
     name: 'cda',
     label: 'CDA Query',
@@ -432,7 +431,7 @@
     init: function (opts){
       if (typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined'){
         // CDA-style cd object
-        this.setOption('file' , opts.path );
+        this.setOption('file' , Dashboards.getAbsoluteFilePath(opts.path, null));
         this.setOption( 'id' , opts.dataAccessId );
         if (typeof opts.sortBy == 'string' && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
           this.setOption('sortBy', opts.sortBy);
@@ -623,9 +622,6 @@
   // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.
   Dashboards.registerQuery( "cda", cdaQueryOpts );
-
-
-
 
   function makeMetadataElement (idx, name, type){
     return { "colIndex" : idx || 0, "colType" : type || "String" , "colName" : name || "Name" }
