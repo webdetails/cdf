@@ -1,0 +1,18 @@
+<div class="container">
+
+</div>
+
+<script language="javascript" type="text/javascript">
+  (function() {
+    window.jQuery = null;
+    window.$ = null;
+    window.backbone = null;
+    window._ = null;
+    window.Mustache = null;
+  })();
+
+  require(['cdf/Dashboard.Clean'], function(Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.init();
+  });
+</script>
