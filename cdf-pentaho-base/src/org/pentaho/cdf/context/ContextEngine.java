@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.io.StringWriter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +37,6 @@ import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
-import org.pentaho.cdf.environment.ICdfEnvironment;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.JsonUtil;
@@ -91,7 +89,7 @@ public class ContextEngine {
 
   public static void clearCache() {
     // TODO figure out what to clear
-    synchronized( autoIncludesLock ) {
+    synchronized ( autoIncludesLock ) {
       autoIncludes = null;
       logger.debug( "auto-includes cleared." );
     }
@@ -165,7 +163,7 @@ public class ContextEngine {
       contextObj.put( "params", params );
 
       logger.info( "[Timing] Finished building context: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+          + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
 
     } catch ( JSONException e ) {
       logger.error( "Error building context" );
@@ -183,7 +181,7 @@ public class ContextEngine {
   }
 
   protected JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
-                                        Map<String, String> parameters ) throws JSONException {
+                                          Map<String, String> parameters ) throws JSONException {
     contextObj.put( "path", dashboardPath );
 
     if ( parameters != null && parameters.containsKey( Parameter.SOLUTION ) ) {
@@ -204,12 +202,12 @@ public class ContextEngine {
 
   // Maintain backward compatibility. This is a configurable option via plugin's settings.xml
   protected JSONObject buildLegacyStructure( final JSONObject contextObj, String path,
-                                           SecurityParameterProvider securityParams )
+                                             SecurityParameterProvider securityParams )
     throws JSONException {
 
-    logger.warn( "CDF: using legacy structure for Dashboard.context; " +
-      "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings" +
-      ".xml" );
+    logger.warn( "CDF: using legacy structure for Dashboard.context; "
+        + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
+        + ".xml" );
 
     if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
@@ -283,7 +281,7 @@ public class ContextEngine {
     if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( user ) ) {
       JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
       if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
-        view = ( JSONObject ) view.get( JsonUtil.JsonField.RESULT.getValue() );
+        view = (JSONObject) view.get( JsonUtil.JsonField.RESULT.getValue() );
         s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
       } else {
         logger.debug( "View not found: " + viewId );
@@ -392,7 +390,7 @@ public class ContextEngine {
   }
 
   protected List<AutoInclude> getAutoIncludes( Document config ) {
-    synchronized( autoIncludesLock ) {
+    synchronized ( autoIncludesLock ) {
       if ( autoIncludes == null ) {
         IReadAccess cdaRoot = getUserContentAccess( getPluginRepositoryDir() + CdfConstants.INCLUDES_DIR );
         autoIncludes = buildAutoIncludeList( config, cdaRoot );
@@ -425,11 +423,11 @@ public class ContextEngine {
     }
   }
 
-  protected boolean cdaExists( ) {
+  protected boolean cdaExists() {
     return ( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists();
-        }
+  }
 
-  protected IUserContentAccess getUserContentAccess( String path) {
+  protected IUserContentAccess getUserContentAccess( String path ) {
     return CdfEngine.getUserContentReader( path );
   }
 
@@ -441,7 +439,7 @@ public class ContextEngine {
     CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
   }
 
-  protected List<AutoInclude> buildAutoIncludeList( Document config, IReadAccess cdaRoot) {
+  protected List<AutoInclude> buildAutoIncludeList( Document config, IReadAccess cdaRoot ) {
     return AutoInclude.buildAutoIncludeList( config, cdaRoot );
   }
 
