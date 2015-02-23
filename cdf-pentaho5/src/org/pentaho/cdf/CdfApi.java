@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.pentaho.cdf.context.ContextEngine;
+import org.pentaho.cdf.embed.EmbeddedHeadersGenerator;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
@@ -309,8 +311,12 @@ public class CdfApi {
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
     @Context HttpServletResponse servletResponse ) throws Exception {
     try {
-      String cdfEmbedded = ContextEngine.getInstance().generateEmbeddedContext();
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), cdfEmbedded );
+      EmbeddedHeadersGenerator embeddedHeadersGenerator = new EmbeddedHeadersGenerator();
+      String locale = servletRequest.getParameter( "locale" );
+      if ( !StringUtils.isEmpty( locale ) ) {
+        embeddedHeadersGenerator.setLocale( new Locale( locale ) );
+      }
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), embeddedHeadersGenerator.generate() );
     } catch ( IOException ex ) {
       logger.error( "getCdfEmbeddedContext: " + ex.getMessage(), ex );
       throw ex;

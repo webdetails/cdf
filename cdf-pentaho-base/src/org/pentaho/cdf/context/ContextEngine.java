@@ -60,15 +60,6 @@ public class ContextEngine {
   static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
   private static final String PREFIX_PARAMETER = "param";
-  // embedded constants
-  private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n" +
-    "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
-  private static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, paths: {}, shim: {}};\n\n";
-  private static final String CDF_CORE_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
-  private static final String CDF_CORE_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
-  private static final String CDF_PENTAHO_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
-  private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
-  private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
@@ -433,27 +424,6 @@ public class ContextEngine {
       return null;
     }
   }
-
-  public String generateEmbeddedContext() throws Exception {
-    StringWriter output = new StringWriter();
-
-    output.append( INITIAL_COMMENT );
-    output.append( REQUIRE_JS_CFG_START );
-
-    output.append( "// injecting document writes to append the cdf require files\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_CORE_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_CORE_LIB_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_PENTAHO_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + REQUIRE_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + REQUIRE_START_PATH + "'></script>\");\n" );
-
-    return output.toString();
-          }
 
   protected boolean cdaExists( ) {
     return ( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists();
