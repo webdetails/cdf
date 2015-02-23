@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.io.StringWriter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +37,6 @@ import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
-import org.pentaho.cdf.environment.ICdfEnvironment;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.JsonUtil;
@@ -60,15 +58,6 @@ public class ContextEngine {
   static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
   private static final String PREFIX_PARAMETER = "param";
-  // embedded constants
-  private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n" +
-    "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
-  private static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, paths: {}, shim: {}};\n\n";
-  private static final String CDF_CORE_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
-  private static final String CDF_CORE_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
-  private static final String CDF_PENTAHO_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
-  private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
-  private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
@@ -100,7 +89,7 @@ public class ContextEngine {
 
   public static void clearCache() {
     // TODO figure out what to clear
-    synchronized( autoIncludesLock ) {
+    synchronized ( autoIncludesLock ) {
       autoIncludes = null;
       logger.debug( "auto-includes cleared." );
     }
@@ -174,7 +163,7 @@ public class ContextEngine {
       contextObj.put( "params", params );
 
       logger.info( "[Timing] Finished building context: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+          + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
 
     } catch ( JSONException e ) {
       logger.error( "Error building context" );
@@ -192,7 +181,7 @@ public class ContextEngine {
   }
 
   protected JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
-                                        Map<String, String> parameters ) throws JSONException {
+                                          Map<String, String> parameters ) throws JSONException {
     contextObj.put( "path", dashboardPath );
 
     if ( parameters != null && parameters.containsKey( Parameter.SOLUTION ) ) {
@@ -213,12 +202,12 @@ public class ContextEngine {
 
   // Maintain backward compatibility. This is a configurable option via plugin's settings.xml
   protected JSONObject buildLegacyStructure( final JSONObject contextObj, String path,
-                                           SecurityParameterProvider securityParams )
+                                             SecurityParameterProvider securityParams )
     throws JSONException {
 
-    logger.warn( "CDF: using legacy structure for Dashboard.context; " +
-      "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings" +
-      ".xml" );
+    logger.warn( "CDF: using legacy structure for Dashboard.context; "
+        + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
+        + ".xml" );
 
     if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
@@ -292,7 +281,7 @@ public class ContextEngine {
     if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( user ) ) {
       JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
       if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
-        view = ( JSONObject ) view.get( JsonUtil.JsonField.RESULT.getValue() );
+        view = (JSONObject) view.get( JsonUtil.JsonField.RESULT.getValue() );
         s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
       } else {
         logger.debug( "View not found: " + viewId );
@@ -401,7 +390,7 @@ public class ContextEngine {
   }
 
   protected List<AutoInclude> getAutoIncludes( Document config ) {
-    synchronized( autoIncludesLock ) {
+    synchronized ( autoIncludesLock ) {
       if ( autoIncludes == null ) {
         IReadAccess cdaRoot = getUserContentAccess( getPluginRepositoryDir() + CdfConstants.INCLUDES_DIR );
         autoIncludes = buildAutoIncludeList( config, cdaRoot );
@@ -434,32 +423,11 @@ public class ContextEngine {
     }
   }
 
-  public String generateEmbeddedContext() throws Exception {
-    StringWriter output = new StringWriter();
-
-    output.append( INITIAL_COMMENT );
-    output.append( REQUIRE_JS_CFG_START );
-
-    output.append( "// injecting document writes to append the cdf require files\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_CORE_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_CORE_LIB_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + CDF_PENTAHO_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + REQUIRE_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
-      "FULLY_QUALIFIED_URL + \"" + REQUIRE_START_PATH + "'></script>\");\n" );
-
-    return output.toString();
-          }
-
-  protected boolean cdaExists( ) {
+  protected boolean cdaExists() {
     return ( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists();
-        }
+  }
 
-  protected IUserContentAccess getUserContentAccess( String path) {
+  protected IUserContentAccess getUserContentAccess( String path ) {
     return CdfEngine.getUserContentReader( path );
   }
 
@@ -471,7 +439,7 @@ public class ContextEngine {
     CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
   }
 
-  protected List<AutoInclude> buildAutoIncludeList( Document config, IReadAccess cdaRoot) {
+  protected List<AutoInclude> buildAutoIncludeList( Document config, IReadAccess cdaRoot ) {
     return AutoInclude.buildAutoIncludeList( config, cdaRoot );
   }
 

@@ -8,10 +8,6 @@
 
 
   <link rel="stylesheet" type="text/css" href="template.css"/>
-  <script type="text/javascript">
-    // change your server url here
-    var FULLY_QUALIFIED_URL = "http://localhost:8080/pentaho/";
-  </script>
   <!-- change your server url here -->
   <script type="text/javascript" src="http://localhost:8080/pentaho/plugin/pentaho-cdf/api/cdf-embed.js"></script>
 </head>
@@ -60,7 +56,7 @@
               </div>
             </div>
             <script language="javascript" type="text/javascript">
-              require(['cdf/Dashboard', 'cdf/components/SelectComponent', 'myModule'], function(Dashboard, SelectComponent, m) {
+              require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'myModule'], function(Dashboard, SelectComponent, m) {
                 console.log("MODULE getString() " + m.getString());
 
                 var myDashboard = new Dashboard();

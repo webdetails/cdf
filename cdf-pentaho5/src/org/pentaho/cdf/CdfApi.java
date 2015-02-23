@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.pentaho.cdf.context.ContextEngine;
+import org.pentaho.cdf.embed.EmbeddedHeadersGenerator;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
@@ -120,7 +122,7 @@ public class CdfApi {
       response.sendError( HttpServletResponse.SC_FORBIDDEN );
     }
   }
-  
+
   @POST
   @Path( "/getResource" )
   public void postResource( @QueryParam( Parameter.RESOURCE ) String resource,
@@ -279,7 +281,7 @@ public class CdfApi {
       @Context HttpServletResponse servletResponse ) throws Exception {
     try {
       CdfHtmlRenderer.getHeaders( dashboardContent, dashboardType, Boolean.parseBoolean( absolute ), root, scheme,
-        Boolean.parseBoolean( debug ), servletResponse.getOutputStream() );
+          Boolean.parseBoolean( debug ), servletResponse.getOutputStream() );
     } catch ( IOException ex ) {
       logger.error( "getHeaders: " + ex.getMessage(), ex );
       throw ex;
@@ -307,10 +309,14 @@ public class CdfApi {
   @Path( "/cdf-embed.js" )
   @Produces( "text/javascript" )
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
-    @Context HttpServletResponse servletResponse ) throws Exception {
+      @Context HttpServletResponse servletResponse ) throws Exception {
     try {
-      String cdfEmbedded = ContextEngine.getInstance().generateEmbeddedContext();
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), cdfEmbedded );
+      EmbeddedHeadersGenerator embeddedHeadersGenerator = new EmbeddedHeadersGenerator();
+      String locale = servletRequest.getParameter( "locale" );
+      if ( !StringUtils.isEmpty( locale ) ) {
+        embeddedHeadersGenerator.setLocale( new Locale( locale ) );
+      }
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), embeddedHeadersGenerator.generate() );
     } catch ( IOException ex ) {
       logger.error( "getCdfEmbeddedContext: " + ex.getMessage(), ex );
       throw ex;
