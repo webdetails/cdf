@@ -102,12 +102,16 @@ Dashboards.getLocationSearchString = function() {
   };
 
   /**
-   * Format the current date with a given mask
+   * Format the a date with a given mask
    *
    * @param mask
+   * @param date
    * @returns {string} formatted date
    */
-  D.dateFormat = function(mask) {
+  D.dateFormat = function(mask, date) {
+    if(date != null && _.isFunction(date.format)) {
+      return date.format(mask);
+    }
     return moment().format(mask);
   };
 
