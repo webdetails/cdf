@@ -106,12 +106,16 @@ define(['../Logger', '../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '..
   };
 
   /**
-   * Format the current date with a given mask
+   * Format the a date with a given mask
    *
    * @param mask
+   * @param date
    * @returns {string} formatted date
    */
-  Utils.dateFormat = function(mask) {
+  Utils.dateFormat = function(mask, date) {
+    if(date != null && _.isFunction(date.format)) {
+      return date.format(mask);
+    }
     return moment().format(mask);
   };
     
