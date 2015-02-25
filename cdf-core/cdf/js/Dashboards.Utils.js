@@ -150,12 +150,6 @@ Dashboards.getLocationSearchString = function() {
 
 })(Dashboards);
 
-(function(D) {
-
-
-})(Dashboards);
-
-
 /**
  * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
  *
@@ -350,6 +344,40 @@ Dashboards.hsvToRgb = function(h, s, v) {
     });
 
     return "rgb(" + rgb.join(",") + ")";
+};
+
+Dashboards.getAbsoluteFilePath = function(filePath, basePath) {
+
+  if(filePath.charAt(0) === '/') {
+    return filePath;
+  }
+
+  if(basePath === null) {
+    basePath = Dashboards.context && Dashboards.context.path;
+  }
+
+  if(basePath === undefined) {
+    return;
+  }
+
+  var lastSep = basePath.lastIndexOf('/');
+  basePath = basePath.substring(0, lastSep);
+
+  if(filePath.indexOf('..') > -1) {
+    var base = basePath.split('/');
+    var file = filePath.split('/');
+    var baseEnd = base.length;
+    var fileStart = 0;
+    while(file[fileStart] == '..' && baseEnd > 0) {
+      fileStart++;
+      baseEnd--;
+    }
+    filePath = base.slice(0, baseEnd).concat(file.slice(fileStart)).join('/');
+  } else {
+    filePath = basePath + '/' + filePath;
+  }
+
+  return filePath.replace(/\/+/g, "/");
 };
 
 /**

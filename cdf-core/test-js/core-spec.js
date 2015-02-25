@@ -738,4 +738,39 @@ describe("The CDF framework #", function() {
     expect(myDashboard.getQueryParameter("notThere")).toBe("");
 
   });
+
+  /**
+   * ## The CDF framework # Get Absolute File Path
+   */
+  it("Get Absolute File Path", function() {
+
+    var absolute = "/myResource.css";
+    var relative1 = "../myResource.css";
+    var relative2 = "../resources/myResource.css";
+    var relative3 = "resources/myResource.css";
+
+    var location1 = "/mySolution/folder/myDashboard.wcdf";
+    var location2 = "/myOtherSolution/folder/myDashboard.wcdf";
+
+    myDashboard.context.path = undefined;
+    expect(myDashboard.getAbsoluteFilePath(absolute)).toBe(absolute);
+    expect(myDashboard.getAbsoluteFilePath(absolute, null)).toBe(absolute);
+    expect(myDashboard.getAbsoluteFilePath(absolute, location1)).toBe(absolute);
+
+    expect(myDashboard.getAbsoluteFilePath(relative1)).toBe(undefined);
+    expect(myDashboard.getAbsoluteFilePath(relative1, null)).toBe(undefined);
+    expect(myDashboard.getAbsoluteFilePath(relative1, location1)).toBe("/mySolution/myResource.css");
+
+
+    myDashboard.context.path = location1;
+    expect(myDashboard.getAbsoluteFilePath(absolute)).toBe(absolute);
+    expect(myDashboard.getAbsoluteFilePath(absolute, null)).toBe(absolute);
+    expect(myDashboard.getAbsoluteFilePath(absolute, location1)).toBe(absolute);
+
+    expect(myDashboard.getAbsoluteFilePath(relative1)).toBe(undefined);
+    expect(myDashboard.getAbsoluteFilePath(relative1, null)).toBe("/mySolution/myResource.css");
+    expect(myDashboard.getAbsoluteFilePath(relative2, null)).toBe("/mySolution/resources/myResource.css");
+    expect(myDashboard.getAbsoluteFilePath(relative3, null)).toBe("/mySolution/folder/resources/myResource.css");
+    expect(myDashboard.getAbsoluteFilePath(relative1, location2)).toBe("/myOtherSolution/myResource.css");
+  });
 });
