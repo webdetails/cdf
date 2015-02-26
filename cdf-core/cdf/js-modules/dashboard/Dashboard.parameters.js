@@ -213,7 +213,7 @@ define(['./Dashboard', '../Logger', '../lib/backbone', './Utf8Encoder'],
      * @returns the parameterName value stored
      */
     getParam: function (parameterName) {
-      this.getParameterValue(parameterName);
+      return this.getParameterValue(parameterName);
     },
 
 
