@@ -300,9 +300,14 @@ define(["cdf/Dashboard"],
       myDashboard.fireChange("parentParam",2);// Test change propagation
       expect(myDashboard.getParameterValue("childParam")).toEqual(2);
     });
+
+    /*
+     * ## The CDF framework # Gets parameters using an alias function getParam
+     */
+    it("Gets parameters using an alias function getParam", function() {
+      myDashboard.addParameter("ping", "pong");
+      expect(myDashboard.getParam("ping")).toEqual("pong");
+    });
   });
-
-
-
 
 });
