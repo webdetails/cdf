@@ -16,7 +16,7 @@ define([
   '../../../Dashboard',
   '../../../lib/raphael',
   '../../../lib/jquery',
-  '../../../lib/datatables'],
+  'amd!../../../lib/datatables'],
   function(AddIn, Dashboard, Raphael, $) {
   
   var circle = new AddIn({

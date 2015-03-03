@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery', 'css!./DateRangeInputComponent'],
+define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery', 'css!./DateRangeInputComponent'],
   function($, BaseComponent) {
 
   var DateRangeInputComponent = BaseComponent.extend({
@@ -120,7 +120,7 @@ define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery', 'cs
       var start = myself.getStartParamValue();
       var end = myself.getEndParamValue();
       var rpPickers = $(".ui-daterangepickercontain .ranges");
-      var cancelBtn = jQuery('<button class="btnCancel ui-state-default ui-corner-all">Cancel</button>')
+      var cancelBtn = $('<button class="btnCancel ui-state-default ui-corner-all">Cancel</button>')
         .click(function() {
           var input = myself.placeholder("input");
           var rangePicker = $(".ui-daterangepickercontain .ui-daterangepicker");
@@ -145,10 +145,10 @@ define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery', 'cs
           rangePicker.fadeOut(300);})
         .hover(
           function() {
-            jQuery(this).addClass('ui-state-hover');
+            $(this).addClass('ui-state-hover');
           },
           function() {
-            jQuery(this).removeClass('ui-state-hover');
+            $(this).removeClass('ui-state-hover');
           })
         .appendTo(rpPickers);
 

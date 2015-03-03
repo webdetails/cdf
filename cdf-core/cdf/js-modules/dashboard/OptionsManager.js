@@ -12,7 +12,7 @@
  */
 
 
-define(['./Utils', '../lib/underscore', '../lib/jquery'], function (Utils, _, $) {
+define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _, $) {
 
 
   // Shared / Static

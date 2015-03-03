@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', '../lib/jquery.impromptu', 'css!./SchedulePrptComponent'],
+define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!../lib/jquery.impromptu', 'css!./SchedulePrptComponent'],
   function(SchedulePrptComponentExt, PrptComponent, $) {
 
   var SchedulePrptComponent = PrptComponent.extend({
@@ -557,8 +557,8 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', '../l
       var rangeOfRecurrenceOnce = '<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
       var mailQuestion =
         '<div id="mailQuestionDiv">' + '<label>Would you like to email a copy when the schedule runs?</label><br>' +
-        '<input type="radio" name="mailRadio" value="no" id="mailRadioNo" checked onClick=\'$("#mailInfoDiv").hide(350)\'>&nbsp;No&nbsp;&nbsp;</input>' +
-        '<input type="radio" name="mailRadio" value="yes" id="mailRadioYes" onClick=\'$("#mailInfoDiv").show(350)\'>&nbsp;Yes&nbsp;&nbsp;</input>' +
+        '<input type="radio" name="mailRadio" value="no" id="mailRadioNo" checked onclick=\'showHideMailDiv()\'>&nbsp;No&nbsp;&nbsp;</input>' +
+        '<input type="radio" name="mailRadio" value="yes" id="mailRadioYes" onclick=\'showHideMailDiv(true)\'>&nbsp;Yes&nbsp;&nbsp;</input>' +
         '</div>';
       var mailInfo =
         '<div id="mailInfoDiv" style="display:none">' +
@@ -571,6 +571,9 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', '../l
         '<label>Message (optional)</label>' +
         '<textarea id="messageInput" type="text" rows="4" style="width:100%"></textarea>' +
         '</div>';
+      showHideMailDiv = function(show){
+        show ? $("#mailInfoDiv").show(350) : $("#mailInfoDiv").hide(350);
+      };
       scheduleRequest = function(sendMail) {
         var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
         var jobParameters = new Array();

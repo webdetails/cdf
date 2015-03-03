@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
- define(['./Dashboard', '../Logger', '../lib/jquery', '../lib/underscore', './Dashboard.storage.ext'],
+ define(['./Dashboard', '../Logger', '../lib/jquery', 'amd!../lib/underscore', './Dashboard.storage.ext'],
      function(Dashboard, Logger, $, _, DashboardStorageExt) {
 
     /**

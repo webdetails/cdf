@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'],
+define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.query', 'amd!../lib/underscore', '../dashboard/Utils'],
   function(DashboardExt, BaseQuery, Dashboard, _, Utils) {
 
   var CpkEndpointsOpts = {

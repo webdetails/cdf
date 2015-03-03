@@ -17,9 +17,9 @@ define([
   '../../../dashboard/Sprintf',
   '../../../lib/CCC/protovis',
   '../../../lib/raphael',
-  '../../../lib/underscore',
+  'amd!../../../lib/underscore',
   '../../../lib/jquery',
-  '../../../lib/datatables',
+  'amd!../../../lib/datatables',
   'css!./dataBar'],
   function(AddIn, Dashboard, sprintf, pv, Raphael, _, $) {
   

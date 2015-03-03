@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/ManagedFreeformComponent"],
+define(["cdf/Dashboard", "cdf/lib/jquery", "amd!cdf/lib/underscore", "cdf/components/ManagedFreeformComponent"],
   function(Dashboard, $, _, ManagedFreeformComponent) {
 
   /**
@@ -404,7 +404,6 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components
            * tiers[current.priority] = _.without(tiers[current.priority], component);
            * this.updateAll();
            */
-           debugger;
           var current = dashboard.updating.current;
           current.components = _.without(current.components, comp1priority5);
           var tiers = dashboard.updating.tiers;

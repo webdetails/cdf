@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["../lib/Base", "../lib/jquery", "../lib/underscore", "../lib/backbone", "../Logger", "../dashboard/Utils"],
+define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/backbone", "../Logger", "../dashboard/Utils"],
   function(Base, $, _, Backbone, Logger, Utils) {
 
   var BaseComponent = Base.extend(Backbone.Events).extend({

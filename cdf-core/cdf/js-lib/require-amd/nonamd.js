@@ -127,13 +127,13 @@ define(["module", "text"], function(module, text) {
     var moduleUrl = moduleConfig.url, // required
         exports   = moduleConfig.exports,
         prescript = moduleConfig.prescript,
-        postcript = moduleConfig.postcript;
+        postscript = moduleConfig.postscript;
     
     jsText = 'define(' + compileHeader(moduleConfig) + 
-             (prescript ? ('  ' + prescript + '\n'): '') +
              '  var define = undefined;\n' + // Avoid 'define' detection and self registration
+             (prescript ? ('  ' + prescript + '\n'): '') +
              jsText + '\n' +
-             (postcript ? ('  ' + postcript +       '\n') : '') +
+             (postscript ? ('  ' + postscript +       '\n') : '') +
              (exports   ? ('  return ' + exports + ';\n') : '') + 
              '});';
     
@@ -148,14 +148,22 @@ define(["module", "text"], function(module, text) {
   
   // The text following "define(", until the opening brace, inclusive.
   function compileHeader(moduleConfig) {
-    var argToModuleMap = moduleConfig.deps;
-    if(argToModuleMap) {
-      var depModuleIds = [], depArgNames= [];
-      for(var argName in argToModuleMap) {
-        if(argToModuleMap.hasOwnProperty(argName)) {
-          depModuleIds.push(argToModuleMap[argName]);
-          depArgNames.push(argName);
+    var moduleToArgMap = moduleConfig.deps;
+    if(moduleToArgMap) {
+      var depModuleIds = [], depArgNames= [], depModuleIdsFinal = [];
+      for(var moduleId in moduleToArgMap) {
+        if(moduleToArgMap.hasOwnProperty(moduleId)) {
+          var argName = moduleToArgMap[moduleId];
+          if(argName) {
+            depArgNames.push(argName);
+            depModuleIds.push(moduleId);
+          } else {
+            depModuleIdsFinal.push(moduleId);
+          }
         }
+      }
+      for(var i = 0; i < depModuleIdsFinal.length; i++) {
+        depModuleIds.push(depModuleIdsFinal[i]);
       }
       
       // Something like: 

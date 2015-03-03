@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-require(['cdf/lib/jquery', 'cdf/lib/jquery.ui'], function($) {
+require(['cdf/lib/jquery', 'amd!cdf/lib/jquery.ui'], function($) {
   $("#tryMe").click(function() {
     eval($('#samplecode').val());
     $("#example").tabs("option", "active", 0);

@@ -15,7 +15,7 @@
  * ## The Traffic Component
  */
 
-define(["cdf/lib/underscore", "cdf/Dashboard"], function(_, Dashboard) {
+define(["amd!cdf/lib/underscore", "cdf/Dashboard"], function(_, Dashboard) {
   describe("The Traffic Component #", function() {
     var myDashboard = new Dashboard();
 

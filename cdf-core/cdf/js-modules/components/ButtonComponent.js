@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/underscore', '../lib/jquery', './ActionComponent'],
+define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
   function(_, $, ActionComponent) {
 
   var ButtonComponent = ActionComponent.extend({

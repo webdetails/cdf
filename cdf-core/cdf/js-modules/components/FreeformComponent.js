@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent'], function(UnmanagedComponent) {
+define(['./UnmanagedComponent', 'amd!../lib/underscore'], function(UnmanagedComponent, _) {
 
   var FreeformComponent = UnmanagedComponent.extend({
   

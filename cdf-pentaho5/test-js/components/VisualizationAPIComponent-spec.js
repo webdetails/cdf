@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard', 'cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/components/VisualizationAPIComponent'],
+define(['cdf/Dashboard', 'amd!cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/components/VisualizationAPIComponent'],
   function(Dashboard, _, $, VisualizationAPIComponent) {
 
   /**
@@ -59,7 +59,7 @@ define(['cdf/Dashboard', 'cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/components
     it("Render Called With Cda Query Data", function(done) {
       spyOn(visualizationAPIComponent, 'update').and.callThrough();
       spyOn(visualizationAPIComponent, 'triggerQuery').and.callThrough();
-      var ajax = spyOn(jQuery, "ajax").and.callFake(function(options) {
+      var ajax = spyOn($, "ajax").and.callFake(function(options) {
         options.success({
           resultset: "queryResults"
         });
@@ -80,7 +80,7 @@ define(['cdf/Dashboard', 'cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/components
     it("Check all component functions", function(done) {
       spyOn(visualizationAPIComponent, 'update').and.callThrough();
       spyOn(visualizationAPIComponent, 'triggerQuery').and.callThrough();
-      var ajax = spyOn(jQuery, "ajax").and.callFake(function(options) {
+      var ajax = spyOn($, "ajax").and.callFake(function(options) {
         options.success({
           resultset: "queryResults"
         });

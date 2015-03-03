@@ -11,8 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./CdaQuery.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils', '../Logger'],
-  function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger) {
+define(
+  ['./CdaQuery.ext',
+   './BaseQuery',
+   '../dashboard/Dashboard.query',
+   'amd!../lib/underscore',
+   '../dashboard/Utils',
+   '../Logger',
+   '../lib/jquery'],
+  function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
   var cdaQueryOpts = {
     name: 'cda',

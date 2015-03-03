@@ -16,8 +16,8 @@ define([
   '../../../Dashboard',
   '../../../Logger',
   '../../../lib/jquery',
-  '../../../lib/datatables',
-  '../../../lib/jquery.sparkline'],
+  'amd!../../../lib/datatables',
+  'amd!../../../lib/jquery.sparkline'],
   function (AddIn, Dashboard, Logger, $) {
   
   var sparkline = new AddIn({

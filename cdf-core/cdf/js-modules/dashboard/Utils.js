@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', '../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/jquery', '../lib/queryParser'],
+define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/jquery', 'amd!../lib/queryParser'],
     function(Logger, _, moment, cdo, $) {
 
   var Utils = {};

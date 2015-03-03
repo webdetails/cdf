@@ -12,7 +12,7 @@
  */
 
 define([
-  '../lib/underscore',
+  'amd!../lib/underscore',
   '../lib/jquery',
   './UnmanagedComponent',
   'common-ui/vizapi/DataTable',

@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', '../lib/underscore', '../components/UnmanagedComponent', '../lib/jquery'],
+define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/UnmanagedComponent', '../lib/jquery'],
   function(Dashboard, Logger, _, UnmanagedComponent, $) {
 
   /**

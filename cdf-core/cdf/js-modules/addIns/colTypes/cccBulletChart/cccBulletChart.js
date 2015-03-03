@@ -16,7 +16,7 @@ define([
   '../../../Dashboard',
   '../../../lib/CCC/pvc',
   '../../../lib/jquery',
-  '../../../lib/datatables'],
+  'amd!../../../lib/datatables'],
   function(AddIn, Dashboard, pvc, $) {
   
   var bullet = new AddIn({

@@ -12,7 +12,7 @@
  */
 
 
-define(['./Dashboard', '../lib/backbone', '../lib/mustache', '../Logger', '../lib/jquery'],
+define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '../lib/jquery'],
   function(Dashboard, Backbone, Mustache, Logger, $) {
   /**
    * A module representing a extension to Dashboard module for storage.

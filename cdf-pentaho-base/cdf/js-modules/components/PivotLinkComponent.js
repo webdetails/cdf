@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', '../lib/jquery.fancybox'],
+define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', 'amd!../lib/jquery.fancybox'],
   function(PivotLinkComponentExt, BaseComponent, $) {
 
   var PivotLinkComponent = BaseComponent.extend({
