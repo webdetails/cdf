@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PrptComponent.ext', '../Logger', '../lib/jquery', '../lib/underscore', './BaseComponent'],
+define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/underscore', './BaseComponent'],
   function(PrptComponentExt, Logger, $, _, BaseComponent) {
 
   var PrptComponent = BaseComponent.extend({

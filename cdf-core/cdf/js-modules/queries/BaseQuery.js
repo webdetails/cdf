@@ -30,7 +30,7 @@
  *
  */
  
- define(['../lib/jquery', '../lib/Base', '../lib/underscore', '../Logger', '../dashboard/OptionsManager', '../dashboard/Dashboard.query'],
+ define(['../lib/jquery', '../lib/Base', 'amd!../lib/underscore', '../Logger', '../dashboard/OptionsManager', '../dashboard/Dashboard.query'],
   function($, Base, _, Logger, OptionsManager, DashboardQuery) {
  
    var BaseQuery = Base.extend({

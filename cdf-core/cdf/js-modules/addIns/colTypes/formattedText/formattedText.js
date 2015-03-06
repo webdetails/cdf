@@ -16,7 +16,7 @@ define([
   '../../../Dashboard',
   '../../../dashboard/Sprintf',
   '../../../lib/jquery',
-  '../../../lib/datatables'],
+  'amd!../../../lib/datatables'],
   function(AddIn, Dashboard, sprintf, $) {
   
   var formattedText = new AddIn({

@@ -15,7 +15,7 @@ define([
   '../../../AddIn',
   '../../../Dashboard',
   '../../../lib/jquery',
-  '../../../lib/datatables',
+  'amd!../../../lib/datatables',
   'css!./hyperlink'],
   function(AddIn, Dashboard, $) {
   

@@ -11,7 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./InputBaseComponent', '../Logger', '../lib/jquery', '../lib/underscore', '../dashboard/Utils'],
+define([
+  './InputBaseComponent',
+  '../Logger',
+  '../lib/jquery',
+  'amd!../lib/underscore',
+  '../dashboard/Utils',
+  'amd!../lib/jquery.chosen',
+  'amd!../lib/jquery.multiselect',
+  'amd!../lib/jquery.select2'],
   function(InputBaseComponent, Logger, $, _, Utils) {
 
   var SelectBaseComponent = InputBaseComponent.extend({

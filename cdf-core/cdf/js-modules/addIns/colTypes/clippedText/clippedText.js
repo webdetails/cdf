@@ -16,7 +16,7 @@ define([
   '../../../Dashboard',
   '../../../lib/jquery',
   '../../../lib/CCC/tipsy',
-  '../../../lib/datatables',
+  'amd!../../../lib/datatables',
   'css!./clippedText'],
   function(AddIn, Dashboard, $) {
   

@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', '../lib/jquery.fancybox'],
+define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', 'amd!../lib/jquery.fancybox'],
   function(AnalyzerComponentExt, $, AnalyzerComponent) {
 
   var ExecuteAnalyzerComponent = AnalyzerComponent.extend({

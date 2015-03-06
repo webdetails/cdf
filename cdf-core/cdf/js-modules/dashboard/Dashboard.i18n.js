@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Dashboard.ext', '../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
+define(['./Dashboard', './Dashboard.ext', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
     function(Dashboard, DashboardExt, _, moment, cdo, $) {
   /**
    * A module representing a extension to Dashboard module for i18n.

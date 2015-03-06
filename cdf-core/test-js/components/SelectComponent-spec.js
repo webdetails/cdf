@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/SelectComponent", 'cdf/dashboard/Query'],
-  function(Dashboard, SelectComponent, Query) {
+define(["cdf/Dashboard", "cdf/components/SelectComponent", 'cdf/dashboard/Query', 'cdf/lib/jquery'],
+  function(Dashboard, SelectComponent, Query, $) {
 
   /**
    * ## The Select Component
@@ -63,7 +63,7 @@ define(["cdf/Dashboard", "cdf/components/SelectComponent", 'cdf/dashboard/Query'
      * ## The Select Component # Allows overriding AJAX settings
      */
     it("Allows overriding AJAX settings", function() {
-      var ajax = spyOn(jQuery,"ajax");
+      var ajax = spyOn($,"ajax");
   
       var query = new Query({dataAccessId: "foo", path:"bar"}, null, dashboard);
       query.setAjaxOptions({

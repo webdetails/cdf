@@ -16,7 +16,7 @@ define([
   '../../../Dashboard',
   '../../../dashboard/Sprintf',
   '../../../lib/jquery',
-  '../../../lib/datatables',
+  'amd!../../../lib/datatables',
   'css!./groupHeaders'],
   function(AddIn, Dashboard, sprintf, $) {
   

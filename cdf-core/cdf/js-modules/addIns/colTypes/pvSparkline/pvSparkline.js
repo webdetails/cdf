@@ -17,7 +17,7 @@ define([
   '../../../lib/CCC/protovis',
   '../../../Logger',
   '../../../lib/jquery',
-  '../../../lib/datatables'],
+  'amd!../../../lib/datatables'],
   function (AddIn, Dashboard, pv, Logger, $) {
   
   var pvSparkline = new AddIn({

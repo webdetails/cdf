@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', '../lib/jquery.fancybox'],
+define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', 'amd!../lib/jquery.fancybox'],
   function(XactionComponentExt, $, BaseComponent) {
 
   var JpivotComponent = BaseComponent.extend({

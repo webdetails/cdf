@@ -50,7 +50,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
           complete: function(XMLHttpRequest, textStatus) {
             /* CDF-271 jQuery 1.9.1 bug #13388 */
             if(typeof XMLHttpRequest.responseXML == "undefined") {
-              func(jQuery.parseXML(XMLHttpRequest.responseText));
+              func($.parseXML(XMLHttpRequest.responseText));
             } else {
               func(XMLHttpRequest.responseXML);
             }
@@ -76,7 +76,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       if(returnType == 'xml') {
         /* CDF-271 jQuery 1.9.1 bug #13388 */
         if(typeof result.responseXML == "undefined") {
-          return jQuery.parseXML(result.responseText);
+          return $.parseXML(result.responseText);
         } else {
           return result.responseXML;
         }

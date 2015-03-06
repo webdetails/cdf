@@ -13,11 +13,11 @@
 
 define([
     '../Logger',
-    '../lib/underscore',
+    'amd!../lib/underscore',
     './UnmanagedComponent',
     '../dashboard/Sprintf',
     '../lib/jquery',
-    '../lib/datatables',
+    'amd!../lib/datatables',
     '../addIns/colTypes'],
   function(Logger, _, UnmanagedComponent, sprintf, $) {
 

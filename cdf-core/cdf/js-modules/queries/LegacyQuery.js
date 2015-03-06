@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../lib/jquery', '../dashboard/Utils'],
+define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashboard.query', 'amd!../lib/underscore', '../lib/jquery', '../dashboard/Utils'],
   function(XactionComponentExt, BaseQuery, Dashboard, _, $, Utils) {
 
   function makeMetadataElement(idx, name, type) {

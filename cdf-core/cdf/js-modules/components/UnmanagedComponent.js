@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent', '../lib/underscore', '../lib/jquery', '../Logger'],
+define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'],
   function(BaseComponent, _, $, Logger) {
 
   /*

@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard"], function(Query, jQuery, Dashboard) {
+define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard"], function(Query, $, Dashboard) {
 
 
     /**
@@ -22,7 +22,7 @@ define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard"], function(Quer
        * ## The Query class # Calls the query callback
        */
       it("Calls the query callback", function() {
-        var ajax = spyOn(jQuery,"ajax").and.callFake(function(options){
+        var ajax = spyOn($,"ajax").and.callFake(function(options){
           options.success();
         });
         
@@ -39,7 +39,7 @@ define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard"], function(Quer
        * ## The Query class # Allows overriding AJAX settings
        */
       it("Allows overriding AJAX settings", function() {
-        var ajax = spyOn(jQuery,"ajax");
+        var ajax = spyOn($,"ajax");
         var d = new Dashboard();
         var query = new Query({dataAccessId: "foo", path:"bar"},null, d);
         query.setAjaxOptions({

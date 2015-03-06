@@ -47,7 +47,7 @@ define(['cdf/Dashboard', 'cdf/components/DateRangeInputComponent', 'cdf/lib/jque
      */
     it("Update Called", function(done) {
       spyOn(dateRangeInputComponent, 'update').and.callThrough();
-      var doc = jQuery('<input/>');
+      var doc = $('<input/>');
       spyOn(doc, 'offset').and.returnValue({});
       spyOn(dateRangeInputComponent, 'placeholder').and.returnValue(doc);
       dashboard.update(dateRangeInputComponent);

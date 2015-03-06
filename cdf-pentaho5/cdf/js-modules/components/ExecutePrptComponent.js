@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PrptComponent.ext', '../lib/jquery', './PrptComponent', '../lib/jquery.fancybox'],
+define(['./PrptComponent.ext', '../lib/jquery', './PrptComponent', 'amd!../lib/jquery.fancybox'],
   function(PrptComponentExt, $, PrptComponent) {
 
   var ExecutePrptComponent = PrptComponent.extend({

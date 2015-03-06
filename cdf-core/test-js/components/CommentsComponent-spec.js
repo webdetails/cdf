@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/CommentsComponent", "cdf/lib/jquery"],
-  function(Dashboard, CommentsComponent, $) {
+define(["cdf/Dashboard", "cdf/components/CommentsComponent", "cdf/lib/jquery", "amd!cdf/lib/backbone"],
+  function(Dashboard, CommentsComponent, $, Backbone) {
 
   /**
    * ## The Comments Component
@@ -435,7 +435,7 @@ define(["cdf/Dashboard", "cdf/components/CommentsComponent", "cdf/lib/jquery"],
        * ## The Comments Component # requestProcessing should use cache-buster to avoid browser caching
        */
       it("should use cache-buster to avoid browser caching", function(done) {
-        spyOn(jQuery, "ajax").and.callThrough();
+        spyOn($, "ajax").and.callThrough();
         commentsComponentOperations.requestProcessing(
           {data: {action: "list", page: "generic", firstResult: 0, maxResults: 100, where: false}},
           "LIST_ALL",

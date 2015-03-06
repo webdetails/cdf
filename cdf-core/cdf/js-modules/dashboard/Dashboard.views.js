@@ -14,8 +14,9 @@
 define([
   './Dashboard',
   '../lib/base64',
-  './Dashboard.views.ext'],
-  function(Dashboard, Base64, DashboardViewsExt) {
+  './Dashboard.views.ext',
+  '../lib/jquery'],
+  function(Dashboard, Base64, DashboardViewsExt, $) {
     /**
      * A module representing a extension to Dashboard module for views.
      * @module Dashboard.views

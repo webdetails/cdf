@@ -13,7 +13,7 @@
 
 define([
   './Dashboard',
-  './lib/bootstrap',
+  'amd!./lib/bootstrap',
   'css!cdf/lib/font-awesome/css/font-awesome.css',
   './lib/html5shiv',
   './lib/respond'],

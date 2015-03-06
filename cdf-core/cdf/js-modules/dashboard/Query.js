@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/underscore'], function (_) {
+define(['amd!../lib/underscore', '../lib/jquery'], function (_, $) {
 
 /*
  * Query STUFF

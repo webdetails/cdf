@@ -15,10 +15,10 @@ define([
   '../lib/Base',
   '../Logger',
   './RefreshEngine',
-  '../lib/underscore',
-  '../lib/backbone',
+  'amd!../lib/underscore',
+  'amd!../lib/backbone',
   '../lib/jquery',
-  '../lib/jquery.impromptu',
+  'amd!../lib/jquery.impromptu',
   '../lib/shims',
   'css!../lib/cdf.css'],
   function(Base, Logger, RefreshEngine, _, Backbone, $) {

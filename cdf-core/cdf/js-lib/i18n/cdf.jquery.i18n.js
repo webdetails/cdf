@@ -18,7 +18,7 @@
 //copied from jquery.i18n.properties.supported.languages.js due to jquery lib conflicts
 // also fixed bug where the settings.path was not used to get the file path
 
-define(["../lib/jquery", "./jquery.i18n"], function($) {
+define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
   var original_i18n = $.i18n.properties;
   var original_browserLang = $.i18n.browserLang;
   $.i18n.properties = function(settings) {
