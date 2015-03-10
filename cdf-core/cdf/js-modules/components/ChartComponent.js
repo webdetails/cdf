@@ -16,8 +16,9 @@ define([
     './UnmanagedComponent',
     './ChartComponent.ext',
     './CggComponent.ext',
-    '../lib/jquery'],
-  function(Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $) {
+    '../lib/jquery',
+    'amd!../lib/underscore'],
+  function(Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $, _) {
 
   var ChartComponent = UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {

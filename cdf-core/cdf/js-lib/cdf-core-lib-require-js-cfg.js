@@ -259,7 +259,7 @@
 
   //jQuery sparkline 2.1.2
   requirePaths['cdf/lib/jquery.sparkline'] = prefix + "/sparkline/jquery.sparkline";
-  amdShim["cdf/lib/queryParser"] = {
+  amdShim["cdf/lib/jquery.sparkline"] = {
      exports: "jQuery",
      deps: {
        "cdf/lib/jquery": "jQuery"
