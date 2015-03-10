@@ -486,7 +486,7 @@
     </copy>
 
     <!-- copy ccc build -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib/CCC" >
+    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib/CCC" overwrite="true">
       <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
     </copy>
 
