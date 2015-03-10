@@ -303,6 +303,85 @@
         "cdf/dashboard/Dashboard.views.ext",
         "cdf/queries/CdaQuery.ext"
       ]
+    },
+    {
+      name: "cdf/Dashboard.Clean",
+      //create: true can be used to create the module layer at the given
+      //name, if it does not already exist in the source location. If
+      //there is a module at the source location with this name, then
+      //create: true is superfluous.
+      //create: true,
+
+      //Also combines all the dependencies of the modules listed below
+      //and any of their dependencies into one file.
+      include: [
+        'cdf/Dashboard',
+
+        'cdf/dashboard/Container',
+        'cdf/dashboard/Dashboard.addIns',
+        'cdf/dashboard/Dashboard.bookmarkable',
+        'cdf/dashboard/Dashboard.components',
+        'cdf/dashboard/Dashboard.context',
+        'cdf/dashboard/Dashboard.i18n',
+        'cdf/dashboard/Dashboard',
+        'cdf/dashboard/Dashboard.legacy',
+        'cdf/dashboard/Dashboard.lifecycle',
+        'cdf/dashboard/Dashboard.notifications',
+        'cdf/dashboard/Dashboard.parameters',
+        'cdf/dashboard/Dashboard.query',
+        'cdf/dashboard/Dashboard.storage',
+        'cdf/dashboard/Dashboard.views',
+        'cdf/dashboard/OptionsManager',
+        'cdf/dashboard/Popups',
+        'cdf/dashboard/Query',
+        'cdf/dashboard/RefreshEngine',
+
+        'cdf/Logger',
+
+        "cdf/queries/BaseQuery",
+        "cdf/queries/CdaQuery",
+        "cdf/queries/CpkQuery",
+        "cdf/queries/LegacyQuery"
+      ],
+
+      //Exclude the modules listed bellow and their dependencies from the built file. If you want
+      //to exclude a module that is also another module being optimized, it is more
+      //efficient if you define that module optimization entry before using it
+      exclude: [
+        // CSSs
+        'css!cdf/Dashboard',
+        'css!cdf/lib/cdf',
+        "css!cdf/lib/impromptu/jquery-impromptu",
+
+        //exclude core included jquery libs otherwise we will not be able to use them without load issues
+        'cdf/lib/jquery',
+        'amd!cdf/lib/jquery.ui',
+        'amd!cdf/lib/jquery.blockUI',
+        'amd!cdf/lib/jquery.impromptu',
+        'amd!cdf/lib/jquery.i18n',
+        'cdf/lib/Base',
+        "amd!cdf/lib/underscore",
+        "amd!cdf/lib/backbone",
+        "cdf/lib/shims",
+        "amd!cdf/lib/queryParser",
+        "cdf/lib/mustache",
+        "cdf/lib/cdf.jquery.i18n",
+
+        //files that need to be accessible to other AMD modules (e.g. addIns)
+        "cdf/components/BaseComponent",
+        "cdf/components/UnmanagedComponent",
+        "cdf/dashboard/Sprintf",
+        "cdf/dashboard/Utils",
+        "cdf/dashboard/Utf8Encoder",
+
+        // Extensions might need to be accessed from a context other than Dashboard.Clean
+        "cdf/components/XactionComponent.ext",
+        "cdf/dashboard/Dashboard.ext",
+        "cdf/dashboard/Dashboard.context.ext",
+        "cdf/dashboard/Dashboard.storage.ext",
+        "cdf/dashboard/Dashboard.views.ext",
+        "cdf/queries/CdaQuery.ext"
+      ]
     }
   ]
 })
