@@ -87,7 +87,7 @@ return function (options) {
         }
         options = typeof options == "function" ? options(state) : options;
         var evaluatedDefaults = typeof _defaults == "function" ? _defaults(state) : _defaults;
-        var compiledOptions = jQuery.extend(true,{},evaluatedDefaults,options);
+        var compiledOptions = $.extend(true,{},evaluatedDefaults,options);
         try{
           return _implementation.call(myself,target,state,compiledOptions);    
         }
