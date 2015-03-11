@@ -152,6 +152,7 @@
      exports: "jQuery",
      deps: {
        "cdf/lib/jquery": "jQuery",
+       "css!cdf/lib/dataTables/css/jquery.dataTables_themeroller": "",
        "css!cdf/lib/dataTables/css/jquery.dataTables": ""
      }
   };
