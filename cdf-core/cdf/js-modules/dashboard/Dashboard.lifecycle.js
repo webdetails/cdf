@@ -647,6 +647,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       myself.createAndCleanErrorDiv(); //Dashboards.Legacy
 
       myself.setParameter(parameter, value, true);
+      myself.trigger("cdf " + parameter + ":fireChange",{parameter: parameter, value: value});
       var toUpdate = [];
       var workDone = false;
       for(var i= 0, len = myself.components.length; i < len; i++) {
