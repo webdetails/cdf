@@ -36,7 +36,6 @@ import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
-import org.pentaho.cdf.environment.ICdfEnvironment;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.JsonUtil;
@@ -256,7 +255,7 @@ public class ContextEngine {
 
   private JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
     throws JSONException {
-    for ( String param : params.values() ) {
+    for ( String param : params.keySet() ) {
       if ( param.startsWith( PREFIX_PARAMETER ) ) {
         contextObj.put( param.substring( PREFIX_PARAMETER.length() ), params.get( param ) );
       }
