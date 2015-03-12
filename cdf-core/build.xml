@@ -109,7 +109,7 @@
   </target>
 
   <tstamp/>
-
+  <mkdir dir="${js.module.script.dir}"/>
   <echo>distribution.version = ${distribution.version}</echo>
 
   <!-- subfloor test override so we can add resolve-dev -->
@@ -164,13 +164,6 @@
 
   <target name="run-karma" depends="install-antcontrib, npm-install">
     <!-- compile the require file -->
-    <echo message="Collecting RequireJS Configurations"/>
-    <delete file="build-res/requireCfg-raw.js"/>
-    <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
-      <fileset dir="cdf" casesensitive="yes">
-        <include name="*/*-require-js-cfg.js"/>
-      </fileset>
-    </concat>
 
     <if>
       <available file="${js.karma.ci.config}"/>
@@ -178,14 +171,6 @@
         <if>
           <isset property="isWindows"/>
           <then>
-            <if>
-              <not>
-                <isset property="karma-is-available-windows"/>
-              </not>
-              <then>
-                <fail>Karma is not available, make sure Node.js is installed. Unit tests could not run.</fail>
-              </then>
-            </if>
             <exec executable="${js.node.node_modules.bin.dir}\karma.cmd">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
@@ -194,14 +179,6 @@
             </exec>
           </then>
           <else>
-            <if>
-              <not>
-                <isset property="karma-is-available"/>
-              </not>
-              <then>
-                <fail>Make sure Node.js is installed and run 'npm install -g karma-cli' [adds karma to the command line]</fail>
-              </then>
-            </if>
             <exec executable="karma">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
@@ -217,7 +194,7 @@
     </if>
   </target>
 
-  <target name="test-js-require" depends="subfloor-js.resolve-js">
+  <target name="test-js-require" depends="subfloor-js.resolve-js, subfloor-js.npm-install, subfloor-js.extract-source-and-build-require-js-profile">
 
     <!-- create test js resources dir 'bin/test-js-res/cdf/js' -->
     <delete dir="${bin.test-js.cdf.js.dir}"/>
@@ -241,8 +218,17 @@
 
     <!-- copy CCC into bin/test-js/cdf/js/lib/CCC -->
     <copy todir="${bin.test-js.cdf.js.lib.dir}/CCC" overwrite="true">
-      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
+      <fileset dir="${js.module.script.agg.dir}/ccc/amd"/>
     </copy>
+
+    <echo message="Collecting RequireJS Configurations"/>
+    <delete file="build-res/requireCfg-raw.js"/>
+    <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
+      <fileset dir="cdf" casesensitive="yes">
+        <include name="*/*-require-js-cfg.js"/>
+      </fileset>
+    </concat>
+
 
     <antcall target="run-karma"/>
   </target>
