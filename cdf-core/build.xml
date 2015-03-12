@@ -34,12 +34,6 @@
   <property name='bin.test-js.cdf.js.dir' value='${bin.test-js.cdf.dir}/js' description='CDF Modules for Karma tests' />
   <property name='bin.test-js.cdf.js.lib.dir' value='${bin.test-js.cdf.js.dir}/lib' description='CDF libs for Karma tests' />
 
-  <!-- Overriding values in subfloor-js.xml -->
-  <!-- Path for node_modules dir -->
-  <property name="nodemodules.local.dir" value="node_modules"/>
-  <property name="nodemodules.local.dir.bin" value="${nodemodules.local.dir}\.bin"/>
-  <property name="nodemodules.dir" value="${basedir}/${nodemodules.local.dir}" description="Directory with require dependencies to compile."/>
-
   <property name="plugin.name" value="pentaho-cdf" description="Name of the plugin"/>
 
   <property name="resource.dir" value="resources" description="Name of the resource directory"/>
@@ -61,8 +55,8 @@
   <target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
     <echo message="Deleting... ${runtimelib.dir}"/>
     <delete dir="${runtimelib.dir}"/>
-    <echo message="Deleting... ${nodemodules.dir}"/>
-    <delete dir="${nodemodules.dir}"/>
+    <echo message="Deleting... ${js.node.node_modules.dir}"/>
+    <delete dir="${js.node.node_modules.dir}"/>
     <echo message="Deleting RequireJS Configurations"/>
     <delete file="build-res/requireCfg-raw.js"/>
     <delete file="build-res/requireCfg.js"/>
@@ -178,42 +172,21 @@
       </fileset>
     </concat>
 
-    <!-- Check to see if karma is on the PATH -->
-    <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
-    <available file="karma.cmd" filepath="${nodemodules.local.dir.bin}" property="karma-is-available-windows"/>
-
-    <if>
-      <isset property="isWindows"/>
-      <then>
-        <if>
-          <not>
-            <isset property="karma-is-available-windows"/>
-          </not>
-          <then>
-            <echo message="${nodemodules.local.dir.bin}"/>
-            <fail>karma.cmd is not available on the '${nodemodules.local.dir.bin}'. Unit tests could not be run.</fail>
-          </then>
-        </if>
-      </then>
-      <else>
-        <if>
-          <not>
-            <isset property="karma-is-available"/>
-          </not>
-          <then>
-            <fail>karma is not available on the PATH. Unit tests could not be run.</fail>
-          </then>
-        </if>
-      </else>
-    </if>
     <if>
       <available file="${js.karma.ci.config}"/>
       <then>
         <if>
           <isset property="isWindows"/>
           <then>
-            <!-- we have karma available, use it to run the tests -->
-            <exec executable="${nodemodules.local.dir.bin}\karma.cmd">
+            <if>
+              <not>
+                <isset property="karma-is-available-windows"/>
+              </not>
+              <then>
+                <fail>Karma is not available, make sure Node.js is installed. Unit tests could not run.</fail>
+              </then>
+            </if>
+            <exec executable="${js.node.node_modules.bin.dir}\karma.cmd">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
               <!-- if we are running via ant, then assume we must 'single-run' -->
@@ -221,7 +194,14 @@
             </exec>
           </then>
           <else>
-            <!-- we have karma available, use it to run the tests -->
+            <if>
+              <not>
+                <isset property="karma-is-available"/>
+              </not>
+              <then>
+                <fail>Make sure Node.js is installed and run 'npm install -g karma-cli' [adds karma to the command line]</fail>
+              </then>
+            </if>
             <exec executable="karma">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
