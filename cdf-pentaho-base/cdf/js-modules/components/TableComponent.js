@@ -18,7 +18,6 @@ define([
     '../dashboard/Sprintf',
     '../lib/jquery',
     'amd!../lib/datatables',
-    'amd!../lib/jquery.sparkline',
     '../addIns/colTypes'],
   function(Logger, _, UnmanagedComponent, sprintf, $) {
 
