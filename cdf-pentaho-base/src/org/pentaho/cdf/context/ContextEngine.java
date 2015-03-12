@@ -299,7 +299,7 @@ public class ContextEngine {
 
   protected JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
     throws JSONException {
-    for ( String param : params.values() ) {
+    for ( String param : params.keySet() ) {
       if ( param.startsWith( PREFIX_PARAMETER ) ) {
         contextObj.put( param.substring( PREFIX_PARAMETER.length() ), params.get( param ) );
       }
