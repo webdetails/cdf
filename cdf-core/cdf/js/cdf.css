@@ -759,3 +759,27 @@ div.scheduler  label {
   height:32px;
 }
 /*******************/
+
+/*
+  [CDE-471] This hack can be removed when jquery.ui in common-ui is updated to 1.11.*
+  where the bug causing this issue has been fixed
+*/
+
+/* IE9- */
+body.draggable-popup-fix {
+  position: relative\9;
+}
+
+/* IE10+ */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body.draggable-popup-fix {
+    position: relative;
+  }
+}
+
+@-moz-document url-prefix() { /* firefox */
+  body.draggable-popup-fix {
+    position: relative;
+  }
+}
+/*******************/
