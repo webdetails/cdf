@@ -21,15 +21,18 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
 
     render: function() {
       var myself = this;
-      var b = $("<button type='button'/>").text(myself.label).unbind("click").bind("click", function() {
-        var proceed = true;
-        if(_.isFunction(myself.expression)) {
-          proceed = myself.expression.apply(myself, arguments);
-        }
-        if(myself.hasAction() && !(proceed === false)) {
-          return myself.triggerAction.apply(myself);
-        }
-      });
+      var b = $("<button type='button'/>")
+        .text(typeof myself.label === 'function' ? myself.label() : myself.label)
+        .unbind("click")
+        .bind("click", function() {
+          var proceed = true;
+          if(_.isFunction(myself.expression)) {
+            proceed = myself.expression.apply(myself, arguments);
+          }
+          if(myself.hasAction() && !(proceed === false)) {
+            return myself.triggerAction.apply(myself);
+          }
+        });
       if(_.isUndefined(myself.buttonStyle) || myself.buttonStyle === "themeroller") {
         b.button();
       }
