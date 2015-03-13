@@ -21,6 +21,7 @@
 define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
   var original_i18n = $.i18n.properties;
   var original_browserLang = $.i18n.browserLang;
+  var hasSupportedLanguages;
   $.i18n.properties = function(settings) {
 
     if(settings.language === null || settings.language == '' || settings.language == undefined) {
@@ -29,8 +30,9 @@ define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
     if(settings.language === null || settings.language == undefined) {settings.language='';}
 
     settings.language = supportedLocale(settings);
-
-    original_i18n(settings);
+    if (hasSupportedLanguages) {
+      original_i18n(settings);
+    }
   };
   $.i18n.browserLang = function() {
     return null;
@@ -46,8 +48,10 @@ define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
       dataType:   'text',
       success:    function(data, status) {
         resultLocale = parseData(data, settings.language);
+        hasSupportedLanguages = true;
       },
       error:function (xhr, ajaxOptions, thrownError){
+        hasSupportedLanguages = false;
         if(xhr.status==404) {
           resultLocale = settings.language;
         }
