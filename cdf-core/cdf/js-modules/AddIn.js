@@ -11,26 +11,29 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Creates a new AddIn.
- * 
- * The options parameter needs a label and name member, and must have
- * either a value (for static Add Ins) or implementation member (for
- * scriptable Add Ins). Should the AddIn support configuration, then
- * there should also be an options.defaults member containing the
- * default values for the configurable settings.
- *
- * @class AddIns come in two varieties: Static AddIns
- * represent static data or behaviour, whereas Scriptable AddIns
- * represent dynamic, context-dependent behaviour.
- *
- * @property {String} label  The AddIn's human-readable label. (read only) 
- * @property {String} name The internal identifier for the AddIn. (read only) 
- * @parameters options {Object} The options for the AddIn.
- */
 
 
 define(['./dashboard/Utils', './Logger', './lib/jquery'], function (Utils, Logger, $) {
+
+
+    /**
+     * Creates a new AddIn.
+     *
+     * The options parameter needs a label and name member, and must have
+     * either a value (for static Add Ins) or implementation member (for
+     * scriptable Add Ins). Should the AddIn support configuration, then
+     * there should also be an options.defaults member containing the
+     * default values for the configurable settings.
+     *
+     *  AddIns come in two varieties: Static AddIns
+     * represent static data or behaviour, whereas Scriptable AddIns
+     * represent dynamic, context-dependent behaviour.
+     *
+     * @class AddIn
+     * @constructor
+     * @param options {Object} The options for the AddIn.
+     */
+
 
 return function (options) {
   
@@ -42,7 +45,20 @@ return function (options) {
       if (!options.label || !options.name || (!options.implementation && !options.value)) {
         throw TypeError;
       }
+
+    /**
+     *  The internal identifier for the AddIn. (read only)
+     *  @property name
+     *  @type String
+     */
+
       var _name = options.name,
+        /**
+         *  The AddIn's human-readable label. (read only)
+         *  @property label
+         *  @type String
+         */
+
           _label = options.label,
           _type = options.implementation ? "scriptable" : "static",
           /* It's OK if any of these ends up being undefined */
@@ -76,10 +92,11 @@ return function (options) {
        * Components are allowed to pass undefined as the target if 
        * no Elements make sense in context, and 
        *
-       * @parameter target {Element} The relevant DOM Element.
-       * @parameter state {Object} A representation of the necessary
+       * @method call
+       * @param target {Element} The relevant DOM Element.
+       * @param state {Object} A representation of the necessary
        * context for the AddIn to operate.
-       * @parameter options {Object} Configuration options for the AddIn
+       * @param options {Object} Configuration options for the AddIn
        */
       this.call = function(target, state, options) {
         if (!_implementation) {

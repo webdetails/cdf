@@ -16,7 +16,6 @@ define(['./Dashboard', '../Logger', './Utils'],
 
   /**
    * A module representing a extension to Dashboard module for bookmarkable parameters.
-   * It requires the parameter module
    * @module Dashboard.bookmarkable
    */
   Dashboard.implement({
@@ -32,9 +31,11 @@ define(['./Dashboard', '../Logger', './Utils'],
   
     /**
      *
-     *
+     * @method getHashValue
+     * @for Dashboard
      * @param key
      * @returns {*}
+     * @private
      */
     getHashValue: function(key) {
       var hash = window.location.hash;
@@ -53,8 +54,11 @@ define(['./Dashboard', '../Logger', './Utils'],
   
     /**
      *
+     * @method setHashValue
+     * @for Dashboard
      * @param key
      * @param value
+     * @private
      */
     setHashValue: function(key, value) {
       var obj = this.getHashValue(),json;
@@ -76,7 +80,10 @@ define(['./Dashboard', '../Logger', './Utils'],
   
     /**
      *
+     * @method deleteHashValue
+     * @for Dashboard
      * @param key
+     * @private
      */
     deleteHashValue: function(key) {
       var obj = this.getHashValue();
@@ -91,6 +98,8 @@ define(['./Dashboard', '../Logger', './Utils'],
     /**
      * Sets a pair parameter/value as bookmarkable
      *
+     * @method setBookmarkable
+     * @for Dashboard
      * @param parameter the name of the parameter to be stored
      * @param value of the parameter
      */
@@ -102,6 +111,8 @@ define(['./Dashboard', '../Logger', './Utils'],
     /**
      * Checks if a parameter is bookmarkable
      *
+     * @method isBookmarkable
+     * @for Dashboard
      * @param parameter
      * @returns {boolean} describing if a parameter is bookmarkable
      */
@@ -112,6 +123,8 @@ define(['./Dashboard', '../Logger', './Utils'],
     /**
      * Generates a bookmark state using values stored
      *
+     * @method generateBookmarkState
+     * @for Dashboard
      * @returns an object with the state of the parameters previously marked as bookmarkable
      */
     generateBookmarkState: function() {
@@ -126,8 +139,12 @@ define(['./Dashboard', '../Logger', './Utils'],
     },
   
     /**
+     *
      * Persists a bookmark state
      *
+     *
+     * @method persistBookmarkables
+     * @for Dashboard
      * @param param
      */
     persistBookmarkables: function(param) {
@@ -153,6 +170,9 @@ define(['./Dashboard', '../Logger', './Utils'],
     /**
      * Overrides a bookmark state with a given state
      *
+     *
+     * @method setBookmarkState
+     * @for Dashboard
      * @param state to override the existing state
      */
     setBookmarkState: function(state) {
@@ -177,6 +197,8 @@ define(['./Dashboard', '../Logger', './Utils'],
     /**
      * Gets the bookmark state url decoded
      *
+     * @method getBookmarkState
+     * @for Dashboard
      * @returns an object with the current bookmark state
      */
     getBookmarkState: function() {
@@ -211,6 +233,8 @@ define(['./Dashboard', '../Logger', './Utils'],
   
     /**
      * Restores the bookmark state
+     * @method restoreBookmarkables
+     * @for Dashboard
      */
     restoreBookmarkables: function() {
       var state;

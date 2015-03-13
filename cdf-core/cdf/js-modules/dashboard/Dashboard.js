@@ -24,14 +24,15 @@ define([
   function(Base, Logger, RefreshEngine, _, Backbone, $) {
 
   /**
-   * A module representing a Dashboard.
-   * @module Dashboard
+   * A class representing a Dashboard.
+   * @class Dashboard
    */
   var Dashboard = Base.extend({
   
     /**
      * Creates an instance of Dashboard
      *
+     * @class Dashboard
      * @constructor
      * @alias module:constructor
      */
@@ -201,6 +202,7 @@ define([
     /**
      * Sets the globalContext value
      *
+     * @method setGlobalContext
      * @param globalContext boolean
      */
     setGlobalContext: function(globalContext) {
@@ -208,8 +210,10 @@ define([
     },
   
     /**
+     * Gets the current webapp path
      *
-     * @returns {*}
+     * @method getWebAppPath
+     * @returns the current webapp path (/pentaho for instance)
      */
     getWebAppPath: function() {
       return this.webAppPath;

@@ -15,7 +15,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     function (Dashboard, Logger, Backbone, Utf8Encoder) {
 
   /**
-   * A module representing a extension to Dashboard module for parameters.
+   * A module representing a extension to Dashboard class for parameters.
+   * The methods here handle getting and saving parameters from the dashboard context.
    * @module Dashboard.parameters
    */
   Dashboard.implement({
@@ -40,6 +41,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     /**
      * Verifies if a parameter is available in the context
      *
+     * @method _isParameterInModel
+     * @for Dashboard
      * @param name the parameter name
      * @param model the parameter location to check
      * @returns boolean
@@ -52,6 +55,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     /**
      * Gets the value from a context o from the property with a given path
      *
+     * @method _getValueFromContext
+     * @for Dashboard
      * @param o the context of the assignment
      * @param path the path of the property
      * @returns the value of the property
@@ -85,6 +90,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     /**
      * Sets a property path in a context o with v as value
      *
+     * @method _setValueFromContext
+     * @for Dashboard
      * @param o the context of the assignment
      * @param path the path of the property
      * @param v the value of the property
@@ -116,6 +123,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * Gets the parameter store location (<code>this.parameters</code> or <code>this.storage</code>) according to its
      * name and the new name, without the store prefix
      *
+     * @method _getParameterStore
+     * @for Dashboard
      * @param parameterName the name of the parameter
      * @returns <code>object</code> with the store location and the new name of the parameter (without the store prefix)
      * @private
@@ -144,6 +153,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * Receives a parameter name and an initial value, that will be used if the parameter is
      * not available in the parameter model. Otherwise, the getParameterValue return is used
      *
+     * @method addParameter
+     * @for Dashboard
      * @param parameterName the name of the parameter
      * @param parameterValue the initial value of the parameter
      * @returns the value assigned to the parameter
@@ -166,6 +177,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     /**
      * Gets a parameter value
      *
+     * @method getParameterValue
+     * @for Dashboard
      * @param parameterName the parameter name
      * @returns the parameterName value stored
      */
@@ -180,8 +193,24 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     },
 
     /**
+     * Alias for getParameterValue
+     *
+     * @method getParam
+     * @for Dashboard
+     * @param parameterName the parameter name
+     * @returns the parameterName value stored
+     */
+    getParam: function (parameterName) {
+      return this.getParameterValue(parameterName);
+    },
+
+
+
+    /**
      * Stores a parameter with a certain value
      *
+     * @method setParameter
+     * @for Dashboard
      * @param parameterName the parameter name
      * @param parameterValue the value of the parameter
      * @param isNotified
@@ -206,20 +235,13 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     },
 
 
-    /**
-     * Alias for getParameterValue
-     *
-     * @param parameterName the parameter name
-     * @returns the parameterName value stored
-     */
-    getParam: function (parameterName) {
-      return this.getParameterValue(parameterName);
-    },
 
 
     /**
      * Alias for setParameter
      *
+     * @method setParam
+     * @for Dashboard
      * @param parameterName the parameter name
      * @param parameterValue the value of the parameter
      * @param isNotified
@@ -232,6 +254,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * Keep parameters master and slave in sync. The master parameter's initial value takes precedence over the slave
      * parameter's when initializing the dashboard.
      *
+     * @method syncParameters
+     * @for Dashboard
      * @private
      * @param master
      * @param slave
@@ -250,6 +274,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     /**
      * Register parameter pairs that will be synced on dashboard init.
      *
+     * @method syncParametersOnInit
+     * @for Dashboard
      * @private
      * @param master
      * @param slave

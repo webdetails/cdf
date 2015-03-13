@@ -1,0 +1,12 @@
+{
+"name": "CDF JS  Api Documentation",
+"description": "YUI JavaScript Framework",
+"version": "5.4",
+"url": "localhost",
+"options": {
+    "linkNatives": "true",
+    "attributesEmit": "true",
+    "paths": ["cdf/js-modules"],
+    "outdir": "doc-js"
+    }
+}

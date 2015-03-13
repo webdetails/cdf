@@ -12,6 +12,13 @@
  */
 
 
+/**
+ * A module representing a extension to Dashboard class for handling legacy calls.
+ * The methods here handle calling xactions and other legacy related actions
+ * All the methods in this module are deprecated
+ * @module Dashboard.legacy
+ */
+
 define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dashboard.ext', './Dashboard', '../Logger', '../lib/jquery'],
   function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
