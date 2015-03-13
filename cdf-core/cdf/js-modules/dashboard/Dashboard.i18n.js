@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Dashboard.ext', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
-    function(Dashboard, DashboardExt, _, moment, cdo, $) {
+define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
+    function(Logger, Dashboard, DashboardExt, _, moment, cdo, $) {
   /**
    * A module representing a extension to Dashboard module for i18n.
    * @module Dashboard.i18n
@@ -29,17 +29,22 @@ define(['./Dashboard', './Dashboard.ext', 'amd!../lib/underscore', '../lib/momen
     _initI18n: function() {
       var myself = this;
       myself.i18nCurrentLanguageCode = undefined;
-      myself.i18nSupport = {};  // Reference to i18n objects
+      //when correctly initiated, prop will be replaced
+      myself.i18nSupport = {
+      prop: function(text){
+        Logger.warn("i18n support wasn't properly initiated. Is the file messages_supported_languages.properties present?");
+        return text;
+      }};  // Reference to i18n objects
 
       //gets localization from templates
       $.i18n.properties({
-        name: 'Messages',
+        name: 'messages',
         path: DashboardExt.getStaticResource("resources/languages/"),
         mode: 'map',
         language: SESSION_LOCALE,
         callback: function(){
           $.i18n.properties({
-            name: 'Messages',
+            name: 'messages',
             mode: 'map',
             type: 'GET',
             language: SESSION_LOCALE,

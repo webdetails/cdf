@@ -316,13 +316,13 @@
     <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
     <!-- echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/ -->
 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0"
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/messages.properties" token="Version 4.0"
              value="Version ${project.revision}"/>
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0"
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/messages_en.properties" token="Version 4.0"
              value="Version ${project.revision}"/>
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0"
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/messages_hr.properties" token="Version 4.0"
              value="Version ${project.revision}"/>
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0"
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/messages_it.properties" token="Version 4.0"
              value="Version ${project.revision}"/>
 
     <echo file="${stage.dir}/${plugin.name}/version.xml"
