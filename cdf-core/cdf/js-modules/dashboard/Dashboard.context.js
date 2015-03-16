@@ -16,12 +16,14 @@ define(['../lib/jquery', './Dashboard', './Dashboard.ext', './Dashboard.context.
   function($, Dashboard, DashboardExt, DashboardContextExt) {
   
   /**
-   * A module representing a extension to Dashboard module for i18n.
-   * @module Dashboard.i18n
+   * A module representing an extension to Dashboard module for the dashboards Context.
+   * @module Dashboard.Context
    */
   Dashboard.implement({
     /**
      * Method used by the Dashboard constructor for context initialization
+     * @method _initContext
+     * @for Dashboard
      *
      * @private
      */

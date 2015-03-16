@@ -24,6 +24,8 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
      * Reference to current language code . Used in every place where jquery
      * plugins used in CDF has native internationalization support (ex: Datepicker)
      *
+     * @method _initI18n
+     * @for Dashboard
      * @private
      */
     _initI18n: function() {
@@ -61,8 +63,12 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
     },
   
     /**
-     * @param lc
-     * @param i18nRef
+     * Sets the current locale and i18n options
+     *
+     * @method setI18nSupport
+     * @for Dashboard
+     * @param lc  Locale Code
+     * @param i18nRef Additional i18 options
      */
     setI18nSupport: function(lc, i18nRef) {
       this.i18nCurrentLanguageCode = lc;

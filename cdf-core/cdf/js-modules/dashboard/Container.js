@@ -11,6 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Generic container class for registering and fetching objects according to a key, using a factory pattern.
+ * Used for add-ins and queries, this is mostly an internal use only module.
+ * Should not appear by now in yui-documentation
+ */
+
 define(function () {
 
   // Shared/Static stuff

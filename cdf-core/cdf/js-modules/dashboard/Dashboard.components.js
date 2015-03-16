@@ -22,7 +22,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      * Method used by the Dashboard constructor for components initialization
-     *
+     * @method _initComponents
+     * @for Dashboard
      * @private
      */
     _initComponents: function() {
@@ -32,6 +33,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     /**
      * Gets the component with a given name
      *
+     * @method getComponent
+     * @for Dashboard
      * @param name of the component
      * @returns the component or undefined if it does not exists
      */
@@ -44,8 +47,10 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Alias for getComponent
+     * Alias for  {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
      *
+     * @method getComp
+     * @for Dashboard
      * @param name of the component
      * @returns the component or undefined if it does not exists
      */
@@ -54,8 +59,10 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Gets the component with a given name
+     * Alias for  {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
      *
+     * @method getComponentByName
+     * @for Dashboard
      * @param name of the component
      * @returns the component of undefined if it does not exists
      */
@@ -70,6 +77,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     /**
      * Adds a set of components
      *
+     * @method addComponents
+     * @for Dashboard
      * @param components to add
      */
     addComponents: function(components) {
@@ -82,6 +91,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     /**
      * Add a component
      *
+     * @method addComponent
+     * @for Dashboard
      * @param component to add
      * @param options to append to the component
      */
@@ -99,6 +110,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      * Gets a component given a name or a index
+     * @method getComponentIndex
+     * @for Dashboard
      *
      * @param compOrNameOrIndex
      * @returns component index
@@ -127,6 +140,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     /**
      * Remove a component
      *
+     * @method removeComponent
+     * @for Dashboard
      * @param compOrNameOrIndex
      * @returns the component removed
      */
