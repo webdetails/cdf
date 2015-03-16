@@ -402,9 +402,6 @@
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
 
-    <!-- bypass common-ui(/util/URLEncoder) dependency during compilation -->
-    <touch file="${js.module.script.agg.dir}/common-ui/util/URLEncoder.js" mkdirs="true"/>
-
     <!-- run js compilation -->
     <exec executable="node" failonerror="true">
       <!--copy here -->
