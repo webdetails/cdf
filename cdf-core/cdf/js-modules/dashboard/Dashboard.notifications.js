@@ -16,8 +16,7 @@ define(['./Dashboard', './Popups','../Logger', 'amd!../lib/underscore', '../lib/
   function(Dashboard, Popups, Logger, _, $) {
 
   /**
-   * A module representing a extension to Dashboard module for notifications.
-   * It requires the parameter lifecycle module
+   * A module representing an extension to Dashboard module for notifications.
    * @module Dashboard.notifications
    */
   Dashboard.implement({

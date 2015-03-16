@@ -18,13 +18,16 @@ define([
   '../lib/jquery'],
   function(Dashboard, Base64, DashboardViewsExt, $) {
     /**
-     * A module representing a extension to Dashboard module for views.
+     * A module representing an extension to Dashboard module for views.
      * @module Dashboard.views
      */
     Dashboard.implement({
     
+
       /**
-       * Property used to define if a parameter is defined by a view
+       *  Property used to define if a parameter is defined by a view
+       *  @property viewFlags
+       *  @for Dashboard
        */
       viewFlags: {
         UNUSED: "unused",
@@ -35,6 +38,8 @@ define([
       /**
        * Map containing the list of parameters of a dashboard, describing its state with viewFlags
        *
+       * @method _initViews
+       * @for Dashboard
        * @private
        */
       _initViews: function() {
@@ -66,6 +71,10 @@ define([
        * Because we're storing the parameters in OrientDB, and as OrientDB has some serious issues when storing nested
        * objects, we need to marshall the parameters into a JSON object and converting that JSON into a Base64 blob
        * before the storage operation.
+       *
+       *
+       * @method restoreView
+       * @for Dashboard
        */
       restoreView: function() {
         var p, params;
@@ -89,6 +98,8 @@ define([
       /**
        * Defines the viewFlag for a given parameter
        *
+       * @method setParameterViewMode
+       * @for Dashboard
        * @param parameter defines the name of the parameter
        * @param value defines the value of the parameter. Its default value is viewFlags.VIEW
        */
@@ -101,6 +112,8 @@ define([
     
       /**
        *
+       * @method isViewParameter
+       * @for Dashboard
        * @param parameter defines the name of the parameter
        * @returns the parameter viewFlags
        */
@@ -111,6 +124,8 @@ define([
       /**
        * Obtains an object with the values for all dashboard parameters flagged as being View parameters
        *
+       * @method getViewParameters
+       * @for Dashboard
        * @returns object with parameter values
        */
       getViewParameters: function(){
@@ -127,6 +142,8 @@ define([
       /**
        * Obtains a list of viewFlags.UNBOUND parameters
        *
+       * @method getUnboundParameters
+       * @for Dashboard
        * @returns {Array} of parameters
        */
       getUnboundParameters: function(){
