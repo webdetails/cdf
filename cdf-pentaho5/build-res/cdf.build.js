@@ -54,8 +54,7 @@
   //file should be skipped because it has no dependencies.
   paths: {
     'requireLib': 'require',
-    'common-ui': '../../js-lib/expanded/common-ui',
-    'dojo': '../../js-lib/expanded/common-ui/dojo/dojo'
+    'common-ui': '../../build-res/module-scripts/common-ui'
   },
 
   //By default all the configuration for optimization happens from the command
@@ -124,7 +123,8 @@
     'cdf/cdf-pentaho-require-js-cfg',
     'cdf/lib/cdf-core-lib-require-js-cfg',
     //According to https://github.com/guybedford/require-css#basic-usage
-    'cdf/lib/require-css/normalize'
+    'cdf/lib/require-css/normalize',
+    'common-ui/util/URLEncoder'
   ],
 
   //Sets up a map of module IDs to other module IDs. For more details, see

@@ -136,8 +136,7 @@
   </target>
 
   <!-- subfloor test override -->
-
-  <target name="test" depends="compile,compile-tests, init-test-reports" description="Compiles and runs unit tests">
+  <target name="test" depends="compile,compile-tests,init-test-reports" description="Compiles and runs unit tests">
     <junit maxmemory="${junit.maxmemory}"
            dir="${junit.base.dir}"
            fork="yes"
@@ -201,17 +200,12 @@
 
   <!-- overrides subfloor clean to also cleanup runtime-lib -->
   <target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
-    <delete dir="${runtimelib.dir}"/>
-    <delete dir="${dist.dir}"/>
-    <echo message="Deleting... ${js.node.node_modules.dir}"/>
-    <delete dir="${js.node.node_modules.dir}"/>
-    <echo message="Deleting RequireJS Configurations"/>
-    <delete file="build-res/requireCfg-raw.js"/>
-    <delete file="build-res/requireCfg.js"/>
-    <echo message="Deleting... build-res/pentaho-js-build"/>
-    <delete dir="build-res/pentaho-js-build"/>
-    <echo message="Deleting... build-res/pentaho-js-build.zip"/>
-    <delete file="build-res/pentaho-js-build.zip"/>
+    <delete dir="${runtimelib.dir}" verbose="true"/>
+    <delete dir="${dist.dir}" verbose="true"/>
+    <delete file="build-res/requireCfg-raw.js" verbose="true"/>
+    <delete file="build-res/requireCfg.js" verbose="true"/>
+    <delete dir="build-res/pentaho-js-build" verbose="true"/>
+    <delete file="build-res/pentaho-js-build.zip" verbose="true"/>
   </target>
 
   <!--=======================================================================
@@ -399,10 +393,20 @@
       <arg value="build-res/pentaho-js-build/profileBuilder.js"/>
     </java>
 
+    <echo message="Extracting CCC JavaScript from Dependencies"/>
+    <unzip dest="${js.expanded.lib.dir}" overwrite="true">
+      <fileset dir=".">
+        <include name="${js.lib.dir}/ccc-*.zip"/>
+      </fileset>
+    </unzip>
+
     <!-- copy CCC to be included during minification -->
     <copy todir="${js.module.script.agg.dir}/cdf/lib/CCC">
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
+
+    <!-- bypass common-ui(/util/URLEncoder) dependency during compilation -->
+    <touch file="${js.module.script.agg.dir}/common-ui/util/URLEncoder.js" mkdirs="true"/>
 
     <!-- run js compilation -->
     <exec executable="node" failonerror="true">
@@ -416,16 +420,9 @@
       <fileset dir="${js.build.output.dir}"/>
     </copy>
 
-    <copy todir="${bin.dir}/js-source/raw" >
-      <fileset dir="${js.module.script.agg.dir}"/>
+    <copy todir="${bin.dir}/js-source/raw/${js.dir}" >
+      <fileset dir="${js.module.script.agg.dir}/${js.dir}"/>
     </copy>
-
-    <!-- copy ccc build -->
-    <!-- move file="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc-d1.0.js"/ -->
-    <copy todir="${bin.dir}/js-source/raw/cdf/lib/CCC">
-      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
-    </copy>
-    <!-- move file="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc-d1.0.js"/ -->
 
     <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
       <zipfileset dir="${bin.dir}/js-source" includes="**/*"/>
@@ -477,6 +474,13 @@
         <include name="**/*"/>
       </fileset>
     </copy>
+
+    <echo message="Extracting CCC JavaScript from Dependencies"/>
+    <unzip dest="${js.expanded.lib.dir}" overwrite="true">
+      <fileset dir=".">
+        <include name="${js.lib.dir}/ccc-*.zip"/>
+      </fileset>
+    </unzip>
 
     <!-- copy ccc build -->
     <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib/CCC" overwrite="true">
@@ -688,6 +692,7 @@
             </exec>
           </then>
           <else>
+            <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
             <if>
               <not>
                 <isset property="karma-is-available"/>
@@ -741,6 +746,13 @@
         <exclude name="**/*-require-js-cfg.js*"/>
       </fileset>
     </copy>
+
+    <echo message="Extracting CCC JavaScript from Dependencies"/>
+    <unzip dest="${js.expanded.lib.dir}" overwrite="true">
+      <fileset dir=".">
+        <include name="${js.lib.dir}/ccc-*.zip"/>
+      </fileset>
+    </unzip>
 
     <!-- copy CCC into bin/test-js/cdf/js/lib/CCC -->
     <copy todir="${bin.test-js.cdf.js.lib.dir}/CCC" overwrite="true">
