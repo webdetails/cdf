@@ -53,7 +53,8 @@
   //http: URL when running in the browser and during an optimization that
   //file should be skipped because it has no dependencies.
   paths: {
-    'requireLib': 'require'
+    'requireLib': 'require',
+    'common-ui/util/URLEncoder': 'empty:'
   },
 
   //By default all the configuration for optimization happens from the command
@@ -129,9 +130,7 @@
   //These text contents will be used instead of doing a file IO call for
   //those modules. Useful if some module ID contents are dynamically
   //based on user input, which is common in web build tools.
-  rawText: {
-    'common-ui/util/URLEncoder': 'define({});'
-  },
+  //rawText: {},
 
   //Sets up a map of module IDs to other module IDs. For more details, see
   //the http://requirejs.org/docs/api.html#config-map docs.
