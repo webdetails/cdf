@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/CommentsComponent", "cdf/lib/jquery", "amd!cdf/lib/backbone"],
+define(["cdf/Dashboard.Clean", "cdf/components/CommentsComponent", "cdf/lib/jquery", "amd!cdf/lib/backbone"],
   function(Dashboard, CommentsComponent, $, Backbone) {
 
   /**

@@ -11,5 +11,5 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-// this is file is used by config/context.js for bypassing missing AMD dependencies
+// this file is used by config/context.js for bypassing missing AMD dependencies
 define('missing/dependency', [], function() { return; });

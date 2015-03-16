@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/AutocompleteBoxComponent", "cdf/lib/jquery"],
+define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/lib/jquery"],
   function(Dashboard, AutocompleteBoxComponent, $) {
 
   /**

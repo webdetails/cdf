@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/SelectComponent", 'cdf/dashboard/Query', 'cdf/lib/jquery'],
+define(["cdf/Dashboard.Clean", "cdf/components/SelectComponent", 'cdf/dashboard/Query', 'cdf/lib/jquery'],
   function(Dashboard, SelectComponent, Query, $) {
 
   /**

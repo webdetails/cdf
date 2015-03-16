@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard', 'amd!cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/components/VisualizationAPIComponent'],
+define(['cdf/Dashboard.Clean', 'amd!cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/components/VisualizationAPIComponent'],
   function(Dashboard, _, $, VisualizationAPIComponent) {
 
   /**
