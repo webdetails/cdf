@@ -34,7 +34,6 @@ define([
      *
      * @class Dashboard
      * @constructor
-     * @alias module:constructor
      */
     constructor: function() {
       var myself = this;
