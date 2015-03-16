@@ -13,8 +13,8 @@
 
 
 /**
- * A module representing a extension to Dashboard class for handling add Ins.
- * The methods here handle add-in registration and fetching.
+ * A module representing an extension to Dashboard class for handling addIns.
+ * The methods here handle addIn registration and fetching.
  * @module Dashboard.addIns
  */
 define([

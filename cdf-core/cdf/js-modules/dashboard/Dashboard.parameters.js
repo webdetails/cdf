@@ -15,7 +15,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     function (Dashboard, Logger, Backbone, Utf8Encoder) {
 
   /**
-   * A module representing a extension to Dashboard class for parameters.
+   * A module representing an extension to Dashboard class for parameters.
    * The methods here handle getting and saving parameters from the dashboard context.
    * @module Dashboard.parameters
    */

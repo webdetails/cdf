@@ -16,7 +16,7 @@ define(['../lib/jquery', './Dashboard', './Dashboard.ext', './Dashboard.context.
   function($, Dashboard, DashboardExt, DashboardContextExt) {
   
   /**
-   * A module representing a extension to Dashboard module for the dashboards Context.
+   * A module representing an extension to Dashboard module for the dashboards Context.
    * @module Dashboard.Context
    */
   Dashboard.implement({

@@ -15,7 +15,7 @@ define(['./Dashboard', '../Logger', './Utils'],
   function(Dashboard, Logger, Utils) {
 
   /**
-   * A module representing a extension to Dashboard module for bookmarkable parameters.
+   * A module representing an extension to Dashboard module for bookmarkable parameters.
    * @module Dashboard.bookmarkable
    */
   Dashboard.implement({
