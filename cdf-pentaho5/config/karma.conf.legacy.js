@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,51 +15,51 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '../../',
+    basePath: '../',
 
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
     // list of files / patterns to load in the browser
     files: [
-      'cdf-core/cdf/js-lib/shims.js',
-      'cdf-core/cdf/js-lib/pen-shim.js',
-      'cdf-core/test-js/legacy/testUtils.js',
-      'cdf-core/cdf/js/wd.js',
-      'cdf-core/cdf/js-lib/json.js',
-      'cdf-core/cdf/js-lib/jQuery/jquery.js',
-      'cdf-core/cdf/js-lib/jQuery/jquery.ui.js',
-      'cdf-core/cdf/js-lib/autobox/jquery.templating.js',
-      'cdf-core/cdf/js-lib/autobox/jquery.ui.autobox.js',
-      'cdf-core/cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
-      'cdf-core/cdf/js-lib/blockUI/jquery.blockUI.js',
-      'cdf-core/cdf/js-lib/uriQueryParser/jquery-queryParser.js',
-      'cdf-core/cdf/js-lib/underscore/underscore.js',
-      'cdf-core/cdf/js-lib/backbone/backbone.js',
-      'cdf-core/cdf/js-lib/mustache/mustache.js',
-      'cdf-core/cdf/js-lib/base/Base.js',
-      'cdf-pentaho5/cdf/js/cdf-base.js',
-      'cdf-core/cdf/js/Dashboards.Main.js',
-      'cdf-core/cdf/js/Dashboards.Query.js',
-      'cdf-core/cdf/js/Dashboards.Bookmarks.js',
-      'cdf-core/cdf/js/Dashboards.Startup.js',
-      'cdf-core/cdf/js/Dashboards.Utils.js',
-      'cdf-core/cdf/js/Dashboards.Legacy.js',
-      'cdf-core/cdf/js/Dashboards.Notifications.js',
-      'cdf-core/cdf/js/Dashboards.RefreshEngine.js',
-      'cdf-core/cdf/js/components/core.js',
-      'cdf-pentaho5/cdf/js/components/Pentaho.Reporting.js',
-      'cdf-core/cdf/js/components/input.js',
-      'cdf-core/cdf/js/queries/coreQueries.js',
-      'cdf-core/test-js/legacy/lib/test-components.js',
-      'cdf-core/test-js/legacy/main.js',
-      {pattern: 'cdf-pentaho5/test-js/legacy/**/*.js', included: false}
+      '../cdf-core/cdf/js-lib/shims.js',
+      '../cdf-core/cdf/js-lib/pen-shim.js',
+      '../cdf-core/test-js/legacy/testUtils.js',
+      '../cdf-core/cdf/js/wd.js',
+      '../cdf-core/cdf/js-lib/json.js',
+      '../cdf-core/cdf/js-lib/jQuery/jquery.js',
+      '../cdf-core/cdf/js-lib/jQuery/jquery.ui.js',
+      '../cdf-core/cdf/js-lib/autobox/jquery.templating.js',
+      '../cdf-core/cdf/js-lib/autobox/jquery.ui.autobox.js',
+      '../cdf-core/cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
+      '../cdf-core/cdf/js-lib/blockUI/jquery.blockUI.js',
+      '../cdf-core/cdf/js-lib/uriQueryParser/jquery-queryParser.js',
+      '../cdf-core/cdf/js-lib/underscore/underscore.js',
+      '../cdf-core/cdf/js-lib/backbone/backbone.js',
+      '../cdf-core/cdf/js-lib/mustache/mustache.js',
+      '../cdf-core/cdf/js-lib/base/Base.js',
+      'cdf/js/cdf-base.js',
+      '../cdf-core/cdf/js/Dashboards.Main.js',
+      '../cdf-core/cdf/js/Dashboards.Query.js',
+      '../cdf-core/cdf/js/Dashboards.Bookmarks.js',
+      '../cdf-core/cdf/js/Dashboards.Startup.js',
+      '../cdf-core/cdf/js/Dashboards.Utils.js',
+      '../cdf-core/cdf/js/Dashboards.Legacy.js',
+      '../cdf-core/cdf/js/Dashboards.Notifications.js',
+      '../cdf-core/cdf/js/Dashboards.RefreshEngine.js',
+      '../cdf-core/cdf/js/components/core.js',
+      'cdf/js/components/Pentaho.Reporting.js',
+      '../cdf-core/cdf/js/components/input.js',
+      '../cdf-core/cdf/js/queries/coreQueries.js',
+      '../cdf-core/test-js/legacy/lib/test-components.js',
+      '../cdf-core/test-js/legacy/main.js',
+      {pattern: 'test-js/legacy/**/*.js', included: false}
     ],
 
     // list of files to exclude
     exclude: [],
 
-    preprocessors: {'cdf-core/cdf/js/*.js': 'coverage'},
+    preprocessors: {'cdf/js/*.js': 'coverage'},
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -68,12 +68,12 @@ module.exports = function(config) {
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test-reports-legacy/cdf-pentaho5/coverage/reports/'
+      dir: 'bin/test-reports-legacy/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test-reports-legacy/cdf-pentaho5/test-results.xml',
+      outputFile: 'bin/test-reports-legacy/test-results.xml',
       suite: 'unit'
     },
 
@@ -83,11 +83,11 @@ module.exports = function(config) {
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
-    // web server port
-    port: 9876,
-
     //hostname
     hostname: ['localhost'],
+
+    // web server port
+    port: 9876,
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,

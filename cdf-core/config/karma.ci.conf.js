@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -59,9 +59,7 @@ module.exports = function(config) {
     },
 
     //hostname
-    hostname: [
-      'localhost'
-    ],
+    hostname: ['localhost'],
     
     // web server port
     port: 9876,
@@ -75,6 +73,9 @@ module.exports = function(config) {
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
+
+    // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
+    //autoWatchBatchDelay: 250,
 
     // Start these browsers, currently available:
     // - Chrome

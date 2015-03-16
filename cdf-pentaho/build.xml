@@ -67,6 +67,9 @@
 
   <import file="../build-res/subfloor-js.xml"/>
 
+  <mkdir dir="${js.module.script.dir}"/>
+  <mkdir dir="${js.module.script.agg.dir}"/>
+
   <!--
     AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
     THE TASKS THAT NEED TO DIFFER FROM THE DEFAULT IMPLEMENTATION OF THE TASKS
@@ -107,8 +110,10 @@
 
   <!-- overrides subfloor clean to also cleanup runtime-lib -->
   <target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
-    <delete dir="${runtimelib.dir}" />
-    <delete dir="${dist.dir}" />
+    <delete dir="${runtimelib.dir}" verbose="true"/>
+    <delete dir="${dist.dir}" verbose="true"/>
+    <delete dir="${package.resdir}" verbose="true"/>
+    <delete dir="build-res" verbose="true"/>
   </target>
 
     <!--=======================================================================
@@ -227,6 +232,14 @@
     </copy>
 
     <antcall target="write-properties" />
+
+    <echo message="Extracting CCC JavaScript from Dependencies"/>
+    <unzip dest="${js.expanded.lib.dir}" overwrite="true">
+      <fileset dir=".">
+        <include name="${js.lib.dir}/ccc-*.zip"/>
+      </fileset>
+    </unzip>
+
     <!-- copy ccc build -->
     <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC" >
       <fileset dir="${js.expanded.lib.dir}/ccc/ccc"/>
@@ -323,6 +336,13 @@
         <include name="**/*"/>
       </fileset>
     </copy>
+
+    <echo message="Extracting CCC JavaScript from Dependencies"/>
+    <unzip dest="${js.expanded.lib.dir}" overwrite="true">
+      <fileset dir=".">
+        <include name="${js.lib.dir}/ccc-*.zip"/>
+      </fileset>
+    </unzip>
 
     <!-- copy ccc build -->
     <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC" >

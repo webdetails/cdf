@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -24,9 +24,8 @@ module.exports = function(config) {
     files: [
       { pattern: 'bin/test-js/cdf/js/**/*.css', included: false },
       { pattern: 'bin/test-js/cdf/js/**/*.js', included: false },
-      { pattern: 'js-lib/expanded/common-ui/**/*.css', included: false },
-      { pattern: 'js-lib/expanded/common-ui/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
+      'test-js/missing-dependency.js',
       'config/context.js',
       { pattern: 'test-js/**/*.js', included: false },
       'build-res/requireCfg-raw.js',
@@ -75,6 +74,9 @@ module.exports = function(config) {
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
+
+    // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
+    //autoWatchBatchDelay: 250,
 
     // Start these browsers, currently available:
     // - Chrome

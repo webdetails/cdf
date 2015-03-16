@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,7 +13,8 @@
 
 requireCfg = {
   paths: {},
-  shim: {}
+  shim: {},
+  map: {}
 };
 
 var KARMA_RUN = true;
@@ -37,4 +38,12 @@ pentaho.VizController.prototype.setDataTable = function(p1) {};
 pentaho.VizController.prototype.setVisualization = function(p1, p2) {};
 pentaho.visualizations.getById = function(p1) {};
 
-requireCfg.paths['common-ui'] = 'js-lib/expanded/common-ui';
+// setup a fake AMD module for each missing dependency
+requireCfg.map = {
+  '*': {
+    'common-ui/util/URLEncoder': 'missing/dependency',
+    'common-ui/vizapi/DataTable': 'missing/dependency',
+    'common-ui/vizapi/Events': 'missing/dependency',
+    'common-ui/vizapi/VizController': 'missing/dependency'
+  }
+}

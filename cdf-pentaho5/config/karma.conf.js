@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -24,9 +24,8 @@ module.exports = function(config) {
     files: [
       { pattern: 'bin/test-js/cdf/js/**/*.css', included: false },
       { pattern: 'bin/test-js/cdf/js/**/*.js', included: false },
-      { pattern: 'js-lib/expanded/common-ui/**/*.css', included: false },
-      { pattern: 'js-lib/expanded/common-ui/**/*.js', included: false },
       { pattern: 'test-js/**/*.ext.js', included: true },
+      'test-js/missing-dependency.js',
       'config/context.js',
       { pattern: 'test-js/**/*.js', included: false },
       'build-res/requireCfg-raw.js',
@@ -45,26 +44,26 @@ module.exports = function(config) {
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test-reports/cdf-pentaho5/coverage/reports/'
+      dir: 'bin/test-reports/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test-reports/cdf-pentaho5/test-results.xml',
+      outputFile: 'bin/test-reports/test-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test-reports/cdf-pentaho5/karma_html',
+      outputDir:    'bin/test-reports/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
-    // web server port
-    port: 9876,
-
     //hostname
     hostname: ['localhost'],
+
+    // web server port
+    port: 9876,
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,
