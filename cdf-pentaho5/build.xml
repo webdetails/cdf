@@ -106,7 +106,7 @@
   <property name="js.module.script.namespace" value="cdf"/>
   <property name="js.module.script.dir" value="cdf/js"/>
 
-  <property name="build.js.path" value="build-res/cdf.build.js" description="cdf.build.js location"/>
+  <property name="build.js.path" value="config/cdf.build.compile.js" description="cdf.build.compile.js location"/>
 
   <path id="classpath">
     <fileset dir="${devlib.dir}">
@@ -202,10 +202,7 @@
   <target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
     <delete dir="${runtimelib.dir}" verbose="true"/>
     <delete dir="${dist.dir}" verbose="true"/>
-    <delete file="build-res/requireCfg-raw.js" verbose="true"/>
-    <delete file="build-res/requireCfg.js" verbose="true"/>
-    <delete dir="build-res/pentaho-js-build" verbose="true"/>
-    <delete file="build-res/pentaho-js-build.zip" verbose="true"/>
+    <delete dir="build-res" verbose="true"/>
   </target>
 
   <!--=======================================================================
