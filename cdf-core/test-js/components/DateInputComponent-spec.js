@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'],
+define(['cdf/Dashboard.Clean', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'],
   function(Dashboard, $, DateInputComponent) {
 
   /**

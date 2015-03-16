@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/CheckComponent"],
+define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent"],
   function(Dashboard, CheckComponent) {
   
   /**

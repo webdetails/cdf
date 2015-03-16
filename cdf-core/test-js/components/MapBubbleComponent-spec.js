@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/MapBubbleComponent"],
+define(["cdf/Dashboard.Clean", "cdf/components/MapBubbleComponent"],
   function(Dashboard, MapBubbleComponent) {
 
   /**
