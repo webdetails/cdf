@@ -328,7 +328,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * Evaluates the argument. If it is a function, calls the function, otherwise returns the argument
    * @method ev
    * @param o the object to be evaluated
-   * @returns {*} the object it the object is not a function. Otherwise, invokes the function and returns the
+   * @returns {*} the object if the object is not a function. Otherwise, invokes the function and returns the
    * result
    * @static
    */
