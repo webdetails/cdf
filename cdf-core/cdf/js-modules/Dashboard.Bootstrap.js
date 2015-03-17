@@ -11,6 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Represents a bootstrap dashboard. It's a specialization of the base abstract Dashboard class.
+ * Require as cdf/Dashboard.Bootstrap
+ *
+ * @class Dashboard.Bootstrap
+ * @extends Dashboard
+ */
+
 define([
   './Dashboard',
   'amd!./lib/bootstrap',

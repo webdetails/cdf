@@ -32,7 +32,6 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
      * Creates an instance of BaseComponent
      *
      * @constructor
-     * @alias module:constructor
      */
     constructor: function(dashboard, properties) {    
       this.extend(properties);

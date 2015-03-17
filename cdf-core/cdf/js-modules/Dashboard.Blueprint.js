@@ -11,6 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Represents a blueprint dashboard. It's a specialization of the base abstract Dashboard class.
+ * Require as cdf/Dashboard.Blueprint
+ *
+ * @class Dashboard.Blueprint
+ * @extends Dashboard
+ */
+
 define(['./Dashboard', 'css!./lib/blueprint/screen'],
   function(Dashboard) {
   
