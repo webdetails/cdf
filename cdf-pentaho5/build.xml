@@ -649,21 +649,6 @@
   </target>
 
   <target name="run-karma" depends="install-antcontrib, npm-install">
-    <!-- compile the require file -->
-    <echo message="Collecting RequireJS Configurations"/>
-    <delete file="build-res/requireCfg-raw.js"/>
-    <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
-      <fileset dir="../cdf-core/cdf" casesensitive="yes">
-        <include name="*/*-require-js-cfg.js"/>
-      </fileset>
-      <fileset dir="../cdf-pentaho-base/cdf" casesensitive="yes">
-        <include name="*/*-require-js-cfg.js"/>
-      </fileset>
-      <fileset dir="cdf/js-modules" casesensitive="yes">
-        <include name="*-require-js-cfg.js"/>
-      </fileset>
-    </concat>
-
     <if>
       <available file="${js.karma.ci.config}"/>
       <then>
@@ -752,6 +737,21 @@
     <copy todir="${bin.test-js.cdf.js.lib.dir}/CCC" overwrite="true">
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
+
+    <!-- compile the require file -->
+    <echo message="Collecting RequireJS Configurations"/>
+    <delete file="build-res/requireCfg-raw.js"/>
+    <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
+      <fileset dir="../cdf-core/cdf" casesensitive="yes">
+        <include name="*/*-require-js-cfg.js"/>
+      </fileset>
+      <fileset dir="../cdf-pentaho-base/cdf" casesensitive="yes">
+        <include name="*/*-require-js-cfg.js"/>
+      </fileset>
+      <fileset dir="cdf/js-modules" casesensitive="yes">
+        <include name="*-require-js-cfg.js"/>
+      </fileset>
+    </concat>
 
     <!-- run karma -->
     <antcall target="run-karma"/>
