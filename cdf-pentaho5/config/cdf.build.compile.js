@@ -53,7 +53,8 @@
   //http: URL when running in the browser and during an optimization that
   //file should be skipped because it has no dependencies.
   paths: {
-    'requireLib': 'require'
+    'requireLib': 'require',
+    'common-ui/util/URLEncoder': 'empty:'
   },
 
   //By default all the configuration for optimization happens from the command
@@ -122,9 +123,14 @@
     'cdf/cdf-pentaho-require-js-cfg',
     'cdf/lib/cdf-core-lib-require-js-cfg',
     //According to https://github.com/guybedford/require-css#basic-usage
-    'cdf/lib/require-css/normalize',
-    'common-ui/util/URLEncoder'
+    'cdf/lib/require-css/normalize'
   ],
+
+  //Introduced in 2.1.3: Seed raw text contents for the listed module IDs.
+  //These text contents will be used instead of doing a file IO call for
+  //those modules. Useful if some module ID contents are dynamically
+  //based on user input, which is common in web build tools.
+  //rawText: {},
 
   //Sets up a map of module IDs to other module IDs. For more details, see
   //the http://requirejs.org/docs/api.html#config-map docs.
