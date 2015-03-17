@@ -11,6 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Represents a clean (no css engine) dashboard. It's a specialization of the base abstract Dashboard class.
+ * Require as cdf/Dashboard.Clean
+ *
+ * @class Dashboard.Clean
+ * @extends Dashboard
+ */
+
 define(['./Dashboard'],
     function(Dashboard) {
 

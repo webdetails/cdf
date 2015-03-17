@@ -13,7 +13,7 @@
 
 
 /**
- * A collection of utility functions. Request as dashboard/Utils.
+ * A collection of utility functions. Require as cdf/dashboard/Utils.
  * @class Utils
  */
 
@@ -170,13 +170,13 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   // Conversion functions
 
 
-      /**
-       * Converts an array to an object
-        * @param pArray array to be converted
-       * @returns an object with the same info as the array
-       * @private
-       * @static
-       */
+  /**
+   * Converts an array to an object
+   * @param pArray array to be converted
+   * @returns an object with the same info as the array
+   * @private
+   * @static
+   */
   function _pa2obj(pArray) {
     var obj = {};
     for(var p in pArray) {
@@ -193,7 +193,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * Converts an object to an array
    *
    * @method _obj2pa
-    * @param obj object to convert
+   * @param obj object to convert
    * @returns {Array}
    * @private
    * @static
@@ -238,12 +238,12 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
 
 
   /**
-   * Gets the url parameters from an URL. CDF url parameters are defined as those that are present in the query
+   * Gets the url parameters from a URL. CDF url parameters are defined as those that are present in the query
    * string with names starting with the string 'param'. So, for a query string like ?paramfoo=bar, you'd get
    * a parameter foo with value bar
    *
    * @method  getURLParameters
-   * @param sURL URL wit the query stirng to be parsed
+   * @param sURL URL with the query string to be parsed
    * @returns {Array} Array with the parsed parameters. Each element is an array with two positions, the first being
    * the parameter name and the second the value
    * @static
