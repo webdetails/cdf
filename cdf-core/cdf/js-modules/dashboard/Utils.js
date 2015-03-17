@@ -11,11 +11,30 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * A collection of utility functions. Request as dashboard/Utils.
+ * @class Utils
+ */
+
 define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/jquery', 'amd!../lib/queryParser'],
     function(Logger, _, moment, cdo, $) {
 
   var Utils = {};
 
+
+  var formProvider = undefined;
+  var urlParams = undefined;
+
+  /**
+   * Escapes a string into an html safe string.
+   * It assumes that, if there is an escaped char in the input then the input is fully escaped.
+   *
+   * @method escapeHtml
+   * @param input Input string to be escape
+   * @returns Escaped string
+   * @static
+   */
   Utils.escapeHtml = function(input) {
     // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
     // the input is fully escaped. Using http://webdesign.about.com/od/localization/l/blhtmlcodes-ascii.htm 
@@ -36,8 +55,17 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
 
     return escaped;
   };
-  
-  Utils.getPathParameter = function(url) {  
+
+
+  /**
+   * Given a url containing an encoded Pentaho path (:home:admin:Test.wcdf), returns the encoded path
+   *
+   * @method getPathParameter
+   * @param Url url to parse
+   * @returns path parameter value or null if not available
+   * @static
+   */
+  Utils.getPathParameter = function(url) {
   
     url = (url || window.location.pathname);
     url = decodeURIComponent(url);
@@ -49,12 +77,26 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     }
   };
 
+  /**
+   * Returns the query string part of the url
+   *
+   * @method getLocationSearchString
+   * @returns Query string
+   * @static
+   */
   Utils.getLocationSearchString = function() {
     return window.location.search;
   };
 
-  var urlParams = undefined;
 
+  /**
+   * Returns the value of a query string parameter
+   *
+   * @method getQueryParameter
+   * @param parameterName parameter name
+   * @returns value of the query parameter or null
+   * @static
+   */
   Utils.getQueryParameter = function(parameterName) {
     if(urlParams === undefined) {
       urlParams = $.parseQuery(this.getLocationSearchString());
@@ -63,17 +105,19 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return urlParams[parameterName] || "";
   };
 
-  var formProvider = undefined;
+
 
   /**
    * Format a number with the given mask using the Dashboard language
    * or the one that the user specified if it exists, otherwise
    * uses the default language 'en-US'
    *
+   * @method numberFormat
    * @param value
    * @param mask
    * @param langCode
    * @returns {string} formatted number
+   * @static
    */
   Utils.numberFormat = function(value, mask, langCode) {
     if(formProvider === undefined) {
@@ -92,8 +136,10 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * - 'number' to configure number's format language
    * - 'dateLocale' to configure date's format language
    *
+   * @method configLanguage
    * @param langCode
    * @param config
+   * @static
    */
   Utils.configLanguage = function(langCode, config) {
     var dateConfig = config.dateLocale || {};
@@ -108,9 +154,11 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   /**
    * Format the a date with a given mask
    *
+   * @mnethod dateFormat
    * @param mask
    * @param date
    * @returns {string} formatted date
+   * @static
    */
   Utils.dateFormat = function(mask, date) {
     if(date != null && _.isFunction(date.format)) {
@@ -120,6 +168,15 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   };
     
   // Conversion functions
+
+
+      /**
+       * Converts an array to an object
+        * @param pArray array to be converted
+       * @returns an object with the same info as the array
+       * @private
+       * @static
+       */
   function _pa2obj(pArray) {
     var obj = {};
     for(var p in pArray) {
@@ -130,7 +187,17 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     }
     return obj;
   };
-  
+
+
+  /**
+   * Converts an object to an array
+   *
+   * @method _obj2pa
+    * @param obj object to convert
+   * @returns {Array}
+   * @private
+   * @static
+   */
   function _obj2pa(obj) {
     var pArray = [];
     for(var key in obj) if (obj.hasOwnProperty(key)) {
@@ -138,21 +205,49 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     }
     return pArray;
   };
-  
+
+
+  /**
+   * Converts an array to an object
+   *
+   * @method propertiesArrayToObject
+   * @param pArray Array to Convert
+   * @returns The object represented by the array or undefined if argument is not an array
+   * @static
+   */
   Utils.propertiesArrayToObject = function(pArray) {
     // Mantra 1: "Order matters!"
     // Mantra 2: "Arrays are Objects!"
     return (_.isArray(pArray) && _pa2obj(pArray)) || (_.isObject(pArray) && pArray) || undefined;  
   };
-  
+
+
+  /**
+   * Converts an object to an array
+   *
+   * @method  objectToPropertiesArray
+   * @param obj
+   * @returns An array or undefined if argument is not an object
+   * @static
+   */
   Utils.objectToPropertiesArray = function(obj) {
     // Mantra 1: "Order matters!"
     // Mantra 2: "Arrays are Objects!"
     return (_.isArray(obj) && obj) || (_.isObject(obj) && _obj2pa(obj)) || undefined;
   };
-  
 
 
+  /**
+   * Gets the url parameters from an URL. CDF url parameters are defined as those that are present in the query
+   * string with names starting with the string 'param'. So, for a query string like ?paramfoo=bar, you'd get
+   * a parameter foo with value bar
+   *
+   * @method  getURLParameters
+   * @param sURL URL wit the query stirng to be parsed
+   * @returns {Array} Array with the parsed parameters. Each element is an array with two positions, the first being
+   * the parameter name and the second the value
+   * @static
+   */
   Utils.getURLParameters = function(sURL) {
     if(sURL.indexOf("?") > 0){
   
@@ -173,7 +268,18 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   
     return arrParam;
   };
-  
+
+
+  /**
+   * Formats a string according to some arcane and unreadable algorithm. Just ignore and don't use it.
+   *
+   * @method toFormatedString
+   * @param value Value to be formatted
+   * @returns {string} Some piece of formatted string
+   * @private
+   * @static
+   * @deprecated
+   */
   Utils.toFormatedString = function(value) {
     value += '';
     var x = value.split('.');
@@ -186,7 +292,18 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return x1 + x2;
   };
   
-  //quote csv values in a way compatible with CSVTokenizer
+
+  /**
+   * Quote csv values in a way compatible with CSVTokenizer
+   *
+   * @method doCsvQuoting
+   * @param value Value quote
+   * @param separator Separator to use when quoting
+   * @param alwaysEscape Boolean that indicates if the value should always be escaped or just when needed
+   * @returns {*} The escaped value
+   * @static
+   *
+   */
   Utils.doCsvQuoting = function(value, separator, alwaysEscape) {
     var QUOTE_CHAR = '"';
     if(separator == null) {
@@ -206,10 +323,28 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return value;
   };
 
+
+  /**
+   * Evaluates the argument. If it is a function, calls the function, otherwise returns the argument
+   * @method ev
+   * @param o the object to be evaluated
+   * @returns {*} the object it the object is not a function. Otherwise, invokes the function and returns the
+   * result
+   * @static
+   */
   Utils.ev =  function(o) {
     return typeof o == 'function' ? o() : o;
   };
 
+
+  /**
+   * Performs a post to the server
+   *
+   * @method post
+   * @param url Url where to post
+   * @param obj Parameter object
+   * @static
+   */
   Utils.post = function(url, obj) {
   
     var form = '<form action="' + url + '" method="post">';
@@ -226,7 +361,17 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     form += '</form>';
     jQuery(form).appendTo('body').submit().remove();
   };
-  
+
+
+  /**
+   * Deep clones an object. This method is deprecated, use $.extend(true, {}, obj)
+   *
+   * @method clone
+   * @param obj Object to clone
+   * @returns Cloned object
+   * @static
+   * @deprecated
+   */
   Utils.clone = function clone(obj) {
   
     var c = obj instanceof Array ? [] : {};
@@ -256,12 +401,31 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return c;
   };
 
+
+  /**
+   * Adds the url parameters to a local object
+   *
+   * @method addArgs
+   * @param url
+   * @static
+   * @deprecated
+   */
   Utils.addArgs = function(url) {
     if(url != undefined) {
       this.args = getURLParameters(url);
     }
   };
-  
+
+  /**
+   * Gets an argument value that was previously set by calling addArgs. This is deprecated, use
+   * {{#crossLink "Utils/getQueryParameter:method"}}getQueryParameter{{/crossLink}} or dashboard.context.params
+   *
+   * @method getArgValue
+   * @param key Argument name
+   * @returns the argument value or null
+   * @static
+   * @deprecated
+   */
   Utils.getArgValue = function(key) {
     for(i = 0; i < this.args.length; i++) {
       if(this.args[i][0] == key) {
@@ -275,6 +439,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   /**
    * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
    *
+   * @method eachValuesArray
    * @param {Array.<Array.<*>>} values the values array - an array of arrays.
    *   <p>
    *   Each second-level array is a <i>value specification</i> and contains
@@ -309,6 +474,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    *
    * @return {boolean} indicates if the traversal was complete, <tt>true</tt>,
    *   or if explicitly stopped by the traversal function, <tt>false</tt>.
+   *   @static
    */
   Utils.eachValuesArray = function(values, opts, f, x) {
     if(typeof opts === 'function') {
@@ -344,6 +510,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   /**
    * Given a parameter value obtains an equivalent values array.
    *
+   *
    * <p>The parameter value may encode multiple values in a string format.</p>
    * <p>A nully (i.e. null or undefined) input value or an empty string result in <tt>null</tt>,
    *    and so the result of this method is normalized.
@@ -354,6 +521,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * <p>An array or array-like object is returned without modification.</p>
    * <p>Any other value type returns <tt>null</tt>.</p>
    *
+   * @method parseMultipleValues
    * @param {*} value
    * a parameter value, as returned by {@link Dashboards.getParameterValue}.
    *
@@ -375,6 +543,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   /**
    * Normalizes a value so that <tt>undefined</tt>, empty string
    * and empty array, are all translated to <tt>null</tt>.
+   * @method normalizeValue
    * @param {*} value the value to normalize.
    * @return {*} the normalized value.
    *
@@ -388,6 +557,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   
   /**
    * Determines if a value is considered an array.
+   * @method isArray
    * @param {*} value the value.
    * @return {boolean}
    *
@@ -401,6 +571,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   
   /**
    * Determines if two values are considered equal.
+   * @method equalValues
    * @param {*} a the first value.
    * @param {*} b the second value.
    * @return {boolean}
@@ -425,9 +596,10 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return a == b;
   };
   
-  // Based on the algorithm described at http://en.wikipedia.org/wiki/HSL_and_HSV.
+
   /**
    * Converts an HSV to an RGB color value.
+   * Based on the algorithm described at http://en.wikipedia.org/wiki/HSL_and_HSV.
    * 
    * @param {number} h Hue as a value between 0 - 360 (degrees)
    * @param {number} s Saturation as a value between 0 - 100 (%)
