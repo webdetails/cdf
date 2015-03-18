@@ -11,6 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * The dashboard module. Groups all classes that represent a Dashboard
+ * @module Dashboard
+ *
+ */
+
 define([
   '../lib/Base',
   '../Logger',
@@ -26,6 +33,7 @@ define([
   /**
    * A class representing a Dashboard.
    * @class Dashboard
+
    */
   var Dashboard = Base.extend({
   

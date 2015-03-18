@@ -11,11 +11,43 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+
+/**
+ * Logger module.
+ * Require as cdf/Logger
+ *
+ * @class Logger
+ * @module Logger
+ */
+
 define(function() {
 
   var logger = {
+
+    /**
+     *  Property enumerating the various log levels
+     *  @property logLevels
+     *  @type Array
+     */
     loglevels: ['debug', 'info', 'warn', 'error', 'exception'],
+
+
+    /**
+     *  Current log level. Assign a new value to this property to change the log level
+     *  @property logLevel
+     *  @type string
+     */
     loglevel: 'debug',
+
+    /**
+     *
+     * Logs a message at the specified log level
+     *
+     * @method log
+     * @param m Message to log
+     * @param type Log level. One of debug, info, warn, error or exception
+     */
     log: function(m, type) {    
       type = type || "info";
       if(this.loglevels.indexOf(type) < this.loglevels.indexOf(this.loglevel)) {
@@ -31,18 +63,48 @@ define(function() {
         }
       }
     },
+
+    /**
+     * Logs a message at debug level
+     * @method debug
+     * @param m Message to log
+     */
     debug: function(m) {
       return this.log(m, "debug");
     },
+    /**
+     * Logs a message at info level
+     * @method info
+     * @param m Message to log
+     */
+
     info: function(m) {
       return this.log(m, "info");
     },
+
+    /**
+     * Logs a message at warn level
+     * @method warn
+     * @param m Message to log
+     */
     warn: function(m) {
       return this.log(m, "warn");
     },
+
+    /**
+     * Logs a message at error level
+     * @method error
+     * @param m Message to log
+     */
     error: function(m) {
       return this.log(m, "error");
     },
+
+    /**
+     * Logs a message at exception level
+     * @method exception
+     * @param m Message to log
+     */
     exception: function(m) {
       return this.log(m, "exception");
     }                       

@@ -22,8 +22,11 @@ define(['./Dashboard', './Popups','../Logger', 'amd!../lib/underscore', '../lib/
   Dashboard.implement({
   
     /**
+     * Inits the notification module
      *
+     * @method   _initNotifications
      * @private
+     * @for Dashboard
      */
     _initNotifications: function() {
       this.ERROR_CODES = {

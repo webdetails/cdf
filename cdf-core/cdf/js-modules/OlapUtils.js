@@ -11,11 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/******************************************************************************************************/
 
-/**************************************** OLAP UTILS**************************************************/
-
-/******************************************************************************************************/
+/**
+ * OlapUtils is a collection of functions allowing client side CDF to issue MDX queries.
+ * This functionality is completely deprecated now and only used by the MdxQueryGroupComponent,
+ * which is deprecated as well.
+ * @class OlapUtils
+ * @module OlapUtils
+ * @deprecated
+ */
 
 
 

@@ -15,6 +15,7 @@
 /**
  * A collection of utility functions. Require as cdf/dashboard/Utils.
  * @class Utils
+ * @module Utils
  */
 
 define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/jquery', 'amd!../lib/queryParser'],

@@ -30,6 +30,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function (Utils, Logge
      * represent dynamic, context-dependent behaviour.
      *
      * @class AddIn
+     * @module AddIn
      * @constructor
      * @param options {Object} The options for the AddIn.
      */
@@ -70,10 +71,24 @@ return function (options) {
       if(typeof options.init === 'function'){
         options.init.call(myself);
       }
-    
+
+  /**
+   * Returns the AddIn label
+   *
+   * @method getLabel
+   * @returns {String} AddIn label
+   */
       this.getLabel = function() {
         return _label;
       }
+
+
+  /**
+   * Returns the AddIn name
+   *
+   * @method getName
+   * @returns {String} AddIn name
+   */
       this.getName = function() {
         return _name;
       }

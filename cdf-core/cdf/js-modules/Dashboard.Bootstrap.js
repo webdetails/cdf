@@ -18,6 +18,7 @@
  *
  * @class Dashboard.Bootstrap
  * @extends Dashboard
+ * @module Dashboard
  */
 
 define([

@@ -18,6 +18,7 @@
  *
  * @class Dashboard.Blueprint
  * @extends Dashboard
+ * @module Dashboard
  */
 
 define(['./Dashboard', 'css!./lib/blueprint/screen'],
