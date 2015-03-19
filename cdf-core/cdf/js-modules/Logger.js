@@ -18,6 +18,7 @@
  * Require as cdf/Logger
  *
  * @class Logger
+ * @module Logger
  */
 
 define(function() {

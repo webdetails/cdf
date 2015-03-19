@@ -18,6 +18,7 @@
  *
  * @class Dashboard.Clean
  * @extends Dashboard
+ * @module Dashboard
  */
 
 define(['./Dashboard'],

@@ -24,6 +24,22 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
 
   Dashboard.implement({
 
+
+    /**
+     * Calls an xaction
+     *
+     * @method callPentahoAction
+     * @param obj  Dom object where the response from the xaction should be written
+     * @param solution Solution folder
+     * @param path   Path to the xaction - can be the full path, in which case you don't need the solution and action
+     * @param action  xaction name
+     * @param parameters Parameter object to send to the xaction
+     * @param callback Callback function to call when the xaction responds
+     * @returns {*} The xaction result
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     callPentahoAction : function(obj, solution, path, action, parameters, callback) {
       var myself = this;
     
@@ -37,11 +53,36 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
         return myself.parseXActionResult(obj,myself.pentahoAction(solution, path, action, parameters, callback));
       }
     },
-    
+
+    /**
+     * Calls an arbitrary URL expecting the result content type to be xml
+     *
+     * @method urlAction
+     * @param url   Url to call
+     * @param params Parameters object
+     * @param func Callback function
+     * @returns {*} The parsed invocation result if no callback was supplied. Otherwise, null
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     urlAction : function(url, params, func) {
       return this.executeAjax('xml', url, params, func);
     },
-    
+
+    /**
+     * Executes an AJAX request
+     *
+     * @method executeAjax
+     * @param returnType expected return type
+     * @param url   Url to call
+     * @param params Parameters object
+     * @param func Callback function
+     * @returns {*} The parsed invocation result if no callback was supplied. Otherwise, null
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     executeAjax : function(returnType, url, params, func) {
       var myself = this;
       // execute a url
@@ -92,11 +133,43 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       }
     
     },
-    
+
+
+    /**
+     * Another way to call an xaction
+     *
+     * @method pentahoAction
+     * @param solution Solution folder
+     * @param path   Path to the xaction - can be the full path, in which case you don't need the solution and action
+     * @param action  xaction name
+     * @param params Parameter object to send to the xaction
+     * @param func Callback function to call when the xaction responds
+     * @returns {*} The xaction result
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     pentahoAction : function(solution, path, action, params, func) {
       return this.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
     },
-    
+
+    /**
+     * Calls an xaction
+     *
+     * @method pentahoServiceAction
+     *
+     * @param serviceMethod  Dom object where the response from the xaction should be written
+     * @param returntype Expected return type of the response
+     * @param solution Solution folder
+     * @param path   Path to the xaction - can be the full path, in which case you don't need the solution and action
+     * @param action  xaction name
+     * @param params Parameter object to send to the xaction
+     * @param func Callback function to call when the xaction responds
+     * @returns {*} The xaction result
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     pentahoServiceAction : function(serviceMethod, returntype, solution, path, action, params, func) {
       // execute an Action Sequence on the server
     
@@ -131,7 +204,19 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
         }
       });
     },
-    
+
+    /**
+     * Parses the xaction result
+     *
+     *
+     * @method parseXActionResult
+     * @param obj DOM object where the response will be written to
+     * @param html HTML string containing the xaction result
+     *
+     * @for Dashboard
+     * @deprecated
+     * @private
+     */
     parseXActionResult : function(obj,html) {
     
       var jXML = $(html);
@@ -166,7 +251,17 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       return null;
     
     },
-    
+
+    /**
+     * Sets a setting in the server
+     *
+     * @method setSettingsValue
+     * @param name  Name of the setting
+     * @param object Value for the setting
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     setSettingsValue : function(name,object) {
     
       var data = {
@@ -176,7 +271,18 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       };
       $.post(DashboardExt.getSettings("set", null), data, function(){});
     },
-    
+
+
+    /**
+     * gets a setting value from the server
+     *
+     * @method getSettingsValue
+     * @param key Key to the setting
+     * @param value Callback
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     getSettingsValue : function(key,value) {
     
       var callback = typeof value == 'function' ? value : function(json) {
@@ -185,7 +291,17 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
     
       $.getJSON(DashboardExt.getSettings("get", key), callback);
     },
-    
+
+    /**
+     * Fetches data from the server according to a ChartDefinition object.
+     * This method is deprecated. {{#crossLink "Query"}}Query{{/crossLink}} object should be used instead
+     * @param cd Chart Definition object
+     * @param params Parameter object
+     * @param callback Callback to be called with results
+     *
+     * @for Dashboard
+     * @deprecated
+     */
     fetchData : function(cd, params, callback) {
       Logger.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
       // Detect and handle CDA data sources

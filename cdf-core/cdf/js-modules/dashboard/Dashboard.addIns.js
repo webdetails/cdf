@@ -136,7 +136,7 @@ define([
     /**
      * Sets an addin default options
      *
-     * @method getAddIn
+     * @method setAddInDefaults
      * @for Dashboard
      * @param {String} type Type of the add-in, usually the component type where this addIn will be available
      * @param {String} subType  subtype of the addIn
