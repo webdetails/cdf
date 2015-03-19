@@ -222,6 +222,7 @@
         "cdf/components/XactionComponent.ext",
         "cdf/dashboard/Dashboard.ext",
         "cdf/dashboard/Dashboard.context.ext",
+        "cdf/dashboard/Dashboard.notifications.ext",
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
         "cdf/queries/CdaQuery.ext"
@@ -304,6 +305,7 @@
         "cdf/components/XactionComponent.ext",
         "cdf/dashboard/Dashboard.ext",
         "cdf/dashboard/Dashboard.context.ext",
+        "cdf/dashboard/Dashboard.notifications.ext",
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
         "cdf/queries/CdaQuery.ext"
@@ -383,6 +385,7 @@
         "cdf/components/XactionComponent.ext",
         "cdf/dashboard/Dashboard.ext",
         "cdf/dashboard/Dashboard.context.ext",
+        "cdf/dashboard/Dashboard.notifications.ext",
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
         "cdf/queries/CdaQuery.ext"

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,8 +12,15 @@
  */
 
 
-define(['./Dashboard', './Popups','../Logger', 'amd!../lib/underscore', '../lib/jquery', 'amd!../lib/jquery.blockUI'],
-  function(Dashboard, Popups, Logger, _, $) {
+define([
+  './Dashboard',
+  './Dashboard.notifications.ext',
+  './Popups',
+  '../Logger',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  'amd!../lib/jquery.blockUI'],
+  function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
 
   /**
    * A module representing an extension to Dashboard module for notifications.
@@ -174,7 +181,7 @@ define(['./Dashboard', './Popups','../Logger', 'amd!../lib/underscore', '../lib/
         type: 'POST',
         async: false,
         dataType: 'json',
-        //url: wd.cdf.endpoints.getPing(),
+        url: DashboardNotificationsExt.getPing(),
         success: function(result) {
           if(result && result.ping == 'ok') {
             retVal = true;
