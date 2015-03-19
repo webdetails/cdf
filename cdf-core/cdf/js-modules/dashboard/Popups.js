@@ -12,10 +12,23 @@
 */
 
 
+/**
+ * A module containing pre-built error and ok popups.
+ * Each exposed popup is an object with a _render_ method that can be called to show the popup.
+ * @class popups
+ * @module popups
+ */
+
 define(['../lib/mustache', 'amd!../lib/underscore', '../lib/jquery', 'amd!../lib/jquery.blockUI'], function (Mustache, _, $) {
 
     var popups = {};
 
+    /**
+     *  Ok Popup.
+     *  @property okPopup
+     *  @type object
+     *  @static
+     */
     popups.okPopup = {
       template:   "<div class='cdfPopup'>" +
                   "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
@@ -68,7 +81,12 @@ define(['../lib/mustache', 'amd!../lib/underscore', '../lib/jquery', 'amd!../lib
      */
 
 
-
+    /**
+     *  Error Popup used by the notificationsComponent.
+     *  @property notificationsComponent
+     *  @type object
+     *  @static
+     */
     popups.notificationsComponent = {
       template:   "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
                   "  <div class='cdfNotificationBody'>" +
@@ -90,6 +108,12 @@ define(['../lib/mustache', 'amd!../lib/underscore', '../lib/jquery', 'amd!../lib
       }
     };
 
+    /**
+     *  Growl default Popup
+     *  @property notificationsGrowl
+     *  @type object
+     *  @static
+     */
     popups.notificationsGrowl = {
       template:   "<div class='cdfNotification growl'>" +
                   "  <div class='cdfNotificationBody'>" +
