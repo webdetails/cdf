@@ -21,8 +21,11 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
   Dashboard.implement({
 
     /**
+     * Inits the lifecyle module
      *
+     * @method _initLifecycle
      * @private
+     * @for Dashboard
      */
     _initLifecycle: function() {
       // Init Counter, for subdashboards
@@ -37,7 +40,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Resets the running calls counter and hides the progress indicator
      *
+     * @method  resetRunningCalls
+     * @for Dashboard
      */
     resetRunningCalls: function() {
       this.runningCalls = 0;
@@ -48,14 +54,20 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
 
     /**
      *
-     * @returns {number}
+     * @returns {number} Number of  actual running calls to the server
+     *
+     * @method  getRunningCalls
+     * @for Dashboard
      */
     getRunningCalls: function() {
       return this.runningCalls;
     },
 
     /**
+     * Increments the running calls counter
      *
+     * @method  incrementRunningCalls
+     * @for Dashboard
      */
     incrementRunningCalls: function() {
       this.runningCalls++;
@@ -64,7 +76,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Decrements the running calls counter. If the counter reaches 0, hides the progress indicator
      *
+     * @method  decrementRunningCalls
+     * @for Dashboard
      */
     decrementRunningCalls: function() {
       this.runningCalls--;
@@ -78,9 +93,11 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Init function for the dashboard. Calling this method will trigger the dashboard execution and render
      *
-     * @param components
-     * @private
+     * @method  init
+     * @param components - Components to be added to the dashboard
+     * @for Dashboard
      */
     init: function(components) {
       var myself = this;
@@ -126,9 +143,13 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Part of the initialization procedure. This supports some deprecated functionality.
      *
+     * @method _initEngine
+     * @for Dashboard
      * @param initInstance
      * @private
+     * @deprecated
      */
     _initEngine: function(initInstance) {
       var myself = this;
@@ -217,17 +238,17 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Handles the postInit section of the dashboard initialization
      *
+     * @method _handlePostInit
      * @param initInstance
      * @private
+     * @for Dashboard
      */
     _handlePostInit: function(initInstance) {
       var myself = this;
 
-      /**
-       *
-       * @private
-       */
+
       var _restoreDuplicates = function() {
         /*
          * We mark duplicates by appending an _nn suffix to their names.
@@ -306,8 +327,14 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Update algorithm for a managed component. Calls preExecution, update and postExecution.
      *
-     * @param object
+     *
+     * @method updateLifecycle
+     * @param object Component to update
+     *
+     * @for Dashboard
+     * @private
      */
     updateLifecycle: function(object) {
       var silent = object.lifecycle ? !!object.lifecycle.silent : false;
@@ -399,15 +426,15 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * an object, rather than an array, so as to allow negative keys (and so that
      * we can use it as a sparse array of sorts)
      *
-     * @param components
+     * @method updateAll
+     * @param components Components to update
+     *
+     * @for Dashboard
+     * @private
      */
     updateAll: function(components) {
       /**
        * Add all components in priority list 'source' into priority list 'target'
-       *
-       * @param target
-       * @param source
-       * @private
        */
       var _mergePriorityLists = function(target,source) {
         if(!source) {
@@ -506,8 +533,15 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Adds a component to the "to be updated" queue and starts a timer.
+     * If the timer finishes before this method is called again, the
+     * {{#crossLink "Dashboard/updateAll:mehotd"}}updateAll{{/crossLink}} method is called
+     * updating all the components in the queue.
      *
-     * @param component
+     * @method update
+     * @param component Component to update
+     *
+     * @for Dashboard
      */
     update: function(component) {
       /*
@@ -536,8 +570,12 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Updates a specific component
      *
-     * @param object
+     * @method updateComponent
+     * @param component component to update
+     *
+     * @for Dashboard
      */
     updateComponent: function(object) {
       if(Date.now() - this.lastServerResponse > this.serverCheckResponseTimeout) {
@@ -563,8 +601,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * Given a list of component priority tiers, returns the highest priority
      * non-empty tier of components awaiting update, or null if no such tier exists.
      *
+     * @method getFirstTier
      * @param tiers
      * @returns {*}
+     * @for Dashboard
      * @private
      */
     getFirstTier: function(tiers) {
@@ -583,7 +623,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     *  Resets the dashboard.
      *
+     *  @method resetAll
+     *  @for Dashboard
      */
     resetAll: function() {
       this.createAndCleanErrorDiv(); //Dashboards.Legacy
@@ -600,8 +643,12 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
+     * Forces a process change on a component's parameter
      *
-     * @param object_name
+     * @method processChange
+     * @param object_name Component name on which the fireChange should be triggered
+     *
+     * @for Dashboard
      */
     processChange: function(object_name) {
       //Dashboards.log("Processing change on " + object_name);
@@ -639,8 +686,11 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * in a function wrapped in a setTimeout, so the running
      * script has the opportunity to finish.
      *
-     * @param parameter
-     * @param value
+     * @method fireChange
+     * @param parameter parameter on which to fire change
+     * @param value Value for the parameter
+     *
+     * @for Dashboard
      */
     fireChange: function(parameter, value) {
       var myself = this;
@@ -667,6 +717,11 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     /*
      * Checks if there are any other components of equal or higher 
      * priority than the one that is currently being executed
+     *
+     * @method     othersAwaitExecution
+     * @for Dashboard
+     *
+     * @private
      */
     othersAwaitExecution: function(tiers, current) {
 
