@@ -37,29 +37,40 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
         Logger.warn("i18n support wasn't properly initiated. Is the file messages_supported_languages.properties present?");
         return text;
       }};  // Reference to i18n objects
-
+      
+      var normalizeLocale = function(sessionLocale){
+        if( !sessionLocale ){
+          return;
+        }
+        var bits = sessionLocale.split('-');
+        if (bits.length > 1) {
+          return bits.join('_');
+        }
+        return sessionLocale;
+      }
+      var normalizedLocale = normalizeLocale(SESSION_LOCALE);
       //gets localization from templates
       $.i18n.properties({
         name: 'messages',
         path: DashboardExt.getStaticResource("resources/languages/"),
         mode: 'map',
-        language: SESSION_LOCALE,
+        language: normalizedLocale,
         callback: function(){
           $.i18n.properties({
             name: 'messages',
             mode: 'map',
             type: 'GET',
-            language: SESSION_LOCALE,
+            language: normalizedLocale,
             callback: function(){
-              myself.setI18nSupport(SESSION_LOCALE, $.i18n);
+              myself.setI18nSupport(normalizedLocale, $.i18n);
             }
           });
         }
       });
 
-      var formProvider = cdo.format.language(SESSION_LOCALE);
+      var formProvider = cdo.format.language(normalizedLocale);
       cdo.format.language(formProvider);
-      moment.locale(SESSION_LOCALE);
+      moment.locale(normalizedLocale);
     },
   
     /**
