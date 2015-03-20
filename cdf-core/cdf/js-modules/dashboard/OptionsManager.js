@@ -44,7 +44,6 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
   return function  (config ){
     var myself = this;
 
-    // PROTECTED
     /**
      *  Options collection
      *  @property _options
@@ -101,6 +100,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
     /**
      * Initializes the OptionsManager
      *
+     * @method init
      * @param defaults Optional defaults
      * @param interfaces Optional interfaces
      * @param libraries Optional libraries

@@ -53,7 +53,7 @@ define([
         }
       };
     },
-  
+
     /**
      * Renders a blocking div that can be dragged
      *

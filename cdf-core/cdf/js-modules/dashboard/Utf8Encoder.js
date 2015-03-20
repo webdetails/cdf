@@ -11,6 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Auxiliary UTF8 encoder . Request as cdf/dashboard/Utf8Encoder
+ *
+ * @module Utf8Encoder
+ * @class Utf8Encoder
+ */
 define(["../lib/jquery"], function($) {
 
   /**
@@ -77,6 +84,15 @@ define(["../lib/jquery"], function($) {
    * http://www.webtoolkit.info/
    **/
   var Utf8Encoder = {
+    /**
+     * Prepares an UTF8 string to be used in Opera or Internet Explorer
+     *
+     * @method   encode_prepare
+     * @param s String to be prepared
+     * @returns {*} Encoded/Prepared String
+     *
+     * @static
+     */
     encode_prepare : function(s) {
       if(s != null) {
         s = s.replace(/\+/g," ");
@@ -91,6 +107,15 @@ define(["../lib/jquery"], function($) {
       return s;
     },
 
+    /**
+     * Prepares an array containing UTF8 strings to be used in Opera or Internet Explorer
+     *
+     * @method   encode_prepare_arr
+     * @param value Array to be encoded
+     * @returns {Array} Array with encoded/prepared elements
+     *
+     * @static
+     */
     encode_prepare_arr : function(value) {
       var myself = this;
 
