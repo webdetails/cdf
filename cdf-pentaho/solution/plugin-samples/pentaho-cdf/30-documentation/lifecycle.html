@@ -110,9 +110,10 @@
       details), your can use subclass UnmanagedComponent and use the <code>synchronous</code>
       lifecycle method to emulate BaseComponent's behaviour:</p>
 
-    <pre><code>update: function() {
-		this.synchronous(this.redraw);
-	}
+    <pre><code>
+update: function() {
+  this.synchronous(this.redraw);
+}
 	</code></pre>
 
     <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
@@ -120,8 +121,8 @@
 
     <pre><code>
 update: function() {
-		/* Will call this.redraw(1,2,3) */
-		this.synchronous(this.redraw, [1,2,3]);
+  /* Will call this.redraw(1,2,3) */
+  this.synchronous(this.redraw, [1,2,3]);
 }
 	</code></pre>
 
@@ -135,7 +136,7 @@ update: function() {
     <pre><code>
 {
   dataAccessId: 'myQuery',
-	file: '/path/to/my/datasourceDefinition.cda'
+  file: '/path/to/my/datasourceDefinition.cda'
 }
 	</code></pre>
 
@@ -145,8 +146,8 @@ update: function() {
 
     <pre><code>
 update: function() {
-	var redraw = _.bind(this.redraw,this);
-	this.triggerQuery(this.queryDefinition, redraw);
+  var redraw = _.bind(this.redraw,this);
+  this.triggerQuery(this.queryDefinition, redraw);
 }
 </code></pre>
 
@@ -161,12 +162,12 @@ update: function() {
 
     <pre><code>
 update: function() {
-	var redraw = _.bind(this.redraw,this);
-	if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
-		this.synchronous(redraw,this.valuesArray);
-	} else {
-		this.triggerQuery(this.queryDefinition,redraw);
-	}
+  var redraw = _.bind(this.redraw,this);
+  if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
+    this.synchronous(redraw,this.valuesArray);
+  } else {
+    this.triggerQuery(this.queryDefinition,redraw);
+  }
 }
 </code></pre>
 
@@ -199,12 +200,13 @@ update: function() {
       pointing at another component, you should override <code>clone</code> using this general
       template:</p>
 
-    <pre><code>clone: function(parameterRemap,componentRemap,htmlRemap) {
-	var other = this.otherComponent;
-	delete this.otherComponent;
-	var that = this.base(parameterRemap,componentRemap,htmlRemap);
-	this.otherComponent = that.otherComponent = other;
-	return that;
+    <pre><code>
+clone: function(parameterRemap,componentRemap,htmlRemap) {
+  var other = this.otherComponent;
+  delete this.otherComponent;
+  var that = this.base(parameterRemap,componentRemap,htmlRemap);
+  this.otherComponent = that.otherComponent = other;
+  return that;
 }
 </code></pre>
 
@@ -259,14 +261,18 @@ ExampleComponent = UnmanagedComponent.extend({
 
     /* Specific code goes here */
     if(!this.isInitialized){
-      this.compiledStr = Mustache.compile("<p> Got a result set with  {{nrRows}} rows and {{nrCols}} columns </p>");
       this.isInitialized = true;
     }
-    $("#"+this.htmlObject).html(this.compiledStr({
-      nrRows: data.resultset.length||0,
-      nrCols: data.resultset[0]?data.resultset[0].length || 0:0
-    }));
 
+    $("#"+this.htmlObject).html(
+      Mustache.render(
+        "<p> Got a result set with  {{nrRows}} rows and {{nrCols}} columns </p>",
+        {
+          nrRows: data.resultset.length||0,
+          nrCols: data.resultset[0] ? (data.resultset[0].length || 0) : 0
+        }
+      )
+    );
   }
 
 });
