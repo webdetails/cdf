@@ -36,6 +36,14 @@ define([
      * @for Dashboard
      */
     _initNotifications: function() {
+
+      /**
+       *  Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
+       *  are registered and assigned to a specific error message
+       *  @property ERROR_CODES
+       *  @type Object
+       *  @for Dashboard
+       */
       this.ERROR_CODES = {
         'QUERY_TIMEOUT' : {
           msg: "Query timeout reached"
@@ -45,9 +53,12 @@ define([
         }
       };
     },
-  
+
     /**
+     * Renders a blocking div that can be dragged
      *
+     * @method blockUIwithDrag
+     * @for Dashboard
      */
     blockUIwithDrag: function() {
       if(typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
@@ -65,14 +76,21 @@ define([
     },
   
     /**
+     * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner
      *
+     * @method     showProgressIndicator
+     * @for Dashboard
      */
     showProgressIndicator: function() {
       $.blockUI && this.blockUIwithDrag();
     },
   
     /**
+     *  Hides the progress indicator. Optionally, resets the running calls counter
      *
+     *  @method   hideProgressIndicator
+     *  @param {Boolean} _true_ if the running calls counter should be reset, _false_ otherwise
+     *  @for Dashboard
      */
     hideProgressIndicator: function(force) {
       if(force) {
@@ -84,20 +102,29 @@ define([
   
   
     /**
+     *  Given an error code, returns the registered error object associated with that code
      *
-     * @param errorCode
-     * @returns {*|{}}
+     * @param errorCode errorCode to translate
+     * @returns {*|{}} error object or the empty object if the code is not registered
+     *
+     * @for Dashboard
      */
     getErrorObj: function (errorCode){
       return this.ERROR_CODES[errorCode] || {};
     },
   
     /**
+     * Parses a server error response and creates an error object
      *
-     * @param resp
-     * @param txtStatus
-     * @param error
-     * @returns {{}}
+     * @method     parseServerError
+     * @param resp         Server response
+     * @param txtStatus  Response status
+     * @param error Error object to encapsulate
+     * @returns {{}} an error object containing detailed error message
+     *
+     * @for Dashboard
+     * @deprecated
+     * @private
      */
     parseServerError: function(resp, txtStatus, error){
       var out = {};
@@ -122,7 +149,10 @@ define([
     },
   
     /**
+     *  Handles a server error
      *
+     *  @method     handleServerError
+     *  @for Dashboard
      */
     handleServerError: function() {
       var err = Dashboard.parseServerError.apply( this, arguments );
@@ -133,9 +163,13 @@ define([
     },
   
     /**
+     * Displays an error notification
      *
-     * @param err
-     * @param ph
+     * @method errorNotification
+     * @param err Error message to display
+     * @param ph Optional html element where to attach the error notification
+     *
+     * @for Dashboard
      */
     errorNotification: function (err, ph) {
       if(ph) {
@@ -153,7 +187,12 @@ define([
     },
   
     /**
-     * Default impl when not logged in
+     * Default implementation for the login alert that pops up when we detect the user is no longer logged in.
+     *
+     * @method loginAlert
+     * @param newOpts Options for the login popup
+     *
+     * @for Dashboard
      */
     loginAlert: function(newOpts) {
       var opts = {
@@ -171,11 +210,14 @@ define([
     },
   
     /**
+     * Check if we're able to connect to the server correctly, using post to avoid cache
      *
+     * @method checkServer
+     * @returns {Boolean} _true_ if able to connect, _false_ otherwise
+     *
+     * @for Dashboard
      */
     checkServer: function() {
-      //check if is connecting to server ok
-      //use post to avoid cache
       var retVal = false;
       $.ajax({
         type: 'POST',

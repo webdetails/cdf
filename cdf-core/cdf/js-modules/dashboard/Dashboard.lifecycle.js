@@ -535,7 +535,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     /**
      * Adds a component to the "to be updated" queue and starts a timer.
      * If the timer finishes before this method is called again, the
-     * {{#crossLink "Dashboard/updateAll:mehotd"}}updateAll{{/crossLink}} method is called
+     * {{#crossLink "Dashboard/updateAll:method"}}updateAll{{/crossLink}} method is called
      * updating all the components in the queue.
      *
      * @method update

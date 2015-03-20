@@ -30,15 +30,42 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
     }
   }
 
-  // This class is intended to be used as a generic Options Manager, by providing a way to
-  // keep record of the values of an options set, but also custom readers, writers and validators 
-  // for each of the options.
-  return function  (config ){ /* { defaults: {}, interfaces: {}, libraries: {} }*/
+  /**
+   * This class is intended to be used as a generic Options Manager, by providing a way to
+   * keep record of the values of an options set, but also custom readers, writers and validators
+   * for each of the options.
+   *
+   * @module OptionsManager
+   * @class OptionsManager
+   * @constructor
+   * @params config Options object for the manager -  { defaults: {}, interfaces: {}, libraries: {} }
+   *
+   */
+  return function  (config ){
     var myself = this;
 
-    // PROTECTED
+    /**
+     *  Options collection
+     *  @property _options
+     *  @type object
+     *  @protected
+     */
     this._options = {};
+
+    /**
+     *  Interfaces collection
+     *  @property _interfaces
+     *  @type object
+     *  @protected
+     */
     this._interfaces = {};
+
+    /**
+     *  Libraries collection
+     *  @property _libraries
+     *  @type object
+     *  @protected
+     */
     this._libraries = {
       predicates: {
         tautology: function (value){ return true },
@@ -58,12 +85,26 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
       }
     };
 
-    // PUBLIC
+    /**
+     * Extends the instance supplied as argument with the getOption and setOption methods
+     *
+     * @method mixin
+     * @param instance - Instance to be extended
+     *
+     */
     this.mixin = function (instance){
       instance.getOption = this.getOption;
       instance.setOption = this.setOption;
     };
 
+    /**
+     * Initializes the OptionsManager
+     *
+     * @method init
+     * @param defaults Optional defaults
+     * @param interfaces Optional interfaces
+     * @param libraries Optional libraries
+     */
     this.init = function (defaults, interfaces, libraries) {
       var myself = this;
       
@@ -81,6 +122,17 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
       })
     };
 
+    /**
+     * Sets an option in the OptionManager
+     *
+     * @method setOption
+     * @param opt Option to set
+     * @param value Value to set
+     * @param interfaces Optionally an interface object to set along with the option -
+     * {reader: fn, writer: fn, validator: fn}
+     * @returns {boolean} _true_ if able to set the option, otherwise an error is thrown
+     *
+     */
     this.setOption = function (opt, value, interfaces){
       setInterfaces(opt, interfaces);
       var reader = getReader(opt),
@@ -94,13 +146,28 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
       }
     };
 
+    /**
+     * Gets an option from the Manager
+     *
+     * @method getOption
+     * @param opt Option to get
+     * @returns {*} Value associated with the option
+     */
     this.getOption = function (opt){
       var writer = getWriter( opt ),
           value = getValue(opt);
       return writer( value );
-    }; 
+    };
 
-    // PRIVATE
+    /**
+     * Sets the interfaces for the option
+     *
+     * @method setInterfaces
+     * @param opt  Option where the interfaces are being set
+     * @param interfaces Object with the interfaces to set {reader: , writer:, validator: }
+     *
+     * @private
+     */
     function setInterfaces (opt, interfaces){
       interfaces = interfaces || {};
       setReader(opt, interfaces['reader']);
@@ -108,15 +175,51 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
       setValidator(opt, interfaces['validator']);
     };
 
+    /**
+     * Gets the reader for an option
+     * @method getReader
+     * @param opt Option
+     * @returns {*} Option reader it one was registered or the identity reader
+     *
+     * @private
+     */
     function getReader(opt){ 
       return get( myself._interfaces, opt, 'reader', myself._libraries.mappers['identity'] 
     )};
+
+    /**
+     * Gets the writer for an option
+     * @method getWriter
+     * @param opt Option
+     * @returns {*} Option writer it one was registered or the identity writer
+     *
+     * @private
+     */
+
     function getWriter(opt){
       return get( myself._interfaces, opt, 'writer', myself._libraries.mappers['identity'] 
     )};
+
+    /**
+     * Gets the validator for an option
+     * @method getValidator
+     * @param opt Option
+     * @returns {*} Option validator it one was registered or the tautology validator (always returns true)
+     *
+     * @private
+     */
     function getValidator(opt){ 
       return get( myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology'] 
     )};
+
+    /**
+     * Gets the value for an option
+     * @method getValue
+     * @param opt Option
+     * @returns {*} Value for the option
+     *
+     * @private
+     */
     function getValue(opt){ return get( myself._options, opt, 'value') };
     
     // Reader, Writer and Validator work in the same way:
@@ -125,21 +228,62 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
     // Otherwise, use a default library function: for readers and writers an indentity map, 
     //    for validators a predicate that always returns true.
 
+    /**
+     * Set a reader function for an option. If the value is a function, use it.
+     * Otherwise, if it is a string and a valid library key, use it.
+     * Otherwise, use the identity map
+     *
+     * @method setReader
+     * @param opt Option where to set the reader
+     * @param fn Reader to set
+     * @private
+     */
     function setReader(opt, fn){
       var lib = myself._libraries.mappers;
       fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getReader(opt) || lib['identity'] ;
       return set( myself._interfaces , opt, 'reader', fn) 
     };
+
+    /**
+     * Set a writer function for an option. If the value is a function, use it.
+     * Otherwise, if it is a string and a valid library key, use it.
+     * Otherwise, use the identity map
+     *
+     * @method setWriter
+     * @param opt Option where to set the writer
+     * @param fn Writer to set
+     * @private
+     */
     function setWriter(opt, fn){ 
       var lib = myself._libraries.mappers;
       fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getWriter(opt) || lib['identity'] ;
       return set( myself._interfaces, opt, 'writer', fn) 
     };
-    function setValidator(opt, fn){ 
+
+    /**
+     * Set a validator function for an option. If the value is a function, use it.
+     * Otherwise, if it is a string and a valid library key, use it.
+     * Otherwise, use a predicate that always returns true.
+     *
+     * @method setValidator
+     * @param opt Option where to set the validator
+     * @param fn Validator to set
+     * @private
+     */
+    function setValidator(opt, fn){
       var lib = myself._libraries.predicates;
       fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getValidator(opt) || lib['tautology'] ;
       return set( myself._interfaces, opt, 'validator', fn)
     };
+
+    /**
+     * Sets the value for the option
+     *
+     * @method setValue
+      * @param opt Option to set the value
+     * @param value Value to set
+     * @private
+     */
     function setValue(opt, value){ return set( myself._options, opt, 'value', value) };
 
     // Init
