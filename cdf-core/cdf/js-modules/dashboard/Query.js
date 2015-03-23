@@ -11,18 +11,28 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Query class. Here mainly for legacy reasons.
+ * NOTE: The query type detection code should be kept in sync with CGG's UnmanagedComponent#detectQueryType.
+ *
+ * @class Query
+ * @module Query
+ *
+ */
+
 define(['amd!../lib/underscore', '../lib/jquery'], function (_, $) {
 
-/*
- * Query STUFF
- * (Here for legacy reasons)
- * NOTE: The query type detection code should be kept in sync with CGG's UnmanagedComponent#detectQueryType.
- */
-//Ctors:
-// Query(queryString) --> DEPRECATED
-// Query(queryDefinition{path, dataAccessId})
-// Query(path, dataAccessId)
-return  function( cd, dataAccessId, dashboard ) {
+  /**
+   * Builds a new Query object
+   *
+   * @class Query
+   * @constructor
+   * @param cd Path to the server-side query or a Chart Definition object
+   * @param dataAccessId dataAccessId
+   * @param dashboard Dashboard where this query will be executed
+    */
+  return  function( cd, dataAccessId, dashboard ) {
 
   var opts, queryType;
 
