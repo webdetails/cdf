@@ -11,6 +11,19 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Module that holds query related objects
+ * @module Query
+ */
+
+
+/**
+ * Class that represents a CDA query
+ * @class CdaQuery
+ * @extends BaseQuery
+ */
+
 define(
   ['./CdaQuery.ext',
    './BaseQuery',
@@ -39,6 +52,13 @@ define(
       searchPattern: ''
     },
 
+    /**
+     * Init method for the Cda query
+     *
+     * @method init
+     * @param opts Options is an object with the following properties: path, dataAccessId, sortBy, pageSize, outputIndexId
+     * @throws InvalidQuery error  if the opts object does not contain path and dataAccessId
+     */
     init: function(opts) {
       if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
         // CDA-style cd object
@@ -58,6 +78,15 @@ define(
       }
     },
 
+    /**
+     * Builds the query definition object
+     *
+     * @method buildQueryDefinition
+     * @param overrides Overrides to the existing options
+     * @returns {{}} Query definition object
+     *
+     * @private
+     */
     buildQueryDefinition: function(overrides) {
       overrides = (overrides instanceof Array)
         ? Utils.propertiesArrayToObject(overrides)
@@ -88,10 +117,15 @@ define(
       return queryDefinition;
     },
 
-    /*
-     * Public interface
-     */
 
+    /**
+     * Exports the data, according to a specific output type
+     *
+     * @method exportData
+     * @param outputType Output type (csv, xls, xml, html)
+     * @param overrides Overrides for the query definition object
+     * @param options Export options {separator, filename, template, columnHeaders, dtFilter, dtSearchableColumn
+     */
     exportData: function(outputType, overrides, options) {
       if(!options) {
         options = {};
@@ -137,7 +171,8 @@ define(
           Logger.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });
     },
 
-    /* Sorting
+    /**
+     * Sets the sort by columns
      *
      * CDA expects an array of terms consisting of a number and a letter
      * that's either 'A' or 'D'. Each term denotes, in order, a column
@@ -148,6 +183,10 @@ define(
      * the same as the array ["0A","1D"], which would sort the results
      * first by the first column (ascending), and then by the second
      * column (descending).
+     *
+     * @method setSortBy
+     * @param sortBy  Sort By columns
+     * @throws   InvalidSortExpression if the sort by columns are not correctly defined
      */
     setSortBy: function(sortBy) {
       var newSort;
@@ -203,6 +242,14 @@ define(
       return !same;
     },
 
+    /**
+     * Sorts the result set. See the notes on sort columns on the
+     * {{#crossLink "CdaQuery/setSortBy:method"}}setSortBy{{/crossLink}} method.
+     *
+     * @method sortBy
+     * @param sortBy Sort By Columns
+     * @param outsideCallback  Callback to call after the sorting has been processed
+     */
     sortBy: function(sortBy,outsideCallback) {
       /* If the parameter is not the same, and we have a valid state,
        * we can fire the query.

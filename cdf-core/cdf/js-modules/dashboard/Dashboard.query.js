@@ -23,7 +23,7 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
                 
     /**
      * A module representing a extension to Dashboard module for i18n.
-     * @module Dashboard.i18n
+     * @module Dashboard.query
      */
     Dashboard.implement({
 
@@ -33,18 +33,38 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
        * Method used by the Dashboard constructor for query initialization
        * Reference to current language code . 
        *
+       * @method _initQuery
+       *
+       * @for Dashboard
        * @private
        */
       _initQuery: function(){
         this.queryFactories = Utils.clone(globalQueryFactories);
       },
 
+
+        /**
+         * Gets the base query object, from where other query types can be extended
+         *
+         * @method getBaseQuery
+         * @returns {*} the base query object
+         *
+         * @for Dashboard
+         */
         getBaseQuery : function (){
             return _BaseQuery;
         },
 
 
-
+        /**
+         * Registers a new query for the dashboard
+         *
+         * @method registerQuery
+         * @param type Query type
+         * @param query Query object
+         *
+         * @for Dashboard
+         */
         registerQuery : function(type, query){
             var BaseQuery = this.getBaseQuery();
 
@@ -66,10 +86,28 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
             });
         },
 
+        /**
+         * Determines if a given query type is registered in the curent dashboard
+         *
+         * @method hasQuery
+         * @param type query type
+         * @returns {boolean} _true_ if the query type has been registered for this dashboard
+         *
+         * @for Dashboard
+         */
         hasQuery: function(type){
             return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
         },
-    
+
+        /**
+         * Given a query definition object, returns it query type
+         *
+         * @method detectQueryType
+         * @param qd - Query definition object
+         * @returns {queryType} Query type associated with the query definition object
+         *
+         * @for Dashboard
+         */
         detectQueryType: function(qd) {
             if(qd) {
                 var qt = qd.queryType                 ? qd.queryType : // cpk goes here
@@ -80,8 +118,18 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
                 qd.queryType = qt;
                 return this.hasQuery(qt)? qt : undefined;
             }
-        },    
-    
+        },
+
+        /**
+         * Given a type and options, returns the query object for runnning that particular query
+         *
+         * @method getQuery
+         * @param type Query type
+         * @param opts Options object
+         * @returns {*} the query object
+         *
+         * @for Dashboard
+         */
         getQuery: function(type, opts){
             if (_.isUndefined(type) ) {
                 type = 'cda';
@@ -94,20 +142,54 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
             return query;
         },
 
+
+        /**
+         * Lists the registered query types in this dashboard
+         *
+         * @method listQueries
+         * @returns {Array} Array of registered query types
+         *
+         * @for Dashboard
+         */
         listQueries: function() {    
             return _.keys( this.queryFactories.listType('Query') );
         }        
     });
-    
-    
+
+
+    /**
+     * Helper object for registering and setting queries.
+     * @class DashboardQuery
+     *
+     */
     
     return {
+
+        /**
+         * Sets the base query object
+         *
+         * @method setBaseQuery
+         * @param QueryClass Base query object
+         *
+         * @for DashboardQuery
+         * @static
+         */
         setBaseQuery: function ( QueryClass ){
             if ( _.isFunction(QueryClass) && QueryClass.extend ){
                 _BaseQuery = QueryClass;
             }
         },
-        
+
+        /**
+         * Register a globally available query.
+         *
+         *
+         * @method registerGlobalQuery
+         * @param type Query type
+         * @param query Query object that represents that query type
+         *
+         * @static
+         */
         registerGlobalQuery : function(type, query){
             var BaseQuery = _BaseQuery;
 
