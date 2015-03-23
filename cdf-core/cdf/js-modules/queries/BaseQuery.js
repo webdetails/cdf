@@ -11,25 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/*
- * BaseQuery.js
- *
- * Registers several query types and sets the base query class.
- *
- * Additional query types can be registered at any time using the Dashboards method:
- *    Dashboards.registerQuery( name, query )
- * The second argument, the query definition, can be one of two things:
- *    1. An object, which will be used to extend the BaseQuery class, and the resulting class used
- *       to create new query instances.
- *    2. A class constructor function, which will be used directly to create new query instances
- *       without depending on BaseQuery.
- *
- * Additionally, the BaseQuery class can be set to something other than the default by using:
- *    Dashboards.setBaseQuery( constructor )
- * but this is a risky operation whith considerable implications. Use at your own risk!
- *
+
+/**
+ * Module that holds query related objects
+ * @module Query
  */
- 
+
  define(['../lib/jquery', '../lib/Base', 'amd!../lib/underscore', '../Logger', '../dashboard/OptionsManager', '../dashboard/Dashboard.query'],
   function($, Base, _, Logger, OptionsManager, DashboardQuery) {
  
@@ -61,27 +48,78 @@
 
     },
 
+   /**
+    * Defines the base query type and sets it as the base query class in
+    * {{#crossLink "DashboardQuery"}}DashboardQuery{{/crossLink}} .
+    *
+    * Additional query types can be registered at any time using the
+    * {{#crossLink "Dashboard/registerQuery:method"}}registerQuery{{/crossLink}} method:
+    * The second argument, the query definition, can be one of two things:
+    *
+    *     An object, which will be used to extend the BaseQuery class, and the resulting class used to create new query instances.
+    *
+    *     A class constructor function, which will be used directly to create new query instances without depending on BaseQuery.
+    *
+    * Additionally, the BaseQuery class can be set to something other than the default by using
+    * {{#crossLink "DashboardQuery/setBaseQuery:method"}}setBaseQuery{{/crossLink}} method:
+    *    DashboardQuery.setBaseQuery( constructor )
+    * but this is a risky operation whith considerable implications. Use at your own risk!
+    *
+    * @constructor
+    * @class BaseQuery
+    * @param config Query configuration object
+    */
     constructor: function(config) {          
       this._optionsManager = new OptionsManager(this);
       this._optionsManager.mixin(this);          
       this.init(config);
     },
 
-    // Default options interface in case there is no options manager defined.
+   /**
+    * Gets an option (fallback for when the OptionManager is not available)
+    *
+    * @method getOption
+    * @param prop The property from where to get the options from
+    * @returns {*} Value for the option
+    */
     getOption: function(prop) {
-      // Fallback for when Dashboards.OptionManager is not available
       return this.defaults[prop];
     },
 
+
+   /**
+    * Sets an option (fallback for when the OptionManager is not available)
+    *
+    * @method setOption
+    * @param prop The property for which the value will be set
+    * @param value Value for the property
+    */
     setOption: function(prop, value) {
       // Fallback for when Dashboards.OptionManager is not available
       this.defaults[prop] = value;
     },
 
+
+   /**
+    * Initialization function
+    *
+    * @method init
+    * @param opts
+    *
+    * @abstract
+    */
     init: function(opts) {
       // Override
     },
 
+    /**
+     * Gets the success handler for the query, given a callback to call
+     *
+     * @method getSuccessHandler
+     * @param callback Callback to cal after the query is successful
+     * @returns Success handler
+     *
+     */
     getSuccessHandler: function(callback) {
       var myself = this;
       return function(json) {
@@ -91,6 +129,14 @@
       }
     },
 
+
+   /**
+    * Gets the error handler for the query, given a callback to call
+    *
+    * @method getErrorHandler
+    * @param callback Callback to cal if the query fails
+    * @returns Error handler
+    */
     getErrorHandler: function(callback) {
       return function(resp, txtStatus, error) {
         if(callback) {
@@ -99,6 +145,14 @@
       }
     },
 
+
+   /**
+    * Calls the server-side query
+    *
+    * @method doQuery
+    * @param outsideCallback Success callback
+    * @param errorCallback Error callback
+    */
     doQuery: function(outsideCallback, errorCallback) {
       if(typeof this.getOption('successCallback') != 'function') {
         throw 'QueryNotInitialized';
@@ -123,22 +177,62 @@
       $.ajax(settings);
     },
 
+   /**
+    * Exports the data represented by the query
+    *
+    * @method exportData
+    * @abstract
+    */
     exportData: function() {
       // Override
     },
 
+   /**
+    * Sets the ajax options for the query
+    *
+    * @method setAjaxOptions
+    * @param newOptions Options to set
+    */
     setAjaxOptions: function(newOptions) {
       this.setOption('ajaxOptions', _.extend({}, this.getOption('ajaxOptions'), newOptions));
     },
 
+   /**
+    * Sets the sort by columns
+    *
+    * @method setSortBy
+    * @param sortBy Sort by columns
+    *
+    * @abstract
+    */
     setSortBy: function(sortBy) {
       // Override
     },
 
+
+       /**
+        * Sorts the data, specifying a callback that'll be called after the sorting takes place
+        *
+        * @method sortBy
+        * @param sortBy Sort By columns
+        * @param outsideCallback Post-sort callback
+        *
+        * @abstract
+        */
     sortBy: function(sortBy,outsideCallback) {
       // Override
     },
 
+       /**
+        * Fetches the data
+        *
+        * @method fetchData
+        * @param params  params for the query
+        * @param successCallback  Success callback
+        * @param errorCallback Error callback
+        * @returns the result of calling doQuery with the specified arguments
+        * @throws InvalidInput error if the arguments are not correct
+        */
     fetchData: function(params, successCallback, errorCallback) {
       switch(arguments.length) {
         case 0:
@@ -186,7 +280,13 @@
       throw "InvalidInput";
     },
 
-    // Result caching
+   /**
+    * Gets last retrieved results
+    *
+    * @method lastResults
+    * @returns {*} the last result set obtained from the server
+    * @throws  NoCachedResults error if there haven't been previous calls to the server
+    */
     lastResults: function() {
       if(this.getOption('lastResultSet') !== null) {
         return $.extend(true, {}, this.getOption('lastResultSet'));
@@ -195,6 +295,14 @@
       }
     },
 
+   /**
+    * Reruns the success callback on the last retrieved result set from the server
+    *
+    * @method  reprocessLastResults
+    * @param outerCallback Success callback
+    * @returns the result of calling the specified callback
+    * @throws NoCachedResults error if there haven't been previous calls to the server
+    */
     reprocessLastResults: function(outerCallback) {
       if(this.getOption('lastResultSet') !== null) {
         var clone = $.extend(true, {}, this.getOption('lastResultSet'));
@@ -205,28 +313,55 @@
       }
     },
 
+   /**
+    * Alias for {{#crossLink "BaseQuery/reprocessLastResults:method"}}reprocessLastResults{{/crossLink}}
+    *
+    * @method reprocessResults
+    * @param outsideCallback Success callback
+    * @returns the result of calling the specified callback
+    * @throws  NoCachedResults error if there haven't been previous calls to the server
+    */
     reprocessResults: function(outsideCallback) {
-      if(this.getOption('lastResultSet') !== null) {
-        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
-        var callback = (outsideCallback ? outsideCallback : this.getOption('successCallback'));
-        callback(clone);
-      } else {
-        throw "NoCachedResults";
-      }
+       return  this.reprocessLastResults(outsideCallback);
     },
 
+   /**
+    * Sets query parameters
+    *
+    * @method setParameters
+    * @param params Query parameters
+    */
     setParameters: function(params) {
       this.setOption('params', params);
     },
 
+   /**
+    * Sets the success callback for the query
+    *
+    * @method setCallback
+    * @param callback Callback function
+    */
     setCallback: function(callback) {
       this.setOption('successCallback', callback);
     },
 
+
+   /**
+    * Sets the error callback for the query
+    *
+    * @method setErrorCallback
+    * @param callback Error callback to set
+    */
     setErrorCallback: function(callback) {
       this.setOption('errorCallback', callback);
     },
 
+   /**
+    * Sets the search pattern for the query
+    *
+    * @method setSearchPattern
+    * @param pattern Search Pattern
+    */
     setSearchPattern: function (pattern) {
       this.setOption('searchPattern', pattern);
     },
@@ -238,7 +373,14 @@
      * the page size. All paging operations change the paging cursor.
      */
 
-    // Gets the next _pageSize results
+   /**
+    * Gets the next page of results, as controlled by the @_pageSize option
+    *
+    * @method nextPage
+    * @param outsideCallback Callback to execute when the page of results is retrieved
+    * @returns the result of calling doQuery
+    * @throws InvalidPageSize if the page size option is not a positive number
+    */
     nextPage: function(outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
@@ -251,7 +393,14 @@
       }
     },
 
-    // Gets the previous _pageSize results
+   /**
+    * Gets the previous page of results, as controlled by the _pageSize option
+    *
+    * @method previousPage
+    * @param outsideCallback Callback to execute when the page of results is retrieved
+    * @returns the result of calling doQuery
+    * @throws AtBeggining error if current page is the first one
+    */
     previousPage: function(outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
@@ -267,7 +416,15 @@
       }
     },
 
-    // Gets the page-th set of _pageSize results (0-indexed)
+   /**
+    * Gets the page-th set of results (0-indexed)
+    *
+    * @method getPage
+    * @param targetPage   Page to get
+    * @param outsideCallback  Callback to execute when the page is retrieved
+    * @returns the result of calling doQuery
+    * @throws  InvalidPage if targetPage is not a positive number
+    */
     getPage: function( targetPage, outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
@@ -281,7 +438,14 @@
       }
     },
 
-    // Gets pageSize results starting at page
+   /**
+    * Sets the starting page for later executions of the query
+    *
+    * @method setPageStartingAt
+    * @param targetPage index for the target page
+    * @returns {boolean} _true_ if the page is correctly set, _false_ if the target page is already the selected one
+    * @throws InvalidPage if the page number is not a positive number
+    */
     setPageStartingAt: function(targetPage) {
       if(targetPage == this.getOption('page')) {
         return false;
@@ -292,6 +456,15 @@
       }
     },
 
+   /**
+    * Runs the query, setting a starting page before doing so. If the starting page matches the already selected
+    * one, the query run is cancelled and _false_ is returned
+    *
+    * @method pageStartingAt
+    * @param page  Starting page index
+    * @param outsideCallback Callback to execute after server side query is processed
+    * @returns {*} _false_ if the query run is cancelled, null otherwise
+    */
     pageStartingAt: function(page,outsideCallback) {
       if(this.setPageStartingAt(page) !== false) {
         return this.doQuery(outsideCallback);
@@ -300,12 +473,26 @@
       }
     },
 
-    // Sets the page size
+
+   /**
+    * Sets the page size.
+    *
+    * @method setPageSize
+    * @param pageSize Page size to set
+    */
     setPageSize: function(pageSize) {
       this.setOption('pageSize', pageSize);
     },
 
-    // sets _pageSize to pageSize, and gets the first page of results
+   /**
+    * Sets the page size and gets the first page of results
+    *
+    * @method initPage
+    * @param pageSize Page Size
+    * @param outsideCallback Callback to run after query is ran
+    * @returns the result of calling doQuery
+    * @throws InvalidPageSize if the page size is not a positive number
+    */
     initPage: function(pageSize,outsideCallback) {
       if(pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {
         return false;

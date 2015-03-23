@@ -11,6 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Sprintf implementation for javascript . Request as cdf/dashboard/Sprintf.
+ * The module returns a function that can be called to format a string according to the Sprintf specs
+ *
+ * @module Sprintf
+ */
+
 define(['./Utils'], function (utils) {
 
 
@@ -23,7 +31,11 @@ define(['./Utils'], function (utils) {
     *
     **/
     var sprintfWrapper = {
-    
+
+      /**
+       *
+       * @returns {*}
+       */
       init : function () {
     
         if (typeof arguments == 'undefined') {
