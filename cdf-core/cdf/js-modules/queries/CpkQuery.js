@@ -11,6 +11,20 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Module that holds query related objects
+ * @module Query
+ */
+
+
+/**
+ * Class that represents a CPK query
+ * @class CpkQuery
+ * @extends BaseQuery
+ */
+
+
 define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.query', 'amd!../lib/underscore', '../dashboard/Utils'],
   function(DashboardExt, BaseQuery, Dashboard, _, Utils) {
 
@@ -34,6 +48,13 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       }
     },
 
+    /**
+     * Init method for the CPK query
+     *
+     * @method init
+     * @param opts Options is an object with the following properties: pluginId, endpoint, kettleOutput, stepName, systemParams
+     * ajaxOptions
+     */
     init: function(opts) {
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
         this.setOption('pluginId' , opts.pluginId);
@@ -51,6 +72,15 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       }
     },
 
+    /**
+     * Builds the query definition object
+     *
+     * @method buildQueryDefinition
+     * @param overrides Overrides to the existing options
+     * @returns {{}} Query definition object
+     *
+     * @private
+     */
     buildQueryDefinition: function(overrides) {
       overrides = (overrides instanceof Array) 
         ? Utils.propertiesArrayToObject(overrides)
@@ -86,6 +116,15 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
       return queryDefinition;
     },
 
+
+    /**
+     * Gets the success handler for the query, given a fallback to call
+     *
+     * @method getSuccessHandler
+     * @param callback Callback to cal after the query is successful
+     * @returns Success handler
+     *
+     */
     getSuccessHandler: function(callback) {
       // copy-pasted from BaseQuery + added errorCallback
       var myself = this;
@@ -102,9 +141,6 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
         }
       };
     }
-    /*
-     * Public interface
-     */
   };
   // Registering a class will use that class directly when getting new queries.
   Dashboard.registerGlobalQuery("cpk", CpkEndpointsOpts);

@@ -11,6 +11,21 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+
+/**
+ * Module that holds query related objects
+ * @module Query
+ */
+
+
+/**
+ * Class that represents a legacy query (calling xactions). This functionality is deprecated
+ * @class LegacyQuery
+ * @extends BaseQuery
+ * @deprecated
+ */
+
 define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashboard.query', 'amd!../lib/underscore', '../lib/jquery', '../dashboard/Utils'],
   function(XactionComponentExt, BaseQuery, Dashboard, _, $, Utils) {
 
@@ -38,10 +53,24 @@ define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashb
       }
     },
 
+    /**
+     * Init method for the Legacy query
+     *
+     * @method init
+     * @param opts Options object
+     */
     init: function(opts) {
       this.setOption('queryDef', opts);
     },
 
+    /**
+     * Gets the success handler for the query, given a fallback to call
+     *
+     * @method getSuccessHandler
+     * @param callback Callback to cal after the query is successful
+     * @returns {Function} success handler
+     *
+     */
     getSuccessHandler: function(callback) {
       var myself = this;
       return function(json) {
@@ -64,7 +93,15 @@ define(['../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashb
       }
     },
 
-    //TODO: is this enough?
+    /**
+     * Builds the query definition object
+     *
+     * @method buildQueryDefinition
+     * @param overrides Overrides to the existing options
+     * @returns {{}} Query definition object
+     *
+     * @private
+     */
     buildQueryDefinition: function(overrides) {
       return _.extend({}, this.getOption('queryDef'), overrides);
     }

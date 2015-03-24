@@ -11,27 +11,39 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
+/**
+ * Module that holds everything related to Components
+ * @module Components
+ */
+
 define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'],
   function(BaseComponent, _, $, Logger) {
 
-  /*
+  /**
    * UnmanagedComponent is an advanced version of the BaseComponent that allows
    * control over the core CDF lifecycle for implementing components. It should
    * be used as the base class for all components that desire to implement an
    * asynchronous lifecycle, as CDF cannot otherwise ensure that the postExecution
    * callback is correctly handled.
+   *
+   * @class UnmanagedComponent
+   * @extends BaseComponent
    */
   var UnmanagedComponent = BaseComponent.extend({
     isManaged: false,
     isRunning: false,
 
-    /*
+    /**
      * Handle calling preExecution when it exists. All components extending
      * UnmanagedComponent should either use one of the three lifecycles declared
      * in this class (synchronous, triggerQuery, triggerAjax), or call this method
      * explicitly at the very earliest opportunity. If preExec returns a falsy
      * value, component execution should be cancelled as close to immediately as
      * possible.
+     *
+     * @method preExec
+     * @returns _false_ if component execution should be cancelled, _true_ otherwise
      */
     preExec: function() {
       /*
@@ -58,11 +70,13 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       return ret;
     },
 
-    /*
+    /**
      * Handle calling postExecution when it exists. All components extending
      * UnmanagedComponent should either use one of the three lifecycles declared
      * in this class (synchronous, triggerQuery, triggerAjax), or call this method
      * explicitly immediately before yielding control back to CDF.
+     *
+     * @method postExec
      */
     postExec: function() {
       if(typeof this.postExecution == "function") {
@@ -71,6 +85,11 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       this.trigger('cdf cdf:postExecution', this);
     },
 
+    /**
+     * Draws a tooltip, if one is defined in the component options
+     *
+     * @method drawTooltip
+     */
     drawTooltip: function() {
       if (this.tooltip) {
         this._tooltip = typeof this.tooltip == "function" ?
@@ -78,6 +97,12 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
             this.tooltip;
       }
     },
+
+    /**
+     * Show a tooltip attached to the component, if one is defined in the _tooltip option
+     *
+     * @method showTooltip
+     */
     showTooltip: function() {
       if(typeof this._tooltip != "undefined") {
         this.placeholder().attr("title",this._tooltip).tooltip({
@@ -89,12 +114,16 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       }
     },
 
-    /*
+    /**
      * The synchronous lifecycle handler closely resembles the core CDF lifecycle,
      * and is provided as an alternative for components that desire the option to
      * alternate between a synchronous and asynchronous style lifecycles depending
      * on external configuration (e.g. if it can take values from either a static
-     * array or a query). It take the component drawing method as a callback.
+     * array or a query). It takes the component drawing method as a callback.
+     *
+     * @method synchronous
+     * @param callback Component drawing method
+     * @args Arguments for the callback
      */
     synchronous: function(callback, args) {
       if(!this.preExec()) {
@@ -126,7 +155,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       },this), 10);
     },
 
-    /*
+    /**
      * The triggerQuery lifecycle handler builds a lifecycle around Query objects.
      *
      * It takes a query definition object that is passed directly into the Query
@@ -134,6 +163,11 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * preExecution->block->render->postExecution->unblock lifecycle. This method
      * detects concurrent updates to the component and ensures that only one
      * redraw is performed.
+     *
+     * @method triggerQuery
+     * @params queryDef query definition
+     * @params callback Callback to run after query has ran
+     * @params User options for the query
      */
     triggerQuery: function(queryDef, callback, userQueryOptions) {
       if(!this.preExec()) {
@@ -187,7 +221,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       query.fetchData(params, handler, errorHandler);
     },
 
-    /*
+    /**
      * The triggerAjax method implements a lifecycle based on generic AJAX calls.
      * It implements the full preExecution->block->render->postExecution->unblock
      * lifecycle.
@@ -200,6 +234,12 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * to the object, but triggerAjax will take control over the success and error
      * callbacks.
      * If passed, the supplied ajaxParameters will be passed to the default ajax call
+     *
+     * @method triggerAjax
+     * @params url url to call
+     * @params params Parameters for the call
+     * @params callback Callback to call after url has been request
+     * @params _ajaxParameters Parameters specific to the ajax call definition
      */
     triggerAjax: function(url,params,callback,_ajaxParameters) {
       if(!this.preExec()) {
@@ -238,17 +278,24 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
     },
 
 
-    /*
+    /**
      * Increment the call counter, so we can keep track of the order in which
      * requests were made.
+     *
+     * @method callCounter
+     * @returns the incremented counter
      */
     callCounter: function() {
       return ++this.runCounter;
     },
 
-    /* Trigger an error event on the component. Takes as arguments the error
+    /**
+     * Trigger an error event on the component. Takes as arguments the error
      * message and, optionally, a `cause` object.
-     * Also
+     *
+     * @method error
+     * @params msg Error message
+     * @params cause Cause for the error
      */
     error: function(msg, cause) {
       msg = msg || this.dashboard.getErrorObj('COMPONENT_ERROR').msg;
@@ -261,7 +308,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       });
       this.trigger("cdf cdf:error", this, msg , cause || null);
     },
-    /*
+    /**
      * Build a generic response handler that runs the success callback when being
      * called in response to the most recent AJAX request that was triggered for
      * this component (as determined by comparing counter and this.runCounter),
@@ -274,6 +321,12 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * - this.getSuccessHandler(counter, success)
      * - this.getSuccessHandler(success, always)
      * - this.getSuccessHandler(success)
+     *
+     * @method  getSuccessHandler
+     * @param counter id for the ajax call being made
+     * @param success success callback
+     * @param always Callback that is ran independently of call status
+     * @return {Function} Success handler function
      */
     getSuccessHandler: function(counter,success,always) {
 
@@ -309,6 +362,12 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       this);
     },
 
+    /**
+     * Gets the error handler
+     *
+     * @method getErrorHandler
+     * @returns {Function}  Error handler
+     */
     getErrorHandler: function() {
       return  _.bind(function() {
         var err = this.dashboard.parseServerError.apply(this, arguments );
@@ -316,6 +375,14 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       },
       this);
     },
+
+    /**
+     * Triggers an error notification
+     *
+     * @method errorNotification
+     * @param err error message
+     * @param ph Html element where to display the error notification
+     */
     errorNotification: function(err, ph) {
       ph = ph || (this.htmlObject ? this.placeholder() : undefined);
       var name = this.name.replace('render_', '');
@@ -323,11 +390,13 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       this.dashboard.errorNotification( err, ph );
     },
 
-    /*
+    /**
      * Trigger UI blocking while the component is updating. Default implementation
      * uses the global CDF blockUI, but implementers are encouraged to override
      * with per-component blocking where appropriate (or no blocking at all in
      * components that support it!)
+     *
+     * @method block
      */
     block: function() {
       if(!this.isRunning){
@@ -337,10 +406,12 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
 
     },
 
-    /*
+    /**
      * Trigger UI unblock when the component finishes updating. Functionality is
      * defined as undoing whatever was done in the block method. Should also be
-     * overridden in components that override UnmanagedComponent#block.
+     * overridden in components that override {{#crossLink "UnmanagedComponent/block:method"}}block{{/crossLink}}.
+     *
+     * @method unblock
      */
     unblock: function() {
 
@@ -350,6 +421,12 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       }
     },
 
+    /**
+     * Returns _true_ if the component's lifecycle is marked as silent (does not trigger UI block when updating)
+     *
+     * @method isSilent
+     * @returns {boolean} _true_ if the component should not trigger an UI block when updating
+     */
     isSilent: function() {
       return (this.lifecycle) ? !!this.lifecycle.silent : false;
     }
