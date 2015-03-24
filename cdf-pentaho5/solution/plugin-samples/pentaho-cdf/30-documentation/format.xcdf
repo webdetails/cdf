@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>Start Here</title>
+	<title>Format</title>
 	<author>Webdetails</author>
-	<description>Start Here</description>
+	<description>Format Number And Date</description>
 	<icon></icon>
-	<template>template.html</template>
+	<template>format.html</template>
 	<style>mantle</style>
 </cdf>

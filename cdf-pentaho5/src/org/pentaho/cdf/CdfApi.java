@@ -52,6 +52,7 @@ import org.pentaho.cdf.render.CdfHtmlRenderer;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.xactions.ActionEngine;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
+import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.util.web.MimeHelper;
@@ -311,7 +312,8 @@ public class CdfApi {
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
       @Context HttpServletResponse servletResponse ) throws Exception {
     try {
-      EmbeddedHeadersGenerator embeddedHeadersGenerator = new EmbeddedHeadersGenerator();
+      EmbeddedHeadersGenerator embeddedHeadersGenerator =
+          new EmbeddedHeadersGenerator( buildFullServerUrl( servletRequest ) );
       String locale = servletRequest.getParameter( "locale" );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
@@ -321,5 +323,17 @@ public class CdfApi {
       logger.error( "getCdfEmbeddedContext: " + ex.getMessage(), ex );
       throw ex;
     }
+
+  }
+
+  protected String buildFullServerUrl( HttpServletRequest servletRequest ) {
+    String p = "http";
+    String protocol = servletRequest.getProtocol();
+    if ( !StringUtils.isEmpty( protocol ) ) {
+      String[] bits = protocol.split( "/" );
+      p = bits[0].toLowerCase();
+    }
+    String webAppPath = PentahoRequestContextHolder.getRequestContext().getContextPath();
+    return p + "://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + webAppPath;
   }
 }

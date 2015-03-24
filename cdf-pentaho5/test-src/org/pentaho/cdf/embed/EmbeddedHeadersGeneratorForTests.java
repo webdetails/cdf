@@ -18,13 +18,8 @@ import java.util.List;
 
 public class EmbeddedHeadersGeneratorForTests extends EmbeddedHeadersGenerator {
 
-  public EmbeddedHeadersGeneratorForTests() {
-
-  }
-
-  @Override
-  protected String getContextPath() {
-    return "TEST_CONTEXT_PATH";
+  public EmbeddedHeadersGeneratorForTests( String fullQualifiedUrl ) {
+    super( fullQualifiedUrl );
   }
 
   @Override
@@ -35,11 +30,6 @@ public class EmbeddedHeadersGeneratorForTests extends EmbeddedHeadersGenerator {
   @Override
   protected String getUserHomeFolderPath() {
     return "TEST_USER_HOME_FOLDER_PATH";
-  }
-
-  @Override
-  protected String getFullyQualifiedServerURL() {
-    return "httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL";
   }
 
   @Override

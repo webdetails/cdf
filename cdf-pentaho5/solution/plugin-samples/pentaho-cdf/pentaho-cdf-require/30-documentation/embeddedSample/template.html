@@ -1,0 +1,68 @@
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>CDF Embedded Example</h2>
+
+    <h3>Description</h3>
+
+    <p> Loads CDF require configs from a server and renders a new Dashboard with a Select Component. </p>
+    <p> It also allows to add custom require modules and load them along with the CDF modules. </p>
+    <p> This will make it possible for any server and/or 3rd party applications to embed CDF Dashboards, from a Pentaho Server.</p>
+
+    <h3>Configurations</h3>
+
+    <dl class="documentation">
+      <dt>script tag</dt>
+      <dd>The url for the server endpoint that injects the CDF dependencies</dd>
+    </dl>
+    
+
+    <br>
+    <p>To demonstrate the embedding capabilities of CDF, we have an embedded.html file (located in the same folder), which is is capable of embedding CDF.<br>
+    This is done by simply including a javascript resource, which will make sure to embed the necessary files.<br>
+    You can drop te embedded.html file into any web server and you'll be able to embed a CDF dashboard, as long as you provide the correct url for the script tag mentioned below.
+    </p>
+    
+    <p>You really only need to know the path to the Pentaho Server from which you want to embed CDF, and then include the embed javascript resource:</p>
+    <pre>&lt;script type="text/javascript" src="path/to/server/pentaho/plugin/pentaho-cdf/api/cdf-embed.js"&gt;&lt;/script&gt;</pre><br>
+    <p>Our embedded.html demonstrates this:</p>
+    <p>ln12:</p> <pre>&lt;script type="text/javascript" src="http://localhost:8080/pentaho/plugin/pentaho-cdf/api/cdf-embed.js"&gt;&lt;/script&gt;</pre>
+    <br>
+    <p>We can then assume we are in a Pentaho CDF environment, we are embedded!</p>
+    <p>ln54:</p>
+    <pre>
+              require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'myModule'], function(Dashboard, SelectComponent, m) {
+                  
+                console.log("MODULE getString() " + m.getString());
+                m.writeOnElement("#myModuleText", "Text written by a custom module defined in myModule.js");
+
+                var myDashboard = new Dashboard();
+
+                myDashboard.addParameter("region", "1");
+
+                var selectComponent = new SelectComponent(myDashboard, {
+                  name: "regionSelector",
+                  type: "select",
+                  parameters:[],
+                  valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
+                  parameter:"region",
+                  valueAsId: false,
+                  htmlObject: "sampleObject",
+                  executeAtStart: true,
+                  postChange: function(){
+                    alert("You chose: " + myDashboard.getParameterValue(this.parameter));
+                  }
+                });
+
+                myDashboard.addComponent(selectComponent);
+                myDashboard.init();
+              });
+    </pre>
+    <p>Note that myModule is not configured in CDF, hence requireJS will try to get its definition from a file named myModule.js in the same path as the embedded.html file.</p>
+    <p>Follow the link to check out the <a href="http://localhost:8080/pentaho/api/repos/:public:plugin-samples:pentaho-cdf:pentaho-cdf-require:30-documentation:embeddedSample:embedded.html/content">result</a></p>
+
+
+    
+  </div>
+</div>
