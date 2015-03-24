@@ -13,9 +13,8 @@
 
 
 /**
- * The dashboard module. Groups all classes that represent a Dashboard
+ * Module aggregating all the classes in the Dashboard hierarchy
  * @module Dashboard
- *
  */
 
 define([
@@ -30,15 +29,14 @@ define([
   'css!../lib/cdf.css'],
   function(Base, Logger, RefreshEngine, _, Backbone, $) {
 
-  /**
-   * A class representing a Dashboard.
-   * @class Dashboard
-
-   */
   var Dashboard = Base.extend({
   
     /**
-     * Creates an instance of Dashboard
+     * A class representing a Dashboard. This class is abstract, so it should not be required or instantiated directly.
+     * Instead use one of its extending subclasses,  {{#crossLink "Dashboard.Blueprint"}}Dashboard.Blueprint{{/crossLink}},
+     * {{#crossLink "Dashboard.Bootstrap"}}Dashboard.Bootstrap{{/crossLink}} or
+     * {{#crossLink "Dashboard.Clean"}}Dashboard.Clean{{/crossLink}}.
+     *
      *
      * @class Dashboard
      * @constructor
