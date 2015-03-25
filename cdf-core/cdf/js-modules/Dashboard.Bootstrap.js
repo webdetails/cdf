@@ -11,14 +11,47 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+/**
+ * Module aggregating all the classes in the Dashboard hierarchy
+ * @module Dashboard
+ */
+
+
 
 /**
  * Represents a bootstrap dashboard. It's a specialization of the base abstract Dashboard class.
  * Require as cdf/Dashboard.Bootstrap
  *
+ * Usage example:
+ *
+ *      require(['cdf/Dashboard.Bootstrap', 'cdf/components/ButtonComponent'],
+ *        function(Dashboard, ButtonComponent) {
+ *          var dashboard = new Dashboard();
+ *
+ *          dashboard.addParameter("input", "");
+ *
+ *          dashboard.addComponent(new ButtonComponent(dashboard, {
+ *            name: "buttonComponent",
+ *            type: "button",
+ *            listeners:[],
+ *            htmlObject: "buttonObject",
+ *            label: "A button",
+ *            expression: function() {
+ *              this.setLabel('Yes, a clickable button');
+ *              alert('Button was clicked');
+ *            },
+ *            executeAtStart: true,
+ *            preChange: function() { return true; },
+ *            postChange: function() { return true; },
+ *            successCallback: function(data) {},
+ *            failureCallback: function() {}
+ *          }));
+ *          dashboard.init();
+ *      });
+ *
+ *
  * @class Dashboard.Bootstrap
  * @extends Dashboard
- * @module Dashboard
  */
 
 define([
