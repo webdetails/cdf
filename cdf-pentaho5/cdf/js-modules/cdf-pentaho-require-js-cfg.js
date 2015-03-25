@@ -21,12 +21,12 @@
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(typeof KARMA_RUN !== "undefined") { // test
+  if(typeof KARMA_RUN !== "undefined") { // unit tests
     requirePaths['cdf'] = 'bin/test-js/cdf/js';
-  } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
+  } else if(typeof CONTEXT_PATH !== "undefined") { // production
     requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
-  } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
-    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+  } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
+    requirePaths['cdf'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
     requirePaths['cdf'] = "cdf";
   }
