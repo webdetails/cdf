@@ -32,7 +32,7 @@ var pen = {
             
                 var newDeps = [];
                 for (var i=0; i < deps.length; i++) {
-                    if (deps[i] == 'cdf/jquery')
+                    if (deps[i] == 'cdf/jquery' || deps[i] == 'cdf-legacy/jquery')
                         newDeps.push($);
                     else
                         newDeps.push( this._loadedModulesById[deps[i]] );
