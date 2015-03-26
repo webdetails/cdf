@@ -30,10 +30,10 @@
       requireShims = requireCfg.shim,
       requireConfig = requireCfg.config;
 
-  if (!requireConfig['amd']){
+  if(!requireConfig['amd']) {
     requireConfig['amd'] = {};
   } 
-  if (!requireConfig['amd']['shim']) {
+  if(!requireConfig['amd']['shim']) {
     requireConfig['amd']['shim'] = {};
   }
   var amdShim = requireConfig['amd']['shim'];
@@ -41,12 +41,12 @@
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   var prefix = "";
-  if(typeof KARMA_RUN !== "undefined") { // test
+  if(typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf/lib'] = 'bin/test-js/cdf/js/lib';
-  } else if(typeof CONTEXT_PATH !== "undefined") { // production vs debug
+  } else if(typeof CONTEXT_PATH !== "undefined") { // production
     prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
-  } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
-    prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
+  } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
+    prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
     prefix = requirePaths['cdf/lib'] = "cdf/lib";
   }

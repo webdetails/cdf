@@ -4,6 +4,7 @@
   <content-types>
     <static-paths>
       <static-path url="/pentaho-cdf/js" localFolder="js"/>
+      <static-path url="/pentaho-cdf/js-legacy" localFolder="js-legacy"/>
       <static-path url="/pentaho-cdf/css" localFolder="css"/>
       <static-path url="/pentaho-cdf/resources" localFolder="resources"/>
       <static-path url="/pentaho-cdf/tmp" localFolder="tmp"/>
@@ -20,5 +21,7 @@
     <file context="requirejs">content/pentaho-cdf/js/cdf-pentaho-require-js-cfg.js</file>
     <file context="requirejs">content/pentaho-cdf/js/cdf-pentaho-base-require-js-cfg.js</file>
     <file context="requirejs">content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js</file>
+    <!-- cdf legacy -->
+    <file context="requirejs">content/pentaho-cdf/js-legacy/cdf-require-js-cfg.js</file>
   </external-resources>
 </plugin>

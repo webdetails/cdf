@@ -230,17 +230,12 @@
 
     <!-- handle js -->
     <copy todir="${stage.dir}/${plugin.name}/js/" overwrite="true">
-      <fileset dir="bin/js-source/raw/cdf"/>
-    </copy>
-    <copy todir="${stage.dir}/${plugin.name}/js/compressed" overwrite="true">
-      <fileset dir="bin/js-source/compressed/cdf">
-        <exclude name="**/*-require-js-cfg.js*"/>
-      </fileset>
+      <fileset dir="bin/js-source/cdf/js"/>
     </copy>
 
     <!-- handle legacy js -->
     <copy todir="${stage.dir}/${plugin.name}/js-legacy" overwrite="true">
-      <fileset dir="bin/js-source/js-legacy/"/>
+      <fileset dir="bin/js-source/cdf/js-legacy/"/>
     </copy>
 
     <!-- handle extra resources -->
@@ -410,60 +405,61 @@
       <arg value="${build.js.path}"/>
     </exec>
 
-    <copy todir="${bin.dir}/js-source/compressed" >
-      <fileset dir="${js.build.output.dir}"/>
+    <copy todir="${bin.dir}/js-source/cdf/js">
+      <fileset dir="${js.module.script.agg.dir}/cdf"/>
     </copy>
 
-    <copy todir="${bin.dir}/js-source/raw/${js.dir}" >
-      <fileset dir="${js.module.script.agg.dir}/${js.dir}"/>
+    <copy todir="${bin.dir}/js-source/cdf/js/compressed">
+      <fileset dir="${js.build.output.dir}/cdf">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
     </copy>
+
+    <!-- provide js-legacy for common-ui ant target test-js merda -->
+    <antcall target="dist-js-legacy" />
 
     <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
-      <zipfileset dir="${bin.dir}/js-source" includes="**/*"/>
+      <zipfileset dir="${bin.dir}/js-source"/>
     </zip>
 
-    <antcall target="dist-legacy-js" />
     <antcall target="write-resources" />
-
 
   </target>
 
-  <target name="dist-legacy-js" description="Creates the js distribution for the legacy js">
+  <target name="dist-js-legacy" description="Creates the js distribution for the legacy version">
     <!-- cdf-core/cdf/js -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy" overwrite="true">
+    <copy todir="${bin.dir}/js-source/cdf/js-legacy" overwrite="true">
       <fileset dir='${core-js-legacy.dir}'>
-        <!-- include name="**/*"/ -->
         <exclude name="cdf.legacy.css"/>
         <exclude name="cdf.css"/>
       </fileset>
     </copy>
     <!-- handle legacy cdf.css files -->
     <copy file="${core-js-legacy.dir}/cdf.legacy.css"
-              toFile="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/cdf.css"/>
+          toFile="${bin.dir}/js-source/cdf/js-legacy/cdf.css" overwrite="true"/>
 
     <!-- cdf-core/cdf/js-lib -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib" overwrite="true">
+    <copy todir="${bin.dir}/js-source/cdf/js-legacy/lib" overwrite="true">
       <fileset dir='${core-js-lib.dir}'>
-        <!-- include name="**/*"/ -->
         <exclude name="${cdf-core-lib-require-js-cfg.name}"/>
         <exclude name="cdf.css"/>
       </fileset>
     </copy>
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib" overwrite="true">
+    <copy todir="${bin.dir}/js-source/cdf/js-legacy/lib" overwrite="true">
       <fileset dir='${core-js-legacy-lib.dir}'>
         <include name="**/*"/>
       </fileset>
     </copy>
 
     <!-- cdf-pentaho-base/cdf/js -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy" overwrite="true">
+    <copy todir="${bin.dir}/js-source/cdf/js-legacy" overwrite="true">
       <fileset dir='${pentaho-base-js-legacy.dir}'>
         <include name="**/*"/>
       </fileset>
     </copy>
 
     <!-- cdf-pentaho/cdf/js -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy" overwrite="true">
+    <copy todir="${bin.dir}/js-source/cdf/js-legacy" overwrite="true">
       <fileset dir='${pentaho-js-legacy.dir}'>
         <include name="**/*"/>
       </fileset>
@@ -477,17 +473,24 @@
     </unzip>
 
     <!-- copy ccc build -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib/CCC" overwrite="true">
-      <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
+    <copy todir="${bin.dir}/js-source/cdf/js-legacy/lib/CCC" overwrite="true">
+      <fileset dir="${js.expanded.lib.dir}/ccc/pen-legacy"/>
     </copy>
 
     <!-- rename ccc files -->
-    <move file="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib/CCC/pvc.js"
-          tofile="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy/lib/CCC/pvc-d1.0.js"/>
+    <move file="${bin.dir}/js-source/cdf/js-legacy/lib/CCC/pvc.js"
+          tofile="${bin.dir}/js-source/cdf/js-legacy/lib/CCC/pvc-d1.0.js"/>
 
     <antcall target="replace-static-resource-labels">
-      <param name="base.js.path" value="${bin.dir}/js-source/${js.module.script.namespace}/js-legacy" />
+      <param name="base.js.path" value="${bin.dir}/js-source/cdf/js-legacy" />
     </antcall>
+
+    <!-- copy require cfg files to subfloor default lookup folder -->
+    <copy todir="${bin.dir}/js-source/cdf" overwrite="true">
+      <fileset dir='${pentaho-js-legacy.dir}'>
+        <include name="cdf-require-js-cfg.js"/>
+      </fileset>
+    </copy>
 
   </target>
 
