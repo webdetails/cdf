@@ -5,6 +5,6 @@
   <description>This dashboard shows a sample of what can be done with the jFreeChartComponent</description>
   <icon></icon>
   <template>template.html</template>
-  <style>require</style>
+  <style>mantle</style>
   <require>true</require>
 </cdf>

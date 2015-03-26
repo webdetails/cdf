@@ -5,6 +5,6 @@
   <description>This is a sample of blueprint css framework usage</description>
   <icon></icon>
   <template>template.html</template>
-  <style>require</style>
+  <style>mantle</style>
   <require>true</require>
 </cdf>
