@@ -5,6 +5,6 @@
   <description>This shows how the classic home dashboard can be rewritten in CDF using metalayers</description>
   <icon></icon>
   <template>template.html</template>
-  <style>require</style>
+  <style>mantle</style>
   <require>true</require>
 </cdf>

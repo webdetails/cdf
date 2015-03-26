@@ -5,6 +5,6 @@
   <description>CDF Embedded</description>
   <icon></icon>
   <template>format.html</template>
-  <style>require</style>
+  <style>mantle</style>
   <require>true</require>
 </cdf>

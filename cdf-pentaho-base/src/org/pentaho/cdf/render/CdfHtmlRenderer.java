@@ -98,13 +98,16 @@ public class CdfHtmlRenderer {
     final String dashboardTemplate = "template-dashboard" + style + ".html"; //$NON-NLS-1$
 
     ArrayList<String> i18nTagsList = new ArrayList<String>();
-
+    final String requireDashboardTemplate = "template-dashboard" + style + "-require.html";
     IBasicFile templateResourceFile = null;
     IReadAccess pluginRepoAccess = getPluginRepositoryReader( "templates/" );
 
-    if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
+    if ( isRequire && pluginRepoAccess.fileExists( requireDashboardTemplate )) {
+      templateResourceFile = pluginRepoAccess.fetchFile( requireDashboardTemplate );
+    } else if ( isRequire && systemAccess.fileExists( requireDashboardTemplate ) ) {
+      templateResourceFile = systemAccess.fetchFile( requireDashboardTemplate );
+    } else if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
       templateResourceFile = pluginRepoAccess.fetchFile( dashboardTemplate );
-
     } else if ( systemAccess.fileExists( dashboardTemplate ) ) {
       // then try in system
       templateResourceFile = systemAccess.fetchFile( dashboardTemplate );
