@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -54,7 +54,7 @@ public class CdfHtmlRenderer {
                        String user, int inactiveInterval ) throws Exception {
 
     execute( out, solution, path, templateName, style, dashboardsMessagesBaseFilename, parameterMap, user,
-      inactiveInterval, false, false );
+        inactiveInterval, false, false );
   }
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
@@ -64,7 +64,7 @@ public class CdfHtmlRenderer {
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
 
     execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval,
-      isRequire, loadTheme );
+        isRequire, loadTheme );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
@@ -72,7 +72,7 @@ public class CdfHtmlRenderer {
                        int inactiveInterval ) throws Exception {
 
     execute( out, style, templatePath, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, false,
-      false );
+        false );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
@@ -82,7 +82,7 @@ public class CdfHtmlRenderer {
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( templatePath );
 
     execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval,
-      isRequire, loadTheme );
+        isRequire, loadTheme );
   }
 
   public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String style,
@@ -102,7 +102,7 @@ public class CdfHtmlRenderer {
     IBasicFile templateResourceFile = null;
     IReadAccess pluginRepoAccess = getPluginRepositoryReader( "templates/" );
 
-    if ( isRequire && pluginRepoAccess.fileExists( requireDashboardTemplate )) {
+    if ( isRequire && pluginRepoAccess.fileExists( requireDashboardTemplate ) ) {
       templateResourceFile = pluginRepoAccess.fetchFile( requireDashboardTemplate );
     } else if ( isRequire && systemAccess.fileExists( requireDashboardTemplate ) ) {
       templateResourceFile = systemAccess.fetchFile( requireDashboardTemplate );
@@ -135,11 +135,11 @@ public class CdfHtmlRenderer {
 
     // Merge dashboard related message file with global message file and save it in the dashboard cache
     String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ),
-      getPluginRepositoryDir() );
+        getPluginRepositoryDir() );
     path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
 
     MessageBundlesHelper mbh =
-      new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
+        new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
 
     intro = replaceIntroParameters( intro, mbh, i18nTagsList, dashboardsMessagesBaseFilename );
 
@@ -183,8 +183,8 @@ public class CdfHtmlRenderer {
   }
 
   protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {
-    String webcontext = "<script language=\"javascript\" type=\"text/javascript\" src=\"webcontext" +
-      ".js?context=cdf" + ( loadTheme ? "" : "&requireJsOnly=true" ) + "\"></script>";
+    String webcontext = "<script language=\"javascript\" type=\"text/javascript\" src=\"webcontext"
+        + ".js?context=cdf" + ( loadTheme ? "" : "&requireJsOnly=true" ) + "\"></script>";
     out.write( webcontext.getBytes( CharsetHelper.getEncoding() ) );
   }
 
@@ -192,7 +192,7 @@ public class CdfHtmlRenderer {
 
     for ( int i = keyIndex - 1; i > 0; i-- ) {
       if ( content.charAt( i ) == ':' || content.charAt( i ) == '"' || ( "" + content.charAt( i ) ).trim()
-        .equals( "" ) ) {
+          .equals( "" ) ) {
         // noinspection UnnecessaryContinue
         continue;
       } else {
@@ -216,7 +216,7 @@ public class CdfHtmlRenderer {
     // Fixed ISSUE #CDF-113
     // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     BufferedReader reader =
-      new BufferedReader(
+        new BufferedReader(
         new InputStreamReader( is, Charset.forName( CdfEngine.getEnvironment().getSystemEncoding() ) ) );
 
     StringBuilder sb = new StringBuilder();
@@ -267,7 +267,7 @@ public class CdfHtmlRenderer {
   }
 
   protected String replaceIntroParameters( String intro, MessageBundlesHelper mbh, ArrayList<String> i18nTagsList,
-                                         String dashboardsMessagesBaseFilename ) throws Exception {
+                                           String dashboardsMessagesBaseFilename ) throws Exception {
     mbh.saveI18NMessageFilesToCache();
     String messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
 
@@ -335,7 +335,7 @@ public class CdfHtmlRenderer {
       for ( String[] componenType : CdfConstants.DASHBOARD_COMPONENT_TYPES ) {
         // Screen Scrap to get component types from dashboardContent
         if ( Pattern.compile( String.format( "type:\\s*[\"'](?i)%s[a-z]*[\"']", componenType[ 0 ] ) )
-          .matcher( dashboardContent ).find() ) {
+            .matcher( dashboardContent ).find() ) {
           componentTypes.add( componenType[ 1 ] );
         }
       }
@@ -355,10 +355,10 @@ public class CdfHtmlRenderer {
       }
 
       out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, webRoot, componentTypes )
-        .getBytes( CharsetHelper.getEncoding() ) );
+          .getBytes( CharsetHelper.getEncoding() ) );
     } else {
       out.write(
-        cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
+          cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
     }
   }
 
