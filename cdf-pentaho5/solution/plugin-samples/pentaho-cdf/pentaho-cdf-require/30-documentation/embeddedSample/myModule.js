@@ -1,4 +1,4 @@
-define(["cdf/lib/jquery"], function($){
+define(["cdf/lib/jquery", "cdf/Logger"], function($, Logger) {
   var myModule = {
     string: "TEST"
   };
@@ -9,12 +9,10 @@ define(["cdf/lib/jquery"], function($){
   
   myModule.writeOnElement = function(selector, text) {
       var element = $(selector);
-      if(element && element.length > 0 ) {
+      if(element && element.length > 0) {
           element.text(text);
       } else {
-          if(console) {
-            console.log("Selector " + selector + " wielded no results");  
-          }
+          Logger.log("Selector " + selector + " wielded no results");
       }
   };
 

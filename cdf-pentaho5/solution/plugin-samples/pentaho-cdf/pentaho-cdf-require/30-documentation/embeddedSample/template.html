@@ -32,9 +32,10 @@
     <p>We can then assume we are in a Pentaho CDF environment, we are embedded!</p>
     <p>ln54:</p>
     <pre>
-              require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'myModule'], function(Dashboard, SelectComponent, m) {
+              require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'myModule', "cdf/Logger"],
+                function(Dashboard, SelectComponent, m, Logger) {
                   
-                console.log("MODULE getString() " + m.getString());
+                Logger.log("MODULE getString() " + m.getString());
                 m.writeOnElement("#myModuleText", "Text written by a custom module defined in myModule.js");
 
                 var myDashboard = new Dashboard();
@@ -44,13 +45,13 @@
                 var selectComponent = new SelectComponent(myDashboard, {
                   name: "regionSelector",
                   type: "select",
-                  parameters:[],
-                  valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
-                  parameter:"region",
+                  parameters: [],
+                  valuesArray: [["1","Lisbon"],["2","Dusseldorf"]],
+                  parameter: "region",
                   valueAsId: false,
                   htmlObject: "sampleObject",
                   executeAtStart: true,
-                  postChange: function(){
+                  postChange: function() {
                     alert("You chose: " + myDashboard.getParameterValue(this.parameter));
                   }
                 });
