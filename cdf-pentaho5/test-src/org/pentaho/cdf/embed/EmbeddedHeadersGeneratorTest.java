@@ -29,24 +29,24 @@ public class EmbeddedHeadersGeneratorTest extends TestCase {
         + "\n"
         + "// injecting document writes to append the cdf require files\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
-        + "src='httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/content/pentaho-cdf/js/cdf-core-require-js-cfg"
+        + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/pentaho-cdf/js/cdf-core-require-js-cfg"
         + ".js'></script>\");\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
-        + "src='httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg"
+        + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg"
         + ".js'></script>\");\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
-        + "src='httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/content/pentaho-cdf/js/cdf-core-require-js-cfg"
+        + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/pentaho-cdf/js/cdf-core-require-js-cfg"
         + ".js'></script>\");\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
-        + "src='httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/content/common-ui/resources/web/common-ui-require-js-cfg"
+        + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/common-ui/resources/web/common-ui-require-js-cfg"
         + ".js'></script>\");\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
-        + "src='httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/content/common-ui/resources/web/require.js'></script>\");\n"
+        + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/common-ui/resources/web/require.js'></script>\");\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
-        + "src='httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/content/common-ui/resources/web/require-cfg.js'></script>\");\n"
-        + "var CONTEXT_PATH = 'TEST_CONTEXT_PATH';\n"
+        + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/common-ui/resources/web/require-cfg.js'></script>\");\n"
+        + "var CONTEXT_PATH = 'httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/';\n"
         + "\n"
-        + "var FULL_QUALIFIED_URL = 'httpTESTPROTOCOL:TEST_FULLY_QUALIFIED_URL/';\n"
+        + "var FULL_QUALIFIED_URL = 'httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/';\n"
         + "\n"
         + "var SERVER_PROTOCOL = 'httpTESTPROTOCOL';\n"
         + "\n"
@@ -59,7 +59,8 @@ public class EmbeddedHeadersGeneratorTest extends TestCase {
         + "var RESERVED_CHARS_DISPLAY = 'a, b';\n"
         + "var RESERVED_CHARS_REGEX_PATTERN = /.*[ab]+.*/;\n";
 
-    EmbeddedHeadersGenerator embeddedHeadersGenerator = new EmbeddedHeadersGeneratorForTests();
+    EmbeddedHeadersGenerator embeddedHeadersGenerator =
+        new EmbeddedHeadersGeneratorForTests( "httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/" );
     embeddedHeadersGenerator.setLocale( new Locale( "TEST_LOCALE" ) );
     String result = embeddedHeadersGenerator.generate();
 

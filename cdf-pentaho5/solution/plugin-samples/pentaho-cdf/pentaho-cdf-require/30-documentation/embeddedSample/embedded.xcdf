@@ -4,7 +4,7 @@
   <author>Webdetails</author>
   <description>CDF Embedded</description>
   <icon></icon>
-  <template>embedded.html</template>
+  <template>template.html</template>
   <style>require</style>
   <require>true</require>
 </cdf>

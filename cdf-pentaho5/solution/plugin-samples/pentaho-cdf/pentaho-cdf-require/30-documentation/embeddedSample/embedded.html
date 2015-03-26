@@ -29,17 +29,14 @@
 
                 <h3>Description</h3>
 
-                <p> Loads CDF require configs from a server and renders a new Dashboard with a Select Component. </p>
-                <p> It also allows to add custom require modules and load them along with the CDF modules. </p>
+                <p>A simple html page which will load the CDF require configs from a Pentaho server and render a new Dashboard with a Select Component and a custom module.</p>
 
                 <h3>Configurations</h3>
-
+                <p>The only real configuration needed is to include the embed file, done by simply calling an endpoint CDF provides</p>
                 <dl class="documentation">
-                  <dt>FULLY_QUALIFIED_URL</dt>
-                  <dd>The url for the server</dd>
 
                   <dt>script tag</dt>
-                  <dd>The url for the server endpoint that injects the CDF dependencies</dd>
+                  <dd>&lt;script type="text/javascript" src="http://localhost:8080/pentaho/plugin/pentaho-cdf/api/cdf-embed.js"&gt;&lt;/script&gt;</dd>
 
                 </dl>
 
@@ -47,17 +44,18 @@
 
                 <div id="example">
                   <div id="sample">
-
                     <div id="sampleObject"></div>
-
+                    <div id="myModuleText"></div>
                   </div>
                 </div>
-
               </div>
             </div>
             <script language="javascript" type="text/javascript">
-              require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'myModule'], function(Dashboard, SelectComponent, m) {
-                console.log("MODULE getString() " + m.getString());
+              require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'myModule', "cdf/Logger"],
+                function(Dashboard, SelectComponent, m, Logger) {
+                  
+                Logger.log("MODULE getString() " + m.getString());
+                m.writeOnElement("#myModuleText", "Text written by a custom module defined in myModule.js");
 
                 var myDashboard = new Dashboard();
 
@@ -66,13 +64,13 @@
                 var selectComponent = new SelectComponent(myDashboard, {
                   name: "regionSelector",
                   type: "select",
-                  parameters:[],
-                  valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
-                  parameter:"region",
+                  parameters: [],
+                  valuesArray: [["1","Lisbon"],["2","Dusseldorf"]],
+                  parameter: "region",
                   valueAsId: false,
                   htmlObject: "sampleObject",
                   executeAtStart: true,
-                  postChange: function(){
+                  postChange: function() {
                     alert("You chose: " + myDashboard.getParameterValue(this.parameter));
                   }
                 });

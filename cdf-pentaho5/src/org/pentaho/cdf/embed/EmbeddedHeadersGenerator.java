@@ -14,9 +14,7 @@
 package org.pentaho.cdf.embed;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
 import org.pentaho.platform.repository2.unified.jcr.JcrRepositoryFileUtils;
 import org.pentaho.platform.util.messages.LocaleHelper;
@@ -52,9 +50,9 @@ public class EmbeddedHeadersGenerator {
   protected Locale locale;
   protected String fullyQualifiedURL;
 
-  public EmbeddedHeadersGenerator() {
+  public EmbeddedHeadersGenerator( String fullUrl ) {
     this.locale = LocaleHelper.getLocale();
-    this.fullyQualifiedURL = this.buildFullyQualifiedServerURL();
+    this.fullyQualifiedURL = fullUrl;
   }
 
   public String generate() throws IOException {
@@ -68,15 +66,6 @@ public class EmbeddedHeadersGenerator {
       .append( printReservedCharsDisplay() )
       .append( printReservedRegexPattern() );
     return sb.toString();
-  }
-
-  protected String buildFullyQualifiedServerURL() {
-    // split out a fully qualified url, guaranteed to have a trailing slash
-    String url = getFullyQualifiedServerURL();
-    if ( !url.endsWith( "/" ) ) {
-      url += "/";
-    }
-    return url;
   }
 
   protected String printScriptsContext() {
@@ -111,7 +100,7 @@ public class EmbeddedHeadersGenerator {
     } else {
       serverProtocolValue = "http";
     }
-    return MessageFormat.format( URL_CONTEXT_BUILDER, getContextPath(), fullyQualifiedURL, serverProtocolValue );
+    return MessageFormat.format( URL_CONTEXT_BUILDER, fullyQualifiedURL, fullyQualifiedURL, serverProtocolValue );
   }
 
   protected String printSessionName() throws IOException {
@@ -169,10 +158,6 @@ public class EmbeddedHeadersGenerator {
     this.locale = locale;
   }
 
-  protected String getContextPath() {
-    return PentahoRequestContextHolder.getRequestContext().getContextPath();
-  }
-
   protected String getSessionName() {
     if ( PentahoSessionHolder.getSession() == null ) {
       return "null";
@@ -186,10 +171,6 @@ public class EmbeddedHeadersGenerator {
         .escapeJavaScript( PentahoSessionHolder.getSession().getName() ) );
     }
     return "null";
-  }
-
-  protected String getFullyQualifiedServerURL() {
-    return PentahoSystem.getApplicationContext().getFullyQualifiedServerURL();
   }
 
   protected List<Character> getReservedChars() {
