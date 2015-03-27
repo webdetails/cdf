@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SchedulePrptComponent"],
 
     dashboard.init();
 
-    var schedulePrpt = new SchedulePrptComponent(dashboard, {
+    var schedulePrpt = new SchedulePrptComponent({
       name: "schedulePrpt",
       type: "schedulePrpt",
       htmlObject: "sampleObject",

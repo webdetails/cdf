@@ -349,7 +349,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/JFreeChartComponent'],
       }
     };
 
-    dashboard.addComponent(new JFreeChartComponent(dashboard, {
+    dashboard.addComponent(new JFreeChartComponent({
       name: "topTenCustomers",
       type: "jFreeChartComponent",
       chartDefinition: topTenCustomerDefinition,

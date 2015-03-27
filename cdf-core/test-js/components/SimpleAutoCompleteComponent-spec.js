@@ -26,7 +26,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SimpleAutoCompleteComponent"],
 
     dashboard.init();
 
-    var simpleAC = new SimpleAutoCompleteComponent(dashboard, {
+    var simpleAC = new SimpleAutoCompleteComponent({
       name: "simpleAC",
       type: "SimpleAutoComplete",
       htmlObject: 'simpleAC',

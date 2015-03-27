@@ -80,7 +80,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/XactionComponent'],
     dashboard.addParameter( "productLineParam", "null");
     dashboard.addParameter( "territoryParam", "null");
 
-    dashboard.addComponent(new XactionComponent(dashboard, {
+    dashboard.addComponent(new XactionComponent({
       name: "topTenCustomers",
       type: "xactionComponent",
       path: "/public/plugin-samples/pentaho-cdf/20-samples/home_dashboard/topTenCustomers.xaction",

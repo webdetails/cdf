@@ -62,12 +62,10 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
      *
      * @constructor
      * @class BaseComponent
-     * @param dashboard  Dashboard that will hold this component
      * @param properties Properties for the component
      */
-    constructor: function(dashboard, properties) {    
+    constructor: function(properties) {    
       this.extend(properties);
-      this.dashboard = dashboard;
     },
 
     /**
@@ -208,6 +206,10 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
      * @returns {*} AddIn registered with the specifed name and sub type
      */
     getAddIn: function(slot,addIn) {
+      if(!this.dashboard) {
+        Logger.warn("dashboard not yet defined, can't call getAddIn");
+        return false;
+      }
       var type = typeof this.type == "function" ? this.type() : this.type;
       return this.dashboard.getAddIn(type,slot,addIn);
     },
@@ -221,6 +223,10 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
      * @returns {*|true} _true_ if the addIn exists, _false_ otherwise
      */
     hasAddIn: function(slot,addIn) {
+      if(!this.dashboard) {
+        Logger.warn("dashboard not yet defined, can't call hasAddIn");
+        return false;
+      }
       var type = typeof this.type == "function" ? this.type() : this.type;
       return this.dashboard.hasAddIn(type,slot,addIn);
     },
@@ -263,6 +269,11 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
           }
           return myArray;
         } else {
+
+          if(!this.dashboard) {
+            Logger.warn("dashboard not yet defined, return empty array");
+            return [];
+          }
   
           //go through parameter array and update values
           var p = new Array(this.parameters?this.parameters.length:0);

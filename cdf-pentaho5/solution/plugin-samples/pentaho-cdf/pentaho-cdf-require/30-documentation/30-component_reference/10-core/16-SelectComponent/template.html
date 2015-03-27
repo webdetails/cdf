@@ -110,7 +110,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent'],
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
-    dashboard.addComponent(new SelectComponent(dashboard, {
+    dashboard.addComponent(new SelectComponent({
       name: "selectComponent",
       type: "selectComponent",
       parameters: [],

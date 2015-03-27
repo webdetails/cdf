@@ -29,7 +29,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/MapBubbleComponent"],
 
     dashboard.init();
 
-    var mapBubble = new MapBubbleComponent(dashboard, {
+    var mapBubble = new MapBubbleComponent({
       name: "mapBubble",
       type: "mapBubble",
       listeners: ["selectedPoint"],

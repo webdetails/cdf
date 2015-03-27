@@ -30,7 +30,7 @@
  *
  *          dashboard.addParameter("input", "");
  *
- *          dashboard.addComponent(new ButtonComponent(dashboard, {
+ *          dashboard.addComponent(new ButtonComponent({
  *            name: "buttonComponent",
  *            type: "button",
  *            listeners:[],

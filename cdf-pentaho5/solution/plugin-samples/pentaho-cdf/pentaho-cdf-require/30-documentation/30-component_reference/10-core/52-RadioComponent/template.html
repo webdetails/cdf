@@ -115,7 +115,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/RadioComponent'],
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "");
 
-    dashboard.addComponent(new RadioComponent(dashboard, {
+    dashboard.addComponent(new RadioComponent({
       name: "radioComponent",
       type: "radioComponent",
       parameters:[],

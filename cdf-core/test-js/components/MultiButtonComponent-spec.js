@@ -25,7 +25,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent"],
 
     dashboard.init();
 
-    var multiButtonComponent = new MultiButtonComponent(dashboard, {
+    var multiButtonComponent = new MultiButtonComponent({
       name: "multiButtonComponent",
       type: "multiButtonComponent",
       parameters:[],

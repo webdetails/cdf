@@ -88,7 +88,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/ExecutePrptComponent'],
 
     var dashboard = new Dashboard();
 
-    dashboard.addComponent(new ExecutePrptComponent(dashboard, {
+    dashboard.addComponent(new ExecutePrptComponent({
       name: "executeTopTenCustomers",
       type: "executePrpt",
       path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",

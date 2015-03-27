@@ -44,7 +44,7 @@ require([
   dashboard.addParameter("productLine", "null");
   dashboard.addParameter("territory", "null");
 
-  dashboard.addComponent(new TextComponent(dashboard, {
+  dashboard.addComponent(new TextComponent({
     name: "titleString",
     type: "text",
     title: "Top Ten Customers",
@@ -68,7 +68,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "topTenCustomers",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/topTenCustomers.xaction",
@@ -80,7 +80,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "territorySales",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/territorySales.xaction",
@@ -92,7 +92,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "productLineSales",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/productLineSales.xaction",

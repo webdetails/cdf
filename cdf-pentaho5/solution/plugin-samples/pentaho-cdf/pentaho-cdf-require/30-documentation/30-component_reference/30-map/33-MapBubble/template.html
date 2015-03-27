@@ -79,7 +79,7 @@
     dashboard.addParameter("topThreshold", 2000000);
     dashboard.addParameter("selectedPoint", "");
 
-    dashboard.addComponent(new MapBubbleComponent(dashboard, {
+    dashboard.addComponent(new MapBubbleComponent({
       name: "mapBubble",
       type: "mapBubble",
       listeners: ["selectedPoint"],
@@ -90,7 +90,7 @@
       postExecution:function() {}
     }));
 
-    dashboard.addComponent(new MapComponent(dashboard, {
+    dashboard.addComponent(new MapComponent({
       name: "mapComponent",
       type: "mapComponent",
       path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/GetPoints.xaction",

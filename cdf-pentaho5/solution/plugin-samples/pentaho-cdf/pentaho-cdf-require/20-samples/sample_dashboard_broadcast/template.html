@@ -62,7 +62,7 @@ require([
   dashboard.addParameter("region", "test");
   dashboard.addParameter("dateStart", "2007-01-01");
 
-  dashboard.addComponent(new SelectComponent(dashboard, {
+  dashboard.addComponent(new SelectComponent({
     name: "regionSelector",
     type: "select",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
@@ -75,7 +75,7 @@ require([
     postExecution:function() { this.dashboard.processChange(this.name); }
   }));
 
-  dashboard.addComponent(new SelectMultiComponent(dashboard, {
+  dashboard.addComponent(new SelectMultiComponent({
     name: "regionSelectorMulti",
     type: "selectMulti",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
@@ -89,7 +89,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new CheckComponent(dashboard, {
+  dashboard.addComponent(new CheckComponent({
     name: "regionCheck",
     type: "check",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
@@ -101,7 +101,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new RadioComponent(dashboard, {
+  dashboard.addComponent(new RadioComponent({
     name: "regionRadio",
     type: "radio",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
@@ -113,7 +113,7 @@ require([
     postExecution:function() {}
   }));
 
-  dashboard.addComponent(new TextInputComponent(dashboard, {
+  dashboard.addComponent(new TextInputComponent({
     name: "regionText",
     type: "textInput",
     parameter: "region",
@@ -123,7 +123,7 @@ require([
     postExecution:function() {}
   }));
 
-  dashboard.addComponent(new DateInputComponent(dashboard, {
+  dashboard.addComponent(new DateInputComponent({
     name: "dateInput",
     type: "dateInput",
     parameter: "dateStart",
@@ -133,7 +133,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "regionVarianceBarChart",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/RegionVarianceBarChart.xaction",
@@ -145,7 +145,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new TextComponent(dashboard, {
+  dashboard.addComponent(new TextComponent({
     name: "regionVarianceBarChart",
     type: "text",
     listeners: ["region","dateStart"],

@@ -28,7 +28,7 @@ define(['cdf/Dashboard.Clean', 'cdf/lib/jquery', 'cdf/components/DateInputCompon
     var onOpen = false;
     var onClose = false;
 
-    var dateInputComponent = new DateInputComponent(dashboard, {
+    var dateInputComponent = new DateInputComponent({
       name: "dateInputComponent",
       type: "dateInputComponent",
       htmlObject: 'dateInputComponent',

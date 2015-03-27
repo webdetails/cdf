@@ -91,7 +91,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/MonthPickerComponent'],
     var d = new Date();
     d.setYear(2006);
 
-    dashboard.addComponent(new MonthPickerComponent(dashboard, {
+    dashboard.addComponent(new MonthPickerComponent({
       name: "monthPickerComponent",
       type: "monthPickerComponent",
       parameter: "input",

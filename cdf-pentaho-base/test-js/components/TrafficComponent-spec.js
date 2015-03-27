@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent"],
 
     myDashboard.init();
 
-    var trafficComponent = new TrafficComponent(myDashboard, {
+    var trafficComponent = new TrafficComponent({
       name: "trafficComponent",
       type: "trafficComponent",
       trafficDefinition: {

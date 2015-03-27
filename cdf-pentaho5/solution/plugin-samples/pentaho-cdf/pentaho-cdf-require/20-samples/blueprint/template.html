@@ -128,7 +128,7 @@ require([
   dashboard.addParameter("productLine", "null");
   dashboard.addParameter("territory", "null");
 
-  dashboard.addComponent(new TextComponent(dashboard, {
+  dashboard.addComponent(new TextComponent({
     name: "title",
     type: "textComponent",
     htmlObject: "title_object",
@@ -136,7 +136,7 @@ require([
     expression: function() { return "Charts examples"; }
   }));
 
-  dashboard.addComponent(new JFreeChartComponent(dashboard, {
+  dashboard.addComponent(new JFreeChartComponent({
     name: "pieChart",
     type: "jFreeChartComponent",
     listeners: ["MetaLayerCharts.regionsMeasure"],
@@ -145,7 +145,7 @@ require([
     executeAtStart: true
   }));
 
-  dashboard.addComponent(new JFreeChartComponent(dashboard, {
+  dashboard.addComponent(new JFreeChartComponent({
     name: "barChart",
     type: "jFreeChartComponent",
     listeners: ["MetaLayerCharts.selectedRegionMeasure"],
@@ -155,7 +155,7 @@ require([
     executeAtStart: true
   }));
 
-  dashboard.addComponent(new DialComponent(dashboard, {
+  dashboard.addComponent(new DialComponent({
     name: "dialChart",
     type: "dialComponent",
     listeners: ["MetaLayerCharts.departmentMeasure"],

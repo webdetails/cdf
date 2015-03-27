@@ -106,7 +106,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'],
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "2009-01-01");
 
-    dashboard.addComponent(new DateInputComponent(dashboard, {
+    dashboard.addComponent(new DateInputComponent({
       name: "myInput",
       type: "dateInputComponent",
       parameters:[],

@@ -25,7 +25,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SelectComponent", 'cdf/dashboard/
 
     dashboard.init();
     
-    var selectComponent = new SelectComponent(dashboard, {
+    var selectComponent = new SelectComponent({
       name: "selectComponent",
       type: "selectComponent",
       parameters:[],
@@ -83,7 +83,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SelectComponent", 'cdf/dashboard/
     describe("The externalPlugin #", function() {
   
       var makeSelect = function(name, externalPlugin, extraOptions, dashboard) {
-        return new SelectComponent(dashboard, {
+        return new SelectComponent({
           name: name,
           type: "SelectComponent",
           parameter: "selectParam",

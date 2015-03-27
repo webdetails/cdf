@@ -25,7 +25,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SelectMultiComponent"],
     
     dashboard.init();
 
-    var multiSelectComponent = new SelectMultiComponent(dashboard, {
+    var multiSelectComponent = new SelectMultiComponent({
       name: "selectMultiComponent",
       type: "selectMultiComponent",
       htmlObject: "sampleObject",

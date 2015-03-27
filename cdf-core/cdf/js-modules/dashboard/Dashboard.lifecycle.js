@@ -195,7 +195,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       // Since we can get into racing conditions between last component's
       // preExecution and dashboard.postInit, we'll add a last component with very
       // low priority who's funcion is only to act as a marker.
-      var postInitComponent = new UnmanagedComponent(myself, {
+      var postInitComponent = new UnmanagedComponent({
         name: "PostInitMarker",
         type: "unmanaged",
         lifecycle: {

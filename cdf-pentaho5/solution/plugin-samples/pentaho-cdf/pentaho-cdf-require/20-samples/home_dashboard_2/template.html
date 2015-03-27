@@ -44,7 +44,7 @@ require([
 
   dashboard = new Dashboard();
   
-  dashboard.addComponent(new TextComponent(dashboard, {
+  dashboard.addComponent(new TextComponent({
     name: "titleString",
     type: "text",
     listeners: ["MetaLayerHome2.filterMeasure"],
@@ -55,7 +55,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new JFreeChartComponent(dashboard, {
+  dashboard.addComponent(new JFreeChartComponent({
     name: "topTenCustomers",
     type: "jFreeChartComponent",
     chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
@@ -67,7 +67,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new PivotLinkComponent(dashboard, {
+  dashboard.addComponent(new PivotLinkComponent({
     name: "topTenCustomersDetails",
     type: "pivotLink",
     htmlObject: "topTenCustomersDetailsObject",
@@ -77,7 +77,7 @@ require([
     executeAtStart: true
   }));
 
-  dashboard.addComponent(new JFreeChartComponent(dashboard, {
+  dashboard.addComponent(new JFreeChartComponent({
     name: "territorySales",
     type: "jFreeChartComponent",
     chartDefinition: MetaLayerHome2.territorySalesDefinition,
@@ -89,7 +89,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new JFreeChartComponent(dashboard, {
+  dashboard.addComponent(new JFreeChartComponent({
     name: "productLineSales",
     type: "jFreeChartComponent",
     chartDefinition: MetaLayerHome2.productLineSalesDefinition,

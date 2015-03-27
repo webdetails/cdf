@@ -70,7 +70,7 @@ require([
   dashboard.addParameter("topThreshold", 2000000);
   dashboard.addParameter("selectedPoint", "");
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "pieChart",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/PieChart1.xaction",
@@ -82,7 +82,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "barChart",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/BarChart2.xaction",
@@ -94,7 +94,7 @@ require([
     postExecution: function() {}
   }));
 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "lineChart",
     type: "xaction",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/LineChart3.xaction",
@@ -121,7 +121,7 @@ require([
     postExecution:function(){}
   }*/
 
-  dashboard.addComponent(new MapComponent(dashboard, {
+  dashboard.addComponent(new MapComponent({
     name: "map",
     type: "map",
     path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/GetPoints.xaction",

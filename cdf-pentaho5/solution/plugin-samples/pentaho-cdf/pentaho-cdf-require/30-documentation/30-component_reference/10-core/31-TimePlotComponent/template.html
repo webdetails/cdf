@@ -161,7 +161,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/TimePlotComponent'],
 
     var dashboard = new Dashboard();
 
-    dashboard.addComponent(new TimePlotComponent(dashboard, {
+    dashboard.addComponent(new TimePlotComponent({
       name: "timePlotComponent",
       type: "timePlotComponent",
       chartDefinition: timePlotDefinition,

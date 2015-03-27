@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/ExecuteXactionComponent"],
 
     dashboard.init();
 
-    var executeXactionComponent = new ExecuteXactionComponent(dashboard, {
+    var executeXactionComponent = new ExecuteXactionComponent({
       name: "executeTopTenCustomers",
       type: "executeXaction",
       path: "/public/plugin-samples/pentaho-cdf/20-samples/home_dashboard/topTenCustomers.xaction",

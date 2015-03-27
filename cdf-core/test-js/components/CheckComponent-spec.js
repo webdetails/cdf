@@ -25,7 +25,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent"],
 
     dashboard.init();
 
-    var checkComponent = new CheckComponent(dashboard, {
+    var checkComponent = new CheckComponent({
       name: "checkComponent",
       type: "checkComponent",
       parameters:[],

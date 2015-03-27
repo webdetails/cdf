@@ -52,7 +52,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/ContentListComponent'],
 
     var dashboard = new Dashboard();
 
-    dashboard.addComponent(new ContentListComponent(dashboard, {
+    dashboard.addComponent(new ContentListComponent({
       name: "folderContentComponent",
       type: "contentList",
       listeners:[],

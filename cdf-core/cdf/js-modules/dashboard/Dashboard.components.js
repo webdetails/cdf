@@ -171,16 +171,12 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      */
     _bindControl: function(control) {
 
-      /** This is LEGACY
-      var Class = this._getControlClass(control);
-      if(!Class) {
-        Logger.log("Object type " + control["type"] + " can't be mapped to a valid class", "error");
-      } else {
-        this._castControlToClass(control, Class);
+      if(!control.dashboard) { 
+        control.dashboard = this;
+        // Add logging lifeCycle
+        this._addLogLifecycleToControl(control);
       }
-      */
-  
-      return this._bindExistingControl(control, null);
+      return control;
     },
   
     /**
@@ -189,6 +185,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      * @param Class
      * @private
      * @returns {*}
+     *
+     * @deprecated
      */
     _bindExistingControl: function(control, Class) {
       if(!control.dashboard) {

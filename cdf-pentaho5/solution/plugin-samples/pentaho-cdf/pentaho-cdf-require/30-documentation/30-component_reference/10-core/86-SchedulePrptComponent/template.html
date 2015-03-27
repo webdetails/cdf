@@ -94,7 +94,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SchedulePrptComponent'],
 
     var dashboard = new Dashboard();
 
-    dashboard.addComponent(new SchedulePrptComponent(dashboard, {
+    dashboard.addComponent(new SchedulePrptComponent({
       name: "executeTopTenCustomers",
       type: "schedulePrpt",
       path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",

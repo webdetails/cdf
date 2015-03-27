@@ -41,7 +41,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
       }
     };
 
-    var autocompleteBox = new AutocompleteBoxComponent(dashboard, {
+    var autocompleteBox = new AutocompleteBoxComponent({
       name: "autocompleteBox",
       type: "autocompleteBox",
       matchType: "fromStart",

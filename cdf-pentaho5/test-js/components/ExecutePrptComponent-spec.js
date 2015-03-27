@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/ExecutePrptComponent", "cdf/lib/j
 
     myDashboard.init();
 
-    var executeTopTenCustomers = new ExecutePrptComponent(myDashboard, {
+    var executeTopTenCustomers = new ExecutePrptComponent({
       name: "executeTopTenCustomers",
       type: "executePrpt",
       path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",

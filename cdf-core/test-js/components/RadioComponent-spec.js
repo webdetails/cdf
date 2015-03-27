@@ -25,7 +25,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/RadioComponent"],
 
     dashboard.init();
 
-    var radioComponent = new RadioComponent(dashboard, {
+    var radioComponent = new RadioComponent({
       name: "radioComponent",
       type: "radioComponent",
       parameters:[],

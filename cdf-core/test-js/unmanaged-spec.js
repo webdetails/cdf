@@ -50,7 +50,7 @@ describe("Unmanaged Base Component #", function() {
   var myDashboard = new Dashboard();
   
   
-  var basic = window.basic = new FreeformComponent( myDashboard, {
+  var basic = window.basic = new FreeformComponent({
     name: "basic",
     type: "freeform",
     testFlag: 0,
@@ -62,7 +62,7 @@ describe("Unmanaged Base Component #", function() {
     postExecution: function(){}
   } );
 
-  var freeformQuery = window.freeformQuery = new FreeformComponent( myDashboard, {
+  var freeformQuery = window.freeformQuery = new FreeformComponent({
     name: "freeformQuery",
     type: "freeform",
     testFlag: 0,
@@ -85,7 +85,7 @@ describe("Unmanaged Base Component #", function() {
 
 
 
-  var freeformAjax = window.freeformAjax = new FreeformComponent( myDashboard, {
+  var freeformAjax = window.freeformAjax = new FreeformComponent({
     name: "freeformAjax",
     type: "freeform",
     testFlag: 0,

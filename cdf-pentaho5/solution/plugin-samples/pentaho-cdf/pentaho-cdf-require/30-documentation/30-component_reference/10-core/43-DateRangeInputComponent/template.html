@@ -99,7 +99,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/DateRangeInputComponent'],
   dashboard.addParameter("startDate", "2014-03-10");
   dashboard.addParameter("endDate", "2014-09-02");
 
-  dashboard.addComponent(new DateRangeInputComponent(dashboard, {
+  dashboard.addComponent(new DateRangeInputComponent({
     name: "myInput",
     type: "dateRangeInputComponent",
     parameter: ["startDate","endDate"],

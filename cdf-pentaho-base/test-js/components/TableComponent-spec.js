@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TableComponent"],
 
     myDashboard.init();
 
-    var tableComponent = new TableComponent(myDashboard, {
+    var tableComponent = new TableComponent({
       name: "tableComponent",
       type: "tableComponent",
       chartDefinition: {

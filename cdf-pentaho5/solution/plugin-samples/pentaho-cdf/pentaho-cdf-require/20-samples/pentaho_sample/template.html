@@ -33,7 +33,7 @@ require([
   dashboard.addParameter("region", "null");
 
   // pageTitleString component generates the page title with any other parameters is may need to construct the string
-  dashboard.addComponent(new TextComponent(dashboard, {
+  dashboard.addComponent(new TextComponent({
     name: "pageTitleString",
     type: "text",
     listeners: ["region", "department"],
@@ -58,7 +58,7 @@ require([
   }));
 
   // RegionsPieChart component generates the 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "RegionsPieChart",
     type: "xaction",
     solution: "plugin-samples",
@@ -71,7 +71,7 @@ require([
   }));
 
   // RegionVarianceBarChart component generates the 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "RegionVarianceBarChart",
     type: "xaction",
     solution: "plugin-samples",
@@ -88,7 +88,7 @@ require([
   }));
 
   // DepartmentDialChart component generates the 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "DepartmentDialChart",
     type: "xaction",
     solution: "plugin-samples",
@@ -101,7 +101,7 @@ require([
   }));
 
   // EmbeddedReport component generates the 
-  dashboard.addComponent(new XactionComponent(dashboard, {
+  dashboard.addComponent(new XactionComponent({
     name: "EmbeddedReport",
     type: "xaction",
     solution: "plugin-samples",

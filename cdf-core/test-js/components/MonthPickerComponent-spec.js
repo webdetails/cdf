@@ -28,7 +28,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/MonthPickerComponent"],
     var d = new Date();
     d.setYear(2006);
 
-    var monthPickerComponent = new MonthPickerComponent(dashboard, {
+    var monthPickerComponent = new MonthPickerComponent({
       name: "monthPickerComponent",
       type: "monthPickerComponent",
       htmlObject: 'monthPickerComponent',
