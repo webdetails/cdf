@@ -94,7 +94,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/ExecuteAnalyzerComponent'],
 
     var dashboard = new Dashboard();
 
-    dashboard.addComponent(new ExecuteAnalyzerComponent(dashboard, {
+    dashboard.addComponent(new ExecuteAnalyzerComponent({
       name: "executeTerritorySales",
       type: "executeAnalyzer",
       solution: "public",

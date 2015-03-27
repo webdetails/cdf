@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/OpenFlashChartComponent"],
 
     myDashboard.init();
 
-    var openFlashChartComponent = new OpenFlashChartComponent(myDashboard, {
+    var openFlashChartComponent = new OpenFlashChartComponent({
       name: "openFlashChartComponent",
       type: "openFlashChartComponent",
       chartDefinition: {

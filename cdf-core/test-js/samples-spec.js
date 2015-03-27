@@ -76,7 +76,7 @@ HelloQueryUnmanagedComponent = UnmanagedComponent.extend({
     describe("Unmanaged Component Samples #", function() {
       var myDashboard = new Dashboard();
     
-      var mhello = window.mhello = new HelloBaseComponent(myDashboard, {
+      var mhello = window.mhello = new HelloBaseComponent({
         name: "mhello",
         type: "HelloBase",
         testFlag: 0,
@@ -85,7 +85,7 @@ HelloQueryUnmanagedComponent = UnmanagedComponent.extend({
         myFunction: function(){}
       });
     
-      var uhello = window.uhello = new HelloUnmanagedComponent(myDashboard, {
+      var uhello = window.uhello = new HelloUnmanagedComponent({
         name: "uhello",
         type: "HelloUnmanaged",
         htmlObject: 'uhello',
@@ -93,7 +93,7 @@ HelloQueryUnmanagedComponent = UnmanagedComponent.extend({
         myFunction: function(){}
       });
     
-      var mquery = window.mquery = new HelloQueryBaseComponent(myDashboard, {
+      var mquery = window.mquery = new HelloQueryBaseComponent({
         name: "mquery",
         type: "HelloQueryBase",
         htmlObject: 'mquery',
@@ -104,7 +104,7 @@ HelloQueryUnmanagedComponent = UnmanagedComponent.extend({
         }
       });
     
-      var uquery = window.uquery = new HelloQueryUnmanagedComponent(myDashboard, {
+      var uquery = window.uquery = new HelloQueryUnmanagedComponent({
         name: "uquery",
         type: "HelloQueryUnmanaged",
         htmlObject: 'uquery',

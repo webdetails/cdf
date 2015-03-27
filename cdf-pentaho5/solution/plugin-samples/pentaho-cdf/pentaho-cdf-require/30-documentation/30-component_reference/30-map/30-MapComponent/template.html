@@ -126,7 +126,7 @@
     dashboard.addParameter("topThreshold", 2000000);
     dashboard.addParameter("selectedPoint", "");
 
-    dashboard.addComponent(new TextComponent(dashboard, {
+    dashboard.addComponent(new TextComponent({
       name: "regionSelector",
       type: "textComponent",
       listeners: ["selectedPoint"],
@@ -136,7 +136,7 @@
       executeAtStart: true
     }));
 
-    dashboard.addComponent(new MapComponent(dashboard, {
+    dashboard.addComponent(new MapComponent({
       name: "mapComponent",
       type: "mapComponent",
       path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetPoints.xaction",

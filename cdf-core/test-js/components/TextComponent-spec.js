@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TextComponent"],
 
     dashboard.init();
 
-    var textComponent = new TextComponent(dashboard, {
+    var textComponent = new TextComponent({
       name: "textComponent",
       type: "textComponent",
       htmlObject: 'textComponent',

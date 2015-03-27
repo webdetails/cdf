@@ -25,7 +25,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TextInputComponent"],
 
     dashboard.init();
 
-    var textInputComponent = new TextInputComponent(dashboard, {
+    var textInputComponent = new TextInputComponent({
       name: "textInputComponent",
       type: "textInputComponent",
       parameters:[],

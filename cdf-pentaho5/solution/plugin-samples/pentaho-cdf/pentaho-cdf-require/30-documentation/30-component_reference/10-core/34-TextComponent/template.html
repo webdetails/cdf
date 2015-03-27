@@ -65,7 +65,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/TextComponent'],
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
-    dashboard.addComponent(new TextComponent(dashboard, {
+    dashboard.addComponent(new TextComponent({
       name: "textGenerator",
       type: "textComponent",
       listeners: [],

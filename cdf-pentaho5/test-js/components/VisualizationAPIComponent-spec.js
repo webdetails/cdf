@@ -25,7 +25,7 @@ define(['cdf/Dashboard.Clean', 'amd!cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/
 
     dashboard.init();
 
-    var visualizationAPIComponent = new VisualizationAPIComponent(dashboard, {
+    var visualizationAPIComponent = new VisualizationAPIComponent({
       name: "visualizationAPIComponent",
       type: "visualizationAPIComponent",
       vizId: "sampleViz",

@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/XactionComponent"],
 
     myDashboard.init();
 
-    var xactionComponent = new XactionComponent(myDashboard, {
+    var xactionComponent = new XactionComponent({
       name: "xactionComponent",
       type: "xactionComponent",
       path: "/public/plugin-samples/pentaho-cdf/20-samples/home_dashboard/topTenCustomers.xaction",

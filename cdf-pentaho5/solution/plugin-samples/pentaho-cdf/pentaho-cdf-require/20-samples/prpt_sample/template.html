@@ -30,7 +30,7 @@ require([
 
   //var oStatus = "Shipped";
 
-  dashboard.addComponent(new TextComponent(dashboard, {
+  dashboard.addComponent(new TextComponent({
     name: "titleString",
     type: "text",
     title: "Order Status",
@@ -51,7 +51,7 @@ require([
   }));
 
 
-  dashboard.addComponent(new SelectComponent(dashboard, {
+  dashboard.addComponent(new SelectComponent({
     name: "statusSelector",
     type: "select",
     parameter: "oStatus",
@@ -63,7 +63,7 @@ require([
     postExecution: function() { this.dashboard.processChange(this.name); }
   }));
 
-  dashboard.addComponent(new PrptComponent(dashboard, {
+  dashboard.addComponent(new PrptComponent({
     name: "orderStatus",
     type: "prpt",
     path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",

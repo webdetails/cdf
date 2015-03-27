@@ -114,7 +114,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/TrafficComponent'],
 
     var dashboard = new Dashboard();
 
-    dashboard.addComponent(new TrafficComponent(dashboard, {
+    dashboard.addComponent(new TrafficComponent({
       name: "trafficComponent",
       type: "trafficComponent",
       trafficDefinition: trafficDefinition,

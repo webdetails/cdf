@@ -48,7 +48,7 @@ define(["cdf/Dashboard.Clean", "cdf/lib/jquery", "amd!cdf/lib/underscore", "cdf/
      * Our setup consists of adding a bunch of components to CDF.
      */
     dashboard.init();
-    var shouldUpdate = new ManagedFreeformComponent(dashboard, {
+    var shouldUpdate = new ManagedFreeformComponent({
       name: "shouldUpdate",
       type: "managedFreeform",
       preExecution: function() {},
@@ -57,7 +57,7 @@ define(["cdf/Dashboard.Clean", "cdf/lib/jquery", "amd!cdf/lib/underscore", "cdf/
     });
 
 
-    var shouldNotUpdate =  new ManagedFreeformComponent(dashboard, {
+    var shouldNotUpdate =  new ManagedFreeformComponent({
       name: "shouldNotUpdate",
       type: "managedFreeform",
       preExecution: function() {return false;},

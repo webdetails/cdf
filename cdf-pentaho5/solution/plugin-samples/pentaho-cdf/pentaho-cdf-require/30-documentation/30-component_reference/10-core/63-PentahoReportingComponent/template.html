@@ -91,7 +91,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'cdf/compo
     var dashboard = new Dashboard();
     dashboard.addParameter("output_type", "");
 
-    dashboard.addComponent(new SelectComponent(dashboard, {
+    dashboard.addComponent(new SelectComponent({
       name: "outputSelector",
       type: "selectComponent",
       parameters:[],
@@ -102,7 +102,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'cdf/compo
       executeAtStart: true
     }));
 
-    dashboard.addComponent(new PrptComponent(dashboard, {
+    dashboard.addComponent(new PrptComponent({
       name: "orderStatusReport",
       type: "prptComponent",
       path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",

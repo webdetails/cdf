@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/ButtonComponent"],
 
     myDashboard.init();
 
-    var buttonComponent = new ButtonComponent(myDashboard, {
+    var buttonComponent = new ButtonComponent({
       name: "buttonComponent",
       type: "button",
       listeners:["productLine", "territory"],

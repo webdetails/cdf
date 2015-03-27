@@ -42,7 +42,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/PrptComponent"],
     dashboard.addParameter('funcArray', function() { return  optionData.funcArray; });
     dashboard.addParameter('array', optionData.array);
 
-    var prptComponent = new PrptComponent(dashboard, {
+    var prptComponent = new PrptComponent({
       name: "prptComponent",
       type: "prptComponent",
       htmlObject: "sampleObject",

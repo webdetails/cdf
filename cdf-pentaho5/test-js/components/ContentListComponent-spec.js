@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/ContentListComponent"],
 
     dashboard.init();
 
-    var contentListComponent = new ContentListComponent(dashboard, {
+    var contentListComponent = new ContentListComponent({
       name: "folderContentComponent",
       type: "contentList",
       listeners:[],

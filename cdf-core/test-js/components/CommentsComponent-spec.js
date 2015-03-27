@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/CommentsComponent", "cdf/lib/jque
 
     dashboard.init();
 
-    var commentsComponent = new CommentsComponent(dashboard, {
+    var commentsComponent = new CommentsComponent({
       name: "commentsComponent",
       type: "commentsComponent",
       page: "generic",

@@ -26,7 +26,7 @@ define(['cdf/Dashboard.Clean', 'cdf/components/DateRangeInputComponent', 'cdf/li
 
     dashboard.init();
 
-    var dateRangeInputComponent = new DateRangeInputComponent(dashboard, {
+    var dateRangeInputComponent = new DateRangeInputComponent({
       name: "dateRangeInputComponent",
       type: "dateRangeInputComponent",
       htmlObject: 'dateRangeInputComponent',

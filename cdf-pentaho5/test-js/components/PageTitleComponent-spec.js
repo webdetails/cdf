@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/PageTitleComponent"],
 
     dashboard.init();
 
-    var pageTitleComponent = new PageTitleComponent(dashboard, {
+    var pageTitleComponent = new PageTitleComponent({
       name: "titleComponent",
       type: "pageTitle",
       listeners:[],

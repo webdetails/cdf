@@ -225,7 +225,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/TableComponent'],
         }
       };
 
-    dashboard.addComponent(new TableComponent(dashboard, {
+    dashboard.addComponent(new TableComponent({
       name: "topTenCustomers",
       type: "tableComponent",
       chartDefinition: topTenCustomerDefinition,

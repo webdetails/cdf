@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent"],
 
     myDashboard.init();
 
-    var topTenCustomers = new JFreeChartComponent(myDashboard, {
+    var topTenCustomers = new JFreeChartComponent({
       name: "topTenCustomers",
       type: "jFreeChartComponent",
       chartDefinition: {

@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/DialComponent"],
 
     myDashboard.init();
 
-    var dialComponent = new DialComponent(myDashboard, {
+    var dialComponent = new DialComponent({
       name: "dialComponent",
       type: "dialComponent",
       chartDefinition: {

@@ -26,7 +26,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/MapComponent"],
 
     dashboard.init();
 
-    var mapComponent = new MapComponent(dashboard, {
+    var mapComponent = new MapComponent({
       name: "mapComponent",
       type: "mapComponent",
       path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetPoints.xaction",

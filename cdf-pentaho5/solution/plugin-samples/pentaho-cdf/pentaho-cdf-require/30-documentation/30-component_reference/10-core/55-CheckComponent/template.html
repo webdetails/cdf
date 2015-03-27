@@ -115,7 +115,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/CheckComponent'],
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "");
 
-    dashboard.addComponent(new CheckComponent(dashboard, {
+    dashboard.addComponent(new CheckComponent({
       name: "checkComponent",
       type: "checkComponent",
       parameters:[],

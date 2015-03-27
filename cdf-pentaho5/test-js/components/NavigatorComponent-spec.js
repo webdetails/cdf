@@ -23,7 +23,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/NavigatorComponent"],
 
     dashboard.init();
 
-    var navigatorComponent = new NavigatorComponent(dashboard, {
+    var navigatorComponent = new NavigatorComponent({
       name: "navigatorMenu",
       type: "navigator",
       listeners:[],
