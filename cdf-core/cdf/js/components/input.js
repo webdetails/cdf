@@ -1057,6 +1057,11 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     this._doAutoFocus();
   },
   callAjaxAfterRender: function(name){
+  
+	//START fix of SP-1771
+    document.cookie = "scrollValVertical=" + $('div.prompt-panel').scrollTop();
+    //END fix of SP-1771
+  
     setTimeout(function(){
       Dashboards.processChange(name)
     },1);
