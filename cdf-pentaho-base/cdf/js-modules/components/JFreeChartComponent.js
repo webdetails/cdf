@@ -11,8 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', '../lib/jquery', './BaseComponent', 'amd!../lib/captify', 'css!./JFreeChartComponent'],
-  function(JFreeChartComponentExt, DashboardExt, Logger, $, BaseComponent) {
+define(['./JFreeChartComponent.ext',
+  '../dashboard/Dashboard.ext',
+  '../Logger',
+  '../lib/jquery',
+  './BaseComponent',
+  'amd!../lib/captify',
+  'css!./JFreeChartComponent',
+  '../dashboard/Utils'],
+  function(JFreeChartComponentExt, DashboardExt, Logger, $, BaseComponent, Utils) {
 
   var JFreeChartComponent = BaseComponent.extend({
     update : function() {
@@ -46,7 +53,7 @@ define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', 
               var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 
               if(value) {
-                value = doCsvQuoting(value, '='); //quote if needed for '='
+                value = Utils.doCsvQuoting(value, '='); //quote if needed for '='
               }
               if(i == 0) {
                 cdaParameterString = "";
@@ -54,7 +61,7 @@ define(['./JFreeChartComponent.ext', '../dashboard/Dashboard.ext', '../Logger', 
                 cdaParameterString += ";";
               }
 
-              cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
+              cdaParameterString += Utils.doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
             }
           }
         }

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -99,7 +99,7 @@ define(
       _.each( params , function(value, name) {
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parseable array by cda
-          value = doCsvQuoting(value[0],';');
+          value = Utils.doCsvQuoting(value[0],';');
         }
         //else will not be correctly handled for functions that return arrays
         if(typeof value == 'function') {

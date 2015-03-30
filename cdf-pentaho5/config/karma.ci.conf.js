@@ -28,6 +28,7 @@ module.exports = function(config) {
       'test-js/missing-dependency.js',
       'config/context.js',
       { pattern: 'test-js/**/*.js', included: false },
+      { pattern: '../cdf-pentaho-base/test-js/**/*.js', included: false },
       'build-res/requireCfg-raw.js',
       'config/require-config.js'
     ],

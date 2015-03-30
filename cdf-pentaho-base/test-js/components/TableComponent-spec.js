@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/TableComponent"],
-  function(Dashboard, TableComponent) {
+define(["cdf/Dashboard.Clean", "cdf/components/TableComponent", "cdf/lib/jquery"],
+  function(Dashboard, TableComponent, $) {
 
   /**
    * ## The Table Component
