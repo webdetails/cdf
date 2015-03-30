@@ -1075,7 +1075,18 @@ Dashboards.updateAll = function(components) {
   if(updating === null || updating.components.length == 0
       || ( othersAwaitExecution = this.othersAwaitExecution( _.clone( this.updating.tiers ) , this.updating.current ) ) ) {
     var toUpdate = this.getFirstTier(this.updating.tiers);
-    if(!toUpdate) return;
+    if(!toUpdate)
+    {
+        //START fix of PRD-5398
+        var scrollValVertical = getCookie('scrollValVertical');
+        if(scrollValVertical)
+        {
+            $('div.prompt-panel').scrollTop(scrollValVertical);
+        }
+        //END fix of PRD-5398
+
+        return;
+    }
 
     if( othersAwaitExecution ){ 
       var tiers = this.updating.tiers;
