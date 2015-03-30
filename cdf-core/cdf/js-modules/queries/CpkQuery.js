@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -25,8 +25,13 @@
  */
 
 
-define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.query', 'amd!../lib/underscore', '../dashboard/Utils'],
-  function(DashboardExt, BaseQuery, Dashboard, _, Utils) {
+define(['../dashboard/Dashboard.ext',
+  './BaseQuery',
+  '../dashboard/Dashboard.query',
+  'amd!../lib/underscore',
+  '../dashboard/Utils',
+  '../lib/jquery'],
+  function(DashboardExt, BaseQuery, Dashboard, _, Utils, $) {
 
   var CpkEndpointsOpts = {
     name: "cpk",
@@ -97,6 +102,9 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
         params = $.extend( {}, cachedParams , overrides);
 
       _.each(params, function(value, name) {
+        if(typeof value == 'function') {
+          value = value();
+        }
         if(_.isObject(value)) {
           // kettle does not handle arrays natively,
           // nor does it interpret multiple parameters with the same name as elements of an array,
@@ -106,9 +114,6 @@ define(['../dashboard/Dashboard.ext', './BaseQuery', '../dashboard/Dashboard.que
           // Another option would be to add futher:
           // value = value.split('],').join(';').split('[').join('').split(']').join('');
           // which transforms [[0,1],[2,3]] into "0,1;2,3"
-        }
-        if(typeof value == 'function') {
-          value = value();
         }
         queryDefinition['param' + name] = value;
       });

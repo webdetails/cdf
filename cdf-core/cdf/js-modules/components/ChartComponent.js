@@ -39,7 +39,7 @@ define([
               var value = this.dashboard.getParameterValue(paramDefs[name]);
               if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
                 // Special case where single element will wrongly be treated as a parseable array by cda
-                value = doCsvQuoting(value[0],';');
+                value = Utils.doCsvQuoting(value[0],';');
               }
               //else Will not be correctly handled for functions that return arrays
 
