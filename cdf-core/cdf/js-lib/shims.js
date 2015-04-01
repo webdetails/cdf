@@ -56,7 +56,13 @@ if ( !String.prototype.endsWith ) {
   String.prototype.endsWith = function(str){
     return (this.match(str+"$")==str);
   };
-} 
+}
+
+if (!String.prototype.trim) {
+  String.prototype.trim = function() {
+    return this.replace(/^\s+/, '').replace(/\s+$/, '');
+  };
+}
 
 if (!Object.keys) {
   Object.keys = (function () {
