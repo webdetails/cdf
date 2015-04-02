@@ -153,19 +153,38 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   };
 
   /**
-   * Format the a date with a given mask
+   * Format a date with a given mask using the Dashboard language
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
    *
-   * @mnethod dateFormat
-   * @param mask
+   * @method dateFormat
    * @param date
+   * @param mask
+   * @param langCode
    * @returns {string} formatted date
    * @static
    */
-  Utils.dateFormat = function(mask, date) {
-    if(date != null && _.isFunction(date.format)) {
-      return date.format(mask);
+  Utils.dateFormat = function(date, mask, langCode) {
+    var toFormat = moment(date);
+
+    if(!toFormat.isValid()) {
+      return toFormat.toDate();
     }
-    return moment().format(mask);
+
+    if(langCode != null) {
+      var mLocale = moment.locale();
+      //Testing if langCode exists. Use langCode if true, and 'en-US' otherwise
+      if(moment.locale(langCode, true) === undefined) {
+        langCode = 'en-US';
+      }
+
+      //must set Dashboard Language back to the previous state,
+      //because moment.locale always changes the current locale being used.
+      moment.locale(mLocale);
+      toFormat.locale(langCode);
+    }
+
+    return toFormat.format(mask);
   };
     
   // Conversion functions

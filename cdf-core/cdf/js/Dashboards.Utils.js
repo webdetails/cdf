@@ -102,7 +102,9 @@ Dashboards.getLocationSearchString = function() {
   };
 
   /**
-   * Format the a date with a given mask
+   * Format a date with a given mask using the Dashboard language
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
    *
    * @param date
    * @param mask
@@ -115,7 +117,21 @@ Dashboards.getLocationSearchString = function() {
     if(!toFormat.isValid()) {
       return toFormat.toDate();
     }
-    return moment().format(mask);
+
+    if(langCode != null) {
+      var mLocale = moment.locale();
+      //Testing if langCode exists. Use langCode if true, and 'en-US' otherwise
+      if(moment.locale(langCode, true) === undefined) {
+        langCode = 'en-US';
+      }
+
+      //must set Dashboard Language back to the previous state,
+      //because moment.locale always changes the current locale being used.
+      moment.locale(mLocale);
+      toFormat.locale(langCode);
+    }
+
+    return toFormat.format(mask);
   };
   
   /**
@@ -138,14 +154,14 @@ Dashboards.getLocationSearchString = function() {
         obj[prop[0]] = prop[1];
       }
     return obj;
-  };
+  }
   function _obj2pa (obj) {
     var pArray = [];
     for (var key in obj) if (obj.hasOwnProperty(key)) {
       pArray.push([key,obj[key]]);
     }
     return pArray;
-  };
+  }
 
   // Exports
   // NOTE: using underscore.js predicates but we could also use Dashboards.isArray() and 
@@ -163,9 +179,6 @@ Dashboards.getLocationSearchString = function() {
   };
 
 })(Dashboards);
-
-
-
 
 /**
  * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
