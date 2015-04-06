@@ -35,24 +35,24 @@
 }
 
 .tableComponent{
-	margin-bottom:0em;
+  margin-bottom:0em;
 }
 
 .tableComponent th{
-	text-align: center;
+  text-align: center;
 }
 
 .tableComponent td.numeric{
-	text-align: right;
-	font-family: monospace;
+  text-align: right;
+  font-family: monospace;
 }
 
 .tableComponent td.string{
-	text-align: left;
+  text-align: left;
 }
 
 .tableComponent td.sparkline{
-	text-align: center;
+  text-align: center;
 }
 
 /* Overriding jquery.dataTable.css table.dataTable box-sizing style*/
@@ -122,7 +122,7 @@
 */
 
 .cdfClickable{
-	cursor: pointer;
+  cursor: pointer;
 }
 
 #GB_window {
@@ -156,8 +156,8 @@ DateRangeInput Component
 .ui-daterangepicker button.btnCancel {
   margin: 0px 5px 5px 0px;
   position: absolute;
-        top: auto;
-        left: auto;
+  top: auto;
+  left: auto;
   bottom: 0px;
   right: 55px;
   float: right;
@@ -479,114 +479,114 @@ Comments Component
 }
 
 button.scheduler_button {
-	-webkit-box-shadow: inset 0px 0px 2px 0px #0b4978;
-	-moz-box-shadow: inset 0px 0px 2px 0px #0b4978;
-	box-shadow: inset 0px 0px 2px 0px #0b4978;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	color: #fff;
-	font-weight: 500;
-	font-family: 'Open Sans', sans-serif;
-	border: none;
-	padding: 10px;
-	padding-right: 45px;
-	width: 99.9%;
-	background: #137bca url('images/open-dialog.png') no-repeat right 15px center;
-	margin: 20px 0px 0px;
+  -webkit-box-shadow: inset 0px 0px 2px 0px #0b4978;
+  -moz-box-shadow: inset 0px 0px 2px 0px #0b4978;
+  box-shadow: inset 0px 0px 2px 0px #0b4978;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 500;
+  font-family: 'Open Sans', sans-serif;
+  border: none;
+  padding: 10px;
+  padding-right: 45px;
+  width: 99.9%;
+  background: #137bca url('images/open-dialog.png') no-repeat right 15px center;
+  margin: 20px 0px 0px;
 }
 
 .scheduler_button:hover
 {
-	background-color: #1887db;
-	transition: all 0.25s linear 0s;
+  background-color: #1887db;
+  transition: all 0.25s linear 0s;
 }
 
 
 /* dialog box */
 .scheduler .jqifade {
-	opacity: 0.8 !important;
+  opacity: 0.8 !important;
 }
 
 .scheduler div#jqi.jqi   {
-	border: 1px solid #DADADA;
-	border-top: 1px #fff solid;
-	-webkit-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
-	-moz-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
-	box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
-	border-radius: 6px;
-	-moz-border-radius: 6px;
-	-webkit-border-radius: 6px;
-	overflow: hidden;
-	top: 10% !important;
+  border: 1px solid #DADADA;
+  border-top: 1px #fff solid;
+  -webkit-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  overflow: hidden;
+  top: 10% !important;
 }
 
 .scheduler div#jqi.jqi,
 .scheduler div.jqi .jqicontainer  {
-	padding: 0px;
+  padding: 0px;
 }
 
 .scheduler div#jqistates {
-	background: #f5f5f5;
-	overflow: hidden;
+  background: #f5f5f5;
+  overflow: hidden;
 }
 
 .scheduler .jqi_state {
-	color: #222;
-	font-weight: 500;
-	border-radius: 6px;
-	-moz-border-radius: 6px;
-	-webkit-border-radius: 6px;
-	overflow: hidden;
-	padding: 0px;
+  color: #222;
+  font-weight: 500;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  overflow: hidden;
+  padding: 0px;
 }
 
 div.scheduler  .jqimessage {
-	background: #f5f5f5 !important;
-	border-radius: 6px;
-	-moz-border-radius: 6px;
-	-webkit-border-radius: 6px;
-	padding: 15px;
+  background: #f5f5f5 !important;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  padding: 15px;
 }
 
 .scheduler  .jqiclose {
-	visibility: hidden;
+  visibility: hidden;
 }
 
 .scheduler  .jqiclose:before {
-	content: "";
-	position: absolute;
-	right: 15px;
-	top: 15px;
-	width: 19px;
-	height: 19px;
-	background: url('images/close-dialog-hover.png');
-	visibility: visible;
-	transition: background 0.25s linear 0s;
+  content: "";
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  width: 19px;
+  height: 19px;
+  background: url('images/close-dialog-hover.png');
+  visibility: visible;
+  transition: background 0.25s linear 0s;
 }
 
 .scheduler  .jqiclose:hover:before {
-	background: url('images/close-dialog.png');
-	transition: background 0.25s linear 0s;
+  background: url('images/close-dialog.png');
+  transition: background 0.25s linear 0s;
 }
 
 .scheduler  form input[type="text"] {
-	padding: 5px;
-	border-radius: 3px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	color: #666;
-	font-family: 'Open Sans', sans-serif;
-	margin-right: 5px;
-	width: 250px;
+  padding: 5px;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  color: #666;
+  font-family: 'Open Sans', sans-serif;
+  margin-right: 5px;
+  width: 250px;
 }
 
 .scheduler  form input[type="checkbox"] {
-	margin: 5px 0px 5px 8px;
+  margin: 5px 0px 5px 8px;
 }
 
 .scheduler  form input[type="text"]:focus {
-	border: 1px solid #137bca;
+  border: 1px solid #137bca;
 }
 
 .scheduler  textarea:focus {
@@ -599,80 +599,80 @@ div.scheduler  .jqimessage {
 }
 
 div.scheduler  label {
-	color: #137bca;
-	font-size: 13px;
-	line-height: 25px;
+  color: #137bca;
+  font-size: 13px;
+  line-height: 25px;
 }
 
 .scheduler  select {
-	padding: 5px;
-	border-radius: 3px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border: 1px solid rgb(187, 187, 187);
-	margin-right: 5px;
+  padding: 5px;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border: 1px solid rgb(187, 187, 187);
+  margin-right: 5px;
 }
 
 .scheduler  select:focus {
-	border: 1px solid #137bca;
+  border: 1px solid #137bca;
 }
 
 .scheduler  .jqibuttons {
-	margin-top: 20px;
+  margin-top: 20px;
 }
 
 .scheduler  .jqibuttons button {
-	color: #fff;
-	font-weight: 500;
-	font-family: 'Open Sans', sans-serif;
-	border: none;
-	background: #137bca;
-	font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+  font-family: 'Open Sans', sans-serif;
+  border: none;
+  background: #137bca;
+  font-size: 14px;
 }
 
 .scheduler  .jqibuttons button:hover {
-	background-color: #1887db;
-	transition: all 0.25s linear 0s;
-	cursor: pointer;
+  background-color: #1887db;
+  transition: all 0.25s linear 0s;
+  cursor: pointer;
 }
 
 .scheduler  #jqi_basicState_buttonCancel, #jqi_mailState_buttonBack  {
-	width: 30%;
-	margin: 0;
-	left:0;
-	display: inline-block;
-	padding: 15px 0px;
-	border: none;
-	background-color: #333;
+  width: 30%;
+  margin: 0;
+  left:0;
+  display: inline-block;
+  padding: 15px 0px;
+  border: none;
+  background-color: #333;
 }
 
 .scheduler  #jqi_basicState_buttonCancel:hover, #jqi_mailState_buttonBack:hover {
-	background-color: #555;
-	transition: all 0.25s linear 0s;
+  background-color: #555;
+  transition: all 0.25s linear 0s;
 }
 
 .scheduler  #jqi_basicState_buttonOk, #jqi_mailState_buttonOk {
-	width: 70%;
-	margin: 0;
-	left:0;
-	display: inline-block;
-	padding: 15px 0px;
-	border: none;
+  width: 70%;
+  margin: 0;
+  left:0;
+  display: inline-block;
+  padding: 15px 0px;
+  border: none;
 }
 
 
 .scheduler .dialog-title {
-	color: #137bca;
-	font-size: 14px;
-	font-weight: 500;
+  color: #137bca;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .scheduler .dialog-label {
-	display: inline-block;
-	width: 100px;
-	color: #137bca;
-	font-size: 14px;
-	font-weight: 500;
+  display: inline-block;
+  width: 100px;
+  color: #137bca;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .img {
@@ -757,5 +757,29 @@ div.scheduler  label {
   background-image: url('../resources/style/images/table.png');
   width:32px;
   height:32px;
+}
+/*******************/
+
+/*
+  [CDE-471] This hack can be removed when jquery.ui in common-ui is updated to 1.11.*
+  where the bug causing this issue has been fixed
+*/
+
+/* IE9- */
+body.draggable-popup-fix {
+  position: relative\9;
+}
+
+/* IE10+ */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body.draggable-popup-fix {
+    position: relative;
+  }
+}
+
+@-moz-document url-prefix() { /* firefox */
+  body.draggable-popup-fix {
+    position: relative;
+  }
 }
 /*******************/

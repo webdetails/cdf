@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 Dashboards.escapeHtml = function(input) {
   // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
@@ -83,10 +83,10 @@ Dashboards.getLocationSearchString = function() {
   };
 
   /**
-   * Config a new or existing language by specifying the language code
+   * Configure a new or existing language by specifying the language code
    * and a configuration object with the keywords:
-   *  - 'number'     to configure number's format language
-   *  - 'dateLocale' to configure date's   format language
+   * - 'number' to configure number's format language
+   * - 'dateLocale' to configure date's format language
    *
    * @param langCode
    * @param config
@@ -102,7 +102,7 @@ Dashboards.getLocationSearchString = function() {
   };
 
   /**
-   * Format a date with a given mask
+   * Format the a date with a given mask
    *
    * @param mask
    * @param date
@@ -112,7 +112,6 @@ Dashboards.getLocationSearchString = function() {
     if(date != null && _.isFunction(date.format)) {
       return date.format(mask);
     }
-
     return moment().format(mask);
   };
 
@@ -150,10 +149,7 @@ Dashboards.getLocationSearchString = function() {
 
 })(Dashboards);
 
-(function(D) {
 
-
-})(Dashboards);
 
 
 /**
@@ -377,8 +373,9 @@ function encode_prepare( s )
     s = s.replace(/\+/g," ");
     /* CDF-271 jQuery 1.9.1 deprecated function $.browser */
     //if ($.browser == "msie" || $.browser == "opera"){
-    if ((navigator.userAgent.toLowerCase().indexOf('msie') != -1) ||
-        (navigator.userAgent.toLowerCase().indexOf('opera') != -1) ){
+    if((navigator.userAgent.toLowerCase().indexOf('msie') != -1)
+      || (navigator.userAgent.toLowerCase().indexOf('opera') != -1)) {
+
       return Utf8.decode(s);
     }
   }

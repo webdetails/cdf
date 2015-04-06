@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-*
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 BaseComponent = Base.extend(Backbone.Events).extend({
 
@@ -295,14 +295,14 @@ BaseComponent = Base.extend(Backbone.Events).extend({
 
   getTimerInfo: function(){
 
-      return {
-        timerStart: this.timerStart,
-        timerSplit: this.timerSplit,
-        elapsedSinceStart: this.elapsedSinceStart,
-        elapsedSinceStartDesc: this.formatTimeDisplay(this.elapsedSinceStart),
-        elapsedSinceSplit: this.elapsedSinceSplit,
-        elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
-      }
+    return {
+      timerStart: this.timerStart,
+      timerSplit: this.timerSplit,
+      elapsedSinceStart: this.elapsedSinceStart,
+      elapsedSinceStartDesc: this.formatTimeDisplay(this.elapsedSinceStart),
+      elapsedSinceSplit: this.elapsedSinceSplit,
+      elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
+    }
 
   },
 
@@ -366,50 +366,49 @@ var CommentsComponent = BaseComponent.extend({
     var myself = {};
 
     myself.defaults = {
-            dataTemplates: {
+      dataTemplates: {
+        comments:         '<div class="commentsDetails">'+
+                          ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
+                          '</div>'+
+                          '<div class="commentsBody">'+
+                          ' <div class="comment">'+
+                          '   {{{comment}}}'+
+                          ' </div>'+
+                          ' {{#user}}'+
+                          ' <div class="operation">'+
+                          ' {{#permissions.deletePermission}}'+
+                          '   <div class="delete">X</div>' +
+                          ' {{/permissions.deletePermission}}'+
+                          ' {{#permissions.archive}}'+
+                          '  <div class="archive">X</div>' +
+                          ' {{/permissions.archive}}'+
+                          ' </div>'+
+                          ' {{/user}}'+
+                          '</div>'
+                          ,
 
-              comments:         '<div class="commentsDetails">'+
-                                ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
-                                '</div>'+
-                                '<div class="commentsBody">'+
-                                ' <div class="comment">'+
-                                '   {{{comment}}}'+
-                                ' </div>'+
-                                ' {{#user}}'+
-                                ' <div class="operation">'+
-                                ' {{#permissions.deletePermission}}'+
-                                '   <div class="delete">X</div>' +
-                                ' {{/permissions.deletePermission}}'+
-                                ' {{#permissions.archive}}'+
-                                '  <div class="archive">X</div>' +
-                                ' {{/permissions.archive}}'+
-                                ' </div>'+
-                                ' {{/user}}'+
-                                '</div>'
-                                ,
+        addComments:      '<div class="commentsAdd">'+
+                          '{{#add}}'+
+                          ' <div class="addComment">Add Comment</div>'+
+                          ' <div class="addCommentWrapper">'+
+                          '   <textarea class=addCommentText></textarea>'+
+                          '   <div class="commentsButtons">'+
+                          '   <div class="saveComment">Save</div>'+
+                          '   <div class="cancelComment">Cancel</div>'+
+                          '   </div>'+
+                          ' </div>'+
+                          '{{/add}}'+
+                          '</div>'
+                          ,
 
-              addComments:      '<div class="commentsAdd">'+
-                                '{{#add}}'+
-                                ' <div class="addComment">Add Comment</div>'+
-                                ' <div class="addCommentWrapper">'+
-                                '   <textarea class=addCommentText></textarea>'+
-                                '   <div class="commentsButtons">'+
-                                '   <div class="saveComment">Save</div>'+
-                                '   <div class="cancelComment">Cancel</div>'+
-                                '   </div>'+
-                                ' </div>'+
-                                '{{/add}}'+
-                                '</div>'
-                                ,
-
-              paginateComments: '<div class="paginate commentPaginate"> '+
-                                '{{#active}}'+
-                                ' <div class="navigateRefresh"> Refresh </div>'+
-                                ' <div class="navigatePrevious"> Newest Comments </div>'+
-                                ' <div class="navigateNext"> Oldest Comments </div>'+
-                                '{{/active}}'+
-                                '</div>'
-            }
+        paginateComments: '<div class="paginate commentPaginate"> '+
+                          '{{#active}}'+
+                          ' <div class="navigateRefresh"> Refresh </div>'+
+                          ' <div class="navigatePrevious"> Newest Comments </div>'+
+                          ' <div class="navigateNext"> Oldest Comments </div>'+
+                          '{{/active}}'+
+                          '</div>'
+      }
 
     };
 
@@ -486,20 +485,20 @@ var CommentsComponent = BaseComponent.extend({
           collection.reset(this.resetCollection(json.result));
           if ((paginate.activePageNumber == 0) && ((json) && (typeof json.result != 'undefined')) && (json.result.length == 0)) {
             json.result = [{
-                id: 0,
-                comment: 'No Comments to show!',
-                createdOn: '',
-                elapsedMinutes: '',
-                isArchived: false,
-                isDeleted: false,
-                isMe: true,
-                page: '',
-                user: '',
-                permissions: {
-                  add: false,
-                  archive: false,
-                  remove: false
-                }
+              id: 0,
+              comment: 'No Comments to show!',
+              createdOn: '',
+              elapsedMinutes: '',
+              isArchived: false,
+              isDeleted: false,
+              isMe: true,
+              page: '',
+              user: '',
+              permissions: {
+                add: false,
+                archive: false,
+                remove: false
+              }
             }];
             if ((collection) && (typeof collection != 'undefined')) {
               collection.reset(this.resetCollection(json.result));
@@ -514,16 +513,16 @@ var CommentsComponent = BaseComponent.extend({
 
     myself.CommentModel = Backbone.Model.extend({
         defaults: {
-            id: 0,
-            comment: 'Guest User',
-            createdOn: '',
-            elapsedMinutes: '',
-            isArchived: false,
-            isDeleted: false,
-            isMe: true,
-            page: 'comments',
-            user: 'comments',
-            permissions: {}
+          id: 0,
+          comment: 'Guest User',
+          createdOn: '',
+          elapsedMinutes: '',
+          isArchived: false,
+          isDeleted: false,
+          isMe: true,
+          page: 'comments',
+          user: 'comments',
+          permissions: {}
         },
 
         initialize: function(){
@@ -547,7 +546,7 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       render: function(){
-        this.$el.append(myself.dataTemplates.comments(this.attributes));
+        this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));
         return this.$el;
       },
 
@@ -611,9 +610,9 @@ var CommentsComponent = BaseComponent.extend({
         _(this.collection.models).each(function(comment){
           $commentsElem.append(this.renderSingeComment(comment));
         }, this);
-        var $add = $(myself.dataTemplates.addComments(myself.options.permissions));
-        var $paginate = $(myself.dataTemplates.paginateComments(myself.options.paginate));
-        this.$el.empty().append($commentsElem, $add, $paginate)
+        var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
+        var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
+        this.$el.empty().append($commentsElem, $add, $paginate);
         $renderElem.append(this.$el);
         this.updateNavigateButtons();
       },
@@ -668,7 +667,8 @@ var CommentsComponent = BaseComponent.extend({
         var paginate = myself.options.paginate;
         myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-        $('.tipsy').remove();
+        $('div.navigateRefreshPopup:first').remove();
+        $('div.navigateRefresh:first').stop();
       },
 
       updateNavigateButtons: function() {
@@ -687,21 +687,32 @@ var CommentsComponent = BaseComponent.extend({
         if (myself.options.queyResult.length > 0) {
           var lastCommentDate = myself.options.queyResult[0].createdOn;
           var callback = function(data) {
-            if (data.result.length > 0) {
-              if (!!(data.result[0].createdOn==lastCommentDate)) {
+            if(data.result.length > 0) {
+              if(!!(data.result[0].createdOn == lastCommentDate)) {
               } else {
-                var tipsyOptions = {
-                  html: true,
-                  fade: true,
-                  trigger: 'manual',
-                  className: 'commentsComponentTipsy',
-                  title: function () {
-                    return 'New comments, please refresh!';
-                  }
-                }
-                $('.commentComponent .navigateRefresh').attr('title','New comments, please refresh!').tipsy(tipsyOptions);
-                $('.commentComponent .navigateRefresh').tipsy('show');
+                var refreshBtn = $('div.navigateRefresh:first');
+                if(!($('div.navigateRefreshPopup:first').length)) {
+                  var popup = $("<div>")
+                    .attr('class', 'navigateRefreshPopup')
+                    .css('position', 'absolute')
+                    .html('New comments, please refresh!')
+                    .hide();
 
+                  refreshBtn.prepend(popup);
+                  var refreshBtnPos = refreshBtn.position();
+
+                  popup
+                    .offset({
+                      top: refreshBtnPos.top - (popup.height() + refreshBtn.height() / 2),
+                      left: refreshBtnPos.left + refreshBtn.width() / 2 - popup.width() / 2})
+                    .toggle("bounce", {times: 3}, "slow");
+
+                  var btnHighlighter = setInterval(function() {
+                    refreshBtn.effect('highlight', {color: '#c0c0c0'}, 2000);
+                  }, 4000);
+
+                  refreshBtn.on('click', function() { clearInterval(btnHighlighter); });
+                }
               }
             }
           }
@@ -723,17 +734,9 @@ var CommentsComponent = BaseComponent.extend({
 
     });
 
-    myself.compileTemplates = function() {
-      myself.dataTemplates = myself.dataTemplates || {};
-      _(myself.defaults.dataTemplates).each(function(value, key) {
-        myself.dataTemplates[key] = Mustache.compile(value);
-      });
-    };
-
     myself.start = function(options) {
       myself.options = options;
       myself.defaults = _.extend({}, myself.defaults, options.defaults);
-      myself.compileTemplates();
 
       myself.commentsCollection = new myself.CommentsCollection();
       myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
@@ -810,7 +813,7 @@ var QueryComponent = BaseComponent.extend({
     QueryComponent.makeQuery(this);
   },
   warnOnce: function() {
-  Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+    Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
     "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
     " for more information");
     delete(this.warnOnce);
@@ -822,7 +825,7 @@ var QueryComponent = BaseComponent.extend({
     if (this.warnOnce) {this.warnOnce();}
     var cd = object.queryDefinition;
     if (cd == undefined){
-     Dashboards.log("Fatal - No query definition passed","error");
+      Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
     var query = Dashboards.getQuery( cd );
