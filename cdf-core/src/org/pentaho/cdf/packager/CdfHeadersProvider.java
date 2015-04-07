@@ -1,3 +1,16 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf.packager;
 
 import java.io.InputStream;
@@ -203,14 +216,14 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
       }
       for ( String filePath: filePaths ) {
         if ( dependency.getClass().isAssignableFrom( FileDependency.class )
-          && ( (FileDependency) dependency ).getUrlFilePath().endsWith( filePath ) ) {
+            && ( (FileDependency) dependency ).getUrlFilePath().endsWith( filePath ) ) {
           return true;
         }
       }
       return false;
     }
   }
-  
+
   private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
                                    String absRoot, final ArrayList<String> files ) {
     if ( absRoot != null ) {
@@ -321,8 +334,8 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     if ( !pathSet.ie8ScriptsBeforeScripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8scriptBeforeScript" );
       dependencies
-        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
-          origin, pathSet.ie8ScriptsBeforeScripts ) );
+          .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+            origin, pathSet.ie8ScriptsBeforeScripts ) );
     }
     if ( !pathSet.scripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "script" );
@@ -331,8 +344,8 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     if ( !pathSet.ie8Scripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8script" );
       dependencies
-        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
-          origin, pathSet.ie8Scripts ) );
+          .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+            origin, pathSet.ie8Scripts ) );
     }
     if ( !pathSet.styles.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "style" );
@@ -354,8 +367,8 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     if ( !pathSet.ie8ScriptsAfterStyles.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8scriptAfterLink" );
       dependencies
-        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
-          origin, pathSet.ie8ScriptsAfterStyles ) );
+          .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+            origin, pathSet.ie8ScriptsAfterStyles ) );
     }
     return dependencies;
   }
