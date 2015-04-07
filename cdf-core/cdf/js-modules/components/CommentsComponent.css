@@ -1,0 +1,177 @@
+/*!
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.commentComponent .commentsBody {
+  box-sizing: border-box; 
+  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box;
+  height: auto;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  margin: 2px 0px ;
+}
+
+.commentComponent .comment {
+  padding: 5px 5px; 
+  width: 90%;
+}
+
+.commentComponent .operation{
+  float: right;
+}
+
+.commentComponent .operation div {
+  padding: 2px 0px;
+  margin: 5px 5px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  float: right;
+  visibility: hidden;
+  cursor: pointer;
+  font-size: 10px;
+  text-align: center;
+  width: 100%;
+  background-color: #eee;
+}
+
+.commentComponent .comment, 
+.commentComponent .operation {
+  vertical-align: top;
+  display: inline-block;
+}
+ 
+.commentComponent .commentsBody:hover {
+
+}
+
+.commentComponent .operation div:hover {
+  color: red;
+  border: 1px solid red;    
+    
+}
+
+.commentComponent .commentsBody:hover .operation div {
+  visibility: visible;
+}
+
+.commentComponent .commentsDetails {
+  font-size: 10px;
+  color: #777 ;
+  text-align: right;
+}
+
+
+.commentComponent .addComment {
+  box-sizing: border-box; 
+  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box;
+  width: 100%;
+  display: inline-block;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  margin-bottom: 5px;
+  padding: 5px 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  background-color: #eee;
+}
+
+.commentComponent .addComment:hover {
+  border: 1px solid #aaa;    
+  background-color: #ccc; 
+}
+
+.commentComponent .commentsBody:hover .operation {
+  display: inline-block;
+}
+
+.commentComponent .commentsBody, .commentsGroup .operation {
+  display: inline-block;
+}
+
+.commentComponent .addCommentWrapper {
+  display: none;
+}
+
+.commentComponent .addCommentText {
+  box-sizing: border-box; 
+  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box;
+  width: 100%;   
+  padding: 10px;
+  margin: 0px;
+  height: 35px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  resize: none;
+}
+
+.commentComponent .saveComment, 
+.commentComponent .cancelComment {
+  display: inline-block;
+  text-align: center;
+  float: right;
+  width: 120px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  padding: 5px 5px;
+  cursor: pointer;
+  background-color: #eee;
+}
+
+.commentsAdd .commentsButtons div:hover {
+  border: 1px solid #aaa;    
+  background-color: #ccc;
+}
+
+.commentComponent .paginate {
+  float: right;
+}
+
+.commentComponent .paginate div {
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  padding: 5px 5px;
+  cursor: pointer;
+  background-color: #eee;
+}
+
+.commentComponent .paginate div span{
+  color: red ;
+  font-size: 10px;
+}
+
+.commentComponent .paginate div:hover {
+  border: 1px solid #aaa;    
+  background-color: #ccc;
+}
+
+
+.commentComponent .paginate div.disabled {
+  color: #aaa ;
+}
+
+.commentComponent .paginate div:hover.disabled {
+  border: 1px solid #ccc;
+  background-color: #eee;
+  cursor: default;
+}

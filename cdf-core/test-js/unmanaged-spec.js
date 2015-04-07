@@ -1,3 +1,18 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+*
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
+define(["cdf/Dashboard.Clean", "cdf/lib/jquery", "amd!cdf/lib/underscore", "cdf/components/FreeformComponent"], function(Dashboard, $, _, FreeformComponent) {
+
 /*
  * Tests on the JS:
  * - name:
@@ -32,8 +47,10 @@ describe("Unmanaged Base Component #", function() {
    * ## Setting test data
    * #begin
    */
-  var myDashboard = _.extend({},Dashboards);
-  var basic = window.basic = {
+  var myDashboard = new Dashboard();
+  
+  
+  var basic = window.basic = new FreeformComponent({
     name: "basic",
     type: "freeform",
     testFlag: 0,
@@ -43,9 +60,9 @@ describe("Unmanaged Base Component #", function() {
       this.testFlag = 0x1;
     },
     postExecution: function(){}
-  };
+  } );
 
-  var freeformQuery = window.freeformQuery = {
+  var freeformQuery = window.freeformQuery = new FreeformComponent({
     name: "freeformQuery",
     type: "freeform",
     testFlag: 0,
@@ -64,9 +81,11 @@ describe("Unmanaged Base Component #", function() {
       this.testFlag=0x2;
     },
     postExecution: function(){}
-  };
+  } );
 
-  var freeformAjax = window.freeformAjax = {
+
+
+  var freeformAjax = window.freeformAjax = new FreeformComponent({
     name: "freeformAjax",
     type: "freeform",
     testFlag: 0,
@@ -87,7 +106,7 @@ describe("Unmanaged Base Component #", function() {
       this.testFlag = 0x4; 
     },
     postExecution: function(){}
-  };
+  } );
 
   var componentList = [
     window.basic,
@@ -158,7 +177,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformQueryTemp,"customfunction").and.callThrough();
       spyOn(freeformQueryTemp,"postExecution").and.callThrough();
       spyOn(freeformQueryTemp,"postFetch").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -191,7 +210,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformQueryTemp,"redraw");
       spyOn(freeformQueryTemp,"block").and.callThrough();
       spyOn(freeformQueryTemp,"unblock").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -235,7 +254,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformQueryTemp,"redraw");
       spyOn(freeformQueryTemp,"block").and.callThrough();
       spyOn(freeformQueryTemp,"unblock").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -276,7 +295,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformQueryTemp,"redraw");
       spyOn(freeformQueryTemp,"block").and.callThrough();
       spyOn(freeformQueryTemp,"unblock").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -311,7 +330,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformQueryTemp,"customfunction").and.callThrough();
       spyOn(freeformQueryTemp,"postExecution");
       spyOn(freeformQueryTemp,"redraw");
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -343,7 +362,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformQuery,"preExecution").and.returnValue(false);
       spyOn(freeformQuery,"customfunction").and.callThrough();
       spyOn(freeformQuery,"postExecution").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -380,7 +399,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformAjax,"redraw").and.callThrough();
       spyOn(freeformAjax,"block").and.callThrough();
       spyOn(freeformAjax,"unblock").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -415,7 +434,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformAjax,"redraw");
       spyOn(freeformAjax,"block").and.callThrough();
       spyOn(freeformAjax,"unblock").and.callThrough();
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },10);
@@ -449,7 +468,7 @@ describe("Unmanaged Base Component #", function() {
       spyOn(freeformAjax,"customfunction").and.callThrough();
       spyOn(freeformAjax,"redraw");
       spyOn(freeformAjax,"postExecution");
-      spyOn(jQuery,"ajax").and.callFake(function(options){
+      spyOn($,"ajax").and.callFake(function(options){
         setTimeout(function(){
           options.success({resultset:[],metadata:[]});
         },100);
@@ -477,7 +496,7 @@ describe("Unmanaged Base Component #", function() {
   it("Plays nicely with postInit", function(done) {
     var expectedFlag = 0x7,
         testFlag = 0;
-    spyOn(jQuery,"ajax").and.callFake(function(options){
+    spyOn($,"ajax").and.callFake(function(options){
       setTimeout(function(){
         options.success({resultset:[],metadata:[]});
       },100);
@@ -502,3 +521,4 @@ describe("Unmanaged Base Component #", function() {
   });
 });
 
+});

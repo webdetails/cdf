@@ -15,6 +15,11 @@ package org.pentaho.cdf;
 
 public class CdfConstants {
 
+  // CDF localization related constants
+  public static final String BASE_GLOBAL_MESSAGE_SET_FILENAME = "Messages";
+  public static final String BASE_CDF_CACHE_DIR = "tmp/.cache";
+  public static final String BASE_GLOBAL_MESSAGE_SET_URL = "resources/languages/";
+
   public static final String GLOBAL_MESSAGES_PROPERTIES_FILE = " messages.properties";
 
   public static final String PLUGIN_RESOURCES_DIR = "resources/";
@@ -32,25 +37,25 @@ public class CdfConstants {
   public static final String MOBILE = "mobile";
   public static final String BOOTSTRAP = "bootstrap";
   public static final String CLEAN = "clean";
-  
+
   public static final String INCLUDES_DIR = "/includes";
-  
+
   public static final String COMPONENT_TYPE_DATERANGEINPUT = "dateRangeInput";
   public static final String COMPONENT_TYPE_TABLE = "tableComponent";
   public static final String COMPONENT_TYPE_TIMEPLOT = "timePlot";
   public static final String COMPONENT_TYPE_AUTOCOMPLETEBOX = "autocompleteBox";
   public static final String COMPONENT_TYPE_MAP = "map";
-  
+
   public static final String COMPONENT_TYPE_DATERANGEINPUT_REGEX = "daterangeinput";
   public static final String COMPONENT_TYPE_TABLE_REGEX = "table";
   public static final String COMPONENT_TYPE_TIMEPLOT_REGEX = "timeplot";
   public static final String COMPONENT_TYPE_AUTOCOMPLETE_REGEX = "(simple)?autocomplete";
   public static final String COMPONENT_TYPE_MAP_REGEX = "(new)?map";
-  
+
   public static final String[][] DASHBOARD_COMPONENT_TYPES = {
     { COMPONENT_TYPE_DATERANGEINPUT_REGEX, COMPONENT_TYPE_DATERANGEINPUT },
     { COMPONENT_TYPE_TABLE_REGEX, COMPONENT_TYPE_TABLE },
-    { COMPONENT_TYPE_TIMEPLOT_REGEX, COMPONENT_TYPE_TIMEPLOT }, 
-    { COMPONENT_TYPE_AUTOCOMPLETE_REGEX, COMPONENT_TYPE_AUTOCOMPLETEBOX }, 
+    { COMPONENT_TYPE_TIMEPLOT_REGEX, COMPONENT_TYPE_TIMEPLOT },
+    { COMPONENT_TYPE_AUTOCOMPLETE_REGEX, COMPONENT_TYPE_AUTOCOMPLETEBOX },
     { COMPONENT_TYPE_MAP_REGEX, COMPONENT_TYPE_MAP } };
 }

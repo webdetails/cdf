@@ -1,0 +1,77 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<div class="shadow">
+
+  <div class="contents" style="height: 920px">
+
+    <h2>NavigatorComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+      This component generate a menu witch allows the user to navigate through the solution folders.
+      When a template is not present in the selected folder, the default-dashboard-template is presented. (see template documentation).
+      The menu items are build dynamically using the index.properties present in each solution folders.
+      <br/>Note: To hide undesired folders edit index.properties and set the property "visible" to false.
+    </p>
+
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>navigator</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>mode</dt>
+      <dd>Menu modes: "vertical" or "horizontal" : Default value: horizontal</dd>
+
+      <dt>includeSolutions</dt>
+      <dd>True to include solutions menu items , false otherwise</dd>
+    </dl>
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
+      <div id="sample">
+        <div id="sampleObject"></div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/NavigatorComponent'],
+  function(Dashboard, NavigatorComponent) {
+
+    var dashboard = new Dashboard();
+
+    dashboard.addComponent(new NavigatorComponent({
+      name: "navigatorMenu",
+      type: "navigator",
+      listeners: [],
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      mode: "horizontal",
+      includeSolutions: true
+    }));
+    dashboard.init();
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

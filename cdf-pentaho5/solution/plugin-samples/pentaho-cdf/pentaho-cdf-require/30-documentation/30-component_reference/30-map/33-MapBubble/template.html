@@ -1,0 +1,121 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>MapBubbleComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+      This component allow the user to see details for the selected map location
+      The details of each location are obtained with a Pentaho Action result content.
+    </p>
+    
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>mapBubble</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>parameters</dt>
+      <dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
+
+      <dt>solution</dt>
+      <dd>Solution where the xaction is</dd>
+
+      <dt>path</dt>
+      <dd>Path where the xaction file is</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+      
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed. The component will be executed only if the result of preChange equals true.</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+    </dl>
+
+    <h3>Sample</h3>
+    <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
+      <div id="sample">
+        <span id="messages">&nbsp;</span>
+        <span> Click on locations to see details.</span>
+        <div id="map" style="width: 600px; height: 200px; z-index:0;">&nbsp;</div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <script type="text/javascript"> 
+          //Used for callbacks from xaction file cityDetails.xaction
+          var dashboard;
+        </script>
+        <textarea cols="80" rows="40" id="samplecode">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/MapComponent', 'cdf/components/MapBubbleComponent'],
+    function(Dashboard, MapComponent, MapBubbleComponent) {
+
+    dashboard = new Dashboard();
+
+    dashboard.addParameter("city", "");
+    dashboard.addParameter("bottomThreshold", 1000000);
+    dashboard.addParameter("topThreshold", 2000000);
+    dashboard.addParameter("selectedPoint", "");
+
+    dashboard.addComponent(new MapBubbleComponent({
+      name: "mapBubble",
+      type: "mapBubble",
+      listeners: ["selectedPoint"],
+      path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/30-map/33-MapBubble/cityDetails.xaction",
+      parameters: [["city", "selectedPoint"]],
+      executeAtStart: false,
+      preExecution:function() {},
+      postExecution:function() {}
+    }));
+
+    dashboard.addComponent(new MapComponent({
+      name: "mapComponent",
+      type: "mapComponent",
+      path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/GetPoints.xaction",
+      parameters: [],
+      listeners: [],
+      htmlObject: "map",
+      executeAtStart: true,
+      initPosLon: -7.5,
+      initPosLat: 39.8,
+      initZoom: 1,
+      expression: function() { return "var icon=''; if(value < this.dashboard.getParameterValue('bottomThreshold')) { icon = markers[2]; } else if(value > this.dashboard.getParameterValue('topThreshold')) { icon = markers[0]; } else { icon = markers[1]; } icon"; },
+      
+      preExecution:function() {},
+      postExecution:function() {},
+      markers: [
+        "js/lib/OpenMap/OpenLayers/img/marker-green.png",
+        "js/lib/OpenMap/OpenLayers/img/marker-gold.png",
+        "js/lib/OpenMap/OpenLayers/img/marker.png"]
+    }));
+    dashboard.init();
+  });
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>
