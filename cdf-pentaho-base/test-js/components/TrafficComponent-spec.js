@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent"],
-  function(Dashboard, TrafficComponent) {
+define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent", "cdf/lib/jquery"],
+  function(Dashboard, TrafficComponent, $) {
   
   /**
    * ## The Traffic Component
@@ -21,27 +21,21 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent"],
 
     var myDashboard = new Dashboard();
 
+    myDashboard.addParameter('trafficTestParameter', 1);
+
     myDashboard.init();
 
     var trafficComponent = new TrafficComponent({
       name: "trafficComponent",
       type: "trafficComponent",
       trafficDefinition: {
-        queryType: 'mdx',
-        jndi: "SampleData",
-        title: "Check current budget",
-        catalog: "mondrian:/SampleData",
-        intervals: [70000000,150000000],
-        showValue: true,
-        query: function() {
-          var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-            " NON EMPTY ([Department].[All Departments]) ON ROWS " +
-            " from [Quadrant Analysis]";
-          return query;
-        }
+        dataAccessId: "dataAccessTestId",
+        intervals: [10, 20],
+        path: "/test/path",
+        showValue: true
       },
       htmlObject: "sampleObject",
-      executeAtStart: true
+      parameter: "trafficTestParameter"
     });
 
     myDashboard.addComponent(trafficComponent);
@@ -54,6 +48,48 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent"],
       myDashboard.update(trafficComponent);
       setTimeout(function() {
         expect(trafficComponent.update).toHaveBeenCalled();
+        done();
+      }, 100);
+    });
+
+    /**
+     * ## The Traffic Component # Uses CDA
+     */
+    it("Uses CDA", function(done) {
+      spyOn(trafficComponent, 'update').and.callThrough();
+      spyOn(trafficComponent, 'doQuery').and.callThrough();
+      var ajax = spyOn($, "ajax").and.callFake(function(options) {
+        options.success({
+          resultset: "queryResults"
+        });
+      });
+      spyOn(trafficComponent, 'trafficLight');
+      trafficComponent.update();
+      setTimeout(function() {
+        expect(trafficComponent.update).toHaveBeenCalled();
+        expect(trafficComponent.doQuery).toHaveBeenCalled();
+        expect(trafficComponent.trafficLight).toHaveBeenCalledWith("queryResults");
+        done();
+      }, 100);
+    });
+
+    /**
+     * ## The Traffic Component # Uses XActions
+     */
+    it("Uses XActions", function(done) {
+      trafficComponent.trafficDefinition.path = false;
+      spyOn(trafficComponent, 'update').and.callThrough();
+      spyOn(trafficComponent, 'doQuery').and.callThrough();
+      spyOn(myDashboard, "callPentahoAction").and.callFake(function() {
+        trafficComponent.trafficLight("queryResults", true);
+      });
+      spyOn(trafficComponent, 'trafficLight');
+      trafficComponent.update();
+      setTimeout(function() {
+        expect(trafficComponent.update).toHaveBeenCalled();
+        expect(trafficComponent.doQuery).toHaveBeenCalled();
+        expect(myDashboard.callPentahoAction).toHaveBeenCalled();
+        expect(trafficComponent.trafficLight).toHaveBeenCalledWith("queryResults", true);
         done();
       }, 100);
     });
