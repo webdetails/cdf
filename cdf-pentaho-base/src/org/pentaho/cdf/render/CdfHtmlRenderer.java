@@ -103,7 +103,7 @@ public class CdfHtmlRenderer {
     ArrayList<String> i18nTagsList = new ArrayList<String>();
     final String requireDashboardTemplate = "template-dashboard" + style + "-require.html";
     IBasicFile templateResourceFile = null;
-    IReadAccess pluginRepoAccess = getPluginRepositoryReader("templates/");
+    IReadAccess pluginRepoAccess = getPluginRepositoryReader( "templates/" );
 
     if ( isRequire && pluginRepoAccess.fileExists( requireDashboardTemplate ) ) {
       templateResourceFile = pluginRepoAccess.fetchFile( requireDashboardTemplate );
@@ -125,23 +125,23 @@ public class CdfHtmlRenderer {
     }
 
     // Process i18n on dashboard outer template
-    templateContent = updateUserLanguageKey(templateContent);
-    templateContent = processi18nTags( templateContent, i18nTagsList);
+    templateContent = updateUserLanguageKey( templateContent );
+    templateContent = processi18nTags( templateContent, i18nTagsList );
     // Process i18n on dashboard outer template - end
 
     ITemplater templater = getTemplater();
 
-    intro = templater.getTemplateSection(templateContent, Section.HEADER);
-    footer = templater.getTemplateSection(templateContent, Section.FOOTER);
+    intro = templater.getTemplateSection( templateContent, Section.HEADER );
+    footer = templater.getTemplateSection( templateContent, Section.FOOTER );
 
-    final String dashboardContent = getDashboardContent(dashboardTemplateFile.getContents(), i18nTagsList);
+    final String dashboardContent = getDashboardContent( dashboardTemplateFile.getContents(), i18nTagsList );
 
     // Merge dashboard related message file with global message file and save it in the dashboard cache
-    String path = StringUtils.defaultIfEmpty(FilenameUtils.getPathNoEndSeparator(dashboardTemplateFile.getPath()),
-            getPluginRepositoryDir());
+    String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ),
+        getPluginRepositoryDir() );
     path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
 
-    intro = getMessageBundlesHelper(path).replaceParameters( intro, i18nTagsList );
+    intro = getMessageBundlesHelper( path ).replaceParameters( intro, i18nTagsList );
 
     /*
      * Add cdf libraries
@@ -215,8 +215,7 @@ public class CdfHtmlRenderer {
   protected String getDashboardContent( InputStream is, ArrayList<String> i18nTagsList ) throws Exception {
     // Fixed ISSUE #CDF-113
     // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-    BufferedReader reader =
-        new BufferedReader(
+    BufferedReader reader = new BufferedReader(
         new InputStreamReader( is, Charset.forName( CdfEngine.getEnvironment().getSystemEncoding() ) ) );
 
     StringBuilder sb = new StringBuilder();
@@ -241,7 +240,7 @@ public class CdfHtmlRenderer {
     StringBuffer resBuffer = new StringBuffer();
     int i;
     String tagValue;
-    resBuffer.append(test[0]);
+    resBuffer.append( test[ 0 ] );
     for ( i = 1; i < test.length; i++ ) {
 
       // First tag is processed differently that other because is the only case where I don't
@@ -263,7 +262,7 @@ public class CdfHtmlRenderer {
     // If we've the character . in the message key substitute it conventionally to _
     // when dynamically generating the selector name. The "." character is not permitted in the
     // selector id name
-    return name.replace(".", "_");
+    return name.replace( ".", "_" );
   }
 
   private String buildMessageSetCode( ArrayList<String> tagsList ) {
@@ -296,7 +295,7 @@ public class CdfHtmlRenderer {
   public static void getHeaders( String dashboardContent, HashMap<String, String> paramMap, OutputStream out )
     throws Exception {
 
-    final String dashboardType = StringUtils.defaultIfEmpty(paramMap.get(Parameter.DASHBOARD_TYPE), "blueprint");
+    final String dashboardType = StringUtils.defaultIfEmpty( paramMap.get( Parameter.DASHBOARD_TYPE ), "blueprint" );
     final boolean isDebugMode = Boolean.TRUE.toString().equalsIgnoreCase( paramMap.get( Parameter.DEBUG ) );
     String root = StringUtils.defaultString( paramMap.get( Parameter.ROOT ) );
     String scheme = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SCHEME ), "http" );
@@ -346,7 +345,7 @@ public class CdfHtmlRenderer {
 
   protected void generateStorage( final OutputStream out, final String user ) throws Exception {
 
-    JSONObject result = StorageEngine.getInstance().read(user);
+    JSONObject result = StorageEngine.getInstance().read( user );
 
     StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
@@ -354,64 +353,44 @@ public class CdfHtmlRenderer {
     s.append( result.toString( 2 ) ).append( "\n" );
     s.append( "</script>\n" );
     // setResponseHeaders(MIME_PLAIN,0,null);
-    out.write(s.toString().getBytes(CharsetHelper.getEncoding()));
+    out.write( s.toString().getBytes( CharsetHelper.getEncoding() ) );
   }
 
   protected void generateContext( final OutputStream out, HashMap parameterMap, int inactiveInterval )
     throws Exception {
-    ContextEngine.getInstance().generateContext(out, parameterMap, inactiveInterval);
+    ContextEngine.getInstance().generateContext( out, parameterMap, inactiveInterval );
   }
 
   protected IReadAccess getPluginSystemReader( String path ) {
-    return CdfEngine.getPluginSystemReader(path);
+    return CdfEngine.getPluginSystemReader( path );
   }
 
   protected IReadAccess getPluginRepositoryReader( String path ) {
-    return CdfEngine.getPluginRepositoryReader(path);
+    return CdfEngine.getPluginRepositoryReader( path );
   }
 
   protected String getPluginRepositoryDir() {
     return CdfEngine.getEnvironment().getCdfPluginRepositoryDir();
   }
 
-  protected String getPluginSystemDir() {
-    return CdfEngine.getEnvironment().getSystemDir();
-  }
-
-  protected IContentAccessFactory getContentAccessFactory() {
-    return CdfEngine.getEnvironment().getContentAccessFactory();
-  }
-
-  protected IReadAccess getAppropriateReadAccess(String path, IContentAccessFactory factory, String pluginId,
-  String pluginSystemDir, String pluginRepoDir) {
-    return Util.getAppropriateReadAccess(path, factory, pluginId, pluginSystemDir, pluginRepoDir);
-  }
-
-  protected String getPluginId(){
-    return CdfEngine.getEnvironment().getPluginId();
-  }
-
-  protected String getPluginStaticBaseUrl(){
-   return CdfEngine.getEnvironment().getPathProvider().getPluginStaticBaseUrl();
-  }
-
-  protected Locale getLocale(){
+  protected Locale getLocale() {
     return CdfEngine.getEnvironment().getLocale();
   }
-  protected MessageBundlesHelper getMessageBundlesHelper(String path) throws IOException {
+
+  protected MessageBundlesHelper getMessageBundlesHelper( String path ) throws IOException {
     IContentAccessFactory factory = CdfEngine.getEnvironment().getContentAccessFactory();
     String cdfStaticBaseUrl = CdfEngine.getEnvironment().getPathProvider().getPluginStaticBaseUrl();
-    IRWAccess cdfSystemWriter = getContentAccessFactory().getPluginSystemWriter(null);
+    IRWAccess cdfSystemWriter = factory.getPluginSystemWriter( null );
 
     return new MessageBundlesHelper( path,
-            Util.getAppropriateReadAccess(path, factory, CdfEngine.getEnvironment().getPluginId(),
-                    CdfEngine.getEnvironment().getSystemDir(), getPluginRepositoryDir()),
-            cdfSystemWriter, CdfEngine.getEnvironment().getLocale(),
-            cdfStaticBaseUrl );
+      Util.getAppropriateReadAccess( path, factory, CdfEngine.getEnvironment().getPluginId(),
+        CdfEngine.getEnvironment().getSystemDir(), getPluginRepositoryDir() ),
+      cdfSystemWriter, CdfEngine.getEnvironment().getLocale(),
+      cdfStaticBaseUrl );
   }
 
   protected String getContentString( InputStream inputStream ) throws IOException {
-    return Util.toString(inputStream);
+    return Util.toString( inputStream );
   }
 
   protected ITemplater getTemplater() {
