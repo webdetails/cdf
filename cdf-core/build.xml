@@ -27,6 +27,9 @@
   <property name='js-modules.dir' value='${basedir}/cdf/js-modules'/>
   <property name='js-lib.dir' value='${basedir}/cdf/js-lib'/>
 
+  <property name='pentaho-base.dir' value='../cdf-pentaho-base' description="Name of pentaho base dir"/>
+  <property name='pentaho-base-js.dir' value='${pentaho-base.dir}/cdf/js-modules'/>
+
   <!-- karma config files and target test dirs -->
   <property name="js.karma.ci.config.legacy" value="config/karma.ci.conf.legacy.js"/>
   <property name="bin.test-js.dir" value="${bin.dir}/test-js" description='Karma tests js source dir' />
@@ -192,20 +195,25 @@
     <!-- create test js resources dir 'bin/test-js-res/cdf/js' -->
     <delete dir="${bin.test-js.cdf.js.dir}"/>
     <mkdir dir="${bin.test-js.cdf.js.dir}"/>
-    <!-- copy CDF core js amd modules into bin/test-js/cdf/js -->
+    <!-- copy amd modules into bin/test-js/cdf/js -->
     <copy todir="${bin.test-js.cdf.js.dir}" overwrite="true">
+      <!-- copy CDF core js amd modules -->
       <fileset dir="${js-modules.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
+      </fileset>
+      <!-- copy CDF base js amd modules -->
+      <fileset dir="${pentaho-base-js.dir}">
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
     </copy>
-
+    
     <!-- create test js resources dir 'bin/test-js/cdf/js/lib' -->
     <delete dir="${bin.test-js.cdf.js.lib.dir}"/> 
     <mkdir dir="${bin.test-js.cdf.js.lib.dir}"/>
     <!-- copy CDF js libs into bin/test-js/cdf/js/lib -->
     <copy todir="${bin.test-js.cdf.js.lib.dir}" overwrite="true">
       <fileset dir="${js-lib.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
     </copy>
 
