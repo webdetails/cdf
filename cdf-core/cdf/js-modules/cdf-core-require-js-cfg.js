@@ -21,23 +21,25 @@
 
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(!isDebug) {
-    requireCfg.urlArgs = "ts=" + (new Date()).getTime();
-  }
-
   var prefix;
   if(typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf'] = 'bin/test-js/cdf/js';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
+
+    if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
+    
     prefix = requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
+
+    if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
+
     prefix = requirePaths['cdf'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else { // build
     prefix = requirePaths['cdf'] = "cdf";
   }
 
   /*
-   * Because CCC components are in a subfolder named "ccc", we need to set each component's path so the
+   * Because CCC components are in a subfolder named "ccc", we need to set each component path so the
    * same path prefix ("cdf/components") can be used. Avoid specific path preprocessing (e.g. CDE renderer).
    */
   requirePaths['cdf/components/BaseCccComponent'] = prefix + '/components/ccc/BaseCccComponent';
