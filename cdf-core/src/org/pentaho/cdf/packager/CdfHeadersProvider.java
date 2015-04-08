@@ -225,7 +225,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     }
   }
 
-  private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
+  protected void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
                                    String absRoot, final ArrayList<String> files ) {
     if ( absRoot != null ) {
       StringFilter filter = new AbsolutizingStringFilter( absRoot, pkg.getDefaultFilter() );
@@ -235,7 +235,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     }
   }
 
-  private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify, String absRoot ) {
+  protected void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify, String absRoot ) {
     if ( absRoot != null ) {
       StringFilter filter = new AbsolutizingStringFilter( absRoot, pkg.getDefaultFilter() );
       deps.append( pkg.getDependencies( filter, minify ) );
@@ -389,11 +389,11 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         .toArray( new String[fileNames.size()] ) );
   }
 
-  private IUrlProvider getUrlProvider() {
+  protected IUrlProvider getUrlProvider() {
     return PluginEnvironment.env().getUrlProvider();
   }
 
-  private IContentAccessFactory getContentAccess() {
+  protected IContentAccessFactory getContentAccess() {
     return PluginEnvironment.repository();
   }
 
