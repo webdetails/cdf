@@ -117,6 +117,8 @@ module.exports = function(config) {
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
+    //browserNoActivityTimeout: 20000,
+
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
     singleRun: true,
@@ -127,9 +129,7 @@ module.exports = function(config) {
       'karma-junit-reporter',
       'karma-html-reporter',
       'karma-coverage',
-      'karma-phantomjs-launcher',
-      'karma-chrome-launcher',
-      'karma-firefox-launcher'
+      'karma-phantomjs-launcher'
     ]
   });
 };

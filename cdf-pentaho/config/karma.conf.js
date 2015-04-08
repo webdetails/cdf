@@ -99,7 +99,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
     // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
     autoWatchBatchDelay: 250,
@@ -112,14 +112,16 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
+    browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
+    //browserNoActivityTimeout: 20000,
+
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: true,
+    singleRun: false,
 
     plugins: [
       'karma-jasmine',
