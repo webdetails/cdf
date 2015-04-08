@@ -411,7 +411,7 @@
 
     <copy todir="${bin.dir}/js-source/cdf/js/compressed">
       <fileset dir="${js.build.output.dir}/cdf">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
     </copy>
 
@@ -707,25 +707,25 @@
     <copy todir="${bin.test-js.cdf.js.dir}" overwrite="true">
       <!-- copy CDF core js amd modules -->
       <fileset dir="${core-js.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
       <!-- copy base CDF js amd modules -->
       <fileset dir="${pentaho-base-js.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
       <!-- copy pentaho5 CDF js amd modules -->
       <fileset dir="${pentaho-js.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
     </copy>
 
-    <!-- create test js resources dir 'bin/test-js/cdf/js/lib' -->
+    <!-- create test-js cdf lib resources dir 'bin/test-js/cdf/js/lib' -->
     <delete dir="${bin.test-js.cdf.js.lib.dir}"/> 
     <mkdir dir="${bin.test-js.cdf.js.lib.dir}"/>
     <!-- copy CDF core js libs into bin/test-js/cdf/js/lib -->
     <copy todir="${bin.test-js.cdf.js.lib.dir}" overwrite="true">
       <fileset dir="${core-js-lib.dir}">
-        <exclude name="**/*-require-js-cfg.js*"/>
+        <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
     </copy>
 
@@ -741,7 +741,7 @@
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
 
-    <!-- compile the require file -->
+    <!-- compile the requirejs config file -->
     <echo message="Collecting RequireJS Configurations"/>
     <delete file="build-res/requireCfg-raw.js"/>
     <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
