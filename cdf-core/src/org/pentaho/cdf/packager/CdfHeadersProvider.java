@@ -1,3 +1,16 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf.packager;
 
 import java.io.InputStream;
@@ -9,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -17,7 +31,6 @@ import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 
 import pt.webdetails.cpf.PluginEnvironment;
-import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.context.api.IUrlProvider;
 import pt.webdetails.cpf.packager.DependenciesPackage;
 import pt.webdetails.cpf.packager.DependenciesPackage.PackageType;
@@ -42,6 +55,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
 
   private static final String SUFFIX_SCRIPT = ".script";
   private static final String SUFFIX_STYLE = ".link";
+  private static final String SUFFIX_MAP = ".map";
   // special case for conditional include
   private static final String SUFFIX_IE8_STYLE = ".ie8link";
   private static final String SUFFIX_IE8_SCRIPT = ".ie8script";
@@ -50,6 +64,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
   // these are always loaded first
   private static final String BASE_SCRIPTS_PROPERTY = "script";
   private static final String BASE_STYLES_PROPERTY = "link";
+  private static final String BASE_STYLEMAP_PROPERTY = "map";
 
   private static final List<String> acceptedDashboardTypes = new ArrayList<String>( 3 );
   static {
@@ -202,15 +217,15 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
       }
       for ( String filePath: filePaths ) {
         if ( dependency.getClass().isAssignableFrom( FileDependency.class )
-          && ( (FileDependency) dependency ).getUrlFilePath().endsWith( filePath ) ) {
+            && ( (FileDependency) dependency ).getUrlFilePath().endsWith( filePath ) ) {
           return true;
         }
       }
       return false;
     }
   }
-  
-  private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
+
+  protected void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
                                    String absRoot, final ArrayList<String> files ) {
     if ( absRoot != null ) {
       StringFilter filter = new AbsolutizingStringFilter( absRoot, pkg.getDefaultFilter() );
@@ -220,7 +235,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     }
   }
 
-  private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify, String absRoot ) {
+  protected void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify, String absRoot ) {
     if ( absRoot != null ) {
       StringFilter filter = new AbsolutizingStringFilter( absRoot, pkg.getDefaultFilter() );
       deps.append( pkg.getDependencies( filter, minify ) );
@@ -283,6 +298,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
   private void addBaseDependencies( PathSet pathSet, Properties properties ) {
     pathSet.scripts.addAll( getProperty( properties, BASE_SCRIPTS_PROPERTY ) );
     pathSet.styles.addAll( getProperty( properties, BASE_STYLES_PROPERTY ) );
+    pathSet.styleMaps.addAll( getProperty( properties, BASE_STYLEMAP_PROPERTY ) );
   }
 
   private void addCustomDependencies( PathSet pathSet, Properties properties ) {
@@ -295,6 +311,8 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         pathSet.ie8Scripts.addAll( getProperty( properties, name ) );
       } else if ( name.endsWith( SUFFIX_STYLE ) ) {
         pathSet.styles.addAll( getProperty( properties, name ) );
+      } else if ( name.endsWith( SUFFIX_MAP ) ) {
+        pathSet.styleMaps.addAll( getProperty( properties, name ) );
       } else if ( name.endsWith( SUFFIX_IE8_STYLE ) ) {
         pathSet.ie8Styles.addAll( getProperty( properties, name ) );
       } else if ( name.endsWith( SUFFIX_IE8_SCRIPT_AFTER_STYLE ) ) {
@@ -317,8 +335,8 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     if ( !pathSet.ie8ScriptsBeforeScripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8scriptBeforeScript" );
       dependencies
-        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
-          origin, pathSet.ie8ScriptsBeforeScripts ) );
+          .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+            origin, pathSet.ie8ScriptsBeforeScripts ) );
     }
     if ( !pathSet.scripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "script" );
@@ -327,12 +345,19 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     if ( !pathSet.ie8Scripts.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8script" );
       dependencies
-        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
-          origin, pathSet.ie8Scripts ) );
+          .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+            origin, pathSet.ie8Scripts ) );
     }
     if ( !pathSet.styles.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "style" );
       dependencies.add( createDependencyPackage( name, PackageType.CSS, origin, pathSet.styles ) );
+    }
+    if ( !pathSet.styleMaps.isEmpty() ) {
+      for ( String map : pathSet.styleMaps ) {
+        if ( StringUtils.isNotEmpty( map ) ) {
+          dependencies.add( createStyleMap( map ) );
+        }
+      }
     }
     if ( !pathSet.ie8Styles.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8style" );
@@ -343,10 +368,15 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     if ( !pathSet.ie8ScriptsAfterStyles.isEmpty() ) {
       String name = String.format( PKG_NAME, pkgBaseName, "ie8scriptAfterLink" );
       dependencies
-        .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
-          origin, pathSet.ie8ScriptsAfterStyles ) );
+          .add( new IE8Dependencies( name, PackageType.JS, getContentAccess(), getUrlProvider(),
+            origin, pathSet.ie8ScriptsAfterStyles ) );
     }
     return dependencies;
+  }
+
+  private StaticDependenciesPackage createStyleMap( String map ) {
+    return new StaticDependenciesPackage( FilenameUtils.getName( map ), PackageType.MAP,
+        getContentAccess(), getUrlProvider(), getDefaultOrigin(), new String[]{map} );
   }
 
   private PathOrigin getDefaultOrigin() {
@@ -359,11 +389,11 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         .toArray( new String[fileNames.size()] ) );
   }
 
-  private IUrlProvider getUrlProvider() {
+  protected IUrlProvider getUrlProvider() {
     return PluginEnvironment.env().getUrlProvider();
   }
 
-  private IContentAccessFactory getContentAccess() {
+  protected IContentAccessFactory getContentAccess() {
     return PluginEnvironment.repository();
   }
 
@@ -384,6 +414,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     public List<String> ie8ScriptsBeforeScripts = new ArrayList<String>();
     public List<String> scripts = new ArrayList<String>();
     public List<String> styles = new ArrayList<String>();
+    public List<String> styleMaps = new ArrayList<String>();
     public List<String> ie8Styles = new ArrayList<String>();
     public List<String> ie8Scripts = new ArrayList<String>();
     public List<String> ie8ScriptsAfterStyles = new ArrayList<String>();
