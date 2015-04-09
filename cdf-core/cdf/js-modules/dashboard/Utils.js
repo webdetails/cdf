@@ -114,9 +114,9 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * uses the default language 'en-US'
    *
    * @method numberFormat
-   * @param value
-   * @param mask
-   * @param langCode
+   * @param value number value to be formatted
+   * @param mask mask with format for the value
+   * @param langCode language to use in format
    * @returns {string} formatted number
    * @static
    */
@@ -138,8 +138,8 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * - 'dateLocale' to configure date's format language
    *
    * @method configLanguage
-   * @param langCode
-   * @param config
+   * @param langCode language to be configured
+   * @param config object with the language configuration
    * @static
    */
   Utils.configLanguage = function(langCode, config) {
@@ -158,9 +158,9 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * uses the default language 'en-US'
    *
    * @method dateFormat
-   * @param date
-   * @param mask
-   * @param langCode
+   * @param date date object to be formatted
+   * @param mask mask with format for the date
+   * @param langCode language to use in format
    * @returns {string} formatted date
    * @static
    */
@@ -185,6 +185,19 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     }
 
     return toFormat.format(mask);
+  };
+
+  /**
+   * Parse a date with a given mask
+   *
+   * @method dateParse
+   * @param date string with date to be parsed
+   * @param mask mask with format for date
+   * @returns {Date} parsed date as a Date object
+   * @static
+   */
+  Utils.dateParse = function(date, mask) {
+    return moment(date, mask).toDate();
   };
     
   // Conversion functions
