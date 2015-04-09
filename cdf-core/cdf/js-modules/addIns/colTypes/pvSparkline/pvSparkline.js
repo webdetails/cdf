@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -14,11 +14,12 @@
 define([
   '../../../AddIn',
   '../../../Dashboard',
-  '../../../lib/CCC/protovis',
   '../../../Logger',
   '../../../lib/jquery',
+  '../../../lib/CCC/protovis',
+  '../../../lib/CCC/protovis-msie',
   'amd!../../../lib/datatables'],
-  function (AddIn, Dashboard, pv, Logger, $) {
+  function (AddIn, Dashboard, Logger, $, pv) {
   
   var pvSparkline = new AddIn({
     name: "pvSparkline",
