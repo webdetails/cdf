@@ -4,7 +4,7 @@
   This build file will use the subfloor.xml file as the default build
   process and should only override the tasks that need to differ from
   the common build file.
-
+de
   See subfloor.xml for more details
 ============================================================================-->
 <project name="Community Dashboard Framework" basedir="." default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
@@ -339,6 +339,7 @@
         &lt;development_stage&gt;
           &lt;lane&gt;${marketplace.metadata.development_stage.lane}&lt;/lane&gt;
           &lt;phase&gt;${marketplace.metadata.development_stage.phase}&lt;/phase&gt;
+        &lt;/development_stage&gt;          
       &lt;/version&gt;</echo>
 
   </target>
