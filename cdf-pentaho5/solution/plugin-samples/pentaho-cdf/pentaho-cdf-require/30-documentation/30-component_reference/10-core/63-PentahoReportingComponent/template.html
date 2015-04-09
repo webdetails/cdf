@@ -7,7 +7,7 @@
 
     <h3>Description</h3>
     <p>
-    This is a component that can execute the new Pentaho Reporting unified file format. The result is displayed in the PUC Report Viewer, 
+    This is a component that can execute the new Pentaho Reporting unified file format. The result is displayed in the PUC Report Viewer,
     including the new parameter and pagination features. For better use in CDF, parameter and pagination in the report viewer can be turned on or off.
     </p>
 
@@ -22,7 +22,7 @@
 
       <dt>listeners</dt>
       <dd><i>Array - </i> Parameters who this component will react to</dd>
-      
+
       <dt>parameters</dt>
       <dd><i>Array of Arrays - </i> Parameters to pass to the report</dd>
 
@@ -49,7 +49,7 @@
 
       <dt>tooltip</dt>
       <dd>Tooltip to be displayed when mouse hovers</dd>
-      
+
       <dt>solution</dt>
       <dd>Solution where the Pentaho Reporting file is</dd>
 
@@ -58,14 +58,14 @@
 
       <dt>action</dt>
       <dd>Pentaho Reporting file name (unified file format *.prpt)</dd>
-      
-      <dt>paginate</dt> 
+
+      <dt>paginate</dt>
       <dd>Pentaho Report Viewer paginate option. Default: true</dd>
-      
-      <dt>showParameters</dt> 
+
+      <dt>showParameters</dt>
       <dd>Pentaho Report Viewer parameter option. Default: false</dd>
 
-      <dt>iframe</dt> 
+      <dt>iframe</dt>
       <dd> Wheather to render the report inside an iframe or inline. Default: true (iframe)</dd>
 
     </dl>
@@ -79,7 +79,7 @@
       </ul>
       <div id="sample">
         <div id="selectorObject"></div>
-        <div id="sampleObject"></div>
+        <div id="sampleObject" style="height:600px; width:920px ;"></div>
         <br/>
       </div>
 
@@ -105,7 +105,7 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'cdf/compo
     dashboard.addComponent(new PrptComponent({
       name: "orderStatusReport",
       type: "prptComponent",
-      path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
+      path: "/public/Steel Wheels/Widget Library/Report Snippets/InventorybyLine.prpt",
       listeners:["output_type"],
       parameters: [["output-type","output_type"]],
       htmlObject: "sampleObject",
