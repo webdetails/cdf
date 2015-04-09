@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,13 +15,14 @@ define([
   '../../../AddIn',
   '../../../Dashboard',
   '../../../dashboard/Sprintf',
-  '../../../lib/CCC/protovis',
   '../../../lib/raphael',
   'amd!../../../lib/underscore',
   '../../../lib/jquery',
+  '../../../lib/CCC/protovis',
+  '../../../lib/CCC/protovis-msie',
   'amd!../../../lib/datatables',
   'css!./dataBar'],
-  function(AddIn, Dashboard, sprintf, pv, Raphael, _, $) {
+  function(AddIn, Dashboard, sprintf, Raphael, _, $, pv) {
   
   var dataBar = new AddIn({
     name: "dataBar",
