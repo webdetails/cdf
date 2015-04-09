@@ -134,6 +134,17 @@ Dashboards.getLocationSearchString = function() {
     return toFormat.format(mask);
   };
 
+  /**
+   * Parse a date with a given mask
+   *
+   * @param date
+   * @param mask
+   * @returns {Date} parsed date as a Date object
+   */
+  D.dateParse = function(date, mask) {
+    return moment(date, mask).toDate();
+  };
+
   // Conversion functions
   function _pa2obj (pArray) {
     var obj = {};
