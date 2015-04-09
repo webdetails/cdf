@@ -80,7 +80,7 @@
 			</ul>
 			<div id="sample">
 				<div id="selectorObject"></div>
-				<div id="sampleObject" style="height:530px"></div>
+				<div id="sampleObject" style="height:600px"></div>
 				<br/>
 			</div>
 
@@ -88,10 +88,9 @@
 			<div id="code">
 				<textarea cols="80" rows="20" id="samplecode">
 
-output_type = "";
+var output_type = "";
 
-outputSelector = 
-{
+var outputSelector = {
 	name: "outputSelector",
 	type: "select",
 	parameters:[],
@@ -102,11 +101,10 @@ outputSelector =
 	executeAtStart: true
 };
 
-orderStatusReport = 
-{
+var orderStatusReport = {
   name: "orderStatus",
   type: "prptComponent",
-  path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
+  path: "/public/Steel Wheels/Widget Library/Report Snippets/InventorybyLine.prpt",
   listeners:["output_type"],
   parameters: [["output-type","output_type"]],
   htmlObject: "sampleObject",
@@ -115,12 +113,9 @@ orderStatusReport =
   iframe: true,
   executeAtStart: true
 }
-				
 
 Dashboards.init([outputSelector,orderStatusReport]);
 Dashboards.finishedInit = false;
-
-
 				</textarea>
 				<br />
 				<button onclick="evaluateCode(true)">Try me</button>
