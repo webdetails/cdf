@@ -37,6 +37,7 @@ module.exports = function(config) {
       'cdf/js-lib/underscore/underscore.js',
       'cdf/js-lib/backbone/backbone.js',
       'cdf/js-lib/mustache/mustache.js',
+      'cdf/js-lib/moment/moment.js',
       'cdf/js-lib/base/Base.js',
       '../cdf-pentaho5/cdf/js/cdf-base.js',
       'cdf/js/Dashboards.Main.js',
