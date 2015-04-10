@@ -744,11 +744,12 @@ describe("The CDF framework #", function() {
    */
   it("Date Parse", function() {
     function expectDateParse(date, mask, expectedResult) {
-      expect(myDashboard.dateParse(date, mask).toString()).toBe(expectedResult);
+      var result = myDashboard.dateParse(date, mask).toString();
+      expect(result.indexOf(expectedResult) > -1).toBe(true);
     }
 
     expectDateParse(null, 'DD-MM-YY', 'Invalid Date');
-    expectDateParse('13-08-1983', 'DD-MM-YYYY', 'Sat Aug 13 1983 00:00:00 GMT+0100 (WEST)');
-    expectDateParse('Wednesday, February 18, 2015 12:00 AM', 'LLLL', 'Wed Feb 18 2015 00:00:00 GMT+0000 (WET)');
+    expectDateParse('13-08-1983', 'DD-MM-YYYY', 'Sat Aug 13 1983');
+    expectDateParse('Wednesday, February 18, 2015 12:00 AM', 'LLLL', 'Wed Feb 18 2015');
   });
 });
