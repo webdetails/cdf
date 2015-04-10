@@ -22,19 +22,49 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'bin/test-js/cdf/js/**/*.css', included: false },
-      { pattern: 'bin/test-js/cdf/js/**/*.js', included: false },
-      'config/context.js',
-      { pattern: 'test-js/**/*.ext.js', included: true },
-      { pattern: 'test-js/**/*-spec.js', included: false },
-      'build-res/requireCfg-raw.js',
-      'config/require-config.js'
+      'cdf/js-lib/shims.js',
+      'cdf/js-lib/pen-shim.js',
+      'test-js/legacy/testUtils.js',
+      'cdf/js/wd.js',
+      'cdf/js-lib/json.js',
+      'cdf/js-lib/jQuery/jquery.js',
+      'cdf/js-lib/jQuery/jquery.ui.js',
+      'cdf/js-lib/autobox/jquery.templating.js',
+      'cdf/js-lib/autobox/jquery.ui.autobox.js',
+      'cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
+      'cdf/js-lib/blockUI/jquery.blockUI.js',
+      'cdf/js-lib/uriQueryParser/jquery-queryParser.js',
+      'cdf/js-lib/underscore/underscore.js',
+      'cdf/js-lib/backbone/backbone.js',
+      'cdf/js-lib/mustache/mustache.js',
+      'cdf/js-lib/moment/moment.js',
+      'cdf/js-lib/base/Base.js',
+      '../cdf-pentaho5/cdf/js/cdf-base.js',
+      'cdf/js/Dashboards.Main.js',
+      'cdf/js/Dashboards.Query.js',
+      'cdf/js/Dashboards.Bookmarks.js',
+      'cdf/js/Dashboards.Startup.js',
+      'cdf/js/Dashboards.Utils.js',
+      'cdf/js/Dashboards.Legacy.js',
+      'cdf/js/Dashboards.Notifications.js',
+      'cdf/js/Dashboards.RefreshEngine.js',
+      'cdf/js/components/core.js',
+      'cdf/js/components/input.js',
+      'cdf/js/queries/coreQueries.js',
+      'cdf/js/components/simpleautocomplete.js',
+      {pattern: '../cdf-pentaho-base/cdf/js/**/*.js', included: true},
+      'test-js/legacy/lib/test-components.js',
+      'test-js/legacy/main.js',
+      {pattern: 'test-js/legacy/**/*.js', included: true}
     ],
 
     // list of files to exclude
-    exclude: ['test-js/legacy/**/*.js'],
+    exclude: ['../cdf-pentaho-base/cdf/js/components/ccc.js'],
 
-    preprocessors: {'bin/test-js/cdf/js/**/*.js': 'coverage'},
+    preprocessors: {
+      "cdf/js/*.js" : 'coverage',
+      "cdf/js/components/*.js" : 'coverage'        
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -43,24 +73,24 @@ module.exports = function(config) {
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test-reports/coverage/reports/'
+      dir: 'bin/test-reports-legacy/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test-reports/test-results.xml',
+      outputFile: 'bin/test-reports-legacy/test-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test-reports/karma_html',
+      outputDir:    'bin/test-reports-legacy/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
     //hostname
     hostname: ['localhost'],
-
+    
     // web server port
     port: 9876,
 
@@ -91,7 +121,7 @@ module.exports = function(config) {
     captureTimeout: 60000,
 
     browserNoActivityTimeout: 600000,
-    
+
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
     singleRun: false,
