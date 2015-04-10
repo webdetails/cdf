@@ -124,10 +124,12 @@ public class CdfHtmlRenderer {
       templateContent = getContentString( systemAccess.fetchFile( "template-dashboard.html" ).getContents() );
     }
 
-    // Process i18n on dashboard outer template
-    templateContent = updateUserLanguageKey( templateContent );
-    templateContent = processi18nTags( templateContent, i18nTagsList );
-    // Process i18n on dashboard outer template - end
+    if ( !isRequire ) {
+      // Process i18n on dashboard outer template
+      templateContent = updateUserLanguageKey( templateContent );
+      templateContent = processi18nTags( templateContent, i18nTagsList );
+      // Process i18n on dashboard outer template - end
+    }
 
     ITemplater templater = getTemplater();
 
@@ -141,7 +143,9 @@ public class CdfHtmlRenderer {
         getPluginRepositoryDir() );
     path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
 
-    intro = getMessageBundlesHelper( path ).replaceParameters( intro, i18nTagsList );
+    if ( !isRequire ) {
+      intro = getMessageBundlesHelper( path ).replaceParameters( intro, i18nTagsList );
+    }
 
     /*
      * Add cdf libraries
