@@ -91,7 +91,11 @@ module.exports = function(config) {
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
-    //browserNoActivityTimeout: 1200000,
+    // to avoid DISCONNECTED messages
+    // see https://github.com/karma-runner/karma/issues/598
+    browserDisconnectTimeout : 10000, // default 2000
+    browserDisconnectTolerance : 1, // default 0
+    browserNoActivityTimeout : 60000, //default 10000
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
@@ -103,9 +107,7 @@ module.exports = function(config) {
       'karma-junit-reporter',
       'karma-html-reporter',
       'karma-coverage',
-      'karma-phantomjs-launcher',
-      'karma-chrome-launcher',
-      'karma-firefox-launcher'
+      'karma-phantomjs-launcher'
     ]
   });
 };
