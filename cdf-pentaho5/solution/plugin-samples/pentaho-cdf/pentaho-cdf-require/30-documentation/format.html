@@ -25,35 +25,35 @@
 
         <code>
             <pre>
-    require(['cdf/dashboard/Utils'], function(Utils) {
-        Utils.numberFormat(1200, '0,#.0')                // -> "1,200.0"
-        Utils.numberFormat(1200, '0,0.#')                // -> "1,200"
-        Utils.numberFormat(1200.46, '0,0.#')             // -> "1,200.5"
+  require(['cdf/dashboard/Utils'], function(Utils) {
+    Utils.numberFormat(1200, '0,#.0')                // -> "1,200.0"
+    Utils.numberFormat(1200, '0,0.#')                // -> "1,200"
+    Utils.numberFormat(1200.46, '0,0.#')             // -> "1,200.5"
 
-        Utils.numberFormat(5480, '0.00 Abbreviation')    // -> "5,49 k"
-        Utils.numberFormat(5480000, '0.00A')             // -> "5,49m"
-        Utils.numberFormat(5480000000, '0.00A')          // -> "5,49b"
-        Utils.numberFormat(5480000000000, '0.00A')       // -> "5,49t"
+    Utils.numberFormat(5480, '0.00 Abbreviation')    // -> "5,49 k"
+    Utils.numberFormat(5480000, '0.00A')             // -> "5,49m"
+    Utils.numberFormat(5480000000, '0.00A')          // -> "5,49b"
+    Utils.numberFormat(5480000000000, '0.00A')       // -> "5,49t"
 
-        Utils.numberFormat(4500.64, '0,0.0\u00a4')       // -> "4,500.6$"
-        Utils.numberFormat(4500000.64, '0,0.0 Currency') // -> "4,500,000.6 $"
-        Utils.numberFormat(4500.64, 'C 0,0.0')           // -> "$ 4,500.6"
+    Utils.numberFormat(4500.64, '0,0.0\u00a4')       // -> "4,500.6$"
+    Utils.numberFormat(4500000.64, '0,0.0 Currency') // -> "4,500,000.6 $"
+    Utils.numberFormat(4500.64, 'C 0,0.0')           // -> "$ 4,500.6"
 
-        Utils.numberFormat(0.2, '0.00%')                 // -> "20.00%"
-        Utils.numberFormat(1200, '0.0e00')               // -> "1.2e03"
-        Utils.numberFormat(4500000, '0.0AC')             // -> "4.5m$"
-    });
+    Utils.numberFormat(0.2, '0.00%')                 // -> "20.00%"
+    Utils.numberFormat(1200, '0.0e00')               // -> "1.2e03"
+    Utils.numberFormat(4500000, '0.0AC')             // -> "4.5m$"
+  });
             </pre>
         </code>
 
         <h5>2. Format a number using a specific language, will use fallback logic if the specified language isn't found:</h5>
         <code>
             <pre>
-    require(['cdf/dashboard/Utils'], function(Utils) {
-        Utils.numberFormat(4500.64, '0,0.0 C', 'pt-pt') // -> "4,500.6 €"
-        Utils.numberFormat(4500.64, 'C 0,0.0', 'en-gb') // -> "£ 4,500.6"
-        Utils.numberFormat(4500.64, 'C 0,0.0', 'xx-zz') // -> "$ 4,500.6" *Fallback to the default 'en-us'*
-    });
+  require(['cdf/dashboard/Utils'], function(Utils) {
+    Utils.numberFormat(4500.64, '0,0.0 C', 'pt-pt') // -> "4,500.6 €"
+    Utils.numberFormat(4500.64, 'C 0,0.0', 'en-gb') // -> "£ 4,500.6"
+    Utils.numberFormat(4500.64, 'C 0,0.0', 'xx-zz') // -> "$ 4,500.6" *Fallback to the default 'en-us'*
+  });
             </pre>
         </code>
 
@@ -78,14 +78,50 @@
         </ul>
 
         <h4>Examples:</h4>
+
+        <h5>1. Format a date using the dashboard language, e.g. 'en-us':</h5>
+
         <code>
-            <pre>
-    require(['cdf/dashboard/Utils', 'cdf/lib/moment'], function(Utils, moment) {
-        Utils.dateFormat('DD/MM/YY')                                        // -> "18/02/15"
-        Utils.dateFormat('dddd Do MMMM YYYY')                               // -> "Wednesday 18th February 2015"
-        Utils.dateFormat('D MMM, YYYY', moment('13-08-1983', 'DD-MM-YYYY')) // -> "13 Aug, 1983"
-    });
-            </pre>
+              <pre>
+  require(['cdf/dashboard/Utils', 'cdf/lib/moment'], function(Utils, moment) {
+    Utils.dateFormat(moment(), 'DD/MM/YY')                                            // -> "18/02/15"
+    Utils.dateFormat(new Date(), 'dddd Do MMMM YYYY')                                 // -> "Wednesday 18th February 2015"
+    Utils.dateFormat(Dashboards.dateParse('13-08-1983', 'DD-MM-YYYY'), 'D MMM, YYYY') // -> "13 Aug, 1983"
+    Utils.dateFormat(null, 'dddd Do MMMM YYYY')                                       // -> Invalid Date
+  });
+              </pre>
+        </code>
+
+        <h5>2. Format a date using a specific language, will use fallback logic if the specified language isn't found:</h5>
+
+        <code>
+              <pre>
+  require(['cdf/dashboard/Utils'], function(Utils) {
+    Utils.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'en-us') // -> "Wednesday 18th February 2015"
+    Utils.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'pt-pt') // -> "quarta-feira 18º fevereiro 2015"
+    Utils.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'xx-zz') // -> "Wednesday 18th February 2015"
+                                                               //    *Fallback to the default 'en-us'*
+  });
+              </pre>
+        </code>
+
+        <h2>Q: How can I parse dates in CDF?</h2>
+        <h3>A:</h3>
+        <p>
+            As in the previous section, here we provide the function <b>Dashboards.dateParse</b> to parse a date with a given mask/format.<br>
+            This function will always return a <b>Date</b> object containing the parsed date.<br>
+        </p>
+
+        <h4>Examples:</h4>
+
+        <code>
+              <pre>
+  require(['cdf/dashboard/Utils'], function(Utils) {
+    Utils.dateParse("Wednesday, February 18, 2015 12:00 AM", 'LLLL') // -> Wed Feb 18 2015 00:00:00 GMT+0000 (WET)
+    Utils.dateParse('13-08-1983', 'DD-MM-YYYY')                      // -> Sat Aug 13 1983 00:00:00 GMT+0100 (WEST)
+    Utils.dateParse(null, 'dddd Do MMMM YYYY')                       // -> Invalid Date
+  });
+              </pre>
         </code>
 
         <h2>Q: How can I configure new or existing languages?</h2>
@@ -109,21 +145,21 @@
         <code>
             <pre>
     require(['cdf/dashboard/Utils'], function(Utils) {
-        Utils.configLanguage('foo-bar', {
-            number: {
-                mask:              '#,0.##',
-                style: {
-                    integerPad:    '0',
-                    fractionPad:   '0',
-                    decimal:       ',',
-                    group:         ' ',
-                    groupSizes:    [3],
-                    abbreviations: ['k','m', 'b', 't'],
-                    negativeSign:  '-',
-                    currency:      'F'
-                }
-            }
-        })
+      Utils.configLanguage('foo-bar', {
+        number: {
+          mask:              '#,0.##',
+          style: {
+            integerPad:    '0',
+            fractionPad:   '0',
+            decimal:       ',',
+            group:         ' ',
+            groupSizes:    [3],
+            abbreviations: ['k','m', 'b', 't'],
+            negativeSign:  '-',
+            currency:      'F'
+          }
+        }
+      })
     });
             </pre>
         </code>
@@ -132,18 +168,18 @@
         <code>
             <pre>
     require(['cdf/dashboard/Utils'], function(Utils) {
-        Utils.configLanguage('foo-bar', {
-            dateLocale: {
-                months: [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ],
-                monthsShort: [
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-                ]
-            }
-        })
+      Utils.configLanguage('foo-bar', {
+        dateLocale: {
+          months: [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+          ],
+          monthsShort: [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+          ]
+        }
+      })
     });
             </pre>
         </code>
@@ -152,31 +188,31 @@
         <code>
             <pre>
     require(['cdf/dashboard/Utils'], function(Utils) {
-        Utils.configLanguage('foo-bar', {
-            number: {
-                mask:              '#,0.##',
-                style: {
-                    integerPad:    '0',
-                    fractionPad:   '0',
-                    decimal:       ',',
-                    group:         ' ',
-                    groupSizes:    [3],
-                    abbreviations: ['k','m', 'b', 't'],
-                    negativeSign:  '-',
-                    currency:      'F'
-                }
-            },
-            dateLocale: {
-                months: [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ],
-                monthsShort: [
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-                ]
-            }
-        })
+      Utils.configLanguage('foo-bar', {
+        number: {
+          mask:              '#,0.##',
+          style: {
+            integerPad:    '0',
+            fractionPad:   '0',
+            decimal:       ',',
+            group:         ' ',
+            groupSizes:    [3],
+            abbreviations: ['k','m', 'b', 't'],
+            negativeSign:  '-',
+            currency:      'F'
+          }
+        },
+        dateLocale: {
+          months: [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+          ],
+          monthsShort: [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+          ]
+        }
+      })
     });
             </pre>
         </code>
@@ -184,14 +220,6 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function() {
-    window.jQuery = null;
-    window.$ = null;
-    window.backbone = null;
-    window._ = null;
-    window.Mustache = null;
-  })();
-
   require(['cdf/Dashboard.Blueprint'], function(Dashboard) {
     var dashboard = new Dashboard();
     dashboard.init();

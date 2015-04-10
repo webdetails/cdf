@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
 *
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -31,5 +31,20 @@ define(["cdf/dashboard/Utils"], function(Utils) {
       expect(Utils.getQueryParameter("noValue")).toBe("");
       expect(Utils.getQueryParameter("notThere")).toBe("");
     });
+
+    /**
+     * ## The Utils class # Date Parse
+     */
+    it("Date Parse", function() {
+      function expectDateParse(date, mask, expectedResult) {
+        expect(Utils.dateParse(date, mask).toString()).toBe(expectedResult);
+      }
+
+      expectDateParse(null, 'DD-MM-YY', 'Invalid Date');
+      expectDateParse('13-08-1983', 'DD-MM-YYYY', 'Sat Aug 13 1983 00:00:00 GMT+0100 (WEST)');
+      expectDateParse('Wednesday, February 18, 2015 12:00 AM', 'LLLL', 'Wed Feb 18 2015 00:00:00 GMT+0000 (WET)');
+    });
+
   });
+
 });

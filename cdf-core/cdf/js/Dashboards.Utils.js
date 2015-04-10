@@ -75,7 +75,7 @@ Dashboards.getLocationSearchString = function() {
     if(formProvider === undefined) {
       formProvider = cdo.format.language().createChild();
     }
-    if(langCode != undefined) {
+    if(langCode != null) {
       return cdo.format.language(langCode).number().mask(mask)(value);
     }
 
@@ -102,17 +102,47 @@ Dashboards.getLocationSearchString = function() {
   };
 
   /**
-   * Format the a date with a given mask
+   * Format a date with a given mask using the Dashboard language
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
    *
-   * @param mask
    * @param date
+   * @param mask
+   * @param langCode
    * @returns {string} formatted date
    */
-  D.dateFormat = function(mask, date) {
-    if(date != null && _.isFunction(date.format)) {
-      return date.format(mask);
+  D.dateFormat = function(date, mask, langCode) {
+    var toFormat = moment(date);
+
+    if(!toFormat.isValid()) {
+      return toFormat.toDate();
     }
-    return moment().format(mask);
+
+    if(langCode != null) {
+      var mLocale = moment.locale();
+      //Testing if langCode exists. Use langCode if true, and 'en-US' otherwise
+      if(moment.locale(langCode, true) === undefined) {
+        langCode = 'en-US';
+      }
+
+      //must set Dashboard Language back to the previous state,
+      //because moment.locale always changes the current locale being used.
+      moment.locale(mLocale);
+      toFormat.locale(langCode);
+    }
+
+    return toFormat.format(mask);
+  };
+
+  /**
+   * Parse a date with a given mask
+   *
+   * @param date
+   * @param mask
+   * @returns {Date} parsed date as a Date object
+   */
+  D.dateParse = function(date, mask) {
+    return moment(date, mask).toDate();
   };
 
   // Conversion functions
@@ -123,14 +153,14 @@ Dashboards.getLocationSearchString = function() {
         obj[prop[0]] = prop[1];
       }
     return obj;
-  };
+  }
   function _obj2pa (obj) {
     var pArray = [];
     for (var key in obj) if (obj.hasOwnProperty(key)) {
       pArray.push([key,obj[key]]);
     }
     return pArray;
-  };
+  }
 
   // Exports
   // NOTE: using underscore.js predicates but we could also use Dashboards.isArray() and 
@@ -148,9 +178,6 @@ Dashboards.getLocationSearchString = function() {
   };
 
 })(Dashboards);
-
-
-
 
 /**
  * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
