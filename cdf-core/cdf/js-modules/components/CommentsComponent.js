@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -277,7 +277,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
           var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
           var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
           this.$el.empty().append($commentsElem, $add, $paginate);
-          $renderElem.append(this.$el);
+          $renderElem.html(this.$el);
           this.updateNavigateButtons();
         },
   
