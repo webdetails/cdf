@@ -2,7 +2,7 @@
 <cdf>
   <title>BootstrapDashboard</title>
   <author>Webdetails</author>
-  <description>CDF Bootsrap Dashboard</description>
+  <description>CDF Bootstrap Dashboard</description>
   <icon></icon>
   <template>template.html</template>
   <style>mantle</style>
