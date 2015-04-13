@@ -188,7 +188,7 @@ public class CdfHtmlRenderer {
 
   protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {
     String webcontext = "<script language=\"javascript\" type=\"text/javascript\" src=\"webcontext"
-        + ".js?context=cdf" + ( loadTheme ? "" : "&requireJsOnly=true" ) + "\"></script>";
+        + ".js?context=cdf" + ( loadTheme ? "" : "&amp;requireJsOnly=true" ) + "\"></script>";
     out.write( webcontext.getBytes( CharsetHelper.getEncoding() ) );
   }
 
