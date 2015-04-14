@@ -94,7 +94,7 @@ var outputSelector = {
 	name: "outputSelector",
 	type: "select",
 	parameters:[],
-	valuesArray:[["text/html","HTML"],["application/pdf","PDF"]],
+	valuesArray:[["table/html;page-mode=stream","HTML"],["pageable/pdf","PDF"]],
 	parameter:"output_type",
 	valueAsId: false,
 	htmlObject: "selectorObject",
@@ -106,14 +106,15 @@ var orderStatusReport = {
   type: "prptComponent",
   path: "/public/Steel Wheels/Widget Library/Report Snippets/InventorybyLine.prpt",
   listeners:["output_type"],
-  parameters: [["output-type","output_type"]],
+  parameters: [["output-target","output_type"]],
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,
   iframe: true,
   executeAtStart: true
-}
+};
 
+Dashboards.addParameter("output_type", output_type);
 Dashboards.init([outputSelector,orderStatusReport]);
 Dashboards.finishedInit = false;
 				</textarea>
