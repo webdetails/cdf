@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -93,15 +93,14 @@ define(['./QueryComponent', './BaseComponent', '../lib/jquery', 'amd!../lib/jque
         : undefined
       );
 
-      //TODO:typo on minTextLength
-      if(myself.minTextLenght == undefined) {
-        myself.minTextLenght = 0;
+      if(myself.minTextLength == undefined) {
+        myself.minTextLength = 0;
       }
 
       var opt = {
         list: function() {
           var val = myself._getTextBoxValue();
-          if(val.length >= myself.minTextLenght
+          if(val.length >= myself.minTextLength
             && !(val == '' //nothing to search
               || val == myself.searchedWord
               || ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows)
@@ -130,7 +129,7 @@ define(['./QueryComponent', './BaseComponent', '../lib/jquery', 'amd!../lib/jque
         },
         multiSelection: myself.selectMulti == undefined ? false : myself.selectMulti,
         checkValue: myself.checkValue == undefined ? true : myself.checkValue,
-        minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+        minTextLength: myself.minTextLength == undefined ? 0 : myself.minTextLength,
         scrollHeight: myself.scrollHeight,
         applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
         tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
