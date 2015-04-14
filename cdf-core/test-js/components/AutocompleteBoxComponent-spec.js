@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -48,7 +48,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
       queryDefinition: MetaLayerHome2.clientSelectorDefinition,
       selectMulti: true,
       showApplyButton: true,
-      minTextLenght: 0,
+      minTextLength: 0,
       scrollHeight: 250,
       parameter: "autocompleteBoxParameter",
       htmlObject: "sampleObject",

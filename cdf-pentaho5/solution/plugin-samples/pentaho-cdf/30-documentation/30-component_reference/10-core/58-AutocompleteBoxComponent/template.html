@@ -55,7 +55,7 @@
 			<dt>selectMulti</dt>
 			<dd>Allow multiple selection. Default: false</dd>
 
-			<dt>minTextLenght</dt>
+			<dt>minTextLength</dt>
 			<dd>The minimal word length to check if there is a match</dd>
 
 			<dt>matchType</dt>
@@ -120,7 +120,7 @@ clientSelectorDefinition: {
 	queryType: 'mdx',
 	jndi: "SampleData",
 	catalog: "mondrian:/SteelWheels",
-	query: function(){
+	query: function() {
 		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
 		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+
 		"(Left([Customers].CurrentMember.Name, Len(\""+clients+"\")) = \""+clients+"\")),100.0,[Measures].[Sales]) ON ROWS "+
@@ -130,31 +130,29 @@ clientSelectorDefinition: {
 }
 
 
-clientSelector =
-{
-  name: "clientSelector",
-  type: "autocompleteBox",
-  matchType: "fromStart",
-  queryDefinition: MetaLayerHome2.clientSelectorDefinition,
-  selectMulti: true,
-  showApplyButton: true,
-  minTextLenght: 0,
-  scrollHeight: 250,
-  parameter:"clients",
-  htmlObject: "sampleObject",
-  reloadOnUpdate:true,
-  autoUpdateTimeout:3000,
-  executeAtStart: true,
-  autoUpdateFunction:function()
-  {
-		if(!clients)
+clientSelector = {
+	name: "clientSelector",
+	type: "autocompleteBox",
+	matchType: "fromStart",
+	queryDefinition: MetaLayerHome2.clientSelectorDefinition,
+	selectMulti: true,
+	showApplyButton: true,
+	minTextLength: 0,
+	scrollHeight: 250,
+	parameter: "clients",
+	htmlObject: "sampleObject",
+	reloadOnUpdate: true,
+	autoUpdateTimeout: 3000,
+	executeAtStart: true,
+	autoUpdateFunction: function() {
+		if(!clients) {
 			clients="";
+		}
 		console.log("!update");
 		var inputValue=$("#autoboxInput").val();
 		console.log("inputValue;"+inputValue);
 		console.log("clients;"+clients);
-		if(clients!=inputValue)
-		{
+		if(clients!=inputValue) {
 			clients=inputValue;
 			Dashboards.update(clientSelector);
 		}

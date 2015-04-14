@@ -295,7 +295,7 @@
       },
 	
     insertText: function(str){ return unescape(escape(str.text)); },
-	  minTextLenght: 0,
+    minTextLength: 0,
     match: function(typed){ 
       if (opt.matchType == "fromStart"){
         this.typed = typed;
@@ -520,7 +520,7 @@
       self.one("updateList", function(e, list){//clear/update/redraw list
         //opt.valueMatched = false;
         valueMatched = false;
-        if(opt.minTextLenght > input.val().length){
+        if(opt.minTextLength > input.val().length){
           list = [];
         }
         list=$(list)
