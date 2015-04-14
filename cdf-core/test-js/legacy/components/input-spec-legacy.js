@@ -16,7 +16,7 @@ describe("The Autocomplete Component #", function() {
     matchType: "fromStart",
     selectMulti: true,
     showApplyButton: true,
-    minTextLenght: 0,
+    minTextLength: 0,
     scrollHeight: 250,
     reloadOnUpdate:true,
     autoUpdateTimeout:3000,

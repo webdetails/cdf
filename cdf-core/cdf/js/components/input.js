@@ -1337,15 +1337,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
 
-    //TODO:typo on minTextLength
-    if(this.minTextLenght == undefined){
-      this.minTextLenght = 0;
+    if(this.minTextLength == undefined){
+      this.minTextLength = 0;
     }
 
     var opt = {
       list: function(){
         var val = myself.textbox.val();
-        if(val.length >= myself.minTextLenght &&
+        if(val.length >= myself.minTextLength &&
            !(val == '' //nothing to search
              ||
              val == myself.searchedWord
@@ -1375,7 +1374,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       },
       multiSelection: myself.selectMulti == undefined ? false : myself.selectMulti,
       checkValue: myself.checkValue == undefined ? true : myself.checkValue,
-      minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+      minTextLength: myself.minTextLength == undefined ? 0 : myself.minTextLength,
       scrollHeight: myself.scrollHeight,
       applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
       tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,

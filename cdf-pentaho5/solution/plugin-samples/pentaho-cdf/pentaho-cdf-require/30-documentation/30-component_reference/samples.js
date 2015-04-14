@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,13 +11,25 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-require(['cdf/lib/jquery', 'amd!cdf/lib/jquery.ui'], function($) {
+require(['cdf/Logger', 'cdf/lib/jquery', 'amd!cdf/lib/jquery.ui'], function(Logger, $) {
+
+  var $example = $("#example"),
+      $sampleCode = $('#samplecode');
+
+  $example.tabs();
+
+  function runSampleCode() {
+    try {
+      eval($sampleCode.val());
+      $example.tabs("option", "active", 0);
+    } catch(e) {
+      Logger.exception(e);
+    }
+  }
+
   $("#tryMe").click(function() {
-    eval($('#samplecode').val());
-    $("#example").tabs("option", "active", 0);
+    runSampleCode();
   });
 
-  $("#example").tabs();
-  eval($('#samplecode').val());
-  $("#example").tabs("option", "active", 0);
+  runSampleCode();
 });
