@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -70,17 +70,13 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
 
         if(myself.type == 'radio' || myself.type == 'radioComponent') {
           if((i == 0 && !hasCurrentVal) || (hasCurrentVal && (myArray[i][vid] == currentVal))) {
-            //selectHTML += " CHECKED";
             input.prop('checked', true);
           }
-          //selectHTML += " type='radio'";
           input.attr({type: "radio"});
         } else {
           if((i == 0 && !hasCurrentVal && myself.defaultIfEmpty) || (hasCurrentVal && isSelected)) {
-            //selectHTML += " CHECKED";
             input.prop('checked', true);
           }
-          //selectHTML += " type='checkbox'";
           input.attr({type: "checkbox"});
         }
         input.attr({
@@ -98,10 +94,8 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           .append((myself.separator == undefined || myself.separator == null || myself.separator == "null") 
             ? "" : myself.separator);
       }
-      //selectHTML += "</ul>"
       // update the placeholder
-      //myself.placeholder().html(selectHTML);
-      myself.placeholder().append(selectHTML);
+      myself.placeholder().html(selectHTML);
       myself.currentVal = null;
       myself._doAutoFocus();
     },

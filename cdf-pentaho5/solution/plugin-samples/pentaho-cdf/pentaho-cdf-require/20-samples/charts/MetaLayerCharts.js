@@ -55,15 +55,13 @@ MetaLayerCharts = {
     parameterName: "region",
     title: "First choose region:",
     query: function() {
-    
-      var query = "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," + 
+
+      return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
         " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," + 
         " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
         " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
         " NON EMPTY ( " + MetaLayerCharts.regionsMeasure + " ) ON ROWS " +
         " from [Quadrant Analysis]";
-      
-      return query;
     }
   },
     
@@ -83,16 +81,14 @@ MetaLayerCharts = {
     urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {MetaLayerCharts.barChartClicked( Utf8Encoder.encode_prepare('{department}') ) })",
     parameterName: "department",
     query: function() {
-    
-      var query = "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])',"+ 
+
+      return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])',"+
         " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\","+ 
         " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
         " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
         " NON EMPTY ([Department].[All Departments].Children ) ON ROWS " +
         " from [Quadrant Analysis]" +
         " where (" + MetaLayerCharts.selectedRegionMeasure + ")";
-      
-      return query;
     }
   },
   
@@ -111,11 +107,9 @@ MetaLayerCharts = {
     
     query: function() {
       
-      var query = " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
+      return " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
         " NON EMPTY (" + MetaLayerCharts.departmentMeasure + " ) ON ROWS " +
         " from [Quadrant Analysis]";
-      
-      return query;
     }
   }
 };
