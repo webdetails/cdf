@@ -16,8 +16,7 @@ define([
     '../lib/CCC/pvc',
     '../lib/modernizr',
     '../lib/jquery',
-    '../lib/CCC/protovis',
-    '../lib/CCC/protovis-msie'
+    '../lib/CCC/protovis-compat!'
   ],
   function(ChartComponent, pvc, Modernizr, $, pv) {
 
