@@ -74,11 +74,42 @@
         </ul>
 
         <h4>Examples:</h4>
+        
+        <h5>1. Format a date using the dashboard language, e.g. 'en-us':</h5>
+        
         <code>
             <pre>
-    Dashboards.dateFormat('DD/MM/YY')                                        -> "18/02/15"
-    Dashboards.dateFormat('dddd Do MMMM YYYY')                               -> "Wednesday 18th February 2015"
-    Dashboards.dateFormat('D MMM, YYYY', moment('13-08-1983', 'DD-MM-YYYY')) -> "13 Aug, 1983"
+    Dashboards.dateFormat(moment(), 'DD/MM/YY')                                            -> "18/02/15"
+    Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY')                                 -> "Wednesday 18th February 2015"
+    Dashboards.dateFormat(Dashboards.dateParse('13-08-1983', 'DD-MM-YYYY'), 'D MMM, YYYY') -> "13 Aug, 1983"
+    Dashboards.dateFormat(null, 'dddd Do MMMM YYYY')                                       -> Invalid Date
+            </pre>
+        </code>
+        
+        <h5>2. Format a date using a specific language, will use fallback logic if the specified language isn't found:</h5>
+        
+        <code>
+            <pre>
+    Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'en-us') -> "Wednesday 18th February 2015"
+    Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'pt-pt') -> "quarta-feira 18º fevereiro 2015"
+    Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'xx-zz') -> "Wednesday 18th February 2015" *Fallback to the default 'en-us'*
+            </pre>
+        </code>
+        
+        <h2>Q: How can I parse dates in CDF?</h2>
+        <h3>A:</h3>
+        <p>
+            As in the previous section, here we provide the function <b>Dashboards.dateParse</b> to parse a date with a given mask/format.<br>
+            This function will always return a <b>Date</b> object containing the parsed date.<br>
+        </p>
+        
+        <h4>Examples:</h4>
+        
+        <code>
+            <pre>
+    Dashboards.dateParse("Wednesday, February 18, 2015 12:00 AM", 'LLLL') -> Wed Feb 18 2015 00:00:00 GMT+0000 (WET)
+    Dashboards.dateParse('13-08-1983', 'DD-MM-YYYY')                      -> Sat Aug 13 1983 00:00:00 GMT+0100 (WEST)
+    Dashboards.dateParse(null, 'dddd Do MMMM YYYY')                       -> Invalid Date
             </pre>
         </code>
 
