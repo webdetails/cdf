@@ -1066,13 +1066,118 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     // update the placeholder
     this.placeholder().html(selectHTML);
     this.currentVal = null;
+	
+	//START fix of SP-1771
+    // add submission timeout
+    this._listenElement(this.placeholder())
+
+    // scroll to position before submission
+    if(this.autoTopHeight != null) {
+       $("div.prompt-panel").scrollTop(this.autoTopHeight);
+    }
+    //END fix of SP-1771
+	
     this._doAutoFocus();
   },
   callAjaxAfterRender: function(name){
+    //SP-1771: processChange call moved to this._listenElement.check method
+    /*
     setTimeout(function(){
       Dashboards.processChange(name);
     },1);
-  }
+    */
+  },
+  
+  //START fix of SP-1771
+  _listenElement: function(elem) {
+      var me = this;
+      var prevValue = me.getValue();
+      var stop;
+      var check = function() {
+        stop && stop();
+
+        // Have been disposed?
+        var dash = me.dashboard;
+        if(dash) {
+            var currValue = me.getValue();
+            if(!dash.equalValues(prevValue, currValue)) {
+                prevValue = currValue;
+                dash.processChange(me.name);
+            }
+        }
+      };
+
+      // get checkbox list
+      var ulElem = $("ul", elem);
+
+      ulElem.keypress(function(ev) { if(ev.which === 13) { check(); } });
+
+      var changeMode = this._getChangeMode();
+      if(changeMode !== 'timeout-focus') {
+        ulElem.on(me._changeTrigger(), check);
+      } else {
+
+        // calc timeouts
+        var timScrollFraction = me.changeTimeoutScrollFraction;
+        timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
+
+        var timChangeFraction = me.changeTimeoutChangeFraction;
+        timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 5/8);
+
+        var changeTimeout = Math.max(100, me.changeTimeout || 2000);
+        var changeTimeoutScroll = timScrollFraction * changeTimeout;
+        var changeTimeoutChange = timChangeFraction * changeTimeout;
+
+        // timer
+        var timeoutHandle;
+
+        // clear timer
+        stop = function() {
+          if(timeoutHandle != null) {
+            clearTimeout(timeoutHandle);
+            timeoutHandle = null;
+          }
+        };
+
+        // restart timer
+        var renew = function(tim) {
+          stop();
+          if(me.dashboard) {
+          timeoutHandle = setTimeout(check, tim || changeTimeout);
+          }
+        };
+
+        // catch checkbox changes and scrolling for timer restarting
+        ulElem.change(function() { renew(changeTimeoutChange); });
+        $("div.prompt-panel").scroll(function() { renew(changeTimeoutScroll); });
+      }
+    },
+
+    _getChangeMode: function() {
+        var changeMode = this.changeMode;
+        if(changeMode) {
+          changeMode = changeMode.toLowerCase();
+          switch(changeMode) {
+            case 'immediate':
+            case 'focus':  return changeMode;
+
+            case 'timeout-focus':
+              // Mobiles do not support this strategy. Downgrade to 'focus'.
+              if((/android|ipad|iphone/i).test(navigator.userAgent)) { return 'focus'; }
+              return changeMode;
+
+            default:
+              Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
+          }
+        }
+        return 'immediate';
+      },
+
+      _changeTrigger: function() {
+          if(this._getChangeMode() === 'immediate') { return 'change'; }
+          return (/android/i).test(navigator.userAgent) ? 'change' : 'focusout';
+      }
+      //END fix of SP-1771
 });
 
 var RadioComponent = ToggleButtonBaseComponent.extend({
