@@ -138,7 +138,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
                paginate.activePageNumber--;
              }
             }
-            myself.options.queyResult = json.result;
+            myself.options.queryResult = json.result;
             collection.reset(this.resetCollection(json.result));
 
             if(paginate.activePageNumber == 0
@@ -251,6 +251,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
             'addComment',
             'saveComment',
             'cancelComment',
+            'renderComments',
             'renderSingeComment',
             'addComment',
             'saveComment',
@@ -259,15 +260,15 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
             'navigatePrevious',
             'commentsUpdateNotification'
           );
-  
+
           this.collection = collection;
   
-          this.collection.on('reset', this.render);
+          this.collection.on('reset', this.renderComments);
           this.collection.on('commentsUpdateNotification', this.commentsUpdateNotification);
   
           this.render();
         },
-  
+
         render: function() {
           var $renderElem = $('#'+myself.options.htmlObject);
           var $commentsElem = $('<div/>').addClass('commentsGroup');
@@ -280,6 +281,14 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
           $renderElem.html(this.$el);
           this.updateNavigateButtons();
         },
+
+        renderComments: function() {
+          var $commentsElem = $('#'+myself.options.htmlObject+' > div .commentsGroup');
+          $commentsElem.empty();
+          _(this.collection.models).each(function(comment) {
+            $commentsElem.append(this.renderSingeComment(comment));
+          }, this);
+        },
   
         renderSingeComment: function(comment) {
           var singleCommentView = new myself.CommentView(comment);
@@ -291,8 +300,10 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
         },
   
         saveComment: function() {
+          var self = this;
           var text = this.$el.find('.addCommentText').val();
           var callback = function(data, collection) {
+            self.hideAddComment();
             var paginate = myself.options.paginate;
             paginate.activePageNumber = 0;
             myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
@@ -308,9 +319,9 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
         navigateNext: function() {
           var paginate = myself.options.paginate;
           var start = paginate.activePageNumber*paginate.pageCommentsSize;
-          if((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
+          if((start+paginate.pageCommentsSize) < myself.options.queryResult.length) {
             paginate.activePageNumber++;
-            this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
+            this.collection.reset(myself.operations.resetCollection(myself.options.queryResult));
           }
           this.commentsUpdateNotification();
           this.updateNavigateButtons();
@@ -321,7 +332,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
           var start = paginate.activePageNumber;
           if(paginate.activePageNumber > 0) {
             paginate.activePageNumber--;
-            this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
+            this.collection.reset(myself.operations.resetCollection(myself.options.queryResult));
           }
           this.commentsUpdateNotification();
           this.updateNavigateButtons();
@@ -342,14 +353,14 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
           if(paginate.activePageNumber > 0) {
             $('.navigatePrevious').removeClass("disabled");
           }
-          if((paginate.activePageNumber + 1) < Math.ceil(myself.options.queyResult.length / paginate.pageCommentsSize)) {
+          if((paginate.activePageNumber + 1) < Math.ceil(myself.options.queryResult.length / paginate.pageCommentsSize)) {
             $('.navigateNext').removeClass("disabled");
           }
         },
   
         commentsUpdateNotification: function() {
-          if(myself.options.queyResult.length > 0) {
-            var lastCommentDate = myself.options.queyResult[0].createdOn;
+          if(myself.options.queryResult.length > 0) {
+            var lastCommentDate = myself.options.queryResult[0].createdOn;
             var callback = function(data) {
               if(data.result.length > 0) {
                 if(!!(data.result[0].createdOn == lastCommentDate)) {
