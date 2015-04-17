@@ -1,0 +1,102 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccBulletChartComponent'],
+    function(Dashboard, CccBulletChartComponent) {
+
+    var dashboard = new Dashboard();
+
+    var bullet_NameDescValueMarkerRanges = {
+      "resultset": [
+          ["Europe", "Profit", 80, 120, 50, 150, 200],
+          ["Asia", "Count", 100,  600, 300, 600, 900],
+          ["Africa", "Result", 400,  500, 100, 200, 300]
+        ],
+        "metadata": [{
+          "colIndex": 0,
+          "colType": "String",
+          "colName": "Title"
+        }, {
+          "colIndex": 1,
+          "colType": "String",
+          "colName": "Subtitle"
+        }, {
+          "colIndex": 2,
+          "colType": "Numeric",
+          "colName": "Value"
+        }, {
+          "colIndex": 3,
+          "colType": "Numeric",
+          "colName": "Marker"
+        }, {
+          "colIndex": 4,
+          "colType": "Numeric",
+          "colName": "Range1"
+        }, {
+          "colIndex": 5,
+          "colType": "Numeric",
+          "colName": "Range2"
+        }, {
+          "colIndex": 6,
+          "colType": "Numeric",
+          "colName": "Range3"
+        }]
+    };
+
+    var render_chart = new CccBulletChartComponent({
+      type: "cccBulletChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        width:   600,
+        height:  400,
+        orientation: 'vertical',
+
+        // Main plot
+        bulletSize:    25,
+        bulletSpacing: 80,
+        bulletMargin:  30,
+        bulletTitlePosition: 'left',
+        bulletTitle_textStyle: '#333333',
+        bulletTitle_font: 'normal 15px "Open Sans"',
+        bulletMeasure_fillStyle: '#005CA7',
+        bulletRuleLabel_font: 'normal 10px "Open Sans"',
+        bulletSubtitle_font: 'normal 10px "Open Sans"'
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(bullet_NameDescValueMarkerRanges);
+    };
+
+    dashboard.init();
+  });
+</script>

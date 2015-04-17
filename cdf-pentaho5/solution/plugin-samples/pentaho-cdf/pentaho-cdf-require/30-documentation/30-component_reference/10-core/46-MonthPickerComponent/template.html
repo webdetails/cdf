@@ -1,0 +1,116 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>MonthPickerComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+    Renders a selection box to collect a month from user input. It's usually faster/more 
+    intuitive than classic datepickers.
+
+    </p>
+
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>monthPickerComponent</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>parameter</dt>
+      <dd>Variable where the input is stored</dd>
+
+      <dt>initialDate</dt>
+      <dd>Initial date to display in the selector</dd>
+
+      <dt>months</dt>
+      <dd>The number of months to display (eg, months = 2 will display 1 month before and 1 month after the initialDate). If 0 or not specified, will use all entries between maxDate and minDate</dd>
+
+      <dt>size</dt>
+      <dd>The vertical size of the component. Default: 1</dd>
+
+      <dt>maxDate</dt>
+      <dd>Maximum date to display in the selector. Default: no restriction</dd>
+
+      <dt>minDate</dt>
+      <dd>Minimum date to display in the selector. Default: no restriction</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>tooltip</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
+
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function(date) - </i> Function to be called before the component is changed</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function(date) - </i> Function to be called after the component is changed</dd>
+
+    </dl>
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
+      <div id="sample">
+        <div id="sampleObject"></div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/MonthPickerComponent'],
+  function(Dashboard, MonthPickerComponent) {
+
+    var dashboard = new Dashboard();
+    dashboard.addParameter("input", "2009-01-01");
+
+    var d = new Date();
+    d.setYear(2006);
+
+    dashboard.addComponent(new MonthPickerComponent({
+      name: "monthPickerComponent",
+      type: "monthPickerComponent",
+      parameter: "input",
+      months: 10,
+      size: 1,
+      initialDate: d,
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      tooltip: "Click me to select a month",
+      postChange: function(date) {
+        alert("You chose: " + date);
+      }
+    }));
+    dashboard.init();
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

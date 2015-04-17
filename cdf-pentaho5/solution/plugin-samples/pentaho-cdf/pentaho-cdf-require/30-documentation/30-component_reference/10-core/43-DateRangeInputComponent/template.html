@@ -1,0 +1,134 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>DateRangeInputComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+    Renders a date range input box to collect user input from. 
+    </p>
+
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>dateRangeInputComponent</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>parameter</dt>
+      <dd><i>Array - </i> Variables where the input is stored</dd>
+
+      <dt>earliestDate</dt>
+      <dd>Date Range Input earliest date</dd>
+
+      <dt>latestDate</dt>
+      <dd>Date Range Input latest date</dd>
+
+      <dt>leftOffset</dt>
+      <dd>Date Range Input left offset</dd>
+
+      <dt>topOffset</dt>
+      <dd>Date Range Input top offset</dd>
+
+      <dt>singleInput</dt>
+      <dd>True will render a single input; False will use 2 input boxes</dd>
+
+      <dt>inputSeparator</dt>
+      <dd>This separator will be used between the fields</dd>
+
+      <dt>canClickOutsidePopup</dt>
+      <dd>If true will not close DateRangeInput popup when the user clicks outside of it, false otherwise</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+      <dt>onOpenEvent</dt>
+      <dd><i>Function - </i> Function to be called when the 'onOpen' event is triggered</dd>
+
+      <dt>onCloseEvent</dt>
+      <dd><i>Function - </i> Function to be called when the 'onClose' event is triggered</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>tooltip</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
+
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function(date1, date2) - </i> Function to be called before the component is changed</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function(date1, date2) - </i> Function to be called after the component is changed</dd>
+
+    </dl>
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
+      <div id="sample">
+        <div style="font-size: 9pt" id="sampleObject"></div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/DateRangeInputComponent'],
+  function(Dashboard, DateRangeInputComponent) {
+
+  var dashboard = new Dashboard();
+  dashboard.addParameter("startDate", "2014-03-10");
+  dashboard.addParameter("endDate", "2014-09-02");
+
+  dashboard.addComponent(new DateRangeInputComponent({
+    name: "myInput",
+    type: "dateRangeInputComponent",
+    parameter: ["startDate","endDate"],
+    singleInput: false,
+    inputSeparator: "<br />",
+    earliestDate: "-1years",
+    latestDate: "+1years",
+    leftOffset: 100,
+    topOffset: 0,
+    canClickOutsidePopup: true,
+    htmlObject: "sampleObject",
+    onOpenEvent: function() {
+      this.placeholder("input").css('border', '2px solid red'); 
+    },
+    onCloseEvent: function() {
+      this.placeholder("input").css('border', '1px solid black'); 
+    },
+    executeAtStart: true,
+    tooltip: "Click me to select a date",
+    postChange: function(date1, date2) {
+      alert("You chose from " + date1 + " to " + date2);
+    }
+  }));
+  dashboard.init();
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

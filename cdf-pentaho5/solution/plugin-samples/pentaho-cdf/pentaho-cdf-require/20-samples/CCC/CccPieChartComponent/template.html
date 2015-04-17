@@ -1,0 +1,97 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccPieChartComponent'],
+    function(Dashboard, CccPieChartComponent) {
+
+    var dashboard = new Dashboard();
+
+    var relational_03_b = {
+      "resultset": [
+        ["London", 74],
+        ["Paris", 48],
+        ["New York", 37],
+        ["Prague", 27],
+        ["Stockholm", 22],
+        ["Sydney", 19],
+        ["Madrid", 18],
+        ["Lisbon", 41]
+      ],
+      "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+      }, {
+        "colIndex": 1,
+        "colType": "Numeric",
+        "colName": "Value"
+      }]
+    };
+
+    var render_chart = new CccPieChartComponent({
+      type: "cccPieChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        width:  600,
+        height: 400,
+
+        // Data source
+        crosstabMode: false,
+
+        // Main plot
+        valuesVisible: true,
+        valuesFont: 'lighter 11px "Open Sans"',
+        explodedSliceRadius: '2%',
+        slice_innerRadiusEx: '50%',
+
+        // Panels
+        legend: false,
+
+        // Chart/Interaction
+        selectable: true,
+        hoverable:  true,
+        tooltipClassName: 'light',
+
+        // Color axes
+        colors: [
+          '#333333', '#777777', '#FFC20F', '#FFE085',
+          '#005CA7', '#0086F4', '#39A74A', '#63CA73'
+        ]}
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(relational_03_b);
+    };
+
+    dashboard.init();
+  });
+</script>

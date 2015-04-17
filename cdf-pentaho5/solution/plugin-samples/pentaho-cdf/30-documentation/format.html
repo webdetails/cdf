@@ -1,0 +1,203 @@
+<div class="shadow">
+
+    <div class="contents">
+
+        <h2>Format Number And Date</h2>
+
+        <p>
+            CDF has a default library to format numbers i.e. <a target="_blank" href="http://www.webdetails.pt/ctools/ccc/charts/jsdoc/symbols/pvc.options.format.FormatProvider.html#number">cdo.NumberFormat</a>
+            and other to format dates i.e. <a target="_blank" href="http://momentjs.com/">moment</a>
+        </p>
+
+        <h2>Q: How can I format numbers in CDF?</h2>
+        
+        <h3>A:</h3>
+        <p>
+            In CDF we provide the function <b>Dashboards.numberFormat</b> to format numbers with a given mask using the dashboard default language or optionally with a specific language.<br>
+
+            The mask syntax is mostly compatible with VB's <b>format</b> function <a target="_blank" href="http://apostate.com/programming/vb-format-syntax.html">mask syntax</a>, only the number related subset is relevant.<br>
+            Other elements of this mask syntax are 'C' or 'Currency' and 'A' or 'Abbreviation' to insert the currency symbol and abbreviate the number.
+        </p>
+
+        <h4>Examples:</h4>
+
+        <h5>1. Format a number using the dashboard language, e.g. 'en-us':</h5>
+
+        <code>
+            <pre>
+    Dashboards.numberFormat(1200, '0,#.0')                -> "1,200.0"
+    Dashboards.numberFormat(1200, '0,0.#')                -> "1,200"
+    Dashboards.numberFormat(1200.46, '0,0.#')             -> "1,200.5"
+
+    Dashboards.numberFormat(5480, '0.00 Abbreviation')    -> "5,49 k"
+    Dashboards.numberFormat(5480000, '0.00A')             -> "5,49m"
+    Dashboards.numberFormat(5480000000, '0.00A')          -> "5,49b"
+    Dashboards.numberFormat(5480000000000, '0.00A')       -> "5,49t"
+
+    Dashboards.numberFormat(4500.64, '0,0.0\u00a4')       -> "4,500.6$"
+    Dashboards.numberFormat(4500000.64, '0,0.0 Currency') -> "4,500,000.6 $"
+    Dashboards.numberFormat(4500.64, 'C 0,0.0')           -> "$ 4,500.6"
+
+    Dashboards.numberFormat(0.2, '0.00%')                 -> "20.00%"
+    Dashboards.numberFormat(1200, '0.0e00')               -> "1.2e03"
+    Dashboards.numberFormat(4500000, '0.0AC')             -> "4.5m$"
+            </pre>
+        </code>
+
+        <h5>2. Format a number using a specific language, will use fallback logic if the specified language isn't found:</h5>
+        <code>
+            <pre>
+    Dashboards.numberFormat(4500.64, '0,0.0 C', 'pt-pt') -> "4,500.6 €"
+    Dashboards.numberFormat(4500.64, 'C 0,0.0', 'en-gb') -> "£ 4,500.6"
+    Dashboards.numberFormat(4500.64, 'C 0,0.0', 'xx-zz') -> "$ 4,500.6" *Fallback to the default 'en-us'*
+            </pre>
+        </code>
+
+        <h2>Q: How can I format dates in CDF?</h2>
+        <h3>A:</h3>
+        <p>
+            Similar to number format, here we provide the function <b>Dashboards.dateFormat</b> to format a date with a given mask.<br>
+            For a detailed list of examples on how to use moment click <a target="_blank" href="http://momentjs.com/docs/">here</a>.<br> 
+                    
+            The mask syntax is explained in detail <a target="_blank" href="http://momentjs.com/docs/#/displaying/">here</a>.<br>
+            To add more languages to moment you can do two things:
+        </p>
+        <ul>
+            <li>
+                Manually configure a new language using the function <b>Dashboards.configLanguage</b> described in the next section with a configuration object
+                as described <a target="_blank" href="http://momentjs.com/docs/#/customization/">here</a>.
+            </li>
+            <li>
+                Import a locale configuration file from 'moment/locale/' to a folder in the repository, e.g. '/public/cdf/locale'
+                and load it in the dashboard using the 'Add Resource - external javascript file' operation
+            </li>
+        </ul>
+
+        <h4>Examples:</h4>
+
+        <h5>1. Format a date using the dashboard language, e.g. 'en-us':</h5>
+
+        <code>
+              <pre>
+      Dashboards.dateFormat(moment(), 'DD/MM/YY')                                            -> "18/02/15"
+      Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY')                                 -> "Wednesday 18th February 2015"
+      Dashboards.dateFormat(Dashboards.dateParse('13-08-1983', 'DD-MM-YYYY'), 'D MMM, YYYY') -> "13 Aug, 1983"
+      Dashboards.dateFormat(null, 'dddd Do MMMM YYYY')                                       -> Invalid Date
+              </pre>
+        </code>
+
+        <h5>2. Format a date using a specific language, will use fallback logic if the specified language isn't found:</h5>
+
+        <code>
+              <pre>
+      Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'en-us') -> "Wednesday 18th February 2015"
+      Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'pt-pt') -> "quarta-feira 18º fevereiro 2015"
+      Dashboards.dateFormat(new Date(), 'dddd Do MMMM YYYY', 'xx-zz') -> "Wednesday 18th February 2015" *Fallback to the default 'en-us'*
+              </pre>
+        </code>
+
+        <h2>Q: How can I parse dates in CDF?</h2>
+        <h3>A:</h3>
+        <p>
+          As in the previous section, here we provide the function <b>Dashboards.dateParse</b> to parse a date with a given mask/format.<br>
+          This function will always return a <b>Date</b> object containing the parsed date.<br>
+        </p>
+
+        <h4>Examples:</h4>
+
+        <code>
+              <pre>
+      Dashboards.dateParse("Wednesday, February 18, 2015 12:00 AM", 'LLLL') -> Wed Feb 18 2015 00:00:00 GMT+0000 (WET)
+      Dashboards.dateParse('13-08-1983', 'DD-MM-YYYY')                      -> Sat Aug 13 1983 00:00:00 GMT+0100 (WEST)
+      Dashboards.dateParse(null, 'dddd Do MMMM YYYY')                       -> Invalid Date
+              </pre>
+        </code>
+
+        <h2>Q: How can I configure new or existing languages?</h2>
+        <h3>A:</h3>
+
+        <p>
+            To configure a new or existing language you can use the function <b>Dashboards.configLanguage</b> by specifying the language code and a configuration object with the keywords:
+        </p>
+        <ul>
+            <li>
+                <b>number</b> - to configure number's format language
+            </li>
+            <li>
+                <b>dateLocale</b> - to configure date's format language
+            </li>
+        </ul>
+        
+        <h4>Examples:</h4>
+
+        <h5>1. Configure the number's format language:</h5>
+        <code>
+            <pre>
+    Dashboards.configLanguage('foo-bar', {
+        number: {
+            mask:              '#,0.##',
+            style: {
+                integerPad:    '0',
+                fractionPad:   '0',
+                decimal:       ',',
+                group:         ' ',
+                groupSizes:    [3],
+                abbreviations: ['k','m', 'b', 't'],
+                negativeSign:  '-',
+                currency:      'F'
+            }
+        }
+    })
+            </pre>
+        </code>
+
+        <h5>2. Configure the date's format language:</h5>
+        <code>
+            <pre>
+    Dashboards.configLanguage('foo-bar', {
+        dateLocale: {
+            months: [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ],
+            monthsShort: [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ]
+        }
+    })
+            </pre>
+        </code>
+
+        <h5>3. Configure both format language:</h5>
+        <code>
+            <pre>
+    Dashboards.configLanguage('foo-bar', {
+        number: {
+            mask:              '#,0.##',
+            style: {
+                integerPad:    '0',
+                fractionPad:   '0',
+                decimal:       ',',
+                group:         ' ',
+                groupSizes:    [3],
+                abbreviations: ['k','m', 'b', 't'],
+                negativeSign:  '-',
+                currency:      'F'
+            }
+        },
+        dateLocale: {
+            months: [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ],
+            monthsShort: [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ]
+        }
+    })
+            </pre>
+        </code>
+    </div>
+</div>

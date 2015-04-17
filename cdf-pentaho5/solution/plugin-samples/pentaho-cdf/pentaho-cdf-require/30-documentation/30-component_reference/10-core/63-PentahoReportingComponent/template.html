@@ -1,0 +1,125 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>PrptComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+    This is a component that can execute the new Pentaho Reporting unified file format. The result is displayed in the PUC Report Viewer,
+    including the new parameter and pagination features. For better use in CDF, parameter and pagination in the report viewer can be turned on or off.
+    </p>
+
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>prptComponent</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>parameters</dt>
+      <dd><i>Array of Arrays - </i> Parameters to pass to the report</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed. The component will be executed only if the result of preChange equals true.</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>tooltip</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
+
+      <dt>solution</dt>
+      <dd>Solution where the Pentaho Reporting file is</dd>
+
+      <dt>path</dt>
+      <dd>Path where the Pentaho Reporting file is</dd>
+
+      <dt>action</dt>
+      <dd>Pentaho Reporting file name (unified file format *.prpt)</dd>
+
+      <dt>paginate</dt>
+      <dd>Pentaho Report Viewer paginate option. Default: true</dd>
+
+      <dt>showParameters</dt>
+      <dd>Pentaho Report Viewer parameter option. Default: false</dd>
+
+      <dt>iframe</dt>
+      <dd> Wheather to render the report inside an iframe or inline. Default: true (iframe)</dd>
+
+    </dl>
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
+      <div id="sample">
+        <div id="selectorObject"></div>
+        <div id="sampleObject" style="height:600px; width:920px ;"></div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'cdf/components/PrptComponent'],
+  function(Dashboard, SelectComponent, PrptComponent) {
+
+    var dashboard = new Dashboard();
+    dashboard.addParameter("output_type", "");
+
+    dashboard.addComponent(new SelectComponent({
+      name: "outputSelector",
+      type: "selectComponent",
+      parameters:[],
+      valuesArray:[["table/html;page-mode=stream","HTML"],["pageable/pdf","PDF"]],
+      parameter:"output_type",
+      valueAsId: false,
+      htmlObject: "selectorObject",
+      executeAtStart: true
+    }));
+
+    dashboard.addComponent(new PrptComponent({
+      name: "orderStatusReport",
+      type: "prptComponent",
+      path: "/public/Steel Wheels/Widget Library/Report Snippets/InventorybyLine.prpt",
+      listeners:["output_type"],
+      parameters: [["output-target","output_type"]],
+      htmlObject: "sampleObject",
+      paginate: false,
+      showParameters: true,
+      iframe: true,
+      executeAtStart: true
+    }));
+    dashboard.init();
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

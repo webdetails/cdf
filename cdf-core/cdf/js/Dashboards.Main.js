@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 var dash, Dashboards = dash = {
 
@@ -1166,15 +1166,22 @@ Dashboards.mergePriorityLists = function(target,source) {
 
 Dashboards.restoreView = function() {
   var p, params;
-  if(!this.view) return;
+  if(!this.view || !this.view.params) {return;}
   /* Because we're storing the parameters in OrientDB, and as OrientDB has some
    * serious issues when storing nested objects, we're stuck marshalling the
    * parameters into a JSON object and converting that JSON into a Base64 blob
    * before storage. So now we have to decode that mess.
    */
   params = JSON.parse(Base64.decode(this.view.params));
-  for(p in params) if (params.hasOwnProperty(p)) {
-    this.setParameter(p,params[p]);
+  if(!params) {return;}
+  if($.isEmptyObject(params)) {
+    this.view.params = params;
+  } else {
+    for(p in params) {
+      if(params.hasOwnProperty(p)) {
+        this.setParameter(p, params[p]);
+      }
+    }
   }
 };
 

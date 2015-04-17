@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 /*
  * Function: fnLengthChange
@@ -360,38 +360,40 @@ var TableComponent = UnmanagedComponent.extend({
   fnDrawCallback: function(dataTableSettings) {
     var dataTable = dataTableSettings.oInstance,
         cd = this.chartDefinition,
-        myself = this,
-        handleAddIns = _.bind(this.handleAddIns,this);
-    this.ph.find("tbody tr").each(function(row,tr){
+        myself = this;
+        
+    var tableRows = this.ph.find("tbody tr");
+        for (var k = 0; k < tableRows.length; k++) {
       /* 
        * Reject rows that are not actually part
        * of the datatable (e.g. nested tables)
        */
-      if (dataTable.fnGetPosition(tr) == null) {
+      if (dataTable.fnGetPosition(tableRows[k]) == null) {
         return true;
       }
-
-      $(tr).children("td").each(function(col,td){
-
-          var foundAddIn = handleAddIns(dataTable, td);
-          /* 
-           * Process column format for those columns
-           * where we didn't find a matching addIn
-           */
-          if(!foundAddIn && cd.colFormats) {
-            var position = dataTable.fnGetPosition(td);
-            if(position && typeof position[0] == "number"){
-              var rowIdx = position[0],
-                colIdx = position[2],
-                format = cd.colFormats[colIdx],
+      var tableData = $(tableRows[k]).children("td");
+      for (var i = 0; i < tableData.length; i++ ) {
+        var td = tableData[i];
+        var $td = $(td);
+          var position = dataTable.fnGetPosition(td);
+          if(position && typeof position[0] == "number") {
+            var rowIdx = position[0],
+                colIdx = position[2];
+            var foundAddIn = myself.handleAddIns(dataTable, td, $td, rowIdx, colIdx);
+            /* 
+             * Process column format for those columns
+             * where we didn't find a matching addIn
+             */
+            if(!foundAddIn && cd.colFormats) {
+              var format = cd.colFormats[colIdx],
                 value = myself.rawData.resultset[rowIdx][colIdx];
               if (format && (typeof value != "undefined" && value !== null)) {
-                $(td).text(sprintf(format,value));
+                $td.text(sprintf(format,value));
               }
             }
           }
-      });
-    });
+      }
+    }
 
     /* Old urlTemplate code. This needs to be here for backward compatibility */
     if(cd.urlTemplate != undefined){
@@ -424,19 +426,13 @@ var TableComponent = UnmanagedComponent.extend({
    * dataTable. Returns true if there was an addIn and it was successfully
    * called, or false otherwise.
    */
-  handleAddIns: function(dataTable, td) {
+  handleAddIns: function(dataTable, td, $td, rowIdx, colIdx) {
     var cd = this.chartDefinition,
-        position = dataTable.fnGetPosition(td);
-        if(position && typeof position[0] != "number"){
-          return false;
-        }
-        rowIdx = position[0],
-        colIdx = position[2],
-        colType = cd.colTypes[colIdx],
-        addIn = this.getAddIn("colType",colType),
+        colType = cd.colTypes[colIdx],     
         state = {},
-        target = $(td),
-        results = this.rawData;
+        target = $td,
+        results = this.rawData,
+        addIn = this.getAddIn("colType",colType);
     if (!addIn) {
       return false;
     }

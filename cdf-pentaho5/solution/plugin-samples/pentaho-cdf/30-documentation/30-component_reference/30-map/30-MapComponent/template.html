@@ -80,7 +80,7 @@
 			<dd>Initial map zoom</dd>
 			
 			<dt>mapDiv</dt>
-			<dd>Name of the traget div to hold the map (default = map)</dd>
+			<dd>Name of the target div to hold the map (default = map)</dd>
 			
 			<dt>showCustomMap</dt>
 			<dd>Turn on custom map support (default = false)</dd>
@@ -150,7 +150,7 @@ mapComponent =
 	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 	  preExecution:function(){},
 	  postExecution:function(){},
-	  markers: [["js/OpenMap/OpenLayers/img/marker-green.png",42,50],"js/OpenMap/OpenLayers/img/marker-gold.png","js/OpenMap/OpenLayers/img/marker.png"]
+	  markers: [["js/lib/OpenMap/OpenLayers/img/marker-green.png",42,50],"js/lib/OpenMap/OpenLayers/img/marker-gold.png","js/lib/OpenMap/OpenLayers/img/marker.png"]
 }
 	
 Dashboards.init([mapComponent,textElement]);

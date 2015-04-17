@@ -41,8 +41,8 @@
     },
     
     sumStrArray: function(arr){
-      return arr.split(',').reduce(function(prev, curr, index, array){  
-        Dashboards.log("Current " + curr +"; prev " +  prev); 
+      return arr.split(',').reduce(function(prev, curr, index, array){
+        Dashboards.log("Current " + curr +"; prev " +  prev);
         return parseFloat(curr) + (typeof(prev)==='number'?prev:parseFloat(prev));
       });
     },
@@ -104,8 +104,8 @@
     },
     
     sumStrArray: function(arr){
-      return arr.split(',').reduce(function(prev, curr, index, array){  
-        Dashboards.log("Current " + curr +"; prev " +  prev); 
+      return arr.split(',').reduce(function(prev, curr, index, array){
+        Dashboards.log("Current " + curr +"; prev " +  prev);
         return parseFloat(curr) + (typeof(prev)==='number'?prev:parseFloat(prev));
       });
     },

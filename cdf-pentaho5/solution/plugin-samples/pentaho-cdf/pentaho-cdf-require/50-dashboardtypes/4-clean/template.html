@@ -1,0 +1,126 @@
+<style>
+    .header, .footer, .filter, .info {
+        border: solid 1px gray;
+    }
+    
+    .header, .footer {
+        background-color: #4682B4;
+        color: white;
+        padding: 10px;
+    }
+    
+    .header {
+        text-align: center;
+        font-size: 16pt;
+    }
+    
+    .footer {
+        clear: left;
+        text-align: right;
+        font-size: 12pt;
+    }
+    
+    .filter, .info {
+        height: 100px;
+        padding: 5px;
+        margin: 5px 2px;
+    }
+    
+    .filter {
+        float: left;
+        background-color: #5F9EA0;
+        color: white;
+        width: 10%;
+    }
+    
+    .info {
+        float: right;
+        background-color: #E0FFFF;
+        width: 85%;
+    }
+</style>
+<div class="container-fluid">
+    <h1>Clean Sample</h1>
+    <p>
+        With a clean dashboard, no css framework, to organize your elements in the layout, will be loaded. This way you can use your own css frameworks<br>
+        or custom css without the interference of our frameworks, i.e. Blueprint or Bootstrap, to build the layout exactly the way you want.
+    </p>
+    <p>
+        <b>Note: </b>Css will still be loaded, but only for specific plugins and components that need it to work properly.
+    </p>
+    <div><h2>Layout</h2></div>
+    
+    <h3>Multiple Columns Layout With Custom Css</h3>
+    
+    <code>
+        /*CSS*/<br>
+        .header, .footer, .filter, .info {<br>
+        &nbsp;&nbsp;border: solid 1px gray;<br>
+        }<br>
+        .header, .footer {<br>
+        &nbsp;&nbsp;background-color: #4682B4;<br>
+        &nbsp;&nbsp;color: white;<br>
+        &nbsp;&nbsp;padding: 10px;<br>
+        }<br>
+        .header {<br>
+        &nbsp;&nbsp;text-align: center;<br>
+        &nbsp;&nbsp;font-size: 16pt;<br>
+        }<br>
+        .footer {<br>
+        &nbsp;&nbsp;clear: left;<br>
+        &nbsp;&nbsp;text-align: right;<br>
+        &nbsp;&nbsp;font-size: 12pt;<br>
+        }<br>
+        .filter, .info {<br>
+        &nbsp;&nbsp;height: 100px;<br>
+        &nbsp;&nbsp;padding: 5px;<br>
+        &nbsp;&nbsp;margin: 5px 2px;<br>
+        }<br>
+        .filter {<br>
+        &nbsp;&nbsp;float: left;<br>
+        &nbsp;&nbsp;background-color: #5F9EA0;<br>
+        &nbsp;&nbsp;color: white;<br>
+        &nbsp;&nbsp;width: 10%;<br>
+        }<br>
+        .info {<br>
+        &nbsp;&nbsp;float: right;<br>
+        &nbsp;&nbsp;background-color: #E0FFFF;<br>
+        &nbsp;&nbsp;width: 85%;<br>
+        }<br><br>
+        /*HTML*/<br>
+    &lt;div&gt;<br>
+    &nbsp;&nbsp;&lt;div class="header"&gt;Custom Css Layout&lt;/div&gt;<br>
+    &nbsp;&nbsp;&lt;div class="filter"&gt;Filter&lt;/div&gt;<br>
+    &nbsp;&nbsp;&lt;div class="info"&gt;&lt;/div&gt;<br>
+    &nbsp;&nbsp;&lt;div class="footer"&gt;Footer&lt;/div&gt;<br>
+    &lt;/div&gt;<br>
+    </code><br>
+    
+    <div>
+        <div class="header">Custom Css Layout</div>
+        <div class="filter">Filter</div>
+        <div class="info">
+            <p>
+                This layout was built without any framework.
+            </p>
+        </div>
+        <div class="footer">Footer</div>
+    </div>
+    
+    <div><h2>Require</h2></div>
+    <h4>To include a  Clean Dashboard:</h4>
+    <div>
+        require(['cdf/Dashboard.Clean'],<br>
+          &nbsp;&nbsp;function(Dashboard) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;...<br>
+        });
+    </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+require(['cdf/Dashboard.Clean'], 
+    function(Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.init();
+});
+</script>

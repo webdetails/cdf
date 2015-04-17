@@ -1,0 +1,208 @@
+/*!
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+button.scheduler_button {
+  -webkit-box-shadow: inset 0px 0px 2px 0px #0b4978;
+  -moz-box-shadow: inset 0px 0px 2px 0px #0b4978;
+  box-shadow: inset 0px 0px 2px 0px #0b4978;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 500;
+  font-family: 'Open Sans', sans-serif;
+  border: none;
+  padding: 10px;
+  padding-right: 45px;
+  width: 99.9%;
+  background: #137bca url('images/SchedulePrptComponent/open-dialog.png') no-repeat right 15px center;
+  margin: 20px 0px 0px;
+}
+
+.scheduler_button:hover
+{
+  background-color: #1887db;
+  transition: all 0.25s linear 0s;
+}
+
+
+/* dialog box */
+.scheduler .jqifade {
+  opacity: 0.8 !important;
+}
+
+.scheduler div#jqi.jqi   {
+  border: 1px solid #DADADA;
+  border-top: 1px #fff solid;
+  -webkit-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  overflow: hidden;
+  top: 10% !important;
+}
+
+.scheduler div#jqi.jqi,
+.scheduler div.jqi .jqicontainer  {
+  padding: 0px;
+}
+
+.scheduler div#jqistates {
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.scheduler .jqi_state {
+  color: #222;
+  font-weight: 500;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  overflow: hidden;
+  padding: 0px;
+}
+
+div.scheduler  .jqimessage {
+  background: #f5f5f5 !important;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  padding: 15px;
+}
+
+.scheduler  .jqiclose {
+  visibility: hidden;
+}
+
+.scheduler  .jqiclose:before {
+  content: "";
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  width: 19px;
+  height: 19px;
+  background: url('images/SchedulePrptComponent/close-dialog-hover.png');
+  visibility: visible;
+  transition: background 0.25s linear 0s;
+}
+
+.scheduler  .jqiclose:hover:before {
+  background: url('images/SchedulePrptComponent/close-dialog.png');
+  transition: background 0.25s linear 0s;
+}
+
+.scheduler  form input[type="text"] {
+  padding: 5px;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  color: #666;
+  font-family: 'Open Sans', sans-serif;
+  margin-right: 5px;
+  width: 250px;
+}
+
+.scheduler  form input[type="checkbox"] {
+  margin: 5px 0px 5px 8px;
+}
+
+.scheduler  form input[type="text"]:focus {
+  border: 1px solid #137bca;
+}
+
+.scheduler  textarea:focus {
+  border: 1px solid #137bca;
+}
+
+.scheduler  textarea {
+  width: 100%;
+  height: auto;
+}
+
+div.scheduler  label {
+  color: #137bca;
+  font-size: 13px;
+  line-height: 25px;
+}
+
+.scheduler  select {
+  padding: 5px;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border: 1px solid rgb(187, 187, 187);
+  margin-right: 5px;
+}
+
+.scheduler  select:focus {
+  border: 1px solid #137bca;
+}
+
+.scheduler  .jqibuttons {
+  margin-top: 20px;
+}
+
+.scheduler  .jqibuttons button {
+  color: #fff;
+  font-weight: 500;
+  font-family: 'Open Sans', sans-serif;
+  border: none;
+  background: #137bca;
+  font-size: 14px;
+}
+
+.scheduler  .jqibuttons button:hover {
+  background-color: #1887db;
+  transition: all 0.25s linear 0s;
+  cursor: pointer;
+}
+
+.scheduler  #jqi_basicState_buttonCancel, #jqi_mailState_buttonBack  {
+  width: 30%;
+  margin: 0;
+  left:0;
+  display: inline-block;
+  padding: 15px 0px;
+  border: none;
+  background-color: #333;
+}
+
+.scheduler  #jqi_basicState_buttonCancel:hover, #jqi_mailState_buttonBack:hover {
+  background-color: #555;
+  transition: all 0.25s linear 0s;
+}
+
+.scheduler  #jqi_basicState_buttonOk, #jqi_mailState_buttonOk {
+  width: 70%;
+  margin: 0;
+  left:0;
+  display: inline-block;
+  padding: 15px 0px;
+  border: none;
+}
+
+
+.scheduler .dialog-title {
+  color: #137bca;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.scheduler .dialog-label {
+  display: inline-block;
+  width: 100px;
+  color: #137bca;
+  font-size: 14px;
+  font-weight: 500;
+}

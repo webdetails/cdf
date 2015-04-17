@@ -1,0 +1,84 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccParCoordComponent'],
+    function(Dashboard, CccParCoordComponent) {
+
+    var dashboard = new Dashboard();
+
+    var parCoordTest_01 = {
+      "resultset": [
+        ["pat 1",  40, "M", 130, 6],
+        ["pat 2",  50, "F", 140, 5],
+        ["pat 3",  50, "M", 135, 4]
+      ],
+      "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "Category"
+      }, {
+        "colIndex": 1,
+        "colType": "Numeric",
+        "colName": "Age"
+      }, {
+        "colIndex": 2,
+        "colType": "String",
+        "colName": "Gender"
+      }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Blood Pressure mmHg"
+      }, {
+        "colIndex": 4,
+        "colType": "Numeric",
+        "colName": "Cholesterol mmol"
+      }]
+    };
+
+    var render_chart = new CccParCoordComponent({
+      type: "cccParallelCoordinates", //parCoord ?
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        crosstabMode: true,
+        seriesInRows: true,
+        width: 820,
+        height: 420,
+        title: "Demonstrating parallel Dimensions"
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(parCoordTest_01);
+    };
+
+    dashboard.init();
+  });
+</script>

@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-*
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 package org.pentaho.cdf.context;
 
@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -36,10 +37,9 @@ import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
-import org.pentaho.cdf.environment.ICdfEnvironment;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
-import org.pentaho.cdf.views.View;
+import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.cdf.views.ViewsEngine;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -51,32 +51,34 @@ import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IBasicFileFilter;
 import pt.webdetails.cpf.repository.api.IContentAccessFactory;
 import pt.webdetails.cpf.repository.api.IReadAccess;
+import pt.webdetails.cpf.repository.api.IUserContentAccess;
 import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.PluginIOUtils;
 import pt.webdetails.cpf.utils.XmlDom4JUtils;
 
 public class ContextEngine {
 
+  static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
   private static final String PREFIX_PARAMETER = "param";
-  static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
-  private static ContextEngine instance;
-
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
-  private final static boolean APPLY_LEGACY_DASHBOARD_CONTEXT = Boolean.valueOf(
-    StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
-    .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ) , "false" ) );
-
+  private static boolean legacyDashboardContext;
+  private static ContextEngine instance;
   private static String CONFIG_FILE = "dashboardContext.xml";
 
   private static List<AutoInclude> autoIncludes;
   private static Object autoIncludesLock = new Object();
 
-  protected IPentahoSession userSession;
-
   public ContextEngine() {
+    legacyDashboardContext = Boolean.valueOf(
+      StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
+        .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ), "false" ) );
+  }
+
+  public ContextEngine( boolean legacy ) {
+    legacyDashboardContext = legacy;
   }
 
   public static synchronized ContextEngine getInstance() {
@@ -86,33 +88,90 @@ public class ContextEngine {
     return instance;
   }
 
+  public static void clearCache() {
+    // TODO figure out what to clear
+    synchronized ( autoIncludesLock ) {
+      autoIncludes = null;
+      logger.debug( "auto-includes cleared." );
+    }
+
+    if ( CdfEngine.getPluginSystemReader( null ).fileExists( MessageBundlesHelper.BASE_CACHE_DIR ) ) {
+
+      List<IBasicFile> cacheFiles = CdfEngine.getPluginSystemReader( null ).listFiles( MessageBundlesHelper.BASE_CACHE_DIR,
+          new IBasicFileFilter() {
+            @Override public boolean accept( IBasicFile file ) {
+              return true; // accept everything
+            }
+          } );
+
+      if ( cacheFiles != null ) {
+        for ( IBasicFile file : cacheFiles ) {
+          CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null ).deleteFile( file.getPath() );
+        }
+      }
+    }
+  }
+
+  public void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
+    throws Exception {
+
+    String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
+    String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
+    String file = StringUtils.defaultIfEmpty( paramMap.get( Parameter.FILE ), StringUtils.EMPTY );
+    String action = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ACTION ), StringUtils.EMPTY );
+    // TODO: why does view default to action?
+    String viewId = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
+    String fullPath = RepositoryHelper.joinPaths( solution, path, file );
+
+    // old xcdf dashboards use solution + path + action
+    if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
+      fullPath = RepositoryHelper.joinPaths( fullPath, action );
+    }
+
+    String dashboardContext = getContext( fullPath, viewId, action, paramMap, inactiveInterval );
+
+    if ( StringUtils.isEmpty( dashboardContext ) ) {
+      logger.error( "empty dashboardContext" );
+    }
+
+    PluginIOUtils.writeOut( out, dashboardContext );
+  }
+
   protected IPentahoSession getUserSession() {
     return PentahoSessionHolder.getSession();
   }
 
   public String getContext( String path, String viewId, String action, Map<String, String> parameters,
                             int inactiveInterval ) {
-    final JSONObject contextObj = new JSONObject();
+    String username = getUserSession().getName();
+
+    try {
+      return buildContextScript( buildContext( path, username, parameters, inactiveInterval ), viewId, action,
+        username );
+    } catch ( JSONException e ) {
+      return "";
+    }
+  }
+
+  public JSONObject buildContext( String path, String username, Map<String, String> parameters, int inactiveInterval ) {
+    JSONObject contextObj = new JSONObject();
 
     Document config = getConfigFile();
 
     try {
-
-      String username = getUserSession().getName();
-
       buildContextConfig( contextObj, path, config, username );
       buildContextSessionTimeout( contextObj, inactiveInterval );
       buildContextDates( contextObj );
 
-      contextObj.put( "user", getUserSession().getName() );
-      contextObj.put( "locale", CdfEngine.getEnvironment().getLocale() );
+      contextObj.put( "user", username );
+      contextObj.put( "locale", getLocale() );
 
       buildContextPaths( contextObj, path, parameters );
 
-      SecurityParameterProvider securityParams = new SecurityParameterProvider( getUserSession() );
+      SecurityParameterProvider securityParams = getSecurityParams();
       contextObj.put( "roles", securityParams.getParameter( "principalRoles" ) );
 
-      if ( APPLY_LEGACY_DASHBOARD_CONTEXT ) {
+      if ( getLegacyStructure() ) {
         buildLegacyStructure( contextObj, path, securityParams );
       }
 
@@ -121,16 +180,16 @@ public class ContextEngine {
       contextObj.put( "params", params );
 
       logger.info( "[Timing] Finished building context: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-
-      return buildContextScript( contextObj, viewId, action, username );
+          + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
 
     } catch ( JSONException e ) {
-      return "";
+      logger.error( "Error building context" );
     }
+
+    return contextObj;
   }
 
-  private JSONObject buildContextSessionTimeout( final JSONObject contextObj, int inactiveInterval )
+  protected JSONObject buildContextSessionTimeout( final JSONObject contextObj, int inactiveInterval )
     throws JSONException {
     if ( getUserSession().isAuthenticated() ) {
       contextObj.put( "sessionTimeout", inactiveInterval );
@@ -138,8 +197,8 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
-                                        Map<String, String> parameters ) throws JSONException {
+  protected JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
+                                          Map<String, String> parameters ) throws JSONException {
     contextObj.put( "path", dashboardPath );
 
     if ( parameters != null && parameters.containsKey( Parameter.SOLUTION ) ) {
@@ -149,7 +208,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextDates( final JSONObject contextObj ) throws JSONException {
+  protected JSONObject buildContextDates( final JSONObject contextObj ) throws JSONException {
     Calendar cal = Calendar.getInstance();
 
     long utcTime = cal.getTimeInMillis();
@@ -159,17 +218,19 @@ public class ContextEngine {
   }
 
   // Maintain backward compatibility. This is a configurable option via plugin's settings.xml
-  private JSONObject buildLegacyStructure( final JSONObject contextObj, String path, SecurityParameterProvider securityParams )
+  protected JSONObject buildLegacyStructure( final JSONObject contextObj, String path,
+                                             SecurityParameterProvider securityParams )
     throws JSONException {
 
-    logger.warn( "CDF: using legacy structure for Dashboard.context; " +
-      "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings.xml" );
+    logger.warn( "CDF: using legacy structure for Dashboard.context; "
+        + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
+        + ".xml" );
 
-    if( securityParams != null ){
+    if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
     }
 
-    if( !StringUtils.isEmpty( path ) ) {
+    if ( !StringUtils.isEmpty( path ) ) {
 
       if ( !contextObj.has( Parameter.FULL_PATH ) ) {
         contextObj.put( Parameter.FULL_PATH, path ); // create fullPath ctx attribute
@@ -219,7 +280,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private JSONObject buildContextConfig( final JSONObject contextObj, String fullPath, Document config, String user )
+  protected JSONObject buildContextConfig( final JSONObject contextObj, String fullPath, Document config, String user )
     throws JSONException {
     contextObj.put( "queryData", processAutoIncludes( fullPath, config ) );
     contextObj.put( "sessionAttributes", processSessionAttributes( config, user ) );
@@ -227,32 +288,35 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private String buildContextScript( JSONObject contextObj, String viewId, String action, String user )
+  protected String buildContextScript( JSONObject contextObj, String viewId, String action, String user )
     throws JSONException {
     final StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
-    s.append( "  Dashboards.context = " );
-    s.append( contextObj.toString( 2 ) + "\n" );
-
-    View view = ViewsEngine.getInstance().getView( ( viewId.isEmpty() ? action : viewId ), user );
-    if ( view != null ) {
-      s.append( "Dashboards.view = " );
-      s.append( view.toJSON().toString( 2 ) + "\n" );
+    // append context
+    s.append( "Dashboards.context = " ).append( contextObj.toString( 2 ) ).append( "\n" );
+    // append views
+    if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( user ) ) {
+      JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
+      if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
+        view = (JSONObject) view.get( JsonUtil.JsonField.RESULT.getValue() );
+        s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
+      } else {
+        logger.debug( "View not found: " + viewId );
+      }
     }
+    // append storage
     String storage = getStorage();
-    if ( !"".equals( storage ) ) {
-      s.append( "Dashboards.initialStorage = " );
-      s.append( storage );
-      s.append( "\n" );
+    if ( !StringUtils.isEmpty( storage ) ) {
+      s.append( "Dashboards.initialStorage = " ).append( storage ).append( "\n" );
     }
     s.append( "</script>\n" );
 
     return s.toString();
   }
 
-  private JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
+  protected JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
     throws JSONException {
-    for ( String param : params.values() ) {
+    for ( String param : params.keySet() ) {
       if ( param.startsWith( PREFIX_PARAMETER ) ) {
         contextObj.put( param.substring( PREFIX_PARAMETER.length() ), params.get( param ) );
       }
@@ -306,7 +370,7 @@ public class ContextEngine {
     return queryOutput;
   }
 
-  private String getStorage() {
+  protected String getStorage() {
     try {
       return StorageEngine.getInstance().read( getUserSession().getName() ).toString( 2 );
     } catch ( Exception e ) {
@@ -318,18 +382,17 @@ public class ContextEngine {
   /**
    * will add a json entry for each data access id in the cda queries applicable to currents dashboard.
    */
-  private JSONObject processAutoIncludes( String dashboardPath, Document config ) {
+  protected JSONObject processAutoIncludes( String dashboardPath, Document config ) {
     JSONObject queries = new JSONObject();
     /* Bail out immediately if CDA isn' available */
-    if ( !( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists() ) {
+    if ( !cdaExists() ) {
       logger.warn( "Couldn't find CDA. Skipping auto-includes" );
       return queries;
     }
 
     /* Bail out if cdf/includes folder does not exists */
-    IReadAccess autoIncludesFolder = CdfEngine.getUserContentReader( null );
-    if ( !autoIncludesFolder.fileExists(
-      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ) {
+    IReadAccess autoIncludesFolder = getUserContentAccess( null );
+    if ( !autoIncludesFolder.fileExists( getPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ) {
       return queries;
     }
 
@@ -337,25 +400,23 @@ public class ContextEngine {
     for ( AutoInclude autoInclude : autoIncludes ) {
       if ( autoInclude.canInclude( dashboardPath ) ) {
         String cdaPath = autoInclude.getCdaPath();
-        CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
+        addCdaQuery( queries, cdaPath );
       }
     }
     return queries;
   }
 
-  private List<AutoInclude> getAutoIncludes( Document config ) {
-    synchronized( autoIncludesLock ) {
+  protected List<AutoInclude> getAutoIncludes( Document config ) {
+    synchronized ( autoIncludesLock ) {
       if ( autoIncludes == null ) {
-        IReadAccess cdaRoot =
-          CdfEngine.getUserContentReader( CdfEngine.getEnvironment().getCdfPluginRepositoryDir()
-            + CdfConstants.INCLUDES_DIR );
-        autoIncludes = AutoInclude.buildAutoIncludeList( config, cdaRoot );
+        IReadAccess cdaRoot = getUserContentAccess( getPluginRepositoryDir() + CdfConstants.INCLUDES_DIR );
+        autoIncludes = buildAutoIncludeList( config, cdaRoot );
       }
       return autoIncludes;
     }
   }
 
-  private Document getConfigFile() {
+  protected Document getConfigFile() {
 
     try {
       IContentAccessFactory factory = CdfEngine.getEnvironment().getContentAccessFactory();
@@ -379,53 +440,37 @@ public class ContextEngine {
     }
   }
 
-  public static void clearCache() {
-    // TODO figure out what to clear
-    synchronized( autoIncludesLock ) {
-      autoIncludes = null;
-      logger.debug( "auto-includes cleared." );
-    }
-
-    if( CdfEngine.getPluginSystemReader( null ).fileExists( MessageBundlesHelper.BASE_CACHE_DIR ) ){
-
-      List<IBasicFile> cacheFiles = CdfEngine.getPluginSystemReader( null ).listFiles( MessageBundlesHelper.BASE_CACHE_DIR,
-        new IBasicFileFilter() {
-          @Override public boolean accept( IBasicFile file ) {
-            return true; // accept everything
-          }
-        });
-
-      if( cacheFiles != null ) {
-        for ( IBasicFile file : cacheFiles ) {
-          CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null ).deleteFile( file.getPath() );
-        }
-      }
-    }
+  protected boolean cdaExists() {
+    return ( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists();
   }
 
-  public static void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
-    throws Exception {
-
-    String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
-    String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
-    String file = StringUtils.defaultIfEmpty( paramMap.get( Parameter.FILE ), StringUtils.EMPTY );
-    String action = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ACTION ), StringUtils.EMPTY );
-    // TODO: why does view default to action?
-    String viewId = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
-    String fullPath = RepositoryHelper.joinPaths( solution, path, file );
-
-    // old xcdf dashboards use solution + path + action
-    if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
-      fullPath = RepositoryHelper.joinPaths( fullPath, action );
-    }
-
-    String dashboardContext =
-      ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap, inactiveInterval );
-
-    if ( StringUtils.isEmpty( dashboardContext ) ) {
-      logger.error( "empty dashboardContext" );
-    }
-
-    PluginIOUtils.writeOut( out, dashboardContext );
+  protected IUserContentAccess getUserContentAccess( String path ) {
+    return CdfEngine.getUserContentReader( path );
   }
+
+  protected String getPluginRepositoryDir() {
+    return CdfEngine.getEnvironment().getCdfPluginRepositoryDir();
+  }
+
+  protected void addCdaQuery( final JSONObject queries, String cdaPath ) {
+    CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
+  }
+
+  protected List<AutoInclude> buildAutoIncludeList( Document config, IReadAccess cdaRoot ) {
+    return AutoInclude.buildAutoIncludeList( config, cdaRoot );
+  }
+
+  protected Locale getLocale() {
+    return CdfEngine.getEnvironment().getLocale();
+  }
+
+  protected SecurityParameterProvider getSecurityParams() {
+    return new SecurityParameterProvider( getUserSession() );
+  }
+
+  protected boolean getLegacyStructure() {
+    return legacyDashboardContext;
+  }
+
+
 }

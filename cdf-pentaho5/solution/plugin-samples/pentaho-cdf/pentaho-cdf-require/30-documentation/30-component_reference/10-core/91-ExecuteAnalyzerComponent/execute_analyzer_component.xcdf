@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+  <title>ExecuteAnalyzerComponent</title>
+  <author>Webdetails</author>
+  <description>ExecuteAnalyzerComponent</description>
+  <icon></icon>
+  <template>template.html</template>
+  <style>mantle</style>
+  <require>true</require>
+</cdf>

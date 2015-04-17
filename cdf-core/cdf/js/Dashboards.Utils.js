@@ -1,16 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
-
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 Dashboards.escapeHtml = function(input) {
   // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
@@ -51,6 +50,7 @@ Dashboards.getLocationSearchString = function() {
 
 (function (D) {
   var urlParams = undefined;
+  var formProvider = undefined;
 
   D.getQueryParameter = function(parameterName) {
     if ( urlParams === undefined ) {
@@ -61,6 +61,90 @@ Dashboards.getLocationSearchString = function() {
 
   };
 
+  /**
+   * Format a number with the given mask using the Dashboard language
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
+   *
+   * @param value
+   * @param mask
+   * @param langCode
+   * @returns {string} formatted number
+   */
+  D.numberFormat = function(value, mask, langCode) {
+    if(formProvider === undefined) {
+      formProvider = cdo.format.language().createChild();
+    }
+    if(langCode != null) {
+      return cdo.format.language(langCode).number().mask(mask)(value);
+    }
+
+    return formProvider.number().mask(mask)(value);
+  };
+
+  /**
+   * Configure a new or existing language by specifying the language code
+   * and a configuration object with the keywords:
+   * - 'number' to configure number's format language
+   * - 'dateLocale' to configure date's format language
+   *
+   * @param langCode
+   * @param config
+   */
+  D.configLanguage = function(langCode, config) {
+    var dateConfig = config.dateLocale || {};
+    var mLocale = moment.locale();
+    delete config.dateLocale;
+
+    cdo.format.language(langCode, config);
+    moment.locale(langCode, dateConfig);
+    moment.locale(mLocale);
+  };
+
+  /**
+   * Format a date with a given mask using the Dashboard language
+   * or the one that the user specified if it exists, otherwise
+   * uses the default language 'en-US'
+   *
+   * @param date
+   * @param mask
+   * @param langCode
+   * @returns {string} formatted date
+   */
+  D.dateFormat = function(date, mask, langCode) {
+    var toFormat = moment(date);
+
+    if(!toFormat.isValid()) {
+      return toFormat.toDate();
+    }
+
+    if(langCode != null) {
+      var mLocale = moment.locale();
+      //Testing if langCode exists. Use langCode if true, and 'en-US' otherwise
+      if(moment.locale(langCode, true) === undefined) {
+        langCode = 'en-US';
+      }
+
+      //must set Dashboard Language back to the previous state,
+      //because moment.locale always changes the current locale being used.
+      moment.locale(mLocale);
+      toFormat.locale(langCode);
+    }
+
+    return toFormat.format(mask);
+  };
+
+  /**
+   * Parse a date with a given mask
+   *
+   * @param date
+   * @param mask
+   * @returns {Date} parsed date as a Date object
+   */
+  D.dateParse = function(date, mask) {
+    return moment(date, mask).toDate();
+  };
+
   // Conversion functions
   function _pa2obj (pArray) {
     var obj = {};
@@ -69,14 +153,14 @@ Dashboards.getLocationSearchString = function() {
         obj[prop[0]] = prop[1];
       }
     return obj;
-  };
+  }
   function _obj2pa (obj) {
     var pArray = [];
     for (var key in obj) if (obj.hasOwnProperty(key)) {
       pArray.push([key,obj[key]]);
     }
     return pArray;
-  };
+  }
 
   // Exports
   // NOTE: using underscore.js predicates but we could also use Dashboards.isArray() and 
@@ -94,9 +178,6 @@ Dashboards.getLocationSearchString = function() {
   };
 
 })(Dashboards);
-
-
-
 
 /**
  * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
@@ -319,8 +400,9 @@ function encode_prepare( s )
     s = s.replace(/\+/g," ");
     /* CDF-271 jQuery 1.9.1 deprecated function $.browser */
     //if ($.browser == "msie" || $.browser == "opera"){
-    if ((navigator.userAgent.toLowerCase().indexOf('msie') != -1) ||
-        (navigator.userAgent.toLowerCase().indexOf('opera') != -1) ){
+    if((navigator.userAgent.toLowerCase().indexOf('msie') != -1)
+      || (navigator.userAgent.toLowerCase().indexOf('opera') != -1)) {
+
       return Utf8.decode(s);
     }
   }

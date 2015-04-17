@@ -1,0 +1,85 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>CommentsComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+    Adds a comment section to the page
+    </p>
+
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>commentsComponent</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>page</dt>
+      <dd><i>String</i> String to identify the comments stored</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the buttom/link object</dd>
+
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>tooltip</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function - </i> Function to be called before the component is changed</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function - </i> Function to be called after the component is changed</dd>
+
+    </dl>
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora">
+      <ul>
+        <li><a href="#sample"><span>Sample</span></a></li>
+        <li><a href="#code"><span>Code</span></a></li>
+      </ul>
+      <div id="sample">
+        <div id="sampleObject"></div>
+        <br/>
+      </div>
+
+      <div id="code">
+        <textarea cols="80" rows="40" id="samplecode">
+require(['cdf/Dashboard.Blueprint', 'cdf/components/CommentsComponent'],
+  function(Dashboard, CommentsComponent) {
+
+    var dashboard = new Dashboard();
+
+    dashboard.addComponent(new CommentsComponent({
+      name: "commentsComponent",
+      type: "commentsComponent",
+      page: "generic",
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      preChange: function() { return true; },
+      postChange: function() { return true; },
+      tooltip: "My first dashboard"
+    }));
+    dashboard.init();
+});
+        </textarea>
+        <br/>
+        <button id="tryMe">Try me</button>
+      </div>
+    </div>
+  </div>
+</div>

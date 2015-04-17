@@ -1,62 +1,41 @@
-// Karma configuration
-// Generated on Fri Nov 15 2013 00:09:22 GMT+0000 (GMT Standard Time)
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '../../',
-
+    basePath: '../',
 
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
-
     // list of files / patterns to load in the browser
-   files: [
-      'cdf-core/cdf/js/lib/shims.js',
-      'cdf-core/cdf/js/lib/pen-shim.js',
-      'cdf-core/test-js/testUtils.js',
-      'cdf-core/cdf/js/wd.js',
-      'cdf-core/cdf/js/json.js',
-      'cdf-core/cdf/js/jquery.js',
-      'cdf-core/cdf/js/jquery.ui.js',
-      'cdf-core/cdf/js/autobox/jquery.templating.js',
-      'cdf-core/cdf/js/autobox/jquery.ui.autobox.js',
-      'cdf-core/cdf/js/autobox/jquery.ui.autobox.ext.js',
-      'cdf-core/cdf/js/jquery.blockUI.js',
-      'cdf-core/cdf/js/uriQueryParser/jquery-queryParser.js',
-      'cdf-core/cdf/js/underscore.js',
-      'cdf-core/cdf/js/backbone.js',
-      'cdf-core/cdf/js/mustache.js',
-      'cdf-core/cdf/js/Base.js',
-      'cdf-pentaho5/cdf/js/cdf-base.js',
-      'cdf-core/cdf/js/Dashboards.Main.js',
-      'cdf-core/cdf/js/Dashboards.Query.js',
-      'cdf-core/cdf/js/Dashboards.Bookmarks.js',
-      'cdf-core/cdf/js/Dashboards.Startup.js',
-      'cdf-core/cdf/js/Dashboards.Utils.js',
-      'cdf-core/cdf/js/Dashboards.Legacy.js',
-      'cdf-core/cdf/js/Dashboards.Notifications.js',
-      'cdf-core/cdf/js/Dashboards.RefreshEngine.js',
-      'cdf-core/cdf/js/components/core.js',
-      'cdf-pentaho5/cdf/js/components/Pentaho.Reporting.js',
-      'cdf-core/cdf/js/components/input.js',
-      'cdf-core/cdf/js/queries/coreQueries.js',
-      'cdf-core/test-js/lib/test-components.js',
-      'cdf-core/test-js/main.js',
-      {pattern: 'cdf-pentaho5/test-js/**/*-spec.js', included: false}
+    files: [
+      { pattern: 'bin/test-js/cdf/js/**/*.css', included: false },
+      { pattern: 'bin/test-js/cdf/js/**/*.js', included: false },
+      { pattern: 'test-js/**/*.ext.js', included: true },
+      'test-js/missing-dependency.js',
+      'config/context.js',
+      { pattern: 'test-js/**/*.js', included: false },
+      'build-res/requireCfg-raw.js',
+      'config/require-config.js'
     ],
-
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: ['test-js/legacy/**/*.js'],
 
-
-    preprocessors: {
-        "cdf/js/*.js" : 'coverage'
-    },
+    preprocessors: {'bin/test-js/cdf/js/**/*.js': 'coverage'},
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -64,43 +43,40 @@ module.exports = function(config) {
 
     //reporter: coverage
     coverageReporter: {
-        type : 'cobertura',
-        dir : 'bin/coverage/reports/'
+      type: 'cobertura',
+      dir: 'bin/test-reports/coverage/reports/'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test/test-results.xml',
+      outputFile: 'bin/test-reports/test-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test/karma_html',
+      outputDir:    'bin/test-reports/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
-  //hostname
-    hostname: [
-      'localhost'
-    ],
+    //hostname
+    hostname: ['localhost'],
     
     // web server port
     port: 9876,
 
-
     // enable / disable colors in the output (reporters and logs)
     colors: true,
-
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
+    // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
+    //autoWatchBatchDelay: 250,
 
     // Start these browsers, currently available:
     // - Chrome
@@ -112,13 +88,26 @@ module.exports = function(config) {
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
     browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
 
-
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
+    // to avoid DISCONNECTED messages
+    // see https://github.com/karma-runner/karma/issues/598
+    browserDisconnectTimeout : 10000, // default 2000
+    browserDisconnectTolerance : 1, // default 0
+    browserNoActivityTimeout : 60000, //default 10000
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: true
+    singleRun: true,
+
+    plugins: [
+      'karma-jasmine',
+      'karma-requirejs',
+      'karma-junit-reporter',
+      'karma-html-reporter',
+      'karma-coverage',
+      'karma-phantomjs-launcher'
+    ]
   });
 };

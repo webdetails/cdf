@@ -1,0 +1,175 @@
+<div class="container-fluid">
+    <h1>Bootstrap Sample</h1>
+    <p>With bootstrap, you can organize your elements like in a grid, using the classes col-xs-n, col-sm-n, col-md-n, col-lg-n (n being a number from 1 to 12)<br>
+    The reason why for so many classes is so you can choose what layout you want in different viewports:</p>
+    <ul>
+        <li>col-xs-n - Extra small devices, like smartphones</li>
+        <li>col-sm-n - Small devices, like tablets</li>
+        <li>col-md-n - Medium devices, like laptop screens</li>
+        <li>col-lg-n - Large devices, like large desktop screens</li>
+    </ul>
+
+    <div class="row"><h2>Layout</h2></div>
+    
+    <h3>Div with class row with 12 divs with class="col-xs-1" inside</h3>
+    <div class="well">
+        &lt;div class="row"&gt;<br>
+        &nbsp;&nbsp;&lt;div class="col-xs-1" style="background-color:#000000; height:20px"&gt;&lt;/div&gt;<br>
+        &nbsp;&nbsp;...<br>
+        &nbsp;&nbsp;&lt;div class="col-xs-1" style="background-color:#999900; height:20px"&gt;&lt;/div&gt;<br>
+        &lt;/div&gt;
+    </div>
+    <div class="row">
+        <div class="col-xs-1" style="background-color:#000000; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#1B1B1B; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#474747; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#9B9B9B; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#000045; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#00008A; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#8080C4; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#550000; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#961919; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#003300; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#194719; height:20px"></div>
+        <div class="col-xs-1" style="background-color:#999900; height:20px"></div>
+
+    </div>
+
+    <div class="row" style="margin-top:20px;"><h4>You can use some useful classes on the go:</h4></div>
+    <div class="row" style="margin-top:5px;">
+        <div class="col-xs-2 text-primary">.text-primary</div>
+        <div class="col-xs-2 text-success">.text-success</div>
+        <div class="col-xs-2 text-info">.text-info</div>
+        <div class="col-xs-2 text-warning">.text-warning</div>
+        <div class="col-xs-2 text-danger">.text-danger</div>
+    </div>
+    <div class="row" style="margin-top:5px;">
+        <div class="col-xs-2 label-primary">.label-primary</div>
+        <div class="col-xs-2 label-success">.label-success</div>
+        <div class="col-xs-2 label-info">.label-info</div>
+        <div class="col-xs-2 label-warning">.label-warning</div>
+        <div class="col-xs-2 label-danger">.label-danger</div>
+    </div>
+    <div class="row" style="margin-top:5px;">
+        <div class="col-xs-2 bg-primary">.bg-primary</div>
+        <div class="col-xs-2 bg-success">.bg-success</div>
+        <div class="col-xs-2 bg-info">.bg-info</div>
+        <div class="col-xs-2 bg-warning">.bg-warning</div>
+        <div class="col-xs-2 bg-danger">.bg-danger</div>
+    </div>
+    <div class="row" style="margin-top:5px;">
+        <input class="col-xs-2 btn-primary" type="button" value=".btn-primary" />
+        <input class="col-xs-2 btn-success" type="button" value=".btn-success" />
+        <input class="col-xs-2 btn-info" type="button" value=".btn-info" />
+        <input class="col-xs-2 btn-warning" type="button" value=".btn-warning" />
+        <input class="col-xs-2 btn-danger" type="button" value=".btn-danger" />
+    </div>
+    <div class="row" style="margin-top:5px;">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-2 alert-success">.alert-success</div>
+        <div class="col-xs-2 alert-info">.alert-info</div>
+        <div class="col-xs-2 alert-warning">.alert-warning</div>
+        <div class="col-xs-2 alert-danger">.alert-danger</div>
+    </div>
+    <h3>This makes it possible for us to create complex positioning</h3>
+    <div class="row">
+        <div class="col-xs-2" style="height:20px"></div>    
+        <div class="col-xs-2" style="background-color:black; height:20px"></div>
+        <div class="col-xs-2" style="height:20px"></div>
+        <div class="col-xs-2" style="background-color:black; height:20px"></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-3" style="height:20px"></div>    
+        <div class="col-xs-1" style="background-color:black; height:20px"></div>
+        <div class="col-xs-1" style="height:20px"></div>
+        <div class="col-xs-2" style="background-color:black; height:20px"></div>
+        <div class="col-xs-2" style="height:20px"></div>
+        <div class="col-xs-2" style="background-color:black; height:20px"></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-2" style="height:20px"></div>    
+        <div class="col-xs-1" style="background-color:black; height:20px"></div>
+        <div class="col-xs-3" style="height:20px"></div>
+        <div class="col-xs-2" style="background-color:black; height:20px"></div>
+    </div>
+
+    <p>html snippet that generates above:</p>
+
+        <div class="well">
+            &lt;div class="row"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &lt;/div&gt;<br>
+            &lt;div class="row"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-3" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-1" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-1" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &lt;/div&gt;<br>
+            &lt;div class="row"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-1" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-3" style="height:20px"&gt;&lt;/div&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="col-xs-2" style="background-color:black; height:20px"&gt;&lt;/div&gt;<br>
+            &lt;/div&gt;
+        </div>
+    <div class="row"><h2>Components</h2></div>
+    <div class="row">
+      <div class="col-md-4" id="textObject"></div>
+      <div class="col-md-3" id="buttonObject"></div>
+    </div>
+    <div class="row"><h2>Require</h2></div>
+    <h4>To include a  Bootstrap Dashboard:</h4>
+    <div class="well">
+        require(['cdf/Dashboard.Bootstrap'],<br>
+          &nbsp;&nbsp;function(Dashboard) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;...<br>
+        });
+    </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+require(['cdf/Dashboard.Bootstrap', 'cdf/components/ButtonComponent', 'cdf/components/TextInputComponent'], 
+    function(Dashboard, ButtonComponent, TextInputComponent) {
+    var dashboard = new Dashboard();
+
+    dashboard.addParameter("input", "");
+    dashboard.addComponent(new TextInputComponent({
+      name: "myInput",
+      type: "textInputComponent",
+      parameters:[],
+      parameter: "input",
+      htmlObject: "textObject",
+      executeAtStart: true,
+      postChange: function() {
+        alert("you typed: " + this.dashboard.getParameterValue(this.parameter));
+      }
+    }));
+
+    dashboard.addComponent(new ButtonComponent({
+      name: "buttonComponent",
+      type: "button",
+      listeners:[],
+      htmlObject: "buttonObject",
+      label: "A button",
+      expression: function() {
+        this.setLabel('Yes, a clickable button');
+        alert('Button was clicked');
+      },
+      executeAtStart: true,
+      preChange: function() { return true; },
+      postChange: function() { return true; },
+      postExecution: function(){
+        this.placeholder('button').attr('class', 'btn-success');
+      },
+      successCallback: function(data) {},
+      failureCallback: function() {},
+      buttonStyle: "simple"
+    }));
+    dashboard.init();
+});
+</script>

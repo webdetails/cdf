@@ -66,7 +66,7 @@
 			<dd>Pentaho Report Viewer parameter option. Default: false</dd>
 
 			<dt>iframe</dt> 
-			<dd> Wheather to render the report inside an iframe or inline. Default: true (iframe)</dd>
+			<dd> Whether to render the report inside an iframe or inline. Default: true (iframe)</dd>
 
 		</dl>
 
@@ -80,7 +80,7 @@
 			</ul>
 			<div id="sample">
 				<div id="selectorObject"></div>
-				<div id="sampleObject" style="height:530px"></div>
+				<div id="sampleObject" style="height:600px"></div>
 				<br/>
 			</div>
 
@@ -88,39 +88,35 @@
 			<div id="code">
 				<textarea cols="80" rows="20" id="samplecode">
 
-output_type = "";
+var output_type = "";
 
-outputSelector = 
-{
+var outputSelector = {
 	name: "outputSelector",
 	type: "select",
 	parameters:[],
-	valuesArray:[["text/html","HTML"],["application/pdf","PDF"]],
+	valuesArray:[["table/html;page-mode=stream","HTML"],["pageable/pdf","PDF"]],
 	parameter:"output_type",
 	valueAsId: false,
 	htmlObject: "selectorObject",
 	executeAtStart: true
 };
 
-orderStatusReport = 
-{
+var orderStatusReport = {
   name: "orderStatus",
-  type: "prpt",
-  path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
+  type: "prptComponent",
+  path: "/public/Steel Wheels/Widget Library/Report Snippets/InventorybyLine.prpt",
   listeners:["output_type"],
-  parameters: [["output-type","output_type"]],
+  parameters: [["output-target","output_type"]],
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,
   iframe: true,
   executeAtStart: true
-}
-				
+};
 
+Dashboards.addParameter("output_type", output_type);
 Dashboards.init([outputSelector,orderStatusReport]);
 Dashboards.finishedInit = false;
-
-
 				</textarea>
 				<br />
 				<button onclick="evaluateCode(true)">Try me</button>

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,13 +15,13 @@ package org.pentaho.cdf.views;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import org.pentaho.cdf.utils.JsonUtil;
 import pt.webdetails.cpf.persistence.IPersistenceEngine;
 import pt.webdetails.cpf.persistence.ISimplePersistence;
 import pt.webdetails.cpf.persistence.PersistenceEngine;
@@ -32,13 +32,13 @@ public class ViewsEngine {
 
   private static final Log logger = LogFactory.getLog( ViewsEngine.class );
 
-  private static final String RESULT_OK = "ok";
-  private static final String RESULT_ERROR = "error";
-
   private static ViewsEngine instance;
 
-  public static enum Operation {
-    GET_VIEW( "GETVIEW" ), LIST_VIEWS( "LISTVIEWS" ), LIST_ALL_VIEWS( "LISTALLVIEWS" ), SAVE_VIEW( "SAVEVIEW" ), DELETE_VIEW(
+  /**
+   * Implementation for server version 4.8
+   */
+  public enum Operation {
+    GETVIEW( "GETVIEW" ), LISTVIEWS( "LISTVIEWS" ), LISTALLVIEWS( "LISTALLVIEWS" ), SAVEVIEW( "SAVEVIEW" ), DELETEVIEW(
         "DELETEVIEW" ), UNKNOWN( "UNKNOWN" );
 
     @SuppressWarnings( "unused" )
@@ -52,9 +52,9 @@ public class ViewsEngine {
       try {
         return valueOf( operation.toUpperCase() );
       } catch ( Exception e ) {
-        // do nothing
+        logger.error( e );
+        return UNKNOWN;
       }
-      return UNKNOWN;
     }
   };
 
@@ -91,110 +91,133 @@ public class ViewsEngine {
     return instance;
   }
 
-  public View getView( String viewName, String user ) {
-    ISimplePersistence sp;
+  public JSONObject getView( String name, String user ) throws JSONException {
+
+    if ( StringUtils.isEmpty( name ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error getting view, empty name parameter", true );
+    } else if ( StringUtils.isEmpty( user ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error getting view, unknown user", true );
+    }
+
     try {
-      sp = getSimplePersistence();
+      ISimplePersistence sp = getSimplePersistence();
       Filter filter = new Filter();
-      filter.where( "name" ).equalTo( viewName ).and().where( "user" ).equalTo( user );
+      filter.where( "name" ).equalTo( name ).and().where( "user" ).equalTo( user );
       List<View> views = sp.load( View.class, filter );
 
-      return ( views != null && views.size() > 0 ) ? views.get( 0 ) : null;
+      if( views != null && views.size() > 0 ) {
+        return JsonUtil.makeJsonSuccessResponse( views.get( 0 ).toJSON() );
+      } else {
+        return JsonUtil.makeJsonErrorResponse( "Error, no view found with name '" + name + "'", true );
+      }
     } catch ( Exception e ) {
-      logger.error( "Error while getting view.", e );
-      return null;
+      logger.error( e );
+      return JsonUtil.makeJsonErrorResponse( "Error getting view '" + name + "' for user '" + user + "'", true );
     }
-    
   }
 
-  public JSONObject listViews( String user ) {
-    ISimplePersistence sp;
-    JSONObject obj = new JSONObject();
-    JSONArray arr = new JSONArray();
+  public JSONObject listViews( String user ) throws JSONException {
+    if ( StringUtils.isEmpty( user ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error getting view, unknown user", true );
+    }
+
     try {
-      sp = getSimplePersistence();
+      ISimplePersistence sp = getSimplePersistence();
       Filter filter = new Filter();
       filter.where( "user" ).equalTo( user );
       List<View> views = sp.load( View.class, filter );
-      for ( View v : views ) {
-        arr.put( v.toJSON() );
+
+      if ( views != null ) {
+        JSONArray arr = new JSONArray();
+        for ( View v : views ) {
+          arr.put( v.toJSON() );
+        }
+        return JsonUtil.makeJsonSuccessResponse( arr );
+      } else {
+        return JsonUtil.makeJsonErrorResponse( "Error listing views for user '" + user + "'", true );
       }
     } catch ( Exception e ) {
-      logger.warn( "Exception while writing result to json array", e );
-      return null;
-    }
-
-    try {
-      obj.put( "views", arr );
-      obj.put( "status", RESULT_OK );
-    } catch ( JSONException e ) {
-      logger.warn( "Exception while writing result to json object", e );
-    }
-    return obj;
-  }
-
-  public JSONObject listAllViews( String user ) {
-    JSONObject response = new JSONObject();
-    ISimplePersistence sp;
-    try {
-      sp = getSimplePersistence();
-    } catch ( Exception e ) {
-      logger.error( "Error while getting view.", e );
-      return null;
-    }
-    Filter filter = new Filter();
-    filter.where( "user" ).equalTo( user );
-    List<View> views = sp.loadAll( View.class );
-    JSONArray arr = new JSONArray();
-    for ( View v : views ) {
-      arr.put( v.toJSON() );
-    }
-    try {
-      response.put( "views", arr );
-      response.put( "status", RESULT_OK );
-    } catch ( JSONException e ) {
-    }
-    return response;
-  }
-
-  public String saveView( String view, String user ) {
-    View viewObj = new View();
-
-    IPersistenceEngine pe = null;
-    try {
-      pe = getPersistenceEngine();
-    } catch ( Exception e ) {
-      logger.error( "Exception while getting persistence engine. View Will not be saved", e );
-    }
-
-    try {
-      JSONObject json = new JSONObject( view );
-      viewObj.fromJSON( json );
-      viewObj.setUser( user );
-      pe.store( viewObj );
-    } catch ( JSONException e ) {
       logger.error( e );
-      return RESULT_ERROR;
+      return JsonUtil.makeJsonErrorResponse( "Error listing views for user '" + user + "'", true );
     }
-    return RESULT_OK;
   }
 
-  public String deleteView( String viewName, String user ) {
+  public JSONObject listAllViews() throws JSONException {
+    try {
+      ISimplePersistence sp = getSimplePersistence();
+      List<View> views = sp.loadAll( View.class );
+
+      if ( views != null ) {
+        JSONArray arr = new JSONArray();
+        for ( View v : views ) {
+          arr.put( v.toJSON() );
+        }
+        return JsonUtil.makeJsonSuccessResponse( arr );
+      } else {
+        return JsonUtil.makeJsonErrorResponse( "Error listing all views", true );
+      }
+    } catch ( Exception e ) {
+      logger.error( e );
+      return JsonUtil.makeJsonErrorResponse( "Error listing all views", true );
+    }
+  }
+
+  public JSONObject saveView( String name, String view, String user ) throws JSONException {
+    if ( StringUtils.isEmpty( name ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error saving view, empty name parameter", true );
+    } else if ( StringUtils.isEmpty( view ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error saving view, empty view parameter", true );
+    } else if ( StringUtils.isEmpty( user ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error saving view, unknown user", true );
+    }
+    View viewObj = new View();
+    try {
+      IPersistenceEngine pe = getPersistenceEngine();
+      JSONObject jSONObj = new JSONObject( view );
+      viewObj.fromJSON( jSONObj );
+      if ( StringUtils.isEmpty( viewObj.getName() ) || !viewObj.getName().equals( name ) ) {
+        return JsonUtil.makeJsonErrorResponse( "Error saving view, unknown user", true );
+      }
+
+      viewObj.setUser( user );
+
+      JSONObject res = pe.store( viewObj );
+
+      if ( res == null ) {
+        return JsonUtil.makeJsonErrorResponse( "Error persisting view '" + name + "'", true );
+      }
+
+      if ( res.getBoolean( JsonUtil.JsonField.RESULT.getValue() ) ) {
+        jSONObj.put( "id", res.getString( "id" ) );
+        return JsonUtil.makeJsonSuccessResponse( jSONObj );
+      } else {
+        return JsonUtil.makeJsonErrorResponse( res.getString( "errorMessage" ), true );
+      }
+    } catch ( Exception e ) {
+      logger.error( e );
+      return JsonUtil.makeJsonErrorResponse( "Error saving view '" + name + "'", true );
+    }
+  }
+
+  public JSONObject deleteView( String name, String user ) throws JSONException {
+    if ( StringUtils.isEmpty( name ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error deleting view, empty name parameter", true );
+    } else if ( StringUtils.isEmpty( user ) ) {
+      return JsonUtil.makeJsonErrorResponse( "Error deleting view, unknown user", true );
+    }
+
     try {
       Filter filter = new Filter();
-      filter.where( "user" ).equalTo( user ).and().where( "name" ).equalTo( viewName );
+      filter.where( "user" ).equalTo( user ).and().where( "name" ).equalTo( name );
       ISimplePersistence sp = getSimplePersistence();
       sp.delete( View.class, filter );
-      return RESULT_OK;
+
+      JSONObject res = new JSONObject();
+      res.put( "name", name );
+      return JsonUtil.makeJsonSuccessResponse( res );
     } catch ( Exception e ) {
-      return RESULT_ERROR;
+      logger.error( e );
+      return JsonUtil.makeJsonErrorResponse( "Error deleting view '" + name + "'", true );
     }
-
-  }
-
-  public void listReports() {
-  }
-
-  public void saveReport() {
   }
 }

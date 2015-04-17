@@ -1,0 +1,129 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccWaterfallChartComponent'],
+    function(Dashboard, CccWaterfallChartComponent) {
+
+    var dashboard = new Dashboard();
+
+    var testWaterfall1 = {
+      "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "Territory"
+      }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Region"
+      }, {
+        "colIndex": 2,
+        "colType": "String",
+        "colName": "Market"
+      }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Product A"
+      }, {
+        "colIndex": 4,
+        "colType": "Numeric",
+        "colName": "Product B"
+      }],
+      "resultset": [
+        ["USA",    'Kansas',     null,         100,  600],
+        
+        ["USA",    'New York',   'Fair',       500,  600],
+        ["USA",    'New York',   'Restaurant', 200,  100],
+        ["USA",    'New York',   'House',      100,  200],
+        
+        ["USA",    'Idaho',      'Farm',       200,  100],
+        ["USA",    'Idaho',      'Fairy',      500,  600],
+        ["USA",    'Idaho',      'House',      400,  100],
+        ["USA",    'Idaho',      'Grocery',    200,  300],
+        
+        ["Europe", null,         null,         400,  300],
+        
+        ["RoW",    "Japan",      null,         100,   75],
+        ["RoW",    "China",      null,         100,   25],
+        ["RoW",    "S. America", null,          50,   80],
+        ["RoW",    "India",      null,          25,   80],
+        ["RoW",    "Mexico",     null,          25,   40]
+      ]
+    };
+
+    var render_chart = new CccWaterfallChartComponent({
+      type: "cccWaterfallChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        width:  600,
+        height: 700,
+
+        // Data source
+        readers: ['product, territory, region, market, sales'],
+
+        // Visual Roles
+        visualRoles: {
+          series:   'product',
+          category: 'territory|region, market',
+          value:    'sales'
+        },
+
+        // Main plot
+        direction:     'up',
+        areasVisible:  true,
+        valuesVisible: true,
+        label_font:    '8px sans-serif',
+        totalValuesVisible: false,
+        line_lineWidth:     2,
+
+        // Cartesian axes
+        baseAxisLabel_textAngle:    -Math.PI/3,
+        baseAxisLabel_textAlign:    'right',
+        baseAxisLabel_textBaseline: 'top',
+
+        // Panels
+        legend: true,
+        legendPosition: 'top',
+
+        // Chart/Interaction
+        animate:    false,
+        selectable: true,
+        hoverable:  true
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(testWaterfall1);
+    };
+
+    dashboard.init();
+  });
+</script>

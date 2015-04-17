@@ -1,0 +1,121 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccTreemapChartComponent'],
+    function(Dashboard, CccTreemapChartComponent) {
+
+    var dashboard = new Dashboard();
+
+    var testTreemapThreeLevel = {
+      "metadata": [{
+          "colIndex": 0,
+          "colType": "String",
+          "colName": "Territory"
+        }, {
+          "colIndex": 1,
+          "colType": "String",
+          "colName": "Region"
+        }, {
+          "colIndex": 2,
+          "colType": "String",
+          "colName": "Market"
+        }, {
+          "colIndex": 3,
+          "colType": "Numeric",
+          "colName": "Sales"
+        }
+      ],
+      "resultset": [
+        ["USA",    'Kansas',     null,         100],
+        
+        ["USA",    'New York',   'Fair',       500],
+        ["USA",    'New York',   'Restaurant', 200],
+        ["USA",    'New York',   'House',      100],
+        
+        ["USA",    'Idaho',      'Farm',       200],
+        ["USA",    'Idaho',      'Fairy',      500],
+        ["USA",    'Idaho',      'House',      400],
+        ["USA",    'Idaho',      'Grocery',    200],
+        
+        ["Europe", null,         null,         400],
+        
+        ["Moon",   "Big Valey",  "North Hole", 300],
+        ["Moon",   "Big Valey",  "South Hole", 100],
+        
+        ["RoW",    "Japan",      null,         100],
+        ["RoW",    "China",      null,         100],
+        ["RoW",    "S. America", null,          50],
+        ["RoW",    "India",      null,          25],
+        ["RoW",    "Mexico",     null,          25]
+      ]
+    };
+
+
+    var render_chart = new CccTreemapChartComponent({
+      type: "cccTreemapChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        width:  600,
+        height: 400,
+
+        // Data source
+        crosstabMode: false,
+
+        // Main plot
+        rootCategoryLabel: "Earth",
+        layoutMode: 'slice-and-dice',
+        colorMode:  'bySelf',
+        valuesFont: 'lighter 11px "Open Sans"',
+
+        // Panels
+        title:     "Slice-and-dice Layout And Self-Colored",
+        titleFont: 'lighter 20px "Open Sans"',
+
+        // Chart/Interaction
+        selectable: true,
+        hoverable:  true,
+
+        // Color axes   
+        colors: [
+          '#005CA7', '#0086F4', '#FFC20F', '#FFE085',
+          '#39A74A', '#63CA73', '#333333', '#777777' 
+        ]
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(testTreemapThreeLevel);
+    };
+
+    dashboard.init();
+  });
+</script>

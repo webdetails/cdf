@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -50,7 +50,7 @@ import org.pentaho.cdf.render.XcdfRenderer;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.JsonUtil;
-import org.pentaho.cdf.views.ViewEngine;
+import org.pentaho.cdf.views.ViewsEngine;
 import org.pentaho.cdf.xactions.ActionEngine;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
@@ -63,7 +63,6 @@ import org.pentaho.platform.engine.security.SecurityHelper;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
 
 import pt.webdetails.cpf.SimpleContentGenerator;
-import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.cpf.repository.api.FileAccess;
 import pt.webdetails.cpf.repository.api.IReadAccess;
@@ -215,8 +214,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       if ( request != null && request.getSession() != null ) {
         inactiveInterval = request.getSession().getMaxInactiveInterval();
       }
-      ContextEngine
-        .generateContext( out, Parameter.asHashMap( request ), inactiveInterval );
+      ContextEngine.getInstance().generateContext( out, Parameter.asHashMap( request ), inactiveInterval );
     } else if ( urlPath.equals( CLEAR_CACHE ) ) {
       clearCache( out );
     } else if ( urlPath.equals( VIEWS ) ) {
@@ -604,41 +602,42 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     try {
 
-      final ViewEngine engine = ViewEngine.getInstance();
+      final ViewsEngine engine = ViewsEngine.getInstance();
 
       String method = requestParams.getStringParameter( Parameter.METHOD, "" );
 
-      final ViewEngine.Operation operation = ViewEngine.Operation.get( method );
+      final ViewsEngine.Operation operation = ViewsEngine.Operation.get( method );
 
-      if ( ViewEngine.Operation.LIST_ALL_VIEWS == operation ) {
+      if ( ViewsEngine.Operation.LISTALLVIEWS == operation ) {
 
         if ( !SecurityHelper.isPentahoAdministrator( PentahoSessionHolder.getSession() ) ) {
-          out.write( "You need to be an administrator to poll all views".getBytes( CharsetHelper.getEncoding() ) );
+          out.write( JsonUtil.makeJsonErrorResponse( "You need to be an administrator to poll all views", true ).toString().getBytes( CharsetHelper.getEncoding() ) );
           return;
         }
       }
 
       switch( operation ) {
-        case GET_VIEW:
+        case GETVIEW:
           result =
             engine.getView( requestParams.getStringParameter( Parameter.NAME, "" ),
-              PentahoSessionHolder.getSession().getName() ).toJSON().toString();
+              PentahoSessionHolder.getSession().getName() ).toString();
           break;
-        case SAVE_VIEW:
+        case SAVEVIEW:
           result =
-            engine.saveView( requestParams.getStringParameter( Parameter.VIEW, "" ), PentahoSessionHolder
-              .getSession().getName() );
+            engine.saveView( requestParams.getStringParameter( Parameter.NAME, "" ),
+              requestParams.getStringParameter( Parameter.VIEW, "" ),
+              PentahoSessionHolder.getSession().getName() ).toString();
           break;
-        case DELETE_VIEW:
+        case DELETEVIEW:
           result =
-            engine.deleteView( requestParams.getStringParameter( Parameter.NAME, "" ), PentahoSessionHolder
-              .getSession().getName() );
+            engine.deleteView( requestParams.getStringParameter( Parameter.NAME, "" ),
+              PentahoSessionHolder.getSession().getName() ).toString();
           break;
-        case LIST_VIEWS:
+        case LISTVIEWS:
           result = engine.listViews( PentahoSessionHolder.getSession().getName() ).toString( 2 );
           break;
-        case LIST_ALL_VIEWS:
-          result = engine.listAllViews( PentahoSessionHolder.getSession().getName() ).toString( 2 );
+        case LISTALLVIEWS:
+          result = engine.listAllViews().toString( 2 );
           break;
         default:
           result = JsonUtil.makeJsonErrorResponse( "Unknown View operation: " + method, true ).toString( 2 );

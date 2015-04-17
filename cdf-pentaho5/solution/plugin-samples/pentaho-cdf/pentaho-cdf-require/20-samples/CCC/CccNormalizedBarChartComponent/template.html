@@ -1,0 +1,120 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccNormalizedBarChartComponent'],
+    function(Dashboard, CccNormalizedBarChartComponent) {
+
+    var dashboard = new Dashboard();
+
+    var relational_01 = {
+      "resultset": [
+        //["London", "2010-01-01", 74],
+        ["London", "2011-06-05", 72],
+        ["London", "2011-06-12", 50],
+        ["London", "2011-06-19", 20],
+        ["London", "2011-06-26", 23],
+        ["London", "2011-07-03", 72],
+        ["London", "2011-07-10", 80],
+        //["London", "2011-07-17", 20],
+        ["London", "2011-07-26", 23],
+        ["London", "2011-07-31", 72],
+        ["London", "2011-08-07", 50],
+        ["London", "2011-08-14", 20],
+        //["London", "2011-08-21", 23],
+        ["London", "2011-08-28", 20],
+        //
+        ["Paris", "2011-06-05", 27],
+        //["Paris", "2011-06-12", 5],
+        //["Paris", "2011-06-19", 2],
+        ["Paris", "2011-06-26", 32],
+        ["Paris", "2011-07-03", 24],
+        ["Paris", "2011-07-10", 80],
+        ["Paris", "2011-07-17", 90],
+        ["Paris", "2011-07-24", 53],
+        ["Paris", "2011-07-31", 17],
+        ["Paris", "2011-08-07", 20],
+        //["Paris", "2011-08-14", 0],
+        ["Paris", "2011-08-21", 43],
+        //["Paris", "2011-08-28", 40],
+        //
+        ["Lisbon", "2011-06-12", 30],
+        ["Lisbon", "2011-07-03", 60],
+        ["Lisbon", "2011-07-10", 80],
+        ["Lisbon", "2011-07-17", 15]//,
+       // ["Lisbon", "2011-07-24", 3]
+      ],
+      "metadata": [{
+          "colIndex": 0,
+          "colType": "String",
+          "colName": "City"
+        }, {
+          "colIndex": 1,
+          "colType": "String",
+          "colName": "Date"
+        }, {
+          "colIndex": 2,
+          "colType": "Numeric",
+          "colName": "Quantity"
+        }]
+    };
+
+    var render_chart = new CccNormalizedBarChartComponent({
+      type: "cccNormalizedBarChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        crosstabMode: false,
+        seriesInRows: false,
+        width: 400,
+        height: 250,
+        title: "100% Stacked Bar Chart",
+        orientation: 'vertical',
+        animate:false,
+        clickable: true,
+        selectable: true,
+        hoverable: true,
+        legend:true,
+        legendPosition:"right",
+
+        xAxisLabel_textAngle: -Math.PI/3,
+        xAxisLabel_textAlign: "right",
+        xAxisLabel_textBaseline: "top",
+        xAxisLabel_textMargin: 0
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(relational_01);
+    };
+
+    dashboard.init();
+  });
+</script>

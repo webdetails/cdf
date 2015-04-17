@@ -1,0 +1,148 @@
+<table align="center" style="border: 1px solid #000;">
+  <tr>
+    <td align="center" colspan="2"><div id="titleObject"></div></td>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td valign="top"><div id="territorySalesObject"></div></td>
+        </tr>
+        <tr>
+          <td valign="top"><div id="productLineSalesObject"></div></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td><div id="sampleObject"></div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccBoxplotChartComponent'],
+    function(Dashboard, CccBoxplotChartComponent) {
+
+    var dashboard = new Dashboard();
+
+    var relational_01c = {
+      "resultset": [
+        ["London", "2011-06-05", 72, 60, 80, 55, 85],
+        ["London", "2011-06-12", 50, 45, 55, 42, 59],
+        ["London", "2011-06-19", 20, 18, 25, 10, 40],
+        ["London", "2011-06-26", 23, 20, 30, -8, 37],
+        ["London", "2011-07-03", 72, 60, 90, 50, 97],
+        ["London", "2011-07-10", 50, 47, 57, 41, 63],
+        ["London", "2011-07-17", 20,  2, 50,-10, 75],
+        ["London", "2011-07-24", 23, 18, 25, 13, 34],
+        //
+        ["Paris", "2011-06-05",  27, 25, 36, 10, 41],
+        ["Paris", "2011-06-12",   5,  4,  8,  2, 13],
+        ["Paris", "2011-06-19",   2, -3, 10,-20, 17],
+        ["Paris", "2011-06-26", -32, -40, -20, -56, -15],
+        ["Paris", "2011-07-03",  24, 21, 31, 18, 35],
+        ["Paris", "2011-07-10",  30, 20, 35, null, null],
+        ["Paris", "2011-07-17",  90, null, null, 67, 105],
+        ["Paris", "2011-07-24",  53, 30, null, 23, 70],
+        //
+        ["Lisbon", "2011-07-03",  6, null, 10, 2, null],
+        ["Lisbon", "2011-07-10",  4,  2,  9, null, 12],
+        ["Lisbon", "2011-07-17",  1,  0,  5, -5,  null],
+        ["Lisbon", "2011-07-24",  3, -2, null, -10, null]
+      ],
+      "metadata": [{
+          "colType": "String",
+          "colName": "City"
+        }, {
+          "colType": "String",
+          "colName": "Day"
+        }, {
+          "colType": "Numeric",
+          "colName": "Sales"
+        }, {
+          "colType": "Numeric",
+          "colName": "p25"
+        }, {
+          "colType": "Numeric",
+          "colName": "p75"
+        }, {
+          "colType": "Numeric",
+          "colName": "p5"
+        }, {
+          "colType": "Numeric",
+          "colName": "p95"
+        }]
+    };
+
+    var render_chart = new CccBoxplotChartComponent({
+      type: "cccBoxplotChart",
+      name: "cccChart",
+      executeAtStart: false,
+      htmlObject: "sampleObject",
+      chartDefinition: {
+        //compatVersion: 1,
+        width:   600,
+        height:  400,
+
+        // Visual roles
+        //  Point color role to category role,
+        //  instead of the default, series,
+        //  just because we can...
+        colorRole: {from: 'category'},
+
+        // Main plot
+        layoutMode: 'overlapped',
+        boxRuleWhisker_strokeDasharray: '- ',
+
+        // Second plot
+        //  shows the median line
+        plot2: true,
+        plot2LinesVisible: true,
+        plot2DotsVisible:  true,
+        plot2AreasVisible: true,
+
+        // Cartesian axes
+        //baseAxisVisible: false, // Hide base axis!
+        axisOffset: 0.03,
+        axisLabel_font: 'normal 10px "Open Sans"',
+
+        // Color axes
+        //  But hide its legend cause it's identical to
+        //  that of the color1Axis...
+        color2AxisLegendVisible: false,
+
+        // Panels
+        title: "All-in-one Boxplot",
+        titleFont: 'lighter 20px "Open Sans"',
+
+        // Show legend (have fun showing/hiding boxes!)
+        legend: true,
+        legendPosition: 'right',
+        legendFont: 'normal 11px "Open Sans"',
+
+        // Chart/Interaction
+        selectable: true,
+        hoverable:  true,
+
+        // Color axes
+        colors: [
+            '#333333', '#777777', '#FFC20F', '#FFE085',
+            '#005CA7', '#0086F4', '#39A74A', '#63CA73'
+        ]
+      }
+    });
+
+    dashboard.addComponent(render_chart);
+
+    dashboard.postInit = function initDummyData() {
+      render_chart.render(relational_01c)
+    };
+
+    dashboard.init();
+  });
+</script>
