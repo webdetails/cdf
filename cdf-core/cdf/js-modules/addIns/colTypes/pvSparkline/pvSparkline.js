@@ -16,8 +16,7 @@ define([
   '../../../Dashboard',
   '../../../Logger',
   '../../../lib/jquery',
-  '../../../lib/CCC/protovis',
-  '../../../lib/CCC/protovis-msie',
+  '../../../lib/CCC/protovis-compat!',
   'amd!../../../lib/datatables'],
   function (AddIn, Dashboard, Logger, $, pv) {
   

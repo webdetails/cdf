@@ -18,8 +18,7 @@ define([
   '../../../lib/raphael',
   'amd!../../../lib/underscore',
   '../../../lib/jquery',
-  '../../../lib/CCC/protovis',
-  '../../../lib/CCC/protovis-msie',
+  '../../../lib/CCC/protovis-compat!',
   'amd!../../../lib/datatables',
   'css!./dataBar'],
   function(AddIn, Dashboard, sprintf, Raphael, _, $, pv) {
