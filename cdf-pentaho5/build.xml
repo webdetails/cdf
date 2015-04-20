@@ -194,7 +194,7 @@ de
     </copy>
   </target>
 
-  <target name="dist" depends="clean-dist,resolve,resolve-js,jar,dist-plugin,dist-samples"/>
+  <target name="dist" depends="clean-dist,resolve,resolve-js,subfloor.dist,dist-plugin,dist-samples"/>
 
   <target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
@@ -220,13 +220,8 @@ de
 
     <mkdir dir="${stage.dir}/${plugin.name}/actions"/>
   </target>
-
-  <target name="clean-bin-dir">
-    <!-- delete and re-create the plugin dist folder tree -->
-    <delete dir="${bin.dir}"/>
-  </target>
-
-  <target name="dist-plugin" depends="clean-bin-dir,subfloor-js.resolve-js,jar,make-stage,dist-js" description="Creates a distribution">
+  
+  <target name="dist-plugin" depends="make-stage,dist-js" description="Creates a distribution">
 
     <!-- handle js -->
     <copy todir="${stage.dir}/${plugin.name}/js/" overwrite="true">
