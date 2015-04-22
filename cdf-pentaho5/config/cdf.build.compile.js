@@ -118,10 +118,8 @@
   //'excludeShallow', 'include' and 'insertRequire' are all allowed as siblings
   //to name. The name of the optimized file is specified by 'out'.
   exclude: [
-    'cdf/cdf-core-require-js-cfg',
-    'cdf/cdf-pentaho-base-require-js-cfg',
-    'cdf/cdf-pentaho-require-js-cfg',
-    'cdf/lib/cdf-core-lib-require-js-cfg',
+    'cdf/js/cdf-require-js-cfg',
+    'cdf/js/lib/cdf-lib-require-js-cfg',
     //According to https://github.com/guybedford/require-css#basic-usage
     'cdf/lib/require-css/normalize'
   ],
@@ -196,7 +194,7 @@
         'css!cdf/lib/blueprint/screen',
         "css!cdf/lib/impromptu/jquery-impromptu",
         "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
-        
+
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         'cdf/lib/jquery',
         'amd!cdf/lib/jquery.ui',

@@ -14,21 +14,3 @@
 /**
  * Configuration file for cdf pentaho version 5
  */
-
-(function() {
-
-  var requirePaths = requireCfg.paths;
-
-  var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
-
-  if(typeof KARMA_RUN !== "undefined") { // unit tests
-    requirePaths['cdf'] = 'bin/test-js/cdf/js';
-  } else if(typeof CONTEXT_PATH !== "undefined") { // production
-    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
-  } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
-    requirePaths['cdf'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
-  } else { // build
-    requirePaths['cdf'] = "cdf";
-  }
-
-})();

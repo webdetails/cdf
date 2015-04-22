@@ -25,7 +25,8 @@ override.properties
 *.iml
 
 cdf-core/js-lib
-
+cdf-core/test-lib
+cdf-core/build-res/module-scripts
 cdf-core/build-res/pentaho-js-build
 cdf-pentaho5/js-lib
 cdf-pentaho5/test-lib
