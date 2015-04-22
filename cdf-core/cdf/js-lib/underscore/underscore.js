@@ -18,33 +18,31 @@
   var breaker = {};
 
   // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype,
-      ObjProto = Object.prototype,
-      FuncProto = Function.prototype;
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
 
   // Create quick reference variables for speed access to core prototypes.
   var
-      push = ArrayProto.push,
-      slice = ArrayProto.slice,
-      concat = ArrayProto.concat,
-      toString = ObjProto.toString,
-      hasOwnProperty = ObjProto.hasOwnProperty;
+    push             = ArrayProto.push,
+    slice            = ArrayProto.slice,
+    concat           = ArrayProto.concat,
+    toString         = ObjProto.toString,
+    hasOwnProperty   = ObjProto.hasOwnProperty;
 
   // All **ECMAScript 5** native function implementations that we hope to use
   // are declared here.
   var
-      nativeForEach = ArrayProto.forEach,
-      nativeMap = ArrayProto.map,
-      nativeReduce = ArrayProto.reduce,
-      nativeReduceRight = ArrayProto.reduceRight,
-      nativeFilter = ArrayProto.filter,
-      nativeEvery = ArrayProto.every,
-      nativeSome = ArrayProto.some,
-      nativeIndexOf = ArrayProto.indexOf,
-      nativeLastIndexOf = ArrayProto.lastIndexOf,
-      nativeIsArray = Array.isArray,
-      nativeKeys = Object.keys,
-      nativeBind = FuncProto.bind;
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
 
   // Create a safe reference to the Underscore object for use below.
   var _ = function(obj) {
@@ -257,8 +255,7 @@
     if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.max.apply(Math, obj);
     }
-    var result = -Infinity,
-        lastComputed = -Infinity;
+    var result = -Infinity, lastComputed = -Infinity;
     each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
       if (computed > lastComputed) {
@@ -274,8 +271,7 @@
     if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.min.apply(Math, obj);
     }
-    var result = Infinity,
-        lastComputed = Infinity;
+    var result = Infinity, lastComputed = Infinity;
     each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
       if (computed < lastComputed) {
@@ -375,8 +371,7 @@
   _.sortedIndex = function(array, obj, iterator, context) {
     iterator = lookupIterator(iterator);
     var value = iterator.call(context, obj);
-    var low = 0,
-        high = array.length;
+    var low = 0, high = array.length;
     while (low < high) {
       var mid = (low + high) >>> 1;
       iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
@@ -468,8 +463,7 @@
   // Split an array into two arrays: one whose elements all satisfy the given
   // predicate, and one whose elements all do not satisfy the predicate.
   _.partition = function(array, predicate) {
-    var pass = [],
-        fail = [];
+    var pass = [], fail = [];
     each(array, function(elem) {
       (predicate(elem) ? pass : fail).push(elem);
     });
@@ -518,9 +512,7 @@
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
     var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function(value) {
-      return !_.contains(rest, value);
-    });
+    return _.filter(array, function(value){ return !_.contains(rest, value); });
   };
 
   // Zip together multiple lists into a single array -- elements that share
@@ -558,8 +550,7 @@
   // for **isSorted** to use binary search.
   _.indexOf = function(array, item, isSorted) {
     if (array == null) return -1;
-    var i = 0,
-        length = array.length;
+    var i = 0, length = array.length;
     if (isSorted) {
       if (typeof isSorted == 'number') {
         i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
@@ -569,8 +560,7 @@
       }
     }
     if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++)
-      if (array[i] === item) return i;
+    for (; i < length; i++) if (array[i] === item) return i;
     return -1;
   };
 
@@ -582,8 +572,7 @@
       return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
     }
     var i = (hasIndex ? from : array.length);
-    while (i--)
-      if (array[i] === item) return i;
+    while (i--) if (array[i] === item) return i;
     return -1;
   };
 
@@ -601,7 +590,7 @@
     var idx = 0;
     var range = new Array(length);
 
-    while (idx < length) {
+    while(idx < length) {
       range[idx++] = start;
       start += step;
     }
@@ -613,7 +602,7 @@
   // ------------------
 
   // Reusable constructor function for prototype setting.
-  var ctor = function() {};
+  var ctor = function(){};
 
   // Create a function bound to a given object (assigning `this`, and arguments,
   // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
@@ -656,9 +645,7 @@
   _.bindAll = function(obj) {
     var funcs = slice.call(arguments, 1);
     if (funcs.length === 0) throw new Error('bindAll must be passed function names');
-    each(funcs, function(f) {
-      obj[f] = _.bind(obj[f], obj);
-    });
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
     return obj;
   };
 
@@ -676,9 +663,7 @@
   // it with the arguments supplied.
   _.delay = function(func, wait) {
     var args = slice.call(arguments, 2);
-    return setTimeout(function() {
-      return func.apply(null, args);
-    }, wait);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
   };
 
   // Defers a function, scheduling it to run after the current call stack has
@@ -762,8 +747,7 @@
   // Returns a function that will be executed at most one time, no matter how
   // often you call it. Useful for lazy initialization.
   _.once = function(func) {
-    var ran = false,
-        memo;
+    var ran = false, memo;
     return function() {
       if (ran) return memo;
       ran = true;
@@ -811,8 +795,7 @@
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
     var keys = [];
-    for (var key in obj)
-      if (_.has(obj, key)) keys.push(key);
+    for (var key in obj) if (_.has(obj, key)) keys.push(key);
     return keys;
   };
 
@@ -880,7 +863,7 @@
     return copy;
   };
 
-  // Return a copy of the object without the blacklisted properties.
+   // Return a copy of the object without the blacklisted properties.
   _.omit = function(obj) {
     var copy = {};
     var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
@@ -948,9 +931,9 @@
       // RegExps are compared by their source patterns and flags.
       case '[object RegExp]':
         return a.source == b.source &&
-            a.global == b.global &&
-            a.multiline == b.multiline &&
-            a.ignoreCase == b.ignoreCase;
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
     }
     if (typeof a != 'object' || typeof b != 'object') return false;
     // Assume equality for cyclic structures. The algorithm for detecting cyclic
@@ -963,17 +946,16 @@
     }
     // Objects with different constructors are not equivalent, but `Object`s
     // from different frames are.
-    var aCtor = a.constructor,
-        bCtor = b.constructor;
+    var aCtor = a.constructor, bCtor = b.constructor;
     if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
-        _.isFunction(bCtor) && (bCtor instanceof bCtor)) && ('constructor' in a && 'constructor' in b)) {
+                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
+                        && ('constructor' in a && 'constructor' in b)) {
       return false;
     }
     // Add the first object to the stack of traversed objects.
     aStack.push(a);
     bStack.push(b);
-    var size = 0,
-        result = true;
+    var size = 0, result = true;
     // Recursively compare objects and arrays.
     if (className == '[object Array]') {
       // Compare array lengths to determine if a deep comparison is necessary.
@@ -1019,8 +1001,7 @@
   _.isEmpty = function(obj) {
     if (obj == null) return true;
     if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj)
-      if (_.has(obj, key)) return false;
+    for (var key in obj) if (_.has(obj, key)) return false;
     return true;
   };
 
@@ -1056,7 +1037,7 @@
   }
 
   // Optimize `isFunction` if appropriate.
-  if (typeof(/./) !== 'function') {
+  if (typeof (/./) !== 'function') {
     _.isFunction = function(obj) {
       return typeof obj === 'function';
     };
@@ -1109,7 +1090,7 @@
   };
 
   _.constant = function(value) {
-    return function() {
+    return function () {
       return value;
     };
   };
@@ -1149,9 +1130,7 @@
   };
 
   // A (possibly faster) way to get the current timestamp as an integer.
-  _.now = Date.now || function() {
-    return new Date().getTime();
-  };
+  _.now = Date.now || function() { return new Date().getTime(); };
 
   // List of HTML entities for escaping.
   var entityMap = {
@@ -1167,7 +1146,7 @@
 
   // Regexes containing the keys and values listed immediately above.
   var entityRegexes = {
-    escape: new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
     unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
   };
 
@@ -1212,9 +1191,9 @@
   // By default, Underscore uses ERB-style template delimiters, change the
   // following template settings to use alternative delimiters.
   _.templateSettings = {
-    evaluate: /<%([\s\S]+?)%>/g,
-    interpolate: /<%=([\s\S]+?)%>/g,
-    escape: /<%-([\s\S]+?)%>/g
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
   };
 
   // When customizing `templateSettings`, if you don't want to define an
@@ -1225,11 +1204,11 @@
   // Certain characters need to be escaped so that they can be put into a
   // string literal.
   var escapes = {
-    "'": "'",
-    '\\': '\\',
-    '\r': 'r',
-    '\n': 'n',
-    '\t': 't',
+    "'":      "'",
+    '\\':     '\\',
+    '\r':     'r',
+    '\n':     'n',
+    '\t':     't',
     '\u2028': 'u2028',
     '\u2029': 'u2029'
   };
@@ -1245,7 +1224,9 @@
 
     // Combine delimiters into one regular expression via alternation.
     var matcher = new RegExp([
-      (settings.escape || noMatch).source, (settings.interpolate || noMatch).source, (settings.evaluate || noMatch).source
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
     ].join('|') + '|$', 'g');
 
     // Compile the template source, escaping string literals appropriately.
@@ -1253,9 +1234,7 @@
     var source = "__p+='";
     text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
       source += text.slice(index, offset)
-          .replace(escaper, function(match) {
-            return '\\' + escapes[match];
-          });
+        .replace(escaper, function(match) { return '\\' + escapes[match]; });
 
       if (escape) {
         source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
@@ -1275,8 +1254,8 @@
     if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
 
     source = "var __t,__p='',__j=Array.prototype.join," +
-        "print=function(){__p+=__j.call(arguments,'');};\n" +
-        source + "return __p;\n";
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + "return __p;\n";
 
     try {
       render = new Function(settings.variable || 'obj', '_', source);
