@@ -21,7 +21,7 @@ de
   <!-- Import subfloor.xml which contains all the default tasks -->
   <import file="../build-res/subfloor-js.xml"/>
   <import file="../build-res/subfloor-pkg.xml" id="subfloor-pkg"/>
-  
+
   <!-- karma config files and target test dirs -->
   <property name="js.karma.ci.config.legacy" value="config/karma.ci.conf.legacy.js" />
   <property name="bin.test-js.dir" value="${bin.dir}/test-js" description='Karma tests js source dir' />
@@ -57,7 +57,7 @@ de
   <property name='core-js-legacy-lib.dir' value='${core.dir}/${js-legacy-lib.dir}'/>
 
   <property name='cdf-core-lib-require-js-cfg.name' value='cdf-core-lib-require-js-cfg.js'/>
-  
+
   <property name='core-resource.dir' value='${core.dir}/${resource.dir}'/>
 
   <property name='pentaho-base.dir' value='../cdf-pentaho-base' description="Name of pentaho base dir"/>
@@ -220,7 +220,7 @@ de
 
     <mkdir dir="${stage.dir}/${plugin.name}/actions"/>
   </target>
-  
+
   <target name="dist-plugin" depends="make-stage,dist-js" description="Creates a distribution">
 
     <!-- handle js -->
@@ -334,7 +334,7 @@ de
         &lt;development_stage&gt;
           &lt;lane&gt;${marketplace.metadata.development_stage.lane}&lt;/lane&gt;
           &lt;phase&gt;${marketplace.metadata.development_stage.phase}&lt;/phase&gt;
-        &lt;/development_stage&gt;          
+        &lt;/development_stage&gt;
       &lt;/version&gt;</echo>
 
   </target>
@@ -348,20 +348,50 @@ de
 
     <!-- copy js to temp location for compilation -->
     <echo message="Copying js source"/>
-    <copy todir='${js.module.script.agg.dir}/cdf'>
-      <fileset dir='${core-js.dir}'/>
+    <copy todir='${js.module.script.agg.dir}/cdf/js'>
+      <fileset dir='${core-js.dir}'>
+        <exclude name="*-require-js-cfg.js" />
+      </fileset>
       <fileset dir='${pentaho-base-js.dir}'>
          <exclude name="ccc.js"/>
+         <exclude name="*-require-js-cfg.js" />
       </fileset>
-      <fileset dir="${pentaho-js.dir}" />
+      <fileset dir="${pentaho-js.dir}">
+        <exclude name="*-require-js-cfg.js" />
+      </fileset>
     </copy>
-    <copy todir='${js.module.script.agg.dir}/cdf/lib'>
-      <fileset dir='${core-js-lib.dir}'/>
+
+    <!-- Create an aggregated "cdf-require-js-cfg.js" file -->
+    <concat destfile="${js.module.script.agg.dir}/cdf/js/cdf-require-js-cfg.js" force="yes">
+      <fileset dir='${core-js.dir}'>
+        <include name="*-require-js-cfg.js" />
+      </fileset>
+      <fileset dir='${pentaho-base-js.dir}'>
+         <include name="*-require-js-cfg.js" />
+      </fileset>
+      <fileset dir="${pentaho-js.dir}">
+        <include name="*-require-js-cfg.js" />
+      </fileset>
+    </concat>
+
+    <copy todir='${js.module.script.agg.dir}/cdf/js/lib'>
+      <fileset dir='${core-js-lib.dir}'>
+        <exclude name="*-require-js-cfg.js" />
+      </fileset>
     </copy>
+
+    <!-- Create an aggregated "cdf-lib-require-js-cfg.js" file -->
+    <concat destfile="${js.module.script.agg.dir}/cdf/js/lib/cdf-lib-require-js-cfg.js"
+            force="yes">
+      <fileset dir='${core-js-lib.dir}'>
+        <include name="*-require-js-cfg.js" />
+      </fileset>
+    </concat>
 
     <delete file="build-res/requireCfg-raw.js" />
     <delete file="build-res/requireCfg.js" />
-    <echo message="var requireCfg={paths:{},shim:{}};" file="build-res/requireCfg-raw.js" force="true" append="false"/>
+    <echo message="var requireCfg={paths: {}, shim: {}, map: {&quot;*&quot;: {}}, bundles: {}, config: {service: {}}, packages: []};"
+          file="build-res/requireCfg-raw.js" force="true" append="false"/>
     <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
       <fileset dir="${js.module.script.agg.dir}" casesensitive="yes">
         <include name="**/*-require-js-cfg.js"/>
@@ -389,7 +419,7 @@ de
     </unzip>
 
     <!-- copy CCC to be included during minification -->
-    <copy todir="${js.module.script.agg.dir}/cdf/lib/CCC">
+    <copy todir="${js.module.script.agg.dir}/cdf/js/lib/CCC">
       <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
 
@@ -402,16 +432,25 @@ de
     </exec>
 
     <copy todir="${bin.dir}/js-source/cdf/js">
-      <fileset dir="${js.module.script.agg.dir}/cdf"/>
+      <fileset dir="${js.module.script.agg.dir}/cdf/js"/>
     </copy>
 
     <copy todir="${bin.dir}/js-source/cdf/js/compressed">
-      <fileset dir="${js.build.output.dir}/cdf">
+      <fileset dir="${js.build.output.dir}/cdf/js">
         <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
     </copy>
 
-    <!-- provide js-legacy for common-ui ant target test-js merda -->
+    <!-- copy require cfg files to subfloor default lookup folder -->
+    <copy todir="${bin.dir}/js-source/cdf/" overwrite="true">
+      <fileset dir="${js.module.script.agg.dir}/cdf/js">
+        <include name="*-require-js-cfg.js"/>
+      </fileset>
+      <fileset dir="${js.module.script.agg.dir}/cdf/js/lib">
+        <include name="*-require-js-cfg.js"/>
+      </fileset>
+    </copy>
+
     <antcall target="dist-js-legacy" />
 
     <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
@@ -481,13 +520,12 @@ de
       <param name="base.js.path" value="${bin.dir}/js-source/cdf/js-legacy" />
     </antcall>
 
-    <!-- copy require cfg files to subfloor default lookup folder -->
-    <copy todir="${bin.dir}/js-source/cdf" overwrite="true">
-      <fileset dir='${pentaho-js-legacy.dir}'>
+    <!-- copy/rename require cfg files to subfloor default lookup folder -->
+    <copy tofile="${bin.dir}/js-source/cdf/cdf-legacy-require-js-cfg.js" overwrite="true">
+      <fileset dir="${pentaho-js-legacy.dir}">
         <include name="cdf-require-js-cfg.js"/>
       </fileset>
     </copy>
-
   </target>
 
   <target name="write-resources">
@@ -716,7 +754,7 @@ de
     </copy>
 
     <!-- create test-js cdf lib resources dir 'bin/test-js/cdf/js/lib' -->
-    <delete dir="${bin.test-js.cdf.js.lib.dir}"/> 
+    <delete dir="${bin.test-js.cdf.js.lib.dir}"/>
     <mkdir dir="${bin.test-js.cdf.js.lib.dir}"/>
     <!-- copy CDF core js libs into bin/test-js/cdf/js/lib -->
     <copy todir="${bin.test-js.cdf.js.lib.dir}" overwrite="true">
