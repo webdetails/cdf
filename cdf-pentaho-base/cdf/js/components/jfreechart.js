@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
- * 
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -276,28 +276,27 @@ var TrafficComponent = UnmanagedComponent.extend({
       }
     }
   },
-  doQuery : function() {
+  doQuery: function() {
     var cd = this.trafficDefinition;
     if(cd.path && cd.dataAccessId) {
       var handler = _.bind(function(data) {
         var filtered;
         if(this.valueAsId) {
           filtered = data.resultset.map(function(e) {
-            return [e[0],e[0]];
+            return [e[0], e[0]];
           });
         } else {
           filtered = data.resultset;
         }
         this.trafficLight(filtered);
       },this);
-      this.triggerQuery(cd,handler);
+      this.triggerQuery(cd, handler);
     } else {
        // go through parameter array and update values
       var parameters = [];
       for(p in cd) {
         var key = p;
         var value = typeof cd[p] == 'function' ? cd[p]() : cd[p];
-        // alert("key: " + key + "; Value: " + value);
         parameters.push([key,value]);
       }
       var myself = this;
@@ -315,15 +314,15 @@ var TrafficComponent = UnmanagedComponent.extend({
       this.synchronous(handler);
     }
   },
-  update : function() {
+  update: function() {
     var cd = this.trafficDefinition;
     if(cd == undefined) {
-      Dashboards.log("Fatal - No trafficDefinition passed","error");
+      Dashboards.log("Fatal - No trafficDefinition passed", "error");
       return;
     }
     var intervals = cd.intervals;
     if(intervals == undefined) {
-      cd.intervals = [-1,1];
+      cd.intervals = [-1, 1];
     }
     this.doQuery();    
   }
