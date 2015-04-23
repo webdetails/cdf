@@ -65,7 +65,6 @@ define(['../Logger', 'amd!../lib/underscore', './UnmanagedComponent', '../lib/jq
             filtered = data.resultset;
           }
           myself.trafficLight(filtered);
-          myself.dashboard.decrementRunningCalls();
         },myself);
         myself.triggerQuery(cd,handler);
       } else {
