@@ -289,7 +289,6 @@ var TrafficComponent = UnmanagedComponent.extend({
           filtered = data.resultset;
         }
         this.trafficLight(filtered);
-        Dashboards.decrementRunningCalls();
       },this);
       this.triggerQuery(cd,handler);
     } else {
