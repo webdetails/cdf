@@ -613,7 +613,7 @@ var CommentsComponent = BaseComponent.extend({
         var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
         var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
         this.$el.empty().append($commentsElem, $add, $paginate);
-        $renderElem.append(this.$el);
+        $renderElem.html(this.$el);
         this.updateNavigateButtons();
       },
 
