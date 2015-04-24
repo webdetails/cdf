@@ -28,10 +28,12 @@ public class EmbeddedHeadersGenerator {
   // embedded constants
   private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n"
       + "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
-  private final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, paths: {}, shim: {}};\n\n";
-  private final String CDF_CORE_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
-  private final String CDF_CORE_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
-  private final String CDF_PENTAHO_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
+  private final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
+      + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n\n";
+
+  private final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-lib-require-js-cfg.js";
+  private final String CDF_PATH = "content/pentaho-cdf/js/cdf-require-js-cfg.js";
+
   private final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
   private final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
   private final String COMMON_UI_START_PATH = "content/common-ui/resources/web/common-ui-require-js-cfg.js";
@@ -77,11 +79,9 @@ public class EmbeddedHeadersGenerator {
 
         .append( "// injecting document writes to append the cdf require files\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + CDF_CORE_PATH + "'></script>\");\n" )
+          + fullyQualifiedURL + CDF_PATH + "'></script>\");\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + CDF_CORE_LIB_PATH + "'></script>\");\n" )
-        .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + CDF_PENTAHO_PATH + "'></script>\");\n" )
+          + fullyQualifiedURL + CDF_LIB_PATH + "'></script>\");\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
           + fullyQualifiedURL + COMMON_UI_START_PATH + "'></script>\");\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
