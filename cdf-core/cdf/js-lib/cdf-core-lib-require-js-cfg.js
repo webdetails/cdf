@@ -32,7 +32,7 @@
 
   if(!requireConfig['amd']) {
     requireConfig['amd'] = {};
-  } 
+  }
   if(!requireConfig['amd']['shim']) {
     requireConfig['amd']['shim'] = {};
   }
@@ -44,11 +44,17 @@
   if(typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf/lib'] = 'bin/test-js/cdf/js/lib';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
+
+    if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
+
     prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
+
+    if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
+
     prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
-    prefix = requirePaths['cdf/lib'] = "cdf/lib";
+    prefix = requirePaths['cdf/lib'] = "cdf/js/lib";
   }
 
   // RequireJS amd! loader plugin. Wraps non-amd scripts as amd modules on the fly,
@@ -297,7 +303,7 @@
     }
   };
 
-  //jQuery MultiSelect UI Widget 1.12 
+  //jQuery MultiSelect UI Widget 1.12
   requirePaths['cdf/lib/jquery.multiselect'] = prefix + "/hynds/jquery.multiselect";
   amdShim['cdf/lib/jquery.multiselect'] = {
     exports: "jQuery",
