@@ -39,6 +39,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      * @returns the component or undefined if it does not exists
      */
     getComponent: function(name) {
+      if(!name) { return; }
       for(var i in this.components) {
         if(this.components[i].name == name) {
           return this.components[i];
@@ -67,11 +68,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      * @returns the component of undefined if it does not exists
      */
     getComponentByName: function(name) {
-      if (this.globalContext) {
-        return eval(name);
-      } else {
         return this.getComponent(name);
-      }
     },
   
     /**
@@ -82,9 +79,12 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      * @param components to add
      */
     addComponents: function(components) {
-      components.forEach(function(component) { //TODO: review why addComponents just not calls addComponent
-        this._bindControl(component);
-        this.components.push(component);
+      if(!$.isArray(components)) { 
+        Logger.warn('addComponents: components in a structure other than an array will not be added!');
+        return;
+      }
+      components.forEach(function(component) {
+        this.addComponent(component);
       }, this);
     },
   
