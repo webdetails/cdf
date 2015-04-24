@@ -517,7 +517,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
          */
         var comps = this.updating.current.components.slice();
         for(var i = 0; i < comps.length;i++) {
-          component = comps[i];
+          var component = comps[i];
           // Start timer
 
           component.startTimer();
