@@ -1023,7 +1023,7 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
 
 
-    selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
+    selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"' style=\'width: 300px; height: 200px; overflow: auto\'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
@@ -1054,12 +1054,69 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     // update the placeholder
     this.placeholder().html(selectHTML);
     this.currentVal = null;
+
+	if (this.type == 'CheckComponent' || this.type == 'radio'){
+      // restore last scroll position for checkbox and radio button components
+      var ulElem = this.placeholder().children("ul");
+      if(this.autoScrollTopValue){
+        ulElem.scrollTop(this.autoScrollTopValue);
+        delete this.autoScrollTopValue;
+      }
+      // add timeout listener for checkbox and radio button components
+      this._listenElement(ulElem);
+    }
+
     this._doAutoFocus();
   },
-  callAjaxAfterRender: function(name){
-    setTimeout(function(){
-      Dashboards.processChange(name)
-    },1);
+
+  callAjaxAfterRender: function(name){},
+
+  _listenElement: function(ulElem) {
+    var me = this;
+    var prevValue = me.getValue();
+    var stop;
+    // update component
+    var check = function() {
+      stop && stop();
+      var dash = me.dashboard;
+      if(dash) {
+        var currValue = me.getValue();
+        if(!dash.equalValues(prevValue, currValue)) {
+          prevValue = currValue;
+          dash.processChange(me.name);
+        }
+      }
+    };
+    // calc timeouts
+    var timScrollFraction = me.changeTimeoutScrollFraction;
+    timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
+    var timChangeFraction = me.changeTimeoutChangeFraction;
+    timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 5/8);
+    var changeTimeout = Math.max(100, me.changeTimeout || 2000);
+    var changeTimeoutScroll = timScrollFraction * changeTimeout;
+    var changeTimeoutChange = timChangeFraction * changeTimeout;
+    // timer
+    var timeoutHandle;
+    // clear timer
+    stop = function() {
+      if(timeoutHandle != null) {
+        clearTimeout(timeoutHandle);
+        timeoutHandle = null;
+      }
+    };
+    // restart timer
+    var renew = function(tim) {
+      stop();
+      if(me.dashboard) {
+        timeoutHandle = setTimeout(check, tim || changeTimeout);
+      }
+    };
+    // catch events
+    ulElem
+      .keypress(function(ev) { if(ev.which === 13) { check(); } })
+      .change(function() { renew(changeTimeoutChange); })
+      .scroll(function() { renew(changeTimeoutScroll); })
+      .mouseleave(check);
   }
 });
 
