@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -48,7 +48,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Alias for  {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
+     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
      *
      * @method getComp
      * @for Dashboard
@@ -60,15 +60,15 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Alias for  {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
+     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
      *
      * @method getComponentByName
      * @for Dashboard
      * @param name of the component
-     * @returns the component of undefined if it does not exists
+     * @returns the component or undefined if it does not exists
      */
     getComponentByName: function(name) {
-        return this.getComponent(name);
+      return this.getComponent(name);
     },
   
     /**

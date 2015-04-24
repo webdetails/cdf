@@ -68,7 +68,7 @@ define([
       }
   
       $.blockUI();
-      var handle = $('<div id="blockUIDragHandle"></div>')
+      var handle = $('<div id="blockUIDragHandle"></div>');
       $("div.blockUI.blockMsg").prepend(handle);
       $("div.blockUI.blockMsg").draggable({
         handle: "#blockUIDragHandle"
@@ -97,7 +97,7 @@ define([
         this.resetRunningCalls();
       }
       $.unblockUI && $.unblockUI();
-      this.showErrorTooltip();// Dashboards.Legacy
+      this.showErrorTooltip();// Dashboard.legacy
     },
   
   
@@ -128,9 +128,7 @@ define([
      */
     parseServerError: function(resp, txtStatus, error) {
       var out = {};
-      var regexs = [
-        { match: /Query timeout/ , msg: Dashboard.getErrorObj('QUERY_TIMEOUT').msg  }
-      ];
+      var regexs = [{match: /Query timeout/, msg: this.getErrorObj('QUERY_TIMEOUT').msg}];
   
       out.error = error;
       out.msg = this.getErrorObj('COMPONENT_ERROR').msg;
@@ -138,14 +136,14 @@ define([
       _.find(regexs, function(el) {
         if(str.match(el.match)) {
           out.msg = el.msg;
-          return true
+          return true;
         } else {
-          return false
+          return false;
         }
       });
       out.errorStatus = txtStatus;
   
-      return out
+      return out;
     },
   
     /**
@@ -171,11 +169,7 @@ define([
      */
     errorNotification: function(err, ph) {
       if(ph) {
-        Popups.notificationsComponent.render(
-            $(ph), {
-              title: err.msg,
-              desc: ""
-            });
+        Popups.notificationsComponent.render($(ph), {title: err.msg, desc: ""});
       } else {
         Popups.notificationsGrowl.render({
           title: err.msg,
@@ -237,7 +231,5 @@ define([
       });
       return retVal;
     }
-  
   });
-    
 });

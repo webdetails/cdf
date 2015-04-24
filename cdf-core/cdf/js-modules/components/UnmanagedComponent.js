@@ -247,13 +247,13 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         this.runCounter = 0;
       }
       var ret;
-      if (typeof this.preExecution == "function") {
+      if(typeof this.preExecution == "function") {
         try {
           ret = this.preExecution();
           ret = typeof ret == "undefined" || ret;
         } catch(e) {
           this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-          Logger.log(e,"error");
+          Logger.exception(e);
           ret = false;
         }
       } else {
@@ -284,10 +284,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method drawTooltip
      */
     drawTooltip: function() {
-      if (this.tooltip) {
-        this._tooltip = typeof this.tooltip == "function" ?
-            this.tooltip():
-            this.tooltip;
+      if(this.tooltip) {
+        this._tooltip = typeof this.tooltip == "function" ? this.tooltip() : this.tooltip;
       }
     },
 
@@ -339,7 +337,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
           this.showTooltip();
         } catch(e) {
           this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-          Logger.log(e, "error");
+          Logger.exception(e);
         } finally {
           if(!silent) {
             this.unblock();
@@ -439,21 +437,18 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         return;
       }
       var silent = this.isSilent();
-      if (!silent){
+      if(!silent) {
         this.block();
       };
       var ajaxParameters = $.extend({
         async: true
       },_ajaxParameters);
       /* Detect call convention used and adjust parameters */
-      if (typeof callback != "function") {
+      if(typeof callback != "function") {
         callback = params;
         _.extend(ajaxParameters, url);
       } else {
-        _.extend(ajaxParameters,{
-          url: url,
-          data: params
-        });
+        _.extend(ajaxParameters, {url: url, data: params});
       }
       var success = _.bind(function(data) {
         callback(data);
@@ -461,7 +456,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         this.postExec();
       },this);
       var always = _.bind(function() {
-        if (!silent){
+        if(!silent) {
           this.unblock();
         }
       }, this);
@@ -523,11 +518,11 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     getSuccessHandler: function(counter, success, always) {
 
-      if (arguments.length === 1) {
+      if(arguments.length === 1) {
       /* getSuccessHandler(success) */
         success = counter;
         counter = this.callCounter();
-      } else if (typeof counter == 'function') {
+      } else if(typeof counter == 'function') {
         /* getSuccessHandler(success,always) */
         always = success;
         success = counter;
@@ -545,7 +540,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
             success(data);
           } catch(e) {
             this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-              Logger.log(e,"error");
+            Logger.exception(e);
           }
         }
         if(typeof always == "function") {
@@ -596,7 +591,6 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         this.dashboard.incrementRunningCalls();
         this.isRunning = true;
       }
-
     },
 
     /**
@@ -607,7 +601,6 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method unblock
      */
     unblock: function() {
-
       if(this.isRunning) {
         this.dashboard.decrementRunningCalls();
         this.isRunning = false;
@@ -626,5 +619,4 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
   });
 
   return UnmanagedComponent;
-
 });
