@@ -1075,7 +1075,20 @@ Dashboards.updateAll = function(components) {
   if(updating === null || updating.components.length == 0
       || ( othersAwaitExecution = this.othersAwaitExecution( _.clone( this.updating.tiers ) , this.updating.current ) ) ) {
     var toUpdate = this.getFirstTier(this.updating.tiers);
-    if(!toUpdate) return;
+    if(!toUpdate) {
+      // restore last scroll position for prompt panel
+      for (i = 0; i < this.components.length; i++) {
+        if(this.components[i].type === 'ScrollingPromptPanelLayoutComponent'){
+          if(this.components[i].autoScrollTopValue){
+            this.components[i].placeholder().children(".prompt-panel").scrollTop(this.components[i].autoScrollTopValue);
+            delete this.components[i].autoScrollTopValue;
+            break;
+          }
+        }
+      }
+
+      return;
+    }
 
     if( othersAwaitExecution ){ 
       var tiers = this.updating.tiers;
