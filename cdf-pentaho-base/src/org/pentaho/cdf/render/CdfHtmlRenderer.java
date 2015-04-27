@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -14,6 +14,7 @@
 package org.pentaho.cdf.render;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -31,18 +32,15 @@ import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.environment.CdfEngine;
-import org.pentaho.cdf.environment.PentahoCdfEnvironment;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.templater.ITemplater;
 import org.pentaho.cdf.environment.templater.ITemplater.Section;
+import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 
 import pt.webdetails.cpf.Util;
-import pt.webdetails.cpf.localization.MessageBundlesHelper;
 import pt.webdetails.cpf.repository.api.IBasicFile;
-import pt.webdetails.cpf.repository.api.IContentAccessFactory;
-import pt.webdetails.cpf.repository.api.IRWAccess;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.CharsetHelper;
@@ -53,46 +51,63 @@ public class CdfHtmlRenderer {
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
                        String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap,
-                       String user, int inactiveInterval )
-    throws Exception {
+                       String user, int inactiveInterval ) throws Exception {
+
+    execute( out, solution, path, templateName, style, dashboardsMessagesBaseFilename, parameterMap, user,
+        inactiveInterval, false, false );
+  }
+
+  public void execute( final OutputStream out, final String solution, final String path, String templateName,
+                       String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap,
+                       String user, int inactiveInterval, boolean isRequire, boolean loadTheme ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval,
+        isRequire, loadTheme );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
                        String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
                        int inactiveInterval ) throws Exception {
 
+    execute( out, style, templatePath, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval, false,
+        false );
+  }
+
+  public void execute( final OutputStream out, final String templatePath, String style,
+                       String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
+                       int inactiveInterval, boolean isRequire, boolean loadTheme ) throws Exception {
+
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( templatePath );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval,
+        isRequire, loadTheme );
   }
 
   public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String style,
                        String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
-                       int inactiveInterval ) throws Exception {
+                       int inactiveInterval, boolean isRequire, boolean loadTheme ) throws Exception {
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
 
-    IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
+    IReadAccess systemAccess = getPluginSystemReader( null );
     style = StringUtils.isEmpty( style ) ? "" : "-" + style;
 
     final String dashboardTemplate = "template-dashboard" + style + ".html"; //$NON-NLS-1$
 
     ArrayList<String> i18nTagsList = new ArrayList<String>();
-
+    final String requireDashboardTemplate = "template-dashboard" + style + "-require.html";
     IBasicFile templateResourceFile = null;
-    IReadAccess pluginRepoAccess = CdfEngine.getPluginRepositoryReader( "templates/" );
-    String pluginRepoDir = CdfEngine.getEnvironment().getCdfPluginRepositoryDir();
-    String pluginSystemDir = CdfEngine.getEnvironment().getSystemDir();
-    IContentAccessFactory factory = CdfEngine.getEnvironment().getContentAccessFactory();
+    IReadAccess pluginRepoAccess = getPluginRepositoryReader( "templates/" );
 
-    if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
+    if ( isRequire && pluginRepoAccess.fileExists( requireDashboardTemplate ) ) {
+      templateResourceFile = pluginRepoAccess.fetchFile( requireDashboardTemplate );
+    } else if ( isRequire && systemAccess.fileExists( requireDashboardTemplate ) ) {
+      templateResourceFile = systemAccess.fetchFile( requireDashboardTemplate );
+    } else if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
       templateResourceFile = pluginRepoAccess.fetchFile( dashboardTemplate );
-
     } else if ( systemAccess.fileExists( dashboardTemplate ) ) {
       // then try in system
       templateResourceFile = systemAccess.fetchFile( dashboardTemplate );
@@ -100,17 +115,18 @@ public class CdfHtmlRenderer {
 
     String templateContent;
     if ( templateResourceFile != null ) { //if a file was obtained correctly
-      templateContent = Util.toString( templateResourceFile.getContents() );
+      templateContent = getContentString( templateResourceFile.getContents() );
     } else { //if not get a default one
-      logger.error( "Template " + dashboardTemplate + "not available on cdf/templates, loading fallback instead" );
-      templateContent = Util.toString( systemAccess.fetchFile( "template-dashboard.html" ).getContents() );
+      logger.error( "Template " + dashboardTemplate + " not available on cdf/templates, loading fallback instead" );
+      templateContent = getContentString( systemAccess.fetchFile( "template-dashboard.html" ).getContents() );
     }
 
     // Process i18n on dashboard outer template
+    templateContent = updateUserLanguageKey( templateContent );
     templateContent = processi18nTags( templateContent, i18nTagsList );
     // Process i18n on dashboard outer template - end
 
-    ITemplater templater = CdfEngine.getEnvironment().getTemplater();
+    ITemplater templater = getTemplater();
 
     intro = templater.getTemplateSection( templateContent, Section.HEADER );
     footer = templater.getTemplateSection( templateContent, Section.FOOTER );
@@ -119,17 +135,13 @@ public class CdfHtmlRenderer {
 
     // Merge dashboard related message file with global message file and save it in the dashboard cache
     String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ),
-      pluginRepoDir );
+        getPluginRepositoryDir() );
     path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
 
-    IReadAccess access = Util.getAppropriateReadAccess( path, factory, CdfEngine.getEnvironment().getPluginId(),
-      pluginSystemDir , pluginRepoDir );
+    MessageBundlesHelper mbh =
+        new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
 
-    IRWAccess cdfSystemWriter = CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null );
-    String cdfStaticBaseUrl = CdfEngine.getEnvironment().getPathProvider().getPluginStaticBaseUrl();
-
-    intro = new MessageBundlesHelper( path, access, cdfSystemWriter, CdfEngine.getEnvironment().getLocale(),
-      cdfStaticBaseUrl ).replaceParameters( intro, i18nTagsList );
+    intro = replaceIntroParameters( intro, mbh, i18nTagsList, dashboardsMessagesBaseFilename );
 
     /*
      * Add cdf libraries
@@ -140,21 +152,28 @@ public class CdfHtmlRenderer {
     // final Hashtable addedFiles = new Hashtable();
 
     out.write( intro.substring( 0, headIndex + 6 ).getBytes( CharsetHelper.getEncoding() ) );
-    // Concat libraries to html head content
-    getHeaders( dashboardContent, parameterMap, out );
+    if ( !isRequire ) { // Concat libraries to html head content
+      getHeadersInternal( dashboardContent, parameterMap, out );
+    } else { // add the webcontext dependency checking if webcontext should load pentaho active theme
+      getWebContextHeader( out, loadTheme );
+    }
     out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
-    // Add context
-    try {
-      ContextEngine.generateContext( out, parameterMap, inactiveInterval );
-    } catch ( Exception e ) {
-      logger.error( "Error generating cdf context.", e );
+
+    if ( !isRequire ) {
+      // Add context
+      try {
+        generateContext( out, parameterMap, inactiveInterval );
+      } catch ( Exception e ) {
+        logger.error( "Error generating cdf context.", e );
+      }
+      // Add storage
+      try {
+        generateStorage( out, user );
+      } catch ( Exception e ) {
+        logger.error( "Error in cdf storage.", e );
+      }
     }
-    // Add storage
-    try {
-      generateStorage( out, user );
-    } catch ( Exception e ) {
-      logger.error( "Error in cdf storage.", e );
-    }
+
 
     out.write( "<div id=\"dashboardContent\">".getBytes( CharsetHelper.getEncoding() ) );
 
@@ -163,11 +182,17 @@ public class CdfHtmlRenderer {
     out.write( footer.getBytes( CharsetHelper.getEncoding() ) );
   }
 
+  protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {
+    String webcontext = "<script language=\"javascript\" type=\"text/javascript\" src=\"webcontext"
+        + ".js?context=cdf" + ( loadTheme ? "" : "&requireJsOnly=true" ) + "\"></script>";
+    out.write( webcontext.getBytes( CharsetHelper.getEncoding() ) );
+  }
+
   public boolean matchComponent( int keyIndex, final String key, final String content ) {
 
     for ( int i = keyIndex - 1; i > 0; i-- ) {
       if ( content.charAt( i ) == ':' || content.charAt( i ) == '"' || ( "" + content.charAt( i ) ).trim()
-        .equals( "" ) ) {
+          .equals( "" ) ) {
         // noinspection UnnecessaryContinue
         continue;
       } else {
@@ -187,11 +212,11 @@ public class CdfHtmlRenderer {
     return false;
   }
 
-  private String getDashboardContent( InputStream is, ArrayList<String> i18nTagsList ) throws Exception {
+  protected String getDashboardContent( InputStream is, ArrayList<String> i18nTagsList ) throws Exception {
     // Fixed ISSUE #CDF-113
     // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     BufferedReader reader =
-      new BufferedReader(
+        new BufferedReader(
         new InputStreamReader( is, Charset.forName( CdfEngine.getEnvironment().getSystemEncoding() ) ) );
 
     StringBuilder sb = new StringBuilder();
@@ -206,7 +231,7 @@ public class CdfHtmlRenderer {
     return sb.toString();
   }
 
-  private String processi18nTags( String content, ArrayList<String> tagsList ) {
+  protected String processi18nTags( String content, ArrayList<String> tagsList ) {
 
     String tagPattern = "CDF.i18n\\(\""; //$NON-NLS-1$
     String[] test = content.split( tagPattern );
@@ -241,6 +266,24 @@ public class CdfHtmlRenderer {
     return name.replace( ".", "_" );
   }
 
+  protected String replaceIntroParameters( String intro, MessageBundlesHelper mbh, ArrayList<String> i18nTagsList,
+                                           String dashboardsMessagesBaseFilename ) throws Exception {
+    mbh.saveI18NMessageFilesToCache();
+    String messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
+
+    // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
+    if ( dashboardsMessagesBaseFilename == null ) {
+      dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
+    }
+
+    intro = intro.replaceAll( "\\{load\\}", "onload=\"load()\"" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    intro = intro.replaceAll( "\\{body-tag-unload\\}", "" ); //$NON-NLS-1$
+    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET_NAME\\}", dashboardsMessagesBaseFilename ); //$NON-NLS-1$
+    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET_PATH\\}", messageSetPath ); //$NON-NLS-1$
+    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode( i18nTagsList ) ); //$NON-NLS-1$
+    return intro;
+  }
+
   private String buildMessageSetCode( ArrayList<String> tagsList ) {
     StringBuffer messageCodeSet = new StringBuffer();
     for ( String tag : tagsList ) {
@@ -251,7 +294,7 @@ public class CdfHtmlRenderer {
     return messageCodeSet.toString();
   }
 
-  private String updateUserLanguageKey( String intro ) {
+  protected String updateUserLanguageKey( String intro ) {
     // Fill the template with the correct user locale
     intro =
       intro.replaceAll( "#\\{LANGUAGE_CODE\\}", CdfEngine.getEnvironment().getLocale().getLanguage() ); //$NON-NLS-1$
@@ -259,8 +302,12 @@ public class CdfHtmlRenderer {
   }
 
   public static void getHeaders( HashMap<String, String> paramMap, OutputStream out ) throws Exception {
-
     String dashboardContent = StringUtils.defaultString( paramMap.get( Parameter.DASHBOARD_CONTENT ) );
+    getHeaders( dashboardContent, paramMap, out );
+  }
+
+  protected void getHeadersInternal( String dashboardContent, HashMap<String, String> paramMap, OutputStream out )
+    throws Exception {
     getHeaders( dashboardContent, paramMap, out );
   }
 
@@ -288,7 +335,7 @@ public class CdfHtmlRenderer {
       for ( String[] componenType : CdfConstants.DASHBOARD_COMPONENT_TYPES ) {
         // Screen Scrap to get component types from dashboardContent
         if ( Pattern.compile( String.format( "type:\\s*[\"'](?i)%s[a-z]*[\"']", componenType[ 0 ] ) )
-          .matcher( dashboardContent ).find() ) {
+            .matcher( dashboardContent ).find() ) {
           componentTypes.add( componenType[ 1 ] );
         }
       }
@@ -297,7 +344,7 @@ public class CdfHtmlRenderer {
       String webRoot;
 
       // some dashboards need full absolute urls
-      if( !StringUtils.isEmpty( root ) ) {
+      if ( !StringUtils.isEmpty( root ) ) {
         if ( root.contains( "/" ) ) {
           // file paths are already absolute, which didn't happen before
           root = root.substring( 0, root.indexOf( "/" ) );
@@ -308,14 +355,14 @@ public class CdfHtmlRenderer {
       }
 
       out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, webRoot, componentTypes )
-        .getBytes( CharsetHelper.getEncoding() ) );
+          .getBytes( CharsetHelper.getEncoding() ) );
     } else {
       out.write(
-        cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
+          cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
     }
   }
 
-  private void generateStorage( final OutputStream out, final String user ) throws Exception {
+  protected void generateStorage( final OutputStream out, final String user ) throws Exception {
 
     JSONObject result = StorageEngine.getInstance().read( user );
 
@@ -326,5 +373,30 @@ public class CdfHtmlRenderer {
     s.append( "</script>\n" );
     // setResponseHeaders(MIME_PLAIN,0,null);
     out.write( s.toString().getBytes( CharsetHelper.getEncoding() ) );
+  }
+
+  protected void generateContext( final OutputStream out, HashMap parameterMap, int inactiveInterval )
+    throws Exception {
+    ContextEngine.getInstance().generateContext( out, parameterMap, inactiveInterval );
+  }
+
+  protected IReadAccess getPluginSystemReader( String path ) {
+    return CdfEngine.getPluginSystemReader( path );
+  }
+
+  protected IReadAccess getPluginRepositoryReader( String path ) {
+    return CdfEngine.getPluginRepositoryReader( path );
+  }
+
+  protected String getPluginRepositoryDir() {
+    return CdfEngine.getEnvironment().getCdfPluginRepositoryDir();
+  }
+
+  protected String getContentString( InputStream inputStream ) throws IOException {
+    return Util.toString( inputStream );
+  }
+
+  protected ITemplater getTemplater() {
+    return CdfEngine.getEnvironment().getTemplater();
   }
 }
