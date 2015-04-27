@@ -1496,7 +1496,6 @@ Dashboards.saveStorage = function(){
       myself.log("Error saving storage",'error');
     }
   });
-
 };
 
 Dashboards.cleanStorage = function(){
@@ -1526,6 +1525,5 @@ Dashboards.cleanStorage = function(){
       myself.log("Error deleting storage", 'error');
     }
   });
-
 };
 

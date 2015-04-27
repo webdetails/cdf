@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 /*
  * queryTypes.js
@@ -108,6 +108,7 @@
         success: this.getSuccessHandler(callback),
         error: this.getErrorHandler(errorCallback)
       });
+
       var async = settings.async == null ?  $.ajaxSettings.async : settings.async;
       if ( !async && settings.xhrFields && settings.xhrFields.withCredentials) {
         Dashboards.log("Cross-domain requests are deprecated for synchronous operations.");
@@ -339,7 +340,7 @@
     },
 
     buildQueryDefinition: function(overrides) {
-      overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
+      overrides = (overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : (overrides || {});
 
       var queryDefinition = {
         kettleOutput: this.getOption('kettleOutput'),
@@ -348,30 +349,29 @@
       // We clone queryDefinition to remove undefined
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
-
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
 
-      _.each( params , function (value, name) {
+      _.each(params , function(value, name) {
         var paramValue;
         try {
           paramValue = Dashboards.getParameterValue(value);
-        } catch( e ) {
+        } catch(e) {
           if(!_.isObject(value) || _.isFunction(value)) {
             printValue = value;
           } else {
             printValue = JSON.stringify(value);
           }
           Dashboards.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used as value instead its value obtained from getParameterValue");
+            "The parameter will be used as value instead its value obtained from getParameterValue");
           paramValue = value;
         }
-        if( paramValue === undefined) {
+        if(paramValue === undefined) {
           paramValue = value;
         }
-        if (_.isFunction(paramValue)){
+        if(_.isFunction(paramValue)) {
           paramValue = paramValue();
-        } else if (_.isObject(paramValue)){
+        } else if(_.isObject(paramValue)) {
           // kettle does not handle arrays natively,
           // nor does it interpret multiple parameters with the same name as elements of an array,
           // nor does CPK do any sort of array handling.
@@ -449,17 +449,17 @@
     },
 
     buildQueryDefinition: function(overrides) {
-      overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
+      overrides = (overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : (overrides || {});
       var queryDefinition = {};
 
       var cachedParams = this.getOption('params'),
-          params = $.extend( {}, cachedParams , overrides);
+          params = $.extend({}, cachedParams , overrides);
 
-      _.each( params , function (value, name) {
+      _.each(params, function(value, name) {
         var paramValue;
         try {
           paramValue = Dashboards.getParameterValue(value);
-        } catch( e ) {
+        } catch(e) {
           var printValue = "";
           if(!_.isObject(value) || _.isFunction(value)) {
             printValue = value;
@@ -467,18 +467,18 @@
             printValue = JSON.stringify(value);
           }
           Dashboards.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used instead the parameter value");
+            "The parameter will be used instead the parameter value");
           paramValue = value;
         }
-        if( paramValue === undefined) {
+        if(paramValue === undefined) {
           paramValue = value;
         }
-        if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0){
+        if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parseable array by cda
           paramValue = doCsvQuoting(paramValue[0],';');
         }
         //else will not be correctly handled for functions that return arrays
-        if (typeof paramValue == 'function') {
+        if(typeof paramValue == 'function') {
           paramValue = paramValue();
         }
         queryDefinition['param' + name] = paramValue;
