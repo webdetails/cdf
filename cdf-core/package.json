@@ -20,6 +20,7 @@
     "url": "http://jira.pentaho.com/browse/CDF"
   },
   "devDependencies": {
+    "yuidocjs": "~0.3.45",  
     "karma": "~0.12",
     "karma-cli": "0.0.x",
     "karma-jasmine": "~0.2",
@@ -29,6 +30,7 @@
     "karma-jasmine-html-reporter": "0.1.x",
     "karma-coverage": "0.2.x",
     "karma-phantomjs-launcher": "0.1.x",
-    "karma-chrome-launcher": "0.1.x"
+    "karma-chrome-launcher": "~0.1.4",
+    "karma-firefox-launcher": "~0.1"
   }
 }

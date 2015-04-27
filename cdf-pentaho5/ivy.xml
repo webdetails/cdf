@@ -74,6 +74,5 @@
       <artifact name="ccc" type="zip" ext="zip"/>
     </dependency>
 
-
   </dependencies>
 </ivy-module>
