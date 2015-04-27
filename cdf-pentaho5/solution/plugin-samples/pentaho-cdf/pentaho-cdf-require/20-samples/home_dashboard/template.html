@@ -1,0 +1,116 @@
+<!-- Created by Harris Ward - www.hazamonzo.co.uk -->
+
+<table align="center" style="border: 1px solid #000;">
+	<tr>
+		<td align="center" colspan="2"><p><div id="titleObject"></div></p></td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td valign="top"><div id="territorySalesObject"></div></td>
+				</tr>
+				<tr>
+					<td valign="top"><div id="productLineSalesObject"></div></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<table>
+				<tr>
+					<td><div id="topTenCustomersObject"></div></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+var dashboard; //accessed in productLineSales.xaction
+
+// This is a custom function that is fired when a user selects a productLine and then want to select a territory
+// Its purpose is to reset the productLine variable back to null and pass the territory that has been selected
+// The function is executed from the url-template tag in the territorySales.xaction
+var clickOnTerritory;
+
+require([
+    'cdf/Dashboard.Blueprint',
+    'cdf/components/TextComponent',
+    'cdf/components/XactionComponent'],
+  function(Dashboard, TextComponent, XactionComponent) {
+
+  dashboard = new Dashboard();
+  dashboard.addParameter("productLine", "null");
+  dashboard.addParameter("territory", "null");
+
+  dashboard.addComponent(new TextComponent({
+    name: "titleString",
+    type: "text",
+    title: "Top Ten Customers",
+    listeners: ["productLine", "territory"],
+    htmlObject: "titleObject",
+    executeAtStart: true,
+    expression: function() { return this.title; },
+    preExecution: function() {
+      var territory =  this.dashboard.getParameterValue("territory");
+      var productLine = this.dashboard.getParameterValue("productLine");
+    	if(territory == "null" && productLine != "null") {
+    		this.title = "Top Ten for " + productLine;
+    	} else if(territory != "null" && productLine == "null") {
+    		this.title = "Top Ten for " + territory;
+    	} else if(territory == "null" && productLine == "null") {
+    		this.title = "Top Ten Customers";
+    	} else {
+    		this.title = "Top Ten for " + territory + ", " + productLine;
+    	}
+    },
+    postExecution: function() {}
+  }));
+
+  dashboard.addComponent(new XactionComponent({
+    name: "topTenCustomers",
+    type: "xaction",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/topTenCustomers.xaction",
+    listeners: ["productLine", "territory"],
+    parameters: [["productLine", "productLine"], ["territory", "territory"]],
+    htmlObject: "topTenCustomersObject",
+    executeAtStart: true,
+    preExecution: function() {},
+    postExecution: function() {}
+  }));
+
+  dashboard.addComponent(new XactionComponent({
+    name: "territorySales",
+    type: "xaction",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/territorySales.xaction",
+    listeners: [],
+    parameters: [],
+    htmlObject: "territorySalesObject",
+    executeAtStart: true,
+    preExecution: function() {},
+    postExecution: function() {}
+  }));
+
+  dashboard.addComponent(new XactionComponent({
+    name: "productLineSales",
+    type: "xaction",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/productLineSales.xaction",
+    listeners: [],
+    parameters: [],
+    htmlObject: "productLineSalesObject",
+    executeAtStart: true,
+    preExecution: function() {},
+    postExecution: function() {}
+  }));
+
+  clickOnTerritory = function(value) {
+    dashboard.setParameter("productLine", "null");
+    dashboard.fireChange('territory', value);
+  }
+
+  dashboard.init();
+
+});
+
+</script>
