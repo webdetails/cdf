@@ -1,145 +1,139 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
- * 
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
-if(typeof CONTEXT_PATH != "undefined") { // production
-  requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
-} else { // build
-  requireCfg['paths']['cdf'] = "cdf";
+/* this file allows platform plugins to use the non-RequireJS version of CDF */
+
+if(typeof CONTEXT_PATH != 'undefined') { // production
+  requireCfg['paths']['cdf-legacy'] = CONTEXT_PATH + 'content/pentaho-cdf/js-legacy';
+} else { // build / unit tests
+  requireCfg['paths']['cdf-legacy'] = 'cdf/js-legacy';
 }
 
-if(!requireCfg['map']) requireCfg['map'] = {};
+if(!requireCfg.map) requireCfg.map = {};
+if(!requireCfg.map['*']) requireCfg.map['*'] = {};
 
-requireCfg['shim']['cdf/cdf-module'] = [
-  'cdf/jquery.ui',
-  'cdf/jquery-impromptu',
-  'cdf/jquery-ui-datepicker-i18n',
-  'cdf/jquery.bgiframe',
-  'cdf/jquery.blockUI',
-  'cdf/jquery.corner',
-  'cdf/jquery.eventstack',
-  'cdf/jquery.i18n.properties',
-  'cdf/jquery.jdMenu',
-  'cdf/jquery.positionBy',
+requireCfg.map['*']['cdf/cdf-module'] = 'cdf-legacy/cdf-module';
 
-  'cdf/simile/ajax/scripts/json',
-  'cdf/json',
-
-  'cdf/CoreComponents'
+requireCfg['shim']['cdf-legacy/cdf-module'] = [
+  'cdf-legacy/lib/jQuery/jquery.ui',
+  'cdf-legacy/lib/impromptu/jquery-impromptu',
+  'cdf-legacy/lib/jquery-ui-datepicker-i18n',
+  'cdf-legacy/lib/bgiframe/jquery.bgiframe',
+  'cdf-legacy/lib/blockUI/jquery.blockUI',
+  'cdf-legacy/lib/corner/jquery.corner',
+  'cdf-legacy/lib/eventstack/jquery.eventstack',
+  'cdf-legacy/lib/i18n/jquery.i18n.properties',
+  'cdf-legacy/lib/jdMenu/jquery.jdMenu',
+  'cdf-legacy/lib/positionBy/jquery.positionBy',
+  'cdf-legacy/lib/simile/ajax/scripts/json',
+  'cdf-legacy/lib/json',
+  'cdf-legacy/CoreComponents'
 ];
 
-
-requireCfg['shim']['cdf/CoreComponents'] = [
-  'cdf/components/core',
-  'cdf/components/ccc',
-  'cdf/components/input'  ,
-  'cdf/components/jfreechart',    
-  'cdf/components/maps',
-  'cdf/components/navigation',
-  'cdf/components/pentaho',
-  'cdf/components/simpleautocomplete',
-  'cdf/components/table'
+requireCfg['shim']['cdf-legacy/CoreComponents'] = [
+  'cdf-legacy/components/core',
+  'cdf-legacy/components/ccc',
+  'cdf-legacy/components/input',
+  'cdf-legacy/components/jfreechart',    
+  'cdf-legacy/components/maps',
+  'cdf-legacy/components/navigation',
+  'cdf-legacy/components/pentaho',
+  'cdf-legacy/components/simpleautocomplete',
+  'cdf-legacy/components/table'
 ];
 
-requireCfg['shim']['cdf/Dashboards'] = [
-  'cdf/Dashboards.Main',
-  'cdf/Dashboards.Query',
-  'cdf/Dashboards.AddIns',
-  'cdf/Dashboards.Bookmarks',
-  'cdf/Dashboards.Legacy',
-  'cdf/Dashboards.Notifications',
-  'cdf/Dashboards.RefreshEngine',
-  'cdf/Dashboards.Utils'
+requireCfg['shim']['cdf-legacy/Dashboards'] = [
+  'cdf-legacy/Dashboards.Main',
+  'cdf-legacy/Dashboards.Query',
+  'cdf-legacy/Dashboards.AddIns',
+  'cdf-legacy/Dashboards.Bookmarks',
+  'cdf-legacy/Dashboards.Legacy',
+  'cdf-legacy/Dashboards.Notifications',
+  'cdf-legacy/Dashboards.RefreshEngine',
+  'cdf-legacy/Dashboards.Utils'
 ];
 
-requireCfg['shim']['cdf/Dashboards.Main'] = [
-  'cdf/Base',
-  'cdf/underscore',
-  'cdf/backbone',
-  'cdf/mustache', 
-  'cdf/lib/shims',
-  'cdf/jquery.blockUI',
-  'cdf/uriQueryParser/jquery-queryParser',
-  'cdf/Dashboards.Startup',
-  'cdf/cdf-base'
+requireCfg['shim']['cdf-legacy/Dashboards.Main'] = [
+  'cdf-legacy/lib/base/Base',
+  'cdf-legacy/lib/underscore/underscore',
+  'cdf-legacy/lib/backbone/backbone',
+  'cdf-legacy/lib/mustache/mustache',
+  'cdf-legacy/lib/shims',
+  'cdf-legacy/lib/blockUI/jquery.blockUI',
+  'cdf-legacy/lib/uriQueryParser/jquery-queryParser',
+  'cdf-legacy/Dashboards.Startup',
+  'cdf-legacy/cdf-base'
 ];
 
-requireCfg['shim']['cdf/cdf-base'] = [
-  'cdf/wd'
+requireCfg['shim']['cdf-legacy/cdf-base'] = ['cdf-legacy/wd'];
+
+requireCfg['shim']['cdf-legacy/lib/backbone/backbone']    = ['cdf-legacy/lib/underscore/underscore'];
+
+requireCfg['shim']['cdf-legacy/Dashboards.Startup']       = ['cdf-legacy/lib/shims'];
+requireCfg['shim']['cdf-legacy/Dashboards.AddIns']        = ['cdf-legacy/Dashboards.Main', 'cdf-legacy/Dashboards.Query'];
+requireCfg['shim']['cdf-legacy/Dashboards.Bookmarks']     = ['cdf-legacy/Dashboards.Main'];
+requireCfg['shim']['cdf-legacy/Dashboards.Legacy']        = ['cdf-legacy/Dashboards.Main'];
+requireCfg['shim']['cdf-legacy/Dashboards.Notifications'] = ['cdf-legacy/Dashboards.Main'];
+requireCfg['shim']['cdf-legacy/Dashboards.Query']         = ['cdf-legacy/Dashboards.Main'];
+requireCfg['shim']['cdf-legacy/Dashboards.RefreshEngine'] = ['cdf-legacy/Dashboards.Main'];
+requireCfg['shim']['cdf-legacy/Dashboards.Utils']         = ['cdf-legacy/Dashboards.Main'];
+
+requireCfg['shim']['cdf-legacy/components/core']          = ['cdf-legacy/Dashboards'];
+requireCfg['shim']['cdf-legacy/components/input']         = [
+  'cdf-legacy/components/core',
+  'cdf-legacy/inputHelper'
 ];
-
-requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
-
-requireCfg['shim']['cdf/Dashboards.Startup'] = ['cdf/lib/shims'];
-
-requireCfg['shim']['cdf/Dashboards.AddIns']        = ['cdf/Dashboards.Main', 'cdf/Dashboards.Query'];
-requireCfg['shim']['cdf/Dashboards.Bookmarks']     = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Legacy']        = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Notifications'] = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Query']         = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.RefreshEngine'] = ['cdf/Dashboards.Main'];
-requireCfg['shim']['cdf/Dashboards.Utils']         = ['cdf/Dashboards.Main'];
-
-requireCfg['shim']['cdf/components/core']       = ['cdf/Dashboards'];
-requireCfg['shim']['cdf/components/input']      = [
-  'cdf/components/core',
-  'cdf/inputHelper'
+requireCfg['shim']['cdf-legacy/components/jfreechart'] = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/maps']       = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/navigation'] = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/pentaho']    = [
+  'cdf-legacy/components/core',
+  'cdf-legacy/components/Pentaho.Analyzer',
+  'cdf-legacy/components/Pentaho.JPivot',
+  'cdf-legacy/components/Pentaho.Reporting',
+  'cdf-legacy/components/Pentaho.XAction'
 ];
-requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/maps']       = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/navigation'] = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/pentaho']    = [
-  'cdf/components/core',
-  'cdf/components/Pentaho.Analyzer',
-  'cdf/components/Pentaho.JPivot',
-  'cdf/components/Pentaho.Reporting',
-  'cdf/components/Pentaho.XAction'
-];
-requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/table']              = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/Pentaho.Analyzer']   = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/Pentaho.JPivot']     = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/Pentaho.Reporting']  = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/Pentaho.XAction']    = ['cdf/components/core'];
+requireCfg['shim']['cdf-legacy/components/simpleautocomplete'] = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/table']              = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/Pentaho.Analyzer']   = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/Pentaho.JPivot']     = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/Pentaho.Reporting']  = ['cdf-legacy/components/core'];
+requireCfg['shim']['cdf-legacy/components/Pentaho.XAction']    = ['cdf-legacy/components/core'];
 
-requireCfg['shim']['cdf/jquery'] = {
-  exports: '$',
-  init: function() {
-    return $;
-  }
-};
+requireCfg['shim']['cdf-legacy/lib/jQuery/jquery'] = {
+  exports: '$'
+}
 
 // AMD compatible libs already define themselves anonymously, yet depend on 
 // module "jquery", which is defined by jQuery.js
-requireCfg['map']['cdf'] = {
-    'jquery': 'cdf/jquery'
-};
-//requireCfg['shim']['cdf/jquery.blockUI']            = ['cdf/jquery'];
-//requireCfg['shim']['cdf/jquery.bgiframe']           = ['cdf/jquery'];
-//requireCfg['shim']['cdf/jquery.sparkline']          = ['cdf/jquery'];
+requireCfg.map['cdf-legacy'] = { 'jquery': 'cdf-legacy/lib/jQuery/jquery' };
+requireCfg.map['*']['cdf-legacy/jquery'] = 'cdf-legacy/lib/jQuery/jquery';
 
-requireCfg['shim']['cdf/jquery.ui']                 = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery-impromptu']          = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery-ui-datepicker-i18n'] = ['cdf/jquery.ui'];
-requireCfg['shim']['cdf/jquery.corner']             = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.eventstack']         = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.i18n.properties']    = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.jdMenu']             = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.positionBy']         = ['cdf/jquery'];
+//requireCfg['shim']['cdf/lib/blockUI/jquery.blockUI']     = ['cdf/lib/jQuery/jquery'];
+//requireCfg['shim']['cdf/lib/bgiframe/jquery.bgiframe']   = ['cdf/lib/jQuery/jquery'];
+//requireCfg['shim']['cdf/lib/sparkline/jquery.sparkline'] = ['cdf/lib/jQuery/jquery'];
 
-requireCfg['shim']['cdf/uriQueryParser/jquery-queryParser'] = ['cdf/jquery'];
+requireCfg['shim']['cdf-legacy/lib/jQuery/jquery.ui']             = ['cdf-legacy/lib/jQuery/jquery'];
+requireCfg['shim']['cdf-legacy/lib/impromptu/jquery-impromptu']   = ['cdf-legacy/lib/jQuery/jquery'];
+requireCfg['shim']['cdf-legacy/lib/jquery-ui-datepicker-i18n']    = ['cdf-legacy/lib/jQuery/jquery.ui'];
+requireCfg['shim']['cdf-legacy/lib/corner/jquery.corner']         = ['cdf-legacy/lib/jQuery/jquery'];
+requireCfg['shim']['cdf-legacy/lib/eventstack/jquery.eventstack'] = ['cdf-legacy/lib/jQuery/jquery'];
+requireCfg['shim']['cdf-legacy/lib/i18n/jquery.i18n.properties']  = ['cdf-legacy/lib/jQuery/jquery'];
+requireCfg['shim']['cdf-legacy/lib/jdMenu/jquery.jdMenu']         = ['cdf-legacy/lib/jQuery/jquery'];
+requireCfg['shim']['cdf-legacy/lib/positionBy/jquery.positionBy'] = ['cdf-legacy/lib/jQuery/jquery'];
 
-requireCfg['shim']['cdf/simile/ajax/scripts/json'] = ['cdf/simile/ajax/simile-ajax-api'];
+requireCfg['shim']['cdf-legacy/lib/uriQueryParser/jquery-queryParser'] = ['cdf-legacy/lib/jQuery/jquery'];
 
-requireCfg['shim']['cdf/json'] = ['cdf/simile/ajax/simile-ajax-api'];
+requireCfg['shim']['cdf-legacy/lib/simile/ajax/scripts/json'] = ['cdf-legacy/lib/simile/ajax/simile-ajax-api'];
 
-
+requireCfg['shim']['cdf-legacy/lib/json'] = ['cdf-legacy/lib/simile/ajax/simile-ajax-api'];
