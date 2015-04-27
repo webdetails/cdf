@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 Dashboards.escapeHtml = function(input) {
   // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
@@ -83,10 +83,10 @@ Dashboards.getLocationSearchString = function() {
   };
 
   /**
-   * Config a new or existing language by specifying the language code
+   * Configure a new or existing language by specifying the language code
    * and a configuration object with the keywords:
-   *  - 'number'     to configure number's format language
-   *  - 'dateLocale' to configure date's   format language
+   * - 'number' to configure number's format language
+   * - 'dateLocale' to configure date's format language
    *
    * @param langCode
    * @param config
@@ -101,10 +101,8 @@ Dashboards.getLocationSearchString = function() {
     moment.locale(mLocale);
   };
 
-/**
-   * Format a date with a given mask using the Dashboard language
-   * or the one that the user specified if it exists, otherwise
-   * uses the default language 'en-US'
+  /**
+   * Format the a date with a given mask
    *
    * @param date
    * @param mask
@@ -117,21 +115,7 @@ Dashboards.getLocationSearchString = function() {
     if(!toFormat.isValid()) {
       return toFormat.toDate();
     }
-
-    if(langCode != null) {
-      var mLocale = moment.locale();
-      //Testing if langCode exists. Use langCode if true, and 'en-US' otherwise
-      if(moment.locale(langCode, true) === undefined) {
-        langCode = 'en-US';
-      }
-
-      //must set Dashboard Language back to the previous state,
-      //because moment.locale always changes the current locale being used.
-      moment.locale(mLocale);
-      toFormat.locale(langCode);
-    }
-
-    return toFormat.format(mask);
+    return moment().format(mask);
   };
   
   /**
@@ -180,10 +164,7 @@ Dashboards.getLocationSearchString = function() {
 
 })(Dashboards);
 
-(function(D) {
 
-
-})(Dashboards);
 
 
 /**
@@ -407,8 +388,9 @@ function encode_prepare( s )
     s = s.replace(/\+/g," ");
     /* CDF-271 jQuery 1.9.1 deprecated function $.browser */
     //if ($.browser == "msie" || $.browser == "opera"){
-    if ((navigator.userAgent.toLowerCase().indexOf('msie') != -1) ||
-        (navigator.userAgent.toLowerCase().indexOf('opera') != -1) ){
+    if((navigator.userAgent.toLowerCase().indexOf('msie') != -1)
+      || (navigator.userAgent.toLowerCase().indexOf('opera') != -1)) {
+
       return Utf8.decode(s);
     }
   }
