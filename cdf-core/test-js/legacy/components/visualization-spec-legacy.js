@@ -25,6 +25,7 @@ pentaho.visualizations.getById = function( p1 ) {};
 describe("The VisualizationAPI Component #", function() {
 
   var myDashboard = _.extend({}, Dashboards);
+  myDashboard.init();
 
   myDashboard.addParameter('optionParameter', "value");
 
@@ -44,6 +45,7 @@ describe("The VisualizationAPI Component #", function() {
   });
 
   myDashboard.addComponent( visualizationAPIComponent );
+
 
   /**
    * ## The VisualizationAPI Component # Update Called

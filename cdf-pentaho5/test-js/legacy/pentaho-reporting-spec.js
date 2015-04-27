@@ -4,6 +4,7 @@
 describe("The prpt Component #", function() {
 
   var myDashboard = _.extend({}, Dashboards);
+  myDashboard.init();
 
   var optionData = {
     funcValue: 2,
@@ -27,7 +28,7 @@ describe("The prpt Component #", function() {
   var prptComponent = window.PrptComponent = new PrptComponent();
   $.extend(prptComponent, {
     name: "prptComponent",
-    type: "prpt",
+    type: "prptComponent",
     htmlObject: "placeholder",
     path: optionData.path,
     parameters: [['funcValue','funcValue'],['value','value'],['funcArray','funcArray'],
