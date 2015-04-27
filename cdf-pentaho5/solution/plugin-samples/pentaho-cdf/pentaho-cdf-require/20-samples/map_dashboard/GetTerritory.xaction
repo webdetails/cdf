@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<action-sequence> 
+  <title></title>
+  <version>1</version>
+  <logging-level>INFO</logging-level>
+  <documentation> 
+    <author>Pedro Alves</author>  
+    <description>Offices query</description>  
+    <help/>  
+    <result-type>none</result-type> 
+    <icon/> 
+  </documentation>
+
+  <inputs/>
+
+  <outputs> 
+    <query_result type="result-set"/> 
+  </outputs>
+
+  <resources/>
+  
+  <actions> 
+    <action-definition> 
+      <component-name>SQLLookupRule</component-name>
+      <action-type>Relational</action-type>
+      <action-outputs> 
+        <query-result type="result-set" mapping="query_result"/>  
+        <id type="integer"/>  
+        <name type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <jndi><![CDATA[SampleData]]></jndi>  
+        <query><![CDATA[
+select top 1 cast('' as varchar(50)) as OFFICECODE, cast('' as varchar(50)) as TERRITORY from offices
+union
+SELECT DISTINCT TERRITORY,TERRITORY FROM OFFICES;
+]]></query>  
+        <live><![CDATA[true]]></live> 
+      </component-definition> 
+    </action-definition>
+ 
+  </actions> 
+</action-sequence>
