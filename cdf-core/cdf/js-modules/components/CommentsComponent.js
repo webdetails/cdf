@@ -1,17 +1,25 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "amd!../lib/backbone", './BaseComponent', '../Logger', '../lib/jquery', 'css!./CommentsComponent'],
+define([
+  './CommentsComponent.ext',
+  '../lib/mustache',
+  'amd!../lib/underscore',
+  'amd!../lib/backbone',
+  './BaseComponent',
+  '../Logger',
+  '../lib/jquery',
+  'css!./CommentsComponent'],
   function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
   var CommentsComponent = BaseComponent.extend({
@@ -24,46 +32,46 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
         dataTemplates: {
 
           comments:
-            '<div class="commentsDetails">'+
-            ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
-            '</div>'+
-            '<div class="commentsBody">'+
-            ' <div class="comment">'+
-            '   {{{comment}}}'+
-            ' </div>'+
-            ' {{#user}}'+
-            ' <div class="operation">'+
-            ' {{#permissions.deletePermission}}'+
+            '<div class="commentsDetails">' +
+            ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}' +
+            '</div>' +
+            '<div class="commentsBody">' +
+            ' <div class="comment">' +
+            '   {{{comment}}}' +
+            ' </div>' +
+            ' {{#user}}' +
+            ' <div class="operation">' +
+            ' {{#permissions.deletePermission}}' +
             '   <div class="delete">X</div>' +
-            ' {{/permissions.deletePermission}}'+
-            ' {{#permissions.archive}}'+
+            ' {{/permissions.deletePermission}}' +
+            ' {{#permissions.archive}}' +
             '  <div class="archive">X</div>' +
-            ' {{/permissions.archive}}'+
-            ' </div>'+
-            ' {{/user}}'+
+            ' {{/permissions.archive}}' +
+            ' </div>' +
+            ' {{/user}}' +
             '</div>',
 
           addComments:
-            '<div class="commentsAdd">'+
-            '{{#add}}'+
-            ' <div class="addComment">Add Comment</div>'+
-            ' <div class="addCommentWrapper">'+
-            '   <textarea class=addCommentText></textarea>'+
-            '   <div class="commentsButtons">'+
-            '   <div class="saveComment">Save</div>'+
-            '   <div class="cancelComment">Cancel</div>'+
-            '   </div>'+
-            ' </div>'+
-            '{{/add}}'+
+            '<div class="commentsAdd">' +
+            '{{#add}}' +
+            ' <div class="addComment">Add Comment</div>' +
+            ' <div class="addCommentWrapper">' +
+            '   <textarea class=addCommentText></textarea>' +
+            '   <div class="commentsButtons">' +
+            '   <div class="saveComment">Save</div>' +
+            '   <div class="cancelComment">Cancel</div>' +
+            '   </div>' +
+            ' </div>' +
+            '{{/add}}' +
             '</div>',
 
           paginateComments:
-            '<div class="paginate commentPaginate"> '+
-            '{{#active}}'+
-            ' <div class="navigateRefresh"> Refresh </div>'+
-            ' <div class="navigatePrevious"> Newest Comments </div>'+
-            ' <div class="navigateNext"> Oldest Comments </div>'+
-            '{{/active}}'+
+            '<div class="paginate commentPaginate"> ' +
+            '{{#active}}' +
+            ' <div class="navigateRefresh"> Refresh </div>' +
+            ' <div class="navigatePrevious"> Newest Comments </div>' +
+            ' <div class="navigateNext"> Oldest Comments </div>' +
+            '{{/active}}' +
             '</div>'
         }
       };
@@ -453,7 +461,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
   
       // set the page name for the comments
       if(this.page == undefined) {
-        Logger.log("Fatal - no page definition passed","error");
+        Logger.error("Fatal - no page definition passed");
         return;
       }
 
@@ -479,9 +487,7 @@ define(['./CommentsComponent.ext', '../lib/mustache', "amd!../lib/underscore", "
   
       this.processing().start(options);
     }
-  
   });
-  
+
   return CommentsComponent;
-    
 });

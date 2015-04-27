@@ -1,22 +1,20 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
-
 
 /**
  * Module that holds query related objects
  * @module Query
  */
-
 
 /**
  * Class that represents a CDA query
@@ -57,7 +55,7 @@ define(
      *
      * @method init
      * @param opts Options is an object with the following properties: path, dataAccessId, sortBy, pageSize, outputIndexId
-     * @throws InvalidQuery error  if the opts object does not contain path and dataAccessId
+     * @throws InvalidQuery error if the opts object does not contain path and data access id
      */
     init: function(opts) {
       if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
@@ -94,12 +92,12 @@ define(
       var queryDefinition = {};
 
       var cachedParams = this.getOption('params');
-      var params = $.extend( {}, cachedParams , overrides);
+      var params = $.extend({}, cachedParams, overrides);
 
       _.each( params , function(value, name) {
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parseable array by cda
-          value = Utils.doCsvQuoting(value[0],';');
+          value = Utils.doCsvQuoting(value[0], ';');
         }
         //else will not be correctly handled for functions that return arrays
         if(typeof value == 'function') {
@@ -116,7 +114,6 @@ define(
       queryDefinition.paramsearchBox = this.getOption('searchPattern');
       return queryDefinition;
     },
-
 
     /**
      * Exports the data, according to a specific output type
@@ -136,10 +133,10 @@ define(
         queryDefinition.settingcsvSeparator = options.separator;
       }
       if(options.filename) {
-        queryDefinition.settingattachmentName= options.filename ;
+        queryDefinition.settingattachmentName = options.filename ;
       }
       if(outputType == 'xls' && options.template) {
-        queryDefinition.settingtemplateName= options.template ;
+        queryDefinition.settingtemplateName = options.template ;
       }
       if( options.columnHeaders) {
         queryDefinition.settingcolumnHeaders = options.columnHeaders;
@@ -147,28 +144,29 @@ define(
 
       if(options.dtFilter != null) {
         queryDefinition.settingdtFilter = options.dtFilter;
-        if(options.dtSearchableColumns != null){
+        if(options.dtSearchableColumns != null) {
           queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
         }
       }
       queryDefinition.wrapItUp = 'true';
 
       $.ajax({
-          type:'POST',
-          dataType: 'text',
-          async: true,
-          data: queryDefinition,
-          url: this.getOption('url'),
-          xhrFields: {
-            withCredentials: true
-          }
+        type: 'POST',
+        dataType: 'text',
+        async: true,
+        data: queryDefinition,
+        url: this.getOption('url'),
+        xhrFields: {
+          withCredentials: true
+        }
       }).done(function(uuid) {
-          var _exportIframe = $('<iframe style="display:none">');
-          _exportIframe.detach();
-          _exportIframe[0].src = CdaQueryExt.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );
-          _exportIframe.appendTo($('body')); })
-        .fail(function(jqXHR,textStatus,errorThrown) {
-          Logger.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });
+        var _exportIframe = $('<iframe style="display:none">');
+        _exportIframe.detach();
+        _exportIframe[0].src = CdaQueryExt.getUnwrapQuery({"path": queryDefinition.path, "uuid": uuid});
+        _exportIframe.appendTo($('body'));
+      }).fail(function(jqXHR,textStatus,errorThrown) {
+        Logger.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown);
+      });
     },
 
     /**
@@ -264,8 +262,8 @@ define(
       }
     }
   };
+
   // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.
-  Dashboard.registerGlobalQuery( "cda", cdaQueryOpts );
-
+  Dashboard.registerGlobalQuery("cda", cdaQueryOpts);
 });

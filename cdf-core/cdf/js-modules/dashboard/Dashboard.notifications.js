@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -45,10 +45,10 @@ define([
        *  @for Dashboard
        */
       this.ERROR_CODES = {
-        'QUERY_TIMEOUT' : {
+        'QUERY_TIMEOUT': {
           msg: "Query timeout reached"
         },
-        "COMPONENT_ERROR" : {
+        "COMPONENT_ERROR": {
           msg: "Error processing component"
         }
       };
@@ -68,7 +68,7 @@ define([
       }
   
       $.blockUI();
-      var handle = $('<div id="blockUIDragHandle"></div>')
+      var handle = $('<div id="blockUIDragHandle"></div>');
       $("div.blockUI.blockMsg").prepend(handle);
       $("div.blockUI.blockMsg").draggable({
         handle: "#blockUIDragHandle"
@@ -97,7 +97,7 @@ define([
         this.resetRunningCalls();
       }
       $.unblockUI && $.unblockUI();
-      this.showErrorTooltip();// Dashboards.Legacy
+      this.showErrorTooltip();// Dashboard.legacy
     },
   
   
@@ -109,7 +109,7 @@ define([
      *
      * @for Dashboard
      */
-    getErrorObj: function (errorCode){
+    getErrorObj: function(errorCode) {
       return this.ERROR_CODES[errorCode] || {};
     },
   
@@ -126,26 +126,24 @@ define([
      * @deprecated
      * @private
      */
-    parseServerError: function(resp, txtStatus, error){
+    parseServerError: function(resp, txtStatus, error) {
       var out = {};
-      var regexs = [
-        { match: /Query timeout/ , msg: Dashboard.getErrorObj('QUERY_TIMEOUT').msg  }
-      ];
+      var regexs = [{match: /Query timeout/, msg: this.getErrorObj('QUERY_TIMEOUT').msg}];
   
       out.error = error;
-      out.msg = Dashboard.getErrorObj('COMPONENT_ERROR').msg;
+      out.msg = this.getErrorObj('COMPONENT_ERROR').msg;
       var str = $('<div/>').html(resp.responseText).find('h1').text();
-      _.find( regexs, function (el){
-        if(str.match(el.match)){
-          out.msg = el.msg ;
-          return true
+      _.find(regexs, function(el) {
+        if(str.match(el.match)) {
+          out.msg = el.msg;
+          return true;
         } else {
-          return false
+          return false;
         }
       });
       out.errorStatus = txtStatus;
   
-      return out
+      return out;
     },
   
     /**
@@ -155,11 +153,9 @@ define([
      *  @for Dashboard
      */
     handleServerError: function() {
-      var err = Dashboard.parseServerError.apply( this, arguments );
-  
-      Dashboard.errorNotification( err );
-      Dashboard.trigger('cdf cdf:serverError', this);
-      Dashboard.resetRunningCalls();
+      this.errorNotification(this.parseServerError.apply(this, arguments));
+      this.trigger('cdf cdf:serverError', this);
+      this.resetRunningCalls();
     },
   
     /**
@@ -171,13 +167,9 @@ define([
      *
      * @for Dashboard
      */
-    errorNotification: function (err, ph) {
+    errorNotification: function(err, ph) {
       if(ph) {
-        Popups.notificationsComponent.render(
-            $(ph), {
-              title: err.msg,
-              desc: ""
-            });
+        Popups.notificationsComponent.render($(ph), {title: err.msg, desc: ""});
       } else {
         Popups.notificationsGrowl.render({
           title: err.msg,
@@ -199,11 +191,11 @@ define([
         header: "Warning",
         desc: "You are no longer logged in or the connection to the server timed out",
         button: "Click to reload this page",
-        callback: function(){
+        callback: function() {
           window.location.reload(true);
         }
       };
-      opts = _.extend( {} , opts, newOpts );
+      opts = _.extend({} , opts, newOpts);
   
       Popups.okPopup.show(opts);
       this.trigger('cdf cdf:loginError', this);
@@ -239,7 +231,5 @@ define([
       });
       return retVal;
     }
-  
   });
-    
 });

@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -47,9 +47,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      */
     resetRunningCalls: function() {
       this.runningCalls = 0;
-      setTimeout(_.bind(function(){
+      setTimeout(_.bind(function() {
         this.hideProgressIndicator();
-      },this),10);
+      }, this), 10);
     },
 
     /**
@@ -84,12 +84,12 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     decrementRunningCalls: function() {
       this.runningCalls--;
       Logger.log("-Running calls decremented to: " + this.getRunningCalls());
-      setTimeout(_.bind(function(){
+      setTimeout(_.bind(function() {
         if(this.runningCalls <= 0) {
           this.hideProgressIndicator();
           this.runningCalls = 0; // Just in case
         }
-      },this),10);
+      }, this), 10);
     },
 
     /**
@@ -136,7 +136,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       // Now we need to go through all components we have and attach this
       // initInstance to all
       _.chain(myself.components)
-        .where({initInstance:undefined})
+        .where({initInstance: undefined})
         .each(function(c) { c.initInstance = initInstance});
 
       $(function() { myself._initEngine(initInstance); });
@@ -167,8 +167,8 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         myself.incrementRunningCalls();
       }
 
-      Logger.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: "+
-        myself.getRunningCalls()  +")","color: #ddd ");
+      Logger.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: " +
+        myself.getRunningCalls() + ")","color: #ddd ");
 
       myself.createAndCleanErrorDiv();
       // Fire all pre-initialization events
@@ -176,18 +176,18 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         myself.preInit();
       }
 
-      myself.trigger("cdf cdf:preInit",myself);
+      myself.trigger("cdf cdf:preInit", myself);
       /* Legacy Event -- don't rely on this! */
       $(window).trigger('cdfAboutToLoad');
       var myself = myself;
       var updating = [],i;
-      for(i = 0; i < components.length;i++) {
+      for(i = 0; i < components.length; i++) {
         if(components[i].executeAtStart) {
           updating.push(components[i]);
         }
       }
 
-      if(!updating.length){
+      if(!updating.length) {
         myself._handlePostInit();
         return;
       }
@@ -221,15 +221,15 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
           return;
         }
         myself.waitingForInit = _(myself.waitingForInit).without(comp);
-        comp.off('cdf:postExecution',callback);
-        comp.off('cdf:preExecution',callback);
-        comp.off('cdf:error',callback);
+        comp.off('cdf:postExecution', callback);
+        comp.off('cdf:preExecution', callback);
+        comp.off('cdf:error', callback);
         myself._handlePostInit(initInstance);
       };
 
       for(var i= 0, len = updating.length; i < len; i++) {
         var component = updating[i];
-        component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
+        component.on('cdf:postExecution cdf:preExecution cdf:error', callback, myself);
       }
       myself.updateAll(updating);
       if(components.length > 0) {
@@ -295,7 +295,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         for(var s in suffixes) {
           if(suffixes.hasOwnProperty(s)) {
             var params = suffixes[s];
-            $.each(dupes,function(i,e) {
+            $.each(dupes, function(i, e) {
               var p;
               for(p = 0; p < e.parameters.length;p++) {
                 if(!params.hasOwnProperty(e.parameters[p]) && myself.isBookmarkable(e.parameters[p])) {
@@ -309,7 +309,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       };
 
       if((!myself.waitingForInit || myself.waitingForInit.length === 0) && !myself.finishedInit) {
-        myself.trigger("cdf cdf:postInit",myself);
+        myself.trigger("cdf cdf:postInit", myself);
         /* Legacy Event -- don't rely on this! */
         $(window).trigger('cdfLoaded');
 
@@ -320,7 +320,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         myself.finishedInit = true;
 
         myself.decrementRunningCalls();
-        Logger.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: "+ myself.getRunningCalls()  +")","color: #ddd ");
+        Logger.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + myself.getRunningCalls()  + ")","color: #ddd ");
 
       }
 
@@ -348,7 +348,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       var handler = _.bind(function() {
         try {
           var shouldExecute;
-          if(!(typeof(object.preExecution)=='undefined')) {
+          if(!(typeof(object.preExecution) == 'undefined')) {
             shouldExecute = object.preExecution.apply(object);
           }
           /*
@@ -376,23 +376,23 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
             // unsupported update call
           }
 
-          if(!(typeof(object.postExecution)=='undefined')) {
+          if(!(typeof(object.postExecution) == 'undefined')) {
             object.postExecution.apply(object);
           }
           // if we have a tooltip component, how is the time.
           if(object._tooltip != undefined) {
-            $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-              delay:0,
+            $("#" + object.htmlObject).attr("title", object._tooltip).tooltip({
+              delay: 0,
               track: true,
               fade: 250
             });
           }
-        } catch (e) {
+        } catch(e) {
           var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
             msg = this.getErrorObj('COMPONENT_ERROR').msg + ' (' + object.name.replace('render_', '') + ')';
           this.errorNotification( { msg: msg  } , ph );
-          Logger.log("Error updating " + object.name +":",'error');
-          Logger.log(e,'exception');
+          Logger.error("Error updating " + object.name + ":");
+          Logger.exception(e);
         } finally {
           if(!silent) {
             this.decrementRunningCalls();
@@ -468,7 +468,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         });
         components = comps;
       }
-      _mergePriorityLists(this.updating.tiers,components);
+      _mergePriorityLists(this.updating.tiers, components);
 
       var updating = this.updating.current;
       var othersAwaitExecution = false;
@@ -486,7 +486,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
 
         this.updating.current = toUpdate;
 
-        var postExec = function(component,isExecuting) {
+        var postExec = function(component, isExecuting) {
           /*
            * We first need to figure out what event we're handling. `error` will
            * pass the component, error message and caught exception (if any) to
@@ -501,9 +501,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
           if(arguments.length == 2 && typeof isExecuting == "boolean" && isExecuting) {
             return;
           }
-          component.off("cdf:postExecution",postExec);
-          component.off("cdf:preExecution",postExec);
-          component.off("cdf:error",postExec);
+          component.off("cdf:postExecution", postExec);
+          component.off("cdf:preExecution", postExec);
+          component.off("cdf:error", postExec);
           var current = this.updating.current;
           current.components = _.without(current.components, component);
           var tiers = this.updating.tiers;
@@ -517,15 +517,15 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
          */
         var comps = this.updating.current.components.slice();
         for(var i = 0; i < comps.length;i++) {
-          component = comps[i];
+          var component = comps[i];
           // Start timer
 
           component.startTimer();
-          component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
+          component.on("cdf:postExecution cdf:preExecution cdf:error", postExec, this);
 
           // Logging this.updating. Uncomment if needed to trace issues with lifecycle
-          // Dashboards.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
-          //  _(this.updating.tiers).map(function(v,k){return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
+          // Logger.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
+          //  _(this.updating.tiers).map(function(v,k) {return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
           this.updateComponent(component);
         }
       }
@@ -566,7 +566,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         this.updateAll(this.updateQueue);
         delete this.updateQueue;
       },this);
-      this.updateTimeout = setTimeout(handler,5);
+      this.updateTimeout = setTimeout(handler, 5);
     },
 
     /**
@@ -608,12 +608,12 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * @private
      */
     getFirstTier: function(tiers) {
-      var keys = _.keys(tiers).sort(function(a,b){
-        return parseInt(a,10) - parseInt(b,10);
+      var keys = _.keys(tiers).sort(function(a, b) {
+        return parseInt(a, 10) - parseInt(b, 10);
       });
 
       var tier;
-      for(var i = 0;i < keys.length;i++) {
+      for(var i = 0;i < keys.length; i++) {
         tier = tiers[keys[i]];
         if(tier.length > 0) {
           return { priority: keys[i], components: tier.slice() };
@@ -629,7 +629,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      *  @for Dashboard
      */
     resetAll: function() {
-      this.createAndCleanErrorDiv(); //Dashboards.Legacy
+      this.createAndCleanErrorDiv(); //Dashboard.legacy
       var compCount = this.components.length;
       for(var i = 0, len = this.components.length; i < len; i++) {
         this.components[i].clear();
@@ -651,7 +651,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * @for Dashboard
      */
     processChange: function(object_name) {
-      //Dashboards.log("Processing change on " + object_name);
+      //Logger.log("Processing change on " + object_name);
 
       var object = this.getComponentByName(object_name);
       var parameter = object.parameter;
@@ -662,14 +662,14 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       if(value == null) {// We won't process changes on null values
         return;
       }
-      if(!(typeof(object.preChange)=='undefined')) {
+      if(!(typeof(object.preChange) == 'undefined')) {
         var preChangeResult = object.preChange(value);
         value = preChangeResult != undefined ? preChangeResult : value;
       }
       if(parameter) {
-        this.fireChange(parameter,value);
+        this.fireChange(parameter, value);
       }
-      if(!(typeof(object.postChange)=='undefined')) {
+      if(!(typeof(object.postChange) == 'undefined')) {
         object.postChange(value);
       }
     },
@@ -694,10 +694,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      */
     fireChange: function(parameter, value) {
       var myself = this;
-      myself.createAndCleanErrorDiv(); //Dashboards.Legacy
+      myself.createAndCleanErrorDiv(); //Dashboard.Legacy
 
       myself.setParameter(parameter, value, true);
-      myself.trigger("cdf " + parameter + ":fireChange",{parameter: parameter, value: value});
+      myself.trigger("cdf " + parameter + ":fireChange", {parameter: parameter, value: value});
       var toUpdate = [];
       var workDone = false;
       for(var i= 0, len = myself.components.length; i < len; i++) {
@@ -751,5 +751,4 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       return true;
     }
   });
-
 });

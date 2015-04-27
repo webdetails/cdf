@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -247,13 +247,13 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         this.runCounter = 0;
       }
       var ret;
-      if (typeof this.preExecution == "function") {
+      if(typeof this.preExecution == "function") {
         try {
           ret = this.preExecution();
           ret = typeof ret == "undefined" || ret;
-        } catch(e){
-          this.error( this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-          Logger.log(e,"error");
+        } catch(e) {
+          this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
+          Logger.exception(e);
           ret = false;
         }
       } else {
@@ -284,10 +284,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method drawTooltip
      */
     drawTooltip: function() {
-      if (this.tooltip) {
-        this._tooltip = typeof this.tooltip == "function" ?
-            this.tooltip():
-            this.tooltip;
+      if(this.tooltip) {
+        this._tooltip = typeof this.tooltip == "function" ? this.tooltip() : this.tooltip;
       }
     },
 
@@ -298,8 +296,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     showTooltip: function() {
       if(typeof this._tooltip != "undefined") {
-        this.placeholder().attr("title",this._tooltip).tooltip({
-          delay:0,
+        this.placeholder().attr("title", this._tooltip).tooltip({
+          delay: 0,
           track: true,
           fade: 250,
           content: this._tooltip
@@ -326,7 +324,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       if(!silent) {
         this.block();
       }
-      setTimeout(_.bind(function(){
+      setTimeout(_.bind(function() {
         try {
           /* The caller should specify what 'this' points at within the callback
            * via a Function#bind or _.bind. Since we need to pass a 'this' value
@@ -339,7 +337,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
           this.showTooltip();
         } catch(e) {
           this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-          Logger.log(e, "error");
+          Logger.exception(e);
         } finally {
           if(!silent) {
             this.unblock();
@@ -380,7 +378,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         callback(data);
         this.postExec();
       },this);
-      var always = _.bind(function (){
+      var always = _.bind(function() {
         if(!silent) {
           this.unblock();
         }
@@ -388,7 +386,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       var handler = this.getSuccessHandler(success, always),
           errorHandler = this.getErrorHandler();
 
-      var query = this.queryState = this.query = this.dashboard.getQuery( queryDef);
+      var query = this.queryState = this.query = this.dashboard.getQuery(queryDef);
       var ajaxOptions = {
         async: true
       }
@@ -434,38 +432,35 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @params callback Callback to call after url has been request
      * @params _ajaxParameters Parameters specific to the ajax call definition
      */
-    triggerAjax: function(url,params,callback,_ajaxParameters) {
+    triggerAjax: function(url, params, callback, _ajaxParameters) {
       if(!this.preExec()) {
         return;
       }
       var silent = this.isSilent();
-      if (!silent){
+      if(!silent) {
         this.block();
       };
       var ajaxParameters = $.extend({
         async: true
       },_ajaxParameters);
       /* Detect call convention used and adjust parameters */
-      if (typeof callback != "function") {
+      if(typeof callback != "function") {
         callback = params;
-        _.extend(ajaxParameters,url);
+        _.extend(ajaxParameters, url);
       } else {
-        _.extend(ajaxParameters,{
-          url: url,
-          data: params
-        });
+        _.extend(ajaxParameters, {url: url, data: params});
       }
       var success = _.bind(function(data) {
         callback(data);
-        this.trigger('cdf cdf:render',this,data);
+        this.trigger('cdf cdf:render', this, data);
         this.postExec();
       },this);
       var always = _.bind(function() {
-        if (!silent){
+        if(!silent) {
           this.unblock();
         }
       }, this);
-      ajaxParameters.success = this.getSuccessHandler(success,always);
+      ajaxParameters.success = this.getSuccessHandler(success, always);
       ajaxParameters.error = this.getErrorHandler();
       $.ajax(ajaxParameters);
     },
@@ -492,7 +487,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     error: function(msg, cause) {
       msg = msg || this.dashboard.getErrorObj('COMPONENT_ERROR').msg;
-      if (!this.isSilent()){
+      if(!this.isSilent()) {
         this.unblock();
       };
       this.errorNotification({
@@ -521,36 +516,36 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @param always Callback that is ran independently of call status
      * @return {Function} Success handler function
      */
-    getSuccessHandler: function(counter,success,always) {
+    getSuccessHandler: function(counter, success, always) {
 
-      if (arguments.length === 1) {
+      if(arguments.length === 1) {
       /* getSuccessHandler(success) */
         success = counter;
         counter = this.callCounter();
-      } else if (typeof counter == 'function') {
+      } else if(typeof counter == 'function') {
         /* getSuccessHandler(success,always) */
         always = success;
         success = counter;
         counter = this.callCounter();
       }
       return _.bind(function(data) {
-          var newData;
-          if(counter >= this.runCounter) {
-            try {
-              if(typeof this.postFetch == "function") {
-                newData = this.postFetch(data);
-                this.trigger('cdf cdf:postFetch',this,data);
-                data = typeof newData == "undefined" ? data : newData;
-              }
-              success(data);
-            } catch(e) {
-              this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-              Logger.log(e,"error");
+        var newData;
+        if(counter >= this.runCounter) {
+          try {
+            if(typeof this.postFetch == "function") {
+              newData = this.postFetch(data);
+              this.trigger('cdf cdf:postFetch', this, data);
+              data = typeof newData == "undefined" ? data : newData;
             }
+            success(data);
+          } catch(e) {
+            this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
+            Logger.exception(e);
           }
-          if(typeof always == "function") {
-            always();
-          }
+        }
+        if(typeof always == "function") {
+          always();
+        }
       },
       this);
     },
@@ -563,8 +558,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     getErrorHandler: function() {
       return  _.bind(function() {
-        var err = this.dashboard.parseServerError.apply(this, arguments );
-        this.error( err.msg, err.error );
+        var err = this.dashboard.parseServerError.apply(this.dashboard, arguments);
+        this.error(err.msg, err.error);
       },
       this);
     },
@@ -580,7 +575,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       ph = ph || (this.htmlObject ? this.placeholder() : undefined);
       var name = this.name.replace('render_', '');
       err.msg = err.msg + ' (' + name + ')';
-      this.dashboard.errorNotification( err, ph );
+      this.dashboard.errorNotification(err, ph);
     },
 
     /**
@@ -592,11 +587,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method block
      */
     block: function() {
-      if(!this.isRunning){
+      if(!this.isRunning) {
         this.dashboard.incrementRunningCalls();
         this.isRunning = true;
       }
-
     },
 
     /**
@@ -607,8 +601,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method unblock
      */
     unblock: function() {
-
-      if(this.isRunning){
+      if(this.isRunning) {
         this.dashboard.decrementRunningCalls();
         this.isRunning = false;
       }
@@ -626,5 +619,4 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
   });
 
   return UnmanagedComponent;
-
 });

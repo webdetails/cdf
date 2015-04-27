@@ -1,29 +1,26 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
-
 
 /**
  * Module that holds query related objects
  * @module Query
  */
 
-
 /**
  * Class that represents a CPK query
  * @class CpkQuery
  * @extends BaseQuery
  */
-
 
 define(['../dashboard/Dashboard.ext',
   './BaseQuery',
@@ -62,9 +59,9 @@ define(['../dashboard/Dashboard.ext',
      */
     init: function(opts) {
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
-        this.setOption('pluginId' , opts.pluginId);
-        this.setOption('endpoint' , opts.endpoint);
-        this.setOption('url', DashboardExt.getPluginEndpoint(opts.pluginId , opts.endpoint));
+        this.setOption('pluginId', opts.pluginId);
+        this.setOption('endpoint', opts.endpoint);
+        this.setOption('url', DashboardExt.getPluginEndpoint(opts.pluginId, opts.endpoint));
       }
       this.setOption('kettleOutput', opts.kettleOutput);
       this.setOption('stepName', opts.stepName);
@@ -99,7 +96,7 @@ define(['../dashboard/Dashboard.ext',
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
       var cachedParams = this.getOption('params'),
-        params = $.extend( {}, cachedParams , overrides);
+        params = $.extend( {}, cachedParams, overrides);
 
       _.each(params, function(value, name) {
         if(typeof value == 'function') {
@@ -121,7 +118,6 @@ define(['../dashboard/Dashboard.ext',
       return queryDefinition;
     },
 
-
     /**
      * Gets the success handler for the query, given a fallback to call
      *
@@ -134,12 +130,12 @@ define(['../dashboard/Dashboard.ext',
       // copy-pasted from BaseQuery + added errorCallback
       var myself = this;
       return function(json) {
-        myself.setOption('lastResultSet' , json);
+        myself.setOption('lastResultSet', json);
         var clone = $.extend(true,{}, myself.getOption('lastResultSet'));
         if(json && json.result == false) {
           // the ajax call might have been successful (no network erros),
           // but the endpoint might have failed, which is signalled by json.result
-          var errorCallback = myself.getErrorHandler( myself.getOption('errorCallback'));
+          var errorCallback = myself.getErrorHandler(myself.getOption('errorCallback'));
           errorCallback(clone);
         } else {
           callback(clone);
@@ -147,7 +143,7 @@ define(['../dashboard/Dashboard.ext',
       };
     }
   };
+
   // Registering a class will use that class directly when getting new queries.
   Dashboard.registerGlobalQuery("cpk", CpkEndpointsOpts);
-
- });
+});
