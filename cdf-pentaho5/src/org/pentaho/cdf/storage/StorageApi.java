@@ -26,6 +26,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -49,12 +50,14 @@ public class StorageApi {
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
   public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue,
+                         @QueryParam( Parameter.USER ) String user,
                          @Context HttpServletRequest request,
                          @Context HttpServletResponse response )
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
     setCorsHeaders( request, response );
-    JSONObject json = StorageEngine.getInstance().store( storageValue, getUserName() );
+    JSONObject json =
+      StorageEngine.getInstance().store( storageValue, StringUtils.isEmpty( user ) ? getUserName() : user );
 
     return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
       : Response.serverError().build();
@@ -64,12 +67,13 @@ public class StorageApi {
   @Path( "/read" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public String read( @Context HttpServletRequest request,
-                      @Context HttpServletResponse response )
-    throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+  public String read( @QueryParam( Parameter.USER ) String user,
+                      @Context HttpServletRequest request,
+                      @Context HttpServletResponse response ) throws JSONException, InvalidCdfOperationException,
+    PluginHibernateException {
 
     setCorsHeaders( request, response );
-    JSONObject json = StorageEngine.getInstance().read( getUserName() );
+    JSONObject json = StorageEngine.getInstance().read( StringUtils.isEmpty( user ) ? getUserName() : user );
 
     if ( json != null ) {
       return json.toString();
@@ -83,12 +87,13 @@ public class StorageApi {
   @Path( "/delete" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public Response delete( @Context HttpServletRequest request,
+  public Response delete( @QueryParam( Parameter.USER ) String user,
+                          @Context HttpServletRequest request,
                           @Context HttpServletResponse response )
     throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
     setCorsHeaders( request, response );
-    JSONObject json = StorageEngine.getInstance().delete( getUserName() );
+    JSONObject json = StorageEngine.getInstance().delete( StringUtils.isEmpty( user ) ? getUserName() : user );
 
     return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
       : Response.serverError().build();

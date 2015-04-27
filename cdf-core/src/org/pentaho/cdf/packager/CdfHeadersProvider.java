@@ -47,7 +47,6 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
   private static final String SUFFIX_IE8_SCRIPT = ".ie8script";
   private static final String SUFFIX_IE8_SCRIPT_AFTER_STYLE = ".ie8scriptAfterLink";
   private static final String SUFFIX_IE8_SCRIPT_BEFORE_SCRIPT = ".ie8scriptBeforeScript";
-
   // these are always loaded first
   private static final String BASE_SCRIPTS_PROPERTY = "script";
   private static final String BASE_STYLES_PROPERTY = "link";
@@ -57,7 +56,6 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     acceptedDashboardTypes.add( CdfConstants.BLUEPRINT );
     acceptedDashboardTypes.add( CdfConstants.MOBILE );
     acceptedDashboardTypes.add( CdfConstants.BOOTSTRAP );
-    acceptedDashboardTypes.add( CdfConstants.CLEAN );
   }
   private static final String DEFAULT_DASHBOARD_TYPE = "blueprint";
 
@@ -210,7 +208,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
       return false;
     }
   }
-
+  
   private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
                                    String absRoot, final ArrayList<String> files ) {
     if ( absRoot != null ) {

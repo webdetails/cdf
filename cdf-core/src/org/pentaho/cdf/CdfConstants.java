@@ -15,6 +15,11 @@ package org.pentaho.cdf;
 
 public class CdfConstants {
 
+  // CDF localization related constants
+  public static final String BASE_GLOBAL_MESSAGE_SET_FILENAME = "Messages";
+  public static final String BASE_CDF_CACHE_DIR = "tmp/.cache";
+  public static final String BASE_GLOBAL_MESSAGE_SET_URL = "resources/languages/";
+
   public static final String GLOBAL_MESSAGES_PROPERTIES_FILE = " messages.properties";
 
   public static final String PLUGIN_RESOURCES_DIR = "resources/";
@@ -31,7 +36,6 @@ public class CdfConstants {
   public static final String BLUEPRINT = "blueprint";
   public static final String MOBILE = "mobile";
   public static final String BOOTSTRAP = "bootstrap";
-  public static final String CLEAN = "clean";
   
   public static final String INCLUDES_DIR = "/includes";
   
