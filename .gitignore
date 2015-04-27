@@ -3,8 +3,8 @@
 # Here be passwords!
 /*/override.properties
 # Build/Staging related stuff
-/*/bin/
-/*/dist/
+/**/bin/
+/**/dist/
 /*/lib/
 /*/runtime-lib/
 /solution/system/
@@ -13,7 +13,6 @@
 /manifest.mf
 override.properties
 .ant*
-/bi-platform-v2-plugin/dev-lib/*
 
 #Eclipse project files
 .classpath
@@ -24,11 +23,23 @@ override.properties
 #IntelliJ files
 .idea/
 *.iml
-bi-platform-v2-plugin/res/META-INF/MANIFEST.MF
+
 cdf-core/js-lib
+
+cdf-core/build-res/pentaho-js-build
 cdf-pentaho5/js-lib
 cdf-pentaho5/test-lib
-dist
+cdf-pentaho5/build-res/module-scripts
+cdf-pentaho5/build-res/pentaho-js-build
+cdf-pentaho5/build-res/script-output
 cdf-pentaho/js-lib
 cdf-pentaho/test-lib
-cdf-core/node_modules
+
+/**/node_modules
+/**/test-res
+
+pentaho-js-build.zip
+requireCfg-raw.js
+
+requireCfg.js
+

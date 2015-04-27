@@ -28,8 +28,8 @@
 loadMessageBundles = function(lang) {
 
 			jQuery.i18n.properties({
-			    name:'#{GLOBAL_MESSAGE_SET_NAME}',
-          path:'#{GLOBAL_MESSAGE_SET_PATH}',
+			    name:'Messages',
+			    path:'resources/languages/',
 			    mode:'both',
 			    language:(lang == 'browser' ? jQuery.i18n.browserLang() : lang)
 			});
@@ -62,12 +62,12 @@ var templateComponents = [folderContent, folderTitle];
 Dashboards.init(templateComponents);
 
 $(document).ready(function(){
-  // Initialize jquery.i18n plugin - load message files
-  var userLocale = '#{LANGUAGE_CODE}';
-  var formProvider = cdo.format.language(userLocale);
-  cdo.format.language(formProvider);
-  moment.locale(userLocale);
-  loadMessageBundles(userLocale);
+    // Initialize jquery.i18n plugin - load message files
+    var userLocale = '#{LANGUAGE_CODE}';
+    var formProvider = cdo.format.language(userLocale);
+    cdo.format.language(formProvider);
+    moment.locale(userLocale);
+    loadMessageBundles(userLocale);
 });
     
 </script>
