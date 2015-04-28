@@ -114,7 +114,7 @@
 
   //If you only intend to optimize a module (and its dependencies), with
   //a single file as the output, you can specify the module options inline,
-  //instead of using the 'modules' section above. 'exclude',
+  //instead of using the 'modules' section. 'exclude',
   //'excludeShallow', 'include' and 'insertRequire' are all allowed as siblings
   //to name. The name of the optimized file is specified by 'out'.
   exclude: [
@@ -208,6 +208,7 @@
         "amd!cdf/lib/queryParser",
         "cdf/lib/mustache",
         "cdf/lib/cdf.jquery.i18n",
+        "cdf/lib/base64",
 
         //files that need to be accessible to other AMD modules (e.g. addIns)
         "cdf/components/BaseComponent",
@@ -286,6 +287,7 @@
         "amd!cdf/lib/queryParser",
         "cdf/lib/mustache",
         "cdf/lib/cdf.jquery.i18n",
+        "cdf/lib/base64",
 
         "cdf/lib/bootstrap",
         "cdf/lib/html5shiv",
@@ -371,6 +373,7 @@
         "amd!cdf/lib/queryParser",
         "cdf/lib/mustache",
         "cdf/lib/cdf.jquery.i18n",
+        "cdf/lib/base64",
 
         //files that need to be accessible to other AMD modules (e.g. addIns)
         "cdf/components/BaseComponent",

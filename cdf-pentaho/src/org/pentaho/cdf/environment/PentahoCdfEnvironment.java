@@ -35,6 +35,7 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
 
   private static final String PLUGIN_REPOSITORY_DIR = "/cdf";
   private static final String CONTENT = "content";
+  private static final String SYSTEM_DIR = "system";
 
   private ICdfBeanFactory factory;
   private IResourceLoader resourceLoader;
@@ -142,5 +143,10 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
         return getPathProvider().getResourcesBasePath();
       }
     };
+  }
+
+  @Override
+  public String getSystemDir(){
+    return this.SYSTEM_DIR;
   }
 }

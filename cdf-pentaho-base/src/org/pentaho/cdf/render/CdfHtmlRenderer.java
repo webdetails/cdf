@@ -36,11 +36,11 @@ import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.templater.ITemplater;
 import org.pentaho.cdf.environment.templater.ITemplater.Section;
-import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 
 import pt.webdetails.cpf.Util;
+import pt.webdetails.cpf.localization.MessageBundlesHelper;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IContentAccessFactory;
 import pt.webdetails.cpf.repository.api.IRWAccess;
