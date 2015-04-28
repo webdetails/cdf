@@ -52,6 +52,12 @@
 
 			<dt>refreshPeriod</dt>
 			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+			
+			<dt>onOpenEvent</dt>
+			<dd><i>Function - </i> Function to be called when the 'onOpen' event is triggered</dd>
+
+			<dt>onCloseEvent</dt>
+			<dd><i>Function - </i> Function to be called when the 'onClose' event is triggered</dd>
 
 			<dt>onOpenEvent</dt>
 			<dd><i>Function - </i> Function to be called when the 'onOpen' event is triggered</dd>
@@ -96,7 +102,6 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-
 $("#sampleObject").empty();
 var myInput = {
 	name: "myInput",
@@ -128,7 +133,6 @@ Dashboards.setParameter("endDate", "2014-09-02");
 
 Dashboards.init([myInput]);
 Dashboards.finishedInit = false;
-
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>

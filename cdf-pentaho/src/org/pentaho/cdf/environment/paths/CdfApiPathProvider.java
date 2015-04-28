@@ -22,7 +22,7 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
 
   @Override
   public String getPluginStaticBaseUrl() {
-    return pluginPath;
+    return StringUtils.removeEnd( urlProvider.getPluginBaseUrl(), "/" );
   }
 
   @Override

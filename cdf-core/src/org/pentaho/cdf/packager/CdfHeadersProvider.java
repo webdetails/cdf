@@ -71,6 +71,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     acceptedDashboardTypes.add( CdfConstants.BLUEPRINT );
     acceptedDashboardTypes.add( CdfConstants.MOBILE );
     acceptedDashboardTypes.add( CdfConstants.BOOTSTRAP );
+    acceptedDashboardTypes.add( CdfConstants.CLEAN );
   }
   private static final String DEFAULT_DASHBOARD_TYPE = "blueprint";
 
