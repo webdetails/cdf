@@ -432,7 +432,7 @@ define([
 
     /* 
      * Handler for when the table finishes initialising. This only happens once,
-     * when the table *initialises* ,as opposed to every time the table is drawn,
+     * when the table *initialises*, as opposed to every time the table is drawn,
      * so it provides us with a good place to add the postExec callback.
      */
     fnInitComplete: function() {
