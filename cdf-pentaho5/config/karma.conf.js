@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -22,14 +22,17 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'bin/test-js/cdf/js/**/*.css', included: false },
-      { pattern: 'bin/test-js/cdf/js/**/*.js', included: false },
-      { pattern: 'test-js/**/*.ext.js', included: true },
+      {pattern: 'bin/test-js/cdf/js/**/*.css', included: false},
+      {pattern: 'bin/test-js/cdf/js/**/*.js', included: false},
+      {pattern: 'test-js/**/*.ext.js', included: true},
       'test-js/missing-dependency.js',
       'config/context.js',
-      { pattern: 'test-js/**/*.js', included: false },
+      {pattern: 'test-js/**/*.js', included: false},
       'build-res/requireCfg-raw.js',
-      'config/require-config.js'
+      'config/require-config.js',
+      // fix 404 messages
+      {pattern: 'bin/test-js/cdf/js/**/*.png', watched: false, included: false, served: true},
+      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true}
     ],
 
     // list of files to exclude
