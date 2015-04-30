@@ -11,7 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
 /**
  * Module aggregating all the classes in the Dashboard hierarchy
  * @module Dashboard
@@ -30,7 +29,7 @@ define([
   function(Base, Logger, RefreshEngine, _, Backbone, $) {
 
   var Dashboard = Base.extend({
-  
+
     /**
      * A class representing a Dashboard. This class is abstract, so it should not be required or instantiated directly.
      * Instead use one of its extending subclasses,  {{#crossLink "Dashboard.Blueprint"}}Dashboard.Blueprint{{/crossLink}},
@@ -43,11 +42,11 @@ define([
      */
     constructor: function() {
       var myself = this;
-  
+
       _.extend(this, Backbone.Events);
-  
+
       _configurePlugins();
-  
+
       //TODO: when we start including the webcontext from the server we must review this part
       if(!(typeof(CONTEXT_PATH) == 'undefined')) {
         this.webAppPath = CONTEXT_PATH;
@@ -55,14 +54,10 @@ define([
       if(this.webAppPath == undefined) {
         this.webAppPath = "/" + window.location.pathname.split( '/' )[1];
       }
-  
+
       if(this.webAppPath.endsWith("/")) {
         this.webAppPath = this.webAppPath.substr(0, this.webAppPath.length - 1);
       }
-
-      //wd.cdf.endpoints.webAppPath = this.webAppPath; TODO: review
-  
-      //this.CDF_BASE_PATH = wd.cdf.endpoints.getCdfBase(); TODO: review
 
       _callIfAvailable(this._initContext, "Context");
       _callIfAvailable(this._initStorage, "Storage");
@@ -75,9 +70,9 @@ define([
       _callIfAvailable(this._initNotifications, "Notifications");
       _callIfAvailable(this._initQuery, "Query");
       _callIfAvailable(this._initAddIns, "AddIns");
-  
+
       this.refreshEngine = new RefreshEngine(this);
-  
+
       /**
        * Calls a function if it is available in the prototype
        *
@@ -91,7 +86,7 @@ define([
           Logger.warn("Not calling init method of module: " + module);
         }
       }
-  
+
       /**
        * Initializes the cdf plugins
        *
@@ -99,7 +94,7 @@ define([
        */
       function _configurePlugins() {
         var myself = this;
-  
+
         if(typeof $ == 'function') {
           //ajax
           $.ajaxSetup({
@@ -114,7 +109,7 @@ define([
               return data;
             }
           });
-  
+
           //Set impromptu defaults
           if($.prompt && typeof $.prompt.setDefaults == 'function') {
             $.prompt.setDefaults({
@@ -122,9 +117,9 @@ define([
               show: 'slideDown'
             });
           } else {
-            Logger.log("$.prompt plugin not loaded!!!!!!!!");
+            Logger.log("$.prompt plugin not loaded!!");
           }
-  
+
           //blockUI
           if(typeof $.blockUI == 'function') {
             $.blockUI.defaults.fadeIn = 0;
@@ -141,52 +136,49 @@ define([
             };
             $.blockUI.defaults.css.border = "none";
           } else {
-            Logger.log("$.blockUI plugin not loaded!!!!!!!!");
+            Logger.log("$.blockUI plugin not loaded!!");
           }
         } else {
-          Logger.log("jQuery plugin not loaded!!!!!!!!");
+          Logger.log("jQuery plugin not loaded!!");
         }
       }
     },
-  
+
     /* globalContext determines if components and params are retrieved
      * from the current window's object or from the Dashboards singleton
      */
     globalContext: false,
-  
+
     // Holds the dashboard parameters if globalContext = false
-  
+
     // Holder for context
     context: {},
-  
+
     /*
      * Legacy dashboards don't have priority, so we'll assign a very low priority
      * to them.
      * */
-  
+
     legacyPriority: -1000,
-  
+
     /* Log lifecycle events? */
     logLifecycle: true,
-  
+
     args: [],
-  
+
     //TODO: Review the monthNames usage in month selector component, impossible to localize!!!!
     monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'],
-  
-  
-  
+
     registerEvent: function(ev, callback) {
       if(typeof this.events == 'undefined') {
         this.events = {};
       }
       this.events[ev] = callback;
     },    
-  
-  
+
     debug: 1,
-    
+
     syncDebugLevel: function() {
       var level = 1; // log errors
       try {
@@ -202,8 +194,7 @@ define([
       }
       return this.debug = level;
     },
-  
-  
+
     /**
      * Sets the globalContext value
      *
@@ -213,7 +204,7 @@ define([
     setGlobalContext: function(globalContext) {
       this.globalContext = globalContext;
     },
-  
+
     /**
      * Gets the current webapp path
      *
@@ -225,7 +216,5 @@ define([
     }
   });
 
-
   return Dashboard;
-
 });

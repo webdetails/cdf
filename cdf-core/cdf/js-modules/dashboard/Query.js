@@ -31,7 +31,7 @@ define(['amd!../lib/underscore', '../lib/jquery'], function (_, $) {
    * @param dataAccessId Data access id
    * @param dashboard Dashboard where this query will be executed
     */
-  return  function(cd, dataAccessId, dashboard) {
+  return function(cd, dataAccessId, dashboard) {
 
     var opts, queryType;
 

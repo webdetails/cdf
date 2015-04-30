@@ -1,16 +1,15 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
-
 
 /**
  * OlapUtils is a collection of functions allowing client side CDF to issue MDX queries.
@@ -482,6 +481,7 @@ define(['./Dashboard', './Utf8Encoder'],
         var out = "";
         var filters = 0;
         var conds = 0;
+        var i;
     
         for (i in this.activeFilters){
             var a = this.activeFilters[i];
@@ -542,7 +542,7 @@ define(['./Dashboard', './Utf8Encoder'],
         if(this.activeFilters != undefined) delete this.activeFilters[key];
         if(this.activeConditions != undefined) delete this.activeConditions[key];
                 
-        for (i in this.mdxQueries){
+        for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             
             if (i == key){
@@ -571,7 +571,7 @@ define(['./Dashboard', './Utf8Encoder'],
         
         var keyObj = this.mdxQueries[key];	
         var value =  keyObj.mdxQuery.drillUp();
-        for (i in this.mdxQueries){
+        for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             
             if (i != key){
@@ -592,7 +592,7 @@ define(['./Dashboard', './Utf8Encoder'],
     }
     
     OlapUtils.mdxQueryGroup.prototype.replaceFocus = function(key,values){
-        
+        var i;
         for (i in this.mdxQueries)
             if(i != key)
                 this.mdxQueries[i].mdxQuery.removeConditions(key);		
@@ -602,7 +602,7 @@ define(['./Dashboard', './Utf8Encoder'],
     
     OlapUtils.mdxQueryGroup.prototype.focus = function(key,values){
         
-        var conditions = [];
+        var conditions = [], i;
         
         Dashboard.incrementRunningCalls();
         
@@ -640,6 +640,8 @@ define(['./Dashboard', './Utf8Encoder'],
             var a = this.activeFilters[key] || [];
             a.push([memberValue,value]);
             this.activeFilters[key] = a;
+
+            var i;
             
             //Replace focus from active conditions by exclude
             for (i in this.mdxQueries){
@@ -673,7 +675,7 @@ define(['./Dashboard', './Utf8Encoder'],
     OlapUtils.mdxQueryGroup.prototype.resetAll = function(){
     
         Dashboard.incrementRunningCalls();
-        for (i in this.mdxQueries){
+        for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             obj.mdxQuery.reset();
             obj.mdxQuery.axisPos = 0;
@@ -691,7 +693,7 @@ define(['./Dashboard', './Utf8Encoder'],
         
         Dashboard.incrementRunningCalls();
         
-        for (i in this.mdxQueries){
+        for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             //Remove Conditions and related filters(because filters are added after drill down)
             if(i != key){
@@ -717,7 +719,7 @@ define(['./Dashboard', './Utf8Encoder'],
         
         Dashboard.incrementRunningCalls();
         var index = this.mdxQueries[key].mdxQuery.resetFilter(value);
-        for (i in this.mdxQueries){
+        for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             if(i != key)
                 obj.mdxQuery.removeFilter(key,this.activeFilters[key][index][1]);

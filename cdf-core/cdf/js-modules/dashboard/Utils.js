@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -18,11 +18,15 @@
  * @module Utils
  */
 
-define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/jquery', 'amd!../lib/queryParser'],
-    function(Logger, _, moment, cdo, $) {
+define(['../Logger',
+  'amd!../lib/underscore',
+  '../lib/moment',
+  '../lib/CCC/cdo',
+  '../lib/jquery',
+  'amd!../lib/queryParser'],
+  function(Logger, _, moment, cdo, $) {
 
   var Utils = {};
-
 
   var formProvider = undefined;
   var urlParams = undefined;
@@ -57,7 +61,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return escaped;
   };
 
-
   /**
    * Given a url containing an encoded Pentaho path (:home:admin:Test.wcdf), returns the encoded path
    *
@@ -89,7 +92,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return window.location.search;
   };
 
-
   /**
    * Returns the value of a query string parameter
    *
@@ -105,8 +107,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
 
     return urlParams[parameterName] || "";
   };
-
-
 
   /**
    * Format a number with the given mask using the Dashboard language
@@ -202,7 +202,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     
   // Conversion functions
 
-
   /**
    * Converts an array to an object
    * @param pArray array to be converted
@@ -221,7 +220,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return obj;
   };
 
-
   /**
    * Converts an object to an array
    *
@@ -233,12 +231,11 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    */
   function _obj2pa(obj) {
     var pArray = [];
-    for(var key in obj) if (obj.hasOwnProperty(key)) {
-      pArray.push([key,obj[key]]);
+    for(var key in obj) if(obj.hasOwnProperty(key)) {
+      pArray.push([key, obj[key]]);
     }
     return pArray;
   };
-
 
   /**
    * Converts an array to an object
@@ -254,7 +251,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return (_.isArray(pArray) && _pa2obj(pArray)) || (_.isObject(pArray) && pArray) || undefined;  
   };
 
-
   /**
    * Converts an object to an array
    *
@@ -268,7 +264,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     // Mantra 2: "Arrays are Objects!"
     return (_.isArray(obj) && obj) || (_.isObject(obj) && _obj2pa(obj)) || undefined;
   };
-
 
   /**
    * Gets the url parameters from a URL. CDF url parameters are defined as those that are present in the query
@@ -296,12 +291,10 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
           arrParam.push(parameter);
         }
       }
-  
     }
   
     return arrParam;
   };
-
 
   /**
    * Formats a string according to some arcane and unreadable algorithm. Just ignore and don't use it.
@@ -324,7 +317,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     }
     return x1 + x2;
   };
-  
 
   /**
    * Quote csv values in a way compatible with CSVTokenizer
@@ -356,7 +348,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     return value;
   };
 
-
   /**
    * Evaluates the argument. If it is a function, calls the function, otherwise returns the argument
    * @method ev
@@ -368,7 +359,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   Utils.ev =  function(o) {
     return typeof o == 'function' ? o() : o;
   };
-
 
   /**
    * Performs a post to the server
@@ -394,7 +384,6 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     form += '</form>';
     jQuery(form).appendTo('body').submit().remove();
   };
-
 
   /**
    * Deep clones an object. This method is deprecated, use $.extend(true, {}, obj)
@@ -460,7 +449,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
    * @deprecated
    */
   Utils.getArgValue = function(key) {
-    for(i = 0; i < this.args.length; i++) {
+    for(var i = 0; i < this.args.length; i++) {
       if(this.args[i][0] == key) {
         return this.args[i][1];
       }
@@ -538,8 +527,8 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
   
     return true;
   };
-  
-  
+ 
+   
   /**
    * Given a parameter value obtains an equivalent values array.
    *
@@ -645,7 +634,7 @@ define(['../Logger', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo',
     v = v / 100; // 0 - 1
     s = s / 100; // idem
     
-    var h6 = (h % 360) /60;
+    var h6 = (h % 360) / 60;
     var chroma = v * s;
     var m = v - chroma;
     var h6t = Math.abs((h6 % 2) - 1);
