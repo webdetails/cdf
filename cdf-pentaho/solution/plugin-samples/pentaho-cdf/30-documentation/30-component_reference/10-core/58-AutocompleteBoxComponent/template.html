@@ -49,37 +49,43 @@
 
 			<dt>postChange</dt>
 			<dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
-			
+
 			<dt>queryDefinition</dt>
 			<dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
-			
+
+			<dt>addTextElements</dt>
+			<dd>If true adds selected values bellow the input box. Default: true</dd>
+
 			<dt>selectMulti</dt>
 			<dd>Allow multiple selection. Default: false</dd>
-			
+
 			<dt>minTextLength</dt>
 			<dd>The minimal word length to check if there is a match</dd>
-			
+
 			<dt>matchType</dt>
 			<dd>The type of the word match (fromStart/all). Default: fromStart </dd>
-			
+
 			<dt>scrollHeight</dt>
 			<dd>The size of the scrollbar. Default: Not defined (without scrollbar) </dd>
-			
+
 			<dt>showApplyButton</dt>
 			<dd>Show apply Button in multi selection mode. Default: true </dd>
 
-			<dt>tooltip</dt>
+			<dt>externalApplyButtonId</dt>
+			<dd>Id of a external button, to apply changes on the component.</dd>
+
+			<dt>tooltipMessage</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
-			
+
 			<dt>autoUpdateFunction</dt>
 			<dd>Function to be called every X second according to the autoUpdateTimeout setting</dd>
-			
+
 			<dt>autoUpdateTimeout</dt>
 			<dd>timeout in milliseconds to call the function defined by autoUpdateFunction. Default 3 secs </dd>
-			
+
 			<dt>reloadOnUpdate</dt>
-			<dd>on update event the component should be reloaded or only update the list of values</dd>				
-			
+			<dd>on update event the component should be reloaded or only update the list of values</dd>
+
 		</dl>	
 		
 		<h3>MetaLayer options</h3>
@@ -103,7 +109,7 @@
 
 		<h3>Sample</h3>
 
-		<div id="example" class="flora">
+		<div id="example" class="flora" style="height:400px">
 			<ul>
 				<li><a href="#sample"><span>Sample</span></a></li>
 				<li><a href="#code"><span>Code</span></a></li>
