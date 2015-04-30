@@ -3,10 +3,12 @@ var pen = {
   
   // Force 'define' to evaluate module definitions immediately
   define: function() {
-    var id, deps, definition;
-    
-    var i = 0;
-    var L = arguments.length;
+    var id,
+        deps,
+        definition,
+        i = 0,
+        L = arguments.length;
+
     while(i < L) {
       var a = arguments[i++];
       switch(typeof a) {
@@ -31,7 +33,7 @@ var pen = {
       if(deps) {
       
         var newDeps = [];
-        for(var i = 0; i < deps.length; i++) {
+        for(i = 0; i < deps.length; i++) {
           if(deps[i] == 'cdf/jquery' || deps[i] == 'cdf-legacy/jquery') {
             newDeps.push($);
           } else {
@@ -63,13 +65,13 @@ var pen = {
 if(typeof define === "undefined") {
   define = function() {
     return pen.define.apply(pen, arguments);
-  }
+  };
 }
 
 if(typeof require === "undefined") {
   require = function() {
     return pen.require.apply(pen, arguments);
-  }
+  };
 }
 
 if(typeof Encoder === "undefined") {
@@ -79,7 +81,7 @@ if(typeof Encoder === "undefined") {
   args === null and str with no {#} returns raw value of str with encoded parameters in queryObj
   args === object||array and str with {#} returns double encoded encodedUrl with encoded parameters in queryObj
   */
-  Encoder.encode = function( str, args, queryObj) {
+  Encoder.encode = function(str, args, queryObj) {
     "use strict"
     if(typeof args === "undefined") {
       return str;
@@ -87,9 +89,13 @@ if(typeof Encoder === "undefined") {
     if(args instanceof Array === false) {
       args = [args];
     }
-    var matchArray = str.match(/{[0-9]+}/g);
-    var encodedUrl = "";
-    var startIndex, urlPrefix, tmp;
+    var matchArray = str.match(/{[0-9]+}/g),
+        encodedUrl = "",
+        startIndex,
+        urlPrefix,
+        tmp,
+        i;
+
     if(matchArray && matchArray.length > 0) {
       // start building encodedURL with it's prefix value
       startIndex = 0;

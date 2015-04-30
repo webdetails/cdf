@@ -12,7 +12,7 @@
  */
 
 define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
-    function (Dashboard, Logger, Backbone, Utf8Encoder) {
+  function(Dashboard, Logger, Backbone, Utf8Encoder) {
 
   /**
    * A module representing an extension to Dashboard class for parameters.
@@ -28,7 +28,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      *
      * @private
      */
-    _initParameters: function () {
+    _initParameters: function() {
       this.parameters = [];
       this.parameterModel = new Backbone.Model();
 
@@ -48,7 +48,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @returns boolean
      * @private
      */
-    _isParameterInModel: function (o, path) {
+    _isParameterInModel: function(o, path) {
       return this._getValueFromContext(o, path) !== undefined;
     },
 
@@ -62,25 +62,31 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @returns the value of the property
      * @private
      */
-    _getValueFromContext: function (o, path) {
-      if (!o) return;
-      if (path != null) {
+    _getValueFromContext: function(o, path) {
+      if(!o) {
+        return;
+      }
+      if(path != null) {
         var parts, L;
-        if (path instanceof Array) {
+        if(path instanceof Array) {
           parts = path;
         } else {
-          if (path.indexOf('.') < 0) {
+          if(path.indexOf('.') < 0) {
             return o[path];
           }
           parts = path.split(".");
         }
         L = parts.length;
 
-        for (var i = 0; i < L; i++) {
-          if (!o) return; // more efficient approximation
+        for(var i = 0; i < L; i++) {
+          if(!o) {
+            return; // more efficient approximation
+          }
           var part = parts[i],
               value = o[part];
-          if (value === undefined) return;
+          if(value === undefined) {
+            return;
+          }
           o = value;
         }
       }
@@ -98,14 +104,16 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @returns the value of the property assigned
      * @private
      */
-    _setValueInContext: function (o, path, v) {
-      if (!o || path == null || v === undefined) return; // undefined
+    _setValueInContext: function(o, path, v) {
+      if(!o || path == null || v === undefined) {
+        return; // undefined
+      }
       var parts, pLast;
-      if (path instanceof Array) {
+      if(path instanceof Array) {
         parts = path;
         pLast = parts.pop();
       } else {
-        if (path.indexOf(".") < 0) {
+        if(path.indexOf(".") < 0) {
           o[path] = v;
           return o;
         }
@@ -113,7 +121,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
         pLast = parts.pop();
       }
       o = this._getValueFromContext(o, parts);
-      if (o) {
+      if(o) {
         o[pLast] = v;
       }
       return o;
@@ -129,15 +137,15 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @returns <code>object</code> with the store location and the new name of the parameter (without the store prefix)
      * @private
      */
-    _getParameterStore: function (parameterName) {
+    _getParameterStore: function(parameterName) {
       var parameterStore = this.parameters;
 
-      if (parameterName.indexOf(this.LEGACY_STORAGE) == 0) {
-        Logger.log("Legacy storage access for " + parameterName + ". Please use storage instead", 'warn');
+      if(parameterName.indexOf(this.LEGACY_STORAGE) == 0) {
+        Logger.warn("Legacy storage access for " + parameterName + ". Please use storage instead");
         parameterName = parameterName.substr(this.LEGACY_STORAGE.length);
         parameterStore = this.storage;
 
-      } else if (parameterName.indexOf(this.STORAGE) == 0) {
+      } else if(parameterName.indexOf(this.STORAGE) == 0) {
         parameterName = parameterName.substr(this.STORAGE.length);
         parameterStore = this.storage;
       }
@@ -159,20 +167,19 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param parameterValue the initial value of the parameter
      * @returns the value assigned to the parameter
      */
-    addParameter: function (parameterName, parameterValue) {
-      if (parameterName == undefined || parameterName == "undefined") {
-        Logger.log('Dashboards.addParameter: trying to add undefined!!', 'warn');
+    addParameter: function(parameterName, parameterValue) {
+      if(parameterName == undefined || parameterName == "undefined") {
+        Logger.warn('Dashboards.addParameter: trying to add undefined!!');
         return;
       }
 
       var parameterStore = this._getParameterStore(parameterName);
-      if (this._isParameterInModel(parameterStore.store, parameterStore.name)) {
+      if(this._isParameterInModel(parameterStore.store, parameterStore.name)) {
         parameterValue = this.getParameterValue(parameterStore.name);
       }
       this.setParameter(parameterName, parameterValue);
       return parameterValue;
     },
-
 
     /**
      * Gets a parameter value
@@ -182,9 +189,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param parameterName the parameter name
      * @returns the parameterName value stored
      */
-    getParameterValue: function (parameterName) {
-      if (parameterName == undefined || parameterName == "undefined") {
-        Logger.log('Dashboard.getParameterValue: trying to get undefined!!', 'warn');
+    getParameterValue: function(parameterName) {
+      if(parameterName == undefined || parameterName == "undefined") {
+        Logger.warn('Dashboard.getParameterValue: trying to get undefined!!');
         return;
       }
 
@@ -200,11 +207,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param parameterName the parameter name
      * @returns the parameterName value stored
      */
-    getParam: function (parameterName) {
+    getParam: function(parameterName) {
       return this.getParameterValue(parameterName);
     },
-
-
 
     /**
      * Stores a parameter with a certain value
@@ -215,27 +220,24 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param parameterValue the value of the parameter
      * @param isNotified
      */
-    setParameter: function (parameterName, parameterValue, isNotified) {
-      if (parameterName == undefined || parameterName == "undefined") {
-        Logger.log('Dashboard.setParameter: trying to set undefined!!', 'warn');
+    setParameter: function(parameterName, parameterValue, isNotified) {
+      if(parameterName == undefined || parameterName == "undefined") {
+        Logger.warn('Dashboard.setParameter: trying to set undefined!!');
         return;
       }
 
       var parameterStore = this._getParameterStore(parameterName);
-      if (this.escapeParameterValues) {
+      if(this.escapeParameterValues) {
         this._setValueInContext(parameterStore.store, parameterStore.name, Utf8Encoder.encode_prepare_arr(parameterValue));
       } else {
         this._setValueInContext(parameterStore.store, parameterStore.name, parameterValue);
       }
 
-      if (this._setValueInContext(parameterStore.store, parameterStore.name, parameterValue) !== undefined) {
+      if(this._setValueInContext(parameterStore.store, parameterStore.name, parameterValue) !== undefined) {
         this.parameterModel.set(parameterStore.name, parameterValue, {notify: isNotified});
         this.persistBookmarkables(parameterStore.name);
       }
     },
-
-
-
 
     /**
      * Alias for setParameter
@@ -246,7 +248,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param parameterValue the value of the parameter
      * @param isNotified
      */
-    setParam: function (parameterName, parameterValue, isNotified) {
+    setParam: function(parameterName, parameterValue, isNotified) {
       this.setParameter(parameterName, parameterValue, isNotified);
     },
 
@@ -260,16 +262,15 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param master
      * @param slave
      */
-    syncParameters: function (master, slave) {
+    syncParameters: function(master, slave) {
       this.setParameter(slave, this.getParameterValue(master));
-      this.parameterModel.on("change:" + master, function (m, v, o) {
-        this[o.notify ? 'fireChange' : 'setParameter'](slave, v)
+      this.parameterModel.on("change:" + master, function(m, v, o) {
+        this[o.notify ? 'fireChange' : 'setParameter'](slave, v);
       }, this);
-      this.parameterModel.on("change:" + slave, function (m, v, o) {
-        this[o.notify ? 'fireChange' : 'setParameter'](master, v)
+      this.parameterModel.on("change:" + slave, function(m, v, o) {
+        this[o.notify ? 'fireChange' : 'setParameter'](master, v);
       }, this);
     },
-
 
     /**
      * Register parameter pairs that will be synced on dashboard init.
@@ -280,7 +281,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      * @param master
      * @param slave
      */
-    syncParametersOnInit: function (master, slave) {
+    syncParametersOnInit: function(master, slave) {
       /* We'll store the dependency pairings in Dashboards.syncedParameters, as an object mapping master parameters to an
        * array of all its slaves (so {a: [b,c]} means that both *b* and *c* are subordinate to *a*), and in
        * Dashboards.chains wel'll store an array of arrays representing a list of separate dependency trees. An entry of
@@ -294,19 +295,21 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
       var parameters = this.syncedParameters,
           currChain,
           masterChain,
-          slaveChain, slaveChainIdx, i;
-      if (!parameters[master]) parameters[master] = [];
+          slaveChain,
+          slaveChainIdx;
+
+      if(!parameters[master]) { parameters[master] = []; }
       parameters[master].push(slave);
 
       /* When inserting an entry into Dashboards.chains, we need to check whether any of the master or the slave are
        * already in one of the chains.
        */
-      for (i = 0; i < this.chains.length; i++) {
+      for(var i = 0; i < this.chains.length; i++) {
         currChain = this.chains[i];
-        if (currChain.indexOf(master) > -1) {
+        if(currChain.indexOf(master) > -1) {
           masterChain = currChain;
         }
-        if (currChain.indexOf(slave) > -1) {
+        if(currChain.indexOf(slave) > -1) {
           slaveChain = currChain;
           slaveChainIdx = i;
         }
@@ -324,17 +327,17 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
        *
        * If neither master nor slave is present in the existing chains, we create a new chain with [master, slave].
        */
-      if (slaveChain && masterChain) {
-        if (masterChain != slaveChain) {
+      if(slaveChain && masterChain) {
+        if(masterChain != slaveChain) {
           args = slaveChain.slice();
           args.unshift(0);
           args.unshift(masterChain.length);
           [].splice.apply(masterChain, args);
           this.chains.splice(slaveChainIdx, 1);
         }
-      } else if (slaveChain) {
+      } else if(slaveChain) {
         slaveChain.unshift(master);
-      } else if (masterChain) {
+      } else if(masterChain) {
         masterChain.push(slave)
       } else {
         this.chains.push([master, slave]);
@@ -346,14 +349,19 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
      *
      * @private
      */
-    syncParametersInit: function () {
+    syncParametersInit: function() {
       var parameters = this.syncedParameters,
-          i, j, k, master, slave;
-      for (i = 0; i < this.chains.length; i++) {
-        for (j = 0; j < this.chains[i].length; j++) {
-          var master = this.chains[i][j];
-          if (!parameters[master]) continue;
-          for (k = 0; k < parameters[master].length; k++) {
+          master,
+          slave,
+          i, j, k;
+
+      for(i = 0; i < this.chains.length; i++) {
+        for(j = 0; j < this.chains[i].length; j++) {
+          master = this.chains[i][j];
+          if(!parameters[master]) {
+            continue;
+          }
+          for(k = 0; k < parameters[master].length; k++) {
             slave = parameters[master][k];
             this.syncParameters(master, slave);
           }
@@ -361,6 +369,4 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
       }
     }
   });
-
-
 });

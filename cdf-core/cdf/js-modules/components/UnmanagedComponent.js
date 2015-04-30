@@ -343,7 +343,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
             this.unblock();
           }
         }
-      },this), 10);
+      }, this), 10);
     },
 
     /**
@@ -391,7 +391,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         async: true
       }
       if(userQueryOptions.ajax) {
-        _.extend(ajaxOptions,userQueryOptions.ajax);
+        _.extend(ajaxOptions, userQueryOptions.ajax);
       }
       query.setAjaxOptions(ajaxOptions);
       if(userQueryOptions.pageSize) {
