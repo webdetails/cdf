@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -18,28 +18,25 @@ define(["cdf/Dashboard.Clean", "cdf/components/PrptComponent"],
    * ## The Pentaho Reporting Component
    */
   describe("The Pentaho Reporting Component #", function() {
-
     var dashboard = new Dashboard();
-
-    dashboard.init();
 
     var optionData = {
       funcValue: 2,
       value: 'one',
-      funcArray: [1,'two'],
-      array: [1,'two'],
+      funcArray: [1, 'two'],
+      array: [1, 'two'],
       path: "fakePath/report.prpt",
       paginate: true,
-      usePost:false,
+      usePost: false,
       showParameters: true,
       iframe: true,
       executeAtStart: true,
       staticValue: "staticValue"
     };
 
-    dashboard.addParameter('funcValue', function() { return  optionData.funcValue; });
+    dashboard.addParameter('funcValue', function() { return optionData.funcValue; });
     dashboard.addParameter('value', optionData.value);
-    dashboard.addParameter('funcArray', function() { return  optionData.funcArray; });
+    dashboard.addParameter('funcArray', function() { return optionData.funcArray; });
     dashboard.addParameter('array', optionData.array);
 
     var prptComponent = new PrptComponent({
@@ -47,8 +44,11 @@ define(["cdf/Dashboard.Clean", "cdf/components/PrptComponent"],
       type: "prptComponent",
       htmlObject: "sampleObject",
       path: optionData.path,
-      parameters: [['funcValue','funcValue'],['value','value'],['funcArray','funcArray'],
-        ['array','array'],['staticValue', 'staticValue']],
+      parameters: [['funcValue', 'funcValue'],
+                   ['value', 'value'],
+                   ['funcArray', 'funcArray'],
+                   ['array', 'array'],
+                   ['staticValue', 'staticValue']],
       paginate: optionData.paginate,
       usePost:optionData.usePost,
       showParameters: optionData.showParameters,
@@ -59,35 +59,41 @@ define(["cdf/Dashboard.Clean", "cdf/components/PrptComponent"],
     dashboard.addComponent(prptComponent);
 
     /**
-     * ## The Pentaho Reporting Component # Update Called
+     * ## The Pentaho Reporting Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
+    it("allows a dashboard to execute update", function(done) {
       spyOn(prptComponent, 'update').and.callThrough();
-      dashboard.update(prptComponent);
-      setTimeout(function() {
+
+      // listen to cdf:postExecution event
+      prptComponent.once("cdf:postExecution", function() {
         expect(prptComponent.update).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(prptComponent);
     });
 
     /**
-     * ## The Pentaho Reporting Component # setIframeUrl Called
+     * ## The Pentaho Reporting Component # setIframeUrl Called while updating
      */
-    it("Update Called", function(done) {
+    it("setIframeUrl Called while updating", function(done) {
       spyOn(prptComponent, 'update').and.callThrough();
       spyOn(prptComponent, 'setIframeUrl');
-      dashboard.update(prptComponent);
-      setTimeout(function() {
+
+      // listen to cdf:postExecution event
+      prptComponent.once("cdf:postExecution", function() {
         expect(prptComponent.update).toHaveBeenCalled();
         expect(prptComponent.setIframeUrl).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(prptComponent);
     });
 
     /**
-     * ## The prpt Component # Verify returned value from getOptions
+     * ## The prpt Component # verify returned value from getOptions
      */
-    it("Verify returned value from getOptions", function() {
+    it("verify returned value from getOptions", function() {
       var options = prptComponent.getOptions();
 
       expect(options.path).toEqual(optionData.path);
@@ -107,9 +113,9 @@ define(["cdf/Dashboard.Clean", "cdf/components/PrptComponent"],
     });
 
     /**
-     * ## The prpt Component # Verify returned value from getParams
+     * ## The prpt Component # verify returned value from getParams
      */
-    it("Verify returned value from getParams", function() {
+    it("verify returned value from getParams", function() {
       var params = prptComponent.getParams();
 
       expect(params['output-target']).toEqual('table/html;page-mode=page');
@@ -122,9 +128,9 @@ define(["cdf/Dashboard.Clean", "cdf/components/PrptComponent"],
     });
 
     /**
-     * ## The prpt Component # Verify returned value from getReportOptions
+     * ## The prpt Component # verify returned value from getReportOptions
      */
-    it("Verify returned value from getReportOptions", function() {
+    it("verify returned value from getReportOptions", function() {
       var reportOptions = prptComponent.getReportOptions();
 
       expect(reportOptions.path).toEqual(optionData.path);

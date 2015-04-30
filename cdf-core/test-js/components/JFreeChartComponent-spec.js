@@ -1,29 +1,29 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent"],
-  function(Dashboard, JFreeChartComponent) {
+define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent", "cdf/lib/jquery"],
+  function(Dashboard, JFreeChartComponent, $) {
   
   /**
    * ## The JFreeChart Component
    */
   describe("The JFreeChart Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
-    var topTenCustomers = new JFreeChartComponent({
+    var jFreeChartComponent = new JFreeChartComponent({
       name: "topTenCustomers",
       type: "jFreeChartComponent",
       chartDefinition: {
@@ -35,39 +35,44 @@ define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent"],
         byRow: false,
         isStacked: false,
         includeLegend: false,
-        caption:{},
+        caption: {},
         domainLabelRotation: 0,
         backgroundColor: "#F3F3F3",
         title: "Top 10 Customers",
         parameterName: "PRODUCTLINE",
         urlTemplate: "alert('clicked')",
-        orientation: 'horizontal',
-        queryType: 'mdx',
-        catalog: 'mondrian:/SteelWheels',
+        orientation: "horizontal",
+        queryType: "mdx",
+        catalog: "mondrian:/SteelWheels",
         jndi: "SampleData",
         query: function() {
-          var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-            " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +  
-            " ON ROWS from [SteelWheelsSales]";
-          return query;
+          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+               + "NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) "
+               + "ON ROWS from [SteelWheelsSales]";
         }
       },
       htmlObject: "sampleObject",
       executeAtStart: true
     });
 
-    myDashboard.addComponent(topTenCustomers);
+    dashboard.addComponent(jFreeChartComponent);
 
     /**
-     * ## The JFreeChart Component # Update Called
+     * ## The JFreeChart Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
-      spyOn(topTenCustomers, 'update').and.callThrough();
-      myDashboard.update(topTenCustomers);
-      setTimeout(function() {
-        expect(topTenCustomers.update).toHaveBeenCalled();
+    it("allows a dashboard to execute update", function(done) {
+      spyOn(jFreeChartComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      jFreeChartComponent.once("cdf:postExecution", function() {
+        expect(jFreeChartComponent.update).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(jFreeChartComponent);
     });
   });
 });

@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -25,18 +25,18 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
 
     dashboard.addParameter("autocompleteBoxParameter", "");
 
-    MetaLayerHome2 = {
+    var MetaLayerHome2 = {
       clientSelectorDefinition: {
-        queryType: 'mdx',
+        queryType: "mdx",
         jndi: "SampleData",
         catalog: "mondrian:/SteelWheels",
         query: function() {
           return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-            "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
-            "(Left([Customers].CurrentMember.Name, Len(\"" +
-            dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \"" +
-            dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\"))," +
-            "100.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
+                 "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
+                 "(Left([Customers].CurrentMember.Name, Len(\"" +
+                 dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")) = \"" +
+                 dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\"))," +
+                 "100.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
         }
       }
     };
@@ -55,7 +55,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
       reloadOnUpdate: true,
       autoUpdateTimeout: 3000,
       executeAtStart: true,
-      autoUpdateFunction:function() {
+      autoUpdateFunction: function() {
         if(!this.dashboard.getParameterValue(this.parameter)) {
           this.dashboard.setParameter(this.parameter, "");
         }
@@ -70,49 +70,44 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
     dashboard.addComponent(autocompleteBox);
 
     /**
-     * ## The Autocomplete Box Component # Update Called
+     * ## The Autocomplete Box Component # allows a dashboard to execute update
      */
-    it("Update Called", function() {
+    it("allows a dashboard to execute update", function(done) {
       spyOn(autocompleteBox, 'update').and.callThrough();
-      dashboard.update(autocompleteBox);
-      setTimeout(function() {
+
+      // listen to cdf:postExecution event
+      autocompleteBox.once("cdf:postExecution", function() {
         expect(autocompleteBox.update).toHaveBeenCalled();
         done();
-      }, 1000);
+      });
+
+      dashboard.update(autocompleteBox);
     });
 
     /**
      * ## The Autocomplete Box Component # Trigger query called on input change
      */
-    it("Trigger Called on input change", function(done) {
+    it("Trigger Called on input change", function() {
       spyOn(autocompleteBox, '_queryServer').and.callFake(function() {
         this.result = {
-          "metadata":["Sales"],
-          "values":[
-            ["AV Stores, Co.","157807.80999999994"],
-            ["Anna's Decorations, Ltd","153996.12999999998"],
-            ["Auto Canal+ Petit","93170.66"],
-            ["Alpha Cognac","70488.43999999999"],
-            ["Auto Associés & Cie.","64834.32000000001"],
-            ["Australian Collectables, Ltd","64591.460000000014"],
-            ["Australian Gift Network, Co","59469.12"],
-            ["Auto-Moto Classics Inc.","26479.260000000002"],
-            ["Atelier graphique","24179.96"]]
+          "metadata": ["Sales"],
+          "values": [["AV Stores, Co.", "157807.94"],
+                     ["Anna's Decorations, Ltd", "153996.98"],
+                     ["Auto Canal+ Petit", "93170.66"],
+                     ["Alpha Cognac", "70488.99"],
+                     ["Auto Associés & Cie.", "64834.01"],
+                     ["Australian Collectables, Ltd", "64591.14"],
+                     ["Australian Gift Network, Co", "59469.12"],
+                     ["Auto-Moto Classics Inc.", "26479.02"],
+                     ["Atelier graphique", "24179.96"]]
         }
       });
       
       spyOn(autocompleteBox, "_getTextBoxValue").and.returnValue("a");
 
-      autocompleteBox.update();
       autocompleteBox.autoBoxOpt.getList(autocompleteBox.textbox, {});
 
-      setTimeout(function() {
-        expect(autocompleteBox._queryServer).toHaveBeenCalledWith("a");
-        done();
-      }, 100);
-
+      expect(autocompleteBox._queryServer).toHaveBeenCalledWith("a");
     });
-
   });
-
 });

@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -18,48 +18,57 @@ define(["cdf/Dashboard.Clean", "cdf/components/TableComponent", "cdf/lib/jquery"
    * ## The Table Component
    */
   describe("The Table Component #", function() {
-
-    var myDashboard = new Dashboard();
-
-    myDashboard.init();
+    var dashboard = new Dashboard();
+    dashboard.init();
 
     var tableComponent = new TableComponent({
       name: "tableComponent",
       type: "tableComponent",
       chartDefinition: {
-        colHeaders: ["Customers","Sales"],
-        colTypes: ['string','numeric'],
-        colFormats: [null,'%.0f'],
-        colWidths: ['500px',null],
+        colHeaders: ["Customers", "Sales"],
+        colTypes: ['string', 'numeric'],
+        colFormats: [null, '%.0f'],
+        colWidths: ['500px', null],
         queryType: 'mdx',
         displayLength: 10,
         catalog: 'mondrian:/SteelWheels',
         jndi: "SampleData",
-        query: function(){
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-            " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
-            " ON ROWS from [SteelWheelsSales]";
+        query: function() {
+          return " select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+                 " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
+                 " ON ROWS from [SteelWheelsSales]";
         }
       },
-      htmlObject: "sampleObject",
+      htmlObject: "tableSampleObject",
       executeAtStart: true
     });
 
-    myDashboard.addComponent(tableComponent);
+    dashboard.addComponent(tableComponent);
+
+    // DataTables manages it's own events, the event 'aoInitComplete' executes
+    // the table component's fnInitComplete() callback function which executes postExec() and unblock() 
+    $htmlObject = $('<div />').attr('id', tableComponent.htmlObject);
 
     /**
-     * ## The Table Component # Update Called
+     * ## The Table Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
+    it("allows a dashboard to execute update", function(done) {
+      $('body').append($htmlObject);
+
       spyOn(tableComponent, 'update').and.callThrough();
-      spyOn($, 'ajax').and.callFake(function(options) {
-          options.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","912294.1100000001"],["Mini Gifts Distributors Ltd.","654858.0600000002"],["Australian Collectors, Co.","200995.41000000006"],["Muscle Machine Inc","197736.93999999997"],["La Rochelle Gifts","180124.90000000008"],["Down Under Souveniers, Inc","174139.77000000002"],["Dragon Souveniers, Ltd.","172989.68000000008"],["Land of Toys Inc.","164069.43999999997"],["The Sharp Gifts Warehouse","160010.27000000005"],["Kelly\'s Gift Shop","158344.79"]]}');
-        });
-      myDashboard.update(tableComponent);
-      setTimeout(function() {
+      spyOn(tableComponent, 'triggerQuery').and.callThrough();
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+      });
+
+      // listen to cdf:postExecution event
+      tableComponent.once("cdf:postExecution", function() {
         expect(tableComponent.update).toHaveBeenCalled();
+        $htmlObject.remove();
         done();
-      }, 100);
+      });
+
+      dashboard.update(tableComponent);
     });
   });
 });
