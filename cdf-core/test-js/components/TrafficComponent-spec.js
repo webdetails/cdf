@@ -1,13 +1,13 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
@@ -18,80 +18,128 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent", "cdf/lib/jquer
    * ## The Traffic Component
    */
   describe("The Traffic Component #", function() {
+    var dashboard;
 
-    var myDashboard = new Dashboard();
-
-    myDashboard.addParameter('trafficTestParameter', 1);
-
-    myDashboard.init();
+    beforeEach(function() {
+      dashboard = new Dashboard();
+      dashboard.init();
+      dashboard.addParameter('trafficTestParameter', 1);
+    });
 
     var trafficComponent = new TrafficComponent({
-      name: "trafficComponent",
+      name: "trafficComponentCDA",
       type: "trafficComponent",
       trafficDefinition: {
-        dataAccessId: "dataAccessTestId",
+        dataAccessId: "1",
         intervals: [10, 20],
         path: "/test/path",
         showValue: true
       },
       htmlObject: "sampleObject",
-      parameter: "trafficTestParameter"
+      parameter: "trafficTestParameter",
+      executeAtStart: true
     });
 
-    myDashboard.addComponent(trafficComponent);
-
     /**
-     * ## The Traffic Component # Update Called
+     * ## The Traffic Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
+    it("allows a dashboard to execute update", function(done) {
+      dashboard.addComponent(trafficComponent);
+
       spyOn(trafficComponent, 'update').and.callThrough();
-      myDashboard.update(trafficComponent);
-      setTimeout(function() {
+      spyOn(trafficComponent, 'doQuery').and.callThrough()
+      spyOn(trafficComponent, 'triggerQuery').and.callThrough()
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success({"resultset": [[1.4]]});
+      });
+
+      // listen to cdf:postExecution event
+      trafficComponent.once("cdf:postExecution", function() {
         expect(trafficComponent.update).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(trafficComponent);
     });
 
     /**
-     * ## The Traffic Component # Uses CDA
+     * ## The Traffic Component # executes CDA queries
      */
-    it("Uses CDA", function(done) {
+    it("executes CDA queries", function(done) {
+      dashboard.addComponent(trafficComponent);
+
+      spyOn(trafficComponent, 'doQuery').and.callThrough();
+      spyOn(trafficComponent, 'triggerQuery').and.callThrough();
+      spyOn(trafficComponent, 'synchronous').and.callThrough();
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success({"resultset": [[1.4]]});
+      });
+      spyOn(trafficComponent, 'trafficLight').and.callThrough();
+
+      // listen to cdf:postExecution event
+      trafficComponent.once("cdf:postExecution", function() {
+        expect(trafficComponent.doQuery).toHaveBeenCalled();
+        expect(trafficComponent.triggerQuery).toHaveBeenCalled();
+        expect(trafficComponent.synchronous).not.toHaveBeenCalled();
+        expect(trafficComponent.trafficLight).toHaveBeenCalledWith([[1.4]]);
+        done();
+      });
+
+      dashboard.update(trafficComponent);
+    });
+
+    /**
+     * ## The Traffic Component # executes XActions if trafficDefinition's path or dataAccessId is falsy
+     */
+    it("executes XActions if trafficDefinition's path or dataAccessId is falsy", function(done) {
+      // override trafficComponent
+      var trafficComponent = new TrafficComponent({
+        name: "trafficComponentXAction",
+        type: "trafficComponent",
+        trafficDefinition: {
+          queryType: 'mdx',
+          jndi: "SampleData",
+          title: "Check current budget",
+          catalog: "mondrian:/SampleData",
+          intervals: [70, 150],
+          query: function() {
+            return " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
+                   " NON EMPTY ([Department].[All Departments]) ON ROWS " +
+                   " from [Quadrant Analysis]";
+          }
+        },
+        htmlObject: "sampleObject",
+        parameter: "trafficTestParameter",
+        executeAtStart: true
+      });
+      dashboard.addComponent(trafficComponent);
+
       spyOn(trafficComponent, 'update').and.callThrough();
       spyOn(trafficComponent, 'doQuery').and.callThrough();
-      var ajax = spyOn($, "ajax").and.callFake(function(options) {
-        options.success({
-          resultset: "queryResults"
-        });
+      spyOn(trafficComponent, 'triggerQuery').and.callThrough();
+      spyOn(trafficComponent, 'synchronous').and.callThrough();
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.complete({responseXML: "<SOAP-ENV><VALUE>1.4</VALUE></SOAP-ENV>"});
       });
-      spyOn(trafficComponent, 'trafficLight');
-      trafficComponent.update();
-      setTimeout(function() {
-        expect(trafficComponent.update).toHaveBeenCalled();
-        expect(trafficComponent.doQuery).toHaveBeenCalled();
-        expect(trafficComponent.trafficLight).toHaveBeenCalledWith("queryResults");
-        done();
-      }, 100);
-    });
+      var jXML;
+      spyOn(dashboard, 'parseXActionResult').and.callFake(function(obj, html) {
+        // store the data for further validation
+        jXML = $(html);
+        return jXML;
+      })
+      spyOn(trafficComponent, 'trafficLight').and.callThrough();
 
-    /**
-     * ## The Traffic Component # Uses XActions
-     */
-    it("Uses XActions", function(done) {
-      trafficComponent.trafficDefinition.path = false;
-      spyOn(trafficComponent, 'update').and.callThrough();
-      spyOn(trafficComponent, 'doQuery').and.callThrough();
-      spyOn(myDashboard, "callPentahoAction").and.callFake(function() {
-        trafficComponent.trafficLight("queryResults", true);
-      });
-      spyOn(trafficComponent, 'trafficLight');
-      trafficComponent.update();
-      setTimeout(function() {
-        expect(trafficComponent.update).toHaveBeenCalled();
+      // listen to cdf:postExecution event
+      trafficComponent.once("cdf:postExecution", function() {
         expect(trafficComponent.doQuery).toHaveBeenCalled();
-        expect(myDashboard.callPentahoAction).toHaveBeenCalled();
-        expect(trafficComponent.trafficLight).toHaveBeenCalledWith("queryResults", true);
+        expect(trafficComponent.triggerQuery).not.toHaveBeenCalled();
+        expect(trafficComponent.synchronous).toHaveBeenCalled();
+        expect(dashboard.parseXActionResult).toHaveBeenCalledWith(trafficComponent, "<SOAP-ENV><VALUE>1.4</VALUE></SOAP-ENV>");
+        expect(trafficComponent.trafficLight).toHaveBeenCalledWith(jXML, true);
         done();
-      }, 100);
+      });
+
+      dashboard.update(trafficComponent);
     });
   });
 });

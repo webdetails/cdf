@@ -1,18 +1,18 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent"],
-  function(Dashboard, CheckComponent) {
+define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent", "cdf/lib/jquery"],
+  function(Dashboard, CheckComponent, $) {
   
   /**
    * ## The Check Component
@@ -28,30 +28,34 @@ define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent"],
     var checkComponent = new CheckComponent({
       name: "checkComponent",
       type: "checkComponent",
-      parameters:[],
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+      parameters: [],
+      path: "/fake/test.xaction",
       parameter: "region",
       separator: ",&nbsp;",
       valueAsId: true,
       htmlObject: "sampleObject",
       executeAtStart: true,
-      postChange: function() {
-        alert("you chose: " + this.dashboard.getParameterValue(this.parameter));
-      }
+      postChange: function() { return; }
     });
 
     dashboard.addComponent(checkComponent);
 
     /**
-     * ## The Check Component # Update Called
+     * ## The Check Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
+    it("allows a dashboard to execute update", function(done) {
       spyOn(checkComponent, 'update').and.callThrough();
-      dashboard.update(checkComponent);
-      setTimeout(function() {
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      checkComponent.once("cdf:postExecution", function() {
         expect(checkComponent.update).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(checkComponent);
     });
   });
 });

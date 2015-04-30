@@ -1,27 +1,27 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/DialComponent"],
-  function(Dashboard, DialComponent) {
+define(["cdf/Dashboard.Clean", "cdf/components/DialComponent", "cdf/lib/jquery"],
+  function(Dashboard, DialComponent, $) {
     
   /**
    * ## The Dial Component
    */
   describe("The Dial Component #", function() {
 
-    var myDashboard = new Dashboard();
+    var dashboard = new Dashboard();
 
-    myDashboard.init();
+    dashboard.init();
 
     var dialComponent = new DialComponent({
       name: "dialComponent",
@@ -34,31 +34,36 @@ define(["cdf/Dashboard.Clean", "cdf/components/DialComponent"],
         jndi: "SampleData",
         title: "Check current budget",
         catalog: "mondrian:/SampleData",
-        colors: ["#F16C3A","#FFFF00","#B0D837"],
-        intervals: [7000000,70000000,150000000],
+        colors: ["#F16C3A", "#FFFF00", "#B0D837"],
+        intervals: [7, 70, 630],
         query: function() {
-          var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-            " NON EMPTY ([Department].[All Departments]) ON ROWS " +
-            " from [Quadrant Analysis]";
-          return query;
+          return "select NON EMPTY [Measures].[Budget] ON COLUMNS," +
+                 "NON EMPTY ([Department].[All Departments]) ON ROWS " +
+                 "from [Quadrant Analysis]";
         }
       },
       htmlObject: "sampleObject",
       executeAtStart: true
     });
 
-    myDashboard.addComponent(dialComponent);
+    dashboard.addComponent(dialComponent);
 
     /**
-     * ## The Dial Component # Update Called
+     * ## The Dial Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
+    it("allows a dashboard to execute update", function(done) {
       spyOn(dialComponent, 'update').and.callThrough();
-      myDashboard.update(dialComponent);
-      setTimeout(function() {
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      dialComponent.once("cdf:postExecution", function() {
         expect(dialComponent.update).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(dialComponent);
     });
   });
 });

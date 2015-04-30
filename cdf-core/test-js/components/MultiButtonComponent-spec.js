@@ -1,18 +1,18 @@
 /*!
- * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent"],
-  function(Dashboard, MultiButtonComponent) {
+define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/jquery"],
+  function(Dashboard, MultiButtonComponent, $) {
 
   /**
    * ## The Multi Button Component
@@ -28,8 +28,8 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent"],
     var multiButtonComponent = new MultiButtonComponent({
       name: "multiButtonComponent",
       type: "multiButtonComponent",
-      parameters:[],
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+      parameters: [],
+      path: "/fake/regions.xaction",
       parameter: "region",
       separator: ",&nbsp;",
       valueAsId: true,
@@ -37,23 +37,28 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent"],
       htmlObject: "sampleObject",
       executeAtStart: true,
       postChange: function() {
-        alert("you chose: " + this.dashboard.getParameterValue(this.parameter));
+        return "you chose: " + this.dashboard.getParameterValue(this.parameter);
       }
     });
 
     dashboard.addComponent(multiButtonComponent);
 
     /**
-     * ## The Multi Button Component # Update Called
+     * ## The Multi Button Component # allows a dashboard to execute update
      */
-    it("Update Called", function(done) {
+    it("allows a dashboard to execute update", function(done) {
       spyOn(multiButtonComponent, 'update').and.callThrough();
-      dashboard.update(multiButtonComponent);
-      setTimeout(function() {
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      multiButtonComponent.once("cdf:postExecution", function() {
         expect(multiButtonComponent.update).toHaveBeenCalled();
         done();
-      }, 100);
+      });
+
+      dashboard.update(multiButtonComponent);
     });
   });
 });
-
