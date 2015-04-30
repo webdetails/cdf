@@ -163,35 +163,6 @@
      }
   };
 
-  //autobox 0.7.0
-  requirePaths['cdf/lib/jquery.ui.autobox'] = prefix + '/autobox/jquery.ui.autobox';
-  amdShim["cdf/lib/jquery.ui.autobox"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/jquery.ui": "",
-       "css!cdf/lib/autobox/jquery.ui.autobox": ""
-     }
-  };
-
-  requirePaths['cdf/lib/jquery.templating'] = prefix + '/autobox/jquery.templating';
-  amdShim["cdf/lib/jquery.templating"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
-  };
-
-  requirePaths['cdf/lib/jquery.ui.autobox.ext'] = prefix + '/autobox/jquery.ui.autobox.ext';
-  amdShim["cdf/lib/jquery.ui.autobox.ext"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/jquery.ui.autobox": "",
-       "amd!cdf/lib/jquery.templating": ""
-     }
-  };
-
   //captify
   requirePaths['cdf/lib/captify'] = prefix + "/captify/captify";
   amdShim["cdf/lib/captify"] = {

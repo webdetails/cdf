@@ -85,29 +85,67 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
     });
 
     /**
-     * ## The Autocomplete Box Component # Trigger query called on input change
+     * ## The Autocomplete Component # List construction after autocomplete search
      */
-    it("Trigger Called on input change", function() {
-      spyOn(autocompleteBox, '_queryServer').and.callFake(function() {
-        this.result = {
-          "metadata": ["Sales"],
-          "values": [["AV Stores, Co.", "157807.94"],
-                     ["Anna's Decorations, Ltd", "153996.98"],
-                     ["Auto Canal+ Petit", "93170.66"],
-                     ["Alpha Cognac", "70488.99"],
-                     ["Auto Associés & Cie.", "64834.01"],
-                     ["Australian Collectables, Ltd", "64591.14"],
-                     ["Australian Gift Network, Co", "59469.12"],
-                     ["Auto-Moto Classics Inc.", "26479.02"],
-                     ["Atelier graphique", "24179.96"]]
-        }
+    it("List construction after autocomplete search", function() {
+      var expectedResult = [
+        "AV Stores, Co.",
+        "Anna's Decorations",
+        "Auto Canal+ Petit"
+      ];
+
+      spyOn(autocompleteBox, '_queryServer').and.callFake(function(){
+        this.result = [
+          ["AV Stores, Co."],
+          ["Anna's Decorations"],
+          ["Auto Canal+ Petit"],
+          ["Euro+ Shopping Channel"],
+          ["La Rochelle Gifts"]
+        ]
       });
-      
-      spyOn(autocompleteBox, "_getTextBoxValue").and.returnValue("a");
 
-      autocompleteBox.autoBoxOpt.getList(autocompleteBox.textbox, {});
+      var returnedList = [];
+      autocompleteBox._search({term:'a'}, function(list) {
+        returnedList = list;
+      });
 
-      expect(autocompleteBox._queryServer).toHaveBeenCalledWith("a");
+      expect(autocompleteBox._queryServer).toHaveBeenCalled();
+      expect(returnedList).toEqual(expectedResult);
+
     });
+
+    /**
+     * ## The Autocomplete Component # Select and Remove Values
+     */
+    it("Select and Remove Values", function() {
+      autocompleteBox.selectedValues = [];
+
+      autocompleteBox._selectValue("value1");
+      expect(autocompleteBox.selectedValues).toEqual(["value1"]);
+
+      autocompleteBox._selectValue("value2");
+      expect(autocompleteBox.selectedValues).toEqual(["value1", "value2"]);
+
+      autocompleteBox._removeValue("value1");
+      expect(autocompleteBox.selectedValues).toEqual(["value2"]);
+
+      autocompleteBox._removeValue("value2");
+      expect(autocompleteBox.selectedValues).toEqual([]);
+    });
+
+    /**
+     * ## The Autocomplete Component # Get Options
+     */
+    it("Get Options", function() {
+      var options = autocompleteBox._getOptions();
+
+      expect(options.appendTo).toEqual('.autocomplete-container');
+      expect(options.minLength).toEqual(autocompleteBox.minTextLength);
+      expect(typeof options.source).toEqual('function');
+      expect(typeof options.focus).toEqual('function');
+      expect(typeof options.open).toEqual('function');
+      expect(typeof options.close).toEqual('function');
+    });
+
   });
 });
