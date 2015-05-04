@@ -119,15 +119,11 @@ Dashboards.getLocationSearchString = function() {
     }
 
     if(langCode != null) {
-      var mLocale = moment.locale();
       //Testing if langCode exists. Use langCode if true, and 'en-US' otherwise
-      if(moment.locale(langCode, true) === undefined) {
+      if(moment.localeData(langCode) === null) {
         langCode = 'en-US';
       }
 
-      //must set Dashboard Language back to the previous state,
-      //because moment.locale always changes the current locale being used.
-      moment.locale(mLocale);
       toFormat.locale(langCode);
     }
 
