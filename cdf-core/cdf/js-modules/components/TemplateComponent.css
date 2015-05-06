@@ -1,0 +1,173 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.templateWrapper {
+}
+
+/* CARDS */
+.templateWrapper .sectionTitle {
+  padding: 10px;
+  border: 1px solid #4D658D;
+  background: #4D658D;
+  color: #e5e5e5;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 4px;
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+.templateWrapper .sectionTitle .description {
+  text-transform: none;
+  font-weight: normal;
+  color: white;
+}
+
+
+.templateWrapperGroups .templateRow {
+  width: auto;
+}
+
+.templateWrapperGroups .templateRow .groupTitle {
+  font-size: 20px;
+}
+
+.templateWrapperGroups .templateRow .title {
+  font-size: 14px;
+}
+
+.templateWrapperGroups .templateRow .title, .templateWrapperGroups .templateRow .value {
+  font-size: 14px;
+  width: 50%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  float: left;
+}
+
+.templateWrapperGroups .templateRow .title:after {
+}
+
+.templateWrapper .templateRow {
+  float: left;
+  margin: 0.5%;
+  padding: 8px;
+  background: #e5e5e5;
+  width: 10.1%;
+  min-width: 115px;
+  border: 2px solid transparent;
+  border-radius: 10px 0 10px 0;
+  box-shadow: 3px 3px 8px 1px rgba(0,0,0,0.17);
+  -moz-box-shadow: 3px 3px 8px 1px rgba(0,0,0,0.17);
+  -webkit-box-shadow: 3px 3px 8px 1px rgba(0,0,0,0.17);
+}
+
+.templateWrapper .templateRow.clickable {
+  cursor: pointer;
+}
+
+.templateWrapper .templateRow.clickable:hover {
+  border: 2px solid rgba(43,75,111,0.8);
+  background: #fafafa;
+}
+
+.templateWrapper .title {
+  font-size: 45px;
+  text-align: center;
+  width: 100%;
+  color:#7089A4;
+}
+
+.templateWrapper .desc {
+  font-size: 9px;
+  text-align: center;
+  width: 100%;
+}
+
+.templateWrapper .value {
+  margin-top: 10px;
+}
+
+.templateWrapper .value div {
+  float: left;
+}
+
+.templateWrapper .trend {
+  width: 25%;
+  height: 16px;
+  border-radius: 100%;
+  padding: 0;
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+.templateWrapper .trend:before {
+  width: 20%;
+  height: 16px;
+  border-radius: 100%;
+  font-size: 20px;
+}
+
+.templateWrapper .trend.up {
+  color: green;
+}
+
+.templateWrapper .trend.down {
+  color: red;
+}
+
+.templateWrapper .number {
+  width: 75%;
+  font-size: 16px;
+  text-align: right;
+}
+
+.templateWrapper .addinOnAddin {
+  text-align: justify;
+  font-size: 8px;
+  padding: 7px;
+  background-color: rgba(211, 212, 106, 0.5);
+  margin-top: 10px;
+  border-radius: 5px;
+  min-height: 100px;
+}
+
+/* TABLE */
+.templateWrapper .table {
+  table-layout:fixed;
+}
+
+.templateWrapper .table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.templateWrapper .message.ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  height: 18px;
+}
+
+.templateWrapper .message {
+  white-space: normal;
+  text-align: justify;
+}
+
+.templateWrapper .toggleEllipsis {
+  font-size: 10px;
+  float: right;
+  cursor: pointer;
+}
