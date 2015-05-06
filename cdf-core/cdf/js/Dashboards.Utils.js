@@ -75,11 +75,15 @@ Dashboards.getLocationSearchString = function() {
     if(formProvider === undefined) {
       formProvider = cdo.format.language().createChild();
     }
+
     if(langCode != null) {
-      return cdo.format.language(langCode).number().mask(mask)(value);
+      var otherFormatP = cdo.format.language(langCode).createChild();
+      otherFormatP.number({mask: mask});
+      return otherFormatP.number()(value);
     }
 
-    return formProvider.number().mask(mask)(value);
+    formProvider.number({mask: mask});
+    return formProvider.number()(value);
   };
 
   /**
