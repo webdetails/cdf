@@ -12,18 +12,7 @@
  */
 
 define([
-  './colTypes/cccBulletChart/cccBulletChart',
-  './colTypes/circle/circle',
-  './colTypes/clippedText/clippedText',
-  './colTypes/dataBar/dataBar',
-  './colTypes/formattedText/formattedText',
-  './colTypes/groupHeaders/groupHeaders',
-  './colTypes/hyperlink/hyperlink',
-  './colTypes/localizedText/localizedText',
-  './colTypes/pvSparkline/pvSparkline',
-  './colTypes/sparkline/sparkline',
-  './colTypes/trendArrow/trendArrow',
-  './colTypes/template/template'],
-  function() {
+      './templateTypes/template/template'],
+    function() {
 
 });
