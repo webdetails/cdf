@@ -740,6 +740,27 @@ describe("The CDF framework #", function() {
   });
 
   /**
+   * ## The CDF framework # Number Format
+   */
+  it("Number Format", function() {
+    var defaultMask = cdo.format.language().number().mask();
+    var defaultMask_en_us = cdo.format.language('en-us').number().mask();
+    var defaultMask_en_gb = cdo.format.language('en-gb').number().mask();
+    var defaultMask_pt_pt = cdo.format.language('pt-pt').number().mask();
+
+    expect(Dashboards.numberFormat(123456, "#AC")).toEqual("123k$");
+    expect(Dashboards.numberFormat(123456, "#AC", 'en-us')).toEqual("123k$");
+    expect(Dashboards.numberFormat(123456, "#AC", 'en-gb')).toEqual("123k£");
+    expect(Dashboards.numberFormat(123456, "#AC", 'pt-pt')).toEqual("123k€");
+
+    //check if default mask values were not changed by numberFormat
+    expect(cdo.format.language().number().mask()).toEqual(defaultMask);
+    expect(cdo.format.language('en-us').number().mask()).toEqual(defaultMask_en_us);
+    expect(cdo.format.language('en-gb').number().mask()).toEqual(defaultMask_en_gb);
+    expect(cdo.format.language('pt-pt').number().mask()).toEqual(defaultMask_pt_pt);
+  });
+
+  /**
    * ## The CDF framework # Date Parse
    */
   it("Date Parse", function() {
