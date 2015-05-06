@@ -271,25 +271,6 @@ public class CdfApi {
     }
   }
 
-  @GET
-  @Path( "/getHeaders" )
-  @Produces( "text/html" )
-  public String getHeaders( @QueryParam( Parameter.DASHBOARD_CONTENT ) String dashboardContent,
-      @QueryParam( Parameter.DASHBOARD_TYPE ) String dashboardType,
-      @QueryParam( Parameter.ABSOLUTE ) @DefaultValue( "false" ) String absolute,
-      @QueryParam( Parameter.ROOT ) String root, @QueryParam( Parameter.SCHEME ) String scheme,
-      @QueryParam( Parameter.DEBUG ) @DefaultValue( "false" ) String debug, @Context HttpServletRequest servletRequest,
-      @Context HttpServletResponse servletResponse ) throws Exception {
-    try {
-      CdfHtmlRenderer.getHeaders( dashboardContent, dashboardType, Boolean.parseBoolean( absolute ), root, scheme,
-          Boolean.parseBoolean( debug ), servletResponse.getOutputStream() );
-    } catch ( IOException ex ) {
-      logger.error( "getHeaders: " + ex.getMessage(), ex );
-      throw ex;
-    }
-    return null;
-  }
-
   private String determineCorrectPath( String solution, String action, String path ) {
 
     String value = StringUtils.EMPTY;
