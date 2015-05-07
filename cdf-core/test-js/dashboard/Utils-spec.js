@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/dashboard/Utils"], function(Utils) {
+define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
 
   /**
    * ## The Utils class
@@ -30,6 +30,27 @@ define(["cdf/dashboard/Utils"], function(Utils) {
       expect(Utils.getQueryParameter("randomName")).toBe("");
       expect(Utils.getQueryParameter("noValue")).toBe("");
       expect(Utils.getQueryParameter("notThere")).toBe("");
+    });
+
+    /**
+     * ## The Utils class # formats numbers
+     */
+    it("formats numbers", function() {
+      var defaultMask = cdo.format.language().number().mask();
+      var defaultMask_en_us = cdo.format.language('en-us').number().mask();
+      var defaultMask_en_gb = cdo.format.language('en-gb').number().mask();
+      var defaultMask_pt_pt = cdo.format.language('pt-pt').number().mask();
+
+      expect(Utils.numberFormat(123456, "#AC")).toEqual("123k$");
+      expect(Utils.numberFormat(123456, "#AC", 'en-us')).toEqual("123k$");
+      expect(Utils.numberFormat(123456, "#AC", 'en-gb')).toEqual("123k£");
+      expect(Utils.numberFormat(123456, "#AC", 'pt-pt')).toEqual("123k€");
+
+      //check if default mask values were not changed by numberFormat
+      expect(cdo.format.language().number().mask()).toEqual(defaultMask);
+      expect(cdo.format.language('en-us').number().mask()).toEqual(defaultMask_en_us);
+      expect(cdo.format.language('en-gb').number().mask()).toEqual(defaultMask_en_gb);
+      expect(cdo.format.language('pt-pt').number().mask()).toEqual(defaultMask_pt_pt);
     });
 
     /**
