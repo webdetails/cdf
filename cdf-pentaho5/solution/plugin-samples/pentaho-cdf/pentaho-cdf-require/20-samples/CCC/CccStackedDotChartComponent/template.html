@@ -25,8 +25,8 @@
 
 <script language="javascript" type="text/javascript">
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccStackedDotChart'],
-    function(Dashboard, CccStackedDotChart) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/CccStackedDotChartComponent'],
+    function(Dashboard, CccStackedDotChartComponent) {
 
     var dashboard = new Dashboard();
 
@@ -59,7 +59,7 @@
         }]
     };
 
-    var render_chart = new CccStackedDotChart({
+    var render_chart = new CccStackedDotChartComponent({
       type: "cccStackedDotChart",
       name: "cccChart",
       executeAtStart: false,
