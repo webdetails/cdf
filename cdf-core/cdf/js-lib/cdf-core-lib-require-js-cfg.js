@@ -76,6 +76,10 @@
     }
   };
 
+  //mapping all jquery requests from inside cdf to 'cdf/lib/jquery'
+  requireCfg.map['cdf'] = requireCfg.map['cdf'] || {};
+  requireCfg.map['cdf']['jquery'] = 'cdf/lib/jquery';
+
   //jquery.ui 1.10.4
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jQuery/jquery.ui";
   amdShim["cdf/lib/jquery.ui"] = {
