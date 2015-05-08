@@ -14,10 +14,10 @@
 define(['./BaseCccComponent', '../lib/CCC/pvc'],
   function(BaseCccComponent, pvc) {
 
-  var CccStackedDotChart = BaseCccComponent.extend({
+  var CccStackedDotChartComponent = BaseCccComponent.extend({
     cccType: pvc.StackedDotChart
   });
 
-  return CccStackedDotChart;
+  return CccStackedDotChartComponent;
 
 });
