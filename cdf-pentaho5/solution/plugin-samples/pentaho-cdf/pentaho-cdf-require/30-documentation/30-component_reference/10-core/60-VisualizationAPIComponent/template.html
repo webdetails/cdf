@@ -1,14 +1,12 @@
 <script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
-<!-- VizController.js, DataTable.js and Events.js are now loaded in the requirejs module VisualizationAPIComponent -->
-<!-- 
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/VizController.js"></script>
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/DataTable.js"></script>
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/Events.js"></script>
--->
-<!-- ccc/sample/sampleVisualization.js is now loaded in the requirejs block in the end of this sample template -->
-<!--
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/ccc/sample/sampleVisualization.js"></script>
--->
+
+<!-- All VizAPI required files are loaded dynamically through the webcontext.js include, below -->
+<script>
+// Undefine define/require shim used by CDF, 
+// to let a real define/require implementation be installed through webcontext.js
+delete define; delete require;
+</script>
+<script src="webcontext.js?context=mantle&amp;requireJsOnly=true"></script>
 
 <div class="shadow">
 
@@ -120,8 +118,8 @@
 require([
   'cdf/Dashboard.Blueprint',
   'cdf/components/VisualizationAPIComponent',
-  'common-ui/vizapi/ccc/sample/sampleVisualization'],
-  function(Dashboard, VisualizationAPIComponent) {
+  'common-ui/vizapi/sample/sampleVisualization'
+], function(Dashboard, VisualizationAPIComponent) {
 
     var dashboard = new Dashboard();
 
@@ -148,14 +146,14 @@ require([
       htmlObject: "sampleObject",
       executeAtStart: true,
       postFetch: function(data) {
-        //Using postFetch to convert data types, because the query is passing 
-        //a Numeric field as String and that breaks the sample visualization
+        // Using postFetch to convert data types, because the query is passing 
+        // a Numeric field as String and that breaks the sample visualization.
         var metaQuantity = data.metadata[1];
-        var resultset = data.resultset;
-
         metaQuantity.colType = "Numeric";
+        
+        var resultset = data.resultset;
         for(var i = 0; i < resultset.length; i++) {
-          resultset[i][1] = parseInt(resultset[i][1]);
+          resultset[i][1] = parseFloat(resultset[i][1]);
         }
       }
     }));

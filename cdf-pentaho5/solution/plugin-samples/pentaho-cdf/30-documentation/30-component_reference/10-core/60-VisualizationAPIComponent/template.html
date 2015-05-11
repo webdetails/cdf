@@ -1,8 +1,4 @@
 <script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/VizController.js"></script>
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/DataTable.js"></script>
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/Events.js"></script>
-<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/ccc/sample/sampleVisualization.js"></script>
 
 <div class="shadow">
 
@@ -143,11 +139,11 @@ sampleVisualization = {
     //Using postFetch to convert data types, because the query is passing 
     //a Numeric field as String and that breaks the sample visualization
     var metaQuantity = data.metadata[1];
-    var resultset = data.resultset;
-
     metaQuantity.colType = "Numeric";
+    
+    var resultset = data.resultset;
     for(var i = 0; i < resultset.length; i++) {
-      resultset[i][1] = parseInt(resultset[i][1]);
+      resultset[i][1] = parseFloat(resultset[i][1]);
     }
   }
 }
