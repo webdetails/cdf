@@ -10,15 +10,11 @@
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
-
-var requireCfg = {
-  paths: {},
-  shim:  {},
-  map:   {}
-};
-
-var KARMA_RUN = true;
-
-var SESSION_NAME = "dummy";
-var CONTEXT_PATH = "/pentaho/";
-var SESSION_LOCALE = "en-US";
+define(function() {
+  var sampleVizType = {id: "sampleViz"};
+  return {
+    get: function(vizType) {
+      return vizType === "sampleViz" ? sampleVizType : null;
+    }
+  };
+});
