@@ -51,8 +51,8 @@ module.exports = function(config) {
       'cdf/js/components/simpleautocomplete.js',
       {pattern: '../cdf-pentaho-base/cdf/js/**/*.js', included: true},
       'test-js/legacy/lib/test-components.js',
-      'test-js/legacy/main.js',
-      {pattern: 'test-js/legacy/**/*.js', included: true}
+      {pattern: 'test-js/legacy/**/*-spec*.js', included: true},
+      'test-js/legacy/main.js'
     ],
 
     // list of files to exclude

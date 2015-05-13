@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-  <title>Pentaho Home Dashboard</title>
+  <title>CCC Line Chart</title>
   <author>Webdetails</author>
-  <description>Pentaho Home Dashboard</description>
+  <description>CCC Line Chart Sample</description>
   <icon></icon>
   <template>template.html</template>
   <style>mantle</style>
