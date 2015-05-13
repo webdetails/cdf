@@ -61,6 +61,8 @@ wd.cdf.endpoints = {
 
   getSimileStaticResource: function( resource ) { return wd.cdf.endpoints.getCdfBase() + "/js/" + resource; },
 
+  getXmlaStaticResource: function() { return wd.cdf.endpoints.getCdfBase() + "/js/xmla/Xmla.js"; },
+
   getCdfXaction: function( path, action, solution, params ) {
     if (params){
       // go through parametere array and update values

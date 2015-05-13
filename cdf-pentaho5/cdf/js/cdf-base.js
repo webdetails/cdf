@@ -96,6 +96,8 @@ wd.cdf.endpoints = {
 
   getSimileStaticResource: function( resource ) { return wd.cdf.endpoints.getWebapp() + "/api/repos/pentaho-cdf/js-legacy/lib/" + resource; },
 
+  getXmlaStaticResource: function() { return wd.cdf.endpoints.getResource() + "?path=js/lib/xmla/Xmla.js"; },
+
   getCdfXaction: function( path, action, solution, params ) {
     if (params){
       var parameters = {};

@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/*
+/**
  * queryTypes.js
  *
  * Registers several query types and sets the base query class.
@@ -36,9 +36,9 @@
   var BaseQuery = Base.extend({
     name: "baseQuery",
     label: "Base Query",
-    deepProperties: [ 'defaults' , 'interfaces' ],
+    deepProperties: ['defaults', 'interfaces'],
     defaults: {
-      successCallback: function(){
+      successCallback: function() {
         Dashboards.log('Query callback not defined. Override.');
       },
       errorCallback: Dashboards.handleServerError,
@@ -53,120 +53,131 @@
       url: ''
     },
     interfaces:{
-      params: { reader:'propertiesObject', validator:'isObjectOrPropertiesArray'},
-      successCallback: { validator:'isFunction'},
-      errorCallback: { validator:'isFunction'},
-      pageSize: { validator:'isPositive'}
-
+      params: {reader: 'propertiesObject', validator: 'isObjectOrPropertiesArray'},
+      successCallback: {validator: 'isFunction'},
+      errorCallback: {validator: 'isFunction'},
+      pageSize: {validator: 'isPositive'}
     },
-    constructor: function (config ){
-      if ( Dashboards && Dashboards.OptionsManager ) {
-        this._optionsManager = new Dashboards.OptionsManager( this );
-        this._optionsManager.mixin( this );
+
+    constructor: function(config) {
+      if(Dashboards && Dashboards.OptionsManager) {
+        this._optionsManager = new Dashboards.OptionsManager(this);
+        this._optionsManager.mixin(this);
       }
       this.init(config);
     },
+
     // Default options interface in case there is no options manager defined.
-    getOption: function (prop){
+    getOption: function(prop) {
       // Fallback for when Dashboards.OptionManager is not available
       return this.defaults[prop];
     },
-    setOption: function (prop, value){
+
+    setOption: function(prop, value) {
       // Fallback for when Dashboards.OptionManager is not available
       this.defaults[prop] = value;
     },
-    init: function (opts){
+
+    init: function(opts) {
       // Override
     },
-    getSuccessHandler: function (callback){
+
+    getSuccessHandler: function(callback) {
       var myself = this;
       return function(json) {
-        myself.setOption('lastResultSet' , json );
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+        myself.setOption('lastResultSet', json);
+        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         callback(clone);
-      }
+      };
     },
-    getErrorHandler: function (callback){
-      return function(resp, txtStatus, error ) {
-        if (callback){
-          callback(resp, txtStatus, error );
+
+    getErrorHandler: function(callback) {
+      return function(resp, txtStatus, error) {
+        if(callback) {
+          callback(resp, txtStatus, error);
         }
-      }
+      };
     },
-    doQuery: function(outsideCallback){
-      if (typeof this.getOption('successCallback') != 'function') {
+
+    doQuery: function(outsideCallback) {
+      if(typeof this.getOption('successCallback') != 'function') {
         throw 'QueryNotInitialized';
       }
       var url = this.getOption('url'),
           callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
-          errorCallback = this.getOption('errorCallback') ,
+          errorCallback = this.getOption('errorCallback'),
           queryDefinition = this.buildQueryDefinition();
 
       var settings = _.extend({}, this.getOption('ajaxOptions'), {
-        data: queryDefinition,
-        url: url,
-        success: this.getSuccessHandler(callback),
-        error: this.getErrorHandler(errorCallback)
+          data: queryDefinition,
+          url: url,
+          success: this.getSuccessHandler(callback),
+          error: this.getErrorHandler(errorCallback)
       });
 
       var async = settings.async == null ?  $.ajaxSettings.async : settings.async;
-      if ( !async && settings.xhrFields && settings.xhrFields.withCredentials) {
+      if(!async && settings.xhrFields && settings.xhrFields.withCredentials) {
         Dashboards.log("Cross-domain requests are deprecated for synchronous operations.");
         delete settings.xhrFields.withCredentials;
       }
 
       $.ajax(settings);
     },
+
     exportData: function() {
       // Override
     },
+
     setAjaxOptions: function(newOptions) {
-        this.setOption( 'ajaxOptions' , _.extend({}, this.getOption('ajaxOptions') , newOptions) );
+      this.setOption('ajaxOptions', _.extend({}, this.getOption('ajaxOptions'), newOptions));
     },
+
     setSortBy: function(sortBy) {
       // Override
     },
+
     sortBy: function(sortBy,outsideCallback) {
       // Override
     },
+
     fetchData: function(params, successCallback, errorCallback) {
       switch(arguments.length) {
         case 0:
-          if( this.getOption('params') &&  this.getOption('successCallback') ) {
+          if( this.getOption('params') &&  this.getOption('successCallback')) {
             return this.doQuery();
           }
         break;
         case 1:
-          if (typeof arguments[0] == "function"){
+          if(typeof arguments[0] == "function") {
             /* If we're receiving _only_ the callback, we're not
             * going to change the internal callback
             */
             return this.doQuery(arguments[0]);
-          } else if(  !_.isEmpty(arguments[0]) &&
-              (_.isObject(arguments[0]) || _.isArray(arguments[0]) ) ) {
-            this.setOption('params' , arguments[0] || {} );
+          } else if(!_.isEmpty(arguments[0]) &&
+              (_.isObject(arguments[0]) || _.isArray(arguments[0]))) {
+            this.setOption('params', arguments[0] || {});
             return this.doQuery();
           }
           break;
         case 2:
-          if (typeof arguments[0] == "function"){
-            this.setOption( 'successCallback' , arguments[0] );
-            this.setOption('errorCallback'  , arguments[1] );
+          if(typeof arguments[0] == "function") {
+            this.setOption('successCallback', arguments[0]);
+            this.setOption('errorCallback', arguments[1]);
             return this.doQuery();
           } else {
-            this.setOption('params' , arguments[0] || {} );
-            this.setOption('successCallback' , arguments[1] );
+            this.setOption('params', arguments[0] || {});
+            this.setOption('successCallback', arguments[1]);
             return this.doQuery();
           }
           break;
         default:
           /* We're just going to discard anything over two params */
-          if (params) {
-            this.setOption('params' , params );
+          if(params) {
+            this.setOption('params', params);
           }
 
-          this.setOption('successCallback' , successCallback );
-          this.setOption('errorCallback' , errorCallback );
+          this.setOption('successCallback', successCallback);
+          this.setOption('errorCallback', errorCallback);
           return this.doQuery();
       }
       /* If we haven't hit a return by this time,
@@ -176,41 +187,47 @@
     },
 
     // Result caching
-    lastResults: function(){
-      if ( this.getOption('lastResultSet') !== null) {
-        return $.extend(true,{}, this.getOption('lastResultSet') );
+    lastResults: function() {
+      if(this.getOption('lastResultSet') !== null) {
+        return $.extend(true, {}, this.getOption('lastResultSet'));
       } else {
         throw "NoCachedResults";
       }
     },
-    reprocessLastResults: function(outerCallback){
-      if ( this.getOption('lastResultSet') !== null) {
-        var clone = $.extend(true,{}, this.getOption('lastResultSet') );
-        var callback = outerCallback || this.getOption('successCallback') ;
+
+    reprocessLastResults: function(outerCallback) {
+      if(this.getOption('lastResultSet') !== null) {
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
+        var callback = outerCallback || this.getOption('successCallback');
         return callback(clone);
       } else {
         throw "NoCachedResults";
       }
     },
+
     reprocessResults: function(outsideCallback) {
-      if ( this.getOption('lastResultSet') !== null) {
-        var clone = $.extend(true,{}, this.getOption('lastResultSet') );
+      if(this.getOption('lastResultSet') !== null) {
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = (outsideCallback ? outsideCallback : this.getOption('successCallback'));
-        callback( clone );
+        callback(clone);
       } else {
         throw "NoCachedResults";
       }
     },
+
     setParameters: function (params) {
       this.setOption('params', params);
     },
+
     setCallback: function(callback) {
-      this.setOption('successCallback' , callback);
+      this.setOption('successCallback', callback);
     },
+
     setErrorCallback: function(callback) {
       this.setOption('errorCallback', callback);
     },
-    setSearchPattern: function (pattern){
+
+    setSearchPattern: function(pattern){
       this.setOption('searchPattern', pattern);
     },
 
@@ -225,37 +242,39 @@
     nextPage: function(outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
-      if ( pageSize > 0) {
+      if(pageSize > 0) {
         page += pageSize;
-        this.setOption('page' , page );
+        this.setOption('page', page);
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPageSize";
       }
     },
+
     // Gets the previous _pageSize results
     previousPage: function(outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
-      if (page > pageSize) {
+      if(page > pageSize) {
         page -= pageSize;
-        this.setOption('page' , page );
+        this.setOption('page', page);
         return this.doQuery(outsideCallback);
-      } else if (_pageSize > 0) {
-        this.setOption('page' , 0 );
+      } else if(_pageSize > 0) {
+        this.setOption('page', 0);
         return this.doQuery(outsideCallback);
       } else {
-        throw "AtBeggining";
+        throw "AtBeginning";
       }
     },
+
     // Gets the page-th set of _pageSize results (0-indexed)
-    getPage: function( targetPage, outsideCallback) {
+    getPage: function(targetPage, outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
-      if (targetPage * pageSize == page) {
+      if(targetPage * pageSize == page) {
         return false;
-      } else if (typeof targetPage == 'number' && targetPage >= 0) {
-        this.setOption('page' , targetPage * pageSize );
+      } else if(typeof targetPage == 'number' && targetPage >= 0) {
+        this.setOption('page' , targetPage * pageSize);
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPage";
@@ -264,10 +283,10 @@
 
     // Gets pageSize results starting at page
     setPageStartingAt: function(targetPage) {
-      if (targetPage == this.getOption('page')) {
+      if(targetPage == this.getOption('page')) {
         return false;
-      } else if (typeof targetPage == 'number' && targetPage >= 0) {
-        this.setOption('page' , targetPage );
+      } else if(typeof targetPage == 'number' && targetPage >= 0) {
+        this.setOption('page' , targetPage);
       } else {
         throw "InvalidPage";
       }
@@ -288,11 +307,11 @@
 
     // sets _pageSize to pageSize, and gets the first page of results
     initPage: function(pageSize,outsideCallback) {
-      if (pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {
+      if(pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {
         return false;
-      } else if (typeof pageSize == 'number' && pageSize > 0) {
-        this.setOption('page' , 0 );
-        this.setOption('pageSize' , pageSize );
+      } else if(typeof pageSize == 'number' && pageSize > 0) {
+        this.setOption('page', 0);
+        this.setOption('pageSize', pageSize);
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPageSize";
@@ -301,7 +320,7 @@
   });
   // Sets the query class that can extended to create new ones.
   // The registered Base needs to have an extend method.
-  Dashboards.setBaseQuery ( BaseQuery );
+  Dashboards.setBaseQuery(BaseQuery);
 
 
   var CpkEndpointsOpts = {
@@ -316,44 +335,42 @@
         dataType:'json',
         type:'POST',
         async: true,
-        xhrFields: {
-          withCredentials: true
-        }
+        xhrFields: {withCredentials: true}
       }
     },
 
-    init: function (opts){
-        if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
-          this.setOption('pluginId' , opts.pluginId);
-          this.setOption('endpoint' , opts.endpoint);
-          this.setOption('url', wd.cdf.endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
-        }
-        this.setOption('kettleOutput', opts.kettleOutput);
-        this.setOption('stepName', opts.stepName);
-        this.setOption('systemParams', opts.systemParams || {} );
-        this.setOption('ajaxOptions' , $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
-        var ajaxOptions = this.getOption('ajaxOptions');
-        if (ajaxOptions.dataType == 'json'){
-            ajaxOptions.mimeType = 'application/json; charset utf-8'; //solves "not well formed" error in Firefox 24
-            this.setOption('ajaxOptions', ajaxOptions);
-        }
+    init: function(opts) {
+      if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
+        this.setOption('pluginId', opts.pluginId);
+        this.setOption('endpoint', opts.endpoint);
+        this.setOption('url', wd.cdf.endpoints.getPluginEndpoint(opts.pluginId, opts.endpoint));
+      }
+      this.setOption('kettleOutput', opts.kettleOutput);
+      this.setOption('stepName', opts.stepName);
+      this.setOption('systemParams', opts.systemParams || {});
+      this.setOption('ajaxOptions', $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
+      var ajaxOptions = this.getOption('ajaxOptions');
+      if(ajaxOptions.dataType == 'json') {
+        ajaxOptions.mimeType = 'application/json; charset utf-8'; //solves "not well formed" error in Firefox 24
+        this.setOption('ajaxOptions', ajaxOptions);
+      }
     },
 
     buildQueryDefinition: function(overrides) {
       overrides = (overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : (overrides || {});
 
       var queryDefinition = {
-        kettleOutput: this.getOption('kettleOutput'),
-        stepName: this.getOption('stepName')
+          kettleOutput: this.getOption('kettleOutput'),
+          stepName: this.getOption('stepName')
       };
       // We clone queryDefinition to remove undefined
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
       var cachedParams = this.getOption('params'),
-          params = $.extend( {}, cachedParams , overrides);
+          params = $.extend({}, cachedParams, overrides);
 
-      _.each(params , function(value, name) {
-        var paramValue;
+      _.each(params, function(value, name) {
+        var paramValue, printValue;
         try {
           paramValue = Dashboards.getParameterValue(value);
         } catch(e) {
@@ -377,7 +394,7 @@
           // nor does CPK do any sort of array handling.
           // A stringify ensures the array is passed as a string, that can be parsed using kettle.
           paramValue = JSON.stringify(paramValue);
-          // Another option would be to add futher:
+          // Another option would be to add further:
           // value = value.split('],').join(';').split('[').join('').split(']').join('');
           // which transforms [[0,1],[2,3]] into "0,1;2,3"
         }
@@ -387,28 +404,28 @@
       return queryDefinition;
     },
 
-      getSuccessHandler: function (callback){
-          // copy-pasted from BaseQuery + added errorCallback
-          var myself = this;
-          return function(json) {
-              myself.setOption('lastResultSet' , json );
-              var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
-              if ( json && json.result == false ) {
-                  // the ajax call might have been successful (no network erros),
-                  // but the endpoint might have failed, which is signalled by json.result
-                  var errorCallback = myself.getErrorHandler( myself.getOption('errorCallback') );
-                  errorCallback(clone);
-              } else {
-                  callback(clone);
-              }
-          };
-      }
+    getSuccessHandler: function(callback) {
+      // copy-pasted from BaseQuery + added errorCallback
+      var myself = this;
+      return function(json) {
+        myself.setOption('lastResultSet', json);
+        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
+        if(json && json.result == false) {
+          // the ajax call might have been successful (no network errors),
+          // but the endpoint might have failed, which is signalled by json.result
+          var errorCallback = myself.getErrorHandler(myself.getOption('errorCallback'));
+          errorCallback(clone);
+        } else {
+          callback(clone);
+        }
+      };
+    }
     /*
      * Public interface
      */
   };
   // Registering a class will use that class directly when getting new queries.
-  Dashboards.registerQuery( "cpk", CpkEndpointsOpts );
+  Dashboards.registerQuery("cpk", CpkEndpointsOpts);
 
 
   var cdaQueryOpts = {
@@ -422,30 +439,28 @@
       sortBy: '',
       ajaxOptions: {
         async: true,
-        xhrFields: {
-          withCredentials: true
-        }
+        xhrFields: {withCredentials: true}
       },
       searchPattern: ''
     },
 
-    init: function (opts){
-      if (typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined'){
+    init: function(opts) {
+      if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
         // CDA-style cd object
-        this.setOption('file' , opts.path );
-        this.setOption( 'id' , opts.dataAccessId );
-        if (typeof opts.sortBy == 'string' && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+        this.setOption('file', opts.path);
+        this.setOption('id', opts.dataAccessId);
+        if(typeof opts.sortBy == 'string' && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
           this.setOption('sortBy', opts.sortBy);
         }
-        if(opts.pageSize != null){
-          this.setOption('pageSize' , opts.pageSize);
+        if(opts.pageSize != null) {
+          this.setOption('pageSize', opts.pageSize);
         }
-        if(opts.outputIndexId != null){
-          this.setOption( 'outputIdx' , opts.outputIndexId );
+        if(opts.outputIndexId != null) {
+          this.setOption('outputIdx', opts.outputIndexId);
         }
-        } else {
-          throw 'InvalidQuery';
-        }
+      } else {
+        throw 'InvalidQuery';
+      }
     },
 
     buildQueryDefinition: function(overrides) {
@@ -453,7 +468,7 @@
       var queryDefinition = {};
 
       var cachedParams = this.getOption('params'),
-          params = $.extend({}, cachedParams , overrides);
+          params = $.extend({}, cachedParams, overrides);
 
       _.each(params, function(value, name) {
         var paramValue;
@@ -474,8 +489,8 @@
           paramValue = value;
         }
         if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0) {
-          //special case where single element will wrongly be treated as a parseable array by cda
-          paramValue = doCsvQuoting(paramValue[0],';');
+          //special case where single element will wrongly be treated as a parsable array by cda
+          paramValue = doCsvQuoting(paramValue[0], ';');
         }
         //else will not be correctly handled for functions that return arrays
         if(typeof paramValue == 'function') {
@@ -496,50 +511,48 @@
     /*
      * Public interface
      */
-
     exportData: function(outputType, overrides, options) {
-      if (!options) {
+      if(!options) {
         options = {};
       }
       var queryDefinition = this.buildQueryDefinition(overrides);
       queryDefinition.outputType = outputType;
-      if (outputType == 'csv' && options.separator) {
+      if(outputType == 'csv' && options.separator) {
         queryDefinition.settingcsvSeparator = options.separator;
       }
-      if (options.filename) {
-        queryDefinition.settingattachmentName= options.filename ;
+      if(options.filename) {
+        queryDefinition.settingattachmentName = options.filename;
       }
-      if (outputType == 'xls' && options.template) {
-        queryDefinition.settingtemplateName= options.template ;
+      if(outputType == 'xls' && options.template) {
+        queryDefinition.settingtemplateName = options.template;
       }
-      if( options.columnHeaders ){
+      if(options.columnHeaders) {
         queryDefinition.settingcolumnHeaders = options.columnHeaders;
       }
 
-      if(options.dtFilter != null){
+      if(options.dtFilter != null) {
         queryDefinition.settingdtFilter = options.dtFilter;
-        if(options.dtSearchableColumns != null){
+        if(options.dtSearchableColumns != null) {
           queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
         }
       }
       queryDefinition.wrapItUp = 'true';
 
       $.ajax({
-          type:'POST',
-          dataType: 'text',
-          async: true,
-          data: queryDefinition,
-          url: this.getOption('url'),
-          xhrFields: {
-            withCredentials: true
-          }
+        type:'POST',
+        dataType: 'text',
+        async: true,
+        data: queryDefinition,
+        url: this.getOption('url'),
+        xhrFields: {withCredentials: true}
       }).done(function(uuid) {
-          var _exportIframe = $('<iframe style="display:none">');
-          _exportIframe.detach();
-          _exportIframe[0].src = wd.cdf.endpoints.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );
-          _exportIframe.appendTo($('body')); })
-        .fail(function(jqXHR,textStatus,errorThrown){
-          console.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });
+        var _exportIframe = $('<iframe style="display:none">');
+        _exportIframe.detach();
+        _exportIframe[0].src = wd.cdf.endpoints.getUnwrapQuery({"path": queryDefinition.path, "uuid": uuid});
+        _exportIframe.appendTo($('body'));
+      }).fail(function(jqXHR,textStatus,errorThrown) {
+        Dashboards.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown);
+      });
     },
 
     /* Sorting
@@ -557,7 +570,7 @@
     setSortBy: function(sortBy) {
       var newSort,
           myself = this;
-      if (sortBy === null || sortBy === undefined || sortBy === '') {
+      if(sortBy === null || sortBy === undefined || sortBy === '') {
         newSort = '';
       }
       /* If we have a string as input, we need to split it into
@@ -565,26 +578,26 @@
        * type, we need to convert everything to upper case, since want
        * to accept 'a' and 'd' even though CDA demands capitals.
        */
-      else if (typeof sortBy == "string") {
+      else if(typeof sortBy == "string") {
         /* Valid sortBy Strings are column numbers, optionally
          * succeeded by A or D (ascending or descending), and separated by commas
          */
-        if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+        if(!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
           throw "InvalidSortExpression";
         }
         /* Break the string into its constituent terms, filter out empty terms, if any */
-        newSort = sortBy.toUpperCase().split(',').filter(function(e){
+        newSort = sortBy.toUpperCase().split(',').filter(function(e) {
           return e !== "";
         });
-      } else if (sortBy instanceof Array) {
-        newSort = sortBy.map(function(d){
+      } else if(sortBy instanceof Array) {
+        newSort = sortBy.map(function(d) {
           return d.toUpperCase();
         });
         /* We also need to validate that each individual term is valid */
-        var invalidEntries = newSort.filter(function(e){
-          return !e.match("^[0-9]+[adAD]?,?$")
+        var invalidEntries = newSort.filter(function(e) {
+          return !e.match("^[0-9]+[adAD]?,?$");
         });
-        if ( invalidEntries.length > 0) {
+        if(invalidEntries.length > 0) {
           throw "InvalidSortExpression";
         }
       }
@@ -593,9 +606,9 @@
        * and notify the caller on whether it changed
        */
       var same;
-      if (newSort instanceof Array) {
+      if(newSort instanceof Array) {
         same = newSort.length != myself.getOption('sortBy').length;
-        $.each(newSort,function(i,d){
+        $.each(newSort,function(i, d) {
           same = (same && d == myself.getOption('sortBy')[i]);
           if(!same) {
             return false;
@@ -613,66 +626,64 @@
        * we can fire the query.
        */
       var changed = this.setSortBy(sortBy);
-      if (!changed) {
+      if(!changed) {
         return false;
-      } else if ( this.getOption('successCallback') !== null) {
+      } else if(this.getOption('successCallback') !== null) {
         return this.doQuery(outsideCallback);
       }
     }
   };
   // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.
-  Dashboards.registerQuery( "cda", cdaQueryOpts );
+  Dashboards.registerQuery("cda", cdaQueryOpts);
 
 
-
-
-  function makeMetadataElement (idx, name, type){
-    return { "colIndex" : idx || 0, "colType" : type || "String" , "colName" : name || "Name" }
+  function makeMetadataElement(idx, name, type) {
+    return {"colIndex": idx || 0, "colType": type || "String", "colName": name || "Name"};
   }
 
   var legacyOpts = {
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions" , "jtable.xaction"),
-      queryDef:{}
+      url: wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "jtable.xaction"),
+      queryDef: {}
     },
-    interfaces:{
-      lastResultSet:{
-        reader: function (json){
+    interfaces: {
+      lastResultSet: {
+        reader: function(json) {
           json = eval("(" + json + ")");
-          var result = { metadata: [ makeMetadataElement(0)] , resultset:json.values || [] };
-          _.each( json.metadata , function (el, idx){
-            return result.metadata.push( makeMetadataElement(idx+1, el) );
+          var result = {metadata: [makeMetadataElement(0)], resultset:json.values || []};
+          _.each(json.metadata, function(el, idx) {
+            return result.metadata.push(makeMetadataElement(idx + 1, el));
           });
           return result
         }
       }
     },
 
-    init: function (opts){
+    init: function(opts) {
       this.setOption('queryDef', opts);
     },
 
-    getSuccessHandler: function (callback){
+    getSuccessHandler: function(callback) {
       var myself = this;
       return function(json) {
         try{
-          myself.setOption('lastResultSet' , json );
-        }catch(e){
-          if(this.async){
+          myself.setOption('lastResultSet', json);
+        } catch(e) {
+          if(this.async) {
             // async + legacy errors while parsing json response aren't caught
             var msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
             Dashboards.error(msg);
-            json = {"metadata":[msg],"values":[]};
+            json = {"metadata": [msg], "values": []};
           }else{
             //exceptions while parsing json response are
-            //already being caught+handled in updateLifecyle()
+            //already being caught+handled in updateLifecycle()
             throw e;
           }
         }
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         callback(clone);
       }
     },
@@ -683,12 +694,11 @@
     }
 
   };
-  Dashboards.registerQuery( "legacy", legacyOpts );
+  Dashboards.registerQuery("legacy", legacyOpts);
 
   // TODO: Temporary until CDE knows how to write queryTypes definitions, with all these old queries
   // falling under the 'legacy' umbrella.
-  Dashboards.registerQuery( "mdx", legacyOpts );
-  Dashboards.registerQuery( "sql", legacyOpts );
-
+  Dashboards.registerQuery("mdx", legacyOpts);
+  Dashboards.registerQuery("sql", legacyOpts);
 
 })();

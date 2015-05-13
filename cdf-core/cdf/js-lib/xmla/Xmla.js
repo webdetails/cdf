@@ -970,6 +970,25 @@ Xmla.EVENT_ALL = [].concat(
 *   @default <code>DataSourceInfo</code>
 */
 Xmla.PROP_DATASOURCEINFO = "DataSourceInfo";
+
+/**
+*   Can be used as key in the <code>properties</code> member of the <code>options</code> object
+*   passed to the <code><a href="#method_request">request()</a></code> method
+*   to specify the XML/A <code>DataSourceName</code> property.
+*   The XML/A <code>DataSourceName</code>, together with the XML/A service URL are required to
+*   connect to a particular OLAP datasource.
+*   Valid values for the <code>DataSourceName</code> as well as the corresponding URL should be obtained
+*   by querying the <code>DataSourceName</code> and <code>URL</code> columns of the <code>DISCOVER_DATASOURCES</code>
+*   rowset respectively (see <code><a href="method_discoverDataSources">discoverDataSources()</a></code>).
+*
+*   @property PROP_DATASOURCENAME
+*   @static
+*   @final
+*   @type string
+*   @default <code>DataSourceName</code>
+*/
+Xmla.PROP_DATASOURCENAME = "DataSourceName";
+
 /**
 *   Can be used as key in the <code>properties</code> member of the <code>options</code> object
 *   passed to the <code><a href="#method_request">execute()</a></code> method
