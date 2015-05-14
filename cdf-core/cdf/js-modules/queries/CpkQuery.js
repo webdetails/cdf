@@ -32,9 +32,7 @@ define(['../dashboard/Dashboard.ext',
 
   var CpkEndpointsOpts = {
     name: "cpk",
-
-    label: "CPK",
-
+    label: "CPK Query",
     defaults: {
       url: '',
       pluginId: '',

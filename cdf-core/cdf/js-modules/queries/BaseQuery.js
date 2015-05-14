@@ -94,7 +94,7 @@
     * @param value Value for the property
     */
     setOption: function(prop, value) {
-      // Fallback for when Dashboards.OptionManager is not available
+      // Fallback for when OptionManager is not available
       this.defaults[prop] = value;
     },
 
