@@ -94,7 +94,7 @@ require(['cdf/Dashboard.Blueprint','cdf/components/QueryComponent'], function(Da
       queryType: 'mdx',
       jndi: "SampleData",
       catalog: "mondrian:/SteelWheels",
-      query: function(){
+      query: function() {
         return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
         "NON EMPTY TopCount([Customers].[All Customers].Children," +
         "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
@@ -109,7 +109,7 @@ require(['cdf/Dashboard.Blueprint','cdf/components/QueryComponent'], function(Da
     executeAtStart: true,
     resultvar: "result",
     queryDefinition: MetaLayerHome2.executeQueryComponentDefinition,
-    postFetch: function(data){
+    postFetch: function(data) {
       $('#sampleObjectResult').html("" + data.resultset[3]);
     }
   }));

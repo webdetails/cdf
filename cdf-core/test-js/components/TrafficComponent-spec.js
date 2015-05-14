@@ -47,7 +47,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent", "cdf/lib/jquer
       dashboard.addComponent(trafficComponent);
 
       spyOn(trafficComponent, 'update').and.callThrough();
-      spyOn(trafficComponent, 'doQuery').and.callThrough()
+      spyOn(trafficComponent, 'doQuery').and.callThrough();
       spyOn(trafficComponent, 'triggerQuery').and.callThrough()
       spyOn($, "ajax").and.callFake(function(params) {
         params.success({"resultset": [[1.4]]});
