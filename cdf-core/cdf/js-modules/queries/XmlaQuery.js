@@ -17,6 +17,11 @@
  * Contact: agrohe21@gmail.com
  */
 
+/**
+ * Module that holds query related objects
+ * @module Query
+ */
+
 define(['amd!../lib/xmla',
   './XmlaQuery.ext',
   '../lib/Base',
@@ -26,12 +31,22 @@ define(['amd!../lib/xmla',
   '../lib/jquery'], 
 function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
+  /**
+   * Class that will be used by both XML/A and XML/A Discover classes.
+   * @class SharedXmla
+   * @extends Base
+   */
   var SharedXmla = Base.extend({
       xmla: null,
       //cache the datasource as there should be only one xmla server
       datasource: null,
       catalogs: null,
 
+    /**
+     * Fetches the available datasources from the server.
+     *
+     * @method getDataSources
+     */
     getDataSources: function() {
       var datasourceCache = [],
           rowset_ds = this.xmla.discoverDataSources();
@@ -53,6 +68,11 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       }
     },
 
+    /**
+     * Fetches the available catalogs from the server.
+     *
+     * @method getCatalogs
+     */
     getCatalogs: function() {
       var properties = {}, catalog = {};
 
@@ -76,54 +96,74 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       }
     },
 
-    discover: function(param) {
+    /**
+     * Executes a XML/A Discover query.
+     *
+     * @method discover
+     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     */
+    discover: function(queryDefinition) {
       var properties = {},
-          //user must pass in a valid XMLA request type for Discover requests (e.g. Xmla.DISCOVER_DATASOURCES)
-          qry = param.query();
+          //user must pass in a valid XML/A request type for Discover requests (e.g. Xmla.DISCOVER_DATASOURCES)
+          qry = queryDefinition.query();
 
       properties[Xmla.PROP_DATASOURCEINFO] = this.datasource[Xmla.PROP_DATASOURCEINFO];
-      if(param.catalog) {
-        properties[Xmla.PROP_CATALOG] = param.catalog;
+      if(queryDefinition.catalog) {
+        properties[Xmla.PROP_CATALOG] = queryDefinition.catalog;
       }
       var rowset_discover = this.xmla.discover({properties: properties, requestType: qry});
       return rowset_discover;
     },
 
-    execute: function(param) {
+    /**
+     * Executes a XML/A query.
+     *
+     * @method execute
+     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     * @throws Error if the catalog is not found in the catalogs array previously retrieved from the server.
+     */
+    execute: function(queryDefinition) {
       //find the requested catalog in internal array of valid catalogs
       for(var i = 0, j = _sharedXmla.catalogs.length; i < j; i++) {
-        if(_sharedXmla.catalogs[i]["CATALOG_NAME"] == param.catalog) {
+        if(_sharedXmla.catalogs[i]["CATALOG_NAME"] == queryDefinition.catalog) {
           var properties = {};
           properties[Xmla.PROP_DATASOURCEINFO] = _sharedXmla.datasource[Xmla.PROP_DATASOURCEINFO];
-          properties[Xmla.PROP_CATALOG]        = param.catalog;
+          properties[Xmla.PROP_CATALOG]        = queryDefinition.catalog;
           properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT || Xmla.PROP_FORMAT_TABULAR; // Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
           var result = this.xmla.execute({
-              statement: param.query(),
+              statement: queryDefinition.query(),
               properties: properties
           });
           return result;
         }
       }
-      //should never make it here if param.catalog is on server
-      throw new Error("Catalog: " + param.catalog + " was not found on Pentaho server.");
+      //should never make it here if queryDefinition.catalog is on server
+      throw new Error("Catalog: " + queryDefinition.catalog + " was not found on Pentaho server.");
     }
   });
 
   var _sharedXmla = new SharedXmla();
 
   /**
-   * XMLA Query
-   * requires queryType="xmla" in chartDefinition of CDF object
+   * Class that represents a XML/A query.
+   * @class XmlaQuery
+   * @extends BaseQuery
    */
   var xmlaOpts = {
     name: "xmla",
-    label: "XMLA",
+    label: "XML/A Query",
     queryDefinition: {},
     defaults: {
       //defaults to Pentaho's Mondrian servlet. can be overridden in options
       url: XmlaQueryExt.getXmla()
     },
 
+    /**
+     * Init method for the XML/A query
+     *
+     * @method init
+     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     */
     init: function(queryDefinition) {
       // store query definition
       this.queryDefinition = $.extend({}, this.getOption('params'), queryDefinition);
@@ -142,11 +182,18 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       }
     },
 
+    /**
+     * Formats the XML/A query result as an object with metadata and resultset properties.
+     *
+     * @method transformXMLAresults
+     * @param results Object with the XML/A query result.
+     * @returns {{}} Object with the XML/A query metadata and resultset as properties.
+     */
     transformXMLAresults: function(results) {
-      var  rows,
-           cols,
-           col,
-           res = {resultset: [], metadata: []};
+      var rows,
+          cols,
+          col,
+          res = {resultset: [], metadata: []};
       // Xmla.PROP_FORMAT_TABULAR
       if(results instanceof Xmla.Rowset) {
         rows = results.fetchAllAsArray();
@@ -180,6 +227,12 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       return res;
     },
 
+    /**
+     * Executes a XML/A query.
+     *
+     * @method doQuery
+     * @param outsideCallback Function to be called with the XML/A query result.
+     */
     doQuery: function(outsideCallback) {
       var url = this.getOption('url'),
           callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
@@ -188,27 +241,36 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       try {      
         var result = _sharedXmla.execute(this.queryDefinition);
       } catch(e) {
-        Logger.error('unable to execute xmla addin query: ' + e +' :');
+        Logger.error('unable to execute the XML/A query: ' + e +' :');
       }
       callback(this.transformXMLAresults(result));
     }
   };
+  // Registering an object that will be used to create a class, by extending BaseQuery,
+  // that will allow to generate new XML/A queries.
   Dashboard.registerGlobalQuery("xmla", xmlaOpts);
 
 
   /**
-   * XMLA Metadata Query
-   * requires queryType="xmla_discover" in chartDefinition of CDF object
+   * Class that represents a XML/A Discover query.
+   * @class XmlaQuery
+   * @extends BaseQuery
    */
   var xmlaDiscoverOpts = {
     name: "xmlaDiscover",
-    label: "XMLA Discover",
+    label: "XML/A Discover Query",
     queryDefinition: {},
     defaults: {
       //defaults to Pentaho's Mondrian servlet. can be overridden in options
       url: XmlaQueryExt.getXmla()
     },
 
+    /**
+     * Init method for the XML/A Discover query.
+     *
+     * @method init
+     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     */
     init: function(queryDefinition) {
       // store query definition
       this.queryDefinition = $.extend({}, this.getOption('params'), queryDefinition);
@@ -225,7 +287,14 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       }
     },
 
-    transformDiscoverresults: function(results) { //format results into standard format with metadata and resultset.
+    /**
+     * Formats the XML/A Discover query result as an object with metadata and resultset properties.
+     *
+     * @method transformDiscoverresults
+     * @param results Object with the XML/A Discover query result.
+     * @returns {{}} Object with the XML/A Discover query metadata and resultset as properties.
+     */
+    transformDiscoverresults: function(results) {
       var cols = results.getFields(),
           col,
           res = {resultset: [], metadata: []};
@@ -246,13 +315,19 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
             res.metadata[i].colType = "string";
         }
       }
-      //build resultset object
-      res.resultset = results.fetchAllAsArray(); //just use array of rows as it comes back from xmla.fetchAllAsObject
+      //build resultset object, use array of rows as it comes back from xmla.fetchAllAsObject
+      res.resultset = results.fetchAllAsArray();
       results.close(); //clear up memory
       //TODO SafeClone?
       return res;
     },
 
+    /**
+     * Executes a XML/A Discover query.
+     *
+     * @method doQuery
+     * @param outsideCallback Function to be called with the XML/A Discover query result.
+     */
     doQuery: function(outsideCallback) {
       var url = this.getOption('url'),
           callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
@@ -261,11 +336,13 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       try {      
         var result = _sharedXmla.discover(this.queryDefinition);
       } catch(e) {
-        Logger.error('unable to execute xmla addin query: ' + e + ' :');
+        Logger.error('unable to execute the XML/A Discover query: ' + e + ' :');
       }
       callback(this.transformDiscoverresults(result));
     }
   };
+  // Registering an object that will be used to create a class, by extending BaseQuery,
+  // that will allow to generate new XML/A Discover queries.
   Dashboard.registerGlobalQuery("xmlaDiscover", xmlaDiscoverOpts);
 
 });

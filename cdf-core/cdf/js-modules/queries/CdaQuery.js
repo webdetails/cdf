@@ -263,7 +263,7 @@ define(
     }
   };
 
-  // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
+  // Registering an object will use it to create a class by extending BaseQuery,
   // and use that class to generate new queries.
   Dashboard.registerGlobalQuery("cda", cdaQueryOpts);
 });

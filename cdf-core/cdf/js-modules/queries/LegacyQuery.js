@@ -35,7 +35,7 @@ define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../da
 
   var legacyOpts = {
     name: "legacy",
-    label: "Legacy",
+    label: "Legacy Query",
     defaults: {
       url: XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "jtable.xaction"),
       queryDef: {}
