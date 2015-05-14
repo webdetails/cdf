@@ -84,7 +84,7 @@ define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../da
             json = {"metadata": [msg], "values": []};
           } else {
             //exceptions while parsing json response are
-            //already being caught+handled in updateLifecyle()
+            //already being caught+handled in updateLifecycle()
             throw e;
           }
         }

@@ -126,7 +126,7 @@
      exports: "jQuery",
      deps: {
        "amd!cdf/lib/jquery.ui": "jQuery",
-       "css!cdf/lib/daterangepicker/ui.daterangepicker": "",
+       "css!cdf/lib/daterangepicker/ui.daterangepicker": ""
      },
       prescript: "define = function(arr, setup) { setup(jQuery) };"
   };
@@ -245,7 +245,7 @@
      exports: "jQuery",
      deps: {
        "cdf/lib/jquery": "jQuery"
-     },
+     }
   };
 
   //OpenLayers 2.13.1

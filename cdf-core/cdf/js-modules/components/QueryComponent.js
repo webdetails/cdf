@@ -13,9 +13,9 @@
 
 define(['./BaseComponent', '../Logger'], function(BaseComponent, Logger) {
 
-    var QueryComponent = BaseComponent.extend({
+  var QueryComponent = BaseComponent.extend({
     visible: false,
-    update : function() {
+    update: function() {
       QueryComponent.makeQuery(this);
     },
     warnOnce: function() {
@@ -26,7 +26,7 @@ define(['./BaseComponent', '../Logger'], function(BaseComponent, Logger) {
     }
   },
   {
-    makeQuery: function(object){
+    makeQuery: function(object) {
 
       if(this.warnOnce) { this.warnOnce(); }
 
@@ -49,7 +49,7 @@ define(['./BaseComponent', '../Logger'], function(BaseComponent, Logger) {
         object.metadata = values.metadata;
         object.result = values.resultset != undefined ? values.resultset : values;
         object.queryInfo = values.queryInfo;
-        if((typeof(object.postFetch)=='function')) {
+        if((typeof(object.postFetch) == 'function')) {
           changedValues = object.postFetch(values);
         }
         if(changedValues != undefined) {
@@ -66,7 +66,6 @@ define(['./BaseComponent', '../Logger'], function(BaseComponent, Logger) {
           object.queryInfo = values.queryInfo;
         }
       });
-
     }
   });
 
