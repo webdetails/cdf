@@ -28,6 +28,7 @@ define([
   './queries/BaseQuery',
   './queries/CpkQuery',
   './queries/CdaQuery',
+  './queries/XmlaQuery',
   './queries/LegacyQuery',
   './components/BaseComponent',
   './components/UnmanagedComponent',
