@@ -359,4 +359,10 @@
     noGlobal: true
   };
 
+  //xmla4js
+  requirePaths['cdf/lib/xmla'] = prefix + "/xmla/Xmla";
+  amdShim["cdf/lib/xmla"] = {
+    exports: "Xmla"
+  };
+
 })();

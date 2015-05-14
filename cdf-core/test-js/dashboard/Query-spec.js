@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
-*
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard.Clean"],
   function(Query, $, Dashboard) {
@@ -150,6 +150,42 @@ define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard.Clean"],
       expect(cdaQueryDefinition.parammyParam11.test1).toBe('test1');
       expect(cdaQueryDefinition.parammyParam11.test2).toBe('test2');
       expect(cdaQueryDefinition.parammyParam12).toBe('"test1;test2;test3"');
+    });
+
+    /**
+     * ## The Query class # allows to create XML/A queries
+     */
+    it("allows to create XML/A queries", function(done) {
+      var count = 0;
+      var d = new Dashboard();
+      spyOn(XMLHttpRequest.prototype, 'open').and.callThrough();
+      spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function(data) {
+        // XML/A discover datasources
+        expect(data).toEqual(
+          '<?xml version="1.0" encoding="UTF-8"?>\n' +
+          '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">\n' +
+          ' <SOAP-ENV:Body>\n' +
+          '  <Discover xmlns="urn:schemas-microsoft-com:xml-analysis" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">\n' +
+          '   <RequestType>DISCOVER_DATASOURCES</RequestType>\n' +
+          '   <Restrictions>\n' +
+          '   </Restrictions>\n' +
+          '   <Properties>\n' +
+          '   </Properties>\n' +
+          '  </Discover>\n' +
+          ' </SOAP-ENV:Body>\n' +
+          '</SOAP-ENV:Envelope>');
+        done();
+      });
+
+      var xmlaQuery = new Query({
+        queryType: 'xmla',
+        catalog: "SteelWheels",
+        query: function() {
+          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+                 "NON EMPTY TopCount([Customers].[All Customers].Children," +
+                 "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
+        }
+      }, null, d);
     });
   });
 });
