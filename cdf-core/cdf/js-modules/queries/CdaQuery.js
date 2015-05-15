@@ -96,7 +96,7 @@ define(
 
       _.each( params , function(value, name) {
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
-          //special case where single element will wrongly be treated as a parseable array by cda
+          //special case where single element will wrongly be treated as a parsable array by cda
           value = Utils.doCsvQuoting(value[0], ';');
         }
         //else will not be correctly handled for functions that return arrays
@@ -263,7 +263,7 @@ define(
     }
   };
 
-  // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
+  // Registering an object will use it to create a class by extending BaseQuery,
   // and use that class to generate new queries.
   Dashboard.registerGlobalQuery("cda", cdaQueryOpts);
 });

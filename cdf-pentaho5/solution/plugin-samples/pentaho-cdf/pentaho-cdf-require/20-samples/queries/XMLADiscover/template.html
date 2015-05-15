@@ -47,32 +47,38 @@
     </table>
 
     <script language="javascript" type="text/javascript">
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/QueryComponent',
+  'cdf/lib/jquery'
+], function(Dashboard, QueryComponent, $) {
 
-      var result = "";
+  var dashboard = new Dashboard();
+  
+  dashboard.addParameter("result", "");
+  
+  var MetaLayer = {
+    queryDefinition: {
+      queryType: 'xmlaDiscover',
+      query: function() {
+        return Xmla.DBSCHEMA_CATALOGS;
+      }
+    }
+  };
 
-      var MetaLayer = {
-        queryDefinition: {
-          queryType: 'xmlaDiscover',
-          query: function() {
-            return Xmla.DBSCHEMA_CATALOGS;
-          }
-        }
-      };
-
-      var executeQueryComponent = {
-        name: "executeQueryComponent",
-        type: "queryComponent",
-        htmlObject: "sampleObject",
-        executeAtStart: true,
-        resultvar: "result",
-        queryDefinition: MetaLayer.queryDefinition,
-        postFetch: function(data) {
-          $('#sampleObjectResult').html(JSON.stringify(data));
-        }
-      };
-
-      Dashboards.init([executeQueryComponent]);
-      Dashboards.finishedInit = false;
+  dashboard.addComponent(new QueryComponent({
+    name: "executeQueryComponent",
+    type: "queryComponent",
+    htmlObject: "sampleObject",
+    executeAtStart: true,
+    resultvar: "result",
+    queryDefinition: MetaLayer.queryDefinition,
+    postFetch: function(data) {
+      $('#sampleObjectResult').html(JSON.stringify(data));
+    }
+  }));
+  dashboard.init();
+});
     </script>
   </div>
 </div>

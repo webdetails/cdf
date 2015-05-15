@@ -32,9 +32,7 @@ define(['../dashboard/Dashboard.ext',
 
   var CpkEndpointsOpts = {
     name: "cpk",
-
-    label: "CPK",
-
+    label: "CPK Query",
     defaults: {
       url: '',
       pluginId: '',
@@ -108,7 +106,7 @@ define(['../dashboard/Dashboard.ext',
           // nor does CPK do any sort of array handling.
           // A stringify ensures the array is passed as a string, that can be parsed using kettle.
           value = JSON.stringify(value);
-          // Another option would be to add futher:
+          // Another option would be to add further:
           // value = value.split('],').join(';').split('[').join('').split(']').join('');
           // which transforms [[0,1],[2,3]] into "0,1;2,3"
         }
@@ -133,7 +131,7 @@ define(['../dashboard/Dashboard.ext',
         myself.setOption('lastResultSet', json);
         var clone = $.extend(true,{}, myself.getOption('lastResultSet'));
         if(json && json.result == false) {
-          // the ajax call might have been successful (no network erros),
+          // the ajax call might have been successful (no network errors),
           // but the endpoint might have failed, which is signalled by json.result
           var errorCallback = myself.getErrorHandler(myself.getOption('errorCallback'));
           errorCallback(clone);

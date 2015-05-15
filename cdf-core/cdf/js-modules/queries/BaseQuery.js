@@ -62,7 +62,7 @@
     * Additionally, the BaseQuery class can be set to something other than the default by using
     * {{#crossLink "DashboardQuery/setBaseQuery:method"}}setBaseQuery{{/crossLink}} method:
     *    DashboardQuery.setBaseQuery( constructor )
-    * but this is a risky operation whith considerable implications. Use at your own risk!
+    * but this is a risky operation with considerable implications. Use at your own risk!
     *
     * @constructor
     * @class BaseQuery
@@ -94,7 +94,7 @@
     * @param value Value for the property
     */
     setOption: function(prop, value) {
-      // Fallback for when Dashboards.OptionManager is not available
+      // Fallback for when OptionManager is not available
       this.defaults[prop] = value;
     },
 
@@ -398,7 +398,7 @@
     * @method previousPage
     * @param outsideCallback Callback to execute when the page of results is retrieved
     * @returns the result of calling doQuery
-    * @throws AtBeggining error if current page is the first one
+    * @throws AtBeginning error if current page is the first one
     */
     previousPage: function(outsideCallback) {
       var page = this.getOption('page'),
@@ -411,7 +411,7 @@
         this.setOption('page', 0);
         return this.doQuery(outsideCallback);
       } else {
-        throw "AtBeggining";
+        throw "AtBeginning";
       }
     },
 
