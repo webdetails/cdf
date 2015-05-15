@@ -11,12 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
+define(['../lib/jquery', './BaseComponent',  'css!./DateInputComponent'], function($, BaseComponent) {
 
   var DateInputComponent = BaseComponent.extend({
     update: function() {
       var myself = this;
       var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
+      var inputId = myself.name;
+      var inputValue = myself.dashboard.getParameterValue(myself.parameter);
       var startDate, endDate;
 
       if(myself.startDate == 'TODAY') {
@@ -38,10 +40,9 @@ define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
       //ToDo: stretch interval to catch defaultValue?..
       //Dashboards.getParameterValue(myself.parameter))
 
-      myself.placeholder().html($("<input/>")
-        .attr("id", myself.name)
-        .attr("value", myself.dashboard.getParameterValue(myself.parameter))
-        .css("width", "80px"));
+      myself.placeholder()
+          .addClass('date-input-container')
+          .html('<input class="date-input" id="' + inputId + '" value="' + inputValue + '"/>');
 
       $(function() {
         myself.placeholder("input").datepicker({
@@ -57,7 +58,7 @@ define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
           minDate: startDate,
           maxDate: endDate,
           onSelect: function(date, input) {
-            myself.dashboard.processChange(myself.name);
+            myself.dashboard.processChange(inputId);
           }
         });
         // Add JQuery DatePicker standard localization support only if the dashboard is localized
@@ -67,8 +68,8 @@ define(['../lib/jquery', './BaseComponent'], function($, BaseComponent) {
           $input.datepicker('option', $.datepicker.regional[myself.dashboard.i18nCurrentLanguageCode]);
 
           //Setup alt field and format to keep iso format
-          $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
-          $input.datepicker("option", "altField", "#" + myself.name + "_hidden");
+          $input.parent().append($('<hidden>').attr("id", inputId + "_hidden"));
+          $input.datepicker("option", "altField", "#" + inputId + "_hidden");
           $input.datepicker("option", "altFormat", format);
         }
         myself._doAutoFocus();
