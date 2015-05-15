@@ -18,26 +18,22 @@ define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery',
     update : function() {
       var myself = this;
       var dr;
+      var inputId = this.name;
+      var startValue = this.getStartParamValue();
+      var endValue = this.getEndParamValue();
       var inputSeparator = this.inputSeparator = this.inputSeparator || ">";
-      if(myself.singleInput == undefined || myself.singleInput == true) {
-        dr = $("<input/>")
-          .attr("id", myself.name)
-          .attr("value", myself.getStartParamValue() + " " + inputSeparator + " " + myself.getEndParamValue())
-          .css("width", "170px");
-        myself.placeholder().html(dr);
+
+      if (this.singleInput == undefined || this.singleInput == true) {
+        dr = $('<input class="date-range-single-input" id="' + inputId + '" value="' + startValue + ' ' + inputSeparator + ' ' + endValue + '"/>');
       } else {
-        dr = $("<input/>")
-          .attr("id", myself.name)
-          .attr("value", myself.getStartParamValue())
-          .css("width", "80px");
-        myself.placeholder().html(dr);
-        dr.after(
-          $("<input/>")
-            .attr("id", myself.name + "2")
-            .attr("value", myself.getEndParamValue())
-            .css("width", "80px"));
-        dr.after(inputSeparator);
+        dr = $('<input class="date-range-multiple-input" id="' + inputId + '" value="' + startValue + '"/>' + inputSeparator +
+        '<input class="date-range-multiple-input-2" id="' + inputId + '2" value="' + endValue + '"/>');
       }
+
+      this.placeholder()
+          .addClass('date-range-input-container')
+          .html(dr);
+
       //onOpen and onClose events
       myself.on('onOpen:dateRangeInput', myself.onOpenEvent );
       myself.on('onClose:dateRangeInput', myself.onCloseEvent );
@@ -54,7 +50,7 @@ define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery',
           myself.fireInputChange(myself.startValue,myself.endValue);
           changed = closed = false;
         }
-      };
+      }
 
       var format = (myself.dateFormat == undefined || myself.dateFormat == null) 
         ? 'yy-mm-dd'
