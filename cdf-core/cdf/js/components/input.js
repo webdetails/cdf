@@ -581,9 +581,11 @@ if($.datepicker) {
 }
 
 var DateInputComponent = BaseComponent.extend({
-  update: function(){
+  update: function() {
     var myself = this;
     var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
+    var inputId = myself.name;
+    var inputValue = Dashboards.getParameterValue(myself.parameter);
 
     var startDate, endDate;
 
@@ -600,10 +602,9 @@ var DateInputComponent = BaseComponent.extend({
     //ToDo: stretch interval to catch defaultValue?..
     //Dashboards.getParameterValue(myself.parameter))
 
-    myself.placeholder().html($("<input/>")
-      .attr("id", myself.name)
-      .attr("value", Dashboards.getParameterValue(myself.parameter))
-      .css("width", "80px"));
+    myself.placeholder()
+        .addClass('date-input-container')
+        .html('<input class="date-input" id="' + inputId + '" value="' + inputValue + '"/>');
 
     $(function(){
       myself.placeholder("input").datepicker({
@@ -619,7 +620,7 @@ var DateInputComponent = BaseComponent.extend({
         minDate: startDate,
         maxDate: endDate,
         onSelect: function(date, input){
-          Dashboards.processChange(myself.name);
+          Dashboards.processChange(inputId);
         }
       });
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
@@ -630,8 +631,8 @@ var DateInputComponent = BaseComponent.extend({
 
 
         //Setup alt field and format to keep iso format
-        $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
-        $input.datepicker("option", "altField", "#" + myself.name + "_hidden" );
+        $input.parent().append($('<hidden>').attr("id", inputId + "_hidden"));
+        $input.datepicker("option", "altField", "#" + inputId + "_hidden" );
         $input.datepicker("option", "altFormat", format );
       }
       myself._doAutoFocus();
@@ -661,18 +662,21 @@ var DateInputComponent = BaseComponent.extend({
 var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
+    var inputId = this.name;
+    var startValue = this.getStartParamValue();
+    var endValue = this.getEndParamValue();
     var inputSeparator = this.inputSeparator = this.inputSeparator || ">";
 
-    if (this.singleInput == undefined || this.singleInput == true){
-      dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue()
-          + " " + inputSeparator + " " + this.getEndParamValue() ).css("width","170px");
-      this.placeholder().html(dr);
+    if (this.singleInput == undefined || this.singleInput == true) {
+      dr = $('<input class="date-range-single-input" id="' + inputId + '" value="' + startValue + ' ' + inputSeparator + ' ' + endValue + '"/>');
     } else {
-      dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue() ).css("width","80px");
-      this.placeholder().html(dr);
-      dr.after($("<input/>").attr("id",this.name + "2").attr( "value", this.getEndParamValue() ).css("width","80px"));
-      dr.after(inputSeparator);
+      dr = $('<input class="date-range-multiple-input" id="' + inputId + '" value="' + startValue + '"/>' + inputSeparator +
+             '<input class="date-range-multiple-input-2" id="' + inputId + '2" value="' + endValue + '"/>');
     }
+
+    this.placeholder()
+        .addClass('date-range-input-container')
+        .html(dr);
 
     //onOpen and onClose events
     this.on('onOpen:dateRangeInput', this.onOpenEvent );
@@ -691,7 +695,7 @@ var DateRangeInputComponent = BaseComponent.extend({
         myself.fireInputChange(myself.startValue,myself.endValue);
         changed = closed = false;
       }
-    };
+    }
 
     var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
 

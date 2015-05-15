@@ -150,15 +150,32 @@
 }
 
 /*******
+DateInput Component
+********/
+
+.date-input-container .date-input {
+  width: 80px
+}
+
+/*******
 DateRangeInput Component
 ********/
 
+.date-range-input-container .date-range-single-input {
+  width: 170px;
+}
+
+.date-range-input-container .date-range-multiple-input,
+.date-range-input-container .date-range-multiple-input-2 {
+  width: 80px;
+}
+
 .ui-daterangepicker button.btnCancel {
-  margin: 0px 5px 5px 0px;
+  margin: 0 5px 5px 0;
   position: absolute;
   top: auto;
   left: auto;
-  bottom: 0px;
+  bottom: 0;
   right: 55px;
   float: right;
   cursor: pointer;
