@@ -397,19 +397,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       if(userQueryOptions.pageSize) {
         query.setPageSize(userQueryOptions.pageSize);
       }
-      // If this.parameters is a mapping between query and dashboard parameter names
-      // send the dashboard's parameter value instead of it's name because the query
-      // component doesn't have access to the dashboard instance to get such values
-      var params;
-      if(this.parameters && this.dashboard && typeof this.dashboard.getParameterValue === 'function') {
-        // create a copy of the parameters array
-        params = $.extend(true, [], this.parameters);
-        for(var i = 0; i < this.parameters.length; i++) {
-          var value = this.dashboard.getParameterValue(this.parameters[i][1]);
-          params[i][1] = value ? value : this.parameters[i][1];
-        }
-      }
-      query.fetchData(params, handler, errorHandler);
+      query.fetchData(this.parameters, handler, errorHandler);
     },
 
     /**
