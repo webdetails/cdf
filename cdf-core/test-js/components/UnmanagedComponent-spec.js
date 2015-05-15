@@ -112,10 +112,26 @@ define(["cdf/Dashboard.Clean",
       }
     });
 
+    var uqueryWithParams = new HelloQueryUnmanagedComponent({
+      name: "uqueryWithParams",
+      type: "HelloQueryUnmanaged",
+      htmlObject: 'uquery',
+      executeAtStart: true,
+      queryDefinition: {
+        path: "/fake/test2.cda",
+        dataAccessId: "2"
+      },
+      parameters: {
+        "MYPARAM1": "myparam1",
+        "MYPARAM2": "myparam2",
+        "MYPARAM3": "myparam3"
+      }
+    });
+
     beforeEach(function() {
       dashboard = new Dashboard();
       dashboard.init();
-      dashboard.addComponents([mhello, uhello, mquery, uquery]);
+      dashboard.addComponents([mhello, uhello, mquery, uquery, uqueryWithParams]);
     });
 
     /**
@@ -180,6 +196,25 @@ define(["cdf/Dashboard.Clean",
       });
 
       dashboard.update(uquery);
+    });
+
+    it("triggers query with the parameters of the unmanaged query component unchanged", function(done) {
+      spyOn(uqueryWithParams, 'update').and.callThrough();
+
+      var myQuery = new Query(uqueryWithParams.queryDefinition, null, uqueryWithParams.dashboard);
+      spyOn(myQuery, 'fetchData').and.callThrough();
+
+      spyOn(uqueryWithParams.dashboard, 'getQuery').and.returnValue(myQuery);
+
+      // listen to cdf:postExecution event
+      uqueryWithParams.once("cdf:postExecution", function() {
+        expect(uqueryWithParams.update).toHaveBeenCalled();
+        expect(myQuery.fetchData).toHaveBeenCalledWith(uqueryWithParams.parameters,
+            jasmine.any(Function), jasmine.any(Function));
+        done();
+      });
+
+      dashboard.update(uqueryWithParams);
     });
   });
 });
