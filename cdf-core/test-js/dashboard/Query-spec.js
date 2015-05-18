@@ -153,6 +153,121 @@ define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard.Clean"],
     });
 
     /**
+     * ## The Query class # allows dashboard params in query parameters
+     */
+    it("allows static params in query parameters", function() {
+      var params = {
+        myParam1: "myParam1",
+        myParam2: "myParam2",
+        myParam3: "myParam3",
+        myParam4: "myParam4",
+        myParam5: "myParam5",
+        myParam6: "myParam6",
+        myParam7: "myParam7",
+        myParam8: "myParam8",
+        myParam9: "myParam9",
+        myParam10: "myParam10",
+        myParam11: "myParam11",
+        myParam12: "myParam12"
+      };
+
+
+      var d = new Dashboard();
+
+      d.setParameter("myParam1", true);
+      d.setParameter("myParam2", "'test'");
+      d.setParameter("myParam3", "test");
+      d.setParameter("myParam4", "['test1', 'test2']");
+      d.setParameter("myParam5", "[test1, test2]");
+      d.setParameter("myParam6", undefined);
+      d.setParameter("myParam7", function() { return "myParam8FuncReturn"; });
+      d.setParameter("myParam8", 1);
+      d.setParameter("myParam9", ["test1"]);
+      d.setParameter("myParam10", [1, 2, 3]);
+      d.setParameter("myParam11", {
+        test1: "test1",
+        test2: "test2"
+      });
+      d.setParameter("myParam12", ["test1;test2;test3"]);
+
+      var CpkQuery = new Query({
+        endpoint: "getPluginMetadata",
+        pluginId: "sparkl",
+        stepName: "OUTPUT",
+        kettleOutput: "Inferred",
+        queryType: "cpk"
+      }, null, d);
+      //debugger;
+      var cpkQueryDefinition = CpkQuery.buildQueryDefinition(params);
+
+      var CdaQuery = new Query({
+        dataAccessId: "foo",
+        path: "bar",
+        queryType: "cda"
+      }, null, d);
+      var cdaQueryDefinition = CdaQuery.buildQueryDefinition(params);
+
+      /**
+       * CPK
+       */
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam1')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam2')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam3')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam4')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam5')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam6')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam7')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam8')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam9')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam10')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam11')).toBe(true);
+      expect(cpkQueryDefinition.hasOwnProperty('parammyParam12')).toBe(true);
+
+      expect(cpkQueryDefinition.parammyParam1).toBe(true);
+      expect(cpkQueryDefinition.parammyParam2).toBe("'test'");
+      expect(cpkQueryDefinition.parammyParam3).toBe("test");
+      expect(cpkQueryDefinition.parammyParam4).toBe("['test1', 'test2']");
+      expect(cpkQueryDefinition.parammyParam5).toBe("[test1, test2]");
+      expect(cpkQueryDefinition.parammyParam7).toBe("myParam8FuncReturn");
+      expect(cpkQueryDefinition.parammyParam8).toBe(1);
+      expect(cpkQueryDefinition.parammyParam9).toBe('["test1"]');
+      expect(cpkQueryDefinition.parammyParam10).toBe('[1,2,3]');
+      expect(cpkQueryDefinition.parammyParam11).toBe('{"test1":"test1","test2":"test2"}');
+      expect(cpkQueryDefinition.parammyParam12).toBe('["test1;test2;test3"]');
+
+      /**
+       * CDA
+       */
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam1')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam2')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam3')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam4')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam5')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam6')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam7')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam8')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam9')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam10')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam11')).toBe(true);
+      expect(cdaQueryDefinition.hasOwnProperty('parammyParam12')).toBe(true);
+
+      expect(cdaQueryDefinition.parammyParam1).toBe(true);
+      expect(cdaQueryDefinition.parammyParam2).toBe("'test'");
+      expect(cdaQueryDefinition.parammyParam3).toBe("test");
+      expect(cdaQueryDefinition.parammyParam4).toBe("['test1', 'test2']");
+      expect(cdaQueryDefinition.parammyParam5).toBe("[test1, test2]");
+      expect(cdaQueryDefinition.parammyParam7).toBe("myParam8FuncReturn");
+      expect(cdaQueryDefinition.parammyParam8).toBe(1);
+      expect(cdaQueryDefinition.parammyParam9[0]).toBe('test1');
+      expect(cdaQueryDefinition.parammyParam10[0]).toBe(1);
+      expect(cdaQueryDefinition.parammyParam10[1]).toBe(2);
+      expect(cdaQueryDefinition.parammyParam10[2]).toBe(3);
+      expect(cdaQueryDefinition.parammyParam11.test1).toBe('test1');
+      expect(cdaQueryDefinition.parammyParam11.test2).toBe('test2');
+      expect(cdaQueryDefinition.parammyParam12).toBe('"test1;test2;test3"');
+    });
+
+    /**
      * ## The Query class # allows to create XML/A queries
      */
     it("allows to create XML/A queries", function(done) {
