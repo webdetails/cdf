@@ -40,13 +40,16 @@ define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../da
       url: XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "jtable.xaction"),
       queryDef: {}
     },
-    interfaces:{
-      lastResultSet:{
+    interfaces: {
+      lastResultSet: {
         reader: function(json) {
           json = eval("(" + json + ")");
-          var result = {metadata: [makeMetadataElement(0)], resultset: json.values || []};
+          var result = {
+            metadata: [makeMetadataElement(0)],
+            resultset: json.values || []
+          };
           _.each(json.metadata, function(el, idx) {
-            return result.metadata.push( makeMetadataElement(idx + 1, el) );
+            return result.metadata.push(makeMetadataElement(idx + 1, el));
           });
           return result
         }
