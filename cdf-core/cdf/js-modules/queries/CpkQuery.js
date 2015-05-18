@@ -27,8 +27,9 @@ define(['../dashboard/Dashboard.ext',
   '../dashboard/Dashboard.query',
   'amd!../lib/underscore',
   '../dashboard/Utils',
+  '../Logger',
   '../lib/jquery'],
-  function(DashboardExt, BaseQuery, Dashboard, _, Utils, $) {
+  function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
   var CpkEndpointsOpts = {
     name: "cpk",

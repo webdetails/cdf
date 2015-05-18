@@ -113,7 +113,7 @@ define(
         }
         if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parsable array by cda
-          paramValue = doCsvQuoting(paramValue[0], ';');
+          paramValue = Utils.doCsvQuoting(paramValue[0], ';');
         }
         //else will not be correctly handled for functions that return arrays
         if(typeof paramValue == 'function') {
