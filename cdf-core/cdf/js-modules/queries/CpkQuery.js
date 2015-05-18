@@ -82,9 +82,8 @@ define(['../dashboard/Dashboard.ext',
      * @private
      */
     buildQueryDefinition: function(overrides) {
-      overrides = (overrides instanceof Array) 
-        ? Utils.propertiesArrayToObject(overrides)
-        : (overrides || {});
+      var myself = this;
+      overrides = (overrides instanceof Array) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
 
       var queryDefinition = {
         kettleOutput: this.getOption('kettleOutput'),
@@ -94,23 +93,38 @@ define(['../dashboard/Dashboard.ext',
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
       var cachedParams = this.getOption('params'),
-        params = $.extend( {}, cachedParams, overrides);
+          params = $.extend({}, cachedParams, overrides);
 
       _.each(params, function(value, name) {
-        if(typeof value == 'function') {
-          value = value();
+        var paramValue, printValue;
+        try {
+          paramValue = myself.dashboard.getParameterValue(value);
+        } catch(e) {
+          if(!_.isObject(value) || _.isFunction(value)) {
+            printValue = value;
+          } else {
+            printValue = JSON.stringify(value);
+          }
+          Logger.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
+            "The parameter will be used as value instead its value obtained from getParameterValue");
+          paramValue = value;
         }
-        if(_.isObject(value)) {
+        if(paramValue === undefined) {
+          paramValue = value;
+        }
+        if(_.isFunction(paramValue)) {
+          paramValue = paramValue();
+        } else if(_.isObject(paramValue)) {
           // kettle does not handle arrays natively,
           // nor does it interpret multiple parameters with the same name as elements of an array,
           // nor does CPK do any sort of array handling.
           // A stringify ensures the array is passed as a string, that can be parsed using kettle.
-          value = JSON.stringify(value);
+          paramValue = JSON.stringify(paramValue);
           // Another option would be to add further:
           // value = value.split('],').join(';').split('[').join('').split(']').join('');
           // which transforms [[0,1],[2,3]] into "0,1;2,3"
         }
-        queryDefinition['param' + name] = value;
+        queryDefinition['param' + name] = paramValue;
       });
 
       return queryDefinition;

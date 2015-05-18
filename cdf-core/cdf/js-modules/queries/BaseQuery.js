@@ -20,30 +20,43 @@
   function($, Base, _, Logger, OptionsManager, DashboardQuery) {
  
    var BaseQuery = Base.extend({
-    name: "baseQuery",
-    label: "Base Query",
-    deepProperties: ['defaults' , 'interfaces'],
-    defaults: {
-      successCallback: function() {
-        Logger.log('Query callback not defined. Override.');
-      },
-//          errorCallback: Dashboards.handleServerError,
-      lastResultSet: null,
-      page: 0,
-      pageSize: 0,
-      params: {},
-      ajaxOptions: {
-        async: false,
-        type: 'POST'
-      },
-      url: ''
-    },
-
-    interfaces: {
-      params: {reader: 'propertiesObject', validator: 'isObjectOrPropertiesArray'},
-      successCallback: {validator: 'isFunction'},
-      errorCallback: {validator: 'isFunction'},
-      pageSize: {validator: 'isPositive'}
+     name: "baseQuery",
+     label: "Base Query",
+     deepProperties: ['defaults' , 'interfaces'],
+     dashboard: undefined,
+     defaults: {
+       successCallback: function() {
+         Logger.log('Query callback not defined. Override.');
+       },
+       errorCallback: function() {
+         if( dashboard != undefined && dashboard.handleServerError != undefined ) {
+           dashboard.handleServerError();
+         }
+       },
+       lastResultSet: null,
+       page: 0,
+       pageSize: 0,
+       params: {},
+       ajaxOptions: {
+         async: false,
+         type: 'POST'
+       },
+       url: ''
+     },
+     interfaces: {
+     params: {
+       reader: 'propertiesObject',
+       validator: 'isObjectOrPropertiesArray'
+     },
+     successCallback: {
+       validator: 'isFunction'
+     },
+     errorCallback: {
+       validator: 'isFunction'
+     },
+     pageSize: {
+       validator: 'isPositive'
+     }
 
     },
 
@@ -68,7 +81,7 @@
     * @class BaseQuery
     * @param config Query configuration object
     */
-    constructor: function(config) {          
+    constructor: function(config) {
       this._optionsManager = new OptionsManager(this);
       this._optionsManager.mixin(this);          
       this.init(config);

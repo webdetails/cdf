@@ -86,24 +86,40 @@ define(
      * @private
      */
     buildQueryDefinition: function(overrides) {
-      overrides = (overrides instanceof Array)
-        ? Utils.propertiesArrayToObject(overrides)
-        : (overrides || {});
+      var myself = this;
+      overrides = (overrides instanceof Array) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
       var queryDefinition = {};
 
-      var cachedParams = this.getOption('params');
-      var params = $.extend({}, cachedParams, overrides);
+      var cachedParams = this.getOption('params'),
+          params = $.extend({}, cachedParams, overrides);
 
-      _.each( params , function(value, name) {
-        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
+      _.each(params, function(value, name) {
+        var paramValue;
+        try {
+          paramValue = myself.dashboard.getParameterValue(value);
+        } catch(e) {
+          var printValue = "";
+          if(!_.isObject(value) || _.isFunction(value)) {
+            printValue = value;
+          } else {
+            printValue = JSON.stringify(value);
+          }
+          Logger.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
+            "The parameter will be used instead the parameter value");
+          paramValue = value;
+        }
+        if(paramValue === undefined) {
+          paramValue = value;
+        }
+        if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parsable array by cda
-          value = Utils.doCsvQuoting(value[0], ';');
+          paramValue = doCsvQuoting(paramValue[0], ';');
         }
         //else will not be correctly handled for functions that return arrays
-        if(typeof value == 'function') {
-          value = value();
+        if(typeof paramValue == 'function') {
+          paramValue = paramValue();
         }
-        queryDefinition['param' + name] = value;
+        queryDefinition['param' + name] = paramValue;
       });
       queryDefinition.path = this.getOption('file');
       queryDefinition.dataAccessId = this.getOption('id');
@@ -133,12 +149,12 @@ define(
         queryDefinition.settingcsvSeparator = options.separator;
       }
       if(options.filename) {
-        queryDefinition.settingattachmentName = options.filename ;
+        queryDefinition.settingattachmentName = options.filename;
       }
       if(outputType == 'xls' && options.template) {
-        queryDefinition.settingtemplateName = options.template ;
+        queryDefinition.settingtemplateName = options.template;
       }
-      if( options.columnHeaders) {
+      if(options.columnHeaders) {
         queryDefinition.settingcolumnHeaders = options.columnHeaders;
       }
 
@@ -188,8 +204,8 @@ define(
      * @throws   InvalidSortExpression if the sort by columns are not correctly defined
      */
     setSortBy: function(sortBy) {
-      var newSort;
-      var myself = this;
+      var newSort,
+          myself = this;
       if(sortBy === null || sortBy === undefined || sortBy === '') {
         newSort = '';
       }
@@ -210,12 +226,12 @@ define(
           return e !== "";
         });
       } else if(sortBy instanceof Array) {
-        newSort = sortBy.map(function(d){
+        newSort = sortBy.map(function(d) {
           return d.toUpperCase();
         });
         /* We also need to validate that each individual term is valid */
         var invalidEntries = newSort.filter(function(e) {
-          return !e.match("^[0-9]+[adAD]?,?$")
+          return !e.match("^[0-9]+[adAD]?,?$");
         });
         if(invalidEntries.length > 0) {
           throw "InvalidSortExpression";
@@ -228,7 +244,7 @@ define(
       var same;
       if(newSort instanceof Array) {
         same = newSort.length != myself.getOption('sortBy').length;
-        $.each(newSort,function(i,d) {
+        $.each(newSort,function(i, d) {
           same = (same && d == myself.getOption('sortBy')[i]);
           if(!same) {
             return false;
