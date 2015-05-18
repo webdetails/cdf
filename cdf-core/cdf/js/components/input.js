@@ -517,8 +517,14 @@ var TextInputComponent = BaseComponent.extend({
     var name = myself.name;
     var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
       "' value='" + Dashboards.getParameterValue(myself.parameter) +
-      (myself.size ? ("' size='" + myself.size) : "") +
-      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") + "'>";
+      (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "" ) ) +
+      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "" ) ) + "'>";
+    if(myself.size) {
+      Dashboards.log("Warning: attribute 'size' is deprecated");
+    }
+    if(myself.maxLength) {
+      Dashboards.log("Warning: attribute 'maxLength' is deprecated");
+    }
 
     myself.placeholder().html(selectHTML);
 
