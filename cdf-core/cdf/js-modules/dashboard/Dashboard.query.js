@@ -133,6 +133,7 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
       }
 
       var query = this.queryFactories.getNew('Query', type, opts);
+      query.dashboard = this;
       return query;
     },
 
