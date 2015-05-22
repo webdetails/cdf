@@ -1289,26 +1289,28 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
   searchedWord : '',
   result: [],
+  selectedValues: [],
 
-  queryServer : function(searchString){
-
-    if(!this.parameters) this.parameters = [];
-
-    if(this.searchParam){
-      this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
+  queryServer: function(searchString) {
+    if(!this.parameters) {
+      this.parameters = [];
     }
-    else if (this.parameters.length > 0){
+
+    if(this.searchParam) {
+      this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
+    } else if (this.parameters.length > 0) {
       this.parameters[0][1] = this.getInnerParameterName();
     }
 
-    if(this.maxResults){
+    if(this.maxResults) {
       this.queryDefinition.pageSize = this.maxResults;
     }
-    Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
+
+    Dashboards.setParameter(this.getInnerParameterName(), this.getTextBoxValue());
     QueryComponent.makeQuery(this);
   },
 
-  getTextBoxValue: function(){
+  getTextBoxValue: function() {
     return this.textbox.val();
   },
 
@@ -1316,93 +1318,214 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     return this.parameter + '_textboxValue';
   },
 
-  update : function() {
+  setInitialValue: function() {
+    var initialValue = null;
+    var param = this.parameter;
 
+    if(param) {
+      initialValue = Dashboards.getParameterValue(param);
+    }
+
+    if(initialValue != null && _.isArray(initialValue)) {
+      for(var i = 0, L = initialValue.length; i < L; i++) {
+        this._selectValue(initialValue[i]);
+      }
+    }
+  },
+
+  update: function() {
     this.placeholder().empty();
 
-    var initialValue = null;
-    if(this.parameter){
-      initialValue = Dashboards.getParameterValue(this.parameter);
-    }
-
     var myself = this;
+    var isMultiple = this.selectMulti || false;
+    var options = this.getOptions();
+
 
     //init parameter
-    if(!Dashboards.getParameterValue(this.getInnerParameterName())){
-      Dashboards.setParameter(this.getInnerParameterName(), '' );
+    if(!Dashboards.getParameterValue(this.getInnerParameterName())) {
+      Dashboards.setParameter(this.getInnerParameterName(), '');
     }
 
-    var processChange = myself.processChange == undefined ? function(objName){
-      Dashboards.processChange(objName);
-    } : function(objName) {
-      myself.processChange();
-    };
-    var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter,value);
-    } : undefined;
+    this.textbox = $('<input class="autocomplete-input">');
+    var autoComplete = $('<div class="autocomplete-container">');
 
-    if(this.minTextLength == undefined){
-      this.minTextLength = 0;
+    if(isMultiple) {
+      var title = this.tooltipMessage || "Click it to Apply";
+      var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="S"/>')
+          .click(function() {
+            myself.endSearch();
+          });
+      autoComplete.append(apply)
     }
 
-    var opt = {
-      list: function(){
-        var val = myself.textbox.val();
-        if(val.length >= myself.minTextLength &&
-           !(val == '' //nothing to search
-             ||
-             val == myself.searchedWord
-             ||
-            ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
-             myself.searchedWord != '' &&
-             ((myself.matchType == "fromStart")?
-                val.indexOf(myself.searchedWord) == 0 :
-                val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
-        {
-          myself.queryServer(val);
-          myself.searchedWord = val;
+    autoComplete
+        .append(this.textbox)
+        .append('<ul class="list-data-selection">')
+        .appendTo(this.placeholder());
+
+    this.textbox.autocomplete(options);
+
+    $('.autocomplete-container .ui-autocomplete').off('menuselect');
+    this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
+      var listItem = $('<li class="list-item">');
+
+      var content = $('<a>' + (isMultiple ? '<input type="checkbox"/>' : '') + item.label + '</a>').click(function(event) {
+        var checkbox = $(this).find('input');
+        if($(event.srcElement).is('a')) {
+          checkbox.prop('checked', !checkbox.is(':checked'))
         }
-        var list = [];
-        for(p in myself.result) if (myself.result.hasOwnProperty(p)){
-          var obj = {};
-          obj.text = myself.result[p][0];
-          list.push(obj);
+        if(!isMultiple) {
+          myself.selectValue(item.label);
+          myself.endSearch();
+        } else if(checkbox.is(':checked')) {
+          myself.selectValue(item.label);
+        } else {
+          myself.removeValue(item.label);
         }
-        return list;
-      },
-      matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
-      processElementChange:  processElementChange,
-      processChange: function(obj,value) {
-        obj.value = value;
-        processChange(obj.name);
-      },
-      multiSelection: myself.selectMulti == undefined ? false : myself.selectMulti,
-      checkValue: myself.checkValue == undefined ? true : myself.checkValue,
-      minTextLength: myself.minTextLength == undefined ? 0 : myself.minTextLength,
-      scrollHeight: myself.scrollHeight,
-      applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
-      tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
-      addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
-      externalApplyButtonId: myself.externalApplyButtonId,
-  //    selectedValues: initialValue,
-      parent: myself
+      });
+
+      content.appendTo(listItem);
+      return listItem.appendTo(ul);
     };
 
+    //if defined and it exists bind a click event to this button
+    $('#' + this.externalApplyButtonId).click(function() {
+      myself.endSearch();
+    });
 
-    this.autoBoxOpt = this.placeholder().autobox(opt);
-
-    //setInitialValue
-    this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
-
-    this.textbox = this.placeholder('input');
-
-    this._doAutoFocus();
+    this.setInitialValue();
   },
+
+  getOptions: function() {
+    var myself = this;
+
+    var processChange = this.processChange == null ?
+        function() {
+          var object = _.extend({}, myself);
+          object.value = myself.selectedValues;
+          Dashboards.processChange(object.name);
+        } :
+        function() {
+          myself.processChange();
+        };
+
+    var options = {
+      appendTo: '.autocomplete-container',
+      minLength: this.minTextLength || 0,
+      source: function(search, callback) {
+        myself.search(search, callback);
+      },
+
+      focus: function(event, ui) {
+        event.preventDefault();
+      },
+
+      open: function(event, ui) {
+        var scroll = myself.scrollHeight || 0;
+
+        if(scroll > 0) {
+          $('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
+        }
+
+        myself.filterData();
+      },
+
+      close: function(event, ui) {
+        var container = $('.autocomplete-container');
+        container.removeClass('show-apply-button');
+        container.find('.autocomplete-input-apply').hide();
+        myself.textbox.val('');
+        processChange();
+      }
+    };
+
+    return options;
+  },
+
+  selectValue: function(label) {
+    var myself = this;
+    var addTextElements = this.addTextElements != null ? this.addTextElements : true;
+    var showApplyButton = this.showApplyButton != null ? this.showApplyButton : true;
+    var list = $('.autocomplete-container .list-data-selection');
+    var listItem = $('<li id="' + label + '"><input type="button" class="close-button" value="x"/>' + label + '</li>');
+
+    if(!this.selectMulti) {
+      list.empty();
+      this.selectedValues = [];
+    } else if(showApplyButton) {
+      $('.autocomplete-container').addClass('show-apply-button');
+      $('.autocomplete-input-apply').show();
+    }
+
+    listItem.find('input').click(function() {
+      myself.removeValue(label);
+    });
+
+    if(addTextElements) {
+      listItem.appendTo(list);
+    }
+    this.selectedValues.push(label);
+  },
+
+  removeValue: function(id) {
+    this.selectedValues = _.without(this.selectedValues, id);
+    $('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+  },
+
+  filterData: function() {
+    var menu = $('.autocomplete-container .ui-autocomplete');
+    var data = this.selectedValues || [];
+    var addTextElements = this.addTextElements != null ? this.addTextElements : true;
+
+    if(data.length > 0) {
+      menu.find('li').each(function () {
+        var $this = $(this);
+        var label = $this.text();
+        if(data.indexOf(label) > -1) {
+          if(addTextElements) {
+            $this.remove();
+          } else {
+            $this.find('input').prop('checked', true);
+          }
+        }
+      });
+
+      if(menu.find('li').length == 0) {
+        menu.hide();
+      }
+    }
+  },
+
+  search: function(search, callback) {
+    var matchType = this.matchType || 'fromStart';
+    var val = search.term.toLowerCase();
+    this.queryServer(val);
+
+    var result = this.result;
+    var list = [];
+
+    for(var p in result) if(result.hasOwnProperty(p)) {
+      var value = result[p][0];
+      if(value != null &&
+          (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0) ||
+          (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
+        list.push(value);
+      }
+    }
+
+    callback(list);
+  },
+
+  endSearch: function() {
+    this.textbox.autocomplete("close");
+  },
+
   getValue : function() {
     return this.value;
   },
+
   processAutoBoxChange : function() {
-    this.autoBoxOpt.processAutoBoxChange();
+    this.textbox.autocomplete("change");
   }
 });
 

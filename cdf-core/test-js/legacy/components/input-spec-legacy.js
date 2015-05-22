@@ -4,7 +4,6 @@
 describe("The Autocomplete Component #", function() {
 
   var myDashboard = _.extend({}, Dashboards);
-
   myDashboard.addParameter('autocompleteTestParameter', 1);
 
   var autocompleteComponent = window.AutocompleteBoxComponent = new AutocompleteBoxComponent();
@@ -51,34 +50,69 @@ describe("The Autocomplete Component #", function() {
   });
 
   /**
-   * ## The Autocomplete Component # Trigger query called on input change
+   * ## The Autocomplete Component # List construction after autocomplete search
    */
-  it("Trigger Called on input change", function(done){
-     spyOn(autocompleteComponent, 'queryServer').and.callFake(function(){
-      this.result = {
-        "metadata":["Sales"],
-        "values":[
-          ["AV Stores, Co.","157807.80999999994"],
-          ["Anna's Decorations, Ltd","153996.12999999998"],
-          ["Auto Canal+ Petit","93170.66"],
-          ["Alpha Cognac","70488.43999999999"],
-          ["Auto Associés & Cie.","64834.32000000001"],
-          ["Australian Collectables, Ltd","64591.460000000014"],
-          ["Australian Gift Network, Co","59469.12"],
-          ["Auto-Moto Classics Inc.","26479.260000000002"],
-          ["Atelier graphique","24179.96"]]
-      }
+  it("List construction after autocomplete search", function(done) {
+    var expectedResult = [
+      "AV Stores, Co.",
+      "Anna's Decorations",
+      "Auto Canal+ Petit"
+    ];
+
+    spyOn(autocompleteComponent, 'queryServer').and.callFake(function(){
+      this.result = [
+        ["AV Stores, Co."],
+        ["Anna's Decorations"],
+        ["Auto Canal+ Petit"],
+        ["Euro+ Shopping Channel"],
+        ["La Rochelle Gifts"]
+      ]
     });
-    spyOn(autocompleteComponent.textbox, "val").and.returnValue("a");
-    myDashboard.update(autocompleteComponent);
-    autocompleteComponent.autoBoxOpt.getList(autocompleteComponent.textbox, {});
+
+    var returnedList = [];
+    autocompleteComponent.search({term:'a'}, function(list) {
+      returnedList = list;
+    });
 
     setTimeout(function(){
       expect(autocompleteComponent.queryServer).toHaveBeenCalled();
+      expect(returnedList).toEqual(expectedResult);
       done();
     }, 100);
   });
 
+  /**
+   * ## The Autocomplete Component # Select and Remove Values
+   */
+  it("Select and Remove Values", function() {
+    autocompleteComponent.selectedValues = [];
+
+    autocompleteComponent.selectValue("value1");
+    expect(autocompleteComponent.selectedValues).toEqual(["value1"]);
+
+    autocompleteComponent.selectValue("value2");
+    expect(autocompleteComponent.selectedValues).toEqual(["value1", "value2"]);
+
+    autocompleteComponent.removeValue("value1");
+    expect(autocompleteComponent.selectedValues).toEqual(["value2"]);
+
+    autocompleteComponent.removeValue("value2");
+    expect(autocompleteComponent.selectedValues).toEqual([]);
+  });
+
+  /**
+   * ## The Autocomplete Component # Get Options
+   */
+  it("Get Options", function() {
+    var options = autocompleteComponent.getOptions();
+
+    expect(options.appendTo).toEqual('.autocomplete-container');
+    expect(options.minLength).toEqual(autocompleteComponent.minTextLength);
+    expect(typeof options.source).toEqual('function');
+    expect(typeof options.focus).toEqual('function');
+    expect(typeof options.open).toEqual('function');
+    expect(typeof options.close).toEqual('function');
+  });
 });
 
 /**

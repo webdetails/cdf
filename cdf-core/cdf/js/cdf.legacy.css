@@ -776,6 +776,62 @@ div.scheduler  label {
   height:32px;
 }
 
+/**
+ * AutoCompleteBox Component
+ **/
+.autocomplete-container {
+  padding: 5px;
+  border: 1px solid black;
+  min-height: 22px;
+  width: 160px;
+}
+
+.show-apply-button.autocomplete-container {
+  width: 190px;
+}
+
+.autocomplete-container .autocomplete-input {
+  margin-bottom: 5px;
+  float: left;
+}
+
+.autocomplete-container .autocomplete-input-apply {
+  float: right;
+}
+
+.autocomplete-container .list-data-selection {
+  clear: both;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+
+  width: 170px;
+}
+
+.autocomplete-container .list-item,
+.autocomplete-container .list-data-selection li {
+  width: auto;
+  text-align: left;
+  padding: 2px;
+  font-size: 0.75em;
+}
+
+.autocomplete-container .list-data-selection .close-button {
+  padding: 0;
+  margin-right: 5px;
+
+  border: none;
+  background-color: transparent;
+
+  color: #A9A9A9;
+  font-weight: bold;
+}
+
+.autocomplete-container .list-data-selection .close-button:hover {
+  cursor: pointer;
+  color: #000000;
+}
+
 /*******************/
 
 /*

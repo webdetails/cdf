@@ -52,6 +52,9 @@
 			<dt>queryDefinition</dt>
 			<dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
 
+			<dt>addTextElements</dt>
+			<dd>If true adds selected values bellow the input box. Default: true</dd>
+
 			<dt>selectMulti</dt>
 			<dd>Allow multiple selection. Default: false</dd>
 
@@ -67,7 +70,10 @@
 			<dt>showApplyButton</dt>
 			<dd>Show apply Button in multi selection mode. Default: true </dd>
 
-			<dt>tooltip</dt>
+			<dt>externalApplyButtonId</dt>
+			<dd>Id of a external button, to apply changes on the component.</dd>
+
+			<dt>tooltipMessage</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
 
 			<dt>autoUpdateFunction</dt>
@@ -102,7 +108,7 @@
 
 		<h3>Sample</h3>
 
-		<div id="example" class="flora">
+		<div id="example" class="flora" style="height:400px">
 			<ul>
 				<li><a href="#sample"><span>Sample</span></a></li>
 				<li><a href="#code"><span>Code</span></a></li>
@@ -115,7 +121,7 @@
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
 
-MetaLayerHome2 = {
+var MetaLayerHome2 = {
 clientSelectorDefinition: {
 	queryType: 'mdx',
 	jndi: "SampleData",
@@ -130,7 +136,7 @@ clientSelectorDefinition: {
 }
 
 
-clientSelector = {
+var clientSelector = {
 	name: "clientSelector",
 	type: "autocompleteBox",
 	matchType: "fromStart",
