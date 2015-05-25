@@ -284,11 +284,18 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      */
     getSettingsValue : function(key,value) {
     
-      var callback = typeof value == 'function' ? value : function(json) {
+      $.ajax({
+        type: 'GET',
+        dataType: "json",
+        url: DashboardExt.getSettings("get", key),
+        data: args,
+        async: true,
+        xhrFields: {
+          withCredentials: true
+        }
+      }).done(typeof value == 'function' ? value : function(json) {
         value = json;
-      };
-    
-      $.getJSON(DashboardExt.getSettings("get", key), callback);
+      });
     },
 
     /**

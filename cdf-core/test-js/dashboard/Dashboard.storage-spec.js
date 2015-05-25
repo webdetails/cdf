@@ -37,9 +37,8 @@ define(["cdf/Dashboard.Clean", "cdf/lib/jquery"], function(Dashboard, $) {
     it("sets the storage objects according to server response", function() {
       var serverResponse = {test: 1};
 
-      spyOn($, "getJSON").and.callFake(function(json) {
-        $.extend(dashboard.storage, serverResponse);
-        $.extend(dashboard.initialStorage, serverResponse);
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success(serverResponse);
       });
 
       dashboard._initStorage();
