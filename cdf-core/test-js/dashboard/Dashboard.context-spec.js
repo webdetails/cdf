@@ -48,8 +48,8 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
         "user": "admin"
       };
       
-      spyOn($, "getJSON").and.callFake(function(json) {
-        $.extend(dashboard.context, serverResponse);
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success(serverResponse);
       });
 
       dashboard._initContext();
