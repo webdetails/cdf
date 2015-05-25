@@ -4,6 +4,7 @@
  */
 package org.pentaho.cdf.settings;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -16,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.util.Parameter;
+import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
@@ -50,7 +52,8 @@ public class SettingsApi {
 
   @GET
   @Path( "/get" )
-  public void get( @QueryParam( Parameter.KEY ) String key, @Context HttpServletResponse servletResponse ) {
+  public void get( @QueryParam( Parameter.KEY ) String key, @Context HttpServletRequest servletRequest,
+                   @Context HttpServletResponse servletResponse ) {
 
     if ( StringUtils.isEmpty( key ) ) {
       logger.equals( "empty key value not allowed" );
@@ -61,6 +64,7 @@ public class SettingsApi {
 
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), value.toString() );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( Exception e ) {
       logger.error( e );
     }

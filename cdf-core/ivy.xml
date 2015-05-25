@@ -49,6 +49,7 @@
       <exclude org="commons-collections"/>
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
+    <dependency org="javax.servlet"               name="servlet-api"                         rev="2.4"                                transitive="false"/>
 
     <!-- Test -->
     <dependency org="org.mockito" name="mockito-all" rev="1.8.4" transitive="false" conf="test, default->default"/>

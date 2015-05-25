@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.pentaho.cdf.util.Parameter;
+import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.security.SecurityHelper;
 
@@ -67,6 +68,7 @@ public class CommentsApi {
 
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -107,6 +109,7 @@ public class CommentsApi {
 
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -145,6 +148,7 @@ public class CommentsApi {
 
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -183,6 +187,7 @@ public class CommentsApi {
 
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }

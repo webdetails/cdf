@@ -50,8 +50,8 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
     it("sets the view object according to server response", function(done) {
       var serverResponse = {test: 1};
 
-      spyOn($, "getJSON").and.callFake(function() {
-        dashboard.view = serverResponse;
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success(serverResponse);
       });
 
       dashboard.init();

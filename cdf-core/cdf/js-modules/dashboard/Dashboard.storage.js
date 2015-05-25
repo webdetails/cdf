@@ -30,18 +30,8 @@
       _initStorage: function() {
         var myself = this;
         myself.storage = {};
-        myself.initialStorage = {};
-
-        var args = {
-          user: this.context.user,
-          action: "read",
-          ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
-        };
-
-        $.getJSON(DashboardStorageExt.getStorage(args.action), args, function(json) {
-          $.extend(myself.storage,json);
-          $.extend(myself.initialStorage,json);
-        });
+        myself.loadStorage();
+        myself.initialStorage = myself.storage;
       },
 
       /**
@@ -71,9 +61,10 @@
           async: true,
           xhrFields: {
             withCredentials: true
+          },
+          success: function (json) {
+            $.extend(myself.storage, json);
           }
-        }).done(function(json) {
-          $.extend(myself.storage, json);
         });
       },
 

@@ -32,6 +32,7 @@ import javax.ws.rs.core.Context;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.util.Parameter;
+import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
 import pt.webdetails.cpf.utils.PluginIOUtils;
@@ -45,10 +46,11 @@ public class ViewsApi {
   @Path( "/" )
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
-  public void listViews( @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
+  public void listViews( @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
           ViewsEngine.getInstance().listViews( getUserName() ).toString( 2 ) );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( Exception ex ) {
       logger.error( "Error listing views", ex );
     }
@@ -60,7 +62,7 @@ public class ViewsApi {
   @Produces( APPLICATION_JSON )
   public void saveView( @DefaultValue( "" ) @PathParam( Parameter.NAME ) String name,
                         @DefaultValue( "" ) @FormParam( Parameter.VIEW ) String view,
-                        @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
+                        @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
           ViewsEngine.getInstance().saveView( name, view, getUserName() ).toString( 2 ) );
@@ -74,7 +76,7 @@ public class ViewsApi {
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
   public void deleteView( @DefaultValue( "" ) @PathParam( Parameter.NAME ) String name,
-                          @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
+                          @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
           ViewsEngine.getInstance().deleteView( name, getUserName() ).toString( 2 ) );
@@ -88,10 +90,11 @@ public class ViewsApi {
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
   public void getView( @DefaultValue( "" ) @PathParam( Parameter.NAME ) String name,
-                       @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
+                       @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
     try {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
           ViewsEngine.getInstance().getView( name, getUserName() ).toString( 2 ) );
+      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( Exception ex ) {
       logger.error( "Error getting view '" + name + "'", ex );
     }

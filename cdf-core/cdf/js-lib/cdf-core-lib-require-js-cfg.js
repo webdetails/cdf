@@ -47,15 +47,24 @@
 
     if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
 
-    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
+    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
 
     if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
 
-    prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '/lib' : '/compressed/lib');
+    prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
     prefix = requirePaths['cdf/lib'] = "cdf/js/lib";
   }
+
+  requireConfig['cdf/lib/require-text/text'] = {
+    onXhr: function(xhr, url) {
+      //Called after the XHR has been created and after the
+      //xhr.open() call, but before the xhr.send() call.
+      //Useful time to set headers.
+      xhr.withCredentials = true;
+    }
+  },
 
   // RequireJS amd! loader plugin. Wraps non-amd scripts as amd modules on the fly,
   // to be used when a shim isn't enough (see plugin prescript and postscript).
