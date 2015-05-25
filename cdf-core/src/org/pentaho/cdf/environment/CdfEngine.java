@@ -32,11 +32,12 @@ public class CdfEngine {
 
     if ( instance == null ) {
       instance = new CdfEngine();
-      try {
-        initialize();
-      } catch ( Exception ex ) {
-        logger.fatal( "Error initializing CdeEngine: " + Util.getExceptionDescription( ex ) );
-      }
+    }
+
+    try {
+      initialize();
+    } catch ( Exception ex ) {
+      logger.fatal( "Error initializing CdeEngine: " + Util.getExceptionDescription( ex ) );
     }
 
     return instance;
