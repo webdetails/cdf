@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.util.Parameter;
+import org.pentaho.cdf.utils.CorsUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +37,7 @@ public class ContextApi {
 
     JSONObject context = ContextEngine.getInstance().buildContext( path, user, Parameter.asHashMap( servletRequest ),
       servletRequest.getSession().getMaxInactiveInterval() );
-
+    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     try {
       return Response.ok( context.toString( 2 ) ).build();
     } catch ( JSONException e ) {

@@ -56,9 +56,17 @@ define([
           ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
         };
 
-        $.getJSON(DashboardViewsExt.getView(viewId), args, function(response) {
-          if(response && response.status && response.status === "success") {
-            myself.view = response.result;
+        $.ajax({
+          type: 'GET',
+          dataType: "json",
+          url: DashboardViewsExt.getView(viewId),
+          data: args,
+          async: true,
+          xhrFields: {
+            withCredentials: true
+          },
+          success: function (json) {
+            myself.view = json;
           }
         });
       }

@@ -31,9 +31,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.InvalidCdfOperationException;
 import org.pentaho.cdf.PluginHibernateException;
+import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.util.Parameter;
+import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
@@ -55,10 +58,9 @@ public class StorageApi {
                          @Context HttpServletResponse response )
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
-    setCorsHeaders( request, response );
     JSONObject json =
       StorageEngine.getInstance().store( storageValue, StringUtils.isEmpty( user ) ? getUserName() : user );
-
+    CorsUtil.getInstance().setCorsHeaders( request, response );
     return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
       : Response.serverError().build();
   }
@@ -72,9 +74,8 @@ public class StorageApi {
                       @Context HttpServletResponse response ) throws JSONException, InvalidCdfOperationException,
     PluginHibernateException {
 
-    setCorsHeaders( request, response );
     JSONObject json = StorageEngine.getInstance().read( StringUtils.isEmpty( user ) ? getUserName() : user );
-
+    CorsUtil.getInstance().setCorsHeaders( request, response );
     if ( json != null ) {
       return json.toString();
     } else {
@@ -92,22 +93,13 @@ public class StorageApi {
                           @Context HttpServletResponse response )
     throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
-    setCorsHeaders( request, response );
     JSONObject json = StorageEngine.getInstance().delete( StringUtils.isEmpty( user ) ? getUserName() : user );
-
+    CorsUtil.getInstance().setCorsHeaders( request, response );
     return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
       : Response.serverError().build();
   }
 
   private String getUserName() {
     return PentahoSessionHolder.getSession().getName();
-  }
-
-  private void setCorsHeaders( HttpServletRequest request, HttpServletResponse response ) {
-    String origin = request.getHeader( "ORIGIN" );
-    if ( origin != null ) {
-      response.setHeader( "Access-Control-Allow-Origin", origin );
-      response.setHeader( "Access-Control-Allow-Credentials", "true" );
-    }
   }
 }
