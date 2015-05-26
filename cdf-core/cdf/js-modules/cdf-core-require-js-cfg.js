@@ -27,12 +27,12 @@
 
     if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
 
-    prefix = requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    prefix = requirePaths['cdf'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
   } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
 
     if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); }
 
-    prefix = requirePaths['cdf'] = FULL_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+    prefix = requirePaths['cdf'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
   } else { // build
     prefix = requirePaths['cdf'] = "cdf/js";
   }

@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.util.CdfHttpServletRequestWrapper;
+import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IRuntimeContext;
 import org.pentaho.platform.api.engine.ISolutionEngine;
@@ -72,6 +73,8 @@ public class ActionEngine {
       if ( !StringUtils.isEmpty( buffer ) ) {
         httpServletResponse.getOutputStream().write( buffer.getBytes( LocaleHelper.getSystemEncoding() ) );
       }
+
+      CorsUtil.getInstance().setCorsHeaders( httpServletRequest, httpServletResponse );
 
       success = true;
 
