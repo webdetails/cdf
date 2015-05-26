@@ -813,64 +813,6 @@ var CommentsComponent = BaseComponent.extend({
 
 });
 
-
-var QueryComponent = BaseComponent.extend({
-  visible: false,
-  update : function() {
-    QueryComponent.makeQuery(this);
-  },
-  warnOnce: function() {
-    Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
-    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
-    " for more information");
-    delete(this.warnOnce);
-  }
-},
-{
-  makeQuery: function(object){
-
-    if (this.warnOnce) {this.warnOnce();}
-    var cd = object.queryDefinition;
-    if (cd == undefined){
-      Dashboards.log("Fatal - No query definition passed","error");
-      return;
-    }
-    var query = Dashboards.getQuery( cd );
-    object.queryState = query;
-
-    // Force synchronous queries
-    query.setAjaxOptions({async: false});
-
-    query.fetchData(object.parameters, function(values) {
-      // We need to make sure we're getting data from the right place,
-      // depending on whether we're using CDA
-
-      changedValues = undefined;
-      object.metadata = values.metadata;
-      object.result = values.resultset != undefined ? values.resultset: values;
-      object.queryInfo = values.queryInfo;
-      if((typeof(object.postFetch)=='function')){
-        changedValues = object.postFetch(values);
-      }
-      if (changedValues != undefined){
-        values = changedValues;
-
-      }
-
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
-      }
-      object.result = values.resultset != undefined ? values.resultset: values;
-      if (typeof values.resultset != "undefined"){
-        object.metadata = values.metadata;
-        object.queryInfo = values.queryInfo;
-      }
-    });
-
-  }
-}
-);
-
 var MdxQueryGroupComponent = BaseComponent.extend({
   visible: false,
   update : function() {
@@ -1211,6 +1153,78 @@ var UnmanagedComponent = BaseComponent.extend({
 
   isSilent: function (){
     return (this.lifecycle) ? !!this.lifecycle.silent : false;
+  }
+});
+
+var QueryComponent = UnmanagedComponent.extend({
+  visible: false,
+  update : function() {
+    QueryComponent.makeQuery(this);
+  },
+
+  render: function(data) {
+    if(this.resultvar != null) {
+      Dashboards.setParameter(this.resultvar, data.resultset);
+    }
+  },
+
+  warnOnce: function() {
+    Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+    "http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
+    " for more information");
+    delete(this.warnOnce);
+  }
+}, {
+  makeQuery: function(object) {
+
+    if(this.warnOnce) {
+      this.warnOnce();
+    }
+
+    var cd = object.queryDefinition;
+    var asyncMode = object.asynchronousMode || false;
+    var redraw = _.bind(object.render, object);
+    if(cd == null) {
+      Dashboards.log("Fatal - No query definition passed","error");
+      return;
+    }
+
+    if(asyncMode) {
+      object.triggerQuery(cd, redraw);
+
+    } else {
+      var query = Dashboards.getQuery(cd);
+      object.queryState = query;
+
+      // Force synchronous queries
+      query.setAjaxOptions({async: false});
+
+      query.fetchData(object.parameters, function (values) {
+        // We need to make sure we're getting data from the right place,
+        // depending on whether we're using CDA
+
+        var changedValues;
+        object.metadata = values.metadata;
+        object.result = values.resultset != null ? values.resultset : values;
+        object.queryInfo = values.queryInfo;
+        if((typeof(object.postFetch) == 'function')) {
+          changedValues = object.postFetch(values);
+        }
+
+        if(changedValues != null) {
+          values = changedValues;
+
+        }
+
+        object.result = values.resultset != undefined ? values.resultset : values;
+        if (typeof values.resultset != "undefined") {
+          object.metadata = values.metadata;
+          object.queryInfo = values.queryInfo;
+        }
+
+        object.synchronous(redraw, values);
+      });
+    }
   }
 });
 

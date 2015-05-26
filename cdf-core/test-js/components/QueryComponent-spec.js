@@ -13,11 +13,11 @@
 
 define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"],
   function(Dashboard, QueryComponent, $) {
-  
+
   /**
-   * ## The Query Component
+   * ## The Synchronous Query Component
    */
-  describe("The Query Component #", function() {
+  describe("The Synchronous Query Component #", function() {
     var dashboard;
 
     beforeEach(function() {
@@ -26,11 +26,12 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
       dashboard.addParameter("result", "");
     });
 
-    var queryComponent = new QueryComponent({
+    var queryComponentSync = new QueryComponent({
       name: "executeQueryComponent",
       type: "queryComponent",
       htmlObject: "sampleObject",
       executeAtStart: true,
+      asynchronousMode: false,
       resultvar: "result",
       queryDefinition: {
         queryType: 'mdx',
@@ -43,29 +44,93 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
           }
       },
       postFetch: function(data) { }
-    })
+    });
 
     /**
-     * ## The Query Component # allows a dashboard to execute update
+     * ## The Synchronous Query Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
-      dashboard.addComponent(queryComponent);
+      dashboard.addComponent(queryComponentSync);
 
-      spyOn(queryComponent, 'update').and.callThrough();
+      spyOn(queryComponentSync, 'update').and.callThrough();
+      spyOn(queryComponentSync, 'synchronous').and.callThrough();
+      spyOn(queryComponentSync, 'triggerQuery').and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
         params.success("{'responseXML': '<test/>'}");
       });
-      spyOn(queryComponent, 'postFetch').and.callThrough();
+      spyOn(queryComponentSync, 'postFetch').and.callThrough();
 
       // listen to cdf:postExecution event
-      queryComponent.once("cdf:postExecution", function() {
-        expect(queryComponent.update).toHaveBeenCalled();
+      queryComponentSync.once("cdf:postExecution", function() {
+        expect(queryComponentSync.update).toHaveBeenCalled();
+        expect(queryComponentSync.synchronous).toHaveBeenCalled();
+        expect(queryComponentSync.triggerQuery).not.toHaveBeenCalled();
         expect($.ajax.calls.count()).toEqual(1);
-        expect(queryComponent.postFetch.calls.count()).toEqual(1);
+        expect(queryComponentSync.postFetch.calls.count()).toEqual(1);
         done();
       });
 
-      dashboard.update(queryComponent);
+      dashboard.update(queryComponentSync);
+    });
+  });
+
+  /**
+   * ## The Asynchronous Query Component
+   */
+  describe("The Asynchronous Query Component #", function() {
+    var dashboard;
+
+    beforeEach(function() {
+      dashboard = new Dashboard();
+      dashboard.init();
+      dashboard.addParameter("result", "");
+    });
+
+    var queryComponentAsync = new QueryComponent({
+      name: "executeQueryComponent",
+      type: "queryComponent",
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      asynchronousMode: true,
+      resultvar: "result",
+      queryDefinition: {
+        queryType: 'mdx',
+        jndi: "SampleData",
+        catalog: "mondrian:/SteelWheels",
+        query: function() {
+          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+              "NON EMPTY TopCount([Customers].[All Customers].Children," +
+              "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
+        }
+      },
+      postFetch: function(data) { }
+    });
+
+    /**
+     * ## The Asynchronous Query Component # allows a dashboard to execute update
+     */
+    it("allows a dashboard to execute update", function(done) {
+      dashboard.addComponent(queryComponentAsync);
+
+      spyOn(queryComponentAsync, 'update').and.callThrough();
+      spyOn(queryComponentAsync, 'synchronous').and.callThrough();
+      spyOn(queryComponentAsync, 'triggerQuery').and.callThrough();
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success([['one', 'two']]);
+      });
+      spyOn(queryComponentAsync, 'postFetch').and.callThrough();
+
+      // listen to cdf:postExecution event
+      queryComponentAsync.once("cdf:postExecution", function() {
+        expect(queryComponentAsync.update).toHaveBeenCalled();
+        expect(queryComponentAsync.synchronous).not.toHaveBeenCalled();
+        expect(queryComponentAsync.triggerQuery).toHaveBeenCalled();
+        expect($.ajax.calls.count()).toEqual(1);
+        expect(queryComponentAsync.postFetch.calls.count()).toEqual(1);
+        done();
+      });
+
+      dashboard.update(queryComponentAsync);
     });
   });
 });
