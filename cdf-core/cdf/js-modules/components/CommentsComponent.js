@@ -398,7 +398,7 @@ define([
                   }
                 }
               }
-            }
+            };
             myself.operations.processOperation('GET_LAST', null, null, callback, myself.options);
           }
         },
@@ -428,7 +428,7 @@ define([
         if(myself.options.intervalActive) {
           var refresh = function() {
             myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
-          }
+          };
           setInterval(function() {
             myself.commentsCollection.trigger('commentsUpdateNotification');
           }, myself.options.interval);
@@ -483,7 +483,7 @@ define([
           archive: this.archivePermission
         },
         defaults: this.options
-      }
+      };
   
       this.processing().start(options);
     }

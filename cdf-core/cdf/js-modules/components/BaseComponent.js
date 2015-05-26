@@ -203,7 +203,7 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
      * @method getAddIn
      * @param slot AddIn sub type
      * @param addIn addIn name
-     * @returns {*} AddIn registered with the specifed name and sub type
+     * @returns {*} AddIn registered with the specified name and sub type
      */
     getAddIn: function(slot,addIn) {
       if(!this.dashboard) {
@@ -527,7 +527,7 @@ define(["../lib/Base", "../lib/jquery", "amd!../lib/underscore", "amd!../lib/bac
             hash = hash & hash; // Convert to 32bit integer
           }
           return hash;
-        }
+        };
   
         var hash = hashCode(this.name).toString();
         var hueSeed = hash.substr(hash.length-6,2) || 0;

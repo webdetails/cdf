@@ -36,7 +36,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     use_mercator: false,
 
     /** 
-     * Converts a LonLat Object using the Mercator formular
+     * Converts a LonLat Object using the Mercator formula
      *
      * @param {OpenLayers.LonLat} ll the coordinate object.
      * 
@@ -211,7 +211,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
 
 
     //
-    // Frome maps.js Dashboards.Map  <-------
+    // From maps.js Dashboards.Map  <-------
     //
 
     markers: null,
@@ -302,7 +302,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       //var record = myself.data[myself.dataIdx++];
       var data = myself.dashboard.getParameterValue('mapData');
 
-      //use stored record if one aleady exists
+      //use stored record if one already exists
       var record = data[myself.dataIdx];
 
       if(jData == null || jData.totalResultsCount == 0) {

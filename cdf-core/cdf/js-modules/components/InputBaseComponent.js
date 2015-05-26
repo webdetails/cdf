@@ -37,7 +37,7 @@ define(['./UnmanagedComponent', 'amd!../lib/underscore', '../dashboard/Utils'],
         this.triggerQuery(qd,handler);
       } else {
         /* Legacy XAction-based components are a wasps' nest, so
-         * we'll steer clearfrom updating those for the time being
+         * we'll steer clear from updating those for the time being
          */
         var handler = _.bind(function() {
           var data = this.getValuesArray();

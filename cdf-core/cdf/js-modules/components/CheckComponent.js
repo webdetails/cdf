@@ -19,7 +19,7 @@ define(["../lib/jquery", "./ToggleButtonBaseComponent"],
       if(this.currentVal != 'undefined' && this.currentVal != null) {
         return this.currentVal;
       } else {
-        var a = new Array()
+        var a = new Array();
         this.placeholder("." + this.name + ":checked").each(function(i,val) {
           a.push($(this).val());
         });

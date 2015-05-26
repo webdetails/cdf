@@ -55,7 +55,7 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
       var selectHTML = $('<ul/>').attr({class: elClass});
       for(var i = 0, len = myArray.length; i < len; i++) {
         //TODO: review the callAjaxAfterRender call because it is calling the lifecycle and should not require the global Dashboards object
-        var li = $('<li/>').attr({class: elClass})
+        var li = $('<li/>').attr({class: elClass});
         var input = $("<input/>").click(function() {
           myself.callAjaxAfterRender(myself, myself.name);
         });

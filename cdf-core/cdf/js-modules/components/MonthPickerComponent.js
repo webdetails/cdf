@@ -127,7 +127,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       var currentDate = new Date(+initialDate);
 
       /*
-      * This block is to make sure the months are compared equally. A millisecond can ruin the comparation.
+      * This block is to make sure the months are compared equally. A millisecond can ruin the comparison.
       */
 
       if(monthCountUndefined == true) {

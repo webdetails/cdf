@@ -14,11 +14,10 @@
 define(['./BaseComponent'], function(BaseComponent) {
 
   var TextComponent = BaseComponent.extend({
-    update : function() {
+    update: function() {
       this.placeholder().html(this.expression());
     }
   });
 
   return TextComponent;
-
 });
