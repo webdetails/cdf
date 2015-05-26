@@ -23,7 +23,7 @@ define(['./MapBaseComponent'],
         div = this.mapDiv;
       }
 
-      //2010-06-29 Ingo: Enable/Dispable Layer Selector
+      //2010-06-29 Ingo: Enable/Disable Layer Selector
       var b_layer_control = true;
       var b_custom_map = false;
       var b_use_mercator = true;
@@ -100,7 +100,7 @@ define(['./MapBaseComponent'],
           var value = myArray[i][4];
 
           var markers = this.markers;
-          // Store expression and markers for update funtion
+          // Store expression and markers for update function
           this.mapExpression = this.expression();
           this.mapMarkers = markers;
 

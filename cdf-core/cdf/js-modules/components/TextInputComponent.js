@@ -34,28 +34,23 @@ define(["../lib/jquery", "./BaseComponent", "../Logger"],
 
       var el = $("#" + name);
 
-      el
-        .change(function() {
-          if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-            myself.dashboard.processChange(name);
-          }
-        })
-        .keyup(function(ev) {
-          if(ev.keyCode == 13 &&
-            myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-
-            myself.dashboard.processChange(name);
-          }
-        });
+      el.change(function() {
+        if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+          myself.dashboard.processChange(name);
+        }
+      }).keyup(function(ev) {
+        if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+          myself.dashboard.processChange(name);
+        }
+      });
 
       myself._doAutoFocus();
     },
 
-    getValue : function() {
+    getValue: function() {
       return $("#" + this.name).val();
     }
   });
 
   return TextInputComponent;
-
 });
