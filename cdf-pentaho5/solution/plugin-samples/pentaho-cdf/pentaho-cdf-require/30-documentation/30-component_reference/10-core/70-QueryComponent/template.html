@@ -26,10 +26,11 @@
       <dt>htmlObject</dt>
       <dd>Id of the component (usually a div or a span tag)</dd>
 
+      <dt>asynchronousMode</dt>
+      <dd>Fetch query data with a asynchronous call if true, synchronous otherwise. Default is false</dd>
+
       <dt>refreshPeriod</dt>
       <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
-
-
 
       <dt>executeAtStart</dt>
       <dd>True to execute the component at start, false otherwise</dd>
@@ -106,6 +107,7 @@ require(['cdf/Dashboard.Blueprint','cdf/components/QueryComponent'], function(Da
     name: "executeQueryComponent",
     type: "queryComponent",
     htmlObject: "sampleObject",
+    asynchronousMode: true,
     executeAtStart: true,
     resultvar: "result",
     queryDefinition: MetaLayerHome2.executeQueryComponentDefinition,

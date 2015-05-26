@@ -11,61 +11,75 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent', '../Logger'], function(BaseComponent, Logger) {
+define(['./UnmanagedComponent', '../Logger', 'amd!../lib/underscore'], function(UnmanagedComponent, Logger, _) {
 
-  var QueryComponent = BaseComponent.extend({
+  var QueryComponent = UnmanagedComponent.extend({
     visible: false,
     update: function() {
       QueryComponent.makeQuery(this);
     },
+
+    render: function(data) {
+      if(this.resultvar != null) {
+        this.dashboard.setParameter(this.resultvar, data.resultset);
+      }
+    },
+
     warnOnce: function() {
       Logger.log("Warning: QueryComponent behaviour is due to change. See "
         + "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent"
         + " for more information");
       delete(this.warnOnce);
     }
-  },
-  {
+  }, {
     makeQuery: function(object) {
 
-      if(this.warnOnce) { this.warnOnce(); }
+      if(this.warnOnce) {
+        this.warnOnce();
+      }
 
       var cd = object.queryDefinition;
+      var asyncMode = object.asynchronousMode || false;
+      var redraw = _.bind(object.render, object);
       if(cd == undefined) {
-        Logger.log("Fatal - No query definition passed","error");
+        Logger.log("Fatal - No query definition passed", "error");
         return;
       }
-      var query = object.dashboard.getQuery(cd);
-      object.queryState = query;
+      if(asyncMode) {
+        object.triggerQuery(cd, redraw);
 
-      // Force synchronous queries
-      query.setAjaxOptions({async: false});
+      } else {
+        var query = object.dashboard.getQuery(cd);
+        object.queryState = query;
 
-      query.fetchData(object.parameters, function(values) {
-        // We need to make sure we're getting data from the right place,
-        // depending on whether we're using CDA
+        // Force synchronous queries
+        query.setAjaxOptions({async: false});
 
-        var changedValues = undefined;
-        object.metadata = values.metadata;
-        object.result = values.resultset != undefined ? values.resultset : values;
-        object.queryInfo = values.queryInfo;
-        if((typeof(object.postFetch) == 'function')) {
-          changedValues = object.postFetch(values);
-        }
-        if(changedValues != undefined) {
-          values = changedValues;
+        query.fetchData(object.parameters, function(values) {
+          // We need to make sure we're getting data from the right place,
+          // depending on whether we're using CDA
 
-        }
-
-        if(object.resultvar != undefined) {
-          object.dashboard.setParameter(object.resultvar, object.result);
-        }
-        object.result = values.resultset != undefined ? values.resultset : values;
-        if(typeof values.resultset != "undefined") {
+          var changedValues = undefined;
           object.metadata = values.metadata;
+          object.result = values.resultset != undefined ? values.resultset : values;
           object.queryInfo = values.queryInfo;
-        }
-      });
+          if((typeof(object.postFetch) == 'function')) {
+            changedValues = object.postFetch(values);
+          }
+
+          if(changedValues != undefined) {
+            values = changedValues;
+          }
+
+          object.result = values.resultset != undefined ? values.resultset : values;
+          if(typeof values.resultset != "undefined") {
+            object.metadata = values.metadata;
+            object.queryInfo = values.queryInfo;
+          }
+
+          object.synchronous(redraw, values);
+        });
+      }
     }
   });
 
