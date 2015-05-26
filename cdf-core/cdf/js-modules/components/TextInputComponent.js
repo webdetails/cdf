@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
+define(["../lib/jquery", "./BaseComponent", "../Logger"],
+  function($, BaseComponent, Logger) {
 
   var TextInputComponent = BaseComponent.extend({
     update: function() {
@@ -20,8 +21,14 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
       var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
         "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
-        (myself.size ? ("' size='" + myself.size) : "") +
-        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") + "'>";
+        (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "")) +
+        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "")) + "'>";
+      if(myself.size) {
+        Logger.warn("Attribute 'size' is deprecated");
+      }
+      if(myself.maxLength) {
+        Logger.warn("Attribute 'maxLength' is deprecated");
+      }
 
       myself.placeholder().html(selectHTML);
 
