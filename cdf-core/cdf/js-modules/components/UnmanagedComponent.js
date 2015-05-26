@@ -53,7 +53,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * </code></pre>
    *
    * <p>This is a more typical lifecycle, and one that has some important limitations.
-   * First, preExeuction and postExecution are entirely the responsibility of CDF
+   * First, preExecution and postExecution are entirely the responsibility of CDF
    * itself, rather than the  component. Because CDF has no control over the contents
    * of the update method, it has no way of ensuring that, should the component
    * execute an asynchronous query, postExecution only runs after redraw. In this
@@ -389,7 +389,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       var query = this.queryState = this.query = this.dashboard.getQuery(queryDef);
       var ajaxOptions = {
         async: true
-      }
+      };
       if(userQueryOptions.ajax) {
         _.extend(ajaxOptions, userQueryOptions.ajax);
       }

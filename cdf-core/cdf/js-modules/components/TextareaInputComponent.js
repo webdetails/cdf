@@ -40,5 +40,4 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
   });
 
   return TextareaInputComponent;
-
 });
