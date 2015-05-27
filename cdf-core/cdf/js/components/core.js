@@ -1159,7 +1159,46 @@ var UnmanagedComponent = BaseComponent.extend({
 var QueryComponent = UnmanagedComponent.extend({
   visible: false,
   update : function() {
-    QueryComponent.makeQuery(this);
+    var myself = this;
+
+    if(myself.warnOnce) {
+      myself.warnOnce();
+    }
+
+    var cd = myself.queryDefinition;
+    var asyncMode = myself.asynchronousMode || false;
+    var redraw = _.bind(myself.render, myself);
+    if(cd == null) {
+      Dashboards.log("Fatal - No query definition passed","error");
+      return;
+    }
+
+    if(asyncMode) {
+      this.triggerQuery(cd, redraw);
+
+    } else {
+      QueryComponent.makeQuery(myself, function (values) {
+        // We need to make sure we're getting data from the right place,
+        // depending on whether we're using CDA
+
+        var changedValues;
+        if((typeof(this.postFetch) == 'function')) {
+          changedValues = myself.postFetch(values);
+        }
+
+        if(changedValues != null) {
+          values = changedValues;
+        }
+
+        myself.result = values.resultset != undefined ? values.resultset : values;
+        if (typeof values.resultset != "undefined") {
+          myself.metadata = values.metadata;
+          myself.queryInfo = values.queryInfo;
+        }
+
+        myself.synchronous(redraw, values);
+      });
+    }
   },
 
   render: function(data) {
@@ -1175,56 +1214,76 @@ var QueryComponent = UnmanagedComponent.extend({
     delete(this.warnOnce);
   }
 }, {
-  makeQuery: function(object) {
 
-    if(this.warnOnce) {
-      this.warnOnce();
-    }
+  /**
+   * @deprecated
+   * @param object
+   * @param successCallback
+   */
+  makeQuery: function(object, successCallback) {
 
+    if (this.warnOnce) {this.warnOnce();}
     var cd = object.queryDefinition;
-    var asyncMode = object.asynchronousMode || false;
-    var redraw = _.bind(object.render, object);
-    if(cd == null) {
+    if (cd == undefined) {
       Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
+    var query = Dashboards.getQuery( cd );
+    object.queryState = query;
 
-    if(asyncMode) {
-      object.triggerQuery(cd, redraw);
+    // Force synchronous queries
+    query.setAjaxOptions({async: false});
 
-    } else {
-      var query = Dashboards.getQuery(cd);
-      object.queryState = query;
-
-      // Force synchronous queries
-      query.setAjaxOptions({async: false});
-
-      query.fetchData(object.parameters, function (values) {
+    if(!successCallback) {
+      successCallback = function(values) {
         // We need to make sure we're getting data from the right place,
         // depending on whether we're using CDA
 
-        var changedValues;
-        object.metadata = values.metadata;
-        object.result = values.resultset != null ? values.resultset : values;
-        object.queryInfo = values.queryInfo;
-        if((typeof(object.postFetch) == 'function')) {
+        var changedValues = undefined;
+        if((typeof(object.postFetch)=='function')) {
           changedValues = object.postFetch(values);
         }
 
-        if(changedValues != null) {
+        if (changedValues != undefined) {
           values = changedValues;
-
         }
 
-        object.result = values.resultset != undefined ? values.resultset : values;
+        if (object.resultvar != undefined) {
+          Dashboards.setParameter(object.resultvar, object.result);
+        }
+
+        object.result = values.resultset != undefined ? values.resultset: values;
         if (typeof values.resultset != "undefined") {
           object.metadata = values.metadata;
           object.queryInfo = values.queryInfo;
         }
-
-        object.synchronous(redraw, values);
-      });
+      }
     }
+
+    query.fetchData(object.parameters, function(values) {
+      // We need to make sure we're getting data from the right place,
+      // depending on whether we're using CDA
+
+      var changedValues = undefined;
+
+      if((typeof(object.postFetch)=='function')){
+        changedValues = object.postFetch(values);
+      }
+
+      if (changedValues != undefined){
+        values = changedValues;
+      }
+
+      if (object.resultvar != undefined){
+        Dashboards.setParameter(object.resultvar, object.result);
+      }
+
+      object.result = values.resultset != undefined ? values.resultset: values;
+      if (typeof values.resultset != "undefined"){
+        object.metadata = values.metadata;
+        object.queryInfo = values.queryInfo;
+      }
+    });
   }
 });
 
