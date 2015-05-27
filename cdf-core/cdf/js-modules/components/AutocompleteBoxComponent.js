@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/jquery'],
+define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/jquery', 'css!./AutocompleteBoxComponent'],
   function(QueryComponent, BaseComponent, _, $) {
 
   var AutocompleteBoxComponent = BaseComponent.extend({
@@ -190,12 +190,6 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
         },
 
         close: function(event, ui) {
-          var container = $('.autocomplete-container');
-
-          container.removeClass('show-apply-button');
-          container.find('.autocomplete-input-apply').hide();
-
-          myself.textbox.val('');
           processChange();
         }
       };
@@ -298,6 +292,12 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
      * @private
      */
     _endSearch: function() {
+      var container = $('.autocomplete-container');
+
+      container.removeClass('show-apply-button');
+      container.find('.autocomplete-input-apply').hide();
+
+      this.textbox.val('');
       this.textbox.autocomplete("close");
     },
 

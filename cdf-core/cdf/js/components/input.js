@@ -1437,10 +1437,6 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       },
 
       close: function(event, ui) {
-        var container = $('.autocomplete-container');
-        container.removeClass('show-apply-button');
-        container.find('.autocomplete-input-apply').hide();
-        myself.textbox.val('');
         processChange();
       }
     };
@@ -1523,6 +1519,12 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   },
 
   endSearch: function() {
+    var container = $('.autocomplete-container');
+
+    container.removeClass('show-apply-button');
+    container.find('.autocomplete-input-apply').hide();
+
+    this.textbox.val('');
     this.textbox.autocomplete("close");
   },
 

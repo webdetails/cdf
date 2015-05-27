@@ -793,6 +793,7 @@ div.scheduler  label {
 .autocomplete-container .autocomplete-input {
   margin-bottom: 5px;
   float: left;
+  width: 145px;
 }
 
 .autocomplete-container .autocomplete-input-apply {
