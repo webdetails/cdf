@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'], function(DashboardExt, Encoder) {
+define(['../lib/jquery', '../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
+  function($, DashboardExt, Encoder) {
 
   var XactionComponentExt = {
 
@@ -39,4 +40,3 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'], function(Das
 
   return XactionComponentExt;
 });
-
