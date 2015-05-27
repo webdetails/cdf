@@ -1,0 +1,66 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.autocomplete-container {
+  padding: 5px;
+  border: 1px solid black;
+  min-height: 22px;
+  width: 160px;
+}
+
+.show-apply-button.autocomplete-container {
+  width: 190px;
+}
+
+.autocomplete-container .autocomplete-input {
+  margin-bottom: 5px;
+  float: left;
+  width: 145px;
+}
+
+.autocomplete-container .autocomplete-input-apply {
+  float: right;
+}
+
+.autocomplete-container .list-data-selection {
+  clear: both;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+
+  width: 170px;
+}
+
+.autocomplete-container .list-item,
+.autocomplete-container .list-data-selection li {
+  width: auto;
+  text-align: left;
+  padding: 2px;
+  font-size: 0.75em;
+}
+
+.autocomplete-container .list-data-selection .close-button {
+  padding: 0;
+  margin-right: 5px;
+
+  border: none;
+  background-color: transparent;
+
+  color: #A9A9A9;
+  font-weight: bold;
+}
+
+.autocomplete-container .list-data-selection .close-button:hover {
+  cursor: pointer;
+  color: #000000;
+}
