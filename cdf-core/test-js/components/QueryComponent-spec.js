@@ -116,7 +116,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
       spyOn(queryComponentAsync, 'synchronous').and.callThrough();
       spyOn(queryComponentAsync, 'triggerQuery').and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
-        params.success([['one', 'two']]);
+        params.success("{'responseXML': '<test/>'}");
       });
       spyOn(queryComponentAsync, 'postFetch').and.callThrough();
 
