@@ -162,6 +162,19 @@
   //mustache 0.8.1
   requirePaths['cdf/lib/mustache'] = prefix + "/mustache/mustache";
 
+  //mustache-wax 0.9.0
+  requirePaths['cdf/lib/mustache-wax'] = prefix + "/mustacheWax/mustache-wax";
+  amdShim["cdf/lib/mustache-wax"] = {
+    exports: "Mustache",
+    deps: {
+      "cdf/lib/mustache": "Mustache"
+    },
+    prescript: "var root = {Mustache: Mustache};\n"+
+    "(function() {\n",
+    postscript: "}.call(root));\n"
+    + "return root.Mustache;"
+  };
+
   //Base 1.1a
   requirePaths['cdf/lib/Base'] = prefix + "/base/Base";
 

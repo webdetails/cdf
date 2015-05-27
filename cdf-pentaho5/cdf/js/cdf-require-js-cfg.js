@@ -68,6 +68,7 @@ requireCfg['shim']['cdf-legacy/Dashboards.Main'] = [
   'cdf-legacy/lib/underscore/underscore',
   'cdf-legacy/lib/backbone/backbone',
   'cdf-legacy/lib/mustache/mustache',
+  'cdf-legacy/lib/mustacheWax/mustache-wax',
   'cdf-legacy/lib/shims',
   'cdf-legacy/lib/blockUI/jquery.blockUI',
   'cdf-legacy/lib/uriQueryParser/jquery-queryParser',
