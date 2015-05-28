@@ -70,22 +70,15 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
 
       for(var i = 0; i<files.length; i++) {
         var file = files[i];
-        //Logger.log("Searching for " + currentPath + ", found " + file.path);
+
         if(file.type == "FOLDER" && file.path == currentPath) {
           files = file.folders;
-          /*
-           Logger.log("Files found for this path:");
-            for (var j = 0; j < files.length; j++) {
-              if (files[j].path != undefined) {
-                Logger.log(files[j].path);
-              }
-            }
-          */
+
           if(files == undefined) {
             return [];
           }
           if(files.length == undefined) {
-            files = [ files ];
+            files = [files];
           }
           return files;
         }

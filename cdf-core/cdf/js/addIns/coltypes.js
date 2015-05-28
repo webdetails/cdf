@@ -142,9 +142,7 @@
       ph.empty();
     
       var container = $("<div></div>").appendTo(ph);
-    
-      //Dashboards.log("count " + count);
-    
+
       var vis = new pv.Panel()
       .canvas(container.get(0))
       .width(w)
