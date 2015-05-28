@@ -6,6 +6,8 @@ import org.dom4j.Node;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
@@ -28,6 +30,8 @@ import static org.mockito.Mockito.*;
 public class ContextEngineTest {
 
   ContextEngine contextEngine;
+  private static final String SESSION_ATTRIBUTE_USER = "user";
+  private static final String SESSION_ATTRIBUTE_TEST = "test";
 
 
   @Before
@@ -57,7 +61,7 @@ public class ContextEngineTest {
 
     JSONObject contextConfig = new JSONObject();
     doReturn( contextConfig ).when( contextEngine ).buildContextConfig( any( JSONObject.class ), eq( path ),
-      eq( doc ), eq( username ) );
+      eq( doc ) );
     doReturn( contextConfig ).when( contextEngine ).buildContextSessionTimeout( any( JSONObject.class ),
       eq( inactiveInterval ) );
     doReturn( contextConfig ).when( contextEngine ).buildContextDates( any( JSONObject.class ) );
@@ -96,12 +100,12 @@ public class ContextEngineTest {
       jsonObject3 = new JSONObject( "{ user: 'admin'}" );
 
     doReturn( jsonObject2 ).when( contextEngine ).processAutoIncludes( fullPath, config );
-    doReturn( jsonObject3 ).when( contextEngine ).processSessionAttributes( config, user );
+    doReturn( jsonObject3 ).when( contextEngine ).processSessionAttributes( config );
 
-    contextEngine.buildContextConfig( jsonObject1, fullPath, config, user );
+    contextEngine.buildContextConfig( jsonObject1, fullPath, config );
 
     verify( contextEngine, times( 1 ) ).processAutoIncludes( fullPath, config );
-    verify( contextEngine, times( 1 ) ).processSessionAttributes( config, user );
+    verify( contextEngine, times( 1 ) ).processSessionAttributes( config );
     assertTrue( jsonObject1.has( "queryData" ) );
     assertTrue( jsonObject1.has( "sessionAttributes" ) );
   }
@@ -165,16 +169,41 @@ public class ContextEngineTest {
   public void processSessionAttributesTest() throws Exception {
     Document doc = mock( Document.class );
 
-    Node node = mock( Node.class );
-    doReturn( "user" ).when( node ).getText();
-    doReturn( node ).when( node ).selectSingleNode( "@name" );
-    List<Node> nodeList = new ArrayList<Node>( asList( node ) );
+    IPentahoSession session = mock(IPentahoSession.class);
+
+    when( session.getAttribute( anyString() ) ).thenAnswer( new Answer<Object>() {
+      @Override public Object answer( InvocationOnMock invocation ) throws Throwable {
+        String attr = invocation.getArguments()[0].toString();
+        if (attr.equals( SESSION_ATTRIBUTE_USER )) {
+          return "admin";
+        }
+        if (attr.equals( SESSION_ATTRIBUTE_TEST )) {
+          return "test";
+        }
+        return null;
+      }
+    } );
+
+    doReturn( session ).when( contextEngine ).getUserSession();
+
+    Node userNode = mock( Node.class );
+    Node testNode = mock( Node.class );
+
+    doReturn( SESSION_ATTRIBUTE_USER ).when( userNode ).getText();
+    doReturn( SESSION_ATTRIBUTE_TEST ).when( testNode ).getText();
+
+    doReturn( userNode ).when( userNode ).selectSingleNode( "@name" );
+    doReturn( testNode ).when( testNode ).selectSingleNode( "@name" );
+
+    List<Node> nodeList = new ArrayList<Node>( asList( userNode, testNode ) );
     doReturn( nodeList ).when( doc ).selectNodes( "//sessionattributes/attribute" );
 
-    JSONObject result = contextEngine.processSessionAttributes( doc, "admin" );
+    JSONObject result = contextEngine.processSessionAttributes( doc );
 
-    assertTrue( result.has( "user" ) );
-    assertEquals( result.get( "user" ), "admin" );
+    assertTrue( result.has( SESSION_ATTRIBUTE_USER ) );
+    assertTrue( result.has( SESSION_ATTRIBUTE_TEST ) );
+    assertEquals( result.get( SESSION_ATTRIBUTE_USER ), "admin" );
+    assertEquals( result.get( SESSION_ATTRIBUTE_TEST ), "test" );
   }
 
   @Test
