@@ -1,6 +1,18 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf.context;
 
-import junit.framework.TestCase;
 import org.dom4j.Document;
 import org.dom4j.Node;
 import org.json.JSONObject;
@@ -36,34 +48,34 @@ public class ContextEngineTest {
 
   @Before
   public void setUp() {
-    contextEngine = spy( new ContextEngine(false) );
+    contextEngine = spy( new ContextEngine( false ) );
   }
 
   @Test
   public void buildContextTest() throws Exception {
     String path = "/public/admin/myDash.xcdf",
-      username = "admin";
+        username = "admin";
     int inactiveInterval = 1234;
 
     Document doc = mock( Document.class );
     doReturn( doc ).when( contextEngine ).getConfigFile();
 
-    Locale locale = new Locale("EN");
+    Locale locale = new Locale( "EN" );
 
     SecurityParameterProvider securityParams = mock( SecurityParameterProvider.class );
     List<String> roles = new ArrayList<String>( asList( "administrator", "master" ) );
     doReturn( roles ).when( securityParams ).getParameter( "principalRoles" );
 
-    Map<String, String> params = new HashMap<String, String>(  );
+    Map<String, String> params = new HashMap<String, String>();
     params.put( "paramTestParam1", "paramTestParam1" );
     params.put( "paramTestParam2", "paramTestParam2" );
     params.put( "paramTestParam3", "paramTestParam3" );
 
     JSONObject contextConfig = new JSONObject();
     doReturn( contextConfig ).when( contextEngine ).buildContextConfig( any( JSONObject.class ), eq( path ),
-      eq( doc ) );
+        eq( doc ) );
     doReturn( contextConfig ).when( contextEngine ).buildContextSessionTimeout( any( JSONObject.class ),
-      eq( inactiveInterval ) );
+        eq( inactiveInterval ) );
     doReturn( contextConfig ).when( contextEngine ).buildContextDates( any( JSONObject.class ) );
     doReturn( locale ).when( contextEngine ).getLocale();
     doReturn( securityParams ).when( contextEngine ).getSecurityParams();
@@ -92,12 +104,12 @@ public class ContextEngineTest {
   @Test
   public void buildContextConfigTest() throws Exception {
     String fullPath = "/public/admin/myDash.xcdf",
-      user = "admin";
+        user = "admin";
     Document config = mock( Document.class );
 
-    JSONObject jsonObject1 = new JSONObject(  ),
-      jsonObject2 = new JSONObject( "{}" ),
-      jsonObject3 = new JSONObject( "{ user: 'admin'}" );
+    JSONObject jsonObject1 = new JSONObject(),
+        jsonObject2 = new JSONObject( "{}" ),
+        jsonObject3 = new JSONObject( "{ user: 'admin'}" );
 
     doReturn( jsonObject2 ).when( contextEngine ).processAutoIncludes( fullPath, config );
     doReturn( jsonObject3 ).when( contextEngine ).processSessionAttributes( config );
@@ -129,14 +141,14 @@ public class ContextEngineTest {
     doReturn( true ).when( autoInclude1 ).canInclude( fullPath );
     doReturn( true ).when( autoInclude2 ).canInclude( fullPath );
     doReturn( true ).when( autoInclude3 ).canInclude( fullPath );
-    doReturn( "/public/cdf/includes/myDash1.cda").when( autoInclude1 ).getCdaPath();
-    doReturn( "/public/cdf/includes/myDash2.cda").when( autoInclude2 ).getCdaPath();
-    doReturn( "/public/cdf/includes/myDash3.cda").when( autoInclude3 ).getCdaPath();
+    doReturn( "/public/cdf/includes/myDash1.cda" ).when( autoInclude1 ).getCdaPath();
+    doReturn( "/public/cdf/includes/myDash2.cda" ).when( autoInclude2 ).getCdaPath();
+    doReturn( "/public/cdf/includes/myDash3.cda" ).when( autoInclude3 ).getCdaPath();
     List<AutoInclude> autoIncludeList = new ArrayList<AutoInclude>( asList(
-      autoInclude1, autoInclude2, autoInclude3
+        autoInclude1, autoInclude2, autoInclude3
     ) );
     doReturn( autoIncludeList ).when( contextEngine ).getAutoIncludes( doc );
-    doNothing().when( contextEngine ).addCdaQuery( any( JSONObject.class), anyString() );
+    doNothing().when( contextEngine ).addCdaQuery( any( JSONObject.class ), anyString() );
 
     contextEngine.processAutoIncludes( fullPath, doc );
 
@@ -152,7 +164,7 @@ public class ContextEngineTest {
 
     List<AutoInclude> autoIncludeList = new ArrayList<AutoInclude>();
     doReturn( autoIncludeList ).when( contextEngine ).buildAutoIncludeList( any( Document.class ),
-      any( IReadAccess.class ) );
+        any( IReadAccess.class ) );
     doReturn( readAccess ).when( contextEngine ).getUserContentAccess( anyString() );
     doReturn( "/public/cdf" ).when( contextEngine ).getPluginRepositoryDir();
 
@@ -162,22 +174,22 @@ public class ContextEngineTest {
 
     contextEngine.getAutoIncludes( doc );
     verify( contextEngine, times( 1 ) ).getUserContentAccess( anyString() );
-    verify( contextEngine, times( 1 ) ).buildAutoIncludeList( any( Document.class), any( IReadAccess.class ) );
+    verify( contextEngine, times( 1 ) ).buildAutoIncludeList( any( Document.class ), any( IReadAccess.class ) );
   }
 
   @Test
   public void processSessionAttributesTest() throws Exception {
     Document doc = mock( Document.class );
 
-    IPentahoSession session = mock(IPentahoSession.class);
+    IPentahoSession session = mock( IPentahoSession.class );
 
     when( session.getAttribute( anyString() ) ).thenAnswer( new Answer<Object>() {
       @Override public Object answer( InvocationOnMock invocation ) throws Throwable {
-        String attr = invocation.getArguments()[0].toString();
-        if (attr.equals( SESSION_ATTRIBUTE_USER )) {
+        String attr = invocation.getArguments()[ 0 ].toString();
+        if ( attr.equals( SESSION_ATTRIBUTE_USER ) ) {
           return "admin";
         }
-        if (attr.equals( SESSION_ATTRIBUTE_TEST )) {
+        if ( attr.equals( SESSION_ATTRIBUTE_TEST ) ) {
           return "test";
         }
         return null;
@@ -208,7 +220,7 @@ public class ContextEngineTest {
 
   @Test
   public void buildContextSessionTimeoutTest() throws Exception {
-    JSONObject jsonObject = new JSONObject(  );
+    JSONObject jsonObject = new JSONObject();
     int inactiveInterval = 1234;
 
     IPentahoSession pentahoSession = mock( IPentahoSession.class );
@@ -222,7 +234,7 @@ public class ContextEngineTest {
 
   @Test
   public void buildContextDatesTest() throws Exception {
-    JSONObject jsonObject = new JSONObject(  );
+    JSONObject jsonObject = new JSONObject();
 
     contextEngine.buildContextDates( jsonObject );
 
@@ -232,10 +244,10 @@ public class ContextEngineTest {
 
   @Test
   public void buildContextPathsTest() throws Exception {
-    JSONObject jsonObject = new JSONObject(  );
+    JSONObject jsonObject = new JSONObject();
     String dashboardPath = "/public/admin/myDash.xcdf";
 
-    Map<String, String> parameters = new HashMap<String, String>(  );
+    Map<String, String> parameters = new HashMap<String, String>();
     parameters.put( "solution", "/public" );
 
     contextEngine.buildContextPaths( jsonObject, dashboardPath, parameters );
@@ -248,7 +260,7 @@ public class ContextEngineTest {
 
   @Test
   public void buildLegacyStructureTest() throws Exception {
-    JSONObject jsonObject = new JSONObject(  );
+    JSONObject jsonObject = new JSONObject();
     String path = "/public/admin/myDash.xcdf";
 
     SecurityParameterProvider securityParams = mock( SecurityParameterProvider.class );
@@ -269,7 +281,7 @@ public class ContextEngineTest {
   @Test
   public void buildContextParamsTest() throws Exception {
     JSONObject jsonObject = new JSONObject();
-    Map<String, String> params = new HashMap<String, String>(  );
+    Map<String, String> params = new HashMap<String, String>();
     params.put( "paramTestParam1", "paramTestParam1" );
     params.put( "paramTestParam2", "paramTestParam2" );
     params.put( "paramTestParam3", "paramTestParam3" );
