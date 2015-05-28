@@ -159,7 +159,7 @@ public class ContextEngine {
     Document config = getConfigFile();
 
     try {
-      buildContextConfig( contextObj, path, config, username );
+      buildContextConfig( contextObj, path, config );
       buildContextSessionTimeout( contextObj, inactiveInterval );
       buildContextDates( contextObj );
 
@@ -280,10 +280,10 @@ public class ContextEngine {
     return contextObj;
   }
 
-  protected JSONObject buildContextConfig( final JSONObject contextObj, String fullPath, Document config, String user )
+  protected JSONObject buildContextConfig( final JSONObject contextObj, String fullPath, Document config )
     throws JSONException {
     contextObj.put( "queryData", processAutoIncludes( fullPath, config ) );
-    contextObj.put( "sessionAttributes", processSessionAttributes( config, user ) );
+    contextObj.put( "sessionAttributes", processSessionAttributes( config ) );
 
     return contextObj;
   }
@@ -324,7 +324,7 @@ public class ContextEngine {
     return contextObj;
   }
 
-  public JSONObject processSessionAttributes( Document config, String user ) {
+  public JSONObject processSessionAttributes( Document config ) {
 
     JSONObject result = new JSONObject();
 
@@ -339,7 +339,7 @@ public class ContextEngine {
       }
 
       try {
-        result.put( key, user );
+        result.put( key, getUserSession().getAttribute( name ) );
       } catch ( JSONException e ) {
         logger.error( e );
       }

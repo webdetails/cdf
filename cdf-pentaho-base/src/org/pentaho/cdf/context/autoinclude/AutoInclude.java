@@ -34,12 +34,15 @@ public class AutoInclude {
   private Matcher cdaMatcher;
   private List<DashboardMatchRule> dashboardRules;
 
+
   public AutoInclude() {
-    this.pluginIncludesDir = CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR;
   }
 
-  public AutoInclude( String dir ) {
-    this.pluginIncludesDir = dir;
+  private static String getPluginIncludesDir() {
+    if ( pluginIncludesDir == null ) {
+      pluginIncludesDir = CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR;
+    }
+    return pluginIncludesDir;
   }
 
   /**
@@ -121,7 +124,7 @@ public class AutoInclude {
       @Override
       public boolean accept( IBasicFile file ) {
         for ( Pattern regex : cdaPathRegexes ) {
-          if ( regex.matcher( RepositoryHelper.joinPaths( pluginIncludesDir, file.getPath() ) ).matches() ) {
+          if ( regex.matcher( RepositoryHelper.joinPaths( getPluginIncludesDir(), file.getPath() ) ).matches() ) {
             return true;
           }
         }
@@ -140,7 +143,7 @@ public class AutoInclude {
   private static List<AutoInclude> processAutoIncludes( AutoIncludeConfig config, List<String> cdaPaths ) {
     List<AutoInclude> autoIncludes = new ArrayList<AutoInclude>();
     for ( String cdaPath : cdaPaths ) {
-      cdaPath = RepositoryHelper.joinPaths( pluginIncludesDir, cdaPath );
+      cdaPath = RepositoryHelper.joinPaths( getPluginIncludesDir(), cdaPath );
       Matcher matcher = config.getCdaRegex().matcher( cdaPath );
       if ( matcher.matches() ) {
         AutoInclude include = new AutoInclude( cdaPath, matcher, config.getDashboardRules() );
