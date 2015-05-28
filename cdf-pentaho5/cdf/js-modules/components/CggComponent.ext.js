@@ -17,8 +17,7 @@ define([], function() {
 
     getCggDrawUrl: function() {
       return CONTEXT_PATH + "plugin/cgg/api/services/draw";
-    },
-
+    }
   };
 
   return CggComponentExt;

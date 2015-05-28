@@ -185,7 +185,7 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
     registerGlobalQuery: function(type, query) {
       var BaseQuery = _BaseQuery;
 
-      // Goes a level deeper one extending these properties. Usefull to preserve defaults and
+      // Goes a level deeper one extending these properties. Useful to preserve defaults and
       // options interfaces from BaseQuery.
       if(!_.isFunction(query) && _.isObject(query)) {
         var deepProperties = {};

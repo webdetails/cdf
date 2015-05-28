@@ -21,7 +21,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
   Dashboard.implement({
 
     /**
-     * Inits the lifecyle module
+     * Inits the lifecycle module
      *
      * @method _initLifecycle
      * @private
@@ -195,7 +195,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
 
       // Since we can get into racing conditions between last component's
       // preExecution and dashboard.postInit, we'll add a last component with very
-      // low priority who's funcion is only to act as a marker.
+      // low priority who's function is only to act as a marker.
       var postInitComponent = new UnmanagedComponent({
         name: "PostInitMarker",
         type: "unmanaged",
@@ -555,7 +555,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
        * result in the components being queued up for update only after the first
        * finished. To prevent this, we build a list of components waiting to be
        * updated, and only pass those forward to `updateAll` if we haven't had any
-       * more calls within 5 miliseconds of the last.
+       * more calls within 5 milliseconds of the last.
        */
       if(!this.updateQueue) {
         this.updateQueue = [];

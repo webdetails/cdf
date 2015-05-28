@@ -436,7 +436,7 @@ Dashboards.update = function(component) {
    * result in the components being queued up for update only after the first
    * finished. To prevent this, we build a list of components waiting to be
    * updated, and only pass those forward to `updateAll` if we haven't had any
-   * more calls within 5 miliseconds of the last.
+   * more calls within 5 milliseconds of the last.
    */
   if(!this.updateQueue){
     this.updateQueue = [];
@@ -722,7 +722,7 @@ Dashboards.syncedParameters = {};
 /* Register parameter pairs that will be synced on dashboard init. We'll store
  * the dependency pairings in Dashboards.syncedParameters,as an object mapping
  * master parameters to an array of all its slaves (so {a: [b,c]} means that
- * both *b* and *c* are subordinate to *a*), and in Dashboards.chains wel'll
+ * both *b* and *c* are subordinate to *a*), and in Dashboards.chains we'll
  * store an array of arrays representing a list of separate dependency trees.
  * An entry of the form [a, b, c] means that *a* doesn't depend on either *b*
  * or *c*, and that *b* doesn't depend on *c*. Inversely, *b* depends on *a*,
@@ -852,7 +852,7 @@ Dashboards.initEngine = function(initInstance) {
 
   // Since we can get into racing conditions between last component's
   // preExecution and dashboard.postInit, we'll add a last component with very
-  // low priority who's funcion is only to act as a marker.
+  // low priority who's function is only to act as a marker.
   var postInitComponent = {
     name: "PostInitMarker",
     type: "unmanaged",
