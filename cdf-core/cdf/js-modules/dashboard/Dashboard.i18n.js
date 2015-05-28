@@ -47,7 +47,7 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
           return bits.join('_');
         }
         return sessionLocale;
-      }
+      };
       var normalizedLocale = normalizeLocale(SESSION_LOCALE);
       //gets localization from templates
       $.i18n.properties({

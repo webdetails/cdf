@@ -76,17 +76,27 @@ var dash, Dashboards = dash = {
 _.extend(Dashboards, Backbone.Events);
 
 // Log
-Dashboards.log = function(m,type){
-  if (typeof console != "undefined" ){
-    if (type && console[type]) {
-      console[type]("CDF: " + m);
-    }else if (type === 'exception' &&
-        !console.exception) {
-      console.error(m.stack);
+Dashboards.log = function(message, type, css) {
+  type =  type || "log"; // default
+
+  if(typeof console != "undefined" ) {
+    if(!console[type]) {
+      if(type === "exception") {
+        type = "error";
+        message = message.stack || message;
+      } else {
+        type = "log";
+      }
     }
-    else {
-      console.log("CDF: " + m);
+    if(css) {
+      try {
+        console[type]("%cCDF: " + message, css);
+        return;
+      } catch(e) {
+        // styling is not supported
+      }
     }
+    console[type]("CDF: " + message);
   }
 };
 
@@ -263,8 +273,10 @@ Dashboards._addLogLifecycleToControl = function(control) {
       }
       
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
-      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+      Dashboards.log("          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]" + " (P: "
+        + this.priority + " ): " + eventName + " " + timeInfo + " (Running: " + this.dashboard.runningCalls  + ")",
+        "log",
+        "color: " + this.getLogColor());
     }
   });
 };
@@ -424,7 +436,7 @@ Dashboards.update = function(component) {
    * result in the components being queued up for update only after the first
    * finished. To prevent this, we build a list of components waiting to be
    * updated, and only pass those forward to `updateAll` if we haven't had any
-   * more calls within 5 miliseconds of the last.
+   * more calls within 5 milliseconds of the last.
    */
   if(!this.updateQueue){
     this.updateQueue = [];
@@ -710,7 +722,7 @@ Dashboards.syncedParameters = {};
 /* Register parameter pairs that will be synced on dashboard init. We'll store
  * the dependency pairings in Dashboards.syncedParameters,as an object mapping
  * master parameters to an array of all its slaves (so {a: [b,c]} means that
- * both *b* and *c* are subordinate to *a*), and in Dashboards.chains wel'll
+ * both *b* and *c* are subordinate to *a*), and in Dashboards.chains we'll
  * store an array of arrays representing a list of separate dependency trees.
  * An entry of the form [a, b, c] means that *a* doesn't depend on either *b*
  * or *c*, and that *b* doesn't depend on *c*. Inversely, *b* depends on *a*,
@@ -812,8 +824,9 @@ Dashboards.initEngine = function(initInstance) {
 
 
   if( this.logLifecycle && typeof console != "undefined" ){
-    console.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: "+
-          this.getRunningCalls()  +")","color: #ddd ");
+    Dashboards.log("          [Lifecycle >Start] Init[" + initInstance + "] (Running: " + this.getRunningCalls()  + ")",
+      "log",
+      "color: #ddd");
   }
 
   this.createAndCleanErrorDiv();
@@ -839,7 +852,7 @@ Dashboards.initEngine = function(initInstance) {
 
   // Since we can get into racing conditions between last component's
   // preExecution and dashboard.postInit, we'll add a last component with very
-  // low priority who's funcion is only to act as a marker.
+  // low priority who's function is only to act as a marker.
   var postInitComponent = {
     name: "PostInitMarker",
     type: "unmanaged",
@@ -898,8 +911,9 @@ Dashboards.handlePostInit = function(initInstance) {
 
     this.decrementRunningCalls();
     if( this.logLifecycle && typeof console != "undefined" ){
-      console.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: "+
-            this.getRunningCalls()  +")","color: #ddd ");
+      Dashboards.log("          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + this.getRunningCalls() + ")",
+        "log",
+        "color: #ddd");
     }
 
   }

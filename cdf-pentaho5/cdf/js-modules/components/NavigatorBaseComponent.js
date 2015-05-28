@@ -29,7 +29,7 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
       var locationArray;
 
       var found = 0;
-      for(i = 0; i<files.length; i++) {
+      for(var i = 0; i<files.length; i++) {
         var file = files[i];
         if(NavigatorBaseComponent.solution == ""
           || file.solution == NavigatorBaseComponent.solution) {
@@ -70,22 +70,15 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
 
       for(var i = 0; i<files.length; i++) {
         var file = files[i];
-        //console.log("Searching for " + currentPath + ", found " + file.path);
+
         if(file.type == "FOLDER" && file.path == currentPath) {
           files = file.folders;
-          /*
-           console.log("Files found for this path:");
-            for (var j = 0; j < files.length; j++) {
-              if (files[j].path != undefined) {
-                console.log(files[j].path);
-              }
-            }
-          */
+
           if(files == undefined) {
             return [];
           }
           if(files.length == undefined) {
-            files = [ files ];
+            files = [files];
           }
           return files;
         }

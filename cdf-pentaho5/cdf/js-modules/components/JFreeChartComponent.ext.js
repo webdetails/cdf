@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder',  '../Logger',],
+define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder',  '../Logger'],
   function(DashboardExt, Encoder, Logger) {
 
   var JFreeChartComponentExt = {
@@ -48,7 +48,7 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder',  '../Logger',
             var parameters = myself.getParameters();
             var width = 200, height = 200;
             var urlTemplate, parameterName = "";
-            for(p in parameters) {
+            for(var p in parameters) {
               if(parameters[p][0] == 'width') {
                 width += parameters[p][1];
                 parameters[p] = ['width', width]

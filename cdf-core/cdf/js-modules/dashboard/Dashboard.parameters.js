@@ -284,7 +284,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
     syncParametersOnInit: function(master, slave) {
       /* We'll store the dependency pairings in Dashboards.syncedParameters, as an object mapping master parameters to an
        * array of all its slaves (so {a: [b,c]} means that both *b* and *c* are subordinate to *a*), and in
-       * Dashboards.chains wel'll store an array of arrays representing a list of separate dependency trees. An entry of
+       * Dashboards.chains we'll store an array of arrays representing a list of separate dependency trees. An entry of
        * the form [a, b, c] means that *a* doesn't depend on either *b* or *c*, and that *b* doesn't depend on *c*.
        * Inversely, *b* depends on *a*, and *c* depends on either *a* or *b*. You can have multiple such entries, each
        * representing a completely isolated set of dependencies.
