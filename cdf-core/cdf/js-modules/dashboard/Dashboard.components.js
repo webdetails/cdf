@@ -331,8 +331,8 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
           }
   
           var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
-          console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: " + this.priority + " ): " +
-            eventName + " " + timeInfo + " (Running: "+ this.dashboard.runningCalls  + ")","color: " + this.getLogColor());
+          Logger.log("          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: " + this.priority + " ): " +
+            eventName + " " + timeInfo + " (Running: "+ this.dashboard.runningCalls  + ")", "log", "color: " + this.getLogColor());
         }
       });
     }
