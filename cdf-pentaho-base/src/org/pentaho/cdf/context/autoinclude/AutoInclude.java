@@ -1,3 +1,16 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf.context.autoinclude;
 
 import java.util.ArrayList;
@@ -35,11 +48,13 @@ public class AutoInclude {
   private List<DashboardMatchRule> dashboardRules;
 
   public AutoInclude() {
-    this.pluginIncludesDir = CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR;
   }
 
-  public AutoInclude( String dir ) {
-    this.pluginIncludesDir = dir;
+  private static String getPluginIncludesDir() {
+    if ( pluginIncludesDir == null ) {
+      pluginIncludesDir = CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR;
+    }
+    return pluginIncludesDir;
   }
 
   /**
@@ -121,7 +136,7 @@ public class AutoInclude {
       @Override
       public boolean accept( IBasicFile file ) {
         for ( Pattern regex : cdaPathRegexes ) {
-          if ( regex.matcher( RepositoryHelper.joinPaths( pluginIncludesDir, file.getPath() ) ).matches() ) {
+          if ( regex.matcher( RepositoryHelper.joinPaths( getPluginIncludesDir(), file.getPath() ) ).matches() ) {
             return true;
           }
         }
@@ -140,7 +155,7 @@ public class AutoInclude {
   private static List<AutoInclude> processAutoIncludes( AutoIncludeConfig config, List<String> cdaPaths ) {
     List<AutoInclude> autoIncludes = new ArrayList<AutoInclude>();
     for ( String cdaPath : cdaPaths ) {
-      cdaPath = RepositoryHelper.joinPaths( pluginIncludesDir, cdaPath );
+      cdaPath = RepositoryHelper.joinPaths( getPluginIncludesDir(), cdaPath );
       Matcher matcher = config.getCdaRegex().matcher( cdaPath );
       if ( matcher.matches() ) {
         AutoInclude include = new AutoInclude( cdaPath, matcher, config.getDashboardRules() );
