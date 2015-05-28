@@ -29,7 +29,7 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
       var locationArray;
 
       var found = 0;
-      for(i = 0; i<files.length; i++) {
+      for(var i = 0; i<files.length; i++) {
         var file = files[i];
         if(NavigatorBaseComponent.solution == ""
           || file.solution == NavigatorBaseComponent.solution) {

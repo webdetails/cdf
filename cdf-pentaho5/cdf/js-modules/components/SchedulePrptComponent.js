@@ -47,17 +47,17 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
       var parameters = {};
       var sharedUuid;
       var error = false;
-      guid = function() {
+      var guid = function() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
           function(c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
           });
       };
-      triggerError = function(msg, id) {
+      var triggerError = function(msg, id) {
         error = true;
         $(id).css("backgroundColor", "rgb(255,159,159)");//error state color.
-        //$(id).css("backgroundColor","rgb(184,245,177)"); Valid state color. aplicable?
+        //$(id).css("backgroundColor","rgb(184,245,177)"); Valid state color. applicable?
         var temp = $(id).val();
         $(id).val(msg);
         setTimeout(function() {
@@ -65,14 +65,14 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
           $(id).val(temp);
         }, 2000);
       };
-      getFileName = function() {
+      var getFileName = function() {
         var path = myself.path;
         return path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
       };
-      getDefaultLocation = function() {
+      var getDefaultLocation = function() {
         return "/home/" + myself.dashboard.context.user;
       };
-      getHour = function() {
+      var getHour = function() {
         var hour = $("#hours").val();
         if($("#amPm").val() == "pm") {
           hour = parseInt(hour, 10) + 12;
@@ -86,7 +86,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         }
         return hour;
       };
-      getUTC = function(exp, end) {
+      var getUTC = function(exp, end) {
         var arr = exp.split("/");
         if(end) {
           return new Date(arr[2], arr[0] - 1, arr[1], 23, 59, 59, 0).getTime();
@@ -94,11 +94,11 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
           return new Date(arr[2], arr[0] - 1, arr[1], 0, 0, 0, 0).getTime();
         }
       };
-      getISO = function(exp) {
+      var getISO = function(exp) {
         var arr = exp.split("/");
         return new Date(arr[2], arr[0] - 1, arr[1], 0, 0, 0, 0).toISOString();
       };
-      makeSelect = function(min, max, interval, id) {
+      var makeSelect = function(min, max, interval, id) {
         var selectHtml = '<select id ="' + id + '">';
         for(var i = min; i <= max; i += interval) {
           if(i < 10) {
@@ -110,13 +110,13 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         selectHtml += '</select>';
         return selectHtml;
       };
-      validateStartDate = function(mili, id) {
+      var validateStartDate = function(mili, id) {
         var now = new Date();
         if(isNaN(mili) || mili < now.getTime()) {
           triggerError("Incorrect Date, pick date from calendar", id);
         }
       };
-      validateEndDate = function(mili, id) {
+      var validateEndDate = function(mili, id) {
         if($("#endByRadio").is(":checked")) {
           var now = new Date();
           var startDate = $("#rangeStartIn").val();
@@ -129,7 +129,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
           }
         }
       };
-      validateName = function(name) {
+      var validateName = function(name) {
         if(name == "") {
           triggerError("You must choose a name", "#nameIn");
         }
@@ -138,7 +138,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
           triggerError('Invalid characters, alpha-numeric text only.', "#nameIn");
         }
       };
-      startTimeGetter = function(selector) {
+      var startTimeGetter = function(selector) {
         var hours = getHour();
         var minutes = $("#minutes").val();
         var mili = (minutes * 60000) + (hours * 3600000);
@@ -152,12 +152,12 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         }
         return new Date(start).toISOString();
       };
-      endTimeGetter = function() {
+      var endTimeGetter = function() {
         var end = getUTC($("#endByIn").val(), true);
         validateEndDate(end, "#endByIn");
         return new Date(end).toISOString();
       };
-      getSelectedDaysOfWeek = function() {
+      var getSelectedDaysOfWeek = function() {
         var selectedDays = new Array();
         var i = 0;
         if($("#sunday").is(":checked")) {
@@ -183,8 +183,8 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         }
         return selectedDays;
       };
-      getDayOfMonth = function() {
-        dayOfMonth = $("#recurrPatternIn").val();
+      var getDayOfMonth = function() {
+        var dayOfMonth = $("#recurrPatternIn").val();
         if(dayOfMonth < 1) {
           triggerError(">0", "#recurrPatternIn");
         } else if(dayOfMonth > 31) {
@@ -192,7 +192,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         }
         return dayOfMonth;
       };
-      setParameters = function() {
+      var setParameters = function() {
         parameters = {
           inputFile: myself.path,
           jobName: $('#nameIn').val(),
@@ -363,17 +363,17 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
             break;
         }
       };
-      validateCron = function(cron) {
+      var validateCron = function(cron) {
         var arr = cron.split(" ");//7 elements - sec min hour dayOfMonth month dayOfWeek year
         if(arr.length < 7) {
           triggerError("Cron Expression too short", "#cronString");
         } else if(arr.length > 7) {
           triggerError("Cron Expression too long", "#cronString");
         } else if((arr[3] != "?" && arr[3] != "*") && (arr[5] != "?" && arr[5] != "*")) {
-          triggerError("M+W unsuported.(M+? or W+?)", "#cronString");//day of month and day of week not suported at the same time
+          triggerError("M+W unsupported.(M+? or W+?)", "#cronString");//day of month and day of week not supported at the same time
         }
       };
-      hideAll = function() {
+      var hideAll = function() {
         $("#rangeOfRecurrDiv").hide();
         $("#cronDiv").hide();
         $("#recurrPatternDiv").hide();
@@ -387,7 +387,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         $("#patternMonth").hide();
         $("#patternYear").hide();
       };
-      changeOpts = function() {
+      var changeOpts = function() {
         var choice = $("#recurrId").val();
         hideAll();
         switch(choice) {
@@ -443,7 +443,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
             break;
         }
       };
-      createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
+      var createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
         if(!forceDefault && (myself.getReportOptions()[paramName] != undefined)) {
           return {name: paramName, stringValue: new Array("" + myself.getReportOptions()[paramName]), type: paramType};
         } else {
@@ -571,10 +571,10 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         '<label>Message (optional)</label>' +
         '<textarea id="messageInput" type="text" rows="4" style="width:100%"></textarea>' +
         '</div>';
-      showHideMailDiv = function(show){
+      var showHideMailDiv = function(show){
         show ? $("#mailInfoDiv").show(350) : $("#mailInfoDiv").hide(350);
       };
-      scheduleRequest = function(sendMail) {
+      var scheduleRequest = function(sendMail) {
         var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
         var jobParameters = new Array();
         var k = 0;

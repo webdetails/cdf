@@ -126,7 +126,7 @@ define(['./Utils'], function (utils) {
             substitution = sprintfWrapper.convert(m);
           }
           else if (m.code == 's') {
-            m.argument = m.argument.substring(0, m.precision ? m.precision : m.argument.length)
+            m.argument = m.argument.substring(0, m.precision ? m.precision : m.argument.length);
             substitution = sprintfWrapper.convert(m, true);
           }
           else if (m.code == 'x') {
@@ -173,7 +173,7 @@ define(['./Utils'], function (utils) {
           }
         }
       }
-    }
+    };
     
     return sprintfWrapper.init;
     

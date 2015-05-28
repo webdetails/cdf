@@ -59,7 +59,7 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
         solution: options.solution,
         path: options.path,
         action: options.action
-      }
+      };
       //we don't want to pass these as parameters
       delete options.solution;
       delete options.path;
@@ -185,6 +185,7 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
         try {
           paramValue = myself.dashboard.getParameterValue(value);
         } catch( e ) {
+          var printValue;
           if(!_.isObject(value) || _.isFunction(value)) {
             printValue = value;
           } else {

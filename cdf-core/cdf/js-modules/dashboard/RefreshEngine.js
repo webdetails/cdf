@@ -78,7 +78,7 @@ define([], function () {
       var mid;
   
       while(low <= high) {
-        mid = parseInt((low + high) / 2)
+        mid = parseInt((low + high) / 2);
         if(coll[mid].nextRefresh > elem.nextRefresh) {
           high = mid - 1;
         } else if (coll[mid].nextRefresh < elem.nextRefresh) {

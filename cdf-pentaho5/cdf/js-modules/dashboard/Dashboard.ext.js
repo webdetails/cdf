@@ -54,7 +54,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     },
 
     /**
-     * Returns a URL parameter for cache-busting porpuses.
+     * Returns a URL parameter for cache-busting purposes.
      *
      * @returns {string} the timestamp parameter of an URL
      */
