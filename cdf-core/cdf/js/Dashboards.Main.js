@@ -76,17 +76,27 @@ var dash, Dashboards = dash = {
 _.extend(Dashboards, Backbone.Events);
 
 // Log
-Dashboards.log = function(m,type){
-  if (typeof console != "undefined" ){
-    if (type && console[type]) {
-      console[type]("CDF: " + m);
-    }else if (type === 'exception' &&
-        !console.exception) {
-      console.error(m.stack);
+Dashboards.log = function(message, type, css) {
+  type =  type || "log"; // default
+
+  if(typeof console != "undefined" ) {
+    if(!console[type]) {
+      if(type === "exception") {
+        type = "error";
+        message = message.stack || message;
+      } else {
+        type = "log";
+      }
     }
-    else {
-      console.log("CDF: " + m);
+    if(css) {
+      try {
+        console[type]("%cCDF: " + message, css);
+        return;
+      } catch(e) {
+        // styling is not supported
+      }
     }
+    console[type]("CDF: " + message);
   }
 };
 
@@ -263,8 +273,10 @@ Dashboards._addLogLifecycleToControl = function(control) {
       }
       
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
-      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+      Dashboards.log("          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]" + " (P: "
+        + this.priority + " ): " + eventName + " " + timeInfo + " (Running: " + this.dashboard.runningCalls  + ")",
+        "log",
+        "color: " + this.getLogColor());
     }
   });
 };
@@ -812,8 +824,9 @@ Dashboards.initEngine = function(initInstance) {
 
 
   if( this.logLifecycle && typeof console != "undefined" ){
-    console.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: "+
-          this.getRunningCalls()  +")","color: #ddd ");
+    Dashboards.log("          [Lifecycle >Start] Init[" + initInstance + "] (Running: " + this.getRunningCalls()  + ")",
+      "log",
+      "color: #ddd");
   }
 
   this.createAndCleanErrorDiv();
@@ -898,8 +911,9 @@ Dashboards.handlePostInit = function(initInstance) {
 
     this.decrementRunningCalls();
     if( this.logLifecycle && typeof console != "undefined" ){
-      console.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: "+
-            this.getRunningCalls()  +")","color: #ddd ");
+      Dashboards.log("          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + this.getRunningCalls() + ")",
+        "log",
+        "color: #ddd");
     }
 
   }

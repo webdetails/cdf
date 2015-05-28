@@ -167,8 +167,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         myself.incrementRunningCalls();
       }
 
-      Logger.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: " +
-        myself.getRunningCalls() + ")","color: #ddd ");
+      Logger.log("          [Lifecycle >Start] Init[" + initInstance + "] (Running: " + myself.getRunningCalls() + ")",
+                 "log",
+                 "color: #ddd");
 
       myself.createAndCleanErrorDiv();
       // Fire all pre-initialization events
@@ -320,7 +321,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         myself.finishedInit = true;
 
         myself.decrementRunningCalls();
-        Logger.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + myself.getRunningCalls()  + ")","color: #ddd ");
+        Logger.log("          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + myself.getRunningCalls()  + ")",
+                   "log",
+                   "color: #ddd");
 
       }
 

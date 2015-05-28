@@ -156,11 +156,12 @@ clientSelector =
   autoUpdateFunction:function()
   {
 		if(!clients)
+		{
 			clients="";
-		console.log("!update");
+		}
 		var inputValue=$("#autoboxInput").val();
-		console.log("inputValue;"+inputValue);
-		console.log("clients;"+clients);
+		Dashboards.log("inputValue: " + inputValue);
+		Dashboards.log("clients: " + clients);
 		if(clients!=inputValue)
 		{
 			clients=inputValue;

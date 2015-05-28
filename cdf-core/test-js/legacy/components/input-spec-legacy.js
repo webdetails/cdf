@@ -24,10 +24,7 @@ describe("The Autocomplete Component #", function() {
       if(!autocompleteTestParameter){
         autocompleteTestParameter="";
       }
-      console.log("!update");
       var inputValue=$("#autoboxInput").val();
-      console.log("inputValue;"+inputValue);
-      console.log("clients;"+autocompleteTestParameter);
       if(autocompleteTestParameter!=inputValue){
         autocompleteTestParameter=inputValue;
         Dashboards.update(autocompleteComponent);

@@ -28,7 +28,7 @@ define(function() {
      *  @property logLevels
      *  @type Array
      */
-    loglevels: ['debug', 'info', 'warn', 'error', 'exception'],
+    loglevels: ['debug', 'log', 'info', 'warn', 'error', 'exception'],
 
 
     /**
@@ -45,20 +45,32 @@ define(function() {
      * @method log
      * @param m Message to log
      * @param type Log level. One of debug, info, warn, error or exception
+     * @param css CSS styling rules for the message to log
      */
-    log: function(m, type) {    
+    log: function(m, type, css) {    
       type = type || "info";
       if(this.loglevels.indexOf(type) < this.loglevels.indexOf(this.loglevel)) {
         return;
       }
-      if(typeof console !== "undefined") {                
-        if(type && console[type]) {
-          console[type]("[" + type + "] WD: " + m);
-        } else if (type === 'exception' && !console.exception) {
-          console.error("[" + type + "] WD: "  + (m.stack || m));
-        } else {
-          console.log("WD: " + m);
+      if(typeof console !== "undefined") {
+
+        if(!console[type]) {
+          if(type === 'exception') {
+            type = "error";
+            m = m.stack || m;
+          } else {
+            type = "log";
+          }
         }
+        if(css) {
+          try {
+            console[type]("%c[" + type + "] WD: " + m, css);
+            return;
+          } catch(e) {
+            // styling is not supported
+          }
+        }
+        console[type]("[" + type + "] WD: " + m);
       }
     },
 

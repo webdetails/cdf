@@ -774,4 +774,89 @@ describe("The CDF framework #", function() {
     expectDateParse('13-08-1983', 'DD-MM-YYYY', 'Sat Aug 13 1983');
     expectDateParse('Wednesday, February 18, 2015 12:00 AM', 'LLLL', 'Wed Feb 18 2015');
   });
+
+  /**
+   * ## The CDF framework # Dashboards.log
+   */
+  describe("Dashboards.log", function() {
+
+    var consoleOriginal = window.console;
+
+    // make sure console.exception is defined
+    if(!window.console.exception) {
+      window.console.exception = function() {};
+    }
+
+    /**
+     * ## The CDF framework # Dashboards.log # logs messages of supported type
+     */
+    it("logs messages of supported types", function() {
+      spyOn(window.console, "debug");
+      Dashboards.log("foo", "debug");
+      expect(console.debug).toHaveBeenCalledWith("CDF: foo");
+
+      spyOn(window.console, "log");
+      Dashboards.log("foo", "log");
+      expect(console.log).toHaveBeenCalledWith("CDF: foo");
+
+      spyOn(window.console, "info");
+      Dashboards.log("foo", "info");
+      expect(console.info).toHaveBeenCalledWith("CDF: foo");
+
+      spyOn(window.console, "warn");
+      Dashboards.log("foo", "warn");
+      expect(console.warn).toHaveBeenCalledWith("CDF: foo");
+
+      spyOn(window.console, "error");
+      Dashboards.log("foo", "error");
+      expect(console.error).toHaveBeenCalledWith("CDF: foo");
+
+      spyOn(window.console, "exception");
+      Dashboards.log("foo", "exception");
+      expect(console.exception).toHaveBeenCalledWith("CDF: foo");
+    });
+
+    /**
+     * ## The CDF framework # Dashboards.log # defaults to type 'log'
+     */
+    it("defaults to type 'log'", function() {
+      spyOn(window.console, "log");
+      Dashboards.log("foo");
+      expect(console.log).toHaveBeenCalledWith("CDF: foo");
+    });
+
+    /**
+     * ## The CDF framework # Dashboards.log # logs type 'error' if 'exception' is unsupported
+     */
+    it("logs type 'error' if 'exception' is unsupported", function() {
+      window.console["exception"] = undefined;
+
+      spyOn(window.console, "error");
+      Dashboards.log({stack: "foo"}, "exception");
+      expect(console.error).toHaveBeenCalledWith("CDF: foo");
+
+      window.console["exception"] = function() {};
+    });
+
+    /**
+     * ## The CDF framework # Dashboards.log # logs exception objects
+     */
+    it("logs exception objects", function() {
+      spyOn(window.console, "exception");
+      Dashboards.log({stack: "foo"}, "exception");
+      expect(console.exception).toHaveBeenCalledWith("CDF: [object Object]");
+    });
+
+    /**
+     * ## The CDF framework # Dashboards.log # logs messages with css styling rules
+     */
+    it("logs type 'log' messages", function() {
+      spyOn(window.console, "info");
+      Dashboards.log("foo", "info", "color: blue");
+      expect(console.info).toHaveBeenCalledWith("%cCDF: foo", "color: blue");
+    });
+
+    // restore window.console
+    window.console = consoleOriginal;
+  });
 });

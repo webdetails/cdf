@@ -61,16 +61,16 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 
     for(var i = 0; i < files.length; i++) {
       var file = files[i];
-      //console.log("Searching for " + currentPath + ", found " + file.path);
+      //Dashboards.log("Searching for " + currentPath + ", found " + file.path);
       if(file.type == "FOLDER" && file.path == currentPath) {
         files = file.folders;
         /*
-         console.log("Files found for this path:");
-          for (var j = 0; j < files.length; j++) {
-            if (files[j].path != undefined) {
-              console.log(files[j].path);
-            }
+        Dashboards.log("Files found for this path:");
+        for (var j = 0; j < files.length; j++) {
+          if (files[j].path != undefined) {
+            Dashboards.log(files[j].path);
           }
+        }
         */
         if(files == undefined) {
           return [];
