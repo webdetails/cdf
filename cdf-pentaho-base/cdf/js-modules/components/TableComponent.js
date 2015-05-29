@@ -534,8 +534,6 @@ define([
 
       // We'll create an Array to keep track of the open expandable rows.
       myself.dataTable.anOpen = [];
-      myself.dataTable.expandParentObj = undefined;
-      myself.dataTable.expandClone = undefined;
 
       myself.ph.find ('table').bind('click', function(e) {
         if(typeof cd.clickAction === 'function' || myself.expandOnClick) { 
@@ -621,9 +619,8 @@ define([
           if(firstChange !== null) {
             myself.dashboard.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0], 10)]);
           }
-
-        };
-      };
+        }
+      }
       $("td.expandingClass").click(
         function(event) {
           //Does nothing but it prevents problems on expandingClass clicks!
@@ -634,47 +631,33 @@ define([
     },
 
     attachToRow: function(row, activeClass) {
-      var myself = this;
+      this.dataTable.anOpen.push(row);
+      this.dataTable.fnOpen(row, "", activeClass);
 
-      myself.dataTable.anOpen.push(row);
-      myself.dataTable.fnOpen(row, "", activeClass);
-
-      var containerId = "#" + myself.expandContainerObject;
-      var expandObj = $(containerId);
       var expandPlace = $(row).next().children().empty();
 
-      myself.dataTable.expandParentObj = expandObj.parent();
-      myself.dataTable.expandClone = expandObj.clone(true);
+      var expandObj;
+      if(!this.expandClone) {
+        var containerId = "#" + this.expandContainerObject;
+
+        expandObj = $( containerId );
+        this.expandClone = expandObj.clone(true);
+      } else {
+        expandObj = this.expandClone;
+      }
 
       expandObj.appendTo(expandPlace).show();
-
-      //register click event so that every row is properly closed when table page is changed
-      $(".dataTables_wrapper div.dataTables_paginate :not(span, .ui-state-disabled, .disabled)")
-        .click(function() {
-          var anOpen = myself.dataTable.anOpen;
-          for(var j = 0; j < anOpen.length; j++) {
-            myself.detachFromRow(anOpen[j], j, activeClass, true);
-          }
-        });
     },
 
-    detachFromRow: function(row, index, activeClass, pageChange) {
-      var myself = this;
+    detachFromRow: function(row, index, activeClass) {
 
-      pageChange = pageChange || false;
-      var expandedSelector = "td." + activeClass + " > *";
-      var dataToDetach = pageChange
-        ? myself.dataTable.expandClone
-        : $(row).next().find(expandedSelector).hide();
-
-      //place expanded object in is previous place, so events can be triggered properly
-      detachTo = myself.dataTable.expandParentObj || $('body div.container');
-      dataToDetach.appendTo(detachTo);
-
+      //remove html from expanded table row
+      $(row).next().find("td." + activeClass + " > *").remove();
+      
       //close expanded table row
       $(row).removeClass(activeClass);
-      myself.dataTable.fnClose(row);
-      myself.dataTable.anOpen.splice(index, 1);
+      this.dataTable.fnClose(row);
+      this.dataTable.anOpen.splice(index, 1);
 
       //event just needs to trigger when row is expanded
       $(".dataTables_wrapper div.dataTables_paginate").off('click');
