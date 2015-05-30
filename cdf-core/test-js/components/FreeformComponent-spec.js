@@ -41,7 +41,7 @@ define([
     // this component is used to validate if preExecution returning false cancels updates
     // should have the lowest priority allowing it to be executed last
     var componentForTestValidation = new FreeformComponent({
-      name: "basic",
+      name: "componentForTestValidation",
       type: "freeform",
       testFlag: 0,
       executeAtStart: true,
@@ -99,7 +99,7 @@ define([
       postFetch: function(d) { return d; },
       redraw: function() { this.testFlag = 0x4; },
       postExecution: function() {}
-    } );
+    });
 
     //#end
 
@@ -206,6 +206,34 @@ define([
        */
       beforeEach(function() {
         dashboard.init()
+        freeformQuery = new FreeformComponent({
+          name: "freeformQuery",
+          type: "freeform",
+          testFlag: 0,
+          executeAtStart: true,
+          manageCallee: false,
+          preExecution: function() {},
+          customfunction: function() {
+            var redraw = _.bind(this.redraw, this);
+            this.triggerQuery({
+              dataAccessId: "foo",
+              path: "bar" 
+            }, redraw);
+          },
+          postFetch: function(d) { return d; },
+          redraw: function() { this.testFlag = 0x2; },
+          postExecution: function() {}
+        });
+        componentForTestValidation = new FreeformComponent({
+          name: "componentForTestValidation",
+          type: "freeform",
+          testFlag: 0,
+          executeAtStart: true,
+          priority: 999,
+          preExecution: function() {},
+          customfunction: function() {},
+          postExecution: function() {}
+        });
         dashboard.addComponent(freeformQuery);
       });
       //#end
@@ -240,40 +268,31 @@ define([
        * ## Freeform Component # Query Lifecycle # overwrites data from postFetch
        */
       it("overwrites data from postFetch", function(done) {
-        spyOn(freeformQuery, "preExecution");
+        spyOn(freeformQuery, "preExecution").and.callThrough();
+        spyOn(freeformQuery, "block").and.callThrough();
         spyOn(freeformQuery, "customfunction").and.callThrough();
         spyOn(freeformQuery, "triggerQuery").and.callThrough();
-        spyOn(freeformQuery, "postExecution");
         spyOn(freeformQuery, "postFetch").and.returnValue({test: true});
-        spyOn(freeformQuery, "redraw");
-        spyOn(freeformQuery, "block").and.callThrough();
+        spyOn(freeformQuery, "redraw").and.callThrough();
+        spyOn(freeformQuery, "postExecution").and.callThrough();
         spyOn(freeformQuery, "unblock").and.callThrough();
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({resultset: [], metadata: []});
         });
 
-        var firstRun = true;
-        var callback = function() {
-          if(firstRun) { return firstRun = false; }
-
-          freeformQuery.off("cdf:postExecution", callback);
-
-          expect(freeformQuery.block.calls.count()).toEqual(2);
-          expect(freeformQuery.preExecution.calls.count()).toEqual(2);
-          expect(freeformQuery.customfunction.calls.count()).toEqual(2);
-          expect(freeformQuery.triggerQuery.calls.count()).toEqual(2);
-          expect(freeformQuery.postFetch.calls.count()).toEqual(2);
-          expect(freeformQuery.redraw.calls.count()).toEqual(2);
-          expect(freeformQuery.redraw.calls.argsFor(0)[0].test).toBeTruthy();
-          expect(freeformQuery.postExecution.calls.count()).toEqual(2);
-          expect(freeformQuery.unblock.calls.count()).toEqual(2);
-          done();
-        }
         // listen to cdf:postExecution event
-        freeformQuery.on("cdf:postExecution", callback);
+        freeformQuery.once("cdf:postExecution", function() {
+          expect(freeformQuery.block.calls.count()).toEqual(1);
+          expect(freeformQuery.preExecution.calls.count()).toEqual(1);
+          expect(freeformQuery.customfunction.calls.count()).toEqual(1);
+          expect(freeformQuery.triggerQuery.calls.count()).toEqual(1);
+          expect(freeformQuery.postFetch.calls.count()).toEqual(1);
+          expect(freeformQuery.redraw.calls.count()).toEqual(1);
+          expect(freeformQuery.redraw.calls.argsFor(0)[0].test).toBeTruthy();
+          expect(freeformQuery.postExecution.calls.count()).toEqual(1);
+          done();
+        });
 
-        // update twice
-        dashboard.update(freeformQuery);
         dashboard.update(freeformQuery);
       });
 
@@ -281,42 +300,32 @@ define([
        * ## Freeform Component # Query Lifecycle # doesn't overwrite data if postFetch returns undefined
        */
       it("doesn't overwrite data if postFetch returns undefined", function(done) {
-        spyOn(freeformQuery, "preExecution");
-        spyOn(freeformQuery, "customfunction").and.callThrough();
-        spyOn(freeformQuery, "triggerQuery").and.callThrough();
-        spyOn(freeformQuery, "postExecution");
-        spyOn(freeformQuery, "postFetch").and.returnValue(undefined);
-        spyOn(freeformQuery, "redraw");
+        spyOn(freeformQuery, "update").and.callThrough();
         spyOn(freeformQuery, "block").and.callThrough();
+        spyOn(freeformQuery, "preExecution").and.callThrough();
+        spyOn(freeformQuery, "customfunction").and.callThrough();
+        spyOn(freeformQuery, "postFetch").and.returnValue(undefined);
+        spyOn(freeformQuery, "redraw").and.callThrough();
+        spyOn(freeformQuery, "triggerQuery").and.callThrough();
+        spyOn(freeformQuery, "postExecution").and.callThrough();
         spyOn(freeformQuery, "unblock").and.callThrough();
         spyOn($, "ajax").and.callFake(function(params) {
-          params.success({resultset: [], metadata: []});
+          params.success({resultset: [10], metadata: []});
         });
 
-        var firstRun = true;
-
-        var callback = function() {
-          if(firstRun) { return firstRun = false; }
-
-          freeformQuery.off("cdf:postExecution", callback);
-
-          expect(freeformQuery.block.calls.count()).toEqual(2);
-          expect(freeformQuery.preExecution.calls.count()).toEqual(2);
-          expect(freeformQuery.customfunction.calls.count()).toEqual(2);
-          expect(freeformQuery.triggerQuery.calls.count()).toEqual(2);
-          expect(freeformQuery.postFetch.calls.count()).toEqual(2);
-          expect(freeformQuery.redraw.calls.count()).toEqual(2);
-          expect(freeformQuery.redraw.calls.argsFor(0)[0].resultset).not.toBeUndefined();
-          expect(freeformQuery.postExecution.calls.count()).toEqual(2);
-          expect(freeformQuery.unblock.calls.count()).toEqual(2);
-          done();
-        }
-
         // listen to cdf:postExecution event
-        freeformQuery.on("cdf:postExecution", callback);
+        freeformQuery.once("cdf:postExecution", function() {
+          expect(freeformQuery.block.calls.count()).toEqual(1);
+          expect(freeformQuery.preExecution.calls.count()).toEqual(1);
+          expect(freeformQuery.customfunction.calls.count()).toEqual(1);
+          expect(freeformQuery.triggerQuery.calls.count()).toEqual(1);
+          expect(freeformQuery.postFetch.calls.count()).toEqual(1);
+          expect(freeformQuery.redraw.calls.count()).toEqual(1);
+          expect(freeformQuery.redraw.calls.argsFor(0)[0].resultset[0]).toEqual(10);
+          expect(freeformQuery.postExecution.calls.count()).toEqual(1);
+          done();
+        });
 
-        // update twice
-        dashboard.update(freeformQuery);
         dashboard.update(freeformQuery);
       });
 
@@ -326,7 +335,6 @@ define([
       it("only updates once if called concurrently", function(done) {
         var success, firstRun = true;
 
-        spyOn(dashboard, "updateComponent").and.callThrough();
         spyOn(freeformQuery, "update").and.callThrough();
         spyOn(freeformQuery, "block").and.callThrough();
         spyOn(freeformQuery, "preExecution").and.callThrough();
@@ -334,12 +342,10 @@ define([
         spyOn(freeformQuery, "postFetch").and.callThrough();
         spyOn(freeformQuery, "redraw").and.callThrough();
         spyOn(freeformQuery, "postExecution").and.callThrough();
-        spyOn(freeformQuery, "unblock").and.callThrough();
         spyOn($, "ajax").and.callFake(function(params) {
-          if(firstRun) {
+          if(!success) {
             // store success callback to be called after the second update's callback runs
             success = params.success;
-            firstRun = false;
           } else {
             // call second update's ajax success callback
             params.success({resultset: ["second"], metadata: ["second"]});
@@ -350,8 +356,10 @@ define([
           }
         });
 
-        componentForTestValidation.once("cdf:postExecution", function() {
-          expect(dashboard.updateComponent.calls.count()).toEqual(3);
+        spyOn(freeformQuery, "unblock").and.callFake(function() {
+
+          if(firstRun) { return firstRun = false; }
+
           expect(freeformQuery.update.calls.count()).toEqual(2);
           expect(freeformQuery.block.calls.count()).toEqual(2);
           expect(freeformQuery.preExecution.calls.count()).toEqual(2);
@@ -365,17 +373,16 @@ define([
 
         dashboard.update(freeformQuery);
         dashboard.update(freeformQuery);
-        dashboard.update(componentForTestValidation);
       });
 
       /**
        * ## Freeform Component # Query Lifecycle # updates multiple times when not called concurrently
        */
       it("updates multiple times when not called concurrently", function(done) {
-        spyOn(freeformQuery, "preExecution");
+        spyOn(freeformQuery, "preExecution").and.callThrough();
         spyOn(freeformQuery, "customfunction").and.callThrough();
-        spyOn(freeformQuery, "postExecution");
-        spyOn(freeformQuery, "redraw");
+        spyOn(freeformQuery, "redraw").and.callThrough();
+        spyOn(freeformQuery, "postExecution").and.callThrough();
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({resultset: [], metadata: []});
         });
@@ -433,8 +440,37 @@ define([
      */
     describe("AJAX Lifecycle #", function() {
       beforeEach(function() {
-        dashboard = new Dashboard();
-        dashboard.init()
+        dashboard.init();
+        freeformAjax = new FreeformComponent({
+          name: "freeformAjax",
+          type: "freeform",
+          testFlag: 0,
+          executeAtStart: true,
+          manageCallee: false,
+          preExecution: function() {},
+          customfunction: function() {
+            var redraw = _.bind(this.redraw, this);
+            this.triggerAjax({
+              url: "foo",
+              type: "json",
+              method: "get",
+              path: "bar" 
+            }, redraw);
+          },
+          postFetch: function(d) { return d; },
+          redraw: function() { this.testFlag = 0x4; },
+          postExecution: function() {}
+        });
+        componentForTestValidation = new FreeformComponent({
+          name: "componentForTestValidation",
+          type: "freeform",
+          testFlag: 0,
+          executeAtStart: true,
+          priority: 999,
+          preExecution: function() {},
+          customfunction: function() {},
+          postExecution: function() {}
+        });
         dashboard.addComponent(freeformAjax);
       });
 
@@ -446,9 +482,9 @@ define([
         spyOn(freeformAjax, 'preExecution').and.callThrough();
         spyOn(freeformAjax, 'block').and.callThrough();
         spyOn(freeformAjax, 'customfunction').and.callThrough();
-        spyOn(freeformAjax, 'postExecution').and.callThrough();
         spyOn(freeformAjax, 'postFetch').and.callThrough();
         spyOn(freeformAjax, 'redraw').and.callThrough();
+        spyOn(freeformAjax, 'postExecution').and.callThrough();
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({resultset: [], metadata: []});
         });
@@ -465,9 +501,6 @@ define([
           done();
         });
 
-        // unblock not called yet
-        //freeformAjax.once("cdf:postExecution", function() { });
-
         // update
         dashboard.update(freeformAjax);
       });
@@ -478,7 +511,7 @@ define([
       it("only updates once if called concurrently", function(done) {
         var success, firstRun = true;
 
-        spyOn(dashboard, "updateComponent").and.callThrough();
+        spyOn(dashboard, 'updateComponent').and.callThrough();
         spyOn(freeformAjax, 'update').and.callThrough();
         spyOn(freeformAjax, 'preExecution').and.callThrough();
         spyOn(freeformAjax, 'block').and.callThrough();
@@ -487,12 +520,10 @@ define([
         spyOn(freeformAjax, 'triggerAjax').and.callThrough();
         spyOn(freeformAjax, 'postFetch').and.callThrough();
         spyOn(freeformAjax, 'postExecution').and.callThrough();
-        spyOn(freeformAjax, 'unblock').and.callThrough();
         spyOn($, "ajax").and.callFake(function(params) {
-          if(firstRun) {
+          if(!success) {
             // store success callback to be called after the second update's callback runs
             success = params.success;
-            firstRun = false;
           } else {
             // call second update's ajax success callback
             params.success({resultset: ["second"], metadata: ["second"]});
@@ -503,8 +534,11 @@ define([
           }
         });
 
-        componentForTestValidation.once("cdf:postExecution", function() {
-          expect(dashboard.updateComponent.calls.count()).toEqual(3);
+        spyOn(freeformAjax, 'unblock').and.callFake(function(params) {
+
+          if(firstRun) { return firstRun = false; }
+
+          expect(dashboard.updateComponent.calls.count()).toEqual(2);
           expect(freeformAjax.update.calls.count()).toEqual(2);
           expect(freeformAjax.preExecution.calls.count()).toEqual(2);
           expect(freeformAjax.block.calls.count()).toEqual(2);
@@ -520,7 +554,6 @@ define([
         // update twice
         dashboard.update(freeformAjax);
         dashboard.update(freeformAjax);
-        dashboard.update(componentForTestValidation);
       });
 
       /**

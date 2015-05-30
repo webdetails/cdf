@@ -17,7 +17,8 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
    * ## The CDF framework Dashboard Views
    */
   describe("The CDF framework Dashboard Views #", function() {
-    var dashboard;
+    var dashboard,
+        serverResponse = {test: 1};
     
     /**
      * ## Global settings for all suites.
@@ -33,6 +34,10 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
      * ## Dashboard Views # correctly calls the initViews
      */
     it("correctly calls the initViews", function(done) {
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success(serverResponse);
+      });
+
       // listen to cdf:postInit event
       dashboard.once("cdf:postInit", function() {
         expect(dashboard._initViews).toBeDefined();
@@ -48,16 +53,12 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
      * ## The CDF framework Dashboard Views # sets the view object according to server response
      */
     it("sets the view object according to server response", function(done) {
-      var serverResponse = {test: 1};
-
-      spyOn($, "ajax").and.callFake(function(params) {
-        params.success(serverResponse);
-      });
-
       dashboard.init();
 
-      // listen to cdf:postInit event
-      dashboard.once("cdf:postInit", function() {
+      spyOn(dashboard, "_initViews").and.callThrough();
+      spyOn($, "ajax").and.callFake(function(params) {
+        params.success(serverResponse);
+        expect(dashboard._initViews.calls.count()).toEqual(1);
         expect(dashboard.view).toEqual(serverResponse);
         done();
       });
