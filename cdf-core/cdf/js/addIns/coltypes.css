@@ -71,3 +71,7 @@ a.hiperlinkAddIn{
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.jqstooltip {
+  box-sizing: initial;
+}
