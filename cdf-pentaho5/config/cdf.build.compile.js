@@ -181,7 +181,8 @@
         "cdf/queries/BaseQuery",
         "cdf/queries/CdaQuery",
         "cdf/queries/CpkQuery",
-        "cdf/queries/LegacyQuery"
+        "cdf/queries/LegacyQuery",
+        "cdf/queries/XmlaQuery"
       ],
 
       //Exclude the modules listed bellow and their dependencies from the built file. If you want
@@ -224,7 +225,8 @@
         "cdf/dashboard/Dashboard.notifications.ext",
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
-        "cdf/queries/CdaQuery.ext"
+        "cdf/queries/CdaQuery.ext",
+        "cdf/queries/XmlaQuery.ext"
       ]
     },
     {
@@ -259,7 +261,8 @@
         "cdf/queries/BaseQuery",
         "cdf/queries/CdaQuery",
         "cdf/queries/CpkQuery",
-        "cdf/queries/LegacyQuery"
+        "cdf/queries/LegacyQuery",
+        "cdf/queries/XmlaQuery"
       ],
 
       //Exclude the modules listed bellow and their dependencies from the built file. If you want
@@ -308,7 +311,8 @@
         "cdf/dashboard/Dashboard.notifications.ext",
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
-        "cdf/queries/CdaQuery.ext"
+        "cdf/queries/CdaQuery.ext",
+        "cdf/queries/XmlaQuery.ext"
       ]
     },
     {
@@ -348,7 +352,8 @@
         "cdf/queries/BaseQuery",
         "cdf/queries/CdaQuery",
         "cdf/queries/CpkQuery",
-        "cdf/queries/LegacyQuery"
+        "cdf/queries/LegacyQuery",
+        "cdf/queries/XmlaQuery"
       ],
 
       //Exclude the modules listed bellow and their dependencies from the built file. If you want
@@ -389,7 +394,8 @@
         "cdf/dashboard/Dashboard.notifications.ext",
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
-        "cdf/queries/CdaQuery.ext"
+        "cdf/queries/CdaQuery.ext",
+        "cdf/queries/XmlaQuery.ext"
       ]
     }
   ]
