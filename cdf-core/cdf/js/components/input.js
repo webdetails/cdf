@@ -97,7 +97,13 @@ var SelectBaseComponent = InputBaseComponent.extend({
     if(placeholderText) { selectHTML += " data-placeholder='" + placeholderText + "'" ; }
 
     var size = this._getListSize(myArray);
-    if(size != null) { selectHTML += " size='" + size + "'"; }
+    if(size != null) {
+      selectHTML += " size='" + size + "'";
+      if (myArray.length > size) {
+        // PRD-5443
+        selectHTML += " style='overflow-y: scroll;' "
+      }
+    }
 
     var extPlugin = this.externalPlugin;
     switch(extPlugin) {
