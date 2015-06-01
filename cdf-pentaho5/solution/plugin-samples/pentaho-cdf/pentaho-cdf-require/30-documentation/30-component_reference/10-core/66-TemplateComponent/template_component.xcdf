@@ -6,4 +6,5 @@
   <icon></icon>
   <template>template.html</template>
   <style>mantle</style>
+  <require>true</require>
 </cdf>
