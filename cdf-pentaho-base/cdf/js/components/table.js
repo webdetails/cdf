@@ -231,7 +231,7 @@ var TableComponent = UnmanagedComponent.extend({
     if(!this.htmlObject) {
       return this.error("TableComponent requires an htmlObject");
     }
-    try{
+    try {
       this.block();
       this.setup();
       if(this.chartDefinition.paginateServerside) {
@@ -397,7 +397,7 @@ var TableComponent = UnmanagedComponent.extend({
 
     /* Old urlTemplate code. This needs to be here for backward compatibility */
     if(cd.urlTemplate != undefined){
-      var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
+      var td = $("#" + myself.htmlObject + " td:nth-child(1)");
       td.addClass('cdfClickable');
       td.bind("click", function(e){
           var regex = new RegExp("{"+cd.parameterName+"}","g");
@@ -514,11 +514,9 @@ var TableComponent = UnmanagedComponent.extend({
 
     // We'll create an Array to keep track of the open expandable rows.
     this.dataTable.anOpen = [];
-    this.dataTable.expandParentObj = undefined;
-    this.dataTable.expandClone = undefined;
 
     myself.ph.find ('table').bind('click',function(e) {
-      if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
+      if(typeof cd.clickAction === 'function' || myself.expandOnClick) {
         var state = {},
           target = $(e.target),
           results = myself.rawData; 
@@ -541,11 +539,10 @@ var TableComponent = UnmanagedComponent.extend({
           
         state.target = target;
 
-        
-        if ( myself.expandOnClick ) {
+        if(myself.expandOnClick) {
         	myself.handleExpandOnClick(state);
         }
-        if ( cd.clickAction  ){
+        if(cd.clickAction ) {
 	        cd.clickAction.call(myself,state);
         }
       }
@@ -573,7 +570,7 @@ var TableComponent = UnmanagedComponent.extend({
           i = $.inArray( row, anOpen );
       
       if( obj.hasClass(activeclass) ){
-        myself.detachFromRow(row, i, activeclass );;
+        myself.detachFromRow(row, i, activeclass );
 
         $(myself.expandParameters).each(function f(i, elt) {
           Dashboards.setParameter(elt[1], "");
@@ -581,12 +578,12 @@ var TableComponent = UnmanagedComponent.extend({
 
       } else {
         // Closes all open expandable rows .
-        for ( var j=0; j < anOpen.length; j++ ) {
-          myself.detachFromRow(anOpen[j], j, activeclass );
+        for (var j = 0; j < anOpen.length; j++) {
+          myself.detachFromRow(anOpen[j], j, activeclass);
         }
         obj.addClass(activeclass);
 
-        myself.attachToRow( row, activeclass );
+        myself.attachToRow(row, activeclass);
 
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
@@ -594,18 +591,17 @@ var TableComponent = UnmanagedComponent.extend({
 
         $(myself.expandParameters).each(function f(i, elt) {
           //skips the first expandParameter that was updated and calls Dashboards.setParameter for the all others
-          if( !firstChange && Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)] ) {
+          if (!firstChange && Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0], 10)]) {
             firstChange = elt;
           } else {
-            Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+            Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0], 10)]);
           }
         });
-        if( firstChange !== null ) {
-          Dashboards.fireChange( firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)] );
+        if (firstChange !== null) {
+          Dashboards.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0], 10)]);
         }
-
-      };
-    };
+      }
+    }
     $("td.expandingClass").click(
       function(event){
         //Does nothing but it prevents problems on expandingClass clicks!
@@ -619,34 +615,25 @@ var TableComponent = UnmanagedComponent.extend({
     this.dataTable.anOpen.push( row );
     this.dataTable.fnOpen( row, "", activeClass );
 
-    var myself = this;
-    var containerId = "#" + this.expandContainerObject;
-    var expandObj = $( containerId );
     var expandPlace = $(row).next().children().empty();
 
-    this.dataTable.expandParentObj = expandObj.parent();
-    this.dataTable.expandClone = expandObj.clone(true);
+    var expandObj;
+    if(!this.expandClone) {
+      var containerId = "#" + this.expandContainerObject;
 
-    expandObj.appendTo( expandPlace ).show();
+      expandObj = $( containerId );
+      this.expandClone = expandObj.clone(true);
+    } else {
+      expandObj = this.expandClone;
+    }
 
-    //register click event so that every row is properly closed when table page is changed
-    $(".dataTables_wrapper div.dataTables_paginate :not(span, .ui-state-disabled, .disabled)").click( function() {
-      var anOpen = myself.dataTable.anOpen;
-      for ( var j=0; j < anOpen.length; j++ ) {
-        myself.detachFromRow(anOpen[j], j, activeClass, true );
-      }
-    });
+    expandObj.appendTo(expandPlace).show();
   },
 
-  detachFromRow: function( row, index, activeClass, pageChange ) {
-    pageChange = pageChange || false;
-    var expandedSelector = "td." + activeClass + " > *";
-    var dataToDetach = pageChange ? this.dataTable.expandClone
-        : $(row).next().find(expandedSelector).hide();
+  detachFromRow: function(row, index, activeClass) {
 
-    //place expanded object in is previous place, so events can be triggered properly
-    detachTo = this.dataTable.expandParentObj || $('body div.container');
-    dataToDetach.appendTo(detachTo);
+    //remove html from expanded table row
+    $(row).next().find("td." + activeClass + " > *").remove();
 
     //close expanded table row
     $(row).removeClass(activeClass);
