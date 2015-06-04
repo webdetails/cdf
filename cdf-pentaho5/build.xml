@@ -341,7 +341,8 @@ de
 
   <target name="dist-js" depends="install-antcontrib, check-pentaho-js-build-downloaded"
           description="Creates the js distribution for js">
-    <delete dir="${js.build.output.dir}"/>
+
+    <!-- delete the dir that contains the sources to be optimized -->
     <delete dir="${js.module.script.agg.dir}"/>
     <echo message="js.module.script.agg.dir: ${js.module.script.agg.dir}"/>
     <mkdir dir="${js.module.script.agg.dir}"/>
@@ -642,7 +643,7 @@ de
 
   <target name="dist-samples" depends="init">
     <mkdir dir="${samples.stage.dir}"/>
-    <!-- copy over all the xactions within the pentaho-cdf folder -->
+    <!-- copy all sample files to the stage solution folder -->
     <copy todir="${samples.stage.dir}/plugin-samples" overwrite="true">
       <fileset dir="solution/plugin-samples"></fileset>
     </copy>
