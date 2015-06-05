@@ -104,9 +104,9 @@ wd.cdf.endpoints = {
       for(var key in params){
         parameters[key] = ( typeof params[key]=='function' ? params[key]() : params[key] );
       }
-      return Encoder.encode( wd.cdf.endpoints.getViewAction(), null, $.extend( { path: wd.cdf.helper.getFullPath( path, action ), ts: new Date().getTime() }, parameters ) );
+      return this.getEncoder().encode( wd.cdf.endpoints.getViewAction(), null, $.extend( { path: wd.cdf.helper.getFullPath( path, action ), ts: new Date().getTime() }, parameters ) );
     }else{
-      return Encoder.encode( wd.cdf.endpoints.getViewAction(), null, { path: wd.cdf.helper.getFullPath( path, action ), ts: new Date().getTime() } );
+      return this.getEncoder().encode( wd.cdf.endpoints.getViewAction(), null, { path: wd.cdf.helper.getFullPath( path, action ), ts: new Date().getTime() } );
     }
   },
 
@@ -115,7 +115,7 @@ wd.cdf.endpoints = {
     var arr = {};
     arr.wrapper = false;
     arr.action = action;
-    arr.url = Encoder.encode( wd.cdf.endpoints.getWebapp()+"/api/repos/{0}/generatedContent", Encoder.encodeRepositoryPath( wd.cdf.helper.getFullPath( path, action ) ) );
+    arr.url = this.getEncoder().encode( wd.cdf.endpoints.getWebapp()+"/api/repos/{0}/generatedContent", this.getEncoder().encodeRepositoryPath( wd.cdf.helper.getFullPath( path, action ) ) );
 
     return arr; 
   }, 
@@ -146,19 +146,19 @@ wd.cdf.endpoints = {
 
   getPivot: function ( solution, path, action ) { 
     var fullPath = path.indexOf( CDF_PLUGIN_NAME ) == 0 ? ( SAMPLES_BASE_PATH + path ) : path;
-    return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/plugin/jpivot/Pivot", null, { solution: (solution || "system"), path: fullPath, action: action } );
+    return this.getEncoder().encode( wd.cdf.endpoints.getWebapp() + "/plugin/jpivot/Pivot", null, { solution: (solution || "system"), path: fullPath, action: action } );
   },
 
   getAnalyzer: function( path, callvar, parameters ) {
-    return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, Encoder.encodeRepositoryPath( wd.cdf.helper.composePath( path ) ), parameters );
+    return this.getEncoder().encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, this.getEncoder().encodeRepositoryPath( wd.cdf.helper.composePath( path ) ), parameters );
   },
 
   getReport: function( path, callvar, parameters ) {
     /* callvar = report || viewer */
     if (typeof path === "string" || path instanceof String){
-      return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, Encoder.encodeRepositoryPath( path ), parameters );
+      return this.getEncoder().encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, this.getEncoder().encodeRepositoryPath( path ), parameters );
     }else{
-      return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, Encoder.encodeRepositoryPath( wd.cdf.helper.composePath( path ) ), parameters );
+      return this.getEncoder().encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, this.getEncoder().encodeRepositoryPath( wd.cdf.helper.composePath( path ) ), parameters );
     }
   },
   
@@ -166,6 +166,18 @@ wd.cdf.endpoints = {
 
   getDoQuery: function(){ return wd.cdf.endpoints.getCdaBase() + "/doQuery?"; },
 
-  getUnwrapQuery: function( parameters ){ return wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( parameters ); }
-  
+  getUnwrapQuery: function( parameters ){ return wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( parameters ); },
+
+  getEncoder: function() {
+    var enc;
+    try {
+      enc = Encoder;
+    } catch(err) {}
+    if (enc === undefined) {
+      try {
+        enc = pho.Encoder;
+      } catch(err) {}
+    }
+    return enc;
+  }
 };
