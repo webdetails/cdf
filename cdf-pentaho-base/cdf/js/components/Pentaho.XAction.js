@@ -48,7 +48,19 @@ var XactionComponent = BaseComponent.extend({
                                 " height=\"100%\"" +
                                 " width=\"100%\" />";
         var iframe = $(xactionIFrameHTML);
-        var url = wd.cdf.endpoints.getCdfXaction(myself.path, myself.action, myself.solution) + "&wrapper=false";
+        var actionIncluded = function(path, action) {
+            //check if path ends with action prefixed with '\' or '/'
+            return (typeof path == "string") && (typeof action == "string")
+                && (path.length > action.length)
+                && (path.lastIndexOf(action) == (path.length - action.length))
+                && ("\\/".indexOf(path.substr(-action.length-1, 1))>=0);
+        };
+        var url;
+        if (actionIncluded(myself.path, myself.action)) {
+            url = wd.cdf.endpoints.getCdfXaction(myself.path, "", myself.solution) + "&wrapper=false";
+        } else {
+            url = wd.cdf.endpoints.getCdfXaction(myself.path, myself.action, myself.solution) + "&wrapper=false";
+        }
         // Add args
         var p = new Array(myself.parameters.length);
         for(var i = 0, len = p.length; i < len; i++) {
