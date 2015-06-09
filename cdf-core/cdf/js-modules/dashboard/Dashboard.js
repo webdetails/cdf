@@ -25,14 +25,14 @@ define([
   '../lib/jquery',
   'amd!../lib/jquery.impromptu',
   '../lib/shims',
-  'css!../lib/cdf.css'],
-  function(Base, Logger, RefreshEngine, _, Backbone, $) {
+  'css!../lib/cdf.css'
+], function(Base, Logger, RefreshEngine, _, Backbone, $) {
 
   var Dashboard = Base.extend({
 
     /**
      * A class representing a Dashboard. This class is abstract, so it should not be required or instantiated directly.
-     * Instead use one of its extending subclasses,  {{#crossLink "Dashboard.Blueprint"}}Dashboard.Blueprint{{/crossLink}},
+     * Instead use one of its extending subclasses, {{#crossLink "Dashboard.Blueprint"}}Dashboard.Blueprint{{/crossLink}},
      * {{#crossLink "Dashboard.Bootstrap"}}Dashboard.Bootstrap{{/crossLink}} or
      * {{#crossLink "Dashboard.Clean"}}Dashboard.Clean{{/crossLink}}.
      *
@@ -52,7 +52,7 @@ define([
         this.webAppPath = CONTEXT_PATH;
       }
       if(this.webAppPath == undefined) {
-        this.webAppPath = "/" + window.location.pathname.split( '/' )[1];
+        this.webAppPath = "/" + window.location.pathname.split('/')[1];
       }
 
       if(this.webAppPath.endsWith("/")) {
@@ -175,7 +175,7 @@ define([
         this.events = {};
       }
       this.events[ev] = callback;
-    },    
+    },
 
     debug: 1,
 
@@ -183,14 +183,13 @@ define([
       var level = 1; // log errors
       try {
         var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
-        var url = urlIfHasDebug(window.location.href) ||
-                  urlIfHasDebug(window.top.location.href);
+        var url = urlIfHasDebug(window.location.href) || urlIfHasDebug(window.top.location.href);
         if(url) {
           var m = /\bdebugLevel=(\d+)/.exec(url);
           level = m ? (+m[1]) : 3;
         }
       } catch(ex) {
-          // swallow
+        // swallow
       }
       return this.debug = level;
     },

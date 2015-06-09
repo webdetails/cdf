@@ -11,12 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', './Utils'],
-  function (Base, Dashboard, Container, _, Utils) {
+define([
+  '../lib/Base',
+  './Dashboard',
+  './Container',
+  'amd!../lib/underscore',
+  './Utils'
+], function(Base, Dashboard, Container, _, Utils) {
 
   var _BaseQuery = Base;
   
-  var  globalQueryFactories = new Container();
+  var globalQueryFactories = new Container();
      
   /**
    * A module representing a extension to Dashboard module for i18n.
@@ -145,7 +150,7 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
      *
      * @for Dashboard
      */
-    listQueries: function() {    
+    listQueries: function() {
       return _.keys(this.queryFactories.listType('Query'));
     }
   });
@@ -203,4 +208,4 @@ define(['../lib/Base', './Dashboard', './Container', 'amd!../lib/underscore', '.
       });
     }
   };
-});    
+});

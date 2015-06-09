@@ -18,20 +18,25 @@
  * @module Dashboard.legacy
  */
 
-define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dashboard.ext', './Dashboard', '../Logger', '../lib/jquery'],
-  function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
+define([
+  '../queries/CdaQuery.ext',
+  '../components/XactionComponent.ext',
+  './Dashboard.ext',
+  './Dashboard',
+  '../Logger',
+  '../lib/jquery'
+], function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
   Dashboard.implement({
-
 
     /**
      * Calls an xaction
      *
      * @method callPentahoAction
-     * @param obj  Dom object where the response from the xaction should be written
+     * @param obj Dom object where the response from the xaction should be written
      * @param solution Solution folder
-     * @param path   Path to the xaction - can be the full path, in which case you don't need the solution and action
-     * @param action  xaction name
+     * @param path Path to the xaction - can be the full path, in which case you don't need the solution and action
+     * @param action xaction name
      * @param parameters Parameter object to send to the xaction
      * @param callback Callback function to call when the xaction responds
      * @returns {*} The xaction result
@@ -39,7 +44,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    callPentahoAction : function(obj, solution, path, action, parameters, callback) {
+    callPentahoAction: function(obj, solution, path, action, parameters, callback) {
       var myself = this;
     
       // Encapsulate pentahoAction call
@@ -57,7 +62,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * Calls an arbitrary URL expecting the result content type to be xml
      *
      * @method urlAction
-     * @param url   Url to call
+     * @param url Url to call
      * @param params Parameters object
      * @param func Callback function
      * @returns {*} The parsed invocation result if no callback was supplied. Otherwise, null
@@ -65,7 +70,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    urlAction : function(url, params, func) {
+    urlAction: function(url, params, func) {
       return this.executeAjax('xml', url, params, func);
     },
 
@@ -74,7 +79,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      *
      * @method executeAjax
      * @param returnType expected return type
-     * @param url   Url to call
+     * @param url Url to call
      * @param params Parameters object
      * @param func Callback function
      * @returns {*} The parsed invocation result if no callback was supplied. Otherwise, null
@@ -82,7 +87,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    executeAjax : function(returnType, url, params, func) {
+    executeAjax: function(returnType, url, params, func) {
       var myself = this;
       // execute a url
       if(typeof func == "function") {
@@ -103,7 +108,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
             }
           },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
-            Logger.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
+            Logger.error("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " + errorThrown);
           }
         });
       }
@@ -116,10 +121,10 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
         async: false,
         data: params,
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-          Logger.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
+          Logger.error("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " + errorThrown);
         }
-    
       });
+
       if(returnType == 'xml') {
         /* CDF-271 jQuery 1.9.1 bug #13388 */
         if(typeof result.responseXML == "undefined") {
@@ -130,17 +135,15 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       } else {
         return result.responseText;
       }
-    
     },
-
 
     /**
      * Another way to call an xaction
      *
      * @method pentahoAction
      * @param solution Solution folder
-     * @param path   Path to the xaction - can be the full path, in which case you don't need the solution and action
-     * @param action  xaction name
+     * @param path Path to the xaction - can be the full path, in which case you don't need the solution and action
+     * @param action xaction name
      * @param params Parameter object to send to the xaction
      * @param func Callback function to call when the xaction responds
      * @returns {*} The xaction result
@@ -148,7 +151,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    pentahoAction : function(solution, path, action, params, func) {
+    pentahoAction: function(solution, path, action, params, func) {
       return this.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
     },
 
@@ -157,11 +160,11 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      *
      * @method pentahoServiceAction
      *
-     * @param serviceMethod  Dom object where the response from the xaction should be written
+     * @param serviceMethod Dom object where the response from the xaction should be written
      * @param returntype Expected return type of the response
      * @param solution Solution folder
-     * @param path   Path to the xaction - can be the full path, in which case you don't need the solution and action
-     * @param action  xaction name
+     * @param path Path to the xaction - can be the full path, in which case you don't need the solution and action
+     * @param action xaction name
      * @param params Parameter object to send to the xaction
      * @param func Callback function to call when the xaction responds
      * @returns {*} The xaction result
@@ -169,7 +172,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    pentahoServiceAction : function(serviceMethod, returntype, solution, path, action, params, func) {
+    pentahoServiceAction: function(serviceMethod, returntype, solution, path, action, params, func) {
       // execute an Action Sequence on the server
     
       var arr = DashboardExt.getServiceAction(serviceMethod, solution, path , action);
@@ -182,17 +185,17 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       return this.executeAjax(returntype, url, arr, func);
     },
     
-    CDF_ERROR_DIV : 'cdfErrorDiv',
+    CDF_ERROR_DIV: 'cdfErrorDiv',
     
-    createAndCleanErrorDiv : function() {
+    createAndCleanErrorDiv: function() {
       if($("#" + this.CDF_ERROR_DIV).length == 0) {
-        $("body").append("<div id='" +  this.CDF_ERROR_DIV + "'></div>");
+        $("body").append("<div id='" + this.CDF_ERROR_DIV + "'></div>");
       }
       $("#" + this.CDF_ERROR_DIV).empty();
     },
     
-    showErrorTooltip : function() {
-      $(function(){
+    showErrorTooltip: function() {
+      $(function() {
         if($.tooltip) {
           $(".cdf_error").tooltip({
             delay:0,
@@ -216,7 +219,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @deprecated
      * @private
      */
-    parseXActionResult : function(obj,html) {
+    parseXActionResult: function(obj,html) {
     
       var jXML = $(html);
       var error = jXML.find("SOAP-ENV\\:Fault");
@@ -229,11 +232,11 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       var errorDetails = new Array();
       errorDetails[0] = " Error details for component execution " + obj.name + " -- ";
       errorDetails[1] = error.find("SOAP-ENV\\:faultstring").find("SOAP-ENV\\:Text:eq(0)").text();
-      error.find("SOAP-ENV\\:Detail").find("message").each(function(){
+      error.find("SOAP-ENV\\:Detail").find("message").each(function() {
         errorDetails.push($(this).text())
       });
       if(errorDetails.length > 8) {
-        errorDetails = errorDetails.slice(0,7);
+        errorDetails = errorDetails.slice(0, 7);
         errorDetails.push("...");
       }
       //<img src='"+ ERROR_IMAGE + "'>
@@ -248,29 +251,27 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
       }
     
       return null;
-    
     },
 
     /**
      * Sets a setting in the server
      *
      * @method setSettingsValue
-     * @param name  Name of the setting
+     * @param name Name of the setting
      * @param object Value for the setting
      *
      * @for Dashboard
      * @deprecated
      */
-    setSettingsValue : function(name,object) {
+    setSettingsValue: function(name,object) {
     
       var data = {
         method: "set",
         key: name,
         value: JSON.stringify(object)
       };
-      $.post(DashboardExt.getSettings("set", null), data, function(){});
+      $.post(DashboardExt.getSettings("set", null), data, function() {});
     },
-
 
     /**
      * Gets a setting value from the server
@@ -282,7 +283,7 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    getSettingsValue : function(key,value) {
+    getSettingsValue: function(key,value) {
     
       $.ajax({
         type: 'GET',
@@ -309,8 +310,8 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
      * @for Dashboard
      * @deprecated
      */
-    fetchData : function(cd, params, callback) {
-      Logger.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
+    fetchData: function(cd, params, callback) {
+      Logger.warn('Dashboards.fetchData() is deprecated. Use Query objects instead');
       // Detect and handle CDA data sources
       if(cd != undefined && cd.dataAccessId != undefined) {
         for(var param in params) {
@@ -337,7 +338,5 @@ define(['../queries/CdaQuery.ext', '../components/XactionComponent.ext', './Dash
         callback([]);
       }
     }
-
   });
-
 });

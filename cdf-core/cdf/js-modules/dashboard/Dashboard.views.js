@@ -15,8 +15,8 @@ define([
   './Dashboard',
   '../lib/base64',
   './Dashboard.views.ext',
-  '../lib/jquery'],
-  function(Dashboard, Base64, DashboardViewsExt, $) {
+  '../lib/jquery'
+], function(Dashboard, Base64, DashboardViewsExt, $) {
   /**
    * A module representing an extension to Dashboard module for views.
    * @module Dashboard.views
@@ -65,7 +65,7 @@ define([
           xhrFields: {
             withCredentials: true
           },
-          success: function (json) {
+          success: function(json) {
             myself.view = json;
           }
         });
@@ -87,7 +87,7 @@ define([
       var p, params;
       if(!this.view || !this.view.params) { return; }
       /*
-       *  So now we have to decode that mess.
+       * So now we have to decode that mess.
        */
       params = JSON.parse(Base64.decode(this.view.params));
       if(!params) { return; }
@@ -158,7 +158,7 @@ define([
     getUnboundParameters: function() {
       var params = this.viewParameters,
           ret = [];
-      for(var p in params) if (params.hasOwnProperty(p)) {
+      for(var p in params) if(params.hasOwnProperty(p)) {
         if(params[p] == this.viewFlags.UNBOUND) {
           ret.push(p);
         }

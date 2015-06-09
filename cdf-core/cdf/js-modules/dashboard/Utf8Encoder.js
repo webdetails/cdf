@@ -24,15 +24,15 @@ define(["../lib/jquery"], function($) {
    * UTF-8 data encode / decode
    * http://www.webtoolkit.info/
    *
-   **/         
+   **/
   var Utf8 = {
-               
+
     // public method for url encoding
-    encode : function(string) {
-      string = string.replace(/\r\n/g,"\n");
+    encode: function(string) {
+      string = string.replace(/\r\n/g, "\n");
       var utftext = "";
 
-      for(var n = 0; n < string.length; n++) {    
+      for(var n = 0; n < string.length; n++) {
         var c = string.charCodeAt(n);
 
         if(c < 128) {
@@ -44,38 +44,36 @@ define(["../lib/jquery"], function($) {
           utftext += String.fromCharCode((c >> 12) | 224);
           utftext += String.fromCharCode(((c >> 6) & 63) | 128);
           utftext += String.fromCharCode((c & 63) | 128);
-        }    
+        }
       }
 
       return utftext;
     },
 
     // public method for url decoding
-    decode : function(utftext) {
+    decode: function(utftext) {
       var string = "";
       var i = 0;
       var c = 0, c2 = 0, c3 = 0;
 
-      while(i < utftext.length) {    
-        c = utftext.charCodeAt(i);    
+      while(i < utftext.length) {
+        c = utftext.charCodeAt(i);
         if(c < 128) {
           string += String.fromCharCode(c);
           i++;
         } else if((c > 191) && (c < 224)) {
-          c2 = utftext.charCodeAt(i+1);
+          c2 = utftext.charCodeAt(i + 1);
           string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
           i += 2;
         } else {
-          c2 = utftext.charCodeAt(i+1);
-          c3 = utftext.charCodeAt(i+2);
+          c2 = utftext.charCodeAt(i + 1);
+          c3 = utftext.charCodeAt(i + 2);
           string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
           i += 3;
-        }    
+        }
       }
-
       return string;
     }
-  
   };
 
   /**
@@ -86,17 +84,17 @@ define(["../lib/jquery"], function($) {
     /**
      * Prepares an UTF8 string to be used in Opera or Internet Explorer
      *
-     * @method   encode_prepare
+     * @method encode_prepare
      * @param s String to be prepared
      * @returns {*} Encoded/Prepared String
      *
      * @static
      */
-    encode_prepare : function(s) {
+    encode_prepare: function(s) {
       if(s != null) {
         s = s.replace(/\+/g," ");
         /* CDF-271 jQuery 1.9.1 deprecated function $.browser */
-        //if ($.browser == "msie" || $.browser == "opera"){
+        //if($.browser == "msie" || $.browser == "opera") {
         if((navigator.userAgent.toLowerCase().indexOf('msie') != -1)
           || (navigator.userAgent.toLowerCase().indexOf('opera') != -1)) {
 
@@ -109,20 +107,20 @@ define(["../lib/jquery"], function($) {
     /**
      * Prepares an array containing UTF8 strings to be used in Opera or Internet Explorer
      *
-     * @method   encode_prepare_arr
+     * @method encode_prepare_arr
      * @param value Array to be encoded
      * @returns {Array} Array with encoded/prepared elements
      *
      * @static
      */
-    encode_prepare_arr : function(value) {
+    encode_prepare_arr: function(value) {
       var myself = this;
 
       if(typeof value == "number") {
         return value;
       } else if($.isArray(value)) {
         var a = new Array(value.length);
-        $.each(value,function(i,val) {
+        $.each(value,function(i, val) {
           a[i] = myself.encode_prepare(val);
         });
         return a;
@@ -130,9 +128,7 @@ define(["../lib/jquery"], function($) {
         return myself.encode_prepare(value);
       }
     }
-
   };
 
   return Utf8Encoder;
-
 });
