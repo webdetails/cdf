@@ -18,141 +18,144 @@
  * @module popups
  */
 
-define(['../lib/mustache', 'amd!../lib/underscore', '../lib/jquery', 'amd!../lib/jquery.blockUI'], function (Mustache, _, $) {
+define([
+  '../lib/mustache',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  'amd!../lib/jquery.blockUI'
+], function(Mustache, _, $) {
 
-    var popups = {};
+  var popups = {};
 
-    /**
-     *  Ok Popup.
-     *  @property okPopup
-     *  @type object
-     *  @static
-     */
-    popups.okPopup = {
-      template:   "<div class='cdfPopup'>" +
-                  "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
-                  "  <div class='cdfPopupBody'>" +
-                  "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
-                  "    <div class='cdfPopupButton'>{{{button}}}</div>" +
-                  "  </div>" +
-                  "</div>",
-      defaults:{
-        header: "Title",
-        desc:"Description Text",
-        button:"Button Text",
-        callback: function (){
-          return true
-        }
-      },
-      $el: undefined,
-      show: function (opts){
-        if (opts || this.firstRender){
-          this.render(opts);
-        }
-        this.$el.show();
-      },
-      hide: function (){
-        this.$el.hide();
-      },
-      render: function (newOpts){
-        var opts = _.extend( {} , this.defaults, newOpts );
-        var myself = this;
-        if (this.firstRender){
-          this.$el = $('<div/>').addClass('cdfPopupContainer')
-            .hide()
-            .appendTo('body');
-          this.firstRender = false;
-        };
-        this.$el.empty().html( Mustache.render( this.template, opts ) );
-        this.$el.find('.cdfPopupButton').click( function (){
-          opts.callback();
-          myself.hide();
-        });
-      },
-      firstRender: true
-    };
-
-
-    /*
-     * Error information divs
-     *
-     *
-     */
-
-
-    /**
-     *  Error Popup used by the notificationsComponent.
-     *  @property notificationsComponent
-     *  @type object
-     *  @static
-     */
-    popups.notificationsComponent = {
-      template:   "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
-                  "  <div class='cdfNotificationBody'>" +
-                  "    <div class='cdfNotificationImg'>&nbsp;</div>" +
-                  "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
-                  "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
-                  "  </div>" +
-                  "</div>" ,
-      defaults:{
-        title: "Component Error",
-        desc: "Error processing component."
-      },
-      render: function (ph, newOpts){
-        var opts = _.extend( {}, this.defaults, newOpts);
-        opts.isSmallComponent = ( $(ph).width() < 300 );
-        $(ph).empty().html( Mustache.render( this.template, opts ) );
-        var $nt = $(ph).find('.cdfNotification');
-        $nt.css({'line-height': $nt.height() + 'px' });
+  /**
+   * Ok Popup.
+   * @property okPopup
+   * @type object
+   * @static
+   */
+  popups.okPopup = {
+    template: "<div class='cdfPopup'>" +
+              "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
+              "  <div class='cdfPopupBody'>" +
+              "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
+              "    <div class='cdfPopupButton'>{{{button}}}</div>" +
+              "  </div>" +
+              "</div>",
+    defaults: {
+      header: "Title",
+      desc: "Description Text",
+      button: "Button Text",
+      callback: function() {
+        return true
       }
-    };
+    },
+    $el: undefined,
+    show: function(opts) {
+      if(opts || this.firstRender) {
+        this.render(opts);
+      }
+      this.$el.show();
+    },
+    hide: function() {
+      this.$el.hide();
+    },
+    render: function(newOpts) {
+      var opts = _.extend({} , this.defaults, newOpts);
+      var myself = this;
+      if(this.firstRender) {
+        this.$el = $('<div/>').addClass('cdfPopupContainer')
+          .hide()
+          .appendTo('body');
+        this.firstRender = false;
+      }
+      this.$el.empty().html( Mustache.render(this.template, opts));
+      this.$el.find('.cdfPopupButton').click(function() {
+        opts.callback();
+        myself.hide();
+      });
+    },
+    firstRender: true
+  };
 
-    /**
-     *  Growl default Popup
-     *  @property notificationsGrowl
-     *  @type object
-     *  @static
-     */
-    popups.notificationsGrowl = {
-      template:   "<div class='cdfNotification growl'>" +
-                  "  <div class='cdfNotificationBody'>" +
-                  "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
-                  "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
-                  "  </div>" +
-                  "</div>" ,
-      defaults:{
-        title: 'Title',
-        desc: 'Default CDF notification.',
-        timeout: 4000,
-        onUnblock: function (){ return true },
-        css: $.extend( {},
-          $.blockUI.defaults.growlCSS,
-          { position: 'absolute' , width: '100%' , top:'10px' } ),
-        showOverlay: false,
-        fadeIn: 700,
-        fadeOut: 1000,
-        centerY:false
-      },
-      render: function (newOpts){
-        var opts = _.extend( {}, this.defaults, newOpts),
-            $m = $( Mustache.render( this.template, opts )),
-            myself = this;
-        opts.message = $m;
-        var outerUnblock = opts.onUnblock;
-        opts.onUnblock = function(){
-          myself.$el.hide();
-          outerUnblock.call(this);
-        };
-        if (this.firstRender){
-          this.$el = $('<div/>').addClass('cdfNotificationContainer')
-            .hide()
-            .appendTo('body');
-          this.firstRender = false;
-        }
-        this.$el.show().block(opts);
-      },
-      firstRender: true
-    };
+  /*
+   * Error information divs
+   *
+   *
+   */
 
-    return popups;
+  /**
+   * Error Popup used by the notificationsComponent.
+   * @property notificationsComponent
+   * @type object
+   * @static
+   */
+  popups.notificationsComponent = {
+    template: "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
+              "  <div class='cdfNotificationBody'>" +
+              "    <div class='cdfNotificationImg'>&nbsp;</div>" +
+              "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
+              "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
+              "  </div>" +
+              "</div>" ,
+    defaults: {
+      title: "Component Error",
+      desc: "Error processing component."
+    },
+    render: function(ph, newOpts) {
+      var opts = _.extend({}, this.defaults, newOpts);
+      opts.isSmallComponent = ($(ph).width() < 300);
+      $(ph).empty().html( Mustache.render(this.template, opts));
+      var $nt = $(ph).find('.cdfNotification');
+      $nt.css({'line-height': $nt.height() + 'px'});
+    }
+  };
+
+  /**
+   * Growl default Popup
+   * @property notificationsGrowl
+   * @type object
+   * @static
+   */
+  popups.notificationsGrowl = {
+    template: "<div class='cdfNotification growl'>" +
+              "  <div class='cdfNotificationBody'>" +
+              "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
+              "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
+              "  </div>" +
+              "</div>" ,
+    defaults: {
+      title: 'Title',
+      desc: 'Default CDF notification.',
+      timeout: 4000,
+      onUnblock: function() { return true; },
+      css: $.extend(
+        {},
+        $.blockUI.defaults.growlCSS,
+        {position: 'absolute' , width: '100%' , top:'10px'}
+      ),
+      showOverlay: false,
+      fadeIn: 700,
+      fadeOut: 1000,
+      centerY: false
+    },
+    render: function(newOpts) {
+      var opts = _.extend({}, this.defaults, newOpts),
+          $m = $(Mustache.render(this.template, opts)),
+          myself = this;
+      opts.message = $m;
+      var outerUnblock = opts.onUnblock;
+      opts.onUnblock = function() {
+        myself.$el.hide();
+        outerUnblock.call(this);
+      };
+      if(this.firstRender) {
+        this.$el = $('<div/>').addClass('cdfNotificationContainer').hide().appendTo('body');
+        this.firstRender = false;
+      }
+      this.$el.show().block(opts);
+    },
+    firstRender: true
+  };
+
+  return popups;
 });

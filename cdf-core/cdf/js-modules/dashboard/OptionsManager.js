@@ -11,19 +11,18 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _, $) {
-
+define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _, $) {
 
   // Shared / Static
-  function get ( container, opt, attr, defaultValue ){
-    var val = defaultValue || undefined ;   
-    if ( container && container[opt] && container[opt].hasOwnProperty(attr) ){
+  function get(container, opt, attr, defaultValue) {
+    var val = defaultValue || undefined;
+    if(container && container[opt] && container[opt].hasOwnProperty(attr)) {
       val = container[opt][attr];
     }
-    return val
+    return val;
   }
-  function set (container, opt, attr, value){
-    if (container && opt && attr){
+  function set(container, opt, attr, value) {
+    if(container && opt && attr) {
       container[opt] = container[opt] || {};
       container[opt][attr] = value ; 
     }
@@ -37,40 +36,40 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
    * @module OptionsManager
    * @class OptionsManager
    * @constructor
-   * @params config Options object for the manager -  { defaults: {}, interfaces: {}, libraries: {} }
+   * @params config Options object for the manager - {defaults: {}, interfaces: {}, libraries: {}}
    *
    */
-  return function  (config ){
+  return function(config) {
     var myself = this;
 
     /**
-     *  Options collection
-     *  @property _options
-     *  @type object
-     *  @protected
+     * Options collection
+     * @property _options
+     * @type object
+     * @protected
      */
     this._options = {};
 
     /**
-     *  Interfaces collection
-     *  @property _interfaces
-     *  @type object
-     *  @protected
+     * Interfaces collection
+     * @property _interfaces
+     * @type object
+     * @protected
      */
     this._interfaces = {};
 
     /**
-     *  Libraries collection
-     *  @property _libraries
-     *  @type object
-     *  @protected
+     * Libraries collection
+     * @property _libraries
+     * @type object
+     * @protected
      */
     this._libraries = {
       predicates: {
-        tautology: function (value){ return true },
+        tautology: function(value) { return true; },
         isFunction: _.isFunction ,
-        isPositive: function (value){ return (_.isNumber(value) && value > 0); },
-        isObjectOrPropertiesArray : function (value){ 
+        isPositive: function(value) { return (_.isNumber(value) && value > 0); },
+        isObjectOrPropertiesArray: function(value) { 
           return _.isArray(value) || _.isObject(value);
         },
         isObject: _.isObject,
@@ -78,7 +77,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
       },
       mappers: {
         identity: _.identity,
-        propertiesObject: function (value) {
+        propertiesObject: function(value) {
           return (_.isArray(value)) ? Utils.propertiesArrayToObject(value) : value;
         }
       }
@@ -91,7 +90,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @param instance - Instance to be extended
      *
      */
-    this.mixin = function (instance){
+    this.mixin = function(instance) {
       instance.getOption = this.getOption;
       instance.setOption = this.setOption;
     };
@@ -104,20 +103,20 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @param interfaces Optional interfaces
      * @param libraries Optional libraries
      */
-    this.init = function (defaults, interfaces, libraries) {
+    this.init = function(defaults, interfaces, libraries) {
       var myself = this;
       
       defaults = $.extend(true, {}, defaults);
       interfaces = $.extend(true, {}, interfaces);
 
       this._libraries = $.extend(true, {}, this._libraries, libraries);
-      _.each( interfaces, function (el,key){
-        setInterfaces( key, el );
+      _.each(interfaces, function(el,key) {
+        setInterfaces(key, el);
       });
       _.each( defaults, function(el, key) {
-        var ifaces = ( interfaces && interfaces[key] ) || {};
-        setInterfaces( key, ifaces);
-        setValue( key, el );
+        var ifaces = (interfaces && interfaces[key]) || {};
+        setInterfaces(key, ifaces);
+        setValue(key, el);
       })
     };
 
@@ -132,16 +131,16 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @returns {boolean} _true_ if able to set the option, otherwise an error is thrown
      *
      */
-    this.setOption = function (opt, value, interfaces){
+    this.setOption = function(opt, value, interfaces) {
       setInterfaces(opt, interfaces);
       var reader = getReader(opt),
           validator = getValidator(opt);
-      if ( validator(value) ){
+      if(validator(value)) {
         value = reader(value);
-        setValue( opt, value );
-        return true
+        setValue(opt, value);
+        return true;
       } else {
-        throw new Error( "Invalid Option " + opt.charAt(0).toUpperCase() + opt.slice(1) );
+        throw new Error("Invalid Option " + opt.charAt(0).toUpperCase() + opt.slice(1));
       }
     };
 
@@ -152,22 +151,22 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @param opt Option to get
      * @returns {*} Value associated with the option
      */
-    this.getOption = function (opt){
-      var writer = getWriter( opt ),
+    this.getOption = function(opt) {
+      var writer = getWriter(opt),
           value = getValue(opt);
-      return writer( value );
+      return writer(value);
     };
 
     /**
      * Sets the interfaces for the option
      *
      * @method setInterfaces
-     * @param opt  Option where the interfaces are being set
+     * @param opt Option where the interfaces are being set
      * @param interfaces Object with the interfaces to set {reader: , writer:, validator: }
      *
      * @private
      */
-    function setInterfaces (opt, interfaces){
+    function setInterfaces(opt, interfaces) {
       interfaces = interfaces || {};
       setReader(opt, interfaces['reader']);
       setWriter(opt, interfaces['writer']);
@@ -182,7 +181,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      *
      * @private
      */
-    function getReader(opt){ 
+    function getReader(opt) { 
       return get( myself._interfaces, opt, 'reader', myself._libraries.mappers['identity'] 
     )};
 
@@ -195,7 +194,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @private
      */
 
-    function getWriter(opt){
+    function getWriter(opt) {
       return get( myself._interfaces, opt, 'writer', myself._libraries.mappers['identity'] 
     )};
 
@@ -207,7 +206,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      *
      * @private
      */
-    function getValidator(opt){ 
+    function getValidator(opt) { 
       return get( myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology'] 
     )};
 
@@ -219,13 +218,13 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      *
      * @private
      */
-    function getValue(opt){ return get( myself._options, opt, 'value') };
+    function getValue(opt) { return get(myself._options, opt, 'value'); };
     
     // Reader, Writer and Validator work in the same way:
     // If the value is a function, use it. 
     // Otherwise, if it is a string and a valid library key, use it.
     // Otherwise, use a default library function: for readers and writers an indentity map, 
-    //    for validators a predicate that always returns true.
+    //  for validators a predicate that always returns true.
 
     /**
      * Set a reader function for an option. If the value is a function, use it.
@@ -237,10 +236,10 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @param fn Reader to set
      * @private
      */
-    function setReader(opt, fn){
+    function setReader(opt, fn) {
       var lib = myself._libraries.mappers;
-      fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getReader(opt) || lib['identity'] ;
-      return set( myself._interfaces , opt, 'reader', fn) 
+      fn = (_.isFunction(fn) && fn) || (_.isString(fn) && lib[fn]) || getReader(opt) || lib['identity'];
+      return set(myself._interfaces , opt, 'reader', fn);
     };
 
     /**
@@ -253,10 +252,10 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @param fn Writer to set
      * @private
      */
-    function setWriter(opt, fn){ 
+    function setWriter(opt, fn) { 
       var lib = myself._libraries.mappers;
-      fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getWriter(opt) || lib['identity'] ;
-      return set( myself._interfaces, opt, 'writer', fn) 
+      fn = (_.isFunction(fn) && fn) || (_.isString(fn) && lib[fn]) || getWriter(opt) || lib['identity'];
+      return set(myself._interfaces, opt, 'writer', fn);
     };
 
     /**
@@ -269,28 +268,23 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function (Utils, _
      * @param fn Validator to set
      * @private
      */
-    function setValidator(opt, fn){
+    function setValidator(opt, fn) {
       var lib = myself._libraries.predicates;
-      fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getValidator(opt) || lib['tautology'] ;
-      return set( myself._interfaces, opt, 'validator', fn)
+      fn = (_.isFunction(fn) && fn) || (_.isString(fn) && lib[fn]) || getValidator(opt) || lib['tautology'];
+      return set(myself._interfaces, opt, 'validator', fn);
     };
 
     /**
      * Sets the value for the option
      *
      * @method setValue
-      * @param opt Option to set the value
+     * @param opt Option to set the value
      * @param value Value to set
      * @private
      */
-    function setValue(opt, value){ return set( myself._options, opt, 'value', value) };
+    function setValue(opt, value) { return set(myself._options, opt, 'value', value); };
 
     // Init
     this.init( config.defaults, config.interfaces, config.libraries);
-
   }
-
-
 });
-
-

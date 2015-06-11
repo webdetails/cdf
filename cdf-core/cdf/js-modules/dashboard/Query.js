@@ -20,7 +20,7 @@
  *
  */
 
-define(['amd!../lib/underscore', '../lib/jquery'], function (_, $) {
+define(['amd!../lib/underscore', '../lib/jquery'], function(_, $) {
 
   /**
    * Builds a new Query object
@@ -30,7 +30,7 @@ define(['amd!../lib/underscore', '../lib/jquery'], function (_, $) {
    * @param cd Path to the server-side query or a Chart Definition object
    * @param dataAccessId Data access id
    * @param dashboard Dashboard where this query will be executed
-    */
+   */
   return function(cd, dataAccessId, dashboard) {
 
     var opts, queryType;
@@ -38,7 +38,7 @@ define(['amd!../lib/underscore', '../lib/jquery'], function (_, $) {
     if(_.isObject(cd)) {
       opts = $.extend(true, {}, cd);
       queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') || 
-        (!_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined ;
+        (!_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined;
     } else if(_.isString(cd) && _.isString(dataAccessId)) {
       queryType = 'cda';
       opts = {

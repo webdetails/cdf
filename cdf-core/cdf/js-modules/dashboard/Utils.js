@@ -18,13 +18,14 @@
  * @module Utils
  */
 
-define(['../Logger',
+define([
+  '../Logger',
   'amd!../lib/underscore',
   '../lib/moment',
   '../lib/CCC/cdo',
   '../lib/jquery',
-  'amd!../lib/queryParser'],
-  function(Logger, _, moment, cdo, $) {
+  'amd!../lib/queryParser'
+], function(Logger, _, moment, cdo, $) {
 
   var Utils = {};
 
@@ -65,7 +66,7 @@ define(['../Logger',
    * Given a url containing an encoded Pentaho path (:home:admin:Test.wcdf), returns the encoded path
    *
    * @method getPathParameter
-   * @param Url url to parse
+   * @param url url to parse
    * @returns path parameter value or null if not available
    * @static
    */
@@ -218,7 +219,7 @@ define(['../Logger',
       }
     }
     return obj;
-  };
+  }
 
   /**
    * Converts an object to an array
@@ -235,7 +236,7 @@ define(['../Logger',
       pArray.push([key, obj[key]]);
     }
     return pArray;
-  };
+  }
 
   /**
    * Converts an array to an object
@@ -248,13 +249,13 @@ define(['../Logger',
   Utils.propertiesArrayToObject = function(pArray) {
     // Mantra 1: "Order matters!"
     // Mantra 2: "Arrays are Objects!"
-    return (_.isArray(pArray) && _pa2obj(pArray)) || (_.isObject(pArray) && pArray) || undefined;  
+    return (_.isArray(pArray) && _pa2obj(pArray)) || (_.isObject(pArray) && pArray) || undefined;
   };
 
   /**
    * Converts an object to an array
    *
-   * @method  objectToPropertiesArray
+   * @method objectToPropertiesArray
    * @param obj
    * @returns An array or undefined if argument is not an object
    * @static
@@ -270,29 +271,29 @@ define(['../Logger',
    * string with names starting with the string 'param'. So, for a query string like ?paramfoo=bar, you'd get
    * a parameter foo with value bar
    *
-   * @method  getURLParameters
+   * @method getURLParameters
    * @param sURL URL with the query string to be parsed
    * @returns {Array} Array with the parsed parameters. Each element is an array with two positions, the first being
    * the parameter name and the second the value
    * @static
    */
   Utils.getURLParameters = function(sURL) {
-    if(sURL.indexOf("?") > 0){
-  
+    if(sURL.indexOf("?") > 0) {
+
       var arrParams = sURL.split("?");
       var arrURLParams = arrParams[1].split("&");
       var arrParam = [];
-  
+
       for(var i = 0; i < arrURLParams.length; i++) {
         var sParam =  arrURLParams[i].split("=");
-  
+
         if(sParam[0].indexOf("param", 0) == 0) {
           var parameter = [sParam[0].substring(5, sParam[0].length), unescape(sParam[1])];
           arrParam.push(parameter);
         }
       }
     }
-  
+
     return arrParam;
   };
 
@@ -356,7 +357,7 @@ define(['../Logger',
    * result
    * @static
    */
-  Utils.ev =  function(o) {
+  Utils.ev = function(o) {
     return typeof o == 'function' ? o() : o;
   };
 
@@ -422,7 +423,6 @@ define(['../Logger',
   
     return c;
   };
-
 
   /**
    * Adds the url parameters to a local object
@@ -504,7 +504,7 @@ define(['../Logger',
       f = opts;
       opts = null;
     }
-  
+
     var valueAsId = !!(opts && opts.valueAsId);
     for(var i = 0, j = 0, L = values.length; i < L; i++) {
       var valSpec = values[i];
@@ -519,7 +519,7 @@ define(['../Logger',
         } else {
           value = label = "" + v0;
         }
-  
+
         if(f.call(x, value, label, id, j, i) === false) { return false; }
         j++;
       }
@@ -527,8 +527,7 @@ define(['../Logger',
   
     return true;
   };
- 
-   
+
   /**
    * Given a parameter value obtains an equivalent values array.
    *
@@ -561,7 +560,7 @@ define(['../Logger',
     // null or of invalid type
     return null;
   };
-  
+
   /**
    * Normalizes a value so that <tt>undefined</tt>, empty string
    * and empty array, are all translated to <tt>null</tt>.
@@ -576,7 +575,7 @@ define(['../Logger',
     if(this.isArray(value) && !value.length) { return null; }
     return value;
   };
-  
+
   /**
    * Determines if a value is considered an array.
    * @method isArray
@@ -590,7 +589,7 @@ define(['../Logger',
     return !!value &&
       ((value instanceof Array) || (typeof value === 'object' && value.join && value.length != null));
   };
-  
+
   /**
    * Determines if two values are considered equal.
    * @method equalValues
@@ -604,20 +603,19 @@ define(['../Logger',
     // Identical or both null/undefined?
     a = this.normalizeValue(a);
     b = this.normalizeValue(b);
-  
+
     if(a === b) { return true; }
-  
+
     if(this.isArray(a) && this.isArray(b)) {
       var L = a.length;
       if(L !== b.length) { return false; }
       while(L--) { if(!this.equalValues(a[L], b[L])) { return false; } }
       return true;
     }
-  
+
     // Last try, give it to JS equals
     return a == b;
   };
-  
 
   /**
    * Converts an HSV to an RGB color value.

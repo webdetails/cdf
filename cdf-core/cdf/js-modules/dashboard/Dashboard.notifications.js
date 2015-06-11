@@ -19,8 +19,8 @@ define([
   '../Logger',
   'amd!../lib/underscore',
   '../lib/jquery',
-  'amd!../lib/jquery.blockUI'],
-  function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
+  'amd!../lib/jquery.blockUI'
+], function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
 
   /**
    * A module representing an extension to Dashboard module for notifications.
@@ -31,18 +31,18 @@ define([
     /**
      * Inits the notification module
      *
-     * @method   _initNotifications
+     * @method _initNotifications
      * @private
      * @for Dashboard
      */
     _initNotifications: function() {
 
       /**
-       *  Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
-       *  are registered and assigned to a specific error message
-       *  @property ERROR_CODES
-       *  @type Object
-       *  @for Dashboard
+       * Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
+       * are registered and assigned to a specific error message
+       * @property ERROR_CODES
+       * @type Object
+       * @for Dashboard
        */
       this.ERROR_CODES = {
         'QUERY_TIMEOUT': {
@@ -78,7 +78,7 @@ define([
     /**
      * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner
      *
-     * @method     showProgressIndicator
+     * @method showProgressIndicator
      * @for Dashboard
      */
     showProgressIndicator: function() {
@@ -86,11 +86,11 @@ define([
     },
   
     /**
-     *  Hides the progress indicator. Optionally, resets the running calls counter
+     * Hides the progress indicator. Optionally, resets the running calls counter
      *
-     *  @method   hideProgressIndicator
-     *  @param {Boolean} _true_ if the running calls counter should be reset, _false_ otherwise
-     *  @for Dashboard
+     * @method hideProgressIndicator
+     * @param {Boolean} _true_ if the running calls counter should be reset, _false_ otherwise
+     * @for Dashboard
      */
     hideProgressIndicator: function(force) {
       if(force) {
@@ -99,10 +99,9 @@ define([
       $.unblockUI && $.unblockUI();
       this.showErrorTooltip();// Dashboard.legacy
     },
-  
-  
+
     /**
-     *  Given an error code, returns the registered error object associated with that code
+     * Given an error code, returns the registered error object associated with that code
      *
      * @param errorCode errorCode to translate
      * @returns {*|{}} error object or the empty object if the code is not registered
@@ -116,9 +115,9 @@ define([
     /**
      * Parses a server error response and creates an error object
      *
-     * @method     parseServerError
-     * @param resp         Server response
-     * @param txtStatus  Response status
+     * @method parseServerError
+     * @param resp Server response
+     * @param txtStatus Response status
      * @param error Error object to encapsulate
      * @returns {{}} an error object containing detailed error message
      *
@@ -147,17 +146,17 @@ define([
     },
   
     /**
-     *  Handles a server error
+     * Handles a server error
      *
-     *  @method     handleServerError
-     *  @for Dashboard
+     * @method handleServerError
+     * @for Dashboard
      */
     handleServerError: function() {
       this.errorNotification(this.parseServerError.apply(this, arguments));
       this.trigger('cdf cdf:serverError', this);
       this.resetRunningCalls();
     },
-  
+
     /**
      * Displays an error notification
      *
@@ -177,7 +176,7 @@ define([
         });
       }
     },
-  
+
     /**
      * Default implementation for the login alert that pops up when we detect the user is no longer logged in.
      *
@@ -200,7 +199,7 @@ define([
       Popups.okPopup.show(opts);
       this.trigger('cdf cdf:loginError', this);
     },
-  
+
     /**
      * Check if we're able to connect to the server correctly, using post to avoid cache
      *
@@ -227,8 +226,8 @@ define([
         error: function() {
           retVal = false;
         }
-  
       });
+
       return retVal;
     }
   });

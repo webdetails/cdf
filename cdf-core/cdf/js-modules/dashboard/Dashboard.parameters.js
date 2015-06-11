@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', 'amd!../lib/backbone', './Utf8Encoder'],
-  function(Dashboard, Logger, Backbone, Utf8Encoder) {
+define([
+  './Dashboard',
+  '../Logger',
+  'amd!../lib/backbone',
+  './Utf8Encoder'
+], function(Dashboard, Logger, Backbone, Utf8Encoder) {
 
   /**
    * A module representing an extension to Dashboard class for parameters.

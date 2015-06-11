@@ -11,8 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', '../lib/moment', '../lib/CCC/cdo', '../lib/cdf.jquery.i18n'],
-    function(Logger, Dashboard, DashboardExt, _, moment, cdo, $) {
+define([
+  '../Logger',
+  './Dashboard',
+  './Dashboard.ext',
+  '../lib/moment',
+  '../lib/CCC/cdo',
+  '../lib/cdf.jquery.i18n'
+], function(Logger, Dashboard, DashboardExt, moment, cdo, $) {
   /**
    * A module representing a extension to Dashboard module for i18n.
    * @module Dashboard.i18n
@@ -33,17 +39,17 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
       myself.i18nCurrentLanguageCode = undefined;
       //when correctly initiated, prop will be replaced
       myself.i18nSupport = {
-      prop: function(text){
+      prop: function(text) {
         Logger.warn("i18n support wasn't properly initiated. Is the file messages_supported_languages.properties present?");
         return text;
-      }};  // Reference to i18n objects
+      }}; // Reference to i18n objects
       
-      var normalizeLocale = function(sessionLocale){
-        if( !sessionLocale ){
+      var normalizeLocale = function(sessionLocale) {
+        if(!sessionLocale) {
           return;
         }
         var bits = sessionLocale.split('-');
-        if (bits.length > 1) {
+        if(bits.length > 1) {
           return bits.join('_');
         }
         return sessionLocale;
@@ -55,13 +61,13 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
         path: DashboardExt.getStaticResource("resources/languages/"),
         mode: 'map',
         language: normalizedLocale,
-        callback: function(){
+        callback: function() {
           $.i18n.properties({
             name: 'messages',
             mode: 'map',
             type: 'GET',
             language: normalizedLocale,
-            callback: function(){
+            callback: function() {
               myself.setI18nSupport(normalizedLocale, $.i18n);
             }
           });
@@ -78,14 +84,13 @@ define(['../Logger', './Dashboard', './Dashboard.ext', 'amd!../lib/underscore', 
      *
      * @method setI18nSupport
      * @for Dashboard
-     * @param lc  Locale Code
+     * @param lc Locale Code
      * @param i18nRef Additional i18 options
      */
     setI18nSupport: function(lc, i18nRef) {
       this.i18nCurrentLanguageCode = lc;
-      _.extend(this.i18nSupport, i18nRef);
+      $.extend(this.i18nSupport, i18nRef);
     }
-  
+
   });
-    
 });

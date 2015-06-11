@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/UnmanagedComponent', '../lib/jquery'],
-  function(Dashboard, Logger, _, UnmanagedComponent, $) {
+define([
+  './Dashboard',
+  '../Logger',
+  'amd!../lib/underscore',
+  '../components/UnmanagedComponent',
+  '../lib/jquery'
+], function(Dashboard, Logger, _, UnmanagedComponent, $) {
 
   /**
    * A module representing a extension to Dashboard module for lifecycle.
@@ -42,7 +47,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     /**
      * Resets the running calls counter and hides the progress indicator
      *
-     * @method  resetRunningCalls
+     * @method resetRunningCalls
      * @for Dashboard
      */
     resetRunningCalls: function() {
@@ -54,9 +59,9 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
 
     /**
      *
-     * @returns {number} Number of  actual running calls to the server
+     * @returns {number} Number of actual running calls to the server
      *
-     * @method  getRunningCalls
+     * @method getRunningCalls
      * @for Dashboard
      */
     getRunningCalls: function() {
@@ -66,7 +71,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     /**
      * Increments the running calls counter
      *
-     * @method  incrementRunningCalls
+     * @method incrementRunningCalls
      * @for Dashboard
      */
     incrementRunningCalls: function() {
@@ -78,7 +83,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     /**
      * Decrements the running calls counter. If the counter reaches 0, hides the progress indicator
      *
-     * @method  decrementRunningCalls
+     * @method decrementRunningCalls
      * @for Dashboard
      */
     decrementRunningCalls: function() {
@@ -95,7 +100,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     /**
      * Init function for the dashboard. Calling this method will trigger the dashboard execution and render
      *
-     * @method  init
+     * @method init
      * @param components - Components to be added to the dashboard
      * @for Dashboard
      */
@@ -249,7 +254,6 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     _handlePostInit: function(initInstance) {
       var myself = this;
 
-
       var _restoreDuplicates = function() {
         /*
          * We mark duplicates by appending an _nn suffix to their names.
@@ -321,12 +325,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         myself.finishedInit = true;
 
         myself.decrementRunningCalls();
-        Logger.log("          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + myself.getRunningCalls()  + ")",
+        Logger.log("          [Lifecycle <End  ] Init[" + initInstance + "] (Running: " + myself.getRunningCalls() + ")",
                    "log",
                    "color: #ddd");
-
       }
-
     },
 
     /**
@@ -414,11 +416,11 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * are the priorities, and the values are arrays of components that should be
      * updated at that priority level:
      *
-     *    {
-     *      0: [c1,c2],
-     *      2: [c3],
-     *      10: [c4]
-     *    }
+     *  {
+     *    0: [c1,c2],
+     *    2: [c3],
+     *    10: [c4]
+     *  }
      *
      * Alternatively, you can pass an array of components, `[c1, c2, c3]`, in which
      * case the priority-keyed object will be created internally from the priority
@@ -443,7 +445,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
         if(!source) {
           return;
         }
-        for(var key in source) if (source.hasOwnProperty(key)) {
+        for(var key in source) if(source.hasOwnProperty(key)) {
           if(_.isArray(target[key])) {
             target[key] = _.union(target[key], source[key]);
           } else {
@@ -626,10 +628,10 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
     },
 
     /**
-     *  Resets the dashboard.
+     * Resets the dashboard.
      *
-     *  @method resetAll
-     *  @for Dashboard
+     * @method resetAll
+     * @for Dashboard
      */
     resetAll: function() {
       this.createAndCleanErrorDiv(); //Dashboard.legacy
@@ -721,7 +723,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
      * Checks if there are any other components of equal or higher 
      * priority than the one that is currently being executed
      *
-     * @method     othersAwaitExecution
+     * @method othersAwaitExecution
      * @for Dashboard
      *
      * @private

@@ -17,7 +17,7 @@
  * Should not appear by now in yui-documentation
  */
 
-define(function () {
+define(function() {
 
   // Shared/Static stuff
 
@@ -178,8 +178,11 @@ define(function () {
       var holder = getHolder(type, name, isTry);
 
       // Can't store as singletons instances with special config params
-      if(config) { isNew = true;  } else
-      if(!isNew) { config = {}; }
+      if(config) {
+        isNew = true;
+      } else if(!isNew) {
+        config = {};
+      }
 
       return holder ? holder.build(config, isNew) : null;
     }
@@ -195,5 +198,4 @@ define(function () {
       return instances;
     }
   }
-
 });
