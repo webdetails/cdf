@@ -32,10 +32,11 @@
      * @private
      */
     _initStorage: function() {
-      var myself = this;
-      myself.storage = {};
-      myself.loadStorage();
-      myself.initialStorage = myself.storage;
+      if(!this.storage) {
+        this.storage = {};
+        $.extend(this.storage, this.storageObj);
+      }
+      this.initialStorage = this.storage;
     },
 
     /**

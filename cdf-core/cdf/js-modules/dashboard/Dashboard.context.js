@@ -28,27 +28,10 @@ define(['../lib/jquery', './Dashboard', './Dashboard.ext', './Dashboard.context.
      */
     _initContext: function() {
       var myself = this;
-      this.context = {};
-
-      var args = $.extend($.parseQuery(location.search), {
-        user: SESSION_NAME,
-        path: DashboardExt.getFilePathFromUrl(),
-        ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
-      });
-
-      $.ajax({
-        type: 'GET',
-        dataType: "json",
-        url: DashboardContextExt.getContext(),
-        data: args,
-        async: true,
-        xhrFields: {
-          withCredentials: true
-        },
-        success: function (json) {
-          $.extend(myself.context, json);
-        }
-      });
+      if(!this.context) {
+        this.context = {};
+        $.extend(this.context, this.contextObj);
+      }
     }
   });
 });

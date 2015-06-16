@@ -27,6 +27,7 @@ public class EmbeddedHeadersGeneratorTest extends TestCase {
         + "\n"
         + "var requireCfg = {waitSeconds: 30, paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n"
         + "\n"
+        +"requireCfg.config['cdf/dashboard/Dashboard'] = TEST_CONFIGURATION;\n"
         + "// injecting document writes to append the cdf require files\n"
         + "document.write(\"<script language='javascript' type='text/javascript' "
         + "src='httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/content/pentaho-cdf/js/cdf-require-js-cfg"
@@ -57,7 +58,7 @@ public class EmbeddedHeadersGeneratorTest extends TestCase {
         + "var RESERVED_CHARS_REGEX_PATTERN = /.*[ab]+.*/;\n";
 
     EmbeddedHeadersGenerator embeddedHeadersGenerator =
-        new EmbeddedHeadersGeneratorForTests( "httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/" );
+        new EmbeddedHeadersGeneratorForTests( "httpTESTPROTOCOL:TEST_FULL_QUALIFIED_URL/", "TEST_CONFIGURATION" );
     embeddedHeadersGenerator.setLocale( new Locale( "TEST_LOCALE" ) );
     String result = embeddedHeadersGenerator.generate();
 
