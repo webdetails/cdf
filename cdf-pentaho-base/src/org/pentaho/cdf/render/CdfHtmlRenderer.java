@@ -181,9 +181,9 @@ public class CdfHtmlRenderer {
     } else {
       String viewId = StringUtils.defaultIfEmpty( parameterMap.get( Parameter.VIEW ), StringUtils.EMPTY );
       out.write( MessageFormat.format( CdfConstants.INLINE_SCRIPT, "requireCfg.config = requireCfg.config || {};\n"
-        + "requireCfg.config['cdf/dashboard/Dashboard'] = "
-        + getConfiguration( path, viewId, parameterMap, inactiveInterval ) + ";\n"
-        + "requirejs.config(requireCfg);" ).getBytes( CharsetHelper.getEncoding() ) ) ;
+          + "requireCfg.config['cdf/dashboard/Dashboard'] = "
+          + getConfiguration( path, viewId, parameterMap, inactiveInterval ) + ";\n"
+          + "requirejs.config(requireCfg);" ).getBytes( CharsetHelper.getEncoding() ) );
     }
 
     out.write( "<div id=\"dashboardContent\">".getBytes( CharsetHelper.getEncoding() ) );
@@ -193,8 +193,8 @@ public class CdfHtmlRenderer {
     out.write( footer.getBytes( CharsetHelper.getEncoding() ) );
   }
 
-  protected String getConfiguration(String path, String viewId, HashMap<String, String> parameterMap,
-                                    int inactiveInterval) throws JSONException {
+  protected String getConfiguration( String path, String viewId, HashMap<String, String> parameterMap,
+                                     int inactiveInterval ) throws JSONException {
     return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
   }
 

@@ -25,18 +25,18 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
         };
 
     /**
-     * ## Dashboard Views # is correctly read trough the module configuration
+     * ## Dashboard Views # is correctly read through the module configuration
      */
-    it("is correctly read trough the module configuration", function() {
+    it("is correctly read through the module configuration", function() {
         expect(dashboard._initViews).toBeDefined();
         expect(dashboard.viewParameters).toEqual({});
         expect(dashboard.view).toEqual(viewObj);
     });
 
     /**
-     * ## Dashboard Views # is correctly read trough the Dashboard constructor
+     * ## Dashboard Views # is correctly read through the Dashboard constructor
      */
-    it("is correctly read trough the Dashboard constructor", function() {
+    it("is correctly read through the Dashboard constructor", function() {
       viewObj.param = 2;
       var options = {
         view: viewObj
