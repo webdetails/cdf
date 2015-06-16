@@ -18,8 +18,8 @@ import java.util.List;
 
 public class EmbeddedHeadersGeneratorForTests extends EmbeddedHeadersGenerator {
 
-  public EmbeddedHeadersGeneratorForTests( String fullQualifiedUrl ) {
-    super( fullQualifiedUrl );
+  public EmbeddedHeadersGeneratorForTests( String fullQualifiedUrl, String contextConfiguration ) {
+    super( fullQualifiedUrl, contextConfiguration );
   }
 
   @Override

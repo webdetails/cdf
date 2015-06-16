@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import junit.framework.TestCase;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.cdf.environment.templater.ITemplater;
@@ -23,6 +24,12 @@ public class CdfHtmlRendererTest extends TestCase {
   @Before
   public void setUp() {
     cdfHtmlRenderer = spy( new CdfHtmlRenderer() );
+    try {
+      doReturn( "" ).when( cdfHtmlRenderer)
+        .getConfiguration( anyString(), anyString(), any( HashMap.class ), anyInt() );
+    } catch ( JSONException e ) {
+      e.printStackTrace();
+    }
   }
 
   @Test
