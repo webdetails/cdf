@@ -48,9 +48,9 @@ define(["cdf/Dashboard.Clean", "cdf/lib/jquery"], function(Dashboard, $) {
     });
 
     /**
-     * ## The CDF storage # is correctly read trough the Dashboard constructor
+     * ## The CDF storage # is correctly read through the Dashboard constructor
      */
-    it("is correctly read trough the Dashboard constructor", function() {
+    it("is correctly read through the Dashboard constructor", function() {
       storageObj.test = 3;
       var options = {
         storage: storageObj

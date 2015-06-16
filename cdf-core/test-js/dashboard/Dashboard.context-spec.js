@@ -38,16 +38,16 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
       };
 
     /**
-     * ## The CDF context # is correctly read trough the module configuration
+     * ## The CDF context # is correctly read through the module configuration
      */
-    it("is correctly read trough the module configuration", function() {
+    it("is correctly read through the module configuration", function() {
       expect(dashboard.context).toEqual(contextObj);
     });
 
     /**
-     * ## The CDF context # is correctly read trough the Dashboard constructor
+     * ## The CDF context # is correctly read through the Dashboard constructor
      */
-    it("is correctly read trough the Dashboard constructor", function() {
+    it("is correctly read through the Dashboard constructor", function() {
       contextObj.path = "/test/fake_from_dashboard_constructor.xcdf";
       var options = {
         context: contextObj
