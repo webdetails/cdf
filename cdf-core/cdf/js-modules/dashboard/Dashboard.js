@@ -23,10 +23,11 @@ define([
   'amd!../lib/underscore',
   'amd!../lib/backbone',
   '../lib/jquery',
+  'module',
   'amd!../lib/jquery.impromptu',
   '../lib/shims',
-  'css!../lib/cdf.css'
-], function(Base, Logger, RefreshEngine, _, Backbone, $) {
+  'css!../lib/cdf.css'],
+  function(Base, Logger, RefreshEngine, _, Backbone, $, module) {
 
   var Dashboard = Base.extend({
 
@@ -40,18 +41,33 @@ define([
      * @class Dashboard
      * @constructor
      */
-    constructor: function() {
+    constructor: function(options) {
       var myself = this;
+
+      if(options) {
+        if(options.context) {
+          this.context = options.context;
+        }
+        if(options.storage) {
+          // Don't do anything for anonymousUser.
+          if(!this.context || this.context.user !== "anonymousUser") {
+            this.storage = options.storage;
+          }
+        }
+        if(options.view) {
+          this.view = options.view;
+        }
+      }
 
       _.extend(this, Backbone.Events);
 
       _configurePlugins();
 
       //TODO: when we start including the webcontext from the server we must review this part
-      if(!(typeof(CONTEXT_PATH) == 'undefined')) {
+      if(typeof(CONTEXT_PATH) != 'undefined') {
         this.webAppPath = CONTEXT_PATH;
       }
-      if(this.webAppPath == undefined) {
+      if(this.webAppPath === undefined) {
         this.webAppPath = "/" + window.location.pathname.split('/')[1];
       }
 
@@ -151,8 +167,14 @@ define([
 
     // Holds the dashboard parameters if globalContext = false
 
-    // Holder for context
-    context: {},
+    //trying to retrieve context from the module configuration
+    contextObj: module.config().context || {},
+    
+    //trying to retrieve storage from the module configuration
+    storageObj: module.config().storage || {},
+    
+    //trying to retrieve view from the module configuration
+    viewObj: module.config().view,
 
     /*
      * Legacy dashboards don't have priority, so we'll assign a very low priority
