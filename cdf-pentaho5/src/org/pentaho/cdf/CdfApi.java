@@ -49,7 +49,6 @@ import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.export.IExport;
-import org.pentaho.cdf.render.CdfHtmlRenderer;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.xactions.ActionEngine;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
@@ -86,7 +85,8 @@ public class CdfApi {
   @Path( "/getResource" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public void getResource( @QueryParam( Parameter.RESOURCE ) String resource,
-      @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response ) throws Exception {
+                           @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response )
+    throws Exception {
     try {
 
       if ( !StringUtils.isEmpty( resource ) && StringUtils.isEmpty( path ) ) {
@@ -128,19 +128,21 @@ public class CdfApi {
   @POST
   @Path( "/getResource" )
   public void postResource( @QueryParam( Parameter.RESOURCE ) String resource,
-      @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response ) throws Exception {
-    getResource( resource , path, response );
+                            @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response )
+    throws Exception {
+    getResource( resource, path, response );
   }
 
   @GET
   @Path( "/getContext" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
-      @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
-      @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
-      @Context HttpServletRequest servletRequest ) {
+                            @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
+                            @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
+                            @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
-    return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
+    return ContextEngine.getInstance()
+      .getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   @GET
@@ -158,10 +160,11 @@ public class CdfApi {
   @Path( "/export" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public void export( @QueryParam( Parameter.SOLUTION ) String solution, @QueryParam( Parameter.PATH ) String path,
-      @QueryParam( Parameter.ACTION ) String action,
-      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-      @QueryParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE ) String exportType,
-      @Context HttpServletRequest request, @Context HttpServletResponse response ) throws Exception {
+                      @QueryParam( Parameter.ACTION ) String action,
+                      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                      @QueryParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE )
+                      String exportType,
+                      @Context HttpServletRequest request, @Context HttpServletResponse response ) throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
 
@@ -188,9 +191,10 @@ public class CdfApi {
   @GET
   @Path( "/callAction" )
   public void callAction( @QueryParam( Parameter.SOLUTION ) String solution, @QueryParam( Parameter.PATH ) String path,
-      @QueryParam( Parameter.ACTION ) String action,
-      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
+                          @QueryParam( Parameter.ACTION ) String action,
+                          @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                          @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse )
+    throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
 
@@ -203,10 +207,13 @@ public class CdfApi {
   @Produces( APPLICATION_JSON )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
   public void getJSONSolution( @QueryParam( Parameter.SOLUTION ) String solution,
-      @QueryParam( Parameter.PATH ) @DefaultValue( "/" ) String path, @QueryParam( Parameter.ACTION ) String action,
-      @QueryParam( Parameter.DEPTH ) @DefaultValue( "-1" ) int depth,
-      @QueryParam( Parameter.SHOW_HIDDEN_FILES ) @DefaultValue( "false" ) boolean showHiddenFiles,
-      @QueryParam( Parameter.MODE ) @DefaultValue( "*" ) String mode, @Context HttpServletResponse servletResponse )
+                               @QueryParam( Parameter.PATH ) @DefaultValue( "/" ) String path,
+                               @QueryParam( Parameter.ACTION ) String action,
+                               @QueryParam( Parameter.DEPTH ) @DefaultValue( "-1" ) int depth,
+                               @QueryParam( Parameter.SHOW_HIDDEN_FILES ) @DefaultValue( "false" )
+                               boolean showHiddenFiles,
+                               @QueryParam( Parameter.MODE ) @DefaultValue( "*" ) String mode,
+                               @Context HttpServletResponse servletResponse )
     throws InvalidCdfOperationException {
 
     String value = determineCorrectPath( solution, action, path );
@@ -226,9 +233,10 @@ public class CdfApi {
   @GET
   @Path( "/viewAction" )
   public void doGetViewAction( @QueryParam( Parameter.SOLUTION ) String solution,
-      @QueryParam( Parameter.PATH ) String path, @QueryParam( Parameter.ACTION ) String action,
-      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
+                               @QueryParam( Parameter.PATH ) String path, @QueryParam( Parameter.ACTION ) String action,
+                               @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                               @Context HttpServletRequest servletRequest,
+                               @Context HttpServletResponse servletResponse ) throws Exception {
 
     doPostViewAction( solution, path, action, contentType, null, null, null, null, servletRequest, servletResponse );
 
@@ -237,11 +245,16 @@ public class CdfApi {
   @POST
   @Path( "/viewAction" )
   public void doPostViewAction( @QueryParam( Parameter.SOLUTION ) String solution,
-      @QueryParam( Parameter.PATH ) String path, @QueryParam( Parameter.ACTION ) String action,
-      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-      @FormParam( Parameter.QUERY_TYPE ) String queryType, @FormParam( Parameter.QUERY ) String query,
-      @FormParam( Parameter.CATALOG ) String catalog, @FormParam( Parameter.JNDI ) String jndi,
-      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
+                                @QueryParam( Parameter.PATH ) String path,
+                                @QueryParam( Parameter.ACTION ) String action,
+                                @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML )
+                                String contentType,
+                                @FormParam( Parameter.QUERY_TYPE ) String queryType,
+                                @FormParam( Parameter.QUERY ) String query,
+                                @FormParam( Parameter.CATALOG ) String catalog,
+                                @FormParam( Parameter.JNDI ) String jndi,
+                                @Context HttpServletRequest servletRequest,
+                                @Context HttpServletResponse servletResponse ) throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
 
@@ -265,7 +278,7 @@ public class CdfApi {
 
     boolean success =
         ActionEngine.getInstance().executeAction( value, contentType, servletRequest, servletResponse,
-            PentahoSessionHolder.getSession(), paramMap );
+        PentahoSessionHolder.getSession(), paramMap );
 
     if ( success ) {
       servletResponse.getOutputStream().flush(); // flush
@@ -292,12 +305,12 @@ public class CdfApi {
   @Path( "/cdf-embed.js" )
   @Produces( "text/javascript" )
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
-      @Context HttpServletResponse servletResponse ) throws Exception {
+                                     @Context HttpServletResponse servletResponse ) throws Exception {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     try {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
           new EmbeddedHeadersGenerator( buildFullServerUrl( servletRequest ),
-            getConfiguration("", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
+          getConfiguration( "", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
       String locale = servletRequest.getParameter( "locale" );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
@@ -310,8 +323,8 @@ public class CdfApi {
 
   }
 
-  protected String getConfiguration(String path, String viewId, HashMap<String, String> parameterMap,
-                                    int inactiveInterval) throws JSONException {
+  protected String getConfiguration( String path, String viewId, HashMap<String, String> parameterMap,
+                                     int inactiveInterval ) throws JSONException {
     return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
   }
 
@@ -320,7 +333,7 @@ public class CdfApi {
     String protocol = servletRequest.getProtocol();
     if ( !StringUtils.isEmpty( protocol ) ) {
       String[] bits = protocol.split( "/" );
-      p = bits[0].toLowerCase();
+      p = bits[ 0 ].toLowerCase();
     }
     String webAppPath = PentahoRequestContextHolder.getRequestContext().getContextPath();
     return p + "://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + webAppPath;

@@ -97,23 +97,26 @@ public class ContextEngine {
 
     if ( CdfEngine.getPluginSystemReader( null ).fileExists( MessageBundlesHelper.BASE_CACHE_DIR ) ) {
 
-      List<IBasicFile> cacheFiles = CdfEngine.getPluginSystemReader( null ).listFiles( MessageBundlesHelper.BASE_CACHE_DIR,
+      List<IBasicFile> cacheFiles =
+          CdfEngine.getPluginSystemReader( null ).listFiles( MessageBundlesHelper.BASE_CACHE_DIR,
           new IBasicFileFilter() {
-            @Override public boolean accept( IBasicFile file ) {
-              return true; // accept everything
-            }
-          } );
+              @Override
+              public boolean accept( IBasicFile file ) {
+                return true; // accept everything
+              }
+            } );
 
       if ( cacheFiles != null ) {
         for ( IBasicFile file : cacheFiles ) {
-          CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null ).deleteFile( file.getPath() );
+          CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemWriter( null )
+            .deleteFile( file.getPath() );
         }
       }
     }
   }
 
   public void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
-      throws Exception {
+    throws Exception {
 
     String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
     String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
@@ -223,8 +226,8 @@ public class ContextEngine {
     throws JSONException {
 
     logger.warn( "CDF: using legacy structure for Dashboard.context; "
-      + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
-      + ".xml" );
+        + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
+        + ".xml" );
 
     if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
@@ -321,16 +324,16 @@ public class ContextEngine {
       JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
       if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
         view = (JSONObject) view.get( JsonUtil.JsonField.RESULT.getValue() );
-          s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
+        s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
       } else {
         logger.debug( "View not found: " + viewId );
       }
     }
-      // append storage
-      String storage = getStorage();
-      if ( !StringUtils.isEmpty( storage ) ) {
-        s.append( "Dashboards.initialStorage = " ).append( storage ).append( "\n" );
-      }
+    // append storage
+    String storage = getStorage();
+    if ( !StringUtils.isEmpty( storage ) ) {
+      s.append( "Dashboards.initialStorage = " ).append( storage ).append( "\n" );
+    }
 
     s.append( "\n</script>\n" );
 
