@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
+define(["cdf/Dashboard.Clean"], function(Dashboard) {
 
   /**
    * ## The CDF context
@@ -22,22 +22,11 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
 
     dashboard.init();
 
-    /**
-     * ## The CDF context # correctly calls the initContext
-     */
-    it("correctly calls the initContext", function() {
-      expect(dashboard._initContext).toBeDefined();
-      expect(dashboard.context).toEqual({});
-    });
-
-    /**
-     * ## The CDF context # sets the context object according to server response
-     */
-    it("sets the context object according to server response", function() {
-      var serverResponse = {
+    //an exact copy of this object is set in context.js
+    var contextObj = {
         "locale": "en_US",
         "params": {},
-        "path": "/test/fake.xcdf",
+        "path": "/test/fake_from_module_configuration.xcdf",
         "queryData": {},
         "roles": ["Administrator",
                   "Authenticated"],
@@ -47,14 +36,24 @@ define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
         "sessionTimeout": 7200,
         "user": "admin"
       };
-      
-      spyOn($, "ajax").and.callFake(function(params) {
-        params.success(serverResponse);
-      });
 
-      dashboard._initContext();
+    /**
+     * ## The CDF context # is correctly read trough the module configuration
+     */
+    it("is correctly read trough the module configuration", function() {
+      expect(dashboard.context).toEqual(contextObj);
+    });
 
-      expect(dashboard.context).toEqual(serverResponse);
+    /**
+     * ## The CDF context # is correctly read trough the Dashboard constructor
+     */
+    it("is correctly read trough the Dashboard constructor", function() {
+      contextObj.path = "/test/fake_from_dashboard_constructor.xcdf";
+      var options = {
+        context: contextObj
+      };
+      var dashboard2 = new Dashboard(options);
+      expect(dashboard2.context).toEqual(contextObj);
     });
   });
 });

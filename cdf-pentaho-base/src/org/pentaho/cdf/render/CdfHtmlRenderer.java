@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.ContextEngine;
@@ -176,14 +178,24 @@ public class CdfHtmlRenderer {
       } catch ( Exception e ) {
         logger.error( "Error in cdf storage.", e );
       }
+    } else {
+      String viewId = StringUtils.defaultIfEmpty( parameterMap.get( Parameter.VIEW ), StringUtils.EMPTY );
+      out.write( MessageFormat.format( CdfConstants.INLINE_SCRIPT, "requireCfg.config = requireCfg.config || {};\n"
+        + "requireCfg.config['cdf/dashboard/Dashboard'] = "
+        + getConfiguration( path, viewId, parameterMap, inactiveInterval ) + ";\n"
+        + "requirejs.config(requireCfg);" ).getBytes( CharsetHelper.getEncoding() ) ) ;
     }
-
 
     out.write( "<div id=\"dashboardContent\">".getBytes( CharsetHelper.getEncoding() ) );
 
     out.write( dashboardContent.getBytes( CharsetHelper.getEncoding() ) );
     out.write( "</div>".getBytes( CharsetHelper.getEncoding() ) );
     out.write( footer.getBytes( CharsetHelper.getEncoding() ) );
+  }
+
+  protected String getConfiguration(String path, String viewId, HashMap<String, String> parameterMap,
+                                    int inactiveInterval) throws JSONException {
+    return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
   }
 
   protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {

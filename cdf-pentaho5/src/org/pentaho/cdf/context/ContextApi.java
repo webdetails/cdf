@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.CorsUtil;
+import pt.webdetails.cpf.utils.PluginIOUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import java.io.IOException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
@@ -44,5 +47,25 @@ public class ContextApi {
       logger.error( e );
       return Response.serverError().build();
     }
+  }
+
+  @GET
+  @Path( "/getConfig" )
+  @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
+  @Produces( MediaType.APPLICATION_JSON )
+  public void getConfig( @QueryParam( Parameter.PATH ) String path,
+                           @QueryParam( Parameter.USER ) String user,
+                           @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse )
+    throws IOException {
+    String config;
+
+    try {
+      config = ContextEngine.getInstance().getConfig( path, user, Parameter.asHashMap( servletRequest ),
+        servletRequest.getSession().getMaxInactiveInterval() );
+    } catch ( JSONException e ) {
+      config = "Error ocurred getting context configuration";
+    }
+    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
+    PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), config );
   }
 }

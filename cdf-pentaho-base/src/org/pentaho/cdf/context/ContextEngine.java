@@ -113,7 +113,7 @@ public class ContextEngine {
   }
 
   public void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
-    throws Exception {
+      throws Exception {
 
     String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
     String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
@@ -223,8 +223,8 @@ public class ContextEngine {
     throws JSONException {
 
     logger.warn( "CDF: using legacy structure for Dashboard.context; "
-        + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
-        + ".xml" );
+      + "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings"
+      + ".xml" );
 
     if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
@@ -288,28 +288,51 @@ public class ContextEngine {
     return contextObj;
   }
 
+  public String getConfig( String path, String viewId, Map<String, String> parameters,
+                           int inactiveInterval ) throws JSONException {
+    String username = getUserSession().getName();
+    final StringBuilder s = new StringBuilder();
+    s.append( "{\n" );
+    s.append( "context: " ).append( buildContext( path, username, parameters, inactiveInterval ) );
+    if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( username ) ) {
+      JSONObject view = ViewsEngine.getInstance().getView( viewId, username );
+      if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
+        s.append( ",\nview: " ).append( view.toString( 2 ) );
+      }
+    }
+    String storage = getStorage();
+    if ( !StringUtils.isEmpty( storage ) ) {
+      s.append( ",\nstorage: " ).append( storage );
+    }
+    s.append( "\n}" );
+    return s.toString();
+  }
+
   protected String buildContextScript( JSONObject contextObj, String viewId, String action, String user )
     throws JSONException {
     final StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
+
     // append context
     s.append( "Dashboards.context = " ).append( contextObj.toString( 2 ) ).append( "\n" );
+
     // append views
     if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( user ) ) {
       JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
       if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
         view = (JSONObject) view.get( JsonUtil.JsonField.RESULT.getValue() );
-        s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
+          s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
       } else {
         logger.debug( "View not found: " + viewId );
       }
     }
-    // append storage
-    String storage = getStorage();
-    if ( !StringUtils.isEmpty( storage ) ) {
-      s.append( "Dashboards.initialStorage = " ).append( storage ).append( "\n" );
-    }
-    s.append( "</script>\n" );
+      // append storage
+      String storage = getStorage();
+      if ( !StringUtils.isEmpty( storage ) ) {
+        s.append( "Dashboards.initialStorage = " ).append( storage ).append( "\n" );
+      }
+
+    s.append( "\n</script>\n" );
 
     return s.toString();
   }

@@ -53,6 +53,9 @@ public class CdfConstants {
   public static final String COMPONENT_TYPE_AUTOCOMPLETE_REGEX = "(simple)?autocomplete";
   public static final String COMPONENT_TYPE_MAP_REGEX = "(new)?map";
 
+  public static final String INLINE_SCRIPT =
+    "<script language=\"javascript\" type=\"text/javascript\">\n{0}\n</script>";
+
   public static final String[][] DASHBOARD_COMPONENT_TYPES = {
     { COMPONENT_TYPE_DATERANGEINPUT_REGEX, COMPONENT_TYPE_DATERANGEINPUT },
     { COMPONENT_TYPE_TABLE_REGEX, COMPONENT_TYPE_TABLE },

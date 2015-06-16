@@ -40,6 +40,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.embed.EmbeddedHeadersGenerator;
@@ -292,9 +293,11 @@ public class CdfApi {
   @Produces( "text/javascript" )
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
       @Context HttpServletResponse servletResponse ) throws Exception {
+    int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     try {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
-          new EmbeddedHeadersGenerator( buildFullServerUrl( servletRequest ) );
+          new EmbeddedHeadersGenerator( buildFullServerUrl( servletRequest ),
+            getConfiguration("", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
       String locale = servletRequest.getParameter( "locale" );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
@@ -305,6 +308,11 @@ public class CdfApi {
       throw ex;
     }
 
+  }
+
+  protected String getConfiguration(String path, String viewId, HashMap<String, String> parameterMap,
+                                    int inactiveInterval) throws JSONException {
+    return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
   }
 
   protected String buildFullServerUrl( HttpServletRequest servletRequest ) {
