@@ -43,34 +43,10 @@ define([
      */
     _initViews: function() {
       this.viewParameters = {};
-      this.view = undefined;
-
-      var viewId = DashboardViewsExt.getViewIdFromUrl();
-
-      var myself = this;
-
-      if(viewId != "") {
-        var args = {
-          user: this.context.user,
-          name: viewId,
-          ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
-        };
-
-        $.ajax({
-          type: 'GET',
-          dataType: "json",
-          url: DashboardViewsExt.getView(viewId),
-          data: args,
-          async: true,
-          xhrFields: {
-            withCredentials: true
-          },
-          success: function(json) {
-            myself.view = json;
-          }
-        });
+      if(!this.view && this.viewObj) {
+        this.view = {};
+        $.extend(this.view, this.viewObj);
       }
-
     },
 
     /**

@@ -29,7 +29,7 @@ public class CdfConstants {
   public static final String PLUGIN_SETTINGS_DOWNLOADABLE_FORMATS = "settings/resources/downloadable-formats";
   public static final String PLUGIN_SETTINGS_HIBERNATE_AVAILABLE = "settings/hibernate-available";
   public static final String PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT = "settings/legacy-dashboard-context";
-  public static final String PLUGIN_SETTINGS_ALLOW_CROSS_DOMAIN_RESOURCES= "settings/allow-cross-domain-resources";
+  public static final String PLUGIN_SETTINGS_ALLOW_CROSS_DOMAIN_RESOURCES = "settings/allow-cross-domain-resources";
 
   public static final String DEFAULT_DASHBOARD_TEMPLATE_HTML = "default-dashboard-template.html";
   public static final String DEFAULT_DASHBOARD_STYLE = "mantle";
@@ -53,10 +53,13 @@ public class CdfConstants {
   public static final String COMPONENT_TYPE_AUTOCOMPLETE_REGEX = "(simple)?autocomplete";
   public static final String COMPONENT_TYPE_MAP_REGEX = "(new)?map";
 
+  public static final String INLINE_SCRIPT =
+      "<script language=\"javascript\" type=\"text/javascript\">\n{0}\n</script>";
+
   public static final String[][] DASHBOARD_COMPONENT_TYPES = {
-    { COMPONENT_TYPE_DATERANGEINPUT_REGEX, COMPONENT_TYPE_DATERANGEINPUT },
-    { COMPONENT_TYPE_TABLE_REGEX, COMPONENT_TYPE_TABLE },
-    { COMPONENT_TYPE_TIMEPLOT_REGEX, COMPONENT_TYPE_TIMEPLOT },
-    { COMPONENT_TYPE_AUTOCOMPLETE_REGEX, COMPONENT_TYPE_AUTOCOMPLETEBOX },
-    { COMPONENT_TYPE_MAP_REGEX, COMPONENT_TYPE_MAP } };
+      { COMPONENT_TYPE_DATERANGEINPUT_REGEX, COMPONENT_TYPE_DATERANGEINPUT },
+      { COMPONENT_TYPE_TABLE_REGEX, COMPONENT_TYPE_TABLE },
+      { COMPONENT_TYPE_TIMEPLOT_REGEX, COMPONENT_TYPE_TIMEPLOT },
+      { COMPONENT_TYPE_AUTOCOMPLETE_REGEX, COMPONENT_TYPE_AUTOCOMPLETEBOX },
+      { COMPONENT_TYPE_MAP_REGEX, COMPONENT_TYPE_MAP } };
 }

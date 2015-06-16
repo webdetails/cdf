@@ -11,59 +11,38 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", 'cdf/lib/jquery'], function(Dashboard, $) {
+define(["cdf/Dashboard.Clean"], function(Dashboard) {
 
   /**
    * ## The CDF framework Dashboard Views
    */
   describe("The CDF framework Dashboard Views #", function() {
-    var dashboard,
-        serverResponse = {test: 1};
+    var dashboard = new Dashboard();
     
-    /**
-     * ## Global settings for all suites.
-     * #begin
-     * - beforeEach
-     */
-    beforeEach(function() {
-      dashboard = new Dashboard();
-    });
-    //#end
+    //an exact copy of this object is set in context.js
+    var viewObj = {
+          param: 1
+        };
 
     /**
-     * ## Dashboard Views # correctly calls the initViews
+     * ## Dashboard Views # is correctly read through the module configuration
      */
-    it("correctly calls the initViews", function(done) {
-      spyOn($, "ajax").and.callFake(function(params) {
-        params.success(serverResponse);
-      });
-
-      // listen to cdf:postInit event
-      dashboard.once("cdf:postInit", function() {
+    it("is correctly read through the module configuration", function() {
         expect(dashboard._initViews).toBeDefined();
         expect(dashboard.viewParameters).toEqual({});
-        expect(dashboard.view).toEqual(undefined);
-        done();
-      });
-
-      dashboard.init();
+        expect(dashboard.view).toEqual(viewObj);
     });
 
     /**
-     * ## The CDF framework Dashboard Views # sets the view object according to server response
+     * ## Dashboard Views # is correctly read through the Dashboard constructor
      */
-    it("sets the view object according to server response", function(done) {
-      dashboard.init();
-
-      spyOn(dashboard, "_initViews").and.callThrough();
-      spyOn($, "ajax").and.callFake(function(params) {
-        params.success(serverResponse);
-        expect(dashboard._initViews.calls.count()).toEqual(1);
-        expect(dashboard.view).toEqual(serverResponse);
-        done();
-      });
-
-      dashboard._initViews();
+    it("is correctly read through the Dashboard constructor", function() {
+      viewObj.param = 2;
+      var options = {
+        view: viewObj
+      };
+      var dashboard2 = new Dashboard(options);
+      expect(dashboard2.view).toEqual(viewObj);
     });
   });
 });
