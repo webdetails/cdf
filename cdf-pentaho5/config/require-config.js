@@ -22,8 +22,11 @@
     }
   }
 
-  requireCfg['baseUrl'] = '/base';
-  requirejs.config(requireCfg);
+  requireCfg.baseUrl = '/base';
+  
+  requireCfg.paths["common-ui"] = "test-js/mocks/common-ui";
+  
+  require.config(requireCfg);
 
   // Ask Require.js to load all test files and start test run
   require(tests, karma.start);

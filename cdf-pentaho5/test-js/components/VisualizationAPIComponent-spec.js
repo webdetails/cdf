@@ -12,11 +12,12 @@
  */
 
 define([
-  'cdf/Dashboard.Clean',
-  'amd!cdf/lib/underscore',
-  'cdf/lib/jquery',
-  'cdf/components/VisualizationAPIComponent'],
-  function(Dashboard, _, $, VisualizationAPIComponent) {
+  'cdf/Dashboard.Clean', 
+  'amd!cdf/lib/underscore', 
+  'cdf/lib/jquery', 
+  'cdf/components/VisualizationAPIComponent',
+  'common-ui/vizapi/vizTypeRegistry'
+], function(Dashboard, _, $, VisualizationAPIComponent, vizTypeRegistryMock) {
 
   /**
    * ## The VisualizationAPI Component
@@ -25,7 +26,7 @@ define([
 
     var dashboard = new Dashboard();
 
-    dashboard.addParameter("optionParam", "value");
+    dashboard.addParameter( "optionParam", "value");
 
     dashboard.init();
 
@@ -64,18 +65,20 @@ define([
      * ## The VisualizationAPI Component # render called with CDA query data
      */
     it("render called with CDA query data", function(done) {
-      spyOn(visualizationAPIComponent, 'update').and.callThrough();
-      spyOn(visualizationAPIComponent, 'triggerQuery').and.callThrough();
+      spyOn(visualizationAPIComponent, 'update'    ).and.callThrough();
+      spyOn(visualizationAPIComponent, 'beginQuery').and.callThrough();
+      spyOn(visualizationAPIComponent, 'endExec'   ).and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
         params.success({resultset: "queryResults"});
       });
-      spyOn(visualizationAPIComponent, 'render');
+      spyOn(visualizationAPIComponent, 'render').and.callThrough();
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        expect(visualizationAPIComponent.update).toHaveBeenCalled();
-        expect(visualizationAPIComponent.triggerQuery).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.update    ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
+        expect(visualizationAPIComponent.render    ).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.endExec   ).toHaveBeenCalled();
         done();
       });
 
@@ -85,28 +88,29 @@ define([
     /**
      * ## The VisualizationAPI Component # check all component functions
      */
-    it("check all component functions", function(done) {
-      spyOn(visualizationAPIComponent, 'update').and.callThrough();
-      spyOn(visualizationAPIComponent, 'triggerQuery').and.callThrough();
-      spyOn($, "ajax").and.callFake(function(params) {
-        params.success({resultset: "queryResults"});
+    it("Check all component functions", function(done) {
+      spyOn(visualizationAPIComponent, 'update'    ).and.callThrough();
+      spyOn(visualizationAPIComponent, 'beginQuery').and.callThrough();
+      var ajax = spyOn($, "ajax").and.callFake(function(options) {
+        options.success({resultset: "queryResults"});
       });
-      spyOn(visualizationAPIComponent, 'render').and.callThrough();
-      spyOn(visualizationAPIComponent, 'getVisualization').and.callThrough();
-      spyOn(pentaho.visualizations, 'getById');
+      spyOn(visualizationAPIComponent, 'render'    ).and.callThrough();
+      spyOn(visualizationAPIComponent, 'getVizType').and.callThrough();
+
+      spyOn(vizTypeRegistryMock,       'get').and.callThrough();
       spyOn(visualizationAPIComponent, 'getVizOptions');
       spyOn(visualizationAPIComponent, 'createGoogleDataTable');
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        expect(visualizationAPIComponent.update).toHaveBeenCalled();
-        expect(visualizationAPIComponent.triggerQuery).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
-
-        expect(visualizationAPIComponent.getVisualization).toHaveBeenCalled();
-        expect(pentaho.visualizations.getById).toHaveBeenCalledWith("sampleViz");
+        expect(visualizationAPIComponent.update       ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.beginQuery   ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.render       ).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.getVizType   ).toHaveBeenCalled();
+        expect(vizTypeRegistryMock.get                ).toHaveBeenCalledWith("sampleViz");
         expect(visualizationAPIComponent.getVizOptions).toHaveBeenCalled();
-        expect(visualizationAPIComponent.createGoogleDataTable).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.createGoogleDataTable)
+          .toHaveBeenCalledWith({resultset: 'queryResults'});
         done();
       });
 

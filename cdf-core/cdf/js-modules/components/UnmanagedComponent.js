@@ -11,14 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
 /**
  * Module that holds everything related to Components
  * @module Components
  */
 
-define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'],
-  function(BaseComponent, _, $, Logger) {
+define([
+  './BaseComponent',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  '../Logger'
+], function(BaseComponent, _, $, Logger) {
 
   /**
    * UnmanagedComponent is an advanced version of the BaseComponent that allows
@@ -53,7 +56,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * </code></pre>
    *
    * <p>This is a more typical lifecycle, and one that has some important limitations.
-   * First, preExecution and postExecution are entirely the responsibility of CDF
+   * First, preExeuction and postExecution are entirely the responsibility of CDF
    * itself, rather than the  component. Because CDF has no control over the contents
    * of the update method, it has no way of ensuring that, should the component
    * execute an asynchronous query, postExecution only runs after redraw. In this
@@ -136,8 +139,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * lifecycle method to emulate BaseComponent's behaviour:</p>
    *
    * <pre><code>update: function() {
-   * 		this.synchronous(this.redraw);
-   * 	}
+   *    this.synchronous(this.redraw);
+   *  }
    * </code></pre>
    *
    * <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
@@ -145,8 +148,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    *
    * <pre><code>
    * update: function() {
-   * 		// Will call this.redraw(1,2,3)
-   * 		   this.synchronous(this.redraw, [1,2,3]);
+   *    // Will call this.redraw(1,2,3)
+   *       this.synchronous(this.redraw, [1,2,3]);
    * }
    * </code></pre>
    *
@@ -215,11 +218,6 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    *   </ul>
    * </div>
    *
-   *
-   *
-   *
-   *
-   *
    * @class UnmanagedComponent
    * @extends BaseComponent
    */
@@ -228,7 +226,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
     isRunning: false,
 
     /**
-     * Handle calling preExecution when it exists. All components extending
+     * Handles calling preExecution when it exists. All components extending
      * UnmanagedComponent should either use one of the three lifecycles declared
      * in this class (synchronous, triggerQuery, triggerAjax), or call this method
      * explicitly at the very earliest opportunity. If preExec returns a falsy
@@ -236,35 +234,32 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * possible.
      *
      * @method preExec
-     * @returns _false_ if component execution should be cancelled, _true_ otherwise
+     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
      */
     preExec: function() {
-      /*
-       * runCounter gets incremented every time we run a query, allowing us to
-       * determine whether the query has been called again after us.
-       */
-      if(typeof this.runCounter == "undefined") {
-        this.runCounter = 0;
-      }
-      var ret;
-      if(typeof this.preExecution == "function") {
+      // runCounter gets incremented every time we run a query, allowing us to
+      // determine whether the query has been called again after us.
+      if(this.runCounter == null) this.runCounter = 0;
+      
+      var execute = true;
+      if(typeof this.preExecution === "function") {
         try {
-          ret = this.preExecution();
-          ret = typeof ret == "undefined" || ret;
-        } catch(e) {
-          this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-          Logger.exception(e);
-          ret = false;
+          var exec = this.preExecution();
+          if(exec !== undefined && !exec) execute = false;
+        } catch(ex) {
+          execute = false;
+          this.failExec(ex);
         }
-      } else {
-        ret = true;
       }
-      this.trigger('cdf cdf:preExecution', this, ret);
-      return ret;
+      
+      // TODO: event should be cancellable!
+      this.trigger('cdf cdf:preExecution', this, execute);
+      
+      return execute;
     },
 
     /**
-     * Handle calling postExecution when it exists. All components extending
+     * Handles calling postExecution when it exists. All components extending
      * UnmanagedComponent should either use one of the three lifecycles declared
      * in this class (synchronous, triggerQuery, triggerAjax), or call this method
      * explicitly immediately before yielding control back to CDF.
@@ -272,10 +267,33 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method postExec
      */
     postExec: function() {
-      if(typeof this.postExecution == "function") {
+      if(typeof this.postExecution === "function") {
         this.postExecution();
       }
+
       this.trigger('cdf cdf:postExecution', this);
+    },
+
+    /**
+     * Handles calling `postFetch`, when it exists,
+     * and of triggering the "cdf:postFetch" event.
+     * 
+     * @method postFetchData
+     * @param {Object} data The fetched data.
+     * @return {Object} The resulting data.
+     */
+    postFetchData: function(data) {
+      if(typeof this.postFetch == "function") {
+        var newData = this.postFetch(data);
+        
+        data = (newData === undefined) ? data : newData;
+        
+        // TODO: postFetch event should allow transformation of data
+        // TODO: shouldn't postFetch event be called even when `postFetch` 
+        //   is not declared? 
+        this.trigger('cdf cdf:postFetch', this, data);
+      }
+      return data;
     },
 
     /**
@@ -284,26 +302,143 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @method drawTooltip
      */
     drawTooltip: function() {
-      if(this.tooltip) {
-        this._tooltip = typeof this.tooltip == "function" ? this.tooltip() : this.tooltip;
+      if(this.htmlObject && this.tooltip) {
+        this._tooltip = typeof this.tooltip == "function" 
+          ? this.tooltip()
+          : this.tooltip;
       }
     },
 
     /**
-     * Show a tooltip attached to the component, if one is defined in the _tooltip option
+     * Shows a tooltip attached to the component, 
+     * if one is defined in the `_tooltip` option
      *
      * @method showTooltip
      */
     showTooltip: function() {
-      if(typeof this._tooltip != "undefined") {
-        this.placeholder().attr("title", this._tooltip).tooltip({
-          delay: 0,
-          track: true,
-          fade: 250,
-          content: this._tooltip
-        });
+      var tooltip; 
+      if(this.htmlObject && (tooltip = this._tooltip) !== undefined) {
+        this.placeholder()
+          .attr("title", tooltip)
+          .tooltip({
+            delay: 0,
+            track: true,
+            fade:  250,
+            content: tooltip
+          });
       }
     },
+
+    // -----------
+
+    /**
+     * Begins execution of the component.
+     * 
+     * This method handles calling `preExec` and 
+     * blocking the UI, if necessary.
+     * 
+     * A component that actually begins execution,
+     * by returning `true`from this method,
+     * should later complete the lifecycle
+     * by calling either `endExec` or `failExec`.
+     * 
+     * @method beginExec
+     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     */
+    beginExec: function() {
+      var exec = this.preExec();
+      if(exec) this._maybeBlock();
+      return exec;
+    },
+
+    /**
+     * Fails execution of the component, 
+     * given an error object or the arguments of a `jQuery.ajax` error callback.
+     * 
+     * This method handles parsing, signaling and logging of the error and 
+     * unblocking the UI, if necessary.
+     * 
+     * @method beginExec
+     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     */
+    failExec: function(arg) {
+      // NOTE: #error() already unblocks
+      if(arg && ('responseText' in arg)) {
+        // Used as a jQuery.ajax({error:}) callback. 
+        var err = this.dashboard.parseServerError.apply(this.dashboard, arguments);
+        this.error(err.msg, err.error);
+      } else {
+        // As a catch(ex) error handler.
+        this.error(null, /*cause:*/arg);
+      }
+    },
+
+    /**
+     * Ends a successful execution of the component.
+     * 
+     * This method handles 
+     * drawing and showing the component's tooltip, if any, 
+     * calling `postExec` and 
+     * unblocking the UI, if necessary.
+     * 
+     * @method beginExec
+     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     */
+    endExec: function() {
+      try {
+        this.drawTooltip();
+      
+        this.postExec();
+        
+        this.showTooltip();
+        
+        this._maybeUnblock();
+      } catch(ex) {
+        // already unblocks
+        this.failExec(ex);
+      }
+    },
+
+    // ------------
+
+    /**
+     * Generic execute method that handles _pre_ and _post_ lifecycle tasks.
+     * 
+     * The specified _executor_ function handles the component's _core_ execution.
+     * If execution is not cancelled by the `preExecution` handler,
+     * it is called synchronously, from within a call to this method.
+     * 
+     * If it throws an error, it is like if `failExec` had been called with that error.
+     * 
+     * This method is sugar for the following common pattern:
+     * 
+     *    if(this.beginExec()) {
+     *      try {
+     *        executor.call(this);
+     *      } catch(ex) {
+     *        this.failExec(ex);
+     *      }
+     *    } 
+     * 
+     * @param {function} executor The executor function.
+     *   This function receives two arguments:
+     *   1. resolve - call this function to signal that core execution has ended.
+     *   2. reject  - called, optionally with a cause value (an `Error` object), 
+     *        to signal that an error occurred during core execution.
+     * 
+     *   This function is called with this component as the `this`context.
+     */
+    execute: function(executor) {
+      if(this.beginExec()) {
+        try {
+          executor.call(this);
+        } catch(ex) {
+          this.failExec(ex);
+        }
+      }
+    },
+
+    // ------------
 
     /**
      * The synchronous lifecycle handler closely resembles the core CDF lifecycle,
@@ -314,145 +449,224 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      *
      * @method synchronous
      * @param callback Component drawing method
-     * @args Arguments for the callback
+     * @param arg Argument for the callback
      */
-    synchronous: function(callback, args) {
-      if(!this.preExec()) {
-        return;
-      }
-      var silent = this.isSilent();
-      if(!silent) {
-        this.block();
-      }
-      setTimeout(_.bind(function() {
+    synchronous: function(callback, arg) {
+      if(!this.beginExec()) return;
+      
+      function synchronousInner() {
         try {
-          /* The caller should specify what 'this' points at within the callback
-           * via a Function#bind or _.bind. Since we need to pass a 'this' value
-           * to call, the component itself is the only sane value to pass as the
-           * callback's 'this' as an alternative to using bind.
-           */
-          callback.call(this, args || []);
-          this.drawTooltip();
-          this.postExec();
-          this.showTooltip();
-        } catch(e) {
-          this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-          Logger.exception(e);
-        } finally {
-          if(!silent) {
-            this.unblock();
-          }
+          callback.call(this, arg || []);
+        } catch(ex) {
+          return void this.failExec(ex);
         }
-      }, this), 10);
+        
+        this.endExec();
+      }
+
+      setTimeout(_.bind(synchronousInner, this), 10);
     },
 
     /**
      * The triggerQuery lifecycle handler builds a lifecycle around Query objects.
-     *
+     * Execution ends immediately after the call to the specified callback.
+     * 
      * It takes a query definition object that is passed directly into the Query
-     * constructor, and the component rendering callback, and implements the full
-     * preExecution->block->render->postExecution->unblock lifecycle. This method
-     * detects concurrent updates to the component and ensures that only one
-     * redraw is performed.
+     * constructor, and the component rendering callback, and implements the lifecycle:
+     * preExecution->block?->doQuery->postFetch->(callback)->postExecution->unblock?.
+     * This method detects concurrent updates to the component and 
+     * ensures that only the redraw of the most recent update is performed.
      *
      * @method triggerQuery
      * @params queryDef query definition
-     * @params callback Callback to run after query has ran
-     * @params User options for the query
+     * @params callback Callback to run after query has ran.
+     *    Receives the fetched data as argument. 
+     * @params queryOptions User options for the query
      */
-    triggerQuery: function(queryDef, callback, userQueryOptions) {
-      if(!this.preExec()) {
-        return;
-      }
-      var silent = this.isSilent();
-      if(!silent) {
-        this.block();
-      };
-      userQueryOptions = userQueryOptions || {};
-      /*
-       * The query response handler should trigger the component-provided callback
-       * and the postExec stage if the call wasn't skipped, and should always
-       * unblock the UI
-       */
-      var success = _.bind(function(data) {
-        callback(data);
-        this.postExec();
-      },this);
-      var always = _.bind(function() {
-        if(!silent) {
-          this.unblock();
-        }
-      }, this);
-      var handler = this.getSuccessHandler(success, always),
-          errorHandler = this.getErrorHandler();
-
-      var query = this.queryState = this.query = this.dashboard.getQuery(queryDef);
-      var ajaxOptions = {
-        async: true
-      };
-      if(userQueryOptions.ajax) {
-        _.extend(ajaxOptions, userQueryOptions.ajax);
-      }
-      query.setAjaxOptions(ajaxOptions);
-      if(userQueryOptions.pageSize) {
-        query.setPageSize(userQueryOptions.pageSize);
-      }
-      query.fetchData(this.parameters, handler, errorHandler);
+    triggerQuery: function(queryDef, callback, queryOptions) {
+      this.beginQuery(
+        queryDef, 
+        function(data) {
+          callback(data);
+          this.endExec();
+        },
+        queryOptions);
     },
 
     /**
-     * The triggerAjax method implements a lifecycle based on generic AJAX calls.
-     * It implements the full preExecution->block->render->postExecution->unblock
-     * lifecycle.
+     * The beginQuery lifecycle handler implements the begin phase of a lifecycle around Query objects.
+     * It implements the lifecycle:
+     * preExecution->block?->doQuery->postFetch->(callback)->.
+     * 
+     * Ending the execution, is the responsibility of the specified callback,
+     * by calling `endExec` (resulting in: ->postExecution->unblock?)
+     * or `failExec`.
+     * 
+     * @method beginQuery
+     * @params {Object} queryDef query definition
+     * @params {function} callback Callback to run after query has ran
+     *    Receives as arguments: the fetched data object, a resolve function and a reject function.
+     * @params {Object} queryOptions User options for the query
+     */
+    beginQuery: function(queryDef, callback, queryOptions) {
+      this.execute(function() {
+        var query  = this._setQuery(queryDef, queryOptions),
+            params = this._getQueryParams();
+        
+        // `getSuccessHandler`:
+        // * behaves like a noop if this execution is subsumed by a following one,
+        //   in which case `endExec` will not be called by this execution
+        // * calls postFetch with the results from `query.fetchData`
+        // * calls the provided callback with the transformed data
+        // * handles any thrown errors
+        query.fetchData(
+          params,
+          this.getSuccessHandler(callback),
+          this.getErrorHandler());
+      });
+    },
+
+    /**
+     * The triggerAjax lifecycle handler builds a lifecycle around generic AJAX calls.
+     * It implements the lifecycle:
+     * preExecution->block?->ajax->postFetch->render->postExecution->unblock?.
+     * 
+     * After the call to the _render callback_, 
+     * the event "cdf:render" is fired, 
+     * and then execution ends.
      *
      * triggerAjax can be used with either of the following call conventions:
-     * - this.triggerAjax(url,params,callback);
-     * - this.triggerAjax({url: url, data: params, ...},callback);
-     * - this.triggerAjax({url: url, data: params, ...},callback, ajaxParameters);
-     * In the second case, you can add any other jQuery.Ajax parameters you desire
-     * to the object, but triggerAjax will take control over the success and error
+     * - this.triggerAjax(url, params, callback);
+     * - this.triggerAjax({url: url, data: params, ...}, callback);
+     * - this.triggerAjax({url: url, data: params, ...}, callback, ajaxParameters);
+     * 
+     * In the second case, you can add any other `jQuery.Ajax` parameters you desire
+     * to the object, but `triggerAjax` will take control over the success and error
      * callbacks.
-     * If passed, the supplied ajaxParameters will be passed to the default ajax call
+     * If passed, the supplied _ajaxParameters_ will be passed to the default ajax call.
      *
      * @method triggerAjax
      * @params url url to call
      * @params params Parameters for the call
-     * @params callback Callback to call after url has been request
-     * @params _ajaxParameters Parameters specific to the ajax call definition
+     * @params callback Render callback, called with the response data.
+     * @params ajaxParameters Parameters specific to the ajax call definition
      */
-    triggerAjax: function(url, params, callback, _ajaxParameters) {
-      if(!this.preExec()) {
-        return;
-      }
-      var silent = this.isSilent();
-      if(!silent) {
-        this.block();
-      };
-      var ajaxParameters = $.extend({
-        async: true
-      },_ajaxParameters);
-      /* Detect call convention used and adjust parameters */
-      if(typeof callback != "function") {
+    triggerAjax: function(url, params, callback, ajaxParameters) {
+      // Process parameters
+      var ajaxOptions = $.extend({}, ajaxParameters);
+    
+      // ...detect call convention used and adjust parameters
+      if(typeof callback !== "function") {
         callback = params;
-        _.extend(ajaxParameters, url);
+        _.extend(ajaxOptions, url);
       } else {
-        _.extend(ajaxParameters, {url: url, data: params});
+        _.extend(ajaxOptions, {url: url, data: params});
       }
-      var success = _.bind(function(data) {
-        callback(data);
-        this.trigger('cdf cdf:render', this, data);
-        this.postExec();
-      },this);
-      var always = _.bind(function() {
-        if(!silent) {
-          this.unblock();
-        }
-      }, this);
-      ajaxParameters.success = this.getSuccessHandler(success, always);
-      ajaxParameters.error = this.getErrorHandler();
-      $.ajax(ajaxParameters);
+      
+      this.beginAjax(ajaxOptions, function(data) {
+          callback.call(this, data);
+          this.trigger('cdf cdf:render', this, data);
+          this.endExec();
+        });
     },
 
+    /**
+     * The beginAjax lifecycle handler implements the begin phase of 
+     * a lifecycle based on generic AJAX calls.
+     * It implements the lifecycle:
+     * preExecution->block?->ajax->postFetch->(callback)->.
+     * 
+     * Ending the execution, is the responsibility of the specified callback,
+     * by calling `endExec` (resulting in: ->postExecution->unblock?)
+     * or `failExec`.
+     * 
+     * @method beginAjax
+     * @params {Object} ajaxParameters Parameters for `jQuery.ajax`, 
+     *    including, at a minimum, the `url` option.
+     *    `beginAjax` will take control over the `success` and `error` callbacks, 
+     *     and default `async` to `true`.
+     *
+     * @params {function} callback Render callback, called with the response data.
+     */
+    beginAjax: function(ajaxParameters, callback) {
+      this.execute(function() {
+        var ajaxOptions = $.extend(
+          {async: true}, 
+          ajaxParameters, // requires url 
+          {
+            success: this.getSuccessHandler(callback),
+            error:   this.getErrorHandler()
+          });
+
+        $.ajax(ajaxOptions);
+      });
+    },
+
+    // ------------
+
+    /**
+     * Creates and sets the component's current query given its definition,
+     * and, optionally, query options.
+     * 
+     * @method _setQuery
+     * @param {object} queryDef The query definition object.
+     * @param {object} [queryOptions] Query options object.
+     * @param {number} [queryOptions.ajax] Options passed to `jQuery.ajax`.
+     *   The AJAX options _data_, _url_, _error_ and _success_ are reserved.
+     * @param {number} [queryOptions.pageSize] The page size of paginated results.
+     * @return {BaseQuery} The query object.
+     * 
+     * @protected
+     */
+    _setQuery: function(queryDef, queryOptions) {
+      var query = this.queryState = this.query = this.dashboard.getQuery(queryDef);
+
+      // Ajax Options
+      var ajaxOptions = {async: true};
+      if(queryOptions && queryOptions.ajax)
+        _.extend(ajaxOptions, queryOptions.ajax);
+
+      query.setAjaxOptions(ajaxOptions);
+
+      // Other Query Options
+      if(queryOptions && queryOptions.pageSize)
+        query.setPageSize(queryOptions.pageSize);
+
+      return query;
+    },
+
+    /**
+     * Evaluates the query parameter mappings of the component, if any. 
+     * 
+     * When the components has no query parameter mappings, 
+     * then `undefined` is returned.
+     * 
+     * @method _getQueryParams
+     * @return {Array|Undefined} An evaluated parameters array or `undefined`.   
+     * @public
+     */
+    _getQueryParams: function() {
+      // If this.parameters is a mapping between query and dashboard parameter names
+      // send the dashboard's parameter value instead of it's name because the query
+      // component doesn't have access to the dashboard instance to get such values
+      var paramsIn = this.parameters,
+          dash     = this.dashboard,
+          paramsOut;
+          
+      if(paramsIn && dash && typeof dash.getParameterValue === "function") {
+        // Create a copy of the parameters array.
+        paramsOut = $.extend(true, [], paramsIn);
+        
+        for(var i = 0, P = paramsIn.length; i < P; i++) {
+          var value = dash.getParameterValue(paramsIn[i][1]);
+          
+          // TODO: this "falsy or" is very suspicious...
+          paramsOut[i][1] = value || paramsIn[i][1];
+        }
+      }
+
+      return paramsOut;
+    },
 
     /**
      * Increment the call counter, so we can keep track of the order in which
@@ -465,25 +679,6 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       return ++this.runCounter;
     },
 
-    /**
-     * Trigger an error event on the component. Takes as arguments the error
-     * message and, optionally, a `cause` object.
-     *
-     * @method error
-     * @params msg Error message
-     * @params cause Cause for the error
-     */
-    error: function(msg, cause) {
-      msg = msg || this.dashboard.getErrorObj('COMPONENT_ERROR').msg;
-      if(!this.isSilent()) {
-        this.unblock();
-      };
-      this.errorNotification({
-        error: cause,
-        msg: msg
-      });
-      this.trigger("cdf cdf:error", this, msg , cause || null);
-    },
     /**
      * Build a generic response handler that runs the success callback when being
      * called in response to the most recent AJAX request that was triggered for
@@ -499,68 +694,84 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * - this.getSuccessHandler(success)
      *
      * @method  getSuccessHandler
-     * @param counter id for the ajax call being made
-     * @param success success callback
-     * @param always Callback that is ran independently of call status
-     * @return {Function} Success handler function
+     * @param {number} counter id for the ajax call being made
+     * @param {function} success Success callback.
+     * @param {function} always Callback that is ran independently of call status
+     * @return {function} Success handler function
      */
     getSuccessHandler: function(counter, success, always) {
-
       if(arguments.length === 1) {
-      /* getSuccessHandler(success) */
+        // getSuccessHandler(success)
         success = counter;
         counter = this.callCounter();
-      } else if(typeof counter == 'function') {
-        /* getSuccessHandler(success,always) */
-        always = success;
+      } else if(typeof counter === "function") {
+        // getSuccessHandler(success, always)
+        always  = success;
         success = counter;
         counter = this.callCounter();
       }
-      return _.bind(function(data) {
-        var newData;
+
+      function fetchDataSuccessHandler(data) {
         if(counter >= this.runCounter) {
           try {
-            if(typeof this.postFetch == "function") {
-              newData = this.postFetch(data);
-              this.trigger('cdf cdf:postFetch', this, data);
-              data = typeof newData == "undefined" ? data : newData;
-            }
-            success(data);
-          } catch(e) {
-            this.error(this.dashboard.getErrorObj('COMPONENT_ERROR').msg, e);
-            Logger.exception(e);
+            var dataPost = this.postFetchData(data);
+            success.call(this, dataPost);
+          } catch(ex) {
+            this.failExec(ex);
           }
         }
-        if(typeof always == "function") {
-          always();
-        }
-      },
-      this);
+        
+        if(typeof always === "function") always.call(this);
+      }
+
+      return _.bind(fetchDataSuccessHandler, this);
     },
 
     /**
-     * Gets the error handler
-     *
+     * Gets an error handler suitable 
+     * for use as 
+     * a `jQuery.ajax` error callback or 
+     * a try/catch handler.
+     * 
+     * This method returns a `this` free version of the `failExec` method.
+     * 
      * @method getErrorHandler
-     * @returns {Function}  Error handler
+     * @returns {Function} Error handler
      */
     getErrorHandler: function() {
-      return  _.bind(function() {
-        var err = this.dashboard.parseServerError.apply(this.dashboard, arguments);
-        this.error(err.msg, err.error);
-      },
-      this);
+      return _.bind(this.failExec, this);
+    },
+
+    /**
+     * Trigger an error event on the component. Takes as arguments the error
+     * message and, optionally, a `cause` object.
+     *
+     * @method error
+     * @params msg Error message
+     * @params cause Cause for the error
+     */
+    error: function(msg, cause) {
+      if(!msg) msg = this.dashboard.getErrorObj('COMPONENT_ERROR').msg;
+      
+      this._maybeUnblock();
+      
+      this.errorNotification({msg: msg, error: cause});
+      
+      this.trigger("cdf cdf:error", this, msg , cause || null);
+      
+      if(cause) Logger.log(cause, "error");
     },
 
     /**
      * Triggers an error notification
      *
      * @method errorNotification
-     * @param err error message
-     * @param ph Html element where to display the error notification
+     * @param {Object} err A CDF error object containing `msg` and `error` properties.
+     * @param ph HTML element where to display the error notification
      */
     errorNotification: function(err, ph) {
-      ph = ph || (this.htmlObject ? this.placeholder() : undefined);
+      if(!ph) ph = this.htmlObject ? this.placeholder() : undefined;
+      
       var name = this.name.replace('render_', '');
       err.msg = err.msg + ' (' + name + ')';
       this.dashboard.errorNotification(err, ph);
@@ -602,9 +813,28 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * @returns {boolean} _true_ if the component should not trigger an UI block when updating
      */
     isSilent: function() {
-      return (this.lifecycle) ? !!this.lifecycle.silent : false;
+      return !!(this.lifecycle && this.lifecycle.silent);
+    },
+
+    /**
+     * Blocks the UI if it isn't silent.
+     * @method _maybeBlock 
+     * @private
+     */
+    _maybeBlock: function() {
+      if(!this.isSilent()) this.block();
+    },
+
+    /**
+     * Unblocks the UI if it isn't silent.
+     * @method _maybeUnblock 
+     * @private
+     */
+    _maybeUnblock: function() {
+      if(!this.isSilent()) this.unblock();
     }
   });
 
   return UnmanagedComponent;
+
 });

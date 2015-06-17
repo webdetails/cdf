@@ -13,53 +13,48 @@
 
 define([
   'amd!../lib/underscore',
-  '../lib/jquery',
   './UnmanagedComponent',
-  'common-ui/vizapi/DataTable',
+  'common-ui/vizapi/data/DataTable',
   'common-ui/vizapi/VizController',
-  'common-ui/vizapi/Events'],
-  function(_, $, UnmanagedComponent) {
+  'common-ui/vizapi/vizTypeRegistry'
+], function(_, UnmanagedComponent, DataTable, VizController, vizTypes) {
 
   var VisualizationAPIComponent = UnmanagedComponent.extend({
 
     update: function() {
-      var render = _.bind(this.render, this);
-      this.triggerQuery(this.queryDefinition, render);
+      this.beginQuery(this.queryDefinition, this.render);
     },
 
     render: function(data) {
-      var vizDiv = this.placeholder()[0];
-      var visualization = this.getVisualization();
-      var vizOptions = this.getVizOptions();
-      var gDataTable = this.createGoogleDataTable(data);
-
-      var controller = new pentaho.VizController(0);
+      var vizDiv     = this.placeholder()[0],
+          vizType    = this.getVizType(),
+          vizOptions = this.getVizOptions(),
+          gDataTable = this.createGoogleDataTable(data),
+          controller = new VizController(0);
+      
       controller.setDomNode(vizDiv);
       controller.setDataTable(gDataTable);
-      controller.setVisualization(visualization, vizOptions);
+      controller.setVisualization(vizType, vizOptions, _.bind(this.endExec, this));
     },
 
     getVizOptions: function() {
-      var myself = this;
       var options = {};
-      $.each(this.vizOptions, function(i, v) {
-        var key = v[0];
-        var value = myself.dashboard.getParameterValue(v[1]);
-        options[key] = value;
-      });
+
+      _.each(this.vizOptions, function(option) {
+        options[option[0]] = this.getParameterValue(option[1]);
+      }, this.dashboard);
+
       return options;
     },
 
-    getVisualization: function() {
-      return pentaho.visualizations.getById(this.vizId);
+    getVizType: function() {
+      return vizTypes.get(this.vizId);
     },
 
-    createGoogleDataTable: function(resultJson) {
-      return new pentaho.DataTable(resultJson);
+    createGoogleDataTable: function(jsonTable) {
+      return new DataTable(jsonTable);
     }
-
   });
 
   return VisualizationAPIComponent;
-
 });

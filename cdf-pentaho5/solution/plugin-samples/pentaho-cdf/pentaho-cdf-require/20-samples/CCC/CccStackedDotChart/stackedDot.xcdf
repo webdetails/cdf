@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+  <title>CCC Stacked Dot Chart</title>
+  <author>Webdetails</author>
+  <description>CCC Stacked Dot Chart sample</description>
+  <icon></icon>
+  <template>template.html</template>
+  <style>mantle</style>
+  <require>true</require>
+</cdf>

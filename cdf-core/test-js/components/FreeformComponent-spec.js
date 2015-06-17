@@ -332,7 +332,7 @@ define([
       /**
        * ## Freeform Component # Query Lifecycle # only updates once if called concurrently
        */
-      it("only updates once if called concurrently", function(done) {
+      xit("only updates once if called concurrently", function(done) {
         var success, firstRun = true;
 
         spyOn(freeformQuery, "update").and.callThrough();
@@ -508,7 +508,7 @@ define([
       /**
        * ## Freeform Component # AJAX Lifecycle # only updates once if called concurrently
        */
-      it("only updates once if called concurrently", function(done) {
+      xit("only updates once if called concurrently", function(done) {
         var success, firstRun = true;
 
         spyOn(dashboard, 'updateComponent').and.callThrough();
