@@ -11,14 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var requireCfg = {
-  paths: {},
-  shim:  {},
-  map:   {}
-};
+define([
+  './BaseCccComponent',
+  '../lib/CCC/pvc'
+], function(BaseCccComponent, pvc) {
 
-var KARMA_RUN = true;
+  var CccStackedDotChart = BaseCccComponent.extend({
+    cccType: pvc.StackedDotChart
+  });
 
-var SESSION_NAME = "dummy";
-var CONTEXT_PATH = "/pentaho/";
-var SESSION_LOCALE = "en-US";
+  return CccStackedDotChart;
+});

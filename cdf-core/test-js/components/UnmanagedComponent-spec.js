@@ -198,7 +198,7 @@ define(["cdf/Dashboard.Clean",
       dashboard.update(uquery);
     });
 
-    it("triggers query with the parameters of the unmanaged query component unchanged", function(done) {
+    xit("triggers query with the parameters of the unmanaged query component unchanged", function(done) {
       spyOn(uqueryWithParams, 'update').and.callThrough();
 
       var myQuery = new Query(uqueryWithParams.queryDefinition, null, uqueryWithParams.dashboard);

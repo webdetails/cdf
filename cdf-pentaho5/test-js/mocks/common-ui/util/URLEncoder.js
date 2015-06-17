@@ -11,14 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var requireCfg = {
-  paths: {},
-  shim:  {},
-  map:   {}
-};
-
-var KARMA_RUN = true;
-
-var SESSION_NAME = "dummy";
-var CONTEXT_PATH = "/pentaho/";
-var SESSION_LOCALE = "en-US";
+define(function() {
+	return {};
+});
