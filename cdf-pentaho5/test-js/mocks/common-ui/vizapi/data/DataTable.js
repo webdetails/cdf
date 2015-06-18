@@ -11,14 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var requireCfg = {
-  paths: {},
-  shim:  {},
-  map:   {}
-};
+define(function() {
+  function DataTable(data) {
+    this.data = data;
+  }
 
-var KARMA_RUN = true;
-
-var SESSION_NAME = "dummy";
-var CONTEXT_PATH = "/pentaho/";
-var SESSION_LOCALE = "en-US";
+  return DataTable;
+});

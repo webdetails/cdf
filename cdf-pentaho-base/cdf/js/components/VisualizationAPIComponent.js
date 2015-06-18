@@ -11,45 +11,74 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var VisualizationAPIComponent = UnmanagedComponent.extend({
+var VisualizationAPIComponent = (function() {
+  var DataTable, VizController, vizTypeRegistry;
 
-  update: function() {
+  return UnmanagedComponent.extend({
 
-    var render = _.bind(this.render, this);
-    this.triggerQuery(this.queryDefinition, render);
+    // Unit tests support.
+    __require: require,
+    __reset: function() {
+      DataTable = VizController = vizTypeRegistry = null;
+    },
 
-  },
+    update: function() {
+      if(!vizTypeRegistry)
+        this._requireFilesAndUpdate();
+      else
+        this._updateCore();
+    },
 
-  render: function(data) {
+    _requireFilesAndUpdate: function() {
+      // Not caring about preExec()...
+      var me = this;
+      me.__require([
+        "common-ui/vizapi/data/DataTable",
+        "common-ui/vizapi/VizController",
+        "common-ui/vizapi/vizTypeRegistry",
+      ], function(_DataTable_, _VizController_, _vizTypeRegistry_) {
+        DataTable = _DataTable_;
+        VizController = _VizController_;
+        vizTypeRegistry = _vizTypeRegistry_;
+        
+        me._updateCore();
+      });
+    },
 
-    var vizDiv = this.placeholder()[0];
-    var visualization = this.getVisualization();
-    var vizOptions = this.getVizOptions();
-    var gDataTable = this.createGoogleDataTable(data);
+    _updateCore: function() {
+      var render = _.bind(this.render, this);
+      this.triggerQuery(this.queryDefinition, render);
+    },
+  
+    render: function(data) {
+      var vizDiv = this.placeholder()[0];
+      var visualization = this.getVizType();
+      var vizOptions = this.getVizOptions();
+      var gDataTable = this.createGoogleDataTable(data);
+  
+      var controller = new VizController(0);
+      controller.setDomNode(vizDiv);
+      controller.setDataTable(gDataTable);
+      controller.setVisualization(visualization, vizOptions);
+      // execution is ended immediately afterwards, although in practice,
+      // the VizAPI will not render synchronously. 
+    },
 
+    getVizOptions: function() {
+      var options = {};
+      $.each(this.vizOptions, function(i, v) {
+        var key = v[0], value = Dashboards.getParameterValue(v[1]);
+        options[key] = value;
+      });
+      return options;
+    },
 
-    var controller = new pentaho.VizController(0);
-    controller.setDomNode(vizDiv);
-    controller.setDataTable(gDataTable);
-    controller.setVisualization(visualization, vizOptions);
-
-  },
-
-  getVizOptions: function() {
-    var options = {};
-    $.each(this.vizOptions, function(i, v) {
-      var key = v[0], value = Dashboards.getParameterValue(v[1]);
-      options[key] = value;
-    });
-    return options;
-  },
-
-  getVisualization: function() {
-    return pentaho.visualizations.getById(this.vizId);
-  },
-
-  createGoogleDataTable: function(resultJson) {
-    return new pentaho.DataTable(resultJson);
-  }
-
-});
+    getVizType: function() {
+      return vizTypeRegistry.get(this.vizId);
+    },
+  
+    createGoogleDataTable: function(resultJson) {
+      return new DataTable(resultJson);
+    }
+  });
+}());

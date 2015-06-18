@@ -11,7 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
 define([
   './Dashboard',
   './Dashboard.notifications.ext',
@@ -27,7 +26,7 @@ define([
    * @module Dashboard.notifications
    */
   Dashboard.implement({
-  
+
     /**
      * Inits the notification module
      *
@@ -45,10 +44,10 @@ define([
        * @for Dashboard
        */
       this.ERROR_CODES = {
-        'QUERY_TIMEOUT': {
+        'QUERY_TIMEOUT' : {
           msg: "Query timeout reached"
         },
-        "COMPONENT_ERROR": {
+        "COMPONENT_ERROR" : {
           msg: "Error processing component"
         }
       };
@@ -66,7 +65,7 @@ define([
         // but we're just setting the same img
         $.blockUI.defaults.message = '<div class="img blockUIDefaultImg" style="padding: 0px;"></div>';
       }
-  
+
       $.blockUI();
       var handle = $('<div id="blockUIDragHandle"></div>');
       $("div.blockUI.blockMsg").prepend(handle);
@@ -74,7 +73,7 @@ define([
         handle: "#blockUIDragHandle"
       });
     },
-  
+
     /**
      * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner
      *
@@ -84,7 +83,7 @@ define([
     showProgressIndicator: function() {
       $.blockUI && this.blockUIwithDrag();
     },
-  
+
     /**
      * Hides the progress indicator. Optionally, resets the running calls counter
      *
@@ -102,7 +101,8 @@ define([
 
     /**
      * Given an error code, returns the registered error object associated with that code
-     *
+     * 
+     * @method getErrorObj
      * @param errorCode errorCode to translate
      * @returns {*|{}} error object or the empty object if the code is not registered
      *
@@ -111,40 +111,44 @@ define([
     getErrorObj: function(errorCode) {
       return this.ERROR_CODES[errorCode] || {};
     },
-  
+
     /**
      * Parses a server error response and creates an error object
      *
-     * @method parseServerError
+     * @method	parseServerError
      * @param resp Server response
      * @param txtStatus Response status
      * @param error Error object to encapsulate
-     * @returns {{}} an error object containing detailed error message
+     * @returns {Object} an error object containing detailed error message
      *
      * @for Dashboard
      * @deprecated
      * @private
      */
     parseServerError: function(resp, txtStatus, error) {
-      var out = {};
-      var regexs = [{match: /Query timeout/, msg: this.getErrorObj('QUERY_TIMEOUT').msg}];
-  
-      out.error = error;
-      out.msg = this.getErrorObj('COMPONENT_ERROR').msg;
+      // NOTE: this method's signature matches the error callback of $.ajax({error: . }).
+      var regexs = [
+        {match: /Query timeout/, msg: this.getErrorObj('QUERY_TIMEOUT').msg}
+      ];
+
+      var out = {
+        msg: this.getErrorObj('COMPONENT_ERROR').msg,
+        error: error,
+        errorStatus: txtStatus
+      };
+
       var str = $('<div/>').html(resp.responseText).find('h1').text();
       _.find(regexs, function(el) {
         if(str.match(el.match)) {
           out.msg = el.msg;
           return true;
-        } else {
-          return false;
         }
+        return false;
       });
-      out.errorStatus = txtStatus;
-  
+
       return out;
     },
-  
+
     /**
      * Handles a server error
      *
@@ -194,8 +198,8 @@ define([
           window.location.reload(true);
         }
       };
-      opts = _.extend({} , opts, newOpts);
-  
+      opts = _.extend({}, opts, newOpts);
+
       Popups.okPopup.show(opts);
       this.trigger('cdf cdf:loginError', this);
     },
@@ -227,7 +231,6 @@ define([
           retVal = false;
         }
       });
-
       return retVal;
     }
   });

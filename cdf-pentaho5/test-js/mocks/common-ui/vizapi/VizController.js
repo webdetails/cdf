@@ -11,5 +11,16 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-// this file is used by config/context.js for bypassing missing AMD dependencies
-define('missing/dependency', [], function() { return; });
+define(function() {
+  function VizController(id) {
+    this.id = id;
+  }
+	
+  VizController.prototype.setDomNode = function(p1) {};
+  VizController.prototype.setDataTable = function(p1) {};
+  VizController.prototype.setVisualization = function(p1, p2, ready) {
+	  setTimeout(ready, 0);
+  };
+  
+  return VizController;
+});
