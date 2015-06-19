@@ -40,6 +40,7 @@ define([
      *
      * @class Dashboard
      * @constructor
+     * @param {Object} options Object that can contain the context, storage and view.
      */
     constructor: function(options) {
       var myself = this;
