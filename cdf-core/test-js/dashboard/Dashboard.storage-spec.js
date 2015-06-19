@@ -17,34 +17,48 @@ define(["cdf/Dashboard.Clean", "cdf/lib/jquery"], function(Dashboard, $) {
    * ## The CDF storage
    */
   describe("The CDF storage", function() {
-
+    //an exact copy of this object is set in context.js
     var dashboard = new Dashboard();
-
-    dashboard.init();
+    var storageObj = {
+      test: 1
+    };
 
     /**
      * ## The CDF storage # correctly calls the initStorage
      */
     it("correctly calls the initStorage", function() {
       expect(dashboard._initStorage).toBeDefined();
-      expect(dashboard.storage).toEqual({});
-      expect(dashboard.initialStorage).toEqual({});
+      expect(dashboard.storage).toEqual(storageObj);
+      expect(dashboard.initialStorage).toEqual(storageObj);
     });
 
     /**
-     * ## The CDF storage # sets the storage objects according to server response
+     * ## The CDF storage # loads the storage correctly
      */
-    it("sets the storage objects according to server response", function() {
-      var serverResponse = {test: 1};
+    it("loads the storage correctly", function() {
+      var dashboard2 = new Dashboard();
+      var serverResponse = {test: 2};
 
       spyOn($, "ajax").and.callFake(function(params) {
         params.success(serverResponse);
+        expect(dashboard2.storage).toEqual(serverResponse);
+        expect(dashboard2.initialStorage).toEqual(serverResponse);
       });
+      dashboard2.loadStorage();
+    });
 
-      dashboard._initStorage();
+    /**
+     * ## The CDF storage # is correctly read through the Dashboard constructor
+     */
+    it("is correctly read through the Dashboard constructor", function() {
+      storageObj.test = 3;
+      var options = {
+        storage: storageObj
+      };
+      var dashboard3 = new Dashboard(options);
 
-      expect(dashboard.storage).toEqual(serverResponse);
-      expect(dashboard.initialStorage).toEqual(serverResponse);
+      expect(dashboard3.storage).toEqual(storageObj);
+      expect(dashboard3.initialStorage).toEqual(storageObj);
     });
   });
 });

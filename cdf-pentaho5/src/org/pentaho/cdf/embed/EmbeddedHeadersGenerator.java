@@ -31,6 +31,9 @@ public class EmbeddedHeadersGenerator {
   private final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
       + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n\n";
 
+  private final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
+      "requireCfg.config[''cdf/dashboard/Dashboard''] = {0};\n";
+
   private final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-lib-require-js-cfg.js";
   private final String CDF_PATH = "content/pentaho-cdf/js/cdf-require-js-cfg.js";
 
@@ -51,10 +54,12 @@ public class EmbeddedHeadersGenerator {
 
   protected Locale locale;
   protected String fullyQualifiedURL;
+  protected String contextConfiguration;
 
-  public EmbeddedHeadersGenerator( String fullUrl ) {
+  public EmbeddedHeadersGenerator( String fullUrl, String contextConfiguration ) {
     this.locale = LocaleHelper.getLocale();
     this.fullyQualifiedURL = fullUrl;
+    this.contextConfiguration = contextConfiguration;
   }
 
   public String generate() throws IOException {
@@ -76,6 +81,7 @@ public class EmbeddedHeadersGenerator {
 
     sb.append( INITIAL_COMMENT )
         .append( REQUIRE_JS_CFG_START )
+        .append( MessageFormat.format( REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION, contextConfiguration ) )
 
         .append( "// injecting document writes to append the cdf require files\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
