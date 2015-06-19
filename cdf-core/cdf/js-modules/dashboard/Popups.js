@@ -14,8 +14,8 @@
 /**
  * A module containing pre-built error and ok popups.
  * Each exposed popup is an object with a _render_ method that can be called to show the popup.
- * @class popups
- * @module popups
+ * @class Popups
+ * @module Popups
  */
 
 define([
@@ -25,7 +25,7 @@ define([
   'amd!../lib/jquery.blockUI'
 ], function(Mustache, _, $) {
 
-  var popups = {};
+  var Popups = {};
 
   /**
    * Ok Popup.
@@ -33,7 +33,7 @@ define([
    * @type object
    * @static
    */
-  popups.okPopup = {
+  Popups.okPopup = {
     template: "<div class='cdfPopup'>" +
               "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
               "  <div class='cdfPopupBody'>" +
@@ -89,7 +89,7 @@ define([
    * @type object
    * @static
    */
-  popups.notificationsComponent = {
+  Popups.notificationsComponent = {
     template: "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
               "  <div class='cdfNotificationBody'>" +
               "    <div class='cdfNotificationImg'>&nbsp;</div>" +
@@ -116,7 +116,7 @@ define([
    * @type object
    * @static
    */
-  popups.notificationsGrowl = {
+  Popups.notificationsGrowl = {
     template: "<div class='cdfNotification growl'>" +
               "  <div class='cdfNotificationBody'>" +
               "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
@@ -157,5 +157,5 @@ define([
     firstRender: true
   };
 
-  return popups;
+  return Popups;
 });
