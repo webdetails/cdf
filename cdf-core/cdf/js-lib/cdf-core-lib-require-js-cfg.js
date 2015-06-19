@@ -71,8 +71,8 @@
   // to be used when a shim isn't enough (see plugin prescript and postscript).
   requirePaths['amd'] = prefix + '/require-amd/nonamd';
 
-  //RequireJS dashboard! loader plugin 0.0.1
-  requirePaths['dashboard'] = prefix + '/require-dashboard/dashboard';
+  // RequireJS dash! loader plugin 0.0.1
+  requirePaths['dash'] = prefix + '/require-dashboard/dashboard';
 
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
