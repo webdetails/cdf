@@ -72,7 +72,7 @@ define(['./Dashboard', './Utf8Encoder'],
 
 
     OlapUtils.fireMdxGroupAction = function(mdxQueryGroup,idx,param1, param2, param3){
-        /**         http://jira.pentaho.com/browse/BISERVER-3542	   *
+        /*         http://jira.pentaho.com/browse/BISERVER-3542	   *
          *								   *
          * Prior to Pentaho 3.5, this function received only 3 parameters: *
          *(query,idx,PARAM). 						   *

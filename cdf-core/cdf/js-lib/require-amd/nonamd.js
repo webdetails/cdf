@@ -12,7 +12,7 @@
  */
 
 /**
- * AMD loader plugin that wraps non-amd scripts as amd modules on the fly.
+ * RequireJS amd! loader plugin that wraps non-amd scripts as amd modules on the fly.
  * Depends on the standard text! plugin, registered under the module id "text".
  * 
  * Wrapping is the only 100% safe method of ensuring that 
@@ -51,39 +51,36 @@
  * The downfall is that all modules that depend on non-amd modules 
  * need to use its _special_ module id:
  * 
- * ```javascript
- * define(['amd!jquery.ui'], function($) {
- *    // jquery ui has been loaded, and in the configured jquery instance, for sure, really, really!
- * });
- * ```
+ *      define(['amd!jquery.ui'], function($) {
+ *        // jquery ui has been loaded, and in the configured jquery instance, for sure, really, really!
+ *      });
  * 
  * The configuration of a module for use with this plugin is as close
  * as possible to a _native_ shim configuration:
  * 
- * ```javascript
- * requirejs.config({
- *   paths: {
- *     "amd": "path to the non-amd plugin" 
- *   },
+ *      requirejs.config({
+ *        paths: {
+ *          "amd": "path to the non-amd plugin" 
+ *        },
  *   
- *   config: {
- *     // non-amd plugin configuration section
- *     "amd": {
- *       shim: {
- *         "jquery.ui": {
- *            exports: "$", // re-exports jquery
- *            deps: { // instead of just an array, an object allows defining the define function argument names
- *              "$": "the-module-id-of-the-jquery-I-want"
- *              // other dependencies
+ *        config: {
+ *          // non-amd plugin configuration section
+ *          "amd": {
+ *            shim: {
+ *              "jquery.ui": {
+ *                exports: "$", // re-exports jquery
+ *                deps: { // instead of just an array, an object allows defining the define function argument names
+ *                  "$": "the-module-id-of-the-jquery-I-want"
+ *                  // other dependencies
+ *                }
+ *              }
  *            }
- *         }
- *       }
- *     }
- *   }
- * });
- * ```
+ *          }
+ *        }
+ *      });
+ *
+ * @module amd
  */
-
 define(["module", "text"], function(module, text) {
   
   var mainConfig = module.config(), // non-amd plugin's own config
@@ -117,7 +114,7 @@ define(["module", "text"], function(module, text) {
    
   // == COMPILER ==
   
-  /**
+  /*
    * Compiles a non-amd module given its non-amd code and its compilation configuration options.
    * @param {string} jsText The non-amd JavaScript code.
    * @param {object} moduleConfig The non-amd configuration of the module being compiled.

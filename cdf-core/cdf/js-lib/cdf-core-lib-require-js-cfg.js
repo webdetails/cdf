@@ -57,6 +57,7 @@
     prefix = requirePaths['cdf/lib'] = "cdf/js/lib";
   }
 
+  // configure text! plugin for usage in embedded environments (CORS)
   requireConfig['cdf/lib/require-text/text'] = {
     onXhr: function(xhr, url) {
       //Called after the XHR has been created and after the
@@ -66,11 +67,12 @@
     }
   },
 
-  // RequireJS amd! loader plugin. Wraps non-amd scripts as amd modules on the fly,
+  // RequireJS amd! loader plugin. Wraps non-AMD scripts as AMD modules on the fly,
   // to be used when a shim isn't enough (see plugin prescript and postscript).
-  // Avoid using map (requireCfg.map['*']['amd'] = 'cdf/lib/require-amd/nonamd') because
-  // it produces unexpected behaviours in the configurations accessible inside the plugin.
   requirePaths['amd'] = prefix + '/require-amd/nonamd';
+
+  // RequireJS dash! loader plugin 0.0.1
+  requirePaths['dash'] = prefix + '/require-dashboard/dashboard';
 
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
