@@ -19,6 +19,9 @@ define([
 ], function(Dashboard, Base64, DashboardViewsExt, $) {
   /**
    * A module representing an extension to Dashboard module for views.
+   * Map containing the list of parameters of a dashboard,
+   * describing its state with viewFlags.
+   *
    * @module Dashboard.views
    */
   Dashboard.implement({
@@ -35,7 +38,7 @@ define([
     },
 
     /**
-     * Map containing the list of parameters of a dashboard, describing its state with viewFlags
+     * Method used by the Dashboard constructor for view initialization
      *
      * @method _initViews
      * @for Dashboard
