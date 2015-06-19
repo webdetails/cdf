@@ -408,13 +408,13 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * 
      * This method is sugar for the following common pattern:
      * 
-     *    if(this.beginExec()) {
-     *      try {
-     *        executor.call(this);
-     *      } catch(ex) {
-     *        this.failExec(ex);
-     *      }
-     *    } 
+     *     if(this.beginExec()) {
+     *       try {
+     *         executor.call(this);
+     *       } catch(ex) {
+     *         this.failExec(ex);
+     *       }
+     *     } 
      * 
      * @param {function} executor The executor function.
      *   This function receives two arguments:
