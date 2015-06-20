@@ -61,4 +61,9 @@
   requirePaths['cdf/components/CccWaterfallChartComponent'] = prefix + '/components/ccc/CccWaterfallChartComponent';
   requirePaths['cdf/components/CccSunburstChartComponent'] = prefix + '/components/ccc/CccSunburstChartComponent';
 
+  /*
+   * Filter component is in a subfolder of its own
+   */
+  requirePaths['cdf/components/FilterComponent'] = prefix + '/components/filter/FilterComponent';
+
 })();

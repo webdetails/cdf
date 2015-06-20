@@ -360,4 +360,28 @@
     exports: "Xmla"
   };
 
+  // backbone.treeModel
+  requirePaths['cdf/lib/backbone.treemodel'] = prefix + "/backboneTreemodel/backbone.treemodel";
+  amdShim["cdf/lib/backbone.treemodel"] = {
+     exports: "Backbone",
+     deps: {
+       "amd!cdf/lib/underscore" : "_",
+       "amd!cdf/lib/backbone" : "Backbone"
+     },
+     prescript: "var root = { Backbone: Backbone, _: _ };\n"+
+     "(function() {\n",
+     postscript: "}.call(root));\n"
+     + "return root.Backbone;"
+  };
+
+  // mCustomScrollbar: jquery mousewheel plugin v3.1.12, MIT License
+  requirePaths['cdf/lib/jquery.mCustomScrollbar'] = prefix + "/mCustomScrollbar/jquery.mCustomScrollbar.concat.min";
+  amdShim["cdf/lib/jquery.mCustomScrollbar"] = {
+     exports: "jQuery",
+     deps: {
+       "cdf/lib/jquery": "jQuery",
+       "css!cdf/lib/mCustomScrollbar/jquery.mCustomScrollbar.min": ""
+     }
+  };
+
 })();
