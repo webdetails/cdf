@@ -137,3 +137,31 @@ requireCfg['shim']['cdf-legacy/lib/uriQueryParser/jquery-queryParser'] = ['cdf-l
 requireCfg['shim']['cdf-legacy/lib/simile/ajax/scripts/json'] = ['cdf-legacy/lib/simile/ajax/simile-ajax-api'];
 
 requireCfg['shim']['cdf-legacy/lib/json'] = ['cdf-legacy/lib/simile/ajax/simile-ajax-api'];
+
+requireCfg['shim']['cdf-legacy/components/FilterComponent'] = [
+  'cdf-legacy/lib/backboneTreemodel/backbone.treemodel',
+  'cdf-legacy/lib/mCustomScrollbar/jquery.mCustomScrollbar.concat.min',
+  'cdf-legacy/lib/mCustomScrollbar/jquery.mCustomScrollbar.min',
+  'cdf-legacy/components/filter/lib/baseevents',
+  'cdf-legacy/components/filter/js/TreeFilter/TreeFilter',
+  'cdf-legacy/components/filter/js/TreeFilter/defaults',
+  'cdf-legacy/components/filter/js/TreeFilter/Logger',
+  'cdf-legacy/components/filter/js/TreeFilter/models/Tree',
+  'cdf-legacy/components/filter/js/TreeFilter/models/SelectionTree',
+  'cdf-legacy/components/filter/js/TreeFilter/templates',
+  'cdf-legacy/components/filter/js/TreeFilter/views/Abstract',
+  'cdf-legacy/components/filter/js/TreeFilter/views/Root',
+  'cdf-legacy/components/filter/js/TreeFilter/views/Group',
+  'cdf-legacy/components/filter/js/TreeFilter/views/Item',
+  'cdf-legacy/components/filter/js/TreeFilter/controllers/Manager',
+  'cdf-legacy/components/filter/js/TreeFilter/controllers/RootCtrl',
+  'cdf-legacy/components/filter/js/TreeFilter/strategies/AbstractSelect',
+  'cdf-legacy/components/filter/js/TreeFilter/strategies/MultiSelect',
+  'cdf-legacy/components/filter/js/TreeFilter/strategies/SingleSelect',
+  'cdf-legacy/components/filter/js/TreeFilter/extensions/renderers',
+  'cdf-legacy/components/filter/js/TreeFilter/extensions/sorters',
+  'cdf-legacy/components/filter/js/TreeFilter/data-handlers/InputDataHandler',
+  'cdf-legacy/components/filter/js/TreeFilter/data-handlers/OutputDataHandler',
+  'cdf-legacy/components/filter/js/TreeFilter/addIns/addIns',
+  'cdf-legacy/components/filter/styles/filter',
+  'cdf-legacy/components/filter/js/filter'];
