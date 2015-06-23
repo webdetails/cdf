@@ -695,13 +695,13 @@ de
           <then>
             <if>
               <not>
-                <isset property="karma-is-available-windows"/>
+                <isset property="karma-for-windows-is-available"/>
               </not>
               <then>
-                <fail>Karma is not available, make sure Node.js is installed. Unit tests could not run.</fail>
+                <fail>Run 'npm install -g karma-cli' [adds karma.cmd to the command line]</fail>
               </then>
             </if>
-            <exec executable="${js.node.node_modules.bin.dir}\karma.cmd">
+            <exec executable="karma.cmd" failonerror="${js.karma.failonerror}">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
               <!-- if we are running via ant, then assume we must 'single-run' -->
@@ -709,16 +709,7 @@ de
             </exec>
           </then>
           <else>
-            <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
-            <if>
-              <not>
-                <isset property="karma-is-available"/>
-              </not>
-              <then>
-                <fail>Make sure Node.js is installed and run 'npm install -g karma-cli' [adds karma to the command line]</fail>
-              </then>
-            </if>
-            <exec executable="karma">
+            <exec executable="node_modules/karma/bin/karma" failonerror="${js.karma.failonerror}">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
               <!-- if we are running via ant, then assume we must 'single-run' -->

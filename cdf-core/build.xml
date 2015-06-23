@@ -159,15 +159,21 @@
   </target>
 
   <target name="run-karma" depends="install-antcontrib, npm-install">
-    <!-- compile the require file -->
-
     <if>
       <available file="${js.karma.ci.config}"/>
       <then>
         <if>
           <isset property="isWindows"/>
           <then>
-            <exec executable="${js.node.node_modules.bin.dir}\karma.cmd">
+            <if>
+              <not>
+                <isset property="karma-for-windows-is-available"/>
+              </not>
+              <then>
+                <fail>Run 'npm install -g karma-cli' [adds karma.cmd to the command line]</fail>
+              </then>
+            </if>
+            <exec executable="karma.cmd" failonerror="${js.karma.failonerror}">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
               <!-- if we are running via ant, then assume we must 'single-run' -->
@@ -175,7 +181,7 @@
             </exec>
           </then>
           <else>
-            <exec executable="karma">
+            <exec executable="node_modules/karma/bin/karma" failonerror="${js.karma.failonerror}">
               <arg value="start"/>
               <arg value="${js.karma.ci.config}"/>
               <!-- if we are running via ant, then assume we must 'single-run' -->
@@ -192,16 +198,16 @@
 
   <target name="test-js-require" depends="subfloor-js.resolve-js, subfloor-js.npm-install, subfloor-js.extract-source-and-build-require-js-profile">
 
-    <!-- create test js resources dir 'bin/test-js-res/cdf/js' -->
+    <!-- create test js resources dir 'bin/test-js/cdf/js' -->
     <delete dir="${bin.test-js.cdf.js.dir}"/>
     <mkdir dir="${bin.test-js.cdf.js.dir}"/>
-    <!-- copy amd modules into bin/test-js/cdf/js -->
+    <!-- copy AMD modules into bin/test-js/cdf/js -->
     <copy todir="${bin.test-js.cdf.js.dir}" overwrite="true">
-      <!-- copy CDF core js amd modules -->
+      <!-- copy CDF core js AMD modules -->
       <fileset dir="${js-modules.dir}">
         <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
-      <!-- copy CDF base js amd modules -->
+      <!-- copy CDF base js AMD modules -->
       <fileset dir="${pentaho-base-js.dir}">
         <exclude name="**/*-require-js-cfg.js"/>
       </fileset>
@@ -241,6 +247,40 @@
   </target>
 
   <target name="test-js" depends="test-js-require, test-js-legacy">
+  </target>
+
+  <!-- Path to the yuidoc configuration -->
+  <property name="yuidoc.json" value="yuidoc.json"/>
+  <available file="yuidoc.cmd" filepath="${env.Path}" property="yuidoc-for-windows-is-available"/>
+  <target name="doc-js" depends="install-antcontrib, npm-install">
+    <if>
+      <available file="${yuidoc.json}"/>
+      <then>
+        <!-- we have yuidoc available, use it to run the tests -->
+          <if>
+            <isset property="isWindows"/>
+            <then>
+              <if>
+                <not>
+                  <isset property="yuidoc-for-windows-is-available"/>
+                </not>
+                <then>
+                  <fail>Run 'npm -g install yuidocjs'</fail>
+                </then>
+              </if>
+              <exec executable="yuidoc.cmd"/>
+            </then>
+            <else>
+              <exec executable="node_modules/yuidocjs/lib/cli.js"/>
+            </else>
+          </if>
+
+          <zip destfile="${dist.dir}/js-doc-${project.revision}.zip" basedir="${basedir}/doc-js" />
+      </then>
+      <else>
+        <fail>There is no yuidoc.json configuration file available (looking for: ${yuidoc.json})</fail>
+      </else>
+    </if>
   </target>
 
 </project>
