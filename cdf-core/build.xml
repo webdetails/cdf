@@ -243,4 +243,38 @@
   <target name="test-js" depends="test-js-require, test-js-legacy">
   </target>
 
+  <!-- Path to the yuidoc configuration -->
+  <property name="yuidoc.json" value="yuidoc.json"/>
+  <available file="yuidoc.cmd" filepath="${env.Path}" property="yuidoc-for-windows-is-available"/>
+  <target name="doc-js" depends="install-antcontrib, npm-install">
+    <if>
+      <available file="${yuidoc.json}"/>
+      <then>
+        <!-- we have yuidoc available, use it to run the tests -->
+          <if>
+            <isset property="isWindows"/>
+            <then>
+              <if>
+                <not>
+                  <isset property="yuidoc-for-windows-is-available"/>
+                </not>
+                <then>
+                  <fail>Run 'npm -g install yuidocjs'</fail>
+                </then>
+              </if>
+              <exec executable="yuidoc.cmd"/>
+            </then>
+            <else>
+              <exec executable="node_modules/yuidocjs/lib/cli.js"/>
+            </else>
+          </if>
+
+          <zip destfile="${dist.dir}/js-doc-${project.revision}.zip" basedir="${basedir}/doc-js" />
+      </then>
+      <else>
+        <fail>There is no yuidoc.json configuration file available (looking for: ${yuidoc.json})</fail>
+      </else>
+    </if>
+  </target>
+
 </project>
