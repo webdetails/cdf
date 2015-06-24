@@ -22,6 +22,8 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
     render: function() {
       var myself = this;
       var b = $("<button type='button'/>")
+        .addClass('buttonComponent')
+        .addClass('enabled')
         .text(typeof myself.label === 'function' ? myself.label() : myself.label)
         .unbind("click")
         .bind("click", function() {
@@ -75,7 +77,7 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
      */
     disable: function() {
       this.placeholder('button').attr('disabled', 'disabled');
-      this.placeholder('button').css({ opacity: 0.5 });
+      this.placeholder('button').removeClass('enabled').addClass('disabled');
     },
 
     /**
@@ -83,7 +85,7 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
      */
     enable: function() {
       this.placeholder('button').removeAttr('disabled');
-      this.placeholder('button').css({ opacity: 1 });
+      this.placeholder('button').removeClass('disabled').addClass('enabled');
     },
 
     /**
