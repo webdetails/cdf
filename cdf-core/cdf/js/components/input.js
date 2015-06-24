@@ -1555,8 +1555,13 @@ var ButtonComponent = ActionComponent.extend({
 
   render: function() {
     var myself = this;
-    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
-      var proceed = true;
+    var b = $("<button type='button'/>")
+        .addClass('buttonComponent')
+        .addClass('enabled')
+        .text(this.label)
+        .unbind("click")
+        .bind("click", function(){
+          var proceed = true;
 
           // disable button to prevent unwanted presses
           myself.disable();
@@ -1592,7 +1597,7 @@ var ButtonComponent = ActionComponent.extend({
           if(myself.hasAction() && !(proceed === false)) {
             return myself.triggerAction.apply(myself);
           }
-    });
+      });
     if ( _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller"){
       b.button();
     }
@@ -1605,6 +1610,7 @@ var ButtonComponent = ActionComponent.extend({
      * Disables the button (grays it out and prevents click events)
      */
     this.placeholder('button').attr('disabled', 'disabled');
+    this.placeholder('button').removeClass('enabled').addClass('disabled');
   },
 
   enable: function(){
@@ -1612,6 +1618,7 @@ var ButtonComponent = ActionComponent.extend({
      * Enables the button
      */
     this.placeholder('button').removeAttr('disabled');
+    this.placeholder('button').removeClass('disabled').addClass('enabled');
   },
 
   setLabel: function(label){
