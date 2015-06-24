@@ -1557,12 +1557,41 @@ var ButtonComponent = ActionComponent.extend({
     var myself = this;
     var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
       var proceed = true;
-      if ( _.isFunction(myself.expression) ){
-        proceed = myself.expression.apply(myself, arguments);
-      }
-      if ( myself.hasAction() && !(proceed === false)) {
-        return myself.triggerAction.apply(myself);
-      }
+
+          // disable button to prevent unwanted presses
+          myself.disable();
+          
+          // override success and failure callbacks to re-enable the button
+          var orSuccessCallback = myself.successCallback;
+          myself.successCallback = function() {
+            myself.enable();
+            orSuccessCallback.apply(myself);
+          }
+
+          var orFailureCallback = myself.failureCallback;
+          myself.failureCallback = function() {
+            myself.enable();
+            orFailureCallback.apply(myself);
+          }
+
+          if(_.isFunction(myself.expression)) {
+            proceed = myself.expression.apply(myself, arguments);
+
+            // re-enable the button if there's no action associated.
+            // neither the successCallback nor the failureCallback will be called in this case
+            if (!myself.hasAction()) {
+              myself.enable();
+            }
+          }
+          else if (!myself.expression) {
+            if (!myself.hasAction()) {
+              myself.enable();
+            }
+          }
+
+          if(myself.hasAction() && !(proceed === false)) {
+            return myself.triggerAction.apply(myself);
+          }
     });
     if ( _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller"){
       b.button();
