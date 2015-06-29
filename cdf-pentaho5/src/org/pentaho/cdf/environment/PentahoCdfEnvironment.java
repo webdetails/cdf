@@ -12,7 +12,6 @@ import org.pentaho.cdf.environment.broker.ICdfInterPluginBroker;
 import org.pentaho.cdf.environment.broker.PentahoCdfInterPluginBroker;
 import org.pentaho.cdf.environment.configurations.IHibernateConfigurations;
 import org.pentaho.cdf.environment.configurations.PentahoHibernanteConfigurations;
-import org.pentaho.cdf.environment.factory.ICdfBeanFactory;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.paths.CdfApiPathProvider;
 import org.pentaho.cdf.environment.paths.ICdfApiPathProvider;
@@ -25,6 +24,7 @@ import org.pentaho.platform.util.messages.LocaleHelper;
 import pt.webdetails.cpf.PentahoPluginEnvironment;
 import pt.webdetails.cpf.PentahoUrlProvider;
 import pt.webdetails.cpf.Util;
+import pt.webdetails.cpf.bean.IBeanFactory;
 import pt.webdetails.cpf.context.api.IUrlProvider;
 import pt.webdetails.cpf.exceptions.InitializationException;
 import pt.webdetails.cpf.resources.IResourceLoader;
@@ -37,13 +37,13 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   private static final String SYSTEM_DIR = "system";
   private static final String PLUGIN = "plugin";
 
-  private ICdfBeanFactory factory;
+  private IBeanFactory factory;
   private IResourceLoader resourceLoader;
   private IHibernateConfigurations pentahoHibernateConfigurations;
   private ICdfApiPathProvider cdfApipathProvider;
   private ICdfHeadersProvider cdfHeadersProvider;
 
-  public void init( ICdfBeanFactory factory ) throws InitializationException {
+  public void init( IBeanFactory factory ) throws InitializationException {
     this.factory = factory;
 
     pentahoHibernateConfigurations = new PentahoHibernanteConfigurations();

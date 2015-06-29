@@ -5,10 +5,10 @@ package org.pentaho.cdf.environment;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pentaho.cdf.environment.factory.CoreBeanFactory;
-import org.pentaho.cdf.environment.factory.ICdfBeanFactory;
 
 import pt.webdetails.cpf.Util;
+import pt.webdetails.cpf.bean.IBeanFactory;
+import pt.webdetails.cpf.bean.AbstractBeanFactory;
 import pt.webdetails.cpf.exceptions.InitializationException;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.repository.api.IUserContentAccess;
@@ -62,7 +62,10 @@ public class CdfEngine {
   private static void initialize() throws InitializationException {
     if ( instance.environment == null ) {
 
-      ICdfBeanFactory factory = new CoreBeanFactory();
+      IBeanFactory factory = new AbstractBeanFactory(){
+        @Override
+        public String getSpringXMLFilename(){ return "cdf.spring.xml"; }
+      };
 
       // try to get the environment from the configuration
       // will return the DefaultEnvironment by default
@@ -76,12 +79,12 @@ public class CdfEngine {
     }
   }
 
-  protected synchronized ICdfEnvironment getConfiguredEnvironment( ICdfBeanFactory factory )
+  protected synchronized ICdfEnvironment getConfiguredEnvironment( IBeanFactory factory )
     throws InitializationException {
 
     String simpleName = ICdfEnvironment.class.getSimpleName();
 
-    Object obj = new CoreBeanFactory().getBean( simpleName );
+    Object obj = factory.getBean( simpleName );
 
     if ( obj != null && obj instanceof ICdfEnvironment ) {
       return (ICdfEnvironment) obj;

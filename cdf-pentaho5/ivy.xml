@@ -25,9 +25,6 @@
     <dependency org="javax.servlet"               name="servlet-api"                          rev="2.4"                                transitive="false"/>
     <dependency org="javax.ws.rs"                 name="javax.ws.rs-api"                      rev="2.0"                                transitive="false"/>
 
-    <dependency org="org.springframework" name="spring" rev="2.5.6" transitive="false"/>
-    <dependency org="org.springframework.security" name="spring-security-core" rev="2.0.5.RELEASE" transitive="false"/>
-
     <!--  pentaho dependencies -->
     <dependency org="pentaho"                     name="pentaho-platform-api"              rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
     <dependency org="pentaho"                     name="pentaho-platform-core"             rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
@@ -70,6 +67,7 @@
     <dependency org="junit"                     name="junit"                                  rev="4.10"                                                                                        conf="test, default->default"/>
     <dependency org="com.google.collections"    name="google-collections"                     rev="1.0"                                           transitive="false"                            conf="test, default->default"/>
 
+    <dependency org="org.springframework.security" name="spring-security-core" rev="2.0.5.RELEASE" conf="test->default" transitive="false"/>
 
     <!-- js dependencies to run tests -->
     <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
