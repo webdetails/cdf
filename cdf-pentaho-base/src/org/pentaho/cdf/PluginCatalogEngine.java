@@ -64,7 +64,7 @@ public class PluginCatalogEngine {
      */
     pluginPool = new Hashtable<String, String>();
 
-    /* xaction case is added manually because it doesnt need a plugin to be runnable */
+    /* xaction case is added manually because it doesn't need a plugin to be runnable */
     pluginPool.put( "xaction", "ViewAction?solution={solution}&path={path}&action={name}" );
 
     List<Plugin> installedPlugins = new PluginsAnalyzer().getInstalledPlugins();

@@ -242,12 +242,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     return null;
   }
 
-  // legacy resource feching support
+  // legacy resource fetching support
   public boolean isCdfResource() {
     return cdfResource;
   }
 
-  // legacy resource feching support
+  // legacy resource fetching support
   public void setCdfResource( boolean cdfResource ) {
     this.cdfResource = cdfResource;
   }
