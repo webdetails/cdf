@@ -38,10 +38,6 @@ import org.pentaho.platform.engine.security.SecurityHelper;
 
 import pt.webdetails.cpf.utils.PluginIOUtils;
 
-/**
- * 
- * @author diogomariano
- */
 @Path( "/pentaho-cdf/api/comments" )
 public class CommentsApi {
 
@@ -68,7 +64,7 @@ public class CommentsApi {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
       CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
-      logger.error( "Error while outputing result", ex );
+      logger.error( "Error while outputting result", ex );
     }
   }
 
@@ -109,7 +105,7 @@ public class CommentsApi {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
       CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
-      logger.error( "Error while outputing result", ex );
+      logger.error( "Error while outputting result", ex );
     }
   }
 
@@ -132,7 +128,7 @@ public class CommentsApi {
       try {
         PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), msg );
       } catch ( IOException ex ) {
-        logger.error( "Error while outputing result", ex );
+        logger.error( "Error while outputting result", ex );
       }
       return;
     }
@@ -148,7 +144,7 @@ public class CommentsApi {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
       CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
-      logger.error( "Error while outputing result", ex );
+      logger.error( "Error while outputting result", ex );
     }
   }
 
@@ -171,7 +167,7 @@ public class CommentsApi {
       try {
         PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), msg );
       } catch ( IOException ex ) {
-        logger.error( "Error while outputing result", ex );
+        logger.error( "Error while outputting result", ex );
       }
       return;
     }
@@ -187,7 +183,7 @@ public class CommentsApi {
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
       CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     } catch ( IOException ex ) {
-      logger.error( "Error while outputing result", ex );
+      logger.error( "Error while outputting result", ex );
     }
   }
 

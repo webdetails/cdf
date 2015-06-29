@@ -257,26 +257,22 @@ public class ContextEngine {
 
       String[] parsedPath = path.split( String.valueOf( RepositoryHelper.SEPARATOR ) );
 
-      if ( parsedPath != null ) {
+      if ( parsedPath.length == 0 ) {
 
-        if ( parsedPath.length == 0 ) {
+        contextObj.put( Parameter.SOLUTION, StringUtils.EMPTY ); // create solution ctx attribute
+        contextObj.put( Parameter.PATH, StringUtils.EMPTY ); // create path ctx attribute
 
-          contextObj.put( Parameter.SOLUTION, StringUtils.EMPTY ); // create solution ctx attribute
-          contextObj.put( Parameter.PATH, StringUtils.EMPTY ); // create path ctx attribute
+      } else if ( parsedPath.length == 1 ) {
 
-        } else if ( parsedPath.length == 1 ) {
+        contextObj.put( Parameter.SOLUTION, parsedPath[ 0 ] );  // create solution ctx attribute
+        contextObj.put( Parameter.PATH, StringUtils.EMPTY ); // create path ctx attribute
 
+      } else {
 
-          contextObj.put( Parameter.SOLUTION, parsedPath[ 0 ] );  // create solution ctx attribute
-          contextObj.put( Parameter.PATH, StringUtils.EMPTY ); // create path ctx attribute
-
-        } else {
-
-          contextObj.put( Parameter.SOLUTION, parsedPath[ 0 ] );  // create solution ctx attribute
-          path = path.replace( FilenameUtils.getName( parsedPath[ 0 ] ), StringUtils.EMPTY ); // remove and continue on
-          path = path.replaceFirst( String.valueOf( RepositoryHelper.SEPARATOR ), StringUtils.EMPTY );
-          contextObj.put( Parameter.PATH, path ); // create path ctx attribute
-        }
+        contextObj.put( Parameter.SOLUTION, parsedPath[ 0 ] );  // create solution ctx attribute
+        path = path.replace( FilenameUtils.getName( parsedPath[ 0 ] ), StringUtils.EMPTY ); // remove and continue on
+        path = path.replaceFirst( String.valueOf( RepositoryHelper.SEPARATOR ), StringUtils.EMPTY );
+        contextObj.put( Parameter.PATH, path ); // create path ctx attribute
       }
     }
 

@@ -13,21 +13,14 @@
 
 package org.pentaho.cdf;
 
+public class InvalidCdfOperationException extends Exception {
+  private static final long serialVersionUID = 1L;
 
-/**
- *
- * @author pedro
- */
-public class InvalidCdfOperationException extends Exception{
+  public InvalidCdfOperationException( Exception ex ) {
+    super( ex );
+  }
 
-    private static final long serialVersionUID = 1L;
-
-    public InvalidCdfOperationException(Exception ex) {
-        super(ex);
-    }
-
-    public InvalidCdfOperationException(String string) {
-        super(string);
-    }
-
+  public InvalidCdfOperationException( String string ) {
+    super( string );
+  }
 }

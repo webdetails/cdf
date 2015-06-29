@@ -31,10 +31,6 @@ import org.pentaho.cdf.utils.PluginHibernateUtil;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 
-/**
- * 
- * @author pedro
- */
 public class StorageEngine {
 
   private static final Log logger = LogFactory.getLog( StorageEngine.class );
@@ -58,7 +54,7 @@ public class StorageEngine {
       }
       return UNKNOWN;
     }
-  };
+  }
 
   public static synchronized StorageEngine getInstance() {
     if ( instance == null ) {

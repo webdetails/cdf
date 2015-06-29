@@ -31,18 +31,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.InvalidCdfOperationException;
 import org.pentaho.cdf.PluginHibernateException;
-import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
-/**
- * @author rmansoor
- */
 @Path( "/pentaho-cdf/api/storage" )
 public class StorageApi {
 
@@ -59,7 +54,7 @@ public class StorageApi {
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
     JSONObject json =
-      StorageEngine.getInstance().store( storageValue, StringUtils.isEmpty( user ) ? getUserName() : user );
+        StorageEngine.getInstance().store( storageValue, StringUtils.isEmpty( user ) ? getUserName() : user );
     CorsUtil.getInstance().setCorsHeaders( request, response );
     return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
       : Response.serverError().build();
