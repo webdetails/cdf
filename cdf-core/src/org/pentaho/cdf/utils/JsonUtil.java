@@ -70,11 +70,11 @@ public class JsonUtil {
   }
 
   public static JSONObject makeJsonSuccessResponse( Object payload ) throws JSONException {
-    if ( payload == null) {
+    if ( payload == null ) {
       return new JSONObject();
     }
     try {
-      if( payload instanceof String ){
+      if ( payload instanceof String ) {
         return new JSONObject( payload.toString() );
       }
       JSONObject json = new JSONObject();
@@ -95,5 +95,4 @@ public class JsonUtil {
     }
     return false;
   }
-
 }

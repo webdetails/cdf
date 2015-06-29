@@ -27,9 +27,6 @@ import org.pentaho.cdf.environment.ICdfEnvironment;
 
 import pt.webdetails.cpf.Util;
 
-/**
- * @author pedro
- */
 public class PluginHibernateUtil {
 
   private static final Log logger = LogFactory.getLog( PluginHibernateUtil.class );

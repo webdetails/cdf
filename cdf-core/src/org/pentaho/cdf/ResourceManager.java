@@ -23,9 +23,6 @@ import org.pentaho.cdf.environment.CdfEngine;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.resources.IResourceLoader;
 
-/**
- * User: pedro Date: Dec 22, 2009 Time: 4:55:59 PM
- */
 public class ResourceManager {
 
   public static ResourceManager instance;
@@ -70,7 +67,7 @@ public class ResourceManager {
     }
 
     IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
-    
+
     // Read file
     final InputStream in = systemAccess.getFileInputStream( path );
     final StringBuilder resource = new StringBuilder();
@@ -132,5 +129,4 @@ public class ResourceManager {
   public void cleanCache() {
     cacheContainer.clear();
   }
-
 }

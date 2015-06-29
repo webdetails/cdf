@@ -33,10 +33,6 @@ import org.pentaho.cdf.utils.PluginHibernateUtil;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 
-/**
- * 
- * @author pedro
- */
 public class CommentsEngine {
   private static final Log logger = LogFactory.getLog( CommentsEngine.class );
   private static CommentsEngine instance;
@@ -59,7 +55,7 @@ public class CommentsEngine {
       }
       return UNKNOWN;
     }
-  };
+  }
 
   private static final SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
 
@@ -110,7 +106,7 @@ public class CommentsEngine {
       logger.error( "Parameter 'page' is not optional" );
       throw new InvalidCdfOperationException( "Page cannot be null" );
     }
-    
+
     final String queryName;
 
     if ( isDeleted || isArchived ) {
@@ -171,7 +167,7 @@ public class CommentsEngine {
     if ( !isUser && !isAdmin ) {
       return JsonUtil.makeJsonErrorResponse( "Operation not authorized: not comment owner or administrator", false );
     }
-    
+
     // this switch-case does not need enum's full spectrum
     switch ( operation ) {
       case DELETE:
@@ -207,8 +203,8 @@ public class CommentsEngine {
 
   private void initialize() throws PluginHibernateException {
 
-    try {      
-      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+    try {
+      Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
 
       // Get comments hbm file
       IBasicFile commentsHbmFile =

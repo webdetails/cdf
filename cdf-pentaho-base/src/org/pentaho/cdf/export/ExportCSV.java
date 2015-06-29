@@ -16,70 +16,55 @@ package org.pentaho.cdf.export;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+
 import org.pentaho.cdf.Messages;
 
-@SuppressWarnings("serial")
-public class ExportCSV extends Export implements IExport
-{
+@SuppressWarnings( "serial" )
+public class ExportCSV extends Export implements IExport {
 
   private static final String extensionFile = ".csv";
 
-  public ExportCSV(final OutputStream out) throws IOException
-  {
-    super(out);
+  public ExportCSV( final OutputStream out ) throws IOException {
+    super( out );
   }
 
-  public void export(String[][] resultSet)
-  {
+  public void export( String[][] resultSet ) {
 
-    PrintWriter pw = new PrintWriter(outputStream);
+    PrintWriter pw = new PrintWriter( outputStream );
 
-    try
-    {
+    try {
 
-      for (int i = 0; i < resultSet.length; i++)
-      {
-        String[] vs = resultSet[i];
-        for (int j = 0; j < vs.length; j++)
-        {
-          String value = vs[j];
-          if (value == null)
-          {
+      for ( int i = 0; i < resultSet.length; i++ ) {
+        String[] vs = resultSet[ i ];
+        for ( int j = 0; j < vs.length; j++ ) {
+          String value = vs[ j ];
+          if ( value == null ) {
             break;
           }
           //pw.append(isDouble(value) ? new Double(value).toString(): vs[j]);
-          if (isDouble(value))
-          {
-            pw.append(new Double(value).toString());
+          if ( isDouble( value ) ) {
+            pw.append( new Double( value ).toString() );
+          } else {
+            String aux = value.replaceAll( "\"", "\\\\\"" );
+            pw.append( '\"' + aux + '\"' );
           }
-          else
-          {
-            String aux = value.replaceAll("\"", "\\\\\"");
-            pw.append('\"' + aux + '\"');
-          }
-          if (j + 1 < vs.length)
-          {
-            pw.append(',');
+          if ( j + 1 < vs.length ) {
+            pw.append( ',' );
           }
         }
-        pw.append('\n');
+        pw.append( '\n' );
       }
 
       pw.flush();
 
-    }
-    catch (Exception e)
-    {
-      logger.error(Messages.getErrorString("CdfExportCSV.ERROR_0001_BUILDING_CSV"));
-    }
-    finally
-    {
+    } catch ( Exception e ) {
+      logger.error( Messages.getErrorString( "CdfExportCSV.ERROR_0001_BUILDING_CSV" ) );
+    } finally {
       pw.close();
     }
   }
 
-  public String getExtension()
-  {
+  public String getExtension() {
     return extensionFile;
   }
 }

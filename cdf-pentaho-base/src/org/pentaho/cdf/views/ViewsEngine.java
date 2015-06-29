@@ -56,11 +56,11 @@ public class ViewsEngine {
         return UNKNOWN;
       }
     }
-  };
+  }
 
   protected ViewsEngine() {
     // initialize orientDb and initialize org.pentaho.cdf.views.View
-    IPersistenceEngine pe = null;
+    IPersistenceEngine pe;
     try {
       pe = getPersistenceEngine();
       if ( pe != null && !pe.classExists( View.class.getName() ) ) {
@@ -105,7 +105,7 @@ public class ViewsEngine {
       filter.where( "name" ).equalTo( name ).and().where( "user" ).equalTo( user );
       List<View> views = sp.load( View.class, filter );
 
-      if( views != null && views.size() > 0 ) {
+      if ( views != null && views.size() > 0 ) {
         return JsonUtil.makeJsonSuccessResponse( views.get( 0 ).toJSON() );
       } else {
         return JsonUtil.makeJsonErrorResponse( "Error, no view found with name '" + name + "'", true );
