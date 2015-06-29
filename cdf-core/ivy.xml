@@ -31,10 +31,6 @@
     <dependency org="dom4j"                         name="dom4j"                  rev="1.6.1"                       transitive="false"/>
     <dependency org="commons-lang"                  name="commons-lang"           rev="2.2"                         transitive="false"/>
     <dependency org="org.json"                      name="json"                   rev="${dependency.json.revision}" transitive="false"/>
-    <dependency org="org.springframework"           name="spring-core"            rev="3.0.3.RELEASE"               transitive="false"/>
-    <dependency org="org.springframework"           name="spring-beans"           rev="3.0.3.RELEASE"               transitive="false"/>
-    <dependency org="org.springframework.security"  name="spring-security-core"   rev="3.0.3.RELEASE"               transitive="false"/>
-    <dependency org="org.springframework"           name="spring-context"         rev="3.0.3.RELEASE"               transitive="false"/>
     <dependency org="org.hibernate"                 name="hibernate"              rev="3.2.6.ga"                    transitive="false">
       <!--
 
