@@ -16,10 +16,6 @@ package org.pentaho.cdf.storage;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * 
- * @author pedro
- */
 public class StorageEntry implements Serializable {
 
   private static final long serialVersionUID = 1680873222553900520L;
@@ -77,7 +73,7 @@ public class StorageEntry implements Serializable {
   }
 
   /**
-   * @param storage
+   * @param storageValue
    *          the storage to set
    */
   public void setStorageValue( String storageValue ) {
@@ -92,7 +88,7 @@ public class StorageEntry implements Serializable {
   }
 
   /**
-   * @param createdDate
+   * @param lastUpdatedDate
    *          the createdDate to set
    */
   public void setLastUpdatedDate( Date lastUpdatedDate ) {
