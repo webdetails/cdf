@@ -12,15 +12,26 @@
  */
 
 define(function() {
-  function VizController(id) {
-    this.id = id;
+  function VisualWrapper(createOptions) {
+    this.domElement = createOptions && createOptions.domElement;
   }
-	
-  VizController.prototype.setDomNode = function(p1) {};
-  VizController.prototype.setDataTable = function(p1) {};
-  VizController.prototype.setVisualization = function(p1, p2, ready) {
-	  setTimeout(ready, 0);
+
+  VisualWrapper.prototype.update = function(drawOptions) {
+    var _callback, done = false;
+
+	  setTimeout(function() {
+      done = true;
+      if(_callback) _callback();
+    }, 0);
+
+    return {
+      then: function(callback) {
+        _callback = callback;
+
+        if(done && _callback) _callback();
+      }
+    }
   };
   
-  return VizController;
+  return VisualWrapper;
 });

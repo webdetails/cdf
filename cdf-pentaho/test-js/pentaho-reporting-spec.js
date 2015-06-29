@@ -24,7 +24,7 @@ describe("The prpt Component #", function() {
   myDashboard.addParameter( 'funcArray', function() { return  optionData.funcArray; } );
   myDashboard.addParameter( 'array', optionData.array );
 
-  var prptComponent = window.PrptComponent = new PrptComponent();
+  var prptComponent = new PrptComponent();
   $.extend(prptComponent, {
     name: "prptComponent",
     type: "prpt",

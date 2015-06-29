@@ -25,18 +25,31 @@ describe("The VisualizationAPI Component #", function() {
 
   // -----
 
-  function VizController(id) {
-    this.id = id;
+  function VisualWrapper(createOptions) {
+    this.domElement = createOptions && createOptions.domElement;
   }
 
-  VizController.prototype.setDomNode = function(p1) {};
-  VizController.prototype.setDataTable = function(p1) {};
-  VizController.prototype.setVisualization = function(p1, p2) {};
+  VisualWrapper.prototype.update = function(drawOptions) {
+    var _callback, done = false;
+
+    setTimeout(function() {
+      done = true;
+      if(_callback) _callback();
+    }, 0);
+
+    return {
+      then: function(callback) {
+        _callback = callback;
+
+        if(done && _callback) _callback();
+      }
+    }
+  };
 
   // -----
 
-  var sampleViz = {id: "sampleViz"};
-  var vizTypeRegistry = {get: function() { return sampleViz; }};
+  var sampleVisual = {id: "sampleVisual"};
+  var visualTypeRegistry = {get: function() { return sampleVisual; }};
 
   // -----
 
@@ -49,7 +62,7 @@ describe("The VisualizationAPI Component #", function() {
   $.extend(visualizationAPIComponent, {
     name: "visualizationAPIComponent",
     type: "visualizationAPI",
-    vizId: "sampleViz",
+    vizId: "sampleVisual",
     vizOptions: [["param1", "optionParameter"]],
     htmlObject: 'visualizationAPIComponent',
     queryDefinition: {
@@ -65,9 +78,9 @@ describe("The VisualizationAPI Component #", function() {
   visualizationAPIComponent.__require = function(deps, callback) {
     var mods = deps.map(function(dep) {
       switch(dep) {
-        case "common-ui/vizapi/data/DataTable": return DataTable;
-        case "common-ui/vizapi/VizController": return VizController;
-        case "common-ui/vizapi/vizTypeRegistry": return vizTypeRegistry;
+        case "pentaho/visual/data/DataTable": return DataTable;
+        case "pentaho/visual/Wrapper": return VisualWrapper;
+        case "pentaho/visual/type/registry": return visualTypeRegistry;
       }
     });
 
@@ -144,9 +157,7 @@ describe("The VisualizationAPI Component #", function() {
       options.success({resultset: "queryResults"});
     });
     spyOn(visualizationAPIComponent, 'render').and.callThrough();
-    spyOn(visualizationAPIComponent, 'getVizType' ).and.callThrough();
-    spyOn(visualizationAPIComponent, 'getVizOptions' );
-    spyOn(visualizationAPIComponent, 'createGoogleDataTable' );
+    spyOn(visualizationAPIComponent, 'getVisualSpec').and.callThrough();
 
     visualizationAPIComponent.update();
     setTimeout(function() {
@@ -154,9 +165,7 @@ describe("The VisualizationAPI Component #", function() {
       expect(visualizationAPIComponent.triggerQuery).toHaveBeenCalled();
       expect(visualizationAPIComponent.render).toHaveBeenCalledWith({ resultset : 'queryResults' });
 
-      expect(visualizationAPIComponent.getVizType).toHaveBeenCalled();
-      expect(visualizationAPIComponent.getVizOptions).toHaveBeenCalled();
-      expect(visualizationAPIComponent.createGoogleDataTable).toHaveBeenCalledWith( {resultset: 'queryResults'} );
+      expect(visualizationAPIComponent.getVisualSpec).toHaveBeenCalled();
       done();
     }, 100);
   });

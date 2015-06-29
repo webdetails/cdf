@@ -25,6 +25,7 @@
   requireCfg.baseUrl = '/base';
 
   requireCfg.paths["common-ui"] = "test-js/mocks/common-ui";
+  requireCfg.paths["pentaho/visual"] = "test-js/mocks/common-ui/vizapi";
   
   require.config(requireCfg);
 

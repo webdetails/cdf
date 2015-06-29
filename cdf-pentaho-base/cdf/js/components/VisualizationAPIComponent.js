@@ -12,18 +12,18 @@
  */
 
 var VisualizationAPIComponent = (function() {
-  var DataTable, VizController, vizTypeRegistry;
+  var VisualWrapper;
 
   return UnmanagedComponent.extend({
 
     // Unit tests support.
-    __require: require,
+    __require: (typeof require !== "undefined" ? require : null),
     __reset: function() {
-      DataTable = VizController = vizTypeRegistry = null;
+      VisualWrapper = null;
     },
 
     update: function() {
-      if(!vizTypeRegistry)
+      if(!VisualWrapper)
         this._requireFilesAndUpdate();
       else
         this._updateCore();
@@ -32,14 +32,8 @@ var VisualizationAPIComponent = (function() {
     _requireFilesAndUpdate: function() {
       // Not caring about preExec()...
       var me = this;
-      me.__require([
-        "common-ui/vizapi/data/DataTable",
-        "common-ui/vizapi/VizController",
-        "common-ui/vizapi/vizTypeRegistry",
-      ], function(_DataTable_, _VizController_, _vizTypeRegistry_) {
-        DataTable = _DataTable_;
-        VizController = _VizController_;
-        vizTypeRegistry = _vizTypeRegistry_;
+      me.__require(["pentaho/visual/Wrapper"], function(_VisualWrapper_) {
+        VisualWrapper = _VisualWrapper_;
         
         me._updateCore();
       });
@@ -51,34 +45,25 @@ var VisualizationAPIComponent = (function() {
     },
   
     render: function(data) {
-      var vizDiv = this.placeholder()[0];
-      var visualization = this.getVizType();
-      var vizOptions = this.getVizOptions();
-      var gDataTable = this.createGoogleDataTable(data);
-  
-      var controller = new VizController(0);
-      controller.setDomNode(vizDiv);
-      controller.setDataTable(gDataTable);
-      controller.setVisualization(visualization, vizOptions);
+      var domElem = this.placeholder()[0];
+      var wrapper = new VisualWrapper(domElem, /*containerTypeId:*/"cdf");
+      wrapper.data = data;
+      wrapper.visualSpec = this.getVisualSpec();
+      wrapper.update();
       // execution is ended immediately afterwards, although in practice,
-      // the VizAPI will not render synchronously. 
+      // the VisualizationAPI will not render synchronously.
     },
 
-    getVizOptions: function() {
-      var options = {};
+    getVisualSpec: function() {
+      var visualSpec = {};
       $.each(this.vizOptions, function(i, v) {
         var key = v[0], value = Dashboards.getParameterValue(v[1]);
-        options[key] = value;
+        visualSpec[key] = value;
       });
-      return options;
-    },
 
-    getVizType: function() {
-      return vizTypeRegistry.get(this.vizId);
-    },
-  
-    createGoogleDataTable: function(resultJson) {
-      return new DataTable(resultJson);
+      visualSpec.type = this.vizId;
+
+      return visualSpec;
     }
   });
 }());
