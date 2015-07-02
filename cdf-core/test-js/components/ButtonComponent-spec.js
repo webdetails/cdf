@@ -160,7 +160,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/ButtonComponent", "cdf/lib/jquery
     });
 
 
-    it("re-enables the button in error case after executing the action", function() {
+    it("re-enables the button in error case after executing the action", function(done) {
       
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentAct = buttonComponent.extend({
