@@ -103,7 +103,8 @@ define([
         },
         renderCollapse: function(viewModel) {
           if (viewModel.isDisabled === true) {
-            this.$('.filter-root-container').toggleClass('expanded', false).toggleClass('collapsed', true).toggleClass('alwaysExpanded', false);
+            var expand = (viewModel.alwaysExpanded === true); // we might want to start off the component as always-expanded
+            this.$('.filter-root-container').toggleClass('expanded', expand).toggleClass('collapsed', !expand).toggleClass('always-expanded', expand);
           } else if (viewModel.alwaysExpanded === true) {
             this.$('.filter-root-container').toggleClass('expanded', false).toggleClass('collapsed', false).toggleClass('always-expanded', true);
           } else if (viewModel.isCollapsed === true) {
