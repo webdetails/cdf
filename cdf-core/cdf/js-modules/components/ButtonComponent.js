@@ -21,6 +21,21 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
 
     render: function() {
       var myself = this;
+
+      // store the original success and failure callback functions and
+      // set a new function to re-enable the button and call the original function
+      var orSuccessCallback = myself.successCallback;
+      myself.successCallback = function() {
+        myself.enable();
+        orSuccessCallback.apply(myself);
+      }
+
+      var orFailureCallback = myself.failureCallback;
+      myself.failureCallback = function() {
+        myself.enable();
+        orFailureCallback.apply(myself);
+      }
+
       var b = $("<button type='button'/>")
         .addClass('buttonComponent')
         .addClass('enabled')
@@ -31,19 +46,6 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
 
           // disable button to prevent unwanted presses
           myself.disable();
-          
-          // override success and failure callbacks to re-enable the button
-          var orSuccessCallback = myself.successCallback;
-          myself.successCallback = function() {
-            myself.enable();
-            orSuccessCallback.apply(myself);
-          }
-
-          var orFailureCallback = myself.failureCallback;
-          myself.failureCallback = function() {
-            myself.enable();
-            orFailureCallback.apply(myself);
-          }
 
           if(_.isFunction(myself.expression)) {
             proceed = myself.expression.apply(myself, arguments);
