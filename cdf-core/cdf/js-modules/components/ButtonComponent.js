@@ -21,19 +21,26 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
 
     render: function() {
       var myself = this;
-
+      
       // store the original success and failure callback functions and
       // set a new function to re-enable the button and call the original function
-      var orSuccessCallback = myself.successCallback;
-      myself.successCallback = function() {
-        myself.enable();
-        orSuccessCallback.apply(myself);
+      if(typeof myself.successCallback === 'function') {
+        var orSuccessCallback = myself.successCallback;
+        myself.successCallback = function() {
+          myself.enable();
+          orSuccessCallback.apply(myself);
+        };
+      } else {
+        myself.successCallback = function() { myself.enable(); };
       }
-
-      var orFailureCallback = myself.failureCallback;
-      myself.failureCallback = function() {
-        myself.enable();
-        orFailureCallback.apply(myself);
+      if(typeof myself.failureCallback === 'function') {
+        var orFailureCallback = myself.failureCallback;
+        myself.failureCallback = function() {
+          myself.enable();
+          orFailureCallback.apply(myself);
+        };
+      } else {
+        myself.failureCallback = function() { myself.enable(); };
       }
 
       var b = $("<button type='button'/>")
