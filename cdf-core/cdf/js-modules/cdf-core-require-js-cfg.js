@@ -21,7 +21,9 @@
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   var prefix;
-  if(typeof KARMA_RUN !== "undefined") { // unit tests
+  if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" &&  ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
+    prefix = requirePaths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
+  } else if(typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf'] = 'bin/test-js/cdf/js';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
 
