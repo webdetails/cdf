@@ -66,7 +66,7 @@ define([
     registerQuery: function(type, query) {
       var BaseQuery = this.getBaseQuery();
 
-      // Goes a level deeper one extending these properties. Usefull to preserve defaults and
+      // Goes a level deeper one extending these properties. Useful to preserve defaults and
       // options interfaces from BaseQuery.
       if(!_.isFunction(query) && _.isObject(query)) {
         var deepProperties = {};
@@ -120,7 +120,7 @@ define([
     },
 
     /**
-     * Given a type and options, returns the query object for runnning that particular query
+     * Given a type and options, returns the query object for running that particular query
      *
      * @method getQuery
      * @param type Query type

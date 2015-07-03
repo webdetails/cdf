@@ -47,8 +47,8 @@ define([
      *
      * @method _isParameterInModel
      * @for Dashboard
-     * @param name the parameter name
-     * @param model the parameter location to check
+     * @param o the parameter name
+     * @param path the parameter location to check
      * @returns boolean
      * @private
      */
@@ -333,7 +333,7 @@ define([
        */
       if(slaveChain && masterChain) {
         if(masterChain != slaveChain) {
-          args = slaveChain.slice();
+          var args = slaveChain.slice();
           args.unshift(0);
           args.unshift(masterChain.length);
           [].splice.apply(masterChain, args);

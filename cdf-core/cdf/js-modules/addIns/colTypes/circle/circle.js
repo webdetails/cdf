@@ -37,7 +37,7 @@ define([
         w,
         paper;
 
-      for(key in opt) if(opt.hasOwnProperty(key)) {
+      for(var key in opt) if(opt.hasOwnProperty(key)) {
         op = opt[key];
         options[key] = typeof op == 'function' ?
           op.call(this, st, opt) :

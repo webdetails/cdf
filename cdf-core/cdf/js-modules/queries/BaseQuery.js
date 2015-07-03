@@ -128,7 +128,7 @@
      * Gets the success handler for the query, given a callback to call
      *
      * @method getSuccessHandler
-     * @param callback Callback to cal after the query is successful
+     * @param callback Callback to call after the query is successful
      * @returns Success handler
      *
      */
@@ -146,7 +146,7 @@
     * Gets the error handler for the query, given a callback to call
     *
     * @method getErrorHandler
-    * @param callback Callback to cal if the query fails
+    * @param callback Callback to call if the query fails
     * @returns Error handler
     */
     getErrorHandler: function(callback) {

@@ -51,8 +51,7 @@ define([
           for(var p in chartDef) {
             var m = /^barLine(.*)$/.exec(p);
             if(m) {
-              p2 = 'secondAxis' + (m[1] || '');
-              chartDef[p2] = chartDef[p];
+              chartDef['secondAxis' + (m[1] || '')] = chartDef[p];
               delete chartDef[p];
             }
           }
