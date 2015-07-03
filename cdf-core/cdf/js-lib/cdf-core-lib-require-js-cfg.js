@@ -41,7 +41,9 @@
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   var prefix = "";
-  if(typeof KARMA_RUN !== "undefined") { // unit tests
+  if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" && ENVIRONMENT_CONFIG.paths["cdf/lib"] !== "undefined") { // environment is configured, checking
+    prefix = requirePaths['cdf/lib'] = ENVIRONMENT_CONFIG.paths["cdf/lib"];
+  } else if(typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf/lib'] = 'bin/test-js/cdf/js/lib';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
 
