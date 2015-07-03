@@ -88,7 +88,7 @@ define([
      * Hides the progress indicator. Optionally, resets the running calls counter
      *
      * @method hideProgressIndicator
-     * @param {Boolean} _true_ if the running calls counter should be reset, _false_ otherwise
+     * @param {Boolean} force _true_ if the running calls counter should be reset, _false_ otherwise
      * @for Dashboard
      */
     hideProgressIndicator: function(force) {

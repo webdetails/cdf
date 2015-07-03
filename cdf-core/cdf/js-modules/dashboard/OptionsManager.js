@@ -11,7 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _, $) {
+define([
+  './Utils',
+  'amd!../lib/underscore',
+  '../lib/jquery'
+], function(Utils, _, $) {
 
   // Shared / Static
   function get(container, opt, attr, defaultValue) {
@@ -113,11 +117,11 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
       _.each(interfaces, function(el,key) {
         setInterfaces(key, el);
       });
-      _.each( defaults, function(el, key) {
+      _.each(defaults, function(el, key) {
         var ifaces = (interfaces && interfaces[key]) || {};
         setInterfaces(key, ifaces);
         setValue(key, el);
-      })
+      });
     };
 
     /**
@@ -171,7 +175,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
       setReader(opt, interfaces['reader']);
       setWriter(opt, interfaces['writer']);
       setValidator(opt, interfaces['validator']);
-    };
+    }
 
     /**
      * Gets the reader for an option
@@ -181,9 +185,9 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
      *
      * @private
      */
-    function getReader(opt) { 
-      return get( myself._interfaces, opt, 'reader', myself._libraries.mappers['identity'] 
-    )};
+    function getReader(opt) {
+      return get(myself._interfaces, opt, 'reader', myself._libraries.mappers['identity']);
+    }
 
     /**
      * Gets the writer for an option
@@ -195,8 +199,8 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
      */
 
     function getWriter(opt) {
-      return get( myself._interfaces, opt, 'writer', myself._libraries.mappers['identity'] 
-    )};
+      return get(myself._interfaces, opt, 'writer', myself._libraries.mappers['identity']);
+    }
 
     /**
      * Gets the validator for an option
@@ -206,9 +210,9 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
      *
      * @private
      */
-    function getValidator(opt) { 
-      return get( myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology'] 
-    )};
+    function getValidator(opt) {
+      return get(myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology']);
+    }
 
     /**
      * Gets the value for an option
@@ -218,12 +222,12 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
      *
      * @private
      */
-    function getValue(opt) { return get(myself._options, opt, 'value'); };
+    function getValue(opt) { return get(myself._options, opt, 'value'); }
     
     // Reader, Writer and Validator work in the same way:
     // If the value is a function, use it. 
     // Otherwise, if it is a string and a valid library key, use it.
-    // Otherwise, use a default library function: for readers and writers an indentity map, 
+    // Otherwise, use a default library function: for readers and writers an identity map,
     //  for validators a predicate that always returns true.
 
     /**
@@ -240,7 +244,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
       var lib = myself._libraries.mappers;
       fn = (_.isFunction(fn) && fn) || (_.isString(fn) && lib[fn]) || getReader(opt) || lib['identity'];
       return set(myself._interfaces , opt, 'reader', fn);
-    };
+    }
 
     /**
      * Set a writer function for an option. If the value is a function, use it.
@@ -252,11 +256,11 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
      * @param fn Writer to set
      * @private
      */
-    function setWriter(opt, fn) { 
+    function setWriter(opt, fn) {
       var lib = myself._libraries.mappers;
       fn = (_.isFunction(fn) && fn) || (_.isString(fn) && lib[fn]) || getWriter(opt) || lib['identity'];
       return set(myself._interfaces, opt, 'writer', fn);
-    };
+    }
 
     /**
      * Set a validator function for an option. If the value is a function, use it.
@@ -272,7 +276,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
       var lib = myself._libraries.predicates;
       fn = (_.isFunction(fn) && fn) || (_.isString(fn) && lib[fn]) || getValidator(opt) || lib['tautology'];
       return set(myself._interfaces, opt, 'validator', fn);
-    };
+    }
 
     /**
      * Sets the value for the option
@@ -282,7 +286,7 @@ define(['./Utils', 'amd!../lib/underscore', '../lib/jquery'], function(Utils, _,
      * @param value Value to set
      * @private
      */
-    function setValue(opt, value) { return set(myself._options, opt, 'value', value); };
+    function setValue(opt, value) { return set(myself._options, opt, 'value', value); }
 
     // Init
     this.init( config.defaults, config.interfaces, config.libraries);
