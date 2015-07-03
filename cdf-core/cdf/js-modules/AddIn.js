@@ -74,7 +74,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
      */
     this.getLabel = function() {
       return _label;
-    }
+    };
 
 
     /**
@@ -85,7 +85,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
      */
     this.getName = function() {
       return _name;
-    }
+    };
     
     /**
      * Call the AddIn. If the AddIn is static, all parameters are
