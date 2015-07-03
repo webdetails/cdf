@@ -63,7 +63,7 @@ define([
             if($.inArray(data[i].trim(), opt.trim.values) !=- 1) {
               data.splice(i, 1);
             }
-          };
+          }
 
         }
         if(opt.trim.type=="both"||opt.trim.type=="left") {
@@ -71,7 +71,7 @@ define([
             if($.inArray(data[i].trim(), opt.trim.values) !=- 1) {
               data.splice(i, 1);
             }
-          };
+          }
         }
       }
       

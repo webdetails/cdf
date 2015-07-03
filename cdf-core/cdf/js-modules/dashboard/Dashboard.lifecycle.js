@@ -578,7 +578,7 @@ define([
      * Updates a specific component
      *
      * @method updateComponent
-     * @param component component to update
+     * @param object component to update
      *
      * @for Dashboard
      */

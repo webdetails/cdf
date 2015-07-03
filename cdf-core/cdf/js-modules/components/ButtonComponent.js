@@ -49,31 +49,31 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
         .text(typeof myself.label === 'function' ? myself.label() : myself.label)
         .unbind("click")
         .bind("click", function() {
-          var proceed = true;
 
-          // disable button to prevent unwanted presses
-          myself.disable();
+        var proceed = true;
 
-          if(_.isFunction(myself.expression)) {
-            proceed = myself.expression.apply(myself, arguments);
+        // disable button to prevent unwanted presses
+        myself.disable();
 
-            // re-enable the button if there's no action associated.
-            // neither the successCallback nor the failureCallback will be called in this case
-            if (!myself.hasAction()) {
-              myself.enable();
-            }
+        if(_.isFunction(myself.expression)) {
+          proceed = myself.expression.apply(myself, arguments);
+
+          // re-enable the button if there's no action associated.
+          // neither the successCallback nor the failureCallback will be called in this case
+          if(!myself.hasAction()) {
+            myself.enable();
           }
-          else if (!myself.expression) {
-            if (!myself.hasAction()) {
-              myself.enable();
-            }
+        } else if(!myself.expression) {
+          if(!myself.hasAction()) {
+            myself.enable();
           }
+        }
 
-          if(myself.hasAction() && !(proceed === false)) {
-            return myself.triggerAction.apply(myself);
-          }
+        if(myself.hasAction() && !(proceed === false)) {
+          return myself.triggerAction.apply(myself);
+        }
+      });
 
-        });        
       if(_.isUndefined(myself.buttonStyle) || myself.buttonStyle === "themeroller") {
         b.button();
       }
