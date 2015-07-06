@@ -11,16 +11,19 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./ToggleButtonBaseComponent', '../lib/jquery'], function(ToggleButtonBaseComponent, $) {
+define([
+  './ToggleButtonBaseComponent',
+  '../lib/jquery'
+], function(ToggleButtonBaseComponent, $) {
 
   var RadioComponent = ToggleButtonBaseComponent.extend({
-  getValue : function() {
-    if(this.currentVal != 'undefined' && this.currentVal != null) {
-      return this.currentVal;
-    } else {
-      return this.placeholder("."+this.name+":checked").val();
+    getValue: function() {
+      if(this.currentVal != 'undefined' && this.currentVal != null) {
+        return this.currentVal;
+      } else {
+        return this.placeholder("." + this.name + ":checked").val();
+      }
     }
-  }
   });
 
   return RadioComponent;

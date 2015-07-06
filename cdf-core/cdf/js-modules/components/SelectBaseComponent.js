@@ -19,8 +19,8 @@ define([
   '../dashboard/Utils',
   'amd!../lib/jquery.chosen',
   'amd!../lib/jquery.multiselect',
-  'amd!../lib/jquery.select2'],
-  function(InputBaseComponent, Logger, $, _, Utils) {
+  'amd!../lib/jquery.select2'
+], function(InputBaseComponent, Logger, $, _, Utils) {
 
   var SelectBaseComponent = InputBaseComponent.extend({
     visible: false,
@@ -54,7 +54,7 @@ define([
       var size = this._getListSize(myArray);
       if(size != null) {
         selectHTML += " size='" + size + "'";
-        if (myArray.length > size) {
+        if(myArray.length > size) {
           // PRD-5443
           selectHTML += " style='overflow-y: scroll;' "
         }
@@ -114,7 +114,7 @@ define([
        * If defaultIfEmpty is true, the first possible value is selected,
        * otherwise, nothing is selected.
        */
-      var isEmpty    = currentVals == null;
+      var isEmpty = currentVals == null;
       var hasChanged = !currentIsValid;
       if(isEmpty && this.defaultIfEmpty && firstVal != null) {
         // Won't remain empty
@@ -187,7 +187,7 @@ define([
      */
     _getPlaceholderText: function() {
       var txt = this.placeholderText;
-      return ( _.isString(txt) && !_.isEmpty(txt) && txt ) || false;
+      return (_.isString(txt) && !_.isEmpty(txt) && txt) || false;
     },
 
     /**
@@ -237,7 +237,7 @@ define([
         if(dash) {
         var currValue = me.getValue();
           if(!Utils.equalValues(prevValue, currValue)) {
-          prevValue = currValue;
+            prevValue = currValue;
             dash.processChange(me.name);
           }
         }
