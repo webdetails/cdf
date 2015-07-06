@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStreetMap'],
-  function(BaseComponent, $, OpenLayers) {
+define([
+  './BaseComponent',
+  '../lib/jquery',
+  '../lib/OpenLayers',
+  '../lib/OpenStreetMap'
+], function(BaseComponent, $, OpenLayers) {
 
   var MapBaseComponent = BaseComponent.extend({
 
@@ -50,7 +54,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     },
 
     /** 
-     * Constructs and sets some inital values and calls show_map.
+     * Constructs and sets some initial values and calls show_map.
      *
      * @param {String} div the id of the div that contains the map
      * @param {Float} lon The longitude coordinate.
@@ -125,11 +129,11 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
             displayOutsideMaxExtent: true
           }
         );
-        // add the OpenStreetMap layer to the map          
+        // add the OpenStreetMap layer to the map
         map.addLayer(layer);
       }
 
-      // add a layer for the markers                                             
+      // add a layer for the markers
       markers = new OpenLayers.Layer.Markers("Markers");
       map.addLayer(markers);
       
@@ -139,7 +143,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       this.map = map;
     },
 
-    /** 
+    /**
      * Adds a new marker - Not implemented.
      */
     add_marker: function(point, icon) {},
@@ -149,12 +153,12 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
      */
     delete_marker: function(old_marker) {},
 
-    /** 
+    /**
      * Change the marker Icon - Not implemented.
      */
     change_marker: function(old_marker, new_icon) {},
 
-    /** 
+    /**
      * Shows a popup bubble with the html content provided
      *
      * @param {String} html the popup html content
@@ -176,17 +180,17 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       popup.setContentHTML(html);
       markers.map.addPopup(popup);
 
-      this.popup = popup; 
+      this.popup = popup;
     },
 
-    /** 
+    /**
      * Shows the mouse pointer coordinates when hovering over the map
      */
     show_positon: function() {
       this.map.addControl(new OpenLayers.Control.MousePosition());
     },
 
-    /** 
+    /**
      * Add the layer control to the map
      */
     show_layers: function() {
@@ -462,7 +466,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     }
 
   });
-  
+
   return MapBaseComponent;
-    
+
 });
