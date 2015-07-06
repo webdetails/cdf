@@ -508,7 +508,7 @@ define([
          * Abstract the origin of the data used to populate the component.
          * Precedence order for importing data: query -> parameter -> valuesArray
          * @method getData
-         * @return {Promise} Returns promise that is fullfilled when the data is available
+         * @return {Promise} Returns promise that is fulfilled when the data is available
          */
         getData: function() {
           var dataCallback, deferred, inputParameterValue, queryOptions, that;
