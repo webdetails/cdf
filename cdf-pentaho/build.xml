@@ -615,5 +615,10 @@
     <replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />
 
   </target>
+  
+  
+  <!-- Disabling publish for 4.8 codeline -->
+    <target name="publish" depends="dist, dist-source">
+  </target>
 
 </project>
