@@ -311,6 +311,12 @@ define([
       }
       cd["tableId"] = this.htmlObject + "Table";
 
+      // make sure we have no expand parameters set
+      var myself = this;
+      $(this.expandParameters).each(function f(i, elt) {
+        myself.dashboard.setParameter(elt[1], "");
+      });
+
       // Clear previous table
       this.ph = $("#" + this.htmlObject).empty();
       // remove drawCallback from the parameters, or
