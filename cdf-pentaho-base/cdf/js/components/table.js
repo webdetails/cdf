@@ -292,6 +292,11 @@ var TableComponent = UnmanagedComponent.extend({
     }
     cd["tableId"] = this.htmlObject + "Table";
 
+    // make sure we have no expand parameters set
+    $(this.expandParameters).each(function f(i, elt) {
+      Dashboards.setParameter(elt[1], "");
+    });
+
     // Clear previous table
     this.ph = $("#"+this.htmlObject).empty();
     // remove drawCallback from the parameters, or
