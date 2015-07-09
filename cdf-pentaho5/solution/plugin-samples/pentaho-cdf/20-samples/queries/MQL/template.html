@@ -1,0 +1,57 @@
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>MQL query sample</h2>
+
+    <h3>Description</h3>
+    <p>Uses a Table component to execute a MQL query.</p>
+
+    <h3>Query result</h3>
+    
+    <table style="border: 1px solid #000;">
+      <tbody><tr><td>
+        <div id="sampleObject"></div>
+        <div id="sampleObjectResult"></div>
+      </td></tr></tbody>
+    </table>
+
+    <script language="javascript" type="text/javascript">
+
+      var executeTableComponent = {
+        type: "TableComponent",
+        name: "render_mqlTable",
+        priority: 5,
+        htmlObject: "sampleObject",
+        listeners: [],
+        parameters: [],
+        executeAtStart: true,
+        extraOptions: [],
+        expandParameters: [],
+        expandOnClick: false,
+        chartDefinition:  {
+          dataAccessId: "mqlQuery",
+          path: "/public/plugin-samples/pentaho-cdf/20-samples/queries/MQL/mqlDash.cda",
+          colHeaders: ["BC_ORDERS_ORDENATE","BC_ORDERS_ORDERNUMBER"],
+          colTypes: ["string","numeric"],
+          colFormats: [],
+          colWidths: [],
+          colSortable: [],
+          colSearchable: [],
+          paginate: true,
+          paginateServerside: false,
+          paginationType: "simple_numbers",
+          filter: true,
+          info: true,
+          sort: true,
+          sortBy: [],
+          lengthChange: true,
+          tableStyle: "bootstrap"
+        }
+      };
+
+      Dashboards.init([executeTableComponent]);
+      Dashboards.finishedInit = false;
+    </script>
+  </div>
+</div>
