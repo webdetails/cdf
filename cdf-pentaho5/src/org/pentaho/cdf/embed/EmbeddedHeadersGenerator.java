@@ -31,7 +31,6 @@ public class EmbeddedHeadersGenerator {
   private final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
       + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n\n";
 
-  private final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-lib-require-js-cfg.js";
   private final String CDF_PATH = "content/pentaho-cdf/js/cdf-require-js-cfg.js";
 
   private final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
@@ -80,8 +79,6 @@ public class EmbeddedHeadersGenerator {
         .append( "// injecting document writes to append the cdf require files\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
           + fullyQualifiedURL + CDF_PATH + "'></script>\");\n" )
-        .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + CDF_LIB_PATH + "'></script>\");\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
           + fullyQualifiedURL + COMMON_UI_START_PATH + "'></script>\");\n" )
         .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
