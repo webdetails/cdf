@@ -14,7 +14,7 @@
 /* this file allows platform plugins to use the non-RequireJS version of CDF */
 
 if(typeof CONTEXT_PATH != 'undefined') { // production
-  requireCfg['paths']['cdf-legacy'] = CONTEXT_PATH + 'content/pentaho-cdf/js-legacy';
+  requireCfg['paths']['cdf-legacy'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js-legacy';
 } else { // build / unit tests
   requireCfg['paths']['cdf-legacy'] = 'cdf/js-legacy';
 }
