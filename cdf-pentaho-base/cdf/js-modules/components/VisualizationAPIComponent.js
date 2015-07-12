@@ -14,10 +14,8 @@
 define([
   'amd!../lib/underscore',
   './UnmanagedComponent',
-  'common-ui/vizapi/data/DataTable',
-  'common-ui/vizapi/VizController',
-  'common-ui/vizapi/vizTypeRegistry'
-], function(_, UnmanagedComponent, DataTable, VizController, vizTypes) {
+  'pentaho/visual/Wrapper'
+], function(_, UnmanagedComponent, VisualWrapper) {
 
   var VisualizationAPIComponent = UnmanagedComponent.extend({
 
@@ -26,36 +24,26 @@ define([
     },
 
     render: function(data) {
-      var vizDiv     = this.placeholder()[0],
-          vizType    = this.getVizType(),
-          vizOptions = this.getVizOptions(),
-          gDataTable = this.createGoogleDataTable(data),
-          controller = new VizController(0);
-      
-      controller.setDomNode(vizDiv);
-      controller.setDataTable(gDataTable);
-      controller.setVisualization(vizType, vizOptions, _.bind(this.endExec, this));
+      var domElem = this.placeholder()[0];
+      var wrapper = new VisualWrapper(domElem);
+      wrapper.data = data;
+      wrapper.visualSpec = this.getVisualSpec();
+      wrapper.update()
+          .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
     },
   	
-    getVizOptions: function() {
-      var options = {};
+    getVisualSpec: function() {
+      var visualSpec = {};
       
       _.each(this.vizOptions, function(option) {
-        options[option[0]] = this.getParameterValue(option[1]);
+        visualSpec[option[0]] = this.getParameterValue(option[1]);
       }, this.dashboard);
-      
-      return options;
-    },
 
-    getVizType: function() {
-      return vizTypes.get(this.vizId);
-    },
+      visualSpec.type = this.vizId;
 
-    createGoogleDataTable: function(jsonTable) {
-      return new DataTable(jsonTable);
+      return visualSpec;
     }
   });
 
   return VisualizationAPIComponent;
-
 });

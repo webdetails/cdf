@@ -15,9 +15,8 @@ define([
   'cdf/Dashboard.Clean', 
   'amd!cdf/lib/underscore', 
   'cdf/lib/jquery', 
-  'cdf/components/VisualizationAPIComponent',
-  'common-ui/vizapi/vizTypeRegistry'
-], function(Dashboard, _, $, VisualizationAPIComponent, vizTypeRegistryMock) {
+  'cdf/components/VisualizationAPIComponent'
+], function(Dashboard, _, $, VisualizationAPIComponent) {
 
   /**
    * ## The VisualizationAPI Component
@@ -33,7 +32,7 @@ define([
     var visualizationAPIComponent = new VisualizationAPIComponent({
       name: "visualizationAPIComponent",
       type: "visualizationAPIComponent",
-      vizId: "sampleViz",
+      vizId: "sampleVisual",
       vizOptions: [["param1", "optionParam"]],
       htmlObject: 'visualizationAPIComponent',
       queryDefinition: {
@@ -65,9 +64,9 @@ define([
      * ## The VisualizationAPI Component # render called with CDA query data
      */
     it("render called with CDA query data", function(done) {
-      spyOn(visualizationAPIComponent, 'update'    ).and.callThrough();
+      spyOn(visualizationAPIComponent, 'update').and.callThrough();
       spyOn(visualizationAPIComponent, 'beginQuery').and.callThrough();
-      spyOn(visualizationAPIComponent, 'endExec'   ).and.callThrough();
+      spyOn(visualizationAPIComponent, 'endExec').and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
         params.success({resultset: "queryResults"});
       });
@@ -75,10 +74,10 @@ define([
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        expect(visualizationAPIComponent.update    ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.update).toHaveBeenCalled();
         expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render    ).toHaveBeenCalledWith({resultset: 'queryResults'});
-        expect(visualizationAPIComponent.endExec   ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.endExec).toHaveBeenCalled();
         done();
       });
 
@@ -89,28 +88,21 @@ define([
      * ## The VisualizationAPI Component # check all component functions
      */
     it("Check all component functions", function(done) {
-      spyOn(visualizationAPIComponent, 'update'    ).and.callThrough();
+      spyOn(visualizationAPIComponent, 'update').and.callThrough();
       spyOn(visualizationAPIComponent, 'beginQuery').and.callThrough();
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
-      spyOn(visualizationAPIComponent, 'render'    ).and.callThrough();
-      spyOn(visualizationAPIComponent, 'getVizType').and.callThrough();
-
-      spyOn(vizTypeRegistryMock,       'get').and.callThrough();
-      spyOn(visualizationAPIComponent, 'getVizOptions');
-      spyOn(visualizationAPIComponent, 'createGoogleDataTable');
+      spyOn(visualizationAPIComponent, 'render').and.callThrough();
+      spyOn(visualizationAPIComponent, 'getVisualSpec');
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        expect(visualizationAPIComponent.update    ).toHaveBeenCalled();
-        expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render    ).toHaveBeenCalledWith({resultset: 'queryResults'});
-        expect(visualizationAPIComponent.getVizType).toHaveBeenCalled();
-        expect(vizTypeRegistryMock.get             ).toHaveBeenCalledWith("sampleViz");
-        expect(visualizationAPIComponent.getVizOptions).toHaveBeenCalled();
-        expect(visualizationAPIComponent.createGoogleDataTable)
-          .toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.update       ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.beginQuery   ).toHaveBeenCalled();
+        expect(visualizationAPIComponent.render       ).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.getVisualSpec).toHaveBeenCalled();
+
         done();
       });
 

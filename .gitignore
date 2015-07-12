@@ -35,6 +35,7 @@ cdf-pentaho5/build-res/pentaho-js-build
 cdf-pentaho5/build-res/script-output
 cdf-pentaho/js-lib
 cdf-pentaho/test-lib
+cdf-pentaho/build-res/pentaho-js-build
 
 /**/node_modules
 /**/test-res
