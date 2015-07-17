@@ -15,9 +15,8 @@
  */
 .filter-root-container {
   position: relative;
-}
-.filter-root-container {
   z-index: 10;
+  color: #616161;
 }
 .filter-root-container.expanded {
   z-index: 1000;
@@ -29,7 +28,7 @@
   height: 100%;
   width: 100%;
   background: #fff;
-  opacity: 0.2;
+  opacity: 0.5;
 }
 .filter-overlay.collapsed {
   display: none;
@@ -54,7 +53,7 @@
   cursor: default;
 }
 .filter-root-header-label {
-  padding: 5px 0 5px 10px;
+  padding: 5px 0 5px 15px;
   line-height: 22px;
   margin-right: 30px;
 }
@@ -124,7 +123,7 @@
 }
 .filter-controls {
   position: relative;
-  padding: 15px;
+  padding: 15px 15px 0;
 }
 .filter-controls .filter-control-buttons {
   padding-bottom: 15px;
@@ -176,6 +175,7 @@
 }
 .filter-controls .filter-filter {
   position: relative;
+  padding-bottom: 15px;
 }
 .filter-controls .filter-filter .filter-filter-input {
   -webkit-box-sizing: border-box;
@@ -188,7 +188,7 @@
 .filter-controls .filter-filter .filter-filter-icon,
 .filter-controls .filter-filter .filter-filter-clear {
   position: absolute;
-  top: 0;
+  top: -15px;
   bottom: 0;
   margin: auto 0;
 }
@@ -284,6 +284,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.no-icons .filter-root-selection-label,
+.no-icons .filter-group-label,
+.no-icons .filter-item-label {
+  margin: 0 5px;
+}
 .filter-root-selection-label,
 .filter-group-label {
   font-weight: 600;
@@ -362,6 +367,7 @@
   width: 14px;
   height: 14px;
   cursor: pointer;
+  pointer-events: none;
   border: 1px solid #c6c6c6;
   position: absolute;
   left: 15px;
@@ -369,7 +375,12 @@
   bottom: 0;
   margin: auto 0;
 }
-.filter-root-container:hover .filter-root-selection-icon,
+.no-icons .filter-root-selection-icon,
+.no-icons .filter-group-selection-icon,
+.no-icons .filter-item-selection-icon {
+  display: none;
+}
+.filter-root-selection:hover .filter-root-selection-icon,
 .filter-group-container:hover .filter-group-selection-icon,
 .filter-item-container:hover .filter-item-selection-icon {
   border-color: #005ca7;
@@ -491,10 +502,10 @@
   border-top: 1px solid #808080;
 }
 .filter-root-info-number-selected-items {
-  color: #333;
+  color: #616161;
 }
 .filter-root-info-number-items {
-  color: #aaa;
+  color: #B3B3B3;
 }
 .filter-item-container {
   font-size: 13px;
@@ -503,7 +514,7 @@
  *  Scrollbar 
  *****/
 .filter-root-items-container.mCustomScrollbar {
-  height: 200px;
+  height: 180px;
   padding: 10px 0;
 }
 .filter-root-items-container.mCustomScrollbar .mCSB_inside > .mCSB_container {
