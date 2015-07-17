@@ -23,6 +23,10 @@
 
   <property name="all.projects" value="${core.project},${projects.list}"/>
 
+  <!-- make sure when junit tests fail the build fails -->
+  <property name="junit.haltonfailure" value="yes" description="Fail the build if a test fails"/>
+  <property name="junit.haltonerror" value="yes" description="Fail the build if a error occurs"/>
+
  <!--params: projects, target -->
   <target name="call" depends="subfloor.install-antcontrib">
     <for list="${projects}" param="proj">
