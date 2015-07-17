@@ -416,8 +416,10 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
     close: function() {
       if (this.manager != null) {
         this.manager.walkDown(function(m) {
+          if ( !m.isRoot() /* CDF-598 */ ){
           m.close();
           return m.remove();
+          }
         });
       }
       if (this.model != null) {
