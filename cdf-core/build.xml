@@ -15,13 +15,12 @@
     and works with the subfloor.xml file.
   </description>
 
+  <!-- Properties are immutable, set them before loading subfloor.xml, make sure when junit tests fail the build fails -->
+  <property name="junit.haltonfailure" value="yes" description="Fail the build if a test fails"/>
+  <property name="junit.haltonerror" value="yes" description="Fail the build if a error occurs"/>
   <!-- Import subfloor.xml which contains all the default tasks -->
   <import file="../build-res/subfloor.xml" id="subfloor"/>
   <import file="../build-res/subfloor-js.xml"/>
-
-  <!-- make sure when junit tests fail the build fails -->
-  <property name="junit.haltonfailure" value="yes" description="Fail the build if a test fails"/>
-  <property name="junit.haltonerror" value="yes" description="Fail the build if a error occurs"/>
 
   <property file="../override.properties"
             description="Top level Properties customized for your development environment belong in this file. This file will never be checked into the SCM."/>
