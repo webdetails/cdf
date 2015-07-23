@@ -238,7 +238,9 @@ define([
         return myself.error("TableComponent requires an htmlObject");
       }
       try {
-        myself.block();
+        if(!myself.isSilent()) {
+          myself.block();
+        }
         myself.setup();
         if(myself.chartDefinition.paginateServerside) {
           myself.paginatingUpdate();
@@ -274,7 +276,9 @@ define([
          * that will trigger unblock, meaning we need to trigger unblock manually.
          */
         Logger.exception(e);
-        myself.unblock();
+        if(!myself.isSilent()) {
+          myself.unblock();
+        }
       }
     },
     
@@ -443,7 +447,9 @@ define([
      */
     fnInitComplete: function() {
       this.postExec();
-      this.unblock();
+      if(!this.isSilent()) {
+        this.unblock();
+      }
     },
 
     /* 
