@@ -232,7 +232,9 @@ var TableComponent = UnmanagedComponent.extend({
       return this.error("TableComponent requires an htmlObject");
     }
     try {
-      this.block();
+      if(!this.isSilent()) {
+        this.block();
+      }
       this.setup();
       if(this.chartDefinition.paginateServerside) {
         this.paginatingUpdate();
@@ -255,7 +257,9 @@ var TableComponent = UnmanagedComponent.extend({
        * that will trigger unblock, meaning we need to trigger unblock manually.
        */
       Dashboards.log(e,'exception');
-      this.unblock();
+      if(!this.isSilent()) {
+        this.unblock();
+      }
     }
   },
   
@@ -423,7 +427,9 @@ var TableComponent = UnmanagedComponent.extend({
    */
   fnInitComplete: function() {
     this.postExec();
-    this.unblock();
+    if(!this.isSilent()) {
+      this.unblock();
+    }
   },
 
   /* 
@@ -545,10 +551,10 @@ var TableComponent = UnmanagedComponent.extend({
         state.target = target;
 
         if(myself.expandOnClick) {
-        	myself.handleExpandOnClick(state);
+          myself.handleExpandOnClick(state);
         }
         if(cd.clickAction ) {
-	        cd.clickAction.call(myself,state);
+          cd.clickAction.call(myself,state);
         }
       }
     });
