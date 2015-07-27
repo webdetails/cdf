@@ -270,6 +270,8 @@ define([
           if (selectionStrategyConfig !== 'SingleSelect') {
             if (cd.showButtonOnlyThis === true || cd.showButtonOnlyThis === false) {
               configuration.component.Root.options.showButtonOnlyThis = cd.showButtonOnlyThis;
+              configuration.component.Group.options.showButtonOnlyThis = cd.showButtonOnlyThis;
+              configuration.component.Item.options.showButtonOnlyThis = cd.showButtonOnlyThis;
             }
           }
 
@@ -449,8 +451,10 @@ define([
         close: function() {
           if (this.manager != null) {
             this.manager.walkDown(function(m) {
+              if ( !m.isRoot() /* CDF-598 */ ){
               m.close();
               return m.remove();
+              }
             });
           }
           if (this.model != null) {
