@@ -12,18 +12,10 @@
  */
 
 Dashboards.escapeHtml = function(input) {
-  // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
-  // the input is fully escaped. Using http://webdesign.about.com/od/localization/l/blhtmlcodes-ascii.htm 
-  // as characters example
-  var regexNumericTags = /&#([0-9][0-9]?[0-9]?[0-9]?);/;
-  var regexAlphabeticTags = /&([a-zA-Z]+);/;
-  var regexHexTags = /&#x[A-F0-9][A-F0-9];/;
-  if(regexNumericTags.test(input) || regexAlphabeticTags.test(input) || regexHexTags.test(input)){
-    return input;
-  }
-  
+  // using Negative Lookahead when replacing '&' to make sure we don't
+  // double escape
   var escaped = input
-  .replace(/&/g,"&amp;")
+  .replace(/&(?!amp;)(?!lt;)(?!gt;)(?!#34;)(?!#39;)/g,"&amp;")
   .replace(/</g,"&lt;")
   .replace(/>/g,"&gt;")
   .replace(/'/g,"&#39;")
