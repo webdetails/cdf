@@ -66,5 +66,20 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       expectDateParse('13-08-1983', 'DD-MM-YYYY', 'Sat Aug 13 1983');
       expectDateParse('Wednesday, February 18, 2015 12:00 AM', 'LLLL', 'Wed Feb 18 2015');
     });
+
+    /**
+     * ## The Utils class # properly escapes html
+     */
+    it("properly escapes html", function() {
+      var script = "<script>alert('Gotcha!')</script>";
+      var escapedScript = "&lt;script&gt;alert(&#39;Gotcha!&#39;)&lt;/script&gt;";
+      var unescapedHtml = "<p>Hello \"person\" && 'being'</p>";
+      var fullyEscapedHtml = "&lt;p&gt;Hello &#34;person&#34; &amp;&amp; &#39;being&#39;&lt;/p&gt;";
+      var halfEscapedHtml = fullyEscapedHtml + script;
+
+      expect(Utils.escapeHtml(unescapedHtml)).toEqual(fullyEscapedHtml);
+      expect(Utils.escapeHtml(halfEscapedHtml)).toEqual(fullyEscapedHtml + escapedScript);
+      expect(Utils.escapeHtml(fullyEscapedHtml)).toEqual(fullyEscapedHtml);
+    });
   });
 });
