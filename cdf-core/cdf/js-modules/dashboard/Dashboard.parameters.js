@@ -70,28 +70,32 @@ define([
       if(!o) {
         return;
       }
-      if(path != null) {
-        var parts, L;
-        if(path instanceof Array) {
-          parts = path;
-        } else {
-          if(path.indexOf('.') < 0) {
-            return o[path];
+      if(this.flatParameters) {
+        return o[path];
+      } else {
+        if(path != null) {
+          var parts, L;
+          if(path instanceof Array) {
+            parts = path;
+          } else {
+            if(path.indexOf('.') < 0) {
+              return o[path];
+            }
+            parts = path.split(".");
           }
-          parts = path.split(".");
-        }
-        L = parts.length;
+          L = parts.length;
 
-        for(var i = 0; i < L; i++) {
-          if(!o) {
-            return; // more efficient approximation
+          for(var i = 0; i < L; i++) {
+            if(!o) {
+              return; // more efficient approximation
+            }
+            var part = parts[i],
+                value = o[part];
+            if(value === undefined) {
+              return;
+            }
+            o = value;
           }
-          var part = parts[i],
-              value = o[part];
-          if(value === undefined) {
-            return;
-          }
-          o = value;
         }
       }
       return o;
@@ -112,21 +116,26 @@ define([
       if(!o || path == null || v === undefined) {
         return; // undefined
       }
-      var parts, pLast;
-      if(path instanceof Array) {
-        parts = path;
-        pLast = parts.pop();
+
+      if(this.flatParameters) { //to keep compatibility with dotted parameters without requiring the path created to work
+        o[path] = v;
       } else {
-        if(path.indexOf(".") < 0) {
-          o[path] = v;
-          return o;
+        var parts, pLast;
+        if(path instanceof Array) {
+          parts = path;
+          pLast = parts.pop();
+        } else {
+          if(path.indexOf(".") < 0) {
+            o[path] = v;
+            return o;
+          }
+          parts = path.split(".");
+          pLast = parts.pop();
         }
-        parts = path.split(".");
-        pLast = parts.pop();
-      }
-      o = this._getValueFromContext(o, parts);
-      if(o) {
-        o[pLast] = v;
+        o = this._getValueFromContext(o, parts);
+        if(o) {
+          o[pLast] = v;
+        }
       }
       return o;
     },
