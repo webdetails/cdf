@@ -283,5 +283,22 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
       dashboard.addParameter("ping", "pong");
       expect(dashboard.getParam("ping")).toEqual("pong");
     });
+
+
+    /*
+     * ## The CDF framework # If flatParameters is on composite params are stored as flatParameters, not objects
+     */
+    it("If flatParameters is on composite params are stored as flatParameters, not objects", function() {
+      dashboard.setParameter("MyParam.Param1.Param", "testValue");
+      dashboard.setParameter("MyParam", "testValue");
+      expect(dashboard.getParameterValue("MyParam.Param1.Param")).toEqual(undefined);
+      expect(dashboard.getParameterValue("MyParam")).toEqual("testValue");
+
+      dashboard.flatParameters = true;
+      dashboard.setParameter("MyParam.Param1.Param", "testValue");
+      dashboard.setParameter("MyParam", "testValue");
+      expect(dashboard.getParameterValue("MyParam.Param1.Param")).toEqual("testValue");
+      expect(dashboard.getParameterValue("MyParam")).toEqual("testValue");
+    });
   });
 });
