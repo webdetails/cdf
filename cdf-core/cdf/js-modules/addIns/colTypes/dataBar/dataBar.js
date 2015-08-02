@@ -79,7 +79,6 @@ define([
       var cell = $(tgt);
       cell.empty();
       var ph = $("<div>&nbsp;</div>").addClass('dataBarContainer');
-      alert("Du.." + opt.align);
       (opt.align == "right") ? ph.addClass('dataBarContainerAlignRight') : ph.addClass('dataBarContainerAlignLeft');
       ph.appendTo(cell);
       var wtmp = opt.width || ph.width();
