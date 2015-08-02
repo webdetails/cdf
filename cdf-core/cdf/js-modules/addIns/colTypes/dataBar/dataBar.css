@@ -16,12 +16,23 @@
   width:100%;
 }
 
-.dataBarContainer svg {
+.dataBarContainer .value {
+  position:relative;
+  z-index:100;
+}
+
+.dataBarContainerAlignLeft svg {
   float:left;
 }
 
-.dataBarContainer .value {
-  position:relative;
+.dataBarContainerAlignLeft .value {
   float:right;
-  z-index:100;
+}
+
+.dataBarContainerAlignRight svg {
+  float:right;
+}
+
+.dataBarContainerAlignRight .value {
+  float:left;
 }
