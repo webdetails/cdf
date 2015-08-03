@@ -108,12 +108,47 @@ define([
       
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentExpr = $.extend({}, buttonComponent, {
-        expression: function() {}
+        expression: function() {
+          return true;
+        },
+        actionDefinition: {
+          dataAccessId: "myDataSource", 
+          path: "/public/test-btn.cda"
+        }
       });
 
       spyOn(buttonComponentExpr, 'update').and.callThrough();
       spyOn(buttonComponentExpr, 'expression').and.callThrough();
       spyOn(buttonComponentExpr, 'enable').and.callFake(function() {
+        expect(buttonComponentExpr.expression).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.addComponent(buttonComponentExpr);
+
+      // listen to cdf:postExecution event
+      buttonComponentExpr.once("cdf:postExecution", function() {
+        expect(buttonComponentExpr.update).toHaveBeenCalled();
+        $('div#' + buttonComponentExpr.htmlObject + ' > button').click();
+      });
+
+      dashboard.update(buttonComponentExpr);
+    });
+
+    /*
+     * ## The Button Component # runs the expression when clicked
+     */
+    it("runs the expression when clicked", function(done) {
+      
+      // create a new button with an expression based on the base buttonComponent
+      var buttonComponentExpr = $.extend({}, buttonComponent, {
+        expression: function() {
+          return true;
+        }
+      });
+
+      spyOn(buttonComponentExpr, 'update').and.callThrough();
+      spyOn(buttonComponentExpr, 'expression').and.callFake(function() {
         expect(buttonComponentExpr.expression).toHaveBeenCalled();
         done();
       });
