@@ -22,7 +22,7 @@ define([
   'amd!../../../lib/datatables',
   'css!./dataBar'],
   function(AddIn, Dashboard, sprintf, Raphael, _, $, pv) {
-  
+
   var dataBar = new AddIn({
     name: "dataBar",
     label: "Data Bar",
@@ -30,6 +30,7 @@ define([
       width: undefined,
       widthRatio: 1,
       height: undefined,
+      align: null,
       startColor: "#55A4D6",
       endColor: "#448FC8",
       backgroundImage: undefined,
@@ -76,23 +77,25 @@ define([
       }
 
       var cell = $(tgt);
-      cell.empty(); 
-      var ph = $("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
+      cell.empty();
+      var ph = $("<div>&nbsp;</div>").addClass('dataBarContainer');
+      (opt.align == "right") ? ph.addClass('dataBarContainerAlignRight') : ph.addClass('dataBarContainerAlignLeft');
+      ph.appendTo(cell);
       var wtmp = opt.width || ph.width();
       wtmp *= opt.widthRatio;
-      var htmp = opt.height || ph.height();       
-    
+      var htmp = opt.height || ph.height();
+
       var leftVal = Math.min(val,0),
         rightVal = Math.max(val,0);
 
       // xx = x axis
-      var xx = pv.Scale.linear(min,max).range(0, wtmp); 
-      
+      var xx = pv.Scale.linear(min,max).range(0, wtmp);
+
       var paperSize = xx(Math.min(rightVal,max)) - xx(min);
       paperSize = (paperSize > 1) ? paperSize : 1;
       var paper = Raphael(ph.get(0), paperSize , htmp);
       var c = paper.rect(xx(leftVal), 0, xx(rightVal) - xx(leftVal), htmp);
-    
+
       c.attr({
         fill: opt.backgroundImage ? "url('" + opt.backgroundImage + "')" : "90-" + opt.startColor + "-" + opt.endColor,
         stroke: opt.stroke,
@@ -100,7 +103,9 @@ define([
       });
 
       if(opt.includeValue) {
-        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st, opt));
+        var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
+        var valph = $("<span></span>").addClass('value');
+        (opt.align == "right") ? valph.prepend(valueStr) : valph.append(valueStr);
         valph.appendTo(ph);
       }
     }

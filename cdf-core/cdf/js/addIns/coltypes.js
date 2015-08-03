@@ -171,6 +171,7 @@
       width: undefined,
       widthRatio:1,
       height: undefined,
+	  align: null,
       startColor: "#55A4D6",
       endColor: "#448FC8",
       backgroundImage: undefined,
@@ -217,8 +218,10 @@
       }
 
       var cell = $(tgt);
-      cell.empty(); 
-      var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
+      cell.empty();
+      var ph = $("<div>&nbsp;</div>").addClass('dataBarContainer');
+      (opt.align == "right") ? ph.addClass('dataBarContainerAlignRight') : ph.addClass('dataBarContainerAlignLeft');
+      ph.appendTo(cell);
       var wtmp = opt.width || ph.width();
       wtmp *= opt.widthRatio;
       var htmp = opt.height || ph.height();       
@@ -241,7 +244,9 @@
       });
 
       if(opt.includeValue) {
-        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st, opt));
+	    var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
+        var valph = $("<span></span>").addClass('value');
+        (opt.align == "right") ? valph.prepend(valueStr) : valph.append(valueStr);
         valph.appendTo(ph);
       }
     }

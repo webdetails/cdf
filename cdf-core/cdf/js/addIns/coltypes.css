@@ -39,15 +39,30 @@ a.hiperlinkAddIn{
 
 .dataBarContainer {
   position: relative;
-  width:100%;
+  width: 100%;
 }
-.dataBarContainer svg {
-  float:left;
+
+.dataBarContainer .value {
+  position: relative;
+  z-index: 100;
 }
-.dataBarContainer .value{
-  position:relative;
-  float:right;
-  z-index:100;
+
+.dataBarContainerAlignLeft svg  {
+  float: left;
+}
+
+.dataBarContainerAlignLeft .value {
+  float: left;
+  margin-left: 5px;
+}
+
+.dataBarContainerAlignRight svg {
+  float: right;
+}
+
+.dataBarContainerAlignRight .value {
+  float: right;
+  margin-right: 5px;
 }
 
 
