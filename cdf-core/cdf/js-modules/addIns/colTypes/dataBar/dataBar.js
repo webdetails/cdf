@@ -104,7 +104,6 @@ define([
 
       if(opt.includeValue) {
         var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
-
         var valph = $("<span></span>").addClass('value');
         (opt.align == "right") ? valph.prepend(valueStr) : valph.append(valueStr);
         valph.appendTo(ph);

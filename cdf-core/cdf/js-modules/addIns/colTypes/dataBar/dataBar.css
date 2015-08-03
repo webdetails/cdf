@@ -13,26 +13,28 @@
 
 .dataBarContainer {
   position: relative;
-  width:100%;
+  width: 100%;
 }
 
 .dataBarContainer .value {
-  position:relative;
-  z-index:100;
+  position: relative;
+  z-index: 100;
 }
 
-.dataBarContainerAlignLeft svg {
-  float:left;
+.dataBarContainerAlignLeft svg  {
+  float: left;
 }
 
 .dataBarContainerAlignLeft .value {
-  float:right;
+  float: left;
+  margin-left: 5px;
 }
 
 .dataBarContainerAlignRight svg {
-  float:right;
+  float: right;
 }
 
 .dataBarContainerAlignRight .value {
-  float:left;
+  float: right;
+  margin-right: 5px;
 }
