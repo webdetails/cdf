@@ -25,10 +25,6 @@ public class CdfLifecycleListener extends SimpleLifeCycleListener {
 
   private static final Log logger = LogFactory.getLog( CdfLifecycleListener.class );
 
-  public void init() throws PluginLifecycleException {
-    // Initialize plugin
-  }
-
   public void loaded() throws PluginLifecycleException {
     ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
     try {
