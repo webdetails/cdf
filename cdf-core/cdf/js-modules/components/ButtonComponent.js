@@ -24,61 +24,63 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
       
       // store the original success and failure callback functions and
       // set a new function to re-enable the button and call the original function
-      if(typeof myself.successCallback === 'function') {
-        var orSuccessCallback = myself.successCallback;
-        myself.successCallback = function() {
+      if(typeof this.successCallback === 'function') {
+        var orSuccessCallback = this.successCallback;
+        this.successCallback = function() {
           myself.enable();
-          orSuccessCallback.apply(myself);
+          orSuccessCallback.apply(myself, arguments);
         };
       } else {
-        myself.successCallback = function() { myself.enable(); };
+        this.successCallback = function() { myself.enable(); };
       }
-      if(typeof myself.failureCallback === 'function') {
-        var orFailureCallback = myself.failureCallback;
-        myself.failureCallback = function() {
+      if(typeof this.failureCallback === 'function') {
+        var orFailureCallback = this.failureCallback;
+        this.failureCallback = function() {
           myself.enable();
-          orFailureCallback.apply(myself);
+          orFailureCallback.apply(myself, arguments);
         };
       } else {
-        myself.failureCallback = function() { myself.enable(); };
+        this.failureCallback = function() { myself.enable(); };
       }
 
       var b = $("<button type='button'/>")
         .addClass('buttonComponent')
-        .addClass('enabled')
-        .text(typeof myself.label === 'function' ? myself.label() : myself.label)
         .unbind("click")
         .bind("click", function() {
+          var proceed = true;
 
-        var proceed = true;
+          // disable button to prevent unwanted presses
+          myself.disable();
 
-        // disable button to prevent unwanted presses
-        myself.disable();
+          if(_.isFunction(myself.expression)) {
+            proceed = myself.expression.apply(myself, arguments);
 
-        if(_.isFunction(myself.expression)) {
-          proceed = myself.expression.apply(myself, arguments);
-
-          // re-enable the button if there's no action associated.
-          // neither the successCallback nor the failureCallback will be called in this case
-          if(!myself.hasAction()) {
-            myself.enable();
+            // re-enable the button if there's no action associated.
+            // neither the successCallback nor the failureCallback will be called in this case
+            if (!myself.hasAction()) {
+              myself.enable();
+            }
           }
-        } else if(!myself.expression) {
-          if(!myself.hasAction()) {
-            myself.enable();
+          else if (!myself.expression) {
+            if (!myself.hasAction()) {
+              myself.enable();
+            }
           }
-        }
 
-        if(myself.hasAction() && !(proceed === false)) {
-          return myself.triggerAction.apply(myself);
-        }
-      });
+          if(myself.hasAction() && !(proceed === false)) {
+            return myself.triggerAction.apply(myself);
+          } 
+        });
 
-      if(_.isUndefined(myself.buttonStyle) || myself.buttonStyle === "themeroller") {
+      if(this._isJQueryUiButton()) {
         b.button();
       }
-      b.appendTo(myself.placeholder().empty());
-      myself._doAutoFocus();
+      b.appendTo(this.placeholder().empty());
+
+      this.setLabel(this.label);
+      this.enable();
+
+      this._doAutoFocus();
     },
 
     /**
@@ -101,8 +103,23 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
      * Changes the label shown on the button
      */
     setLabel: function(label) {
-      this.label = label.toString();
-      this.placeholder('button').text(this.label);
+      var validatedLabel = typeof label === 'function' ? label.call(this) : label;
+      this.label = validatedLabel.toString();
+      
+      // if we have a jQueryUi button change the text with appropriate method
+      if(this._isJQueryUiButton()) {
+        this.placeholder('button').button('option', 'label', this.label);
+      } else {
+        this.placeholder('button').text(this.label);
+      }      
+    },
+
+    /**
+     * Returns whether or not the button is a jQueryUi button
+     * @private
+     */
+    _isJQueryUiButton: function(){
+      return _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller";
     }
   });
 
