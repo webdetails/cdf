@@ -25,3 +25,7 @@
   float:right;
   z-index:100;
 }
+
+.dataBarContainer .value.alignRight {
+  float:left;
+}

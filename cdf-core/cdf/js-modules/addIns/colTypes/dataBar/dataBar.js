@@ -22,14 +22,15 @@ define([
   'amd!../../../lib/datatables',
   'css!./dataBar'],
   function(AddIn, Dashboard, sprintf, Raphael, _, $, pv) {
-  
+
   var dataBar = new AddIn({
     name: "dataBar",
     label: "Data Bar",
     defaults: {
-      width: undefined,
+      width: '98%',
       widthRatio: 1,
       height: undefined,
+      align: null,
       startColor: "#55A4D6",
       endColor: "#448FC8",
       backgroundImage: undefined,
@@ -75,24 +76,55 @@ define([
             val = parseFloat(st.value);
       }
 
+      var hasSVG = !!(
+         document.createElementNS &&
+         document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect
+        );
+
       var cell = $(tgt);
-      cell.empty(); 
+      cell.empty();
       var ph = $("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
       var wtmp = opt.width || ph.width();
-      wtmp *= opt.widthRatio;
-      var htmp = opt.height || ph.height();       
-    
+      if (typeof wtmp === 'string') {
+        if(!hasSVG) {
+          wtmp = ph.width() * opt.widthRatio;
+        } else {
+          var parsedWidth = parseFloat(wtmp);
+          // if we have a widthRatio != 1, we want to apply it to a 100% width
+          parsedWidth = ( (opt.widthRatio != 1 && parsedWidth >= 98) ? 100 : parsedWidth ) * opt.widthRatio;
+          wtmp = parsedWidth + "%";
+        }
+      } else {
+        wtmp *= opt.widthRatio;
+      }
+      var htmp = opt.height || ph.height();
+
       var leftVal = Math.min(val,0),
         rightVal = Math.max(val,0);
+      var options = {
+              scale: 100,
+              wtmp: wtmp,
+              htmp: htmp,
+              align: opt.align,
+              barHeight: 100,
+              r: rightVal,
+              l: leftVal,
+              hasSVG: hasSVG,
+              target: ph.get(0),
+              processVal: function(val){return val + '%'}
+          };
+      var c;
+      // if we have SVG, and wtmp is a string, so probably a percentage width, will use percentage calculations
+      if (hasSVG && typeof wtmp === 'string') {
+        c = this.drawPaper(min, max, options);
+      } else {
+        // falling back to the default
+        options.processVal = function(val){return val};
+        options.scale = wtmp;
+        options.barHeight = htmp;
+        c = this.drawPaper(min, max, options);
+      }
 
-      // xx = x axis
-      var xx = pv.Scale.linear(min,max).range(0, wtmp); 
-      
-      var paperSize = xx(Math.min(rightVal,max)) - xx(min);
-      paperSize = (paperSize > 1) ? paperSize : 1;
-      var paper = Raphael(ph.get(0), paperSize , htmp);
-      var c = paper.rect(xx(leftVal), 0, xx(rightVal) - xx(leftVal), htmp);
-    
       c.attr({
         fill: opt.backgroundImage ? "url('" + opt.backgroundImage + "')" : "90-" + opt.startColor + "-" + opt.endColor,
         stroke: opt.stroke,
@@ -100,9 +132,28 @@ define([
       });
 
       if(opt.includeValue) {
-        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st, opt));
-        valph.appendTo(ph);
+        var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
+        var valph = $("<span></span>").addClass('value');
+        valph.append(valueStr);
+        if ( hasSVG && opt.align == "right") {
+          valph.addClass('alignRight').appendTo(ph);
+          ph.find("svg").css('float', 'right');
+        } else {
+          valph.prependTo(ph);
+        }
       }
+    },
+    drawPaper: function(min, max, opts) {
+      // xx = x axis
+      var xx = pv.Scale.linear(min,max).range(0, opts.scale);
+
+      var paper = Raphael(opts.target, opts.wtmp , opts.htmp);
+      if(opts.hasSVG && opts.align == "right") {
+        return paper.rect( opts.processVal(xx(max) - xx(opts.r)), opts.processVal(0),
+          opts.processVal(xx(opts.r) - xx(opts.l)), opts.processVal(opts.barHeight));
+      }
+      return paper.rect(opts.processVal(xx(opts.l)), opts.processVal(0),
+        opts.processVal(xx(opts.r) - xx(opts.l)), opts.processVal(opts.barHeight));
     }
   });
 
