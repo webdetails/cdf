@@ -96,52 +96,52 @@
   //jquery.ui 1.10.4
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jQuery/jquery.ui";
   amdShim["cdf/lib/jquery.ui"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom": ""
+    }
   };
 
   //jquery.blockUI 2.66.0
   requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/blockUI/jquery.blockUI";
   amdShim["cdf/lib/jquery.blockUI"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/jquery.ui": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "amd!cdf/lib/jquery.ui": ""
+    }
   };
 
   //jquery-impromptu 5.2.4
   requirePaths['cdf/lib/jquery.impromptu'] = prefix + "/impromptu/jquery-impromptu";
   amdShim["cdf/lib/jquery.impromptu"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/impromptu/jquery-impromptu": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/impromptu/jquery-impromptu": ""
+    }
   };
 
   //jquery.fancybox 2.1.5
   requirePaths['cdf/lib/jquery.fancybox'] = prefix + "/fancybox/jquery.fancybox";
   amdShim["cdf/lib/jquery.fancybox"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/fancybox/jquery.fancybox": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/fancybox/jquery.fancybox": ""
+    }
   };
 
   //daterangepicker.jQuery 01.19.2008
   requirePaths['cdf/lib/daterangepicker.jQuery'] = prefix + "/daterangepicker/daterangepicker.jQuery";
   amdShim["cdf/lib/daterangepicker.jQuery"] = {
-     exports: "jQuery",
-     deps: {
-       "amd!cdf/lib/jquery.ui": "jQuery",
-       "css!cdf/lib/daterangepicker/ui.daterangepicker": ""
-     },
-      prescript: "define = function(arr, setup) { setup(jQuery) };"
+    exports: "jQuery",
+    deps: {
+      "amd!cdf/lib/jquery.ui": "jQuery",
+      "css!cdf/lib/daterangepicker/ui.daterangepicker": ""
+    },
+    prescript: "define = function(arr, setup) { setup(jQuery) };"
   };
 
   //underscore 1.6.0
@@ -153,14 +153,14 @@
   //backbone 1.1.2
   requirePaths['cdf/lib/backbone'] = prefix + "/backbone/backbone";
   amdShim["cdf/lib/backbone"] = {
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/underscore" : "_"
-     },
-     prescript: "var root = {jQuery: jQuery, _: _};\n"+
-     "(function() {\n",
-     postscript: "}.call(root));\n"
-     + "return root.Backbone;"
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "amd!cdf/lib/underscore" : "_"
+    },
+    prescript: "var root = {jQuery: jQuery, _: _};\n"
+      + "(function() {\n",
+    postscript: "}.call(root));\n"
+      + "return root.Backbone;"
   };
 
   //mustache 0.8.1
@@ -173,10 +173,10 @@
     deps: {
       "cdf/lib/mustache": "Mustache"
     },
-    prescript: "var root = {Mustache: Mustache};\n"+
-    "(function() {\n",
+    prescript: "var root = {Mustache: Mustache};\n"
+      + "(function() {\n",
     postscript: "}.call(root));\n"
-    + "return root.Mustache;"
+      + "return root.Mustache;"
   };
 
   //Base 1.1a
@@ -185,64 +185,64 @@
   //datatables 1.10.1
   requirePaths['cdf/lib/datatables'] = prefix + "/dataTables/js/jquery.dataTables";
   amdShim["cdf/lib/datatables"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/dataTables/css/jquery.dataTables_themeroller": "",
-       "css!cdf/lib/dataTables/css/jquery.dataTables": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/dataTables/css/jquery.dataTables_themeroller": "",
+      "css!cdf/lib/dataTables/css/jquery.dataTables": ""
+    }
   };
 
   //captify
   requirePaths['cdf/lib/captify'] = prefix + "/captify/captify";
   amdShim["cdf/lib/captify"] = {
-     exports: "$",
-     deps: {
-       "cdf/lib/jquery": "$",
-       "css!cdf/lib/captify": ""
-     }
+    exports: "$",
+    deps: {
+      "cdf/lib/jquery": "$",
+      "css!cdf/lib/captify": ""
+    }
   };
 
   //bgiframe 3.0.1
   requirePaths['cdf/lib/jquery.bgiframe'] = prefix + "/bgiframe/jquery.bgiframe";
   amdShim["cdf/lib/jquery.bgiframe"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery"
+    }
   };
 
   //positionBy 1.0.7 (2008-01-29)
   requirePaths['cdf/lib/jquery.positionBy'] = prefix + "/positionBy/jquery.positionBy";
   amdShim["cdf/lib/jquery.positionBy"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery"
+    }
   };
 
   //jdMenu 1.4.1 (2008-03-31)
   requirePaths['cdf/lib/jquery.jdMenu'] = prefix + "/jdMenu/jquery.jdMenu";
   amdShim["cdf/lib/jquery.jdMenu"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/jquery.positionBy": "",
-       "amd!cdf/lib/jquery.bgiframe": "",
-       "css!cdf/lib/jquery.jdMenu": "",
-       "css!cdf/lib/jdMenu/jquery.jdMenu.slate": ""
-     },
-     prescript: "var $ = jQuery;"
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "amd!cdf/lib/jquery.positionBy": "",
+      "amd!cdf/lib/jquery.bgiframe": "",
+      "css!cdf/lib/jquery.jdMenu": "",
+      "css!cdf/lib/jdMenu/jquery.jdMenu.slate": ""
+    },
+    prescript: "var $ = jQuery;"
   };
 
   //jquery i18n
   requirePaths['cdf/lib/cdf.jquery.i18n'] = prefix + "/i18n/cdf.jquery.i18n";
   requirePaths['cdf/lib/jquery.i18n'] = prefix + "/i18n/jquery.i18n.properties";
   amdShim["cdf/lib/jquery.i18n"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery"
+    }
   };
 
   //OpenLayers 2.13.1
@@ -259,39 +259,39 @@
   //jQuery uriQueryParser 2013
   requirePaths['cdf/lib/queryParser'] = prefix + "/uriQueryParser/jquery-queryParser";
   amdShim["cdf/lib/queryParser"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery"
+    }
   };
 
   //jQuery sparkline 2.1.2
   requirePaths['cdf/lib/jquery.sparkline'] = prefix + "/sparkline/jquery.sparkline";
   amdShim["cdf/lib/jquery.sparkline"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery"
+    }
   };
 
   //jQuery corner 2.13
   requirePaths['cdf/lib/jquery.corner'] = prefix + "/corner/jquery.corner";
   amdShim["cdf/lib/jquery.corner"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery"
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery"
+    }
   };
 
   //jQuery Select2 3.5.0
   requirePaths['cdf/lib/jquery.select2'] = prefix + "/select2/select2";
   amdShim["cdf/lib/jquery.select2"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/select2/select2": "",
-       "css!cdf/lib/select2/select2-bootstrap": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/select2/select2": "",
+      "css!cdf/lib/select2/select2-bootstrap": ""
+    }
   };
 
   //jQuery Chosen 0.9.1
@@ -299,8 +299,8 @@
   amdShim['cdf/lib/jquery.chosen'] = {
     exports: "jQuery",
     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/chosen/chosen": ""
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/chosen/chosen": ""
     }
   };
 
@@ -309,9 +309,9 @@
   amdShim['cdf/lib/jquery.multiselect'] = {
     exports: "jQuery",
     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/jquery.ui": "",
-       "css!cdf/lib/hynds/jquery.multiselect": ""
+      "cdf/lib/jquery": "jQuery",
+      "amd!cdf/lib/jquery.ui": "",
+      "css!cdf/lib/hynds/jquery.multiselect": ""
     }
   };
 
@@ -332,11 +332,11 @@
   //bootstrap 3.1.1
   requirePaths['cdf/lib/bootstrap'] = prefix + '/Bootstrap/js/bootstrap';
   amdShim["cdf/lib/bootstrap"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/Bootstrap/css/bootstrap.css": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/Bootstrap/css/bootstrap.css": ""
+    }
   };
 
   //Font Awesome 4.0.3 (CSS only)
@@ -365,25 +365,25 @@
   // backbone.treeModel
   requirePaths['cdf/lib/backbone.treemodel'] = prefix + "/backboneTreemodel/backbone.treemodel";
   amdShim["cdf/lib/backbone.treemodel"] = {
-     exports: "Backbone",
-     deps: {
-       "amd!cdf/lib/underscore" : "_",
-       "amd!cdf/lib/backbone" : "Backbone"
-     },
-     prescript: "var root = { Backbone: Backbone, _: _ };\n"+
-     "(function() {\n",
-     postscript: "}.call(root));\n"
-     + "return root.Backbone;"
+    exports: "Backbone",
+    deps: {
+      "amd!cdf/lib/underscore" : "_",
+      "amd!cdf/lib/backbone" : "Backbone"
+    },
+    prescript: "var root = { Backbone: Backbone, _: _ };\n"
+      + "(function() {\n",
+    postscript: "}.call(root));\n"
+      + "return root.Backbone;"
   };
 
   // mCustomScrollbar: jquery mousewheel plugin v3.1.12, MIT License
   requirePaths['cdf/lib/jquery.mCustomScrollbar'] = prefix + "/mCustomScrollbar/jquery.mCustomScrollbar.concat.min";
   amdShim["cdf/lib/jquery.mCustomScrollbar"] = {
-     exports: "jQuery",
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "css!cdf/lib/mCustomScrollbar/jquery.mCustomScrollbar.min": ""
-     }
+    exports: "jQuery",
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "css!cdf/lib/mCustomScrollbar/jquery.mCustomScrollbar.min": ""
+    }
   };
 
 })();
