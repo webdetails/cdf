@@ -21,8 +21,6 @@
 
   //RequireJS css! loader plugin 0.1.2
   requireCfg.map['*']['css'] = 'cdf/lib/require-css/css';
-  //RequireJS text! loader plugin 2.0.14
-  requireCfg.map['*']['text'] = 'cdf/lib/require-text/text';
 
   requireCfg.config = requireCfg.config || {};
 
@@ -59,15 +57,17 @@
     prefix = requirePaths['cdf/lib'] = "cdf/js/lib";
   }
 
+  //RequireJS text! loader plugin 2.0.14
+  requirePaths['text'] = prefix + '/require-text/text';
   // configure text! plugin for usage in embedded environments (CORS)
-  requireConfig['cdf/lib/require-text/text'] = {
+  requireConfig['text'] = {
     onXhr: function(xhr, url) {
       //Called after the XHR has been created and after the
       //xhr.open() call, but before the xhr.send() call.
       //Useful time to set headers.
       xhr.withCredentials = true;
     }
-  },
+  };
 
   // RequireJS amd! loader plugin. Wraps non-AMD scripts as AMD modules on the fly,
   // to be used when a shim isn't enough (see plugin prescript and postscript).
