@@ -100,7 +100,7 @@ define([
           // depending on whether we're using CDA
 
           var changedValues = undefined;
-          if((typeof(object.postFetch)=='function')) {
+          if((typeof(object.postFetch) == 'function')) {
             changedValues = object.postFetch(values);
           }
 

@@ -14,15 +14,15 @@
 define([
     './ChartComponent',
     '../lib/jquery',
-    '../lib/CCC/protovis-compat!'],
-  function(ChartComponent, $, pv) {
+    '../lib/CCC/protovis-compat!'
+], function(ChartComponent, $, pv) {
 
   var ProtovisComponent =  ChartComponent.extend({
 
-    update : function() {
+    update: function() {
       if(this.parameters == undefined) {
         this.parameters = [];
-      };
+      }
 
       this.renderChart();
     },

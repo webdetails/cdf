@@ -21,15 +21,15 @@
  * Module that holds query related objects
  * @module Query
  */
-
-define(['amd!../lib/xmla',
+define([
+  'amd!../lib/xmla',
   './XmlaQuery.ext',
   '../lib/Base',
   './BaseQuery',
   '../dashboard/Dashboard.query',
   '../Logger',
-  '../lib/jquery'], 
-function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
+  '../lib/jquery'
+], function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
   /**
    * Class that will be used by both XML/A and XML/A Discover classes.
@@ -37,10 +37,10 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
    * @extends Base
    */
   var SharedXmla = Base.extend({
-      xmla: null,
-      //cache the datasource as there should be only one xmla server
-      datasource: null,
-      catalogs: null,
+    xmla: null,
+    //cache the datasource as there should be only one xmla server
+    datasource: null,
+    catalogs: null,
 
     /**
      * Fetches the available datasources from the server.
@@ -131,8 +131,8 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
           properties[Xmla.PROP_CATALOG]        = queryDefinition.catalog;
           properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT || Xmla.PROP_FORMAT_TABULAR; // Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
           var result = this.xmla.execute({
-              statement: queryDefinition.query(),
-              properties: properties
+            statement: queryDefinition.query(),
+            properties: properties
           });
           return result;
         }
@@ -200,7 +200,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
         cols = results.getFields();
       }
       // Xmla.PROP_FORMAT_MULTIDIMENSIONAL
-      else if (results instanceof Xmla.Dataset) {
+      else if(results instanceof Xmla.Dataset) {
         // TODO support multi dimensional datasets
       }
 
@@ -241,7 +241,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       try {      
         var result = _sharedXmla.execute(this.queryDefinition);
       } catch(e) {
-        Logger.error('unable to execute the XML/A query: ' + e +' :');
+        Logger.error('unable to execute the XML/A query: ' + e + ' :');
       }
       callback(this.transformXMLAresults(result));
     }
@@ -341,8 +341,8 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       callback(this.transformDiscoverresults(result));
     }
   };
+
   // Registering an object that will be used to create a class, by extending BaseQuery,
   // that will allow to generate new XML/A Discover queries.
   Dashboard.registerGlobalQuery("xmlaDiscover", xmlaDiscoverOpts);
-
 });

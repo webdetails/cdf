@@ -70,13 +70,13 @@ define([
       // options interfaces from BaseQuery.
       if(!_.isFunction(query) && _.isObject(query)) {
         var deepProperties = {};
-        _.each( BaseQuery.prototype.deepProperties, function(prop) {
-          deepProperties[prop] = _.extend({} , BaseQuery.prototype[prop], query[prop]);
+        _.each(BaseQuery.prototype.deepProperties, function(prop) {
+          deepProperties[prop] = _.extend({}, BaseQuery.prototype[prop], query[prop]);
         });
       }
 
       var QueryClass = (_.isFunction(query) && query) || 
-        (_.isObject(query) && BaseQuery.extend( _.extend({}, query, deepProperties)));
+        (_.isObject(query) && BaseQuery.extend(_.extend({}, query, deepProperties)));
 
       // Registers a new query factory with a custom class
       this.queryFactories.register('Query', type, function(container, config) {

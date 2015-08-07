@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/jquery', 'css!./AutocompleteBoxComponent'],
-  function(QueryComponent, BaseComponent, _, $) {
+define([
+  './QueryComponent',
+  './BaseComponent',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  'css!./AutocompleteBoxComponent'
+], function(QueryComponent, BaseComponent, _, $) {
 
   var AutocompleteBoxComponent = BaseComponent.extend({
 
@@ -24,21 +29,21 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
      * @param searchString
      * @private
      */
-    _queryServer : function(searchString) {
+    _queryServer: function(searchString) {
       if(!this.parameters) {
-        this.parameters = []
+        this.parameters = [];
       }
 
       if(this.searchParam) {
-        this.parameters = [ [this.searchParam, this._getInnerParameterName()] ];
-      } else if (this.parameters.length > 0) {
+        this.parameters = [[this.searchParam, this._getInnerParameterName()]];
+      } else if(this.parameters.length > 0) {
         this.parameters[0][1] = this._getInnerParameterName();
       }
 
       if(this.maxResults) {
         this.queryDefinition.pageSize = this.maxResults;
       }
-      this.dashboard.setParameter(this._getInnerParameterName(),this._getTextBoxValue());
+      this.dashboard.setParameter(this._getInnerParameterName(), this._getTextBoxValue());
       QueryComponent.makeQuery(this);
     },
 
@@ -54,7 +59,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
      *
      * @returns {string}
      */
-    _getInnerParameterName : function() {
+    _getInnerParameterName: function() {
       return this.parameter + '_textboxValue';
     },
 
@@ -80,7 +85,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
     /**
      *
      */
-    update : function() {
+    update: function() {
       this.placeholder().empty();
 
       var myself = this;
@@ -101,7 +106,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
             .click(function() {
               myself._endSearch();
             });
-        autoComplete.append(apply)
+        autoComplete.append(apply);
       }
 
       autoComplete
@@ -146,7 +151,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
      *
      * @returns {*}
      */
-    getValue : function() {
+    getValue: function() {
       return this.value;
     },
 
@@ -158,13 +163,13 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
     _getOptions: function() {
       var myself = this;
 
-      var processChange = this.processChange == null ?
-          function() {
+      var processChange = this.processChange == null
+        ? function() {
             var object = _.extend({}, myself);
             object.value = myself.selectedValues;
             myself.dashboard.processChange(object.name);
-          } :
-          function() {
+          }
+        : function() {
             myself.processChange();
           };
 
@@ -305,7 +310,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
      *
      * @private
      */
-    _processAutoBoxChange : function() {
+    _processAutoBoxChange: function() {
       this.textbox.autocomplete("change");
     }
   });

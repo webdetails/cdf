@@ -151,16 +151,17 @@ define([
      * @private
      */
     _getParameterStore: function(parameterName) {
-      var parameterStore = this.parameters;
+      var parameterStore;
 
       if(parameterName.indexOf(this.LEGACY_STORAGE) == 0) {
         Logger.warn("Legacy storage access for " + parameterName + ". Please use storage instead");
         parameterName = parameterName.substr(this.LEGACY_STORAGE.length);
         parameterStore = this.storage;
-
       } else if(parameterName.indexOf(this.STORAGE) == 0) {
         parameterName = parameterName.substr(this.STORAGE.length);
         parameterStore = this.storage;
+      } else {
+        parameterStore = this.parameters;
       }
 
       return {
@@ -182,7 +183,7 @@ define([
      */
     addParameter: function(parameterName, parameterValue) {
       if(parameterName == undefined || parameterName == "undefined") {
-        Logger.warn('Dashboards.addParameter: trying to add undefined!!');
+        Logger.warn('Dashboard addParameter: trying to add undefined!!');
         return;
       }
 
