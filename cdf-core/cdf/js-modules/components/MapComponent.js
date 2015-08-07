@@ -11,8 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./MapBaseComponent'],
-  function(MapBaseComponent) {
+define(['./MapBaseComponent'], function(MapBaseComponent) {
 
   var MapComponent = MapBaseComponent.extend({
     initMap: true, // should this be static?
@@ -64,7 +63,6 @@ define(['./MapBaseComponent'],
           str_custom_map
         );
 
-        this.messageElementId = this.messageElementId;
         this.initMap = false;
       }
 
@@ -77,9 +75,10 @@ define(['./MapBaseComponent'],
         p[i] = [key, value];
       }
 
-      html = this.dashboard.pentahoAction(this.solution, this.path, this.action, p, null);
+      var myArray = this.parseArray(
+        this.dashboard.pentahoAction(this.solution, this.path, this.action, p, null),
+        true);
 
-      var myArray = this.parseArray(html, true);
       var len = myArray.length;
       if(len > 1) {
         var cols = myArray[0];

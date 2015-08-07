@@ -19,8 +19,8 @@ define([
   './BaseComponent',
   '../Logger',
   '../lib/jquery',
-  'css!./CommentsComponent'],
-  function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
+  'css!./CommentsComponent'
+], function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
   var CommentsComponent = BaseComponent.extend({
   
@@ -127,8 +127,9 @@ define([
   
         resetCollection: function(result) {
           var paginate = myself.options.paginate;
-          var start = paginate.activePageNumber*paginate.pageCommentsSize;
-          var end = ((start+paginate.pageCommentsSize) < result.length) ? (start+paginate.pageCommentsSize) : result.length;
+          var start = paginate.activePageNumber * paginate.pageCommentsSize;
+          var end = ((start + paginate.pageCommentsSize) < result.length)
+            ? (start + paginate.pageCommentsSize) : result.length;
           var commentsArray = [];
   
           for(var idx = start; idx < end; idx++) {
@@ -326,8 +327,8 @@ define([
   
         navigateNext: function() {
           var paginate = myself.options.paginate;
-          var start = paginate.activePageNumber*paginate.pageCommentsSize;
-          if((start+paginate.pageCommentsSize) < myself.options.queryResult.length) {
+          var start = paginate.activePageNumber * paginate.pageCommentsSize;
+          if((start + paginate.pageCommentsSize) < myself.options.queryResult.length) {
             paginate.activePageNumber++;
             this.collection.reset(myself.operations.resetCollection(myself.options.queryResult));
           }
@@ -465,7 +466,7 @@ define([
         return;
       }
 
-      options = {
+      this.processing().start({
         htmlObject: this.htmlObject,
         page: this.page,
         intervalActive: this.intervalActive,
@@ -483,9 +484,7 @@ define([
           archive: this.archivePermission
         },
         defaults: this.options
-      };
-  
-      this.processing().start(options);
+      });
     }
   });
 
