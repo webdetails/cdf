@@ -21,16 +21,15 @@
  * @class CdaQuery
  * @extends BaseQuery
  */
-
-define(
-  ['./CdaQuery.ext',
-   './BaseQuery',
-   '../dashboard/Dashboard.query',
-   'amd!../lib/underscore',
-   '../dashboard/Utils',
-   '../Logger',
-   '../lib/jquery'],
-  function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
+define([
+  './CdaQuery.ext',
+  './BaseQuery',
+  '../dashboard/Dashboard.query',
+  'amd!../lib/underscore',
+  '../dashboard/Utils',
+  '../Logger',
+  '../lib/jquery'
+], function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
   var cdaQueryOpts = {
     name: 'cda',
@@ -253,7 +252,7 @@ define(
       } else {
         same = (newSort === this.getOption('sortBy'));
       }
-      this.setOption('sortBy' , newSort);
+      this.setOption('sortBy', newSort);
       return !same;
     },
 
@@ -266,7 +265,7 @@ define(
      * @param outsideCallback  Callback to call after the sorting has been processed
      * @returns _false_ if the sort by conditions have not changed, the result of calling doQuery otherwise
      */
-    sortBy: function(sortBy,outsideCallback) {
+    sortBy: function(sortBy, outsideCallback) {
       /* If the parameter is not the same, and we have a valid state,
        * we can fire the query.
        */

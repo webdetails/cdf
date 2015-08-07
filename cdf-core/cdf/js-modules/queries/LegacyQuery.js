@@ -11,13 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
-
 /**
  * Module that holds query related objects
  * @module Query
  */
-
 
 /**
  * Class that represents a legacy query (calling xactions). This functionality is deprecated
@@ -25,12 +22,18 @@
  * @extends BaseQuery
  * @deprecated
  */
-
-define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../dashboard/Dashboard.query', 'amd!../lib/underscore', '../lib/jquery', '../dashboard/Utils'],
-  function(Logger, XactionComponentExt, BaseQuery, Dashboard, _, $, Utils) {
+define([
+  '../Logger',
+  '../components/XactionComponent.ext',
+  './BaseQuery',
+  '../dashboard/Dashboard.query',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  '../dashboard/Utils'
+], function(Logger, XactionComponentExt, BaseQuery, Dashboard, _, $, Utils) {
 
   function makeMetadataElement(idx, name, type) {
-    return {"colIndex": idx || 0, "colType": type || "String", "colName": name || "Name" };
+    return {"colIndex": idx || 0, "colType": type || "String", "colName": name || "Name"};
   }
 
   var legacyOpts = {
@@ -51,7 +54,7 @@ define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../da
           _.each(json.metadata, function(el, idx) {
             return result.metadata.push(makeMetadataElement(idx + 1, el));
           });
-          return result
+          return result;
         }
       }
     },
@@ -93,7 +96,7 @@ define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../da
         }
         var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         callback(clone);
-      }
+      };
     },
 
     /**
@@ -110,11 +113,10 @@ define(['../Logger', '../components/XactionComponent.ext', './BaseQuery', '../da
     }
 
   };
-  Dashboard.registerGlobalQuery("legacy", legacyOpts);
 
+  Dashboard.registerGlobalQuery("legacy", legacyOpts);
   // TODO: Temporary until CDE knows how to write queryTypes definitions, with all these old queries
   // falling under the 'legacy' umbrella.
   Dashboard.registerGlobalQuery("mdx", legacyOpts);
   Dashboard.registerGlobalQuery("sql", legacyOpts);
-
 });

@@ -84,9 +84,9 @@ define([
       use_mercator = b_use_mercator;
       
       if(use_mercator == 'true') {
-        center_point = lonLatToMercator(new OpenLayers.LonLat(lon,lat));
+        center_point = lonLatToMercator(new OpenLayers.LonLat(lon, lat));
       } else {
-        center_point = new OpenLayers.LonLat(lon,lat);
+        center_point = new OpenLayers.LonLat(lon, lat);
       }
       
       //2010-07-14 Custom map support
@@ -113,7 +113,7 @@ define([
         //for now only one OpenStreetMap layer is supported
         map = new OpenLayers.Map(
           map_div,
-          { maxExtent: new OpenLayers.Bounds(-20037508,-20037508,20037508,20037508),
+          { maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
             numZoomLevels: 18,
             maxResolution: 156543,
             units: 'm',
@@ -121,7 +121,7 @@ define([
           }
         );
         layer = new OpenLayers.Layer.TMS(
-          "OpenStreetMap","http://tile.openstreetmap.org/",
+          "OpenStreetMap", "http://tile.openstreetmap.org/",
           {
             type: 'png',
             getURL: this.osm_getTileURL,
