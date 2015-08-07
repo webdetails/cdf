@@ -21,15 +21,15 @@
  * @class CpkQuery
  * @extends BaseQuery
  */
-
-define(['../dashboard/Dashboard.ext',
+define([
+  '../dashboard/Dashboard.ext',
   './BaseQuery',
   '../dashboard/Dashboard.query',
   'amd!../lib/underscore',
   '../dashboard/Utils',
   '../Logger',
-  '../lib/jquery'],
-  function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
+  '../lib/jquery'
+], function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
   var CpkEndpointsOpts = {
     name: "cpk",
@@ -40,8 +40,8 @@ define(['../dashboard/Dashboard.ext',
       endpoint: '',
       systemParams: {},
       ajaxOptions: {
-          dataType:'json',
-        type:'POST',
+        dataType: 'json',
+        type: 'POST',
         async: true,
         xhrFields: {
           withCredentials: true
@@ -144,7 +144,7 @@ define(['../dashboard/Dashboard.ext',
       var myself = this;
       return function(json) {
         myself.setOption('lastResultSet', json);
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet'));
+        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         if(json && json.result == false) {
           // the ajax call might have been successful (no network errors),
           // but the endpoint might have failed, which is signalled by json.result

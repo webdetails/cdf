@@ -44,10 +44,10 @@ define([
        * @for Dashboard
        */
       this.ERROR_CODES = {
-        'QUERY_TIMEOUT' : {
+        'QUERY_TIMEOUT': {
           msg: "Query timeout reached"
         },
-        "COMPONENT_ERROR" : {
+        "COMPONENT_ERROR": {
           msg: "Error processing component"
         }
       };
@@ -213,25 +213,18 @@ define([
      * @for Dashboard
      */
     checkServer: function() {
-      var retVal = false;
       $.ajax({
         type: 'POST',
         async: false,
         dataType: 'json',
         url: DashboardNotificationsExt.getPing(),
         success: function(result) {
-          if(result && result.ping == 'ok') {
-            retVal = true;
-          }
-          else {
-            retVal = false;
-          }
+          return result && result.ping == 'ok';
         },
         error: function() {
-          retVal = false;
+          return false;
         }
       });
-      return retVal;
     }
   });
 });
