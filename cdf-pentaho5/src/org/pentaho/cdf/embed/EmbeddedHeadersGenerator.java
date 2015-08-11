@@ -14,13 +14,16 @@
 package org.pentaho.cdf.embed;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.pentaho.platform.api.engine.IPluginManager;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
 import org.pentaho.platform.repository2.unified.jcr.JcrRepositoryFileUtils;
 import org.pentaho.platform.util.messages.LocaleHelper;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,11 +37,8 @@ public class EmbeddedHeadersGenerator {
   private final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
       "requireCfg.config[''cdf/dashboard/Dashboard''] = {0};\n";
 
-  private final String CDF_PATH = "content/pentaho-cdf/js/cdf-require-js-cfg.js";
-
   private final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
   private final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
-  private final String COMMON_UI_START_PATH = "content/common-ui/resources/web/common-ui-require-js-cfg.js";
 
   private final String URL_CONTEXT_BUILDER =
       "var CONTEXT_PATH = ''{0}'';\n\nvar FULL_QUALIFIED_URL = ''{1}'';\n\nvar SERVER_PROTOCOL = ''{2}'';\n\n";
@@ -51,19 +51,25 @@ public class EmbeddedHeadersGenerator {
   private final String RESERVED_CHARS_DISPLAY_BUILDER = "var RESERVED_CHARS_DISPLAY = ''{0}'';\n";
   private final String RESERVED_CHARS_REGEX_PATTERN_BUILDER = "var RESERVED_CHARS_REGEX_PATTERN = /{0}/;\n";
 
+  private final String DOCUMENT_SCRIPT =
+      "document.write(\"<script language=''javascript'' type=''text/javascript'' src=''{0}''></script>\");\n";
+  private final String REQUIRE_JS = "requirejs";
+  private final String JS = ".js";
+
   protected Locale locale;
-  protected String fullyQualifiedURL;
+  protected String fullQualifiedURL;
   protected String contextConfiguration;
 
   public EmbeddedHeadersGenerator( String fullUrl, String contextConfiguration ) {
     this.locale = LocaleHelper.getLocale();
-    this.fullyQualifiedURL = fullUrl;
+    this.fullQualifiedURL = fullUrl;
     this.contextConfiguration = contextConfiguration;
   }
 
   public String generate() throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append( printScriptsContext() )
+      .append( printRequireJs() )
       .append( printUrlContext() )
       .append( printSessionName() )
       .append( printLocale() )
@@ -79,31 +85,33 @@ public class EmbeddedHeadersGenerator {
     StringBuilder sb = new StringBuilder();
 
     sb.append( INITIAL_COMMENT )
-        .append( REQUIRE_JS_CFG_START )
-        .append( MessageFormat.format( REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION, contextConfiguration ) )
-
-        .append( "// injecting document writes to append the cdf require files\n" )
-        .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + CDF_PATH + "'></script>\");\n" )
-        .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + COMMON_UI_START_PATH + "'></script>\");\n" )
-        .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + REQUIRE_PATH + "'></script>\");\n" )
-        .append( "document.write(\"<script language='javascript' type='text/javascript' src='"
-          + fullyQualifiedURL + REQUIRE_START_PATH + "'></script>\");\n" );
+      .append( REQUIRE_JS_CFG_START )
+      .append( MessageFormat.format( REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION, contextConfiguration ) )
+      .append( "// injecting document writes to append the cdf require files\n" );
+    List<String> contextScripts = getContextScripts();
+    for ( String s : contextScripts ) {
+      sb.append( MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + s ) );
+    }
 
     return sb.toString();
   }
 
+  protected String printRequireJs() {
+    StringBuilder sb = new StringBuilder();
+    sb.append( MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + REQUIRE_PATH ) )
+      .append( MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + REQUIRE_START_PATH ) );
+
+    return sb.toString();
+  }
 
   protected String printUrlContext() {
     String serverProtocolValue;
-    if ( fullyQualifiedURL.startsWith( "http" ) ) {
-      serverProtocolValue = fullyQualifiedURL.substring( 0, fullyQualifiedURL.indexOf( ":" ) );
+    if ( fullQualifiedURL.startsWith( "http" ) ) {
+      serverProtocolValue = fullQualifiedURL.substring( 0, fullQualifiedURL.indexOf( ":" ) );
     } else {
       serverProtocolValue = "http";
     }
-    return MessageFormat.format( URL_CONTEXT_BUILDER, fullyQualifiedURL, fullyQualifiedURL, serverProtocolValue );
+    return MessageFormat.format( URL_CONTEXT_BUILDER, fullQualifiedURL, fullQualifiedURL, serverProtocolValue );
   }
 
   protected String printSessionName() throws IOException {
@@ -178,5 +186,20 @@ public class EmbeddedHeadersGenerator {
 
   protected List<Character> getReservedChars() {
     return JcrRepositoryFileUtils.getReservedChars();
+  }
+
+  protected List<String> getContextScripts() {
+    List<String> scripts = new ArrayList<String>();
+    IPluginManager pluginManager = PentahoSystem.get( IPluginManager.class );
+    List<String> externalResources = pluginManager.getExternalResourcesForContext( REQUIRE_JS );
+    for ( String res : externalResources ) {
+      if ( res == null ) {
+        continue;
+      }
+      if ( res.endsWith( JS ) ) {
+        scripts.add( res );
+      }
+    }
+    return scripts;
   }
 }
