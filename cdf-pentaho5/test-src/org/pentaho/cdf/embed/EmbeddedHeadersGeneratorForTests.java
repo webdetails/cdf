@@ -39,4 +39,13 @@ public class EmbeddedHeadersGeneratorForTests extends EmbeddedHeadersGenerator {
     characters.add( 'b' );
     return characters;
   }
+
+  @Override
+  protected List<String> getContextScripts() {
+    List<String> configurations = new ArrayList<String>();
+    configurations.add( "content/pentaho-cdf/js/cdf-require-js-cfg.js" );
+    configurations.add( "content/common-ui/resources/web/common-ui-require-js-cfg.js" );
+    return configurations;
+  }
+
 }
