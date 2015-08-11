@@ -306,12 +306,23 @@ public class CdfApi {
   @Produces( "text/javascript" )
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
                                      @Context HttpServletResponse servletResponse ) throws Exception {
-    int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
+    buildCdfEmbedContext( servletRequest.getProtocol(), servletRequest.getServerName(),
+        servletRequest.getServerPort(), servletRequest.getSession().getMaxInactiveInterval(),
+        servletRequest.getParameter( "locale" ), servletRequest, servletResponse );
+  }
+
+  // CDE will call buildCdfEmbedContext via InterPluginCall
+  public void buildCdfEmbedContext( @QueryParam( "protocol" ) String protocol,
+                                    @QueryParam( "name" ) String name,
+                                    @QueryParam( "port" ) int port,
+                                    @QueryParam( "inactiveInterval" ) int inactiveInterval,
+                                    @QueryParam( "locale" ) String locale,
+                                    @Context HttpServletRequest servletRequest,
+                                    @Context HttpServletResponse servletResponse ) throws Exception {
     try {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
-          new EmbeddedHeadersGenerator( buildFullServerUrl( servletRequest ),
+          new EmbeddedHeadersGenerator( buildFullServerUrl( protocol, name, port ),
           getConfiguration( "", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
-      String locale = servletRequest.getParameter( "locale" );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
       }
@@ -320,7 +331,6 @@ public class CdfApi {
       logger.error( "getCdfEmbeddedContext: " + ex.getMessage(), ex );
       throw ex;
     }
-
   }
 
   protected String getConfiguration( String path, String viewId, HashMap<String, String> parameterMap,
@@ -328,14 +338,13 @@ public class CdfApi {
     return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
   }
 
-  protected String buildFullServerUrl( HttpServletRequest servletRequest ) {
+  protected String buildFullServerUrl( String protocol, String serverName, int serverPort  ) {
     String p = "http";
-    String protocol = servletRequest.getProtocol();
     if ( !StringUtils.isEmpty( protocol ) ) {
       String[] bits = protocol.split( "/" );
       p = bits[ 0 ].toLowerCase();
     }
     String webAppPath = PentahoRequestContextHolder.getRequestContext().getContextPath();
-    return p + "://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + webAppPath;
+    return p + "://" + serverName + ":" + serverPort + webAppPath;
   }
 }
