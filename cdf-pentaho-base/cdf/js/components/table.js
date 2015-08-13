@@ -294,6 +294,13 @@ var TableComponent = UnmanagedComponent.extend({
       Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
+
+    // Make sure we have a tableStyle in place
+    if(typeof cd.tableStyle === "undefined") {
+      cd.tableStyle = wcdfSettings.rendererType === "bootstrap" ?
+      "bootstrap" : "themeroller";
+    }
+
     cd["tableId"] = this.htmlObject + "Table";
 
     // make sure we have no expand parameters set

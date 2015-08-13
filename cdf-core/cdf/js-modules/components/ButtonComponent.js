@@ -21,7 +21,12 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
 
     render: function() {
       var myself = this;
-      
+
+      // making sure the button plugin we have loaded is the jquery one
+      if($.fn.button.noConflict) {
+        $.fn.button.noConflict();
+      }
+
       // store the original success and failure callback functions and
       // set a new function to re-enable the button and call the original function
       if(typeof this.successCallback === 'function') {
@@ -43,8 +48,17 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
         this.failureCallback = function() { myself.enable(); };
       }
 
+      if (typeof this.buttonStyle === "undefined") {
+        this.buttonStyle = this.dashboard.getWcdfSettings().rendererType === "bootstrap" ?
+          "bootstrap" : "themeroller";
+      }
+      var cssClass = this.cssClass || "";
+      if (this.buttonStyle === "bootstrap") {
+        cssClass = "btn-default " + cssClass;
+      }
+
       var b = $("<button type='button'/>")
-        .addClass('buttonComponent')
+        .addClass('buttonComponent ' + cssClass)
         .unbind("click")
         .bind("click", function() {
           var proceed = true;
