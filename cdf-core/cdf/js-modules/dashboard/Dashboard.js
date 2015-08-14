@@ -235,6 +235,18 @@ define([
      */
     getWebAppPath: function() {
       return this.webAppPath;
+    },
+
+    /**
+     * Gets the dashboard's wcdfSettings
+     * This method is meant to be overriden
+     *
+     * @method getWebAppPath
+     * @returns the dashboard's wcdfSettings
+     */
+    getWcdfSettings: function() {
+      Logger.info("getWcdfSettings was not overriden, returning empty object");
+      return {};
     }
   });
 
