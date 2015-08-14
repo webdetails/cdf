@@ -37,10 +37,18 @@ define(['amd!../lib/underscore', './UnmanagedComponent', '../dashboard/Utils'],
      */
     triggerAction: function() {
       var params = Utils.propertiesArrayToObject(this.actionParameters);
-      var failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function() {};
-      var successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function() {};
-
-      return this.dashboard.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+      var failureCallback =  (this.failureCallback) ?  this.failureCallback : function() {};
+      var successCallback = this.successCallback ?  this.successCallback : function() {};
+      var success = _.bind(function() {
+        this.unblock();
+        successCallback.apply(this, arguments);
+      }, this);
+      var failure = _.bind(function() {
+        this.unblock();
+        failureCallback.apply(this, arguments);
+      }, this);
+      this.block();
+      return this.dashboard.getQuery(this.actionDefinition).fetchData(params, success, failure);
     },
 
     /**
