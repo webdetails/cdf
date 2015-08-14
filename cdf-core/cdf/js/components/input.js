@@ -1270,8 +1270,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
         this.indexes[name].push(index);
       }
-    }
-    else {//de-select old, select new
+    } else if (this.indexes[name] === index) {
+        return false;
+    } else { //de-select old, select new
       this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
       buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);

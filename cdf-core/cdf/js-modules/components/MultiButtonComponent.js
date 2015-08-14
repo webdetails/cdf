@@ -192,6 +192,8 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
           buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
           this.indexes[name].push(index);
         }
+      } else if (this.indexes[name] === index) {
+        return false;
       } else {//de-select old, select new
         this.clearSelections(htmlObject, name, verticalOrientation);
         this.indexes[name] = index;
