@@ -297,7 +297,7 @@ var TableComponent = UnmanagedComponent.extend({
 
     // Make sure we have a tableStyle in place
     if(typeof cd.tableStyle === "undefined") {
-      cd.tableStyle = wcdfSettings.rendererType === "bootstrap" ?
+      cd.tableStyle = typeof wcdfSettings != "undefined" && wcdfSettings.rendererType === "bootstrap" ?
       "bootstrap" : "themeroller";
     }
 
