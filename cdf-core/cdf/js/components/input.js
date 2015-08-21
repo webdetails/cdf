@@ -1583,7 +1583,7 @@ var ButtonComponent = ActionComponent.extend({
       }
 
       if (typeof this.buttonStyle === "undefined") {
-        this.buttonStyle = wcdfSettings.rendererType === "bootstrap" ?
+        this.buttonStyle = typeof wcdfSettings != "undefined" && wcdfSettings.rendererType === "bootstrap" ?
           "bootstrap" : "themeroller";
       }
       var cssClass = this.cssClass || "";

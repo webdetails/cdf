@@ -317,7 +317,7 @@ define([
       // Make sure we have a tableStyle in place
       if(typeof cd.tableStyle === "undefined") {
         cd.tableStyle = this.dashboard.getWcdfSettings().rendererType === "bootstrap" ?
-        "bootstrap" : "themeroller";
+        "bootstrap" : "classic";
       }
 
       cd["tableId"] = this.htmlObject + "Table";
