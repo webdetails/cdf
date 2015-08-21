@@ -329,7 +329,8 @@ define([
                   var st;
                   st = {
                     model: model,
-                    configuration: options
+                    configuration: options,
+                    dashboard: that.dashboard
                   };
                   return addIn.call($tgt, st, addInOptions);
                 };
