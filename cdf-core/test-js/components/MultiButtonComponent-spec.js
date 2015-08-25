@@ -20,28 +20,33 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
   describe("The Multi Button Component #", function() {
 
     var dashboard = new Dashboard();
+    var htmlObject = "sampleMultiButtonComponentObject";
+    var componentName = "multiButtonComponent";
+    $("body").append('<div id="' + htmlObject + '"></div>');
 
     dashboard.addParameter("region", "");
 
-    dashboard.init();
-
     var multiButtonComponent = new MultiButtonComponent({
-      name: "multiButtonComponent",
+      name: componentName,
       type: "multiButtonComponent",
       parameters: [],
       path: "/fake/regions.xaction",
       parameter: "region",
       separator: ",&nbsp;",
       valueAsId: true,
+      valuesArray: [["Button1","b1"],["Button2","b2"],["Button3","b3"]],
       isMultiple: false,
-      htmlObject: "sampleObject",
+      htmlObject: htmlObject,
       executeAtStart: true,
       postChange: function() {
+        this.testCounter = this.testCounter ? this.testCounter + 1 : 1;
         return "you chose: " + this.dashboard.getParameterValue(this.parameter);
       }
     });
 
     dashboard.addComponent(multiButtonComponent);
+    dashboard.init();
+
 
     /**
      * ## The Multi Button Component # allows a dashboard to execute update
@@ -59,6 +64,23 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
       });
 
       dashboard.update(multiButtonComponent);
+    });
+
+    /**
+     * ## The Multi Button Component # doesn't trigger postChange N times for N clicks in same button
+     */
+    it("doesn't trigger postChange N times for N clicks in same button", function(done) {
+      multiButtonComponent.clickButton(htmlObject, componentName, 1);
+      multiButtonComponent.clickButton(htmlObject, componentName, 2);
+      multiButtonComponent.clickButton(htmlObject, componentName, 0);
+      multiButtonComponent.clickButton(htmlObject, componentName, 0);
+      multiButtonComponent.clickButton(htmlObject, componentName, 0);
+      multiButtonComponent.clickButton(htmlObject, componentName, 0);
+      // sending the expect to the end of the call stack
+      setTimeout(function(){
+        expect(multiButtonComponent.testCounter).toEqual(3);
+        done();
+      }, 1);
     });
   });
 });
