@@ -62,6 +62,7 @@ define([
      * Normalizes return values by using {@link Utils.normalizeValue}.
      * </p>
      *
+     * @method _getParameterValue
      * @return {*} the parameter value.
      */
     _getParameterValue: function() {

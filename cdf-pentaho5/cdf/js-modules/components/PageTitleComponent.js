@@ -11,42 +11,43 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../dashboard/Utils', '../lib/jquery', './NavigatorBaseComponent'],
-  function(DashboardExt, Utils, $, NavigatorBaseComponent) {
+define([
+  '../dashboard/Dashboard.ext',
+  '../dashboard/Utils',
+  '../lib/jquery',
+  './NavigatorBaseComponent'
+], function(DashboardExt, Utils, $, NavigatorBaseComponent) {
 
   var PageTitleComponent = NavigatorBaseComponent.extend({
-    update : function() {
+    update: function() {
       var myself = this;
-      if( NavigatorBaseComponent.navigatorResponse == -1 ){
-        $.getJSON(DashboardExt.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || Utils.getPathParameter()), function(json){
+      if(NavigatorBaseComponent.navigatorResponse == -1) {
+        $.getJSON(DashboardExt.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || Utils.getPathParameter()), function(json) {
           myself.processPageTitleResponse(json);
         });
-      }
-      else{
+      } else {
         this.processPageTitleResponse(NavigatorBaseComponent.navigatorResponse);
       }
     },
-    processPageTitleResponse : function(json) {
+    processPageTitleResponse: function(json) {
       // Store the value
       NavigatorBaseComponent.navigatorResponse = json;
 
-      var file = this.findPageTitleObject(json.content,json.id);
+      var file = this.findPageTitleObject(json.content, json.id);
 
-      if (file.title != undefined && file.description != undefined){
+      if(file.title != undefined && file.description != undefined) {
         $("#"+this.htmlObject).text(file.title + (file.description != "" ? (" - " + file.description) : ""));
       }
     },
-    findPageTitleObject : function(folders,id){
-      for(var i = 0; i<folders.length; i++){
+    findPageTitleObject: function(folders, id) {
+      for(var i = 0; i < folders.length; i++) {
         var file = folders[i];
-        if(file.id == id){
+        if(file.id == id) {
           return file;
-        }
-        else if ((id + "/").indexOf(file.id + "/")>=0){
+        } else if((id + "/").indexOf(file.id + "/") >= 0) {
           // we're on the good path
-          return this.findPageTitleObject(file.folders,id);
-        }
-        else{
+          return this.findPageTitleObject(file.folders, id);
+        } else {
           continue;
         }
       }

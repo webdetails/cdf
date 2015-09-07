@@ -40,11 +40,11 @@ define([
     use_mercator: false,
 
     /** 
-     * Converts a LonLat Object using the Mercator formula
+     * Converts a LonLat Object using the Mercator formula.
      *
+     * @method lonLatToMercator
      * @param {OpenLayers.LonLat} ll the coordinate object.
-     * 
-     * @returns {OpenLayers.LonLat} the transformed coordinates
+     * @return {OpenLayers.LonLat} the transformed coordinates
      */
     lonLatToMercator: function(ll) {
       var lon = ll.lon * 20037508.34 / 180;
@@ -56,6 +56,7 @@ define([
     /** 
      * Constructs and sets some initial values and calls show_map.
      *
+     * @method init_map
      * @param {String} div the id of the div that contains the map
      * @param {Float} lon The longitude coordinate.
      * @param {Float} lat The latitude coordinate.
@@ -100,9 +101,10 @@ define([
       }
     },
 
-
     /** 
      * Sets the inital layer and displays the map.
+     *
+     * @method show_map
      */
     show_map: function() {
       var map = this.map;
@@ -113,7 +115,8 @@ define([
         //for now only one OpenStreetMap layer is supported
         map = new OpenLayers.Map(
           map_div,
-          { maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+          {
+            maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
             numZoomLevels: 18,
             maxResolution: 156543,
             units: 'm',
@@ -145,22 +148,29 @@ define([
 
     /**
      * Adds a new marker - Not implemented.
+     *
+     * @method add_marker
      */
     add_marker: function(point, icon) {},
 
     /**
      * Deletes a marker - Not implemented.
+     *
+     * @method delete_marker
      */
     delete_marker: function(old_marker) {},
 
     /**
      * Change the marker Icon - Not implemented.
+     *
+     * @method change_marker
      */
     change_marker: function(old_marker, new_icon) {},
 
     /**
      * Shows a popup bubble with the html content provided
      *
+     * @method show_bubble
      * @param {String} html the popup html content
      */
     show_bubble: function(html) {
@@ -185,6 +195,8 @@ define([
 
     /**
      * Shows the mouse pointer coordinates when hovering over the map
+     *
+     * @method show_positon
      */
     show_positon: function() {
       this.map.addControl(new OpenLayers.Control.MousePosition());
@@ -192,6 +204,8 @@ define([
 
     /**
      * Add the layer control to the map
+     *
+     * @method show_layers
      */
     show_layers: function() {
       this.map.addControl(new OpenLayers.Control.LayerSwitcher());

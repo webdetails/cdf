@@ -70,7 +70,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
      * Returns the AddIn label
      *
      * @method getLabel
-     * @returns {String} AddIn label
+     * @return {String} AddIn label
      */
     this.getLabel = function() {
       return _label;
@@ -81,7 +81,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
      * Returns the AddIn name
      *
      * @method getName
-     * @returns {String} AddIn name
+     * @return {String} AddIn name
      */
     this.getName = function() {
       return _name;

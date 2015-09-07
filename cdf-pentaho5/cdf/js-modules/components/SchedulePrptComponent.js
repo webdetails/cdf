@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!../lib/jquery.impromptu', 'css!./SchedulePrptComponent'],
-  function(SchedulePrptComponentExt, PrptComponent, $) {
+define([
+  './SchedulePrptComponent.ext',
+  './PrptComponent',
+  '../lib/jquery',
+  'amd!../lib/jquery.impromptu',
+  'css!./SchedulePrptComponent'
+], function(SchedulePrptComponentExt, PrptComponent, $) {
 
   var SchedulePrptComponent = PrptComponent.extend({
     visible: false,

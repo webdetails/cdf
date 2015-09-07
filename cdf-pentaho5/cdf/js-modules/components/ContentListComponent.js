@@ -11,11 +11,16 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComponent', '../lib/jquery', 'amd!../lib/jquery.fancybox'],
-  function(DashboardExt, Utils, NavigatorBaseComponent, $) {
+define([
+  '../dashboard/Dashboard.ext',
+  '../dashboard/Utils',
+  './NavigatorBaseComponent',
+  '../lib/jquery',
+  'amd!../lib/jquery.fancybox'
+], function(DashboardExt, Utils, NavigatorBaseComponent, $) {
 
   var ContentListComponent = NavigatorBaseComponent.extend({
-    update : function() {
+    update: function() {
       var myself = this;
       var path = this.mode != 4
         ? (NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path))
@@ -26,7 +31,7 @@ define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComp
     draw: function(path) {
       var myself = this;
       $.getJSON(DashboardExt.getJSONSolution() + "?mode=contentList" + (path != "" ? "&path=" + path : ""), function(json) {
-        myself.processContentListResponse(json,path);
+        myself.processContentListResponse(json, path);
       });
     },
 
@@ -38,9 +43,9 @@ define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComp
       $("#"+this.htmlObject).empty();
       var files = json.content || [];
       files.sort(function(a,b) {
-        var _a = (a.type == "FOLDER"?"000":"") + a.name;
-        var _b = (b.type == "FOLDER"?"000":"") + b.name;
-        return _a > _b
+        var _a = (a.type == "FOLDER" ? "000" : "") + a.name;
+        var _b = (b.type == "FOLDER" ? "000" : "") + b.name;
+        return _a > _b;
       });
       // Create the outmost ul
       var container = $("<ul></ul>").attr("id","contentList-" + this.name).appendTo("#" + this.htmlObject);
@@ -52,12 +57,12 @@ define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComp
 
         var parentDir =  {
           name: "Up",
-          title:"Up",
+          title: "Up",
           type: "FOLDER",
           description: "Go to parent directory",
           visible: true,
           solution: NavigatorBaseComponent.getParentSolution(),
-          path: path.substring(0,path.lastIndexOf("/"))
+          path: path.substring(0, path.lastIndexOf("/"))
         };
         files.reverse().push(parentDir);
         files.reverse();
@@ -65,7 +70,7 @@ define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComp
 
       var myself = this;
       
-      $.each(files,function(i,val) {
+      $.each(files, function(i, val) {
         // We want to iterate only depending on the options:
         // 1 - Files only
         // 2 - Folders only
@@ -128,7 +133,7 @@ define(['../dashboard/Dashboard.ext', '../dashboard/Utils', './NavigatorBaseComp
 
       });
 
-      $('#contentList-' + this.name + ' a').tooltip({ showURL: false });
+      $('#contentList-' + this.name + ' a').tooltip({showURL: false});
       $("li.greybox a").click(function() {
         var t = this.title || this.innerHTML || this.href;
         //$(window).scrollTop(0);

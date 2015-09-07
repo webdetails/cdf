@@ -19,13 +19,14 @@
 ], function(Dashboard, Logger, $, DashboardStorageExt) {
 
   /**
-   * A module representing an extension to Dashboard module for storage.
+   * A module representing an extension to the Dashboard module for storage.
+   *
    * @module Dashboard.storage
    */
   Dashboard.implement({
 
     /**
-     * Method used by the Dashboard constructor for storage initialization
+     * Method used by the Dashboard constructor for storage initialization.
      *
      * @method _initStorage
      * @for Dashboard
@@ -40,7 +41,7 @@
     },
 
     /**
-     * Requests the storage object and stores it in storage object
+     * Requests the storage object and stores it in storage object.
      *
      * @method loadStorage
      * @for Dashboard
@@ -74,7 +75,7 @@
     },
 
     /**
-     * Saves the storage in the server, based on the storage object
+     * Saves the storage in the server, based on the storage object.
      *
      * @method saveStorage
      * @for Dashboard
@@ -109,7 +110,7 @@
     },
 
     /**
-     * Cleans the storage object in the client and places a request to clean it in the server
+     * Cleans the storage object in the client and places a request to clean it in the server.
      *
      * @method cleanStorage
      * @for Dashboard

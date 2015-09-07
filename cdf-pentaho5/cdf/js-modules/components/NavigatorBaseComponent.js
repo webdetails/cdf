@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Utils', '../Logger', './BaseComponent'],
-  function(Utils, Logger, BaseComponent) {
+define([
+  '../dashboard/Utils',
+  '../Logger',
+  './BaseComponent'
+], function(Utils, Logger, BaseComponent) {
 
   var NavigatorBaseComponent = BaseComponent.extend({}, {
     path: Utils.getQueryParameter("path"),
@@ -23,13 +26,13 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
 
     navigatorResponse : -1,
 
-    getSolutionJSON : function(solution) {
+    getSolutionJSON: function(solution) {
       var json = NavigatorBaseComponent.navigatorResponse;
       var files = json.solution.folders;
       var locationArray;
 
       var found = 0;
-      for(var i = 0; i<files.length; i++) {
+      for(var i = 0; i < files.length; i++) {
         var file = files[i];
         if(NavigatorBaseComponent.solution == ""
           || file.solution == NavigatorBaseComponent.solution) {
@@ -66,9 +69,9 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
       }
     },
 
-    browseContent : function(files, currentPath) {
+    browseContent: function(files, currentPath) {
 
-      for(var i = 0; i<files.length; i++) {
+      for(var i = 0; i < files.length; i++) {
         var file = files[i];
 
         if(file.type == "FOLDER" && file.path == currentPath) {
@@ -84,20 +87,26 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
         }
 
       }
-      Logger.error("Fatal: path " + (NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path)) + " not found in navigation object");
+      Logger.error("Fatal: path "
+        + (NavigatorBaseComponent.path
+          || Utils.getPathParameter(NavigatorBaseComponent.path))
+        + " not found in navigation object");
       return;
     },
 
-    getParentSolution : function() {
-      if((NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path)).length>0) {
+    getParentSolution: function() {
+      if((NavigatorBaseComponent.path
+        || Utils.getPathParameter(NavigatorBaseComponent.path)).length > 0) {
+
         return NavigatorBaseComponent.solution;
       } else {
         return "";
       }
     },
 
-    getParentPath : function() {
-      var path = NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path);
+    getParentPath: function() {
+      var path = NavigatorBaseComponent.path
+        || Utils.getPathParameter(NavigatorBaseComponent.path);
       var index = path.lastIndexOf("/");
       if(index == -1) {
         return "";
@@ -106,7 +115,7 @@ define(['../dashboard/Utils', '../Logger', './BaseComponent'],
       return parentPath;
     },
 
-    isAncestor : function(solution, path) {
+    isAncestor: function(solution, path) {
       if(solution != NavigatorBaseComponent.solution) {
         return false;
       } else {

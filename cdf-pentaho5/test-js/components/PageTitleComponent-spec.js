@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/PageTitleComponent"],
-  function(Dashboard, PageTitleComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/PageTitleComponent"
+], function(Dashboard, PageTitleComponent) {
 
   /**
    * ## The Page Title Component

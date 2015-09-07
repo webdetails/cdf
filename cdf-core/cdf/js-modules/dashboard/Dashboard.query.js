@@ -47,7 +47,7 @@ define([
      * Gets the base query object, from where other query types can be extended
      *
      * @method getBaseQuery
-     * @returns {*} the base query object
+     * @return {*} the base query object
      *
      * @for Dashboard
      */
@@ -90,7 +90,7 @@ define([
      *
      * @method hasQuery
      * @param type query type
-     * @returns {boolean} _true_ if the query type has been registered for this dashboard
+     * @return {boolean} _true_ if the query type has been registered for this dashboard
      *
      * @for Dashboard
      */
@@ -103,7 +103,7 @@ define([
      *
      * @method detectQueryType
      * @param qd - Query definition object
-     * @returns {queryType} Query type associated with the query definition object
+     * @return {queryType} Query type associated with the query definition object
      *
      * @for Dashboard
      */
@@ -139,7 +139,7 @@ define([
      * @method getQuery
      * @param type Query type
      * @param opts Options object
-     * @returns {*} the query object
+     * @return {*} the query object
      *
      * @for Dashboard
      */
@@ -175,7 +175,7 @@ define([
      * Lists the registered query types in this dashboard
      *
      * @method listQueries
-     * @returns {Array} Array of registered query types
+     * @return {Array} Array of registered query types
      *
      * @for Dashboard
      */
