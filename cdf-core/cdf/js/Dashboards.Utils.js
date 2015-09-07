@@ -61,7 +61,7 @@ Dashboards.getLocationSearchString = function() {
    * @param value
    * @param mask
    * @param langCode
-   * @returns {string} formatted number
+   * @return {string} formatted number
    */
   D.numberFormat = function(value, mask, langCode) {
     if(formProvider === undefined) {
@@ -105,7 +105,7 @@ Dashboards.getLocationSearchString = function() {
    * @param date
    * @param mask
    * @param langCode
-   * @returns {string} formatted date
+   * @return {string} formatted date
    */
   D.dateFormat = function(date, mask, langCode) {
     var toFormat = moment(date);
@@ -143,7 +143,7 @@ Dashboards.getLocationSearchString = function() {
    *
    * @param date
    * @param mask
-   * @returns {Date} parsed date as a Date object
+   * @return {Date} parsed date as a Date object
    */
   D.dateParse = function(date, mask) {
     return moment(date, mask).toDate();

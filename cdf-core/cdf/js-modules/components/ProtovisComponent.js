@@ -12,9 +12,9 @@
  */
 
 define([
-    './ChartComponent',
-    '../lib/jquery',
-    '../lib/CCC/protovis-compat!'
+  './ChartComponent',
+  '../lib/jquery',
+  '../lib/CCC/protovis-compat!'
 ], function(ChartComponent, $, pv) {
 
   var ProtovisComponent =  ChartComponent.extend({

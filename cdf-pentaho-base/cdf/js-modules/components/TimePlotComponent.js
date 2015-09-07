@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent', '../dashboard/Utils'],
-  function(XactionComponentExt, Logger, $, BaseComponent, Utils) {
+define([
+  './XactionComponent.ext',
+  '../Logger',
+  '../lib/jquery',
+  './BaseComponent',
+  '../dashboard/Utils'
+], function(XactionComponentExt, Logger, $, BaseComponent, Utils) {
 
   var TimePlotComponent = BaseComponent.extend({
 
@@ -22,7 +27,7 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       this.listeners = this.InitialListeners;
     },
 
-    update : function() {
+    update: function() {
 
       var myself = this;
 
@@ -85,7 +90,7 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
         min: 0,
         axisLabelsPlacement: "left",
         gridType: "short",
-        valueFormat : function(value) {
+        valueFormat: function(value) {
           return toFormatedString(value);
         }
       });
@@ -108,7 +113,7 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
 
       var cols = typeof cd['columns'] == 'function' ? cd['columns']() : cd['columns'];
       if(cols == undefined || cols.length == 0) {
-        Logger.log("Fatal - No 'columns' property passed in chartDefinition","error");
+        Logger.log("Fatal - No 'columns' property passed in chartDefinition", "error");
         return;
       }
       // Write the title
@@ -118,10 +123,11 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       }
 
       var plotInfo = [];
-      for(var i = 0,j=0; i<cols.length; i++,j++) {
+      for(var i = 0, j = 0; i < cols.length; i++, j++) {
 
         j = j > 7 ? 0 : j;
-        title.append('<span id="' + myself.name + 'Plot' + i + 'Header" style="color:' + myself.dashboard.timePlotColors[j].toHexString() + '">' + cols[i] + ' &nbsp;&nbsp;</span>');
+        title.append('<span id="' + myself.name + 'Plot' + i + 'Header" style="color:'
+          + myself.dashboard.timePlotColors[j].toHexString() + '">' + cols[i] + ' &nbsp;&nbsp;</span>');
 
         var plotInfoOpts = {
           id: myself.name + "Plot" + i,
@@ -134,10 +140,10 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
           hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
           showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
           toolTipFormat: function(value,plot) {
-            return  plot._name + " = " + toFormatedString(value);
+            return plot._name + " = " + toFormatedString(value);
           },
           headerFormat: function(value,plot) {
-            return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";
+            return plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";
           }
         };
         if(cd.dots == true) {
@@ -174,10 +180,10 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       $("#" + myself.htmlObject).append("<div class='timeplot'></div>");
 
       if(cd.height > 0) {
-        $("#" + myself.htmlObject + " > div.timeplot").css("height",cd.height);
+        $("#" + myself.htmlObject + " > div.timeplot").css("height", cd.height);
       }
       if(cd.width > 0) {
-        $("#" + myself.htmlObject + " > div.timeplot").css("width",cd.width);
+        $("#" + myself.htmlObject + " > div.timeplot").css("width", cd.width);
       }
 
       timeplot = Timeplot.create($("#" + myself.htmlObject + " > div.timeplot")[0], plotInfo);
@@ -232,24 +238,24 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
         });
       }
     },
-    filterEvents : function(events, range) {
+    filterEvents: function(events, range) {
       var result = [];
       var min = MetaLayer.toDateString(new Date(range.earliestDate));
       var max = MetaLayer.toDateString(new Date(range.latestDate));
-      for(i = 0; i < events.length; i++){
-        if(events[i].start >= min && ((events[i].end == undefined && events[i].start <= max) || events[i].end <= max)){
+      for(i = 0; i < events.length; i++) {
+        if(events[i].start >= min && ((events[i].end == undefined && events[i].start <= max) || events[i].end <= max)) {
           result.push(events[i]);
         }
       }
       return result;
     },
-    updateDateRangeInput: function(start,end) {
+    updateDateRangeInput: function(start, end) {
       var toDateString = function(d) {
         var currentMonth = "0" + (d.getMonth() + 1);
         var currentDay = "0" + (d.getDate());
         return d.getFullYear() + "-"
-          + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-"
-          + (currentDay.substring(currentDay.length-2, currentDay.length));
+          + (currentMonth.substring(currentMonth.length - 2, currentMonth.length)) + "-"
+          + (currentDay.substring(currentDay.length - 2, currentDay.length));
       };
       if(this.chartDefinition.dateRangeInput != undefined) {
         if(start > end){

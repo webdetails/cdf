@@ -12,8 +12,7 @@
  */
 
 /**
- * Logger module.
- * Require as cdf/Logger
+ * Logger module. Require as 'cdf/Logger'.
  *
  * @class Logger
  * @module Logger

@@ -11,14 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
+/*
  * Purpose: Provide extensible datasources via Dashboard Addins
  * Author: Andy Grohe
  * Contact: agrohe21@gmail.com
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
 define([
@@ -33,6 +34,7 @@ define([
 
   /**
    * Class that will be used by both XML/A and XML/A Discover classes.
+   *
    * @class SharedXmla
    * @extends Base
    */
@@ -146,6 +148,7 @@ define([
 
   /**
    * Class that represents a XML/A query.
+   *
    * @class XmlaQuery
    * @extends BaseQuery
    */
@@ -159,7 +162,7 @@ define([
     },
 
     /**
-     * Init method for the XML/A query
+     * Init method for the XML/A query.
      *
      * @method init
      * @param queryDefinition Object with the following properties: queryType, catalog, query
@@ -187,7 +190,7 @@ define([
      *
      * @method transformXMLAresults
      * @param results Object with the XML/A query result.
-     * @returns {{}} Object with the XML/A query metadata and resultset as properties.
+     * @return {{}} Object with the XML/A query metadata and resultset as properties.
      */
     transformXMLAresults: function(results) {
       var rows,
@@ -253,6 +256,7 @@ define([
 
   /**
    * Class that represents a XML/A Discover query.
+   *
    * @class XmlaQuery
    * @extends BaseQuery
    */
@@ -292,7 +296,7 @@ define([
      *
      * @method transformDiscoverresults
      * @param results Object with the XML/A Discover query result.
-     * @returns {{}} Object with the XML/A Discover query metadata and resultset as properties.
+     * @return {{}} Object with the XML/A Discover query metadata and resultset as properties.
      */
     transformDiscoverresults: function(results) {
       var cols = results.getFields(),

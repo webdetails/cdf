@@ -76,9 +76,13 @@ define([
   }, {
 
     /**
+     * Generates a query object given a definition object and a success callback function.
+     *
+     * @method makeQuery
+     * @static
      * @deprecated
-     * @param object
-     * @param successCallback
+     * @param object the object containing the query definition
+     * @param successCallback the success callback function
      */
     makeQuery: function(object, successCallback) {
 
@@ -99,7 +103,7 @@ define([
           // We need to make sure we're getting data from the right place,
           // depending on whether we're using CDA
 
-          var changedValues = undefined;
+          var changedValues;
           if((typeof(object.postFetch) == 'function')) {
             changedValues = object.postFetch(values);
           }
@@ -111,10 +115,13 @@ define([
           if(object.resultvar != undefined) {
             object.dashboard.setParameter(object.resultvar, object.result);
           }
-          object.result = values.resultset != undefined ? values.resultset : values;
+          
           if(typeof values.resultset != "undefined") {
             object.metadata = values.metadata;
             object.queryInfo = values.queryInfo;
+            object.result = values.resultset;
+          } else {
+            object.result = values;
           }
         }
       }

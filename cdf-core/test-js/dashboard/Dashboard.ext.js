@@ -16,7 +16,7 @@ define('cdf/dashboard/Dashboard.ext', [], function() {
     pluginName: "pentaho-cdf",
     samplesBasePath: "/public/plugin-samples/",
 
-    getPluginBase: function( plugin ) {
+    getPluginBase: function(plugin) {
       return "";
     },
 

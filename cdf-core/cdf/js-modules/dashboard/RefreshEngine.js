@@ -12,7 +12,7 @@
  */
 
 /**
- * Class that manages the periodic refresh of components. Require as cdf/dashboard/RefreshEngine
+ * Class that manages the periodic refresh of components. Require as 'cdf/dashboard/RefreshEngine'.
  *
  * @module RefreshEngine
  * @class RefreshEngine
@@ -21,7 +21,7 @@
 define([], function() {
 
   /**
-   * Builds a new RefreshEngine for a particular dashboard
+   * Builds a new RefreshEngine for a particular dashboard.
    *
    * @constructor
    *
@@ -135,12 +135,12 @@ define([], function() {
 
       /**
        * Set a component's refresh period and clears it from the queue if there;
-       * processComponent must be called to activate the refresh timer for the component
+       * processComponent must be called to activate the refresh timer for the component.
        *
        * @method registerComponent
        * @param component Component to register
        * @param refreshPeriod Associated refresh period
-       * @returns {boolean} _true_ if registration succeeds, _false_ otherwise
+       * @return {boolean} _true_ if registration succeeds, _false_ otherwise
        */
       registerComponent: function(component, refreshPeriod) {
         if(!component) { return false; }
@@ -154,11 +154,11 @@ define([], function() {
       },
 
       /**
-       * Gets the refresh period for a component
+       * Gets the refresh period for a component.
        *
        * @method getRefreshPeriod
        * @param component Component from which we want the refresh period
-       * @returns {*} Associated refresh period or the value NO_REFRESH (0)
+       * @return {*} Associated refresh period or the value NO_REFRESH (0)
        */
       getRefreshPeriod: function(component) {
         if(component && component.refreshPeriod > 0) {
@@ -169,11 +169,11 @@ define([], function() {
       },
 
       /**
-       * Sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed
+       * Sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed.
        *
        * @method processComponent
        * @param component Component to process
-       * @returns {boolean} _true_ if the component was correctly processed.
+       * @return {boolean} _true_ if the component was correctly processed.
        */
       processComponent: function(component) {
         clearFromQueue(component);
@@ -185,10 +185,10 @@ define([], function() {
       },
 
       /**
-       * Clears queue, sets next refresh for all components, restarts timer
+       * Clears queue, sets next refresh for all components, restarts timer.
        *
        * @method processComponents
-       * @returns {boolean} _true_ if components were correctly processed
+       * @return {boolean} _true_ if components were correctly processed
        */
       processComponents: function() {
         clearQueue();
@@ -200,7 +200,7 @@ define([], function() {
       },
 
       /**
-       * Pop due items from queue, refresh components and set next timeout
+       * Pop due items from queue, refresh components and set next timeout.
        *
        * @method fireRefresh
        */
@@ -219,7 +219,7 @@ define([], function() {
       },
 
       /**
-       * Called when a valid globalRefreshPeriod exists, it updates all components without their own refresh period
+       * Called when a valid globalRefreshPeriod exists, it updates all components without their own refresh period.
        *
        * @method fireGlobalRefresh
        */
@@ -235,7 +235,7 @@ define([], function() {
       },
 
       /**
-       * Sets the global refresh period
+       * Sets the global refresh period.
        *
        * @method setGlobalRefresh
        * @param refreshPeriod Refresh period to set
@@ -245,10 +245,10 @@ define([], function() {
       },
 
       /**
-       * Gets the current queue of components to be processed
+       * Gets the current queue of components to be processed.
        *
        * @method getQueue
-       * @returns {Array} array with components that need to be refreshed
+       * @return {Array} array with components that need to be refreshed
        * @private
        */
       getQueue: function() {

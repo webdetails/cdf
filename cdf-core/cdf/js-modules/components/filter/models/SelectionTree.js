@@ -248,7 +248,7 @@ define([
     },
     inferSelection: function(logic, callback) {
 
-      /**
+      /*
        * calculate the current state based on the state of the children
        * and optionally execute a callback
        */

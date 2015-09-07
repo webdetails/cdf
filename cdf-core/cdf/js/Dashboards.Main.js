@@ -478,7 +478,7 @@ Dashboards.updateComponent = function(object) {
  * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
  * @param {object|string} component the component or a string representing the component's name.
- * @returns {string|undefined} a string with the component's name or <tt>undefined</tt>.
+ * @return {string|undefined} a string with the component's name or <tt>undefined</tt>.
  */
 Dashboards.getComponentName = function(component) {
   if(!component) { return; }
@@ -494,7 +494,7 @@ Dashboards.getComponentName = function(component) {
  * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
  * @param {object|string} component the component or a string representing the component's name.
- * @returns {object|undefined} the component or <tt>undefined</tt>
+ * @return {object|undefined} the component or <tt>undefined</tt>
  */
 Dashboards.getComponent = dash.getComp = function(component) {
   var name = this.getComponentName(component);
@@ -509,7 +509,7 @@ Dashboards.getComponent = dash.getComp = function(component) {
  * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
  * @param {string} name the component's name
- * @returns {object|undefined} the component or <tt>undefined</tt>
+ * @return {object|undefined} the component or <tt>undefined</tt>
  */
 Dashboards.getComponentByName = function(name) {
   if(!name) { return; }
@@ -527,7 +527,7 @@ Dashboards.getComponentByName = function(name) {
  * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
  * @param {array} components the array of components to be added
- * @returns {object|undefined} the Dashboards object or <tt>undefined</tt>
+ * @return {object|undefined} the Dashboards object or <tt>undefined</tt>
  */
 Dashboards.addComponents = function(components) {
   if(!$.isArray(components)) { 
@@ -549,7 +549,7 @@ Dashboards.addComponents = function(components) {
  *
  * @param {object} component the new component to be added
  * @param {object} options an object containing the property <i>options.index</i>
- * @returns {boolean} <tt>true</tt> if the component was added and <tt>false</tt> otherwise
+ * @return {boolean} <tt>true</tt> if the component was added and <tt>false</tt> otherwise
  */
 Dashboards.addComponent = function(component, options) {
   // get the component's name
@@ -580,7 +580,7 @@ Dashboards.addComponent = function(component, options) {
  * If <i>compOrNameOrIndex</i> is a component return the index where it is in <i>Dashboards.components</i>.
  *
  * @param {string|number|object} compOrNameOrIndex the name, index or the component to search
- * @returns {number} the index where the component is at or <tt>-1</tt> if not found
+ * @return {number} the index where the component is at or <tt>-1</tt> if not found
  */
 Dashboards.getComponentIndex = function(compOrNameOrIndex) {
   if(compOrNameOrIndex) {
@@ -611,7 +611,7 @@ Dashboards.getComponentIndex = function(compOrNameOrIndex) {
  * If <i>Dashboards.globalContext</i> is <tt>true</tt> it will also remove the component from the global <i>window</i> object.
  *
  * @param {object|string|number} compOrNameOrIndex the component object, the name of the component or the index of the component to be removed
- * @returns {object|undefined} the removed component or undefined
+ * @return {object|undefined} the removed component or undefined
  */
 Dashboards.removeComponent = function(compOrNameOrIndex) {
   var index = this.getComponentIndex(compOrNameOrIndex);
@@ -1246,7 +1246,7 @@ Dashboards.getUnboundParameters = function(){
 /**
  * Gets the object where the parameters are being stored
  *
- * @returns the parameter store
+ * @return the parameter store
  * @private
  */
 Dashboards._getParameterStore = function(){
@@ -1257,7 +1257,7 @@ Dashboards._getParameterStore = function(){
  * Verifies if a parameter is available in the Parameter Model
  *
  * @param {string} name of the parameter
- * @returns {boolean}
+ * @return {boolean}
  * @private
  */
 Dashboards._isParameterInModel = function(name){
@@ -1269,7 +1269,7 @@ Dashboards._isParameterInModel = function(name){
  *
  * @param {Object} o the context object
  * @param {string|Array.<string>} path the path of the property
- * @returns {*} the value of the property, if the path is present in <i>o</i>, or <tt>undefined</tt>, otherwise.
+ * @return {*} the value of the property, if the path is present in <i>o</i>, or <tt>undefined</tt>, otherwise.
  * @private
  */
 Dashboards._getValueFromContext = function(o, path) {
@@ -1312,7 +1312,7 @@ Dashboards._getValueFromContext = function(o, path) {
  * @param {Object} o the context object
  * @param {string|Array.<string>} path the path of the property
  * @param {*} v the value of the property
- * @returns the context object <i>o</i> or undefined
+ * @return the context object <i>o</i> or undefined
  * @private
  */
 Dashboards._setValueInContext = function(o, path, v) {
@@ -1348,7 +1348,7 @@ Dashboards._setValueInContext = function(o, path, v) {
  *
  * @param name the name of the parameter
  * @param initValue the initial value of the parameter
- * @returns the value assigned to the parameter
+ * @return the value assigned to the parameter
  */
 Dashboards.addParameter = function(name, initValue){
   if(this._isParameterInModel(name)){
@@ -1369,7 +1369,7 @@ Dashboards.getParameterValue = dash.getParam = function (parameterName) {
  * @param parameterName the name of the parameter
  * @param parameterValue the value of the parameter
  * @isNotified the value of notify passed to the Backbone Model setter
- * @returns the new value of the parameter or undefined
+ * @return the new value of the parameter or undefined
  */
 Dashboards.setParameter = dash.setParam = function(parameterName, parameterValue, isNotified) {
   if(parameterName == undefined || parameterName == "undefined" || parameterName == ""){

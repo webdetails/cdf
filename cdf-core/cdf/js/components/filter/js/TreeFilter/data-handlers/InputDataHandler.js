@@ -57,7 +57,7 @@
    * @uses TreeFilter.Logger
    * @extends BaseModel
    * @constructor
-   * @params {Object} options
+   * @param {Object} options
    */
   DataHandlers.Input = BaseModel.extend(LoggerMixin).extend({
     ID: 'TreeFilter.DataHandlers.Input',

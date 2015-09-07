@@ -174,6 +174,8 @@ define([
     /**
      * Indicates if the user can select multiple values.
      * The default implementation returns <tt>false</tt>.
+     *
+     * @method _allowMultipleValues
      * @return {boolean}
      * @protected
      */
@@ -183,6 +185,8 @@ define([
 
     /**
      * Returns the placeholder label for empty values, or false if it is an non-empty String.
+     *
+     * @method _getPlaceholderText
      * @protected
      */
     _getPlaceholderText: function() {
@@ -196,6 +200,7 @@ define([
      * The default implementation
      * returns the value of the {@link #size} property.
      *
+     * @method _getListSize
      * @param {Array.<Array.<*>>} values the values array.
      * @return {?number}
      * @protected
@@ -209,6 +214,7 @@ define([
      * by transforming the array of key/value pair arrays
      * in {@link #extraOptions} into a JS object.
      *
+     * @method _readExtraOptions
      * @return {!Object.<string,*>} an options object.
      */
     _readExtraOptions: function() {
@@ -223,6 +229,8 @@ define([
      *    The default implementation listens to the change event
      *    and dashboard-processes each change.
      * </p>
+     *
+     * @method _listenElement
      * @param {!HTMLElement} elem the element.
      */
     _listenElement: function(elem) {
@@ -295,6 +303,7 @@ define([
      * the change mode value.
      * </p>
      *
+     * @method _getChangeMode
      * @return {!string} one of values:
      * <tt>'immediate'</tt>,
      * <tt>'focus'</tt> or
@@ -324,10 +333,11 @@ define([
      * Obtains an appropriate jQuery event name
      * for when testing for changes is done.
      *
+     * @method _changeTrigger
      * @return {!string} the name of the event.
      */
     _changeTrigger: function() {
-      /**
+      /*
        * <p>
        * Mobile user agents show a dialog/popup for choosing amongst possible values,
        * for both single and multi-selection selects.

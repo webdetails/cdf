@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["../lib/jquery", "./BaseComponent", "../Logger"],
-  function($, BaseComponent, Logger) {
+define([
+  "../lib/jquery",
+  "./BaseComponent",
+  "../Logger"
+], function($, BaseComponent, Logger) {
 
   var TextInputComponent = BaseComponent.extend({
     update: function() {

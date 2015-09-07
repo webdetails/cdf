@@ -40,6 +40,7 @@ define([
    *    following is a guide to converting old components and dashboards to the new
    *    async style, and developing new ones based on asynchronous querying.</p>
    *
+   *
    * <h2>Rationale</h2>
    *
    * <p>The first step to understanding the changes in the async patch is understanding
@@ -77,6 +78,7 @@ define([
    * of these issues, thus allowing queries to be performed asynchronously while
    * reducing the developer effort involved in creating a component.</p>
    *
+   *
    * <h2>Component Execution Order and Priority</h2>
    *
    * <p>There are no major changes in the way components behave. There is, however an
@@ -105,7 +107,6 @@ define([
    * components will have a default priority of 5</strong>. This may break the old behavior.
    * If you need to change a dashboard, make sure you tweak the priorities, if
    * needed.</p>
-   *
    *
    *
    * <h2>Developing Components</h2>
@@ -298,7 +299,7 @@ define([
     },
 
     /**
-     * Draws a tooltip, if one is defined in the component options
+     * Draws a tooltip, if one is defined in the component options.
      *
      * @method drawTooltip
      */
@@ -312,7 +313,7 @@ define([
 
     /**
      * Shows a tooltip attached to the component,
-     * if one is defined in the `_tooltip` option
+     * if one is defined in the `_tooltip` option.
      *
      * @method showTooltip
      */
@@ -480,10 +481,10 @@ define([
      * ensures that only the redraw of the most recent update is performed.
      *
      * @method triggerQuery
-     * @params queryDef query definition
-     * @params callback Callback to run after query has ran.
+     * @param queryDef query definition
+     * @param callback Callback to run after query has ran.
      *    Receives the fetched data as argument. 
-     * @params queryOptions User options for the query
+     * @param queryOptions User options for the query
      */
     triggerQuery: function(queryDef, callback, queryOptions) {
       this.beginQuery(
@@ -498,17 +499,17 @@ define([
     /**
      * The beginQuery lifecycle handler implements the begin phase of a lifecycle around Query objects.
      * It implements the lifecycle:
-     * preExecution->block?->doQuery->postFetch->(callback)->.
+     * preExecution->block?->doQuery->postFetch->(callback)->
      * 
      * Ending the execution, is the responsibility of the specified callback,
      * by calling `endExec` (resulting in: ->postExecution->unblock?)
      * or `failExec`.
      * 
      * @method beginQuery
-     * @params {Object} queryDef query definition
-     * @params {function} callback Callback to run after query has ran
+     * @param {Object} queryDef query definition
+     * @param {function} callback Callback to run after query has ran
      *    Receives as arguments: the fetched data object, a resolve function and a reject function.
-     * @params {Object} queryOptions User options for the query
+     * @param {Object} queryOptions User options for the query
      */
     beginQuery: function(queryDef, callback, queryOptions) {
       this.execute(function() {
@@ -547,10 +548,10 @@ define([
      * If passed, the supplied _ajaxParameters_ will be passed to the default ajax call.
      *
      * @method triggerAjax
-     * @params url url to call
-     * @params params Parameters for the call
-     * @params callback Render callback, called with the response data.
-     * @params ajaxParameters Parameters specific to the ajax call definition
+     * @param url url to call
+     * @param params Parameters for the call
+     * @param callback Render callback, called with the response data.
+     * @param ajaxParameters Parameters specific to the ajax call definition
      */
     triggerAjax: function(url, params, callback, ajaxParameters) {
       // Process parameters
@@ -575,19 +576,19 @@ define([
      * The beginAjax lifecycle handler implements the begin phase of
      * a lifecycle based on generic AJAX calls.
      * It implements the lifecycle:
-     * preExecution->block?->ajax->postFetch->(callback)->.
+     * preExecution->block?->ajax->postFetch->(callback)->
      * 
      * Ending the execution, is the responsibility of the specified callback,
      * by calling `endExec` (resulting in: ->postExecution->unblock?)
      * or `failExec`.
      * 
      * @method beginAjax
-     * @params {Object} ajaxParameters Parameters for `jQuery.ajax`,
+     * @param {Object} ajaxParameters Parameters for `jQuery.ajax`,
      *    including, at a minimum, the `url` option.
      *    `beginAjax` will take control over the `success` and `error` callbacks,
      *    and default `async` to `true`.
      *
-     * @params {function} callback Render callback, called with the response data.
+     * @param {function} callback Render callback, called with the response data.
      */
     beginAjax: function(ajaxParameters, callback) {
       this.execute(function() {
@@ -641,7 +642,7 @@ define([
      * requests were made.
      *
      * @method callCounter
-     * @returns the incremented counter
+     * @return the incremented counter
      */
     callCounter: function() {
       return ++this.runCounter;
@@ -709,7 +710,7 @@ define([
      * This method returns a `this` free version of the `failExec` method.
      * 
      * @method getErrorHandler
-     * @returns {Function} Error handler
+     * @return {Function} Error handler
      */
     getErrorHandler: function() {
       return _.bind(this.failExec, this);
@@ -720,8 +721,8 @@ define([
      * message and, optionally, a `cause` object.
      *
      * @method error
-     * @params msg Error message
-     * @params cause Cause for the error
+     * @param msg Error message
+     * @param cause Cause for the error
      */
     error: function(msg, cause) {
       if(!msg) msg = this.dashboard.getErrorObj('COMPONENT_ERROR').msg;
@@ -736,7 +737,7 @@ define([
     },
 
     /**
-     * Triggers an error notification
+     * Triggers an error notification.
      *
      * @method errorNotification
      * @param {Object} err A CDF error object containing `msg` and `error` properties.
@@ -754,7 +755,7 @@ define([
      * Trigger UI blocking while the component is updating. Default implementation
      * uses the global CDF blockUI, but implementers are encouraged to override
      * with per-component blocking where appropriate (or no blocking at all in
-     * components that support it!)
+     * components that support it!).
      *
      * @method block
      */
@@ -780,10 +781,10 @@ define([
     },
 
     /**
-     * Returns _true_ if the component's lifecycle is marked as silent (does not trigger UI block when updating)
+     * Returns _true_ if the component's lifecycle is marked as silent (does not trigger UI block when updating).
      *
      * @method isSilent
-     * @returns {boolean} _true_ if the component should not trigger an UI block when updating
+     * @return {boolean} _true_ if the component should not trigger an UI block when updating
      */
     isSilent: function() {
       return !!(this.lifecycle && this.lifecycle.silent);
@@ -791,7 +792,9 @@ define([
 
     /**
      * Blocks the UI if it isn't silent.
+     *
      * @method _maybeBlock 
+     *
      * @private
      */
     _maybeBlock: function() {
@@ -800,7 +803,9 @@ define([
 
     /**
      * Unblocks the UI if it isn't silent.
+     *
      * @method _maybeUnblock 
+     *
      * @private
      */
     _maybeUnblock: function() {

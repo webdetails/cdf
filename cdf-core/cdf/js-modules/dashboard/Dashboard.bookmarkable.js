@@ -15,26 +15,28 @@ define(['./Dashboard', '../Logger', './Utils'],
   function(Dashboard, Logger, Utils) {
 
   /**
-   * A module representing an extension to Dashboard module for bookmarkable parameters.
+   * A module representing an extension to the Dashboard module for bookmarkable parameters.
+   *
    * @module Dashboard.bookmarkable
    */
   Dashboard.implement({
   
     /**
-     * Method used by the Dashboard constructor for bookmarkable parameters initialization
+     * Method used by the Dashboard constructor for bookmarkable parameters initialization.
      *
+     * @method _initBookmarkables
      * @private
      */
     _initBookmarkables: function() {
       this.bookmarkables = {};
     },
-  
+
     /**
      *
      * @method getHashValue
      * @for Dashboard
      * @param key
-     * @returns {*}
+     * @return {*}
      * @private
      */
     getHashValue: function(key) {
@@ -42,7 +44,7 @@ define(['./Dashboard', '../Logger', './Utils'],
       var obj;
       try {
         obj = JSON.parse(hash.slice(1));
-      } catch (e) {
+      } catch(e) {
         obj = {};
       }
       if(arguments.length === 0) {
@@ -51,7 +53,7 @@ define(['./Dashboard', '../Logger', './Utils'],
         return obj[key];
       }
     },
-  
+
     /**
      *
      * @method setHashValue
@@ -77,7 +79,7 @@ define(['./Dashboard', '../Logger', './Utils'],
         }
       }
     },
-  
+
     /**
      *
      * @method deleteHashValue
@@ -94,9 +96,9 @@ define(['./Dashboard', '../Logger', './Utils'],
         this.setHashValue(obj);
       }
     },
-  
+
     /**
-     * Sets a pair parameter/value as bookmarkable
+     * Sets a pair parameter/value as bookmarkable.
      *
      * @method setBookmarkable
      * @for Dashboard
@@ -107,40 +109,39 @@ define(['./Dashboard', '../Logger', './Utils'],
       if(arguments.length === 1) { value = true; }
       this.bookmarkables[parameter] = value;
     },
-  
+
     /**
-     * Checks if a parameter is bookmarkable
+     * Checks if a parameter is bookmarkable.
      *
      * @method isBookmarkable
      * @for Dashboard
      * @param parameter
-     * @returns {boolean} describing if a parameter is bookmarkable
+     * @return {boolean} describing if a parameter is bookmarkable
      */
     isBookmarkable: function(parameter) {
       return Boolean(this.bookmarkables[parameter]);
     },
-  
+
     /**
-     * Generates a bookmark state using values stored
+     * Generates a bookmark state using values stored.
      *
      * @method generateBookmarkState
      * @for Dashboard
-     * @returns an object with the state of the parameters previously marked as bookmarkable
+     * @return an object with the state of the parameters previously marked as bookmarkable
      */
     generateBookmarkState: function() {
       var params = {},
           bookmarkables = this.bookmarkables;
-      for(var k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
-        if (bookmarkables[k]) {
+      for(var k in bookmarkables) if(bookmarkables.hasOwnProperty(k)) {
+        if(bookmarkables[k]) {
           params[k] = this.getParameterValue(k);
         }
       }
       return params;
     },
-  
+
     /**
-     *
-     * Persists a bookmark state
+     * Persists a bookmark state.
      *
      *
      * @method persistBookmarkables
@@ -164,12 +165,11 @@ define(['./Dashboard', '../Logger', './Utils'],
         return;
       }
       params = this.generateBookmarkState();
-      this.setBookmarkState({impl: 'client',params: params});
+      this.setBookmarkState({impl: 'client', params: params});
     },
-  
+
     /**
-     * Overrides a bookmark state with a given state
-     *
+     * Overrides a bookmark state with a given state.
      *
      * @method setBookmarkState
      * @for Dashboard
@@ -178,7 +178,7 @@ define(['./Dashboard', '../Logger', './Utils'],
     setBookmarkState: function(state) {
       if(window.history && window.history.replaceState) {
         var method = window.location.pathname.split('/').pop(),
-            query = window.location.search.slice(1).split('&').map(function(e){
+            query = window.location.search.slice(1).split('&').map(function(e) {
               var entry = e.split('=');
               entry[1] = decodeURIComponent(entry[1]);
               return entry;
@@ -187,19 +187,19 @@ define(['./Dashboard', '../Logger', './Utils'],
         query = Utils.propertiesArrayToObject(query);
         query.bookmarkState = JSON.stringify(state);
         url = method + '?' + $.param(query);
-        window.history.replaceState({},'',url);
+        window.history.replaceState({}, '', url);
         this.deleteHashValue('bookmark');
       } else {
-        this.setHashValue('bookmark',state);
+        this.setHashValue('bookmark', state);
       }
     },
-  
+
     /**
-     * Gets the bookmark state url decoded
+     * Gets the bookmark state url decoded.
      *
      * @method getBookmarkState
      * @for Dashboard
-     * @returns an object with the current bookmark state
+     * @return an object with the current bookmark state
      */
     getBookmarkState: function() {
       /*
@@ -211,7 +211,7 @@ define(['./Dashboard', '../Logger', './Utils'],
       if(window.location.hash.length > 1) {
         try {
           return this.getHashValue('bookmark') || {};
-        } catch (e) {
+        } catch(e) {
           /*
            * We'll land here if the hash isn't a valid json object,
            * so we'll go on and try getting the state from the params
@@ -225,14 +225,15 @@ define(['./Dashboard', '../Logger', './Utils'],
           }),
           params = Utils.propertiesArrayToObject(query);
       if(params.bookmarkState) {
-        return JSON.parse(decodeURIComponent(params.bookmarkState.replace(/\+/g,' '))) || {};
-      } else  {
+        return JSON.parse(decodeURIComponent(params.bookmarkState.replace(/\+/g, ' '))) || {};
+      } else {
         return {};
       }
     },
-  
+
     /**
-     * Restores the bookmark state
+     * Restores the bookmark state.
+     *
      * @method restoreBookmarkables
      * @for Dashboard
      */
@@ -240,14 +241,14 @@ define(['./Dashboard', '../Logger', './Utils'],
       var state;
       try {
         state = this.getBookmarkState().params;
-        for (var k in state) if (state.hasOwnProperty(k)) {
-          this.setParameter(k,state[k]);
+        for(var k in state) if(state.hasOwnProperty(k)) {
+          this.setParameter(k, state[k]);
         }
-      } catch (e) {
-        Logger.log(e,'error');
+      } catch(e) {
+        Logger.log(e, 'error');
       }
     }
-    
+
   });
 
 });
