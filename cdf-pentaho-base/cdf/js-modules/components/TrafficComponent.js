@@ -55,6 +55,16 @@ define(['../Logger', 'amd!../lib/underscore', './UnmanagedComponent', '../lib/jq
     doQuery: function() {
       var myself = this;
       var cd = myself.trafficDefinition;
+
+      // check if we should use a data source
+      var dataSource = myself.dashboard.getDataSource(cd);
+      if(dataSource) {
+        // merge options, query definition options override options duplicated in the data source
+        cd = $.extend({}, dataSource, cd);
+        // remove the data source name from the query definition
+        delete cd.dataSource;
+      }
+
       if(cd.path && cd.dataAccessId) {
         var handler = _.bind(function(data) {
           var filtered;
@@ -71,7 +81,7 @@ define(['../Logger', 'amd!../lib/underscore', './UnmanagedComponent', '../lib/jq
       } else {
          // go through parameter array and update values
         var parameters = [];
-        for(p in cd) {
+        for(var p in cd) if(cd.hasOwnProperty(p)) {
           var key = p;
           var value = typeof cd[p] == 'function' ? cd[p]() : cd[p];
           parameters.push([key,value]);

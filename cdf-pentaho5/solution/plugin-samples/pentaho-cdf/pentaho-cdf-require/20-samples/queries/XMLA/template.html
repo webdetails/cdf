@@ -41,25 +41,24 @@ require([
   
   dashboard.addParameter("result", "");
   
-  var MetaLayer = {
-    queryDefinition: {
-      queryType: 'xmla',
-      catalog: "SteelWheels",
-      query: function() {
-        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-               "NON EMPTY TopCount([Customers].[All Customers].Children," +
-               "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-      }
+  dashboard.addDataSource("queryXMLA", {
+    queryType: "xmla",
+    catalog: "SteelWheels",
+    query: function() {
+      return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+             "NON EMPTY TopCount([Customers].[All Customers].Children," +
+             "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
     }
-  };
+  });
 
   dashboard.addComponent(new QueryComponent({
     name: "executeQueryComponent",
     type: "queryComponent",
     htmlObject: "sampleObject",
     executeAtStart: true,
+    asynchronousMode: true,
     resultvar: "result",
-    queryDefinition: MetaLayer.queryDefinition,
+    queryDefinition: {dataSource: "queryXMLA"},
     postFetch: function(data) {
       $('#sampleObjectResult').html(JSON.stringify(data));
     }

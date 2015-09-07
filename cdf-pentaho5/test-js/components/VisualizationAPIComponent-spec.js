@@ -25,7 +25,12 @@ define([
 
     var dashboard = new Dashboard();
 
-    dashboard.addParameter( "optionParam", "value");
+    dashboard.addParameter("optionParam", "value");
+
+    dashboard.addDataSource("vizQuery", {
+      dataAccessId: "dataAccessTestId",
+      path: "/test/path.cda"
+    });
 
     dashboard.init();
 
@@ -34,10 +39,9 @@ define([
       type: "visualizationAPIComponent",
       vizId: "sampleVisual",
       vizOptions: [["param1", "optionParam"]],
-      htmlObject: 'visualizationAPIComponent',
+      htmlObject: "visualizationAPIComponent",
       queryDefinition: {
-        dataAccessId: "dataAccessTestId",
-        path: "/test/path",
+        dataSource: "vizQuery",
         showValue: true
       },
       executeAtStart: true
@@ -98,9 +102,9 @@ define([
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        expect(visualizationAPIComponent.update       ).toHaveBeenCalled();
-        expect(visualizationAPIComponent.beginQuery   ).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render       ).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.update).toHaveBeenCalled();
+        expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
+        expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
         expect(visualizationAPIComponent.getVisualSpec).toHaveBeenCalled();
 
         done();

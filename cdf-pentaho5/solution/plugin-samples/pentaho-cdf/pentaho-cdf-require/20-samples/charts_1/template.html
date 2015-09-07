@@ -25,6 +25,10 @@ require([
   dashboard.addParameter("productLine", "null");
   dashboard.addParameter("territory", "null");
 
+  dashboard.addDataSource(MetaLayerCharts.pieChartDataSource);
+  dashboard.addDataSource(MetaLayerCharts.barChartDataSource);
+  dashboard.addDataSource(MetaLayerCharts.dialChartDataSource);
+
   dashboard.addComponent(new TextComponent({
     name: "title",
     type: "text",

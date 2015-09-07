@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/DialComponent", "cdf/lib/jquery"],
-  function(Dashboard, DialComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/DialComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, DialComponent, $) {
     
   /**
    * ## The Dial Component
@@ -23,24 +26,28 @@ define(["cdf/Dashboard.Clean", "cdf/components/DialComponent", "cdf/lib/jquery"]
 
     dashboard.init();
 
+    dashboard.addDataSource("dialQuery", {
+      queryType: "mdx",
+      jndi: "SampleData",
+      catalog: "mondrian:/SampleData",
+      query: function() {
+        return " SELECT NON EMPTY [Measures].[Budget] ON COLUMNS,"
+          + " NON EMPTY ([Department].[All Departments]) ON ROWS "
+          + " FROM [Quadrant Analysis]";
+      }
+    });
+
     var dialComponent = new DialComponent({
       name: "dialComponent",
       type: "dialComponent",
       chartDefinition: {
+        dataSource: "dialQuery",
         width: 400,
         height: 200,
         chartType: "DialChart",
-        queryType: 'mdx',
-        jndi: "SampleData",
         title: "Check current budget",
-        catalog: "mondrian:/SampleData",
         colors: ["#F16C3A", "#FFFF00", "#B0D837"],
-        intervals: [7, 70, 630],
-        query: function() {
-          return "select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-                 "NON EMPTY ([Department].[All Departments]) ON ROWS " +
-                 "from [Quadrant Analysis]";
-        }
+        intervals: [7, 70, 630]
       },
       htmlObject: "sampleObject",
       executeAtStart: true

@@ -12,12 +12,13 @@
  */
 
 define([
+  '../Logger',
   '../lib/Base',
   './Dashboard',
   './Container',
   'amd!../lib/underscore',
   './Utils'
-], function(Base, Dashboard, Container, _, Utils) {
+], function(Logger, Base, Dashboard, Container, _, Utils) {
 
   var _BaseQuery = Base;
   
@@ -108,9 +109,21 @@ define([
      */
     detectQueryType: function(qd) {
       if(qd) {
+        // check if we should use a data source
+        if(_.isString(qd.dataSource) && !_.isEmpty(qd.dataSource)) {
+          var dataSource = this.dataSources[qd.dataSource];
+          if(!_.isEmpty(dataSource)) {
+            // merge options, query definition options override options duplicated in the data source
+            qd = _.extend({}, dataSource, qd);
+          } else {
+            Logger.error("Invalid data source name " + qd.dataSource);
+            return;
+          }
+        }
+
         var qt = qd.queryType          ? qd.queryType : // cpk goes here
           qd.query                     ? 'legacy'     :
-          (qd.path && qd.dataAccessId) ? 'cda'        : 
+          (qd.path && qd.dataAccessId) ? 'cda'        :
           undefined;
 
         qd.queryType = qt;
@@ -120,7 +133,8 @@ define([
     },
 
     /**
-     * Given a type and options, returns the query object for running that particular query
+     * Given a type and options, returns the query object for running that particular query.
+     * If a data source name is provided as an option, also include all options from it.
      *
      * @method getQuery
      * @param type Query type
@@ -134,6 +148,21 @@ define([
         type = 'cda';
       } else if(_.isObject(type)) {
         opts = type;
+
+        // check if we should use a data source
+        if(_.isString(opts.dataSource) && !_.isEmpty(opts.dataSource)) {
+          var dataSource = this.dataSources[opts.dataSource];
+          if(!_.isEmpty(dataSource)) {
+            // merge options, query definition options override options duplicated in the data source
+            opts = _.extend({}, dataSource, opts);
+            // remove the data source name from the query definition
+            delete opts.dataSource;
+          } else {
+            Logger.error("Invalid data source name " + opts.dataSource);
+            return;
+          }
+        }
+
         type = opts.queryType || 'cda';
       }
 

@@ -12,14 +12,14 @@
  */
 
 define([
-  './QueryComponent',
-  './BaseComponent',
+  '../Logger',
+  './UnmanagedComponent',
   'amd!../lib/underscore',
   '../lib/jquery',
   'css!./AutocompleteBoxComponent'
-], function(QueryComponent, BaseComponent, _, $) {
+], function(Logger, UnmanagedComponent, _, $) {
 
-  var AutocompleteBoxComponent = BaseComponent.extend({
+  var AutocompleteBoxComponent = UnmanagedComponent.extend({
 
     result: [],
     selectedValues: [],
@@ -29,7 +29,7 @@ define([
      * @param searchString
      * @private
      */
-    _queryServer: function(searchString) {
+    _queryServer: function(searchString, successCallback) {
       if(!this.parameters) {
         this.parameters = [];
       }
@@ -44,7 +44,12 @@ define([
         this.queryDefinition.pageSize = this.maxResults;
       }
       this.dashboard.setParameter(this._getInnerParameterName(), this._getTextBoxValue());
-      QueryComponent.makeQuery(this);
+
+      if(this.queryDefinition) {
+        this.triggerQuery(this.queryDefinition, successCallback);
+      } else {
+        Logger.error("No query definition found");
+      }
     },
 
     /**
@@ -86,9 +91,23 @@ define([
      *
      */
     update: function() {
+
+      // Allow the component to be silent
+      if(this.lifecycle) { this.lifecycle.silent = this.silent === true; }
+      else { this.lifecycle = {silent: this.silent === true}; }
+
+      if(!this.preExec()) {
+        return;
+      }
+
+      if(!this.isSilent()) {
+        this.block();
+      }
+
       this.placeholder().empty();
 
       var myself = this;
+
       var isMultiple = this.selectMulti || false;
       var options = this._getOptions();
 
@@ -103,16 +122,16 @@ define([
       if(isMultiple) {
         var title = this.tooltipMessage || "Click it to Apply";
         var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="S"/>')
-            .click(function() {
-              myself._endSearch();
-            });
+          .click(function() {
+            myself._endSearch();
+          });
         autoComplete.append(apply);
       }
 
       autoComplete
-          .append(this.textbox)
-          .append('<ul class="list-data-selection">')
-          .appendTo(this.placeholder());
+        .append(this.textbox)
+        .append('<ul class="list-data-selection">')
+        .appendTo(this.placeholder());
 
       this.textbox.autocomplete(options);
 
@@ -145,6 +164,12 @@ define([
       });
 
       this._setInitialValue();
+
+      this.postExec();
+
+      if(!this.isSilent()) {
+        this.unblock();
+      }
     },
 
     /**
@@ -275,21 +300,25 @@ define([
     _search: function(search, callback) {
       var matchType = this.matchType || 'fromStart';
       var val = search.term.toLowerCase();
-      this._queryServer(val);
 
-      var result = this.result;
-      var list = [];
+      this._queryServer(val, function(data) {
 
-      for(var p in result) if(result.hasOwnProperty(p)) {
-        var value = result[p][0];
-        if(value != null &&
-            (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0) ||
-            (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
-          list.push(value);
+        var result = data.resultset ? data.resultset : data;
+        var list = [];
+
+        for(var p in result) if(result.hasOwnProperty(p)) {
+          var value = result[p][0];
+          if(value != null
+            && (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0)
+            || (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
+
+            list.push(value);
+          }
         }
-      }
 
-      callback(list);
+        callback(list);
+      });
+
     },
 
     /**

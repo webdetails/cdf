@@ -38,8 +38,16 @@ define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', 'amd!../
     openPivotLink: function(object) {
       var url = PivotLinkComponentExt.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
       var qd = object.pivotDefinition;
+      // check if we should use a data source
+      var dataSource = object.dashboard.getDataSource(qd);
+      if(dataSource) {
+        // merge options, query definition options override options duplicated in the data source
+        qd = $.extend({}, dataSource, qd);
+        // remove the data source name from the query definition
+        delete qd.dataSource;
+      }
       var parameters = [];
-      for (p in qd) {
+      for(var p in qd) if(qd.hasOwnProperty(p)) {
         var key = p;
         var value = typeof qd[p] == 'function' ? qd[p]() : qd[p];
         parameters.push(key + "=" + encodeURIComponent(value));

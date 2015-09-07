@@ -85,6 +85,7 @@ define([
       _callIfAvailable(this._initComponents, "Components");
       _callIfAvailable(this._initLifecycle, "Lifecycle");
       _callIfAvailable(this._initNotifications, "Notifications");
+      _callIfAvailable(this._initDataSources, "DataSources");
       _callIfAvailable(this._initQuery, "Query");
       _callIfAvailable(this._initAddIns, "AddIns");
 

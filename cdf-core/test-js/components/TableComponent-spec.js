@@ -11,33 +11,41 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/TableComponent", "cdf/lib/jquery"],
-  function(Dashboard, TableComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/TableComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, TableComponent, $) {
 
   /**
    * ## The Table Component
    */
   describe("The Table Component #", function() {
     var dashboard = new Dashboard();
+
     dashboard.init();
+
+    dashboard.addDataSource("tableQuery", {
+      queryType: "mdx",
+      catalog: "mondrian:/SteelWheels",
+      jndi: "SampleData",
+      query: function() {
+        return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS, "
+             + "NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales]) "
+             + "ON ROWS FROM [SteelWheelsSales]";
+      }
+    });
 
     var tableComponent = new TableComponent({
       name: "tableComponent",
       type: "tableComponent",
       chartDefinition: {
+        dataSource: "tableQuery",
         colHeaders: ["Customers", "Sales"],
         colTypes: ['string', 'numeric'],
         colFormats: [null, '%.0f'],
         colWidths: ['500px', null],
-        queryType: 'mdx',
-        displayLength: 10,
-        catalog: 'mondrian:/SteelWheels',
-        jndi: "SampleData",
-        query: function() {
-          return " select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-                 " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales])" +
-                 " ON ROWS from [SteelWheelsSales]";
-        }
+        displayLength: 10
       },
       htmlObject: "tableSampleObject",
       executeAtStart: true
