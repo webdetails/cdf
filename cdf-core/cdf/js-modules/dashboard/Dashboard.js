@@ -94,6 +94,7 @@ define([
       /**
        * Calls a function if it is available in the prototype
        *
+       * @method _callIfAvailable
        * @private
        */
       function _callIfAvailable(func, module) {
@@ -108,6 +109,7 @@ define([
       /**
        * Initializes the cdf plugins
        *
+       * @method _configurePlugins
        * @private
        */
       function _configurePlugins() {
@@ -232,7 +234,7 @@ define([
      * Gets the current webapp path
      *
      * @method getWebAppPath
-     * @returns the current webapp path (/pentaho for instance)
+     * @return the current webapp path (/pentaho for instance)
      */
     getWebAppPath: function() {
       return this.webAppPath;
@@ -242,8 +244,8 @@ define([
      * Gets the dashboard's wcdfSettings
      * This method is meant to be overriden
      *
-     * @method getWebAppPath
-     * @returns the dashboard's wcdfSettings
+     * @method getWcdfSettings
+     * @return the dashboard's wcdfSettings
      */
     getWcdfSettings: function() {
       Logger.info("getWcdfSettings was not overriden, returning empty object");

@@ -20,17 +20,15 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
     var dashboard = new Dashboard();
     
     //an exact copy of this object is set in context.js
-    var viewObj = {
-          param: 1
-        };
+    var viewObj = {param: 1};
 
     /**
      * ## Dashboard Views # is correctly read through the module configuration
      */
     it("is correctly read through the module configuration", function() {
-        expect(dashboard._initViews).toBeDefined();
-        expect(dashboard.viewParameters).toEqual({});
-        expect(dashboard.view).toEqual(viewObj);
+      expect(dashboard._initViews).toBeDefined();
+      expect(dashboard.viewParameters).toEqual({});
+      expect(dashboard.view).toEqual(viewObj);
     });
 
     /**
@@ -38,10 +36,7 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
      */
     it("is correctly read through the Dashboard constructor", function() {
       viewObj.param = 2;
-      var options = {
-        view: viewObj
-      };
-      var dashboard2 = new Dashboard(options);
+      var dashboard2 = new Dashboard({view: viewObj});
       expect(dashboard2.view).toEqual(viewObj);
     });
   });

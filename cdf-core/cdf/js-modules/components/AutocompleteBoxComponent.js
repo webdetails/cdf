@@ -26,6 +26,7 @@ define([
 
     /**
      *
+     * @method _queryServer
      * @param searchString
      * @private
      */
@@ -54,7 +55,9 @@ define([
 
     /**
      *
-     * @returns {*}
+     * @method _getTextBoxValue
+     * @return {*}
+     * @private
      */
     _getTextBoxValue: function() {
       return this.textbox.val();
@@ -62,7 +65,9 @@ define([
 
     /**
      *
-     * @returns {string}
+     * @method _getInnerParameterName
+     * @return {string}
+     * @private
      */
     _getInnerParameterName: function() {
       return this.parameter + '_textboxValue';
@@ -70,6 +75,7 @@ define([
 
     /**
      *
+     * @method _setInitialValue
      * @private
      */
     _setInitialValue: function() {
@@ -89,6 +95,7 @@ define([
 
     /**
      *
+     * @method update
      */
     update: function() {
 
@@ -174,7 +181,8 @@ define([
 
     /**
      *
-     * @returns {*}
+     * @method getValue
+     * @return {*}
      */
     getValue: function() {
       return this.value;
@@ -182,7 +190,8 @@ define([
 
     /**
      *
-     * @returns {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|*|number), source: Function, focus: Function, open: Function, close: Function}}
+     * @method _getOptions
+     * @return {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|*|number), source: Function, focus: Function, open: Function, close: Function}}
      * @private
      */
     _getOptions: function() {
@@ -229,6 +238,7 @@ define([
 
     /**
      *
+     * @method _selectValue
      * @param label
      * @private
      */
@@ -259,6 +269,7 @@ define([
 
     /**
      *
+     * @method _removeValue
      * @param id
      * @private
      */
@@ -293,6 +304,7 @@ define([
 
     /**
      *
+     * @method _search
      * @param search
      * @param callback
      * @private
@@ -323,6 +335,7 @@ define([
 
     /**
      *
+     * @method _endSearch
      * @private
      */
     _endSearch: function() {
@@ -337,6 +350,7 @@ define([
 
     /**
      *
+     * @method _processAutoBoxChange
      * @private
      */
     _processAutoBoxChange: function() {

@@ -25,7 +25,7 @@ define([
           this.configuration = options.configuration;
           this.config = this.configuration[this.type];
 
-          /**
+          /*
            * Consider user-defined templates
            */
           if (this.config.view.templates != null) {
@@ -77,7 +77,7 @@ define([
           }, this);
         },
 
-        /**
+        /*
          * View methods
          */
         getViewModel: function() {
@@ -110,7 +110,8 @@ define([
         },
 
         /**
-         * Fully renders the view
+         * Fully renders the view.
+         *
          * @method render
          * @chainable
          */
@@ -150,7 +151,7 @@ define([
           }
         },
 
-        /**
+        /*
          * Children management
          */
         getChildrenContainer: function() {
@@ -170,7 +171,7 @@ define([
           return $child;
         },
 
-        /**
+        /*
          * Scrollbar methods
          */
         updateScrollBar: function() {
@@ -228,7 +229,7 @@ define([
           return this;
         },
 
-        /**
+        /*
          * Events triggered by the user
          */
         onMouseOver: function(event) {
@@ -277,14 +278,14 @@ define([
           return this;
         },
 
-        /**
+        /*
          * Boilerplate methods
          */
         close: function() {
           this.remove();
           return this.unbind();
 
-          /**
+          /*
            * Update tree of views
            */
         }

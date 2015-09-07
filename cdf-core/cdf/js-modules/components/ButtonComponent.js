@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
-  function(_, $, ActionComponent) {
+define([
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  './ActionComponent'
+], function(_, $, ActionComponent) {
 
   var ButtonComponent = ActionComponent.extend({
     _docstring: function() {
@@ -71,12 +74,11 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
 
             // re-enable the button if there's no action associated.
             // neither the successCallback nor the failureCallback will be called in this case
-            if (!myself.hasAction()) {
+            if(!myself.hasAction()) {
               myself.enable();
             }
-          }
-          else if (!myself.expression) {
-            if (!myself.hasAction()) {
+          } else if(!myself.expression) {
+            if(!myself.hasAction()) {
               myself.enable();
             }
           }
@@ -98,7 +100,9 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
     },
 
     /**
-     * Disables the button (grays it out and prevents click events)
+     * Disables the button (grays it out and prevents click events).
+     *
+     * @method disable
      */
     disable: function() {
       this.placeholder('button').attr('disabled', 'disabled');
@@ -106,7 +110,9 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
     },
 
     /**
-     * Enables the button
+     * Enables the button.
+     *
+     * @method enable
      */
     enable: function() {
       this.placeholder('button').removeAttr('disabled');
@@ -114,7 +120,9 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
     },
 
     /**
-     * Changes the label shown on the button
+     * Changes the label shown on the button.
+     *
+     * @method setLabel
      */
     setLabel: function(label) {
       var validatedLabel = typeof label === 'function' ? label.call(this) : label;
@@ -129,10 +137,12 @@ define(['amd!../lib/underscore', '../lib/jquery', './ActionComponent'],
     },
 
     /**
-     * Returns whether or not the button is a jQueryUi button
+     * Returns whether or not the button is a jQueryUi button.
+     *
+     * @method _isJQueryUiButton
      * @private
      */
-    _isJQueryUiButton: function(){
+    _isJQueryUiButton: function() {
       return _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller";
     }
   });

@@ -58,16 +58,16 @@ public class ActionEngine {
 
       IUnifiedRepository unifiedRepository = PentahoSystem.get( IUnifiedRepository.class, null );
       RepositoryFile file = unifiedRepository.getFile( path );
-      
+
       CdfHttpServletRequestWrapper request = new CdfHttpServletRequestWrapper( httpServletRequest );
-      if( params != null ){
+      if ( params != null ) {
         Iterator<String> it = params.keySet().iterator();
-        while( it.hasNext() ){
+        while ( it.hasNext() ) {
           String key = it.next();
           request.addParameter( key, params.get( key ) );
         }
       }
-      
+
       String buffer = XactionUtil.execute( contentType, file, request, httpServletResponse, userSession, null );
 
       if ( !StringUtils.isEmpty( buffer ) ) {

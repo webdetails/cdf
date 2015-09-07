@@ -19,7 +19,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     /**
      *
      * @param plugin
-     * @returns {string}
+     * @return {string}
      */
     getPluginBase: function(plugin) {
       return CONTEXT_PATH + "plugin/" + plugin + "/api";
@@ -27,7 +27,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
 
     /**
      *
-     * @returns {string}
+     * @return {string}
      */
     getCdfBase: function() {
       return this.getPluginBase( this.pluginName );
@@ -38,7 +38,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
      * The url can (or not) be encoded, so paths like /pentaho/api/repos/:path1:path2:path3:path4/myOperation
      * or /pentaho/api/repos/%3path1%3path2%3path3%3path4/myOperation will be correctly translated
      *
-     * @returns {string} the file path
+     * @return {string} the file path
      */
     getFilePathFromUrl: function() {
       var filePath = window.location.pathname;
@@ -56,7 +56,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     /**
      * Returns a URL parameter for cache-busting purposes.
      *
-     * @returns {string} the timestamp parameter of an URL
+     * @return {string} the timestamp parameter of an URL
      */
     getTimestamp: function() {
       return "ts=" + new Date().getTime();
@@ -65,7 +65,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     /**
      * Returns the full path to an explicit action.
      *
-     * @returns {string} the full path
+     * @return {string} the full path
      */
     getFullPath: function(path, action) {
 
@@ -82,7 +82,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
      * Builds a full path based on the properties of the options parameter provided.
      *
      * @param {object} options An object with solution, path or action properties for path building.
-     * @returns {string} the full path
+     * @return {string} the full path
      */
     composePath: function(options) {
       var clean = function(segment) {

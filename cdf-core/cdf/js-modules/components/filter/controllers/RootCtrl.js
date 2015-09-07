@@ -15,7 +15,8 @@ define([
     function( $, _, BaseComponent, BaseEvents, BaseView, BaseFilter ) {
 
       /**
-       * General-purpose controller
+       * General-purpose controller.
+       *
        * @class RootCtrl
        * @constructor
        * @uses BaseFilter.Logger
@@ -46,13 +47,14 @@ define([
           return this;
         },
 
-        /**
+        /*
          * Event handling
          */
 
         /**
          * Acts upon the model whenever the user selected something.
-         * Delegates work to the current selection strategy
+         * Delegates work to the current selection strategy.
+         *
          * @method onSelection
          * @chainable
          */
@@ -62,8 +64,9 @@ define([
         },
 
         /**
-         * Informs the model that the user chose to commit the current selection
-         * Delegates work to the current selection strategy
+         * Informs the model that the user chose to commit the current selection.
+         * Delegates work to the current selection strategy.
+         *
          * @method onApply
          * @chainable
          */
@@ -73,8 +76,9 @@ define([
         },
 
         /**
-         * Informs the model that the user chose to revert to the last saved selection
-         * Delegates work to the current selection strategy
+         * Informs the model that the user chose to revert to the last saved selection.
+         * Delegates work to the current selection strategy.
+         *
          * @method onCancel
          * @chainable
          */

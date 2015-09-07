@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./JFreeChartComponent.ext', '../lib/jquery', './JFreeChartComponent'],
-  function(JFreeChartComponentExt, $, JFreeChartComponent) {
+define([
+  './JFreeChartComponent.ext',
+  '../lib/jquery',
+  './JFreeChartComponent'
+], function(JFreeChartComponentExt, $, JFreeChartComponent) {
 
   var OpenFlashChartComponent = JFreeChartComponent.extend({
 
@@ -20,14 +23,15 @@ define(['./JFreeChartComponent.ext', '../lib/jquery', './JFreeChartComponent'],
 
       this.dashboard.incrementRunningCalls();
 
-      var myself = this;
+      var myself = this,
+          getDataFunction;
 
-      this.dashboard.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML) {
+      this.dashboard.callPentahoAction(myself, "system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(), function(jXML) {
 
         if(jXML != null) {
           var result = JFreeChartComponentExt.getOpenFlashChart(jXML.find("ExecuteActivityResponse:first-child").text());
-          getDataFuntion = result.match(/getData.*\(\)/gi);
-          $("#"+myself.htmlObject).html(result);
+          getDataFunction = result.match(/getData.*\(\)/gi);
+          $("#" + myself.htmlObject).html(result);
         }
 
         myself.dashboard.decrementRunningCalls();
@@ -35,10 +39,10 @@ define(['./JFreeChartComponent.ext', '../lib/jquery', './JFreeChartComponent'],
       });
 
       OpenFlashChartComponent.prototype.onClick = function(value) {
-        if(getDataFuntion != null && myself.chartDefinition.urlTemplate != undefined && myself.chartDefinition.parameterName != undefined) {
-          myself.data = myself.data != undefined ? myself.data : eval('(' + eval(getDataFuntion[0]) + ')');
+        if(getDataFunction != null && myself.chartDefinition.urlTemplate != undefined && myself.chartDefinition.parameterName != undefined) {
+          myself.data = myself.data != undefined ? myself.data : eval('(' + eval(getDataFunction[0]) + ')');
           if(myself.data.x_axis != undefined) {
-            var urlTemplate = myself.chartDefinition.urlTemplate.replace("{" + myself.chartDefinition.parameterName + "}",myself.data.x_axis.labels.labels[value]);
+            var urlTemplate = myself.chartDefinition.urlTemplate.replace("{" + myself.chartDefinition.parameterName + "}", myself.data.x_axis.labels.labels[value]);
             eval(urlTemplate);
           }
         }

@@ -29,7 +29,7 @@ define([
       wrapper.data = data;
       wrapper.visualSpec = this.getVisualSpec();
       wrapper.update()
-          .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
+        .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
     },
   	
     getVisualSpec: function() {

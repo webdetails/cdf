@@ -21,7 +21,8 @@ define([
 ], function(Base, $, _, Backbone, Logger, Utils) {
 
   /**
-   * Module that holds everything related to Components
+   * Module that holds everything related to Components.
+   *
    * @module Components
    */
   var BaseComponent = Base.extend(Backbone.Events).extend({
@@ -30,28 +31,32 @@ define([
     visible: true,
     isManaged: true,
     /**
-     * Properties for handling timer function: Start date for the timer
+     * Properties for handling timer function: Start date for the timer.
+     *
      * @property timerStart
      * @type Date
      * @private
      */
     timerStart: 0,
     /**
-     * Properties for handling timer function: Start date for the timer split
+     * Properties for handling timer function: Start date for the timer split.
+     *
      * @property timerSplit
      * @type Date
      * @private
      */
     timerSplit: 0,
     /**
-     * Properties for handling timer function: number of milliseconds since timer split
+     * Properties for handling timer function: number of milliseconds since timer split.
+     *
      * @property elapsedSinceSplit
      * @type Numeric
      * @private
      */
     elapsedSinceSplit: -1,
     /**
-     * Properties for handling timer function: number of milliseconds since timer start
+     * Properties for handling timer function: number of milliseconds since timer start.
+     *
      * @property elapsedSinceStart
      * @type Numeric
      * @private
@@ -63,7 +68,7 @@ define([
     //autoFocus: false,
   
     /**
-     * Creates an instance of BaseComponent
+     * Creates an instance of BaseComponent.
      *
      * @constructor
      * @class BaseComponent
@@ -74,11 +79,11 @@ define([
     },
 
     /**
-     * Getter for the component's html object. Returns the jquery element that represents it
+     * Getter for the component's html object. Returns the jquery element that represents it.
      *
      * @method placeholder
      * @param selector  Optional selector to use inside the html object
-     * @returns {*|jQuery|HTMLElement} Html object Jquery element or one of its children (if selector is supplied
+     * @return {*|jQuery|HTMLElement} Html object Jquery element or one of its children (if selector is supplied
      */
     placeholder: function(selector) {
       var ho = this.htmlObject;
@@ -86,7 +91,7 @@ define([
     },
 
     /**
-     * Focus on the component
+     * Focus on the component.
      *
      * @method focus
      */
@@ -97,9 +102,10 @@ define([
     },
 
     /**
-     * Autofocus on the component
+     * Autofocus on the component.
      *
      * @method _doAutoFocus
+     *
      * @private
      */
     _doAutoFocus: function() {
@@ -120,14 +126,14 @@ define([
 
     /**
      * General copy events methods. Given a target object and an event list, adds the target object as listener for all
-     * events in the list
+     * events in the list.
      *
      * @method copyEvents
      * @param target Target object
      * @param events Event list
      */
     copyEvents: function(target, events) {
-      _.each(events,function(evt, evtName) {
+      _.each(events, function(evt, evtName) {
         var e = evt,
             tail = evt.tail;
         while((e = e.next) !== tail) {
@@ -137,13 +143,13 @@ define([
     },
 
     /**
-     * Clones a component
+     * Clones a component.
      *
      * @method clone
      * @param parameterRemap Map containing parameter remapping
      * @param componentRemap Map containing component remapping
      * @param htmlRemap Map containing html object remapping
-     * @returns {*} The cloned component
+     * @return {*} The cloned component
      */
     clone: function(parameterRemap, componentRemap, htmlRemap) {
       var that, dashboard, callbacks;
@@ -198,12 +204,12 @@ define([
     },
 
     /**
-     * Gets an addIn for this component
+     * Gets an addIn for this component.
      *
      * @method getAddIn
      * @param slot AddIn sub type
      * @param addIn addIn name
-     * @returns {*} AddIn registered with the specified name and sub type
+     * @return {*} AddIn registered with the specified name and sub type
      */
     getAddIn: function(slot, addIn) {
       if(!this.dashboard) {
@@ -215,12 +221,12 @@ define([
     },
 
     /**
-     * Returns true is an addIn with given sub type and name exists
+     * Returns true is an addIn with given sub type and name exists.
      *
      * @method hasAddIn
      * @param slot AddIn sub type
      * @param addIn AddIn name
-     * @returns {*|true} _true_ if the addIn exists, _false_ otherwise
+     * @return {*|true} _true_ if the addIn exists, _false_ otherwise
      */
     hasAddIn: function(slot, addIn) {
       if(!this.dashboard) {
@@ -235,7 +241,7 @@ define([
      * Gets the values array property, if one is defined. Otherwise, issues a call to the server to get data.
      *
      * @method getValuesArray
-     * @returns {*} array with values
+     * @return {*} array with values
      * @deprecated
      */
     getValuesArray: function() {
@@ -243,7 +249,7 @@ define([
       if(typeof(this.valuesArray) == 'undefined' || this.valuesArray.length == 0) {
         if(typeof(this.queryDefinition) != 'undefined') {
 
-          var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
+          var vid = (this.queryDefinition.queryType == "sql") ? "sql" : "none";
           if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)) {
             vid = "mdx";
           } else if(this.queryDefinition.dataAccessId !== undefined && !this.valueAsId) {
@@ -252,7 +258,7 @@ define([
           QueryComponent.makeQuery(this);
           var myArray = new Array();
           for(p in this.result) if(this.result.hasOwnProperty(p)) {
-            switch(vid){
+            switch(vid) {
               case "sql":
                 myArray.push([this.result[p][0], this.result[p][1]]);
                 break;
@@ -271,13 +277,13 @@ define([
         } else {
 
           if(!this.dashboard) {
-            Logger.warn("dashboard not yet defined, return empty array");
+            Logger.warn("dashboard not yet defined, returning an empty array");
             return [];
           }
 
           //go through parameter array and update values
           var p = new Array(this.parameters ? this.parameters.length : 0);
-          for(var i= 0, len = p.length; i < len; i++) {
+          for(var i = 0, len = p.length; i < len; i++) {
             var key = this.parameters[i][0];
             var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL"
               ? this.parameters[i][2] : this.dashboard.getParameterValue(this.parameters[i][1]);
@@ -288,7 +294,7 @@ define([
           var myself = this;
           if(this.url) {
             var arr = {};
-            $.each(p,function(i, val) {
+            $.each(p, function(i, val) {
               arr[val[0]] = val[1];
             });
             jXML = this.dashboard.parseXActionResult(myself, this.dashboard.urlAction(this.url, arr));
@@ -296,8 +302,7 @@ define([
             jXML = this.dashboard.callPentahoAction(myself, this.solution, this.path, this.action, p, null);
           }
           //transform the result int a javascript array
-          var myArray = this.parseArray(jXML, false);
-          return myArray;
+          return this.parseArray(jXML, false);
         }
       } else {
         return this.valuesArray;
@@ -305,12 +310,12 @@ define([
     },
 
     /**
-     * Builds an array given data received from the server in another format
+     * Builds an array given data received from the server in another format.
      *
      * @method parseArray
      * @param jData data object (Xaction or CDA) resulting from a call to the server
      * @param includeHeader boolean indicating whether the resulting array should include the headers
-     * @returns {*} data array
+     * @return {*} data array
      *
      * @deprecated
      */
@@ -349,12 +354,12 @@ define([
     },
 
     /**
-     * Builds an array given data received from the server in CDA format
+     * Builds an array given data received from the server in CDA format.
      *
      * @method parseArrayCda
      * @param jData  data object (CDA format) resulting from a call to the server
      * @param includeHeader boolean indicating whether the resulting array should include the headers
-     * @returns {*} data array
+     * @return {*} data array
      *
      * @deprecated
      */
@@ -391,7 +396,7 @@ define([
     },
 
     /**
-     * Sets the options for an addIn
+     * Sets the options for an addIn.
      *
      * @method setAddInOptions
      * @param slot AddIn Subtype
@@ -410,12 +415,12 @@ define([
     },
 
     /**
-     * Gets an addIn options
+     * Gets an addIn options.
      *
      * @method getAddInOptions
      * @param slot AddIn subtype
      * @param addIn AddIn name
-     * @returns {*|{}} options associated with the specified addIn
+     * @return {*|{}} options associated with the specified addIn
      */
     getAddInOptions: function(slot, addIn) {
       var opts = null;
@@ -429,9 +434,10 @@ define([
     },
 
     /**
-     * Starts a timer
+     * Starts a timer.
      *
      * @method startTimer
+     *
      * @private
      */
     startTimer: function() {
@@ -442,10 +448,11 @@ define([
     },
 
     /**
-     * Marks a split time in the timer
+     * Marks a split time in the timer.
      *
      * @method splitTimer
-     * @returns {*} timer Info
+     * @return {*} timer Info
+     *
      * @private
      */
     splitTimer: function() {
@@ -465,11 +472,12 @@ define([
     },
 
     /**
-     * Formats time display given a number of milliseconds
+     * Formats time display given a number of milliseconds.
      *
      * @method formatTimeDisplay
      * @param t Number of milliseconds
-     * @returns {string} formatted string
+     * @return {string} formatted string
+     *
      * @private
      */
     formatTimeDisplay: function(t) {
@@ -478,10 +486,11 @@ define([
 
 
     /**
-     * Gets timer info
+     * Gets timer info.
      *
      * @method getTimerInfo
-     * @returns {{timerStart: *, timerSplit: *, elapsedSinceStart: *, elapsedSinceStartDesc: (string|*), elapsedSinceSplit: *, elapsedSinceSplitDesc: (string|*)}}
+     * @return {{timerStart: *, timerSplit: *, elapsedSinceStart: *, elapsedSinceStartDesc: (string|*), elapsedSinceSplit: *, elapsedSinceSplitDesc: (string|*)}}
+     *
      * @private
      */
     getTimerInfo: function() {
@@ -500,10 +509,11 @@ define([
      * This method assigns and returns a unique and somewhat randomish color for
      * this log. The goal is to be able to track cdf lifecycle more easily in
      * the console logs. We're returning a Hue value between 0 and 360, a range between 0
-     * and 75 for saturation and between 45 and 80 for value
+     * and 75 for saturation and between 45 and 80 for value.
      *
      * @method getLogColor
-     * @returns the Log color
+     * @return the Log color
+     *
      * @private
      */
     getLogColor: function() {

@@ -27,6 +27,7 @@ define([
     /**
      * Method used by the Dashboard constructor for data sources initialization
      *
+     * @method _initDataSources
      * @private
      */
     _initDataSources: function() {
@@ -36,7 +37,8 @@ define([
     /**
      * Gets the data source name.
      *
-     * @param obj a string, a data source object with a name property or a query definition object with a dataSource property
+     * @method _getDataSourceName
+     * @param {Object} obj a string, a data source object with a name property or a query definition object with a dataSource property
      * @return {string|undefined} the data source name or undefined if none is found
      *
      * @private
@@ -70,9 +72,9 @@ define([
      *
      * @method addDataSource
      * @for Dashboard
-     * @param name the name of the data source
-     * @param obj the data source to be added
-     * @param force a flag indicating if any previous data sources with the
+     * @param {string|Object} name the name of the data source
+     * @param {Object|boolean} obj the data source to be added
+     * @param {boolean|undefined} force a flag indicating if any previous data sources with the
      *  same name are to be overridden
      */
     addDataSource: function(name, obj, force) {
@@ -120,8 +122,8 @@ define([
      *
      * @method getDataSource
      * @for Dashboard
-     * @param obj the name of the data source or an object from which to extract the name from
-     * @returns {*|undefined} the data source or undefined if none is found
+     * @param {string|Object} obj the name of the data source or an object from which to extract the name from
+     * @return {Object|undefined} the data source or undefined if none is found
      */
     getDataSource: function(obj) {
       var dataSource;
@@ -138,8 +140,8 @@ define([
      *
      * @method getDataSourceQuery
      * @for Dashboard
-     * @param obj the name of the data source or an object from which to extract the name from
-     * return {*|undefined} the query built using the target data source or undefined if no data source was found
+     * @param {string|Object} obj the name of the data source or an object from which to extract the name from
+     * return {Object|undefined} the query built using the target data source or undefined if no data source was found
      */
     getDataSourceQuery: function(obj) {
       var dataSource = _.extend({}, this.dataSources[this._getDataSourceName(obj)]);
@@ -156,8 +158,8 @@ define([
      *
      * @method setDataSource
      * @for Dashboard
-     * @param name the name of the data source
-     * @param obj the data source to be added
+     * @param {string|Object} name the name of the data source
+     * @param {Object|undefined} obj the data source to be added
      */
     setDataSource: function(name, obj) {
       // if no name is provided, try to extract it from the provided object
@@ -174,7 +176,7 @@ define([
      *
      * @method removeDataSource
      * @for Dashboard
-     * @param obj the name of the data source or an object from which to extract the name
+     * @param {string|Object} obj the name of the data source or an object from which to extract the name
      */
     removeDataSource: function(obj) {
       var name;

@@ -12,12 +12,14 @@
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
 
 /**
- * Class that represents a legacy query (calling xactions). This functionality is deprecated
+ * Class that represents a legacy query (calling xactions). This functionality is deprecated.
+ *
  * @class LegacyQuery
  * @extends BaseQuery
  * @deprecated
@@ -60,7 +62,7 @@ define([
     },
 
     /**
-     * Init method for the Legacy query
+     * Init method for the Legacy query.
      *
      * @method init
      * @param opts Options object
@@ -70,12 +72,11 @@ define([
     },
 
     /**
-     * Gets the success handler for the query, given a fallback to call
+     * Gets the success handler for the query, given a fallback to call.
      *
      * @method getSuccessHandler
      * @param callback Callback to cal after the query is successful
-     * @returns {Function} success handler
-     *
+     * @return {Function} success handler
      */
     getSuccessHandler: function(callback) {
       var myself = this;
@@ -100,11 +101,11 @@ define([
     },
 
     /**
-     * Builds the query definition object
+     * Builds the query definition object.
      *
      * @method buildQueryDefinition
      * @param overrides Overrides to the existing options
-     * @returns {{}} Query definition object
+     * @return {{}} Query definition object
      *
      * @private
      */

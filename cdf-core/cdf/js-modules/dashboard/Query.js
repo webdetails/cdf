@@ -23,7 +23,7 @@
 define(['amd!../lib/underscore', '../lib/jquery'], function(_, $) {
 
   /**
-   * Builds a new Query object
+   * Builds a new Query object.
    *
    * @class Query
    * @constructor
@@ -37,7 +37,7 @@ define(['amd!../lib/underscore', '../lib/jquery'], function(_, $) {
 
     if(_.isObject(cd)) {
       opts = $.extend(true, {}, cd);
-      queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') || 
+      queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') ||
         (!_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined;
     } else if(_.isString(cd) && _.isString(dataAccessId)) {
       queryType = 'cda';

@@ -15,7 +15,7 @@ define(['../Logger', './JFreeChartComponent'], function(Logger, JFreeChartCompon
 
   var DialComponent = JFreeChartComponent.extend({
 
-    update : function() {
+    update: function() {
 
       var cd = this.chartDefinition;
       if(cd == undefined) {

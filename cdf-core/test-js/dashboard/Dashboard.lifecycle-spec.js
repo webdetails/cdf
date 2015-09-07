@@ -15,8 +15,8 @@ define([
   "cdf/Dashboard.Clean",
   "cdf/lib/jquery",
   "amd!cdf/lib/underscore",
-  "cdf/components/ManagedFreeformComponent"],
-  function(Dashboard, $, _, ManagedFreeformComponent) {
+  "cdf/components/ManagedFreeformComponent"
+], function(Dashboard, $, _, ManagedFreeformComponent) {
 
   /**
    * ## The CDF framework Dashboard Lifecycle

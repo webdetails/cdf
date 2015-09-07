@@ -12,7 +12,8 @@
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
 define([
@@ -66,7 +67,7 @@ define([
 
     /**
      * Defines the base query type and sets it as the base query class in
-     * {{#crossLink "DashboardQuery"}}DashboardQuery{{/crossLink}} .
+     * {{#crossLink "DashboardQuery"}}DashboardQuery{{/crossLink}}.
      *
      * Additional query types can be registered at any time using the
      * {{#crossLink "Dashboard/registerQuery:method"}}registerQuery{{/crossLink}} method:
@@ -92,18 +93,18 @@ define([
     },
 
     /**
-     * Gets an option (fallback for when the OptionManager is not available)
+     * Gets an option (fallback for when the OptionManager is not available).
      *
      * @method getOption
      * @param prop The property from where to get the options from
-     * @returns {*} Value for the option
+     * @return {*} Value for the option
      */
     getOption: function(prop) {
       return this.defaults[prop];
     },
 
     /**
-     * Sets an option (fallback for when the OptionManager is not available)
+     * Sets an option (fallback for when the OptionManager is not available).
      *
      * @method setOption
      * @param prop The property for which the value will be set
@@ -115,7 +116,7 @@ define([
     },
 
     /**
-     * Initialization function
+     * Initialization function.
      *
      * @method init
      * @param opts
@@ -127,11 +128,11 @@ define([
     },
 
     /**
-     * Gets the success handler for the query, given a callback to call
+     * Gets the success handler for the query, given a callback to call.
      *
      * @method getSuccessHandler
      * @param callback Callback to call after the query is successful
-     * @returns Success handler
+     * @return Success handler
      *
      */
     getSuccessHandler: function(callback) {
@@ -144,11 +145,11 @@ define([
     },
 
     /**
-     * Gets the error handler for the query, given a callback to call
+     * Gets the error handler for the query, given a callback to call.
      *
      * @method getErrorHandler
      * @param callback Callback to call if the query fails
-     * @returns Error handler
+     * @return Error handler
      */
     getErrorHandler: function(callback) {
       return function(resp, txtStatus, error) {
@@ -159,28 +160,25 @@ define([
     },
 
     /**
-     * Calls the server-side query
+     * Calls the server-side query.
      *
      * @method doQuery
-     * @param outsideCallback Success callback
+     * @param successCallback Success callback
      * @param errorCallback Error callback
      */
-    doQuery: function(outsideCallback, errorCallback) {
+    doQuery: function(successCallback, errorCallback) {
       if(typeof this.getOption('successCallback') != 'function') {
         throw 'QueryNotInitialized';
       }
-      var url = this.getOption('url');
-      var callback = (outsideCallback ? outsideCallback : this.getOption('successCallback'));
-      var queryDefinition = this.buildQueryDefinition();
 
       var settings = _.extend({}, this.getOption('ajaxOptions'), {
-        data: queryDefinition,
-        url: url,
-        success: this.getSuccessHandler(callback),
-        error: this.getErrorHandler(errorCallback)
+        data: this.buildQueryDefinition(),
+        url: this.getOption('url'),
+        success: this.getSuccessHandler(successCallback ? successCallback : this.getOption('successCallback')),
+        error: this.getErrorHandler(errorCallback ? errorCallback : this.getOption('errorCallback'))
       });
 
-      var async = settings.async == null ?  $.ajaxSettings.async : settings.async;
+      var async = settings.async == null ? $.ajaxSettings.async : settings.async;
       if(!async && settings.xhrFields && settings.xhrFields.withCredentials) {
         Logger.log("Cross-domain requests are deprecated for synchronous operations.");
         delete settings.xhrFields.withCredentials;
@@ -190,7 +188,7 @@ define([
     },
 
     /**
-     * Exports the data represented by the query
+     * Exports the data represented by the query.
      *
      * @method exportData
      * @abstract
@@ -200,7 +198,7 @@ define([
     },
 
     /**
-     * Sets the ajax options for the query
+     * Sets the ajax options for the query.
      *
      * @method setAjaxOptions
      * @param newOptions Options to set
@@ -210,7 +208,7 @@ define([
     },
 
     /**
-     * Sets the sort by columns
+     * Sets the sort by columns.
      *
      * @method setSortBy
      * @param sortBy Sort by columns
@@ -222,7 +220,7 @@ define([
     },
 
     /**
-     * Sorts the data, specifying a callback that'll be called after the sorting takes place
+     * Sorts the data, specifying a callback that'll be called after the sorting takes place.
      *
      * @method sortBy
      * @param sortBy Sort By columns
@@ -235,13 +233,13 @@ define([
     },
 
     /**
-     * Fetches the data
+     * Fetches the data.
      *
      * @method fetchData
-     * @param params  params for the query
-     * @param successCallback  Success callback
+     * @param params params for the query
+     * @param successCallback Success callback
      * @param errorCallback Error callback
-     * @returns the result of calling doQuery with the specified arguments
+     * @return the result of calling doQuery with the specified arguments
      * @throws InvalidInput error if the arguments are not correct
      */
     fetchData: function(params, successCallback, errorCallback) {
@@ -258,7 +256,7 @@ define([
           } else if(!_.isEmpty(arguments[0])
             && (_.isObject(arguments[0]) || _.isArray(arguments[0]))) {
 
-            this.setOption('params' , arguments[0] || {});
+            this.setOption('params', arguments[0] || {});
             return this.doQuery();
           }
           break;
@@ -288,10 +286,10 @@ define([
     },
 
     /**
-     * Gets last retrieved results
+     * Gets last retrieved results.
      *
      * @method lastResults
-     * @returns {*} the last result set obtained from the server
+     * @return {*} the last result set obtained from the server
      * @throws  NoCachedResults error if there haven't been previous calls to the server
      */
     lastResults: function() {
@@ -303,11 +301,11 @@ define([
     },
 
     /**
-     * Reruns the success callback on the last retrieved result set from the server
+     * Reruns the success callback on the last retrieved result set from the server.
      *
      * @method  reprocessLastResults
      * @param outerCallback Success callback
-     * @returns the result of calling the specified callback
+     * @return the result of calling the specified callback
      * @throws NoCachedResults error if there haven't been previous calls to the server
      */
     reprocessLastResults: function(outerCallback) {
@@ -321,11 +319,11 @@ define([
     },
 
     /**
-     * Alias for {{#crossLink "BaseQuery/reprocessLastResults:method"}}reprocessLastResults{{/crossLink}}
+     * Alias for {{#crossLink "BaseQuery/reprocessLastResults:method"}}reprocessLastResults{{/crossLink}}.
      *
      * @method reprocessResults
      * @param outsideCallback Success callback
-     * @returns the result of calling the specified callback
+     * @return the result of calling the specified callback
      * @throws  NoCachedResults error if there haven't been previous calls to the server
      */
     reprocessResults: function(outsideCallback) {
@@ -333,7 +331,7 @@ define([
     },
 
     /**
-     * Sets query parameters
+     * Sets query parameters.
      *
      * @method setParameters
      * @param params Query parameters
@@ -343,7 +341,7 @@ define([
     },
 
     /**
-     * Sets the success callback for the query
+     * Sets the success callback for the query.
      *
      * @method setCallback
      * @param callback Callback function
@@ -353,7 +351,7 @@ define([
     },
 
     /**
-     * Sets the error callback for the query
+     * Sets the error callback for the query.
      *
      * @method setErrorCallback
      * @param callback Error callback to set
@@ -363,7 +361,7 @@ define([
     },
 
     /**
-     * Sets the search pattern for the query
+     * Sets the search pattern for the query.
      *
      * @method setSearchPattern
      * @param pattern Search Pattern
@@ -380,11 +378,11 @@ define([
      */
 
     /**
-     * Gets the next page of results, as controlled by the @_pageSize option
+     * Gets the next page of results, as controlled by the @_pageSize option.
      *
      * @method nextPage
      * @param outsideCallback Callback to execute when the page of results is retrieved
-     * @returns the result of calling doQuery
+     * @return the result of calling doQuery
      * @throws InvalidPageSize if the page size option is not a positive number
      */
     nextPage: function(outsideCallback) {
@@ -400,11 +398,11 @@ define([
     },
 
     /**
-     * Gets the previous page of results, as controlled by the _pageSize option
+     * Gets the previous page of results, as controlled by the _pageSize option.
      *
      * @method previousPage
      * @param outsideCallback Callback to execute when the page of results is retrieved
-     * @returns the result of calling doQuery
+     * @return the result of calling doQuery
      * @throws AtBeginning error if current page is the first one
      */
     previousPage: function(outsideCallback) {
@@ -423,15 +421,15 @@ define([
     },
 
     /**
-     * Gets the page-th set of results (0-indexed)
+     * Gets the page-th set of results (0-indexed).
      *
      * @method getPage
-     * @param targetPage   Page to get
-     * @param outsideCallback  Callback to execute when the page is retrieved
-     * @returns the result of calling doQuery
-     * @throws  InvalidPage if targetPage is not a positive number
+     * @param targetPage Page to get
+     * @param outsideCallback Callback to execute when the page is retrieved
+     * @return the result of calling doQuery
+     * @throws InvalidPage if targetPage is not a positive number
      */
-    getPage: function( targetPage, outsideCallback) {
+    getPage: function(targetPage, outsideCallback) {
       var page = this.getOption('page'),
           pageSize = this.getOption('pageSize');
       if(targetPage * pageSize == page) {
@@ -445,11 +443,11 @@ define([
     },
 
     /**
-     * Sets the starting page for later executions of the query
+     * Sets the starting page for later executions of the query.
      *
      * @method setPageStartingAt
      * @param targetPage index for the target page
-     * @returns {boolean} _true_ if the page is correctly set, _false_ if the target page is already the selected one
+     * @return {boolean} _true_ if the page is correctly set, _false_ if the target page is already the selected one
      * @throws InvalidPage if the page number is not a positive number
      */
     setPageStartingAt: function(targetPage) {
@@ -464,12 +462,12 @@ define([
 
     /**
      * Runs the query, setting a starting page before doing so. If the starting page matches the already selected
-     * one, the query run is cancelled and _false_ is returned
+     * one, the query run is cancelled and _false_ is returned.
      *
      * @method pageStartingAt
-     * @param page  Starting page index
+     * @param page Starting page index
      * @param outsideCallback Callback to execute after server side query is processed
-     * @returns {*} _false_ if the query run is cancelled, null otherwise
+     * @return {*} _false_ if the query run is cancelled, null otherwise
      */
     pageStartingAt: function(page, outsideCallback) {
       if(this.setPageStartingAt(page) !== false) {
@@ -490,12 +488,12 @@ define([
     },
 
     /**
-     * Sets the page size and gets the first page of results
+     * Sets the page size and gets the first page of results.
      *
      * @method initPage
      * @param pageSize Page Size
      * @param outsideCallback Callback to run after query is ran
-     * @returns the result of calling doQuery
+     * @return the result of calling doQuery
      * @throws InvalidPageSize if the page size is not a positive number
      */
     initPage: function(pageSize, outsideCallback) {

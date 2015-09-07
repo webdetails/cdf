@@ -18,7 +18,7 @@ define([
   '../lib/jquery'
 ], function(Dashboard, Base64, DashboardViewsExt, $) {
   /**
-   * A module representing an extension to Dashboard module for views.
+   * A module representing an extension to the Dashboard module for views.
    * Map containing the list of parameters of a dashboard,
    * describing its state with viewFlags.
    *
@@ -27,9 +27,10 @@ define([
   Dashboard.implement({
 
     /**
-     *  Property used to define if a parameter is defined by a view
-     *  @property viewFlags
-     *  @for Dashboard
+     * Property used to define if a parameter is defined by a view.
+     *
+     * @property viewFlags
+     * @for Dashboard
      */
     viewFlags: {
       UNUSED: "unused",
@@ -38,7 +39,7 @@ define([
     },
 
     /**
-     * Method used by the Dashboard constructor for view initialization
+     * Method used by the Dashboard constructor for view initialization.
      *
      * @method _initViews
      * @for Dashboard
@@ -57,7 +58,6 @@ define([
      * Because we're storing the parameters in OrientDB, and as OrientDB has some serious issues when storing nested
      * objects, we need to marshall the parameters into a JSON object and converting that JSON into a Base64 blob
      * before the storage operation.
-     *
      *
      * @method restoreView
      * @for Dashboard
@@ -82,7 +82,7 @@ define([
     },
 
     /**
-     * Defines the viewFlag for a given parameter
+     * Defines the view flag of a given parameter.
      *
      * @method setParameterViewMode
      * @for Dashboard
@@ -97,22 +97,23 @@ define([
     },
 
     /**
+     * Returns the view flag for a given parameter.
      *
      * @method isViewParameter
      * @for Dashboard
      * @param parameter defines the name of the parameter
-     * @returns the parameter viewFlags
+     * @return the parameter viewFlags
      */
     isViewParameter: function(parameter) {
       return this.viewParameters[parameter];
     },
 
     /**
-     * Obtains an object with the values for all dashboard parameters flagged as being View parameters
+     * Obtains an object with the values for all dashboard parameters flagged as being View parameters.
      *
      * @method getViewParameters
      * @for Dashboard
-     * @returns object with parameter values
+     * @return object with parameter values
      */
     getViewParameters: function() {
       var params = this.viewParameters,
@@ -128,11 +129,11 @@ define([
     },
 
     /**
-     * Obtains a list of viewFlags.UNBOUND parameters
+     * Obtains a list of viewFlags.UNBOUND parameters.
      *
      * @method getUnboundParameters
      * @for Dashboard
-     * @returns {Array} of parameters
+     * @return {Array} of parameters
      */
     getUnboundParameters: function() {
       var params = this.viewParameters,
