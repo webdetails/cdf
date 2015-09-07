@@ -2,7 +2,7 @@
 
 <!-- All VizAPI required files are loaded dynamically through the webcontext.js include, below -->
 <script>
-  // Undefine define/require shim used by CDF, 
+  // Undefine define/require shim used by CDF,
   // to let a real define/require implementation be installed through webcontext.js
   delete define; delete require;
 </script>
@@ -28,13 +28,13 @@
       <dt>type</dt>
       <dd><code>visualizationAPIComponent</code></dd>
 
-      <dt>vizId</dt> 
+      <dt>vizId</dt>
       <dd>Id of the visualization to be rendered</dd>
 
       <dt>listeners</dt>
       <dd><i>Array - </i> Parameters who this component will react to</dd>
 
-      <dt>vizOptions</dt> 
+      <dt>vizOptions</dt>
       <dd><i>Array - </i>Parameters to pass as options to the visualization</dd>
 
       <dt>queryDefinition</dt>
@@ -72,16 +72,16 @@
       <dt>queryType</dt>
       <dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
 
-      <dt>jndi</dt> 
+      <dt>jndi</dt>
       <dd>Connection to use for the query</dd>
 
-      <dt>query</dt> 
+      <dt>query</dt>
       <dd>sql or mdx Query to execute</dd>
 
-      <dt>cube</dt> 
+      <dt>cube</dt>
       <dd>Cube name to use when queryType is mdx</dd>
 
-      <dt>catalog</dt> 
+      <dt>catalog</dt>
       <dd>Mondrian schema to use when queryType is mdx</dd>
 
     </dl>
@@ -125,12 +125,12 @@ sampleVisualization = {
   type: "visualizationAPIComponent",
   listeners: [],
   queryDefinition: MetaLayer.sampleVisualization,
-  vizId: "sample_calc",
+  vizId: "x-sample_calc",
   vizOptions: [["calc", "optionParam"]],
   htmlObject: "sampleObject",
   executeAtStart: true,
   postFetch: function(data) {
-    //Using postFetch to convert data types, because the query is passing 
+    //Using postFetch to convert data types, because the query is passing
     //a Numeric field as String and that breaks the sample visualization
     var metaQuantity = data.metadata[1];
     var resultset = data.resultset;
@@ -141,7 +141,7 @@ sampleVisualization = {
     }
   }
 }
-        
+
 Dashboards.init([sampleVisualization]);
 Dashboards.finishedInit = false;
         </textarea>
