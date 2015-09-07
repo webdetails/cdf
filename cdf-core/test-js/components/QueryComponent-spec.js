@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"],
-  function(Dashboard, QueryComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/QueryComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, QueryComponent, $) {
 
   /**
    * ## The Synchronous Query Component
@@ -24,6 +27,16 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
       dashboard = new Dashboard();
       dashboard.init();
       dashboard.addParameter("result", "");
+      dashboard.addDataSource("topTenQuery", {
+        queryType: "mdx",
+        catalog: "mondrian:/SteelWheels",
+        jndi: "SampleData",
+        query: function() {
+          return "SELECT NON EMPTY [Measures].[Sales] ON COLUMNS, "
+               + "NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales]) "
+               + "ON ROWS FROM [SteelWheelsSales]";
+        }
+      });
     });
 
     var queryComponentSync = new QueryComponent({
@@ -33,16 +46,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
       executeAtStart: true,
       asynchronousMode: false,
       resultvar: "result",
-      queryDefinition: {
-        queryType: 'mdx',
-        jndi: "SampleData",
-        catalog: "mondrian:/SteelWheels",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-                 "NON EMPTY TopCount([Customers].[All Customers].Children," +
-                 "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-          }
-      },
+      queryDefinition: {dataSource: "topTenQuery"},
       postFetch: function(data) { }
     });
 
@@ -84,6 +88,16 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
       dashboard = new Dashboard();
       dashboard.init();
       dashboard.addParameter("result", "");
+      dashboard.addDataSource("topTenQuery", {
+        queryType: "mdx",
+        catalog: "mondrian:/SteelWheels",
+        jndi: "SampleData",
+        query: function() {
+          return "SELECT NON EMPTY [Measures].[Sales] ON COLUMNS, "
+               + "NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales]) "
+               + "ON ROWS FROM [SteelWheelsSales]";
+        }
+      });
     });
 
     var queryComponentAsync = new QueryComponent({
@@ -93,16 +107,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
       executeAtStart: true,
       asynchronousMode: true,
       resultvar: "result",
-      queryDefinition: {
-        queryType: 'mdx',
-        jndi: "SampleData",
-        catalog: "mondrian:/SteelWheels",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-              "NON EMPTY TopCount([Customers].[All Customers].Children," +
-              "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-        }
-      },
+      queryDefinition: {dataSource: "topTenQuery"},
       postFetch: function(data) { }
     });
 

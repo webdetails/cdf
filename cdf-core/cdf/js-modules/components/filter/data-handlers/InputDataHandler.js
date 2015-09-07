@@ -63,7 +63,7 @@ define([
        * @uses BaseFilter.Logger
        * @extends BaseModel
        * @constructor
-       * @params {Object} options
+       * @param {Object} options
        */
       BaseFilter.DataHandlers.Input = BaseModel.extend( BaseFilter.Logger ).extend({
         ID: 'BaseFilter.DataHandlers.Input',

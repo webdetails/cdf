@@ -204,35 +204,41 @@
 
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/TableComponent'],
-  function(Dashboard, TableComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/TableComponent'
+], function(Dashboard, TableComponent) {
 
-    var dashboard = new Dashboard();
+  var dashboard = new Dashboard();
+  
+  dashboard.addDataSource("tableQuery", {
+    queryType: "mdx",
+    catalog: "mondrian:/SteelWheels",
+    jndi: "SampleData",
+    query: function() {
+      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+        + " NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales])"
+        + " ON ROWS FROM [SteelWheelsSales]";
+    }
+  });
 
-    var topTenCustomerDefinition = {
-      colHeaders: ["Customers","Sales"],
-      colTypes: ['string','numeric'],
-      colFormats: [null,'%.0f'],
-      colWidths: ['500px',null],
-      queryType: 'mdx',
-      displayLength: 10,
-      catalog: 'mondrian:/SteelWheels',
-      jndi: "SampleData",
-      query: function(){
-        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-          " NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales])" +
-          " ON ROWS from [SteelWheelsSales]";
-        }
-      };
+  dashboard.addComponent(new TableComponent({
+    name: "topTenCustomers",
+    type: "tableComponent",
+    chartDefinition: {
+      dataSource: "tableQuery",
+      colHeaders: ["Customers", "Sales"],
+      colTypes: ["string", "numeric"],
+      colFormats: [null, "%.0f"],
+      colWidths: ["500px", null],
+      displayLength: 10
+    },
+    htmlObject: "sampleObject",
+    executeAtStart: true
+  }));
 
-    dashboard.addComponent(new TableComponent({
-      name: "topTenCustomers",
-      type: "tableComponent",
-      chartDefinition: topTenCustomerDefinition,
-      htmlObject: "sampleObject",
-      executeAtStart: true
-    }));
-    dashboard.init();
+  dashboard.init();
+
 });
         </textarea>
         <br/>

@@ -18,9 +18,10 @@ define(['./SelectBaseComponent'], function(SelectBaseComponent) {
     defaultIfEmpty: true,
 
     /**
-     * Gets the value of the select tag
+     * Gets the value of the select tag.
      *
-     * @returns {*} the value of the selector
+     * @method getValue
+     * @return {*} the value of the selector
      */
     getValue: function() {
       return this.placeholder("select").val();

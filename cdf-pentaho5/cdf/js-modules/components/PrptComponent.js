@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/underscore', './BaseComponent'],
-  function(PrptComponentExt, Logger, $, _, BaseComponent) {
+define([
+  './PrptComponent.ext',
+  '../Logger',
+  '../lib/jquery',
+  'amd!../lib/underscore',
+  './BaseComponent'
+], function(PrptComponentExt, Logger, $, _, BaseComponent) {
 
   var PrptComponent = BaseComponent.extend({
     getIframeName: function() {
@@ -176,7 +181,7 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
 
       // update options with report parameters
       var myself = this;
-      _.each(this.parameters, function( param, index ) {
+      _.each(this.parameters, function(param, index) {
         // param: [<prptParam>, <dashParam>, <default>]
         var name = param[0];
         var value = param[1];
@@ -191,16 +196,16 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
           } else {
             printValue = JSON.stringify(value);
           }
-          Logger.log("GetOptions detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used as value instead its value obtained from getParameterValue");
+          Logger.log("GetOptions detected static parameter " + name + "=" + printValue + ". "
+            + "The parameter will be used as value instead its value obtained from getParameterValue");
           paramValue = value;
         }
-        if (paramValue == null && param.length == 3) {
+        if(paramValue == null && param.length == 3) {
           paramValue = param[2];
         } else if (paramValue === undefined) {
           paramValue = value;
         }
-        if (_.isFunction(paramValue)) {
+        if(_.isFunction(paramValue)) {
           paramValue = paramValue();
         }
         options[name] = paramValue;
@@ -228,7 +233,7 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
         var paramValue;
         try {
           paramValue = myself.dashboard.getParameterValue(value);
-        } catch( e ) {
+        } catch(e) {
           if(!_.isObject(value) || _.isFunction(value)) {
             printValue = value;
           } else {
@@ -238,12 +243,12 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
               "The parameter will be used as value instead its value obtained from getParameterValue");
           paramValue = value;
         }
-        if (paramValue == null && param.length == 3) {
+        if(paramValue == null && param.length == 3) {
           paramValue = param[2];
         } else if (paramValue === undefined) {
           paramValue = value;
         }
-        if (_.isFunction(paramValue)) {
+        if(_.isFunction(paramValue)) {
           paramValue = paramValue();
         }
         options[name] = paramValue;
@@ -321,7 +326,7 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
             htmlObj.width(sized.scrollWidth + wMargin);
           }
         }
-      } catch (e) {
+      } catch(e) {
         Logger.log(e);
       }
     },

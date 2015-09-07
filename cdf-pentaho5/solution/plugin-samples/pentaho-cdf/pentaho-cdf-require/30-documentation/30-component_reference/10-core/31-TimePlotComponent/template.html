@@ -139,36 +139,42 @@
 
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/TimePlotComponent'],
-  function(Dashboard, TimePlotComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/TimePlotComponent'
+], function(Dashboard, TimePlotComponent) {
 
-    var timePlotDefinition = {
-      width: 500,
-      height: 300,
-      title: "Total order income",
-      queryType: 'mdx',
-      jndi: "SampleData",
-      catalog: "solution:/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
-      query: function() {
-      var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
-      return query;
-      },
-      columns: ["Total Price"],
-      dots: false,
-      showValues: true,
-      fill: true
-    };
+  var timePlotDefinition = {
+    dataSource: "timePlotQuery",
+    width: 500,
+    height: 300,
+    title: "Total order income",
+    columns: ["Total Price"],
+    dots: false,
+    showValues: true,
+    fill: true
+  };
 
-    var dashboard = new Dashboard();
+  var dashboard = new Dashboard();
 
-    dashboard.addComponent(new TimePlotComponent({
-      name: "timePlotComponent",
-      type: "timePlotComponent",
-      chartDefinition: timePlotDefinition,
-      htmlObject: "sampleObject",
-      executeAtStart: true
-    }));
-    dashboard.init();
+  dashboard.addDataSource("timePlotQuery", {
+    queryType: "mdx",
+    catalog: "solution:/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
+    jndi: "SampleData",
+    query: function() {
+      return "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
+    },
+  });
+
+  dashboard.addComponent(new TimePlotComponent({
+    name: "timePlotComponent",
+    type: "timePlotComponent",
+    chartDefinition: timePlotDefinition,
+    htmlObject: "sampleObject",
+    executeAtStart: true
+  }));
+
+  dashboard.init();
 });
         </textarea>
         <br/>

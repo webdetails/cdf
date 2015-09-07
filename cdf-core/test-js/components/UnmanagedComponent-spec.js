@@ -11,13 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean",
+define([
+  "cdf/Dashboard.Clean",
   "cdf/dashboard/Query",
   "cdf/lib/jquery",
   "amd!cdf/lib/underscore",
   "cdf/components/BaseComponent",
-  "cdf/components/UnmanagedComponent"],
-  function(Dashboard, Query, $, _, BaseComponent, UnmanagedComponent) {
+  "cdf/components/UnmanagedComponent"
+], function(Dashboard, Query, $, _, BaseComponent, UnmanagedComponent) {
 
   var HelloBaseComponent = BaseComponent.extend({
     update: function() {
@@ -40,7 +41,8 @@ define(["cdf/Dashboard.Clean",
   var HelloQueryBaseComponent = BaseComponent.extend({
     update: function() {
       var myself = this;
-      var query = new Query(myself.queryDefinition, null, myself.dashboard);
+
+      var query = new Query(myself.dashboard.getDataSource(myself.queryDefinition), null, myself.dashboard);
       query.fetchData(myself.parameters, function(values) {
         var changedValues = undefined;
         if((typeof(myself.postFetch) == 'function')) {
@@ -95,10 +97,7 @@ define(["cdf/Dashboard.Clean",
       type: "HelloQueryBase",
       htmlObject: 'mquery',
       executeAtStart: true,
-      queryDefinition: {
-        path: "/fake/test1.cda",
-        dataAccessId: "1"
-      }
+      queryDefinition: {dataSource: "fakeQuery"}
     });
   
     var uquery = new HelloQueryUnmanagedComponent({
@@ -106,10 +105,7 @@ define(["cdf/Dashboard.Clean",
       type: "HelloQueryUnmanaged",
       htmlObject: 'uquery',
       executeAtStart: true,
-      queryDefinition: {
-        path: "/fake/test2.cda",
-        dataAccessId: "2"
-      }
+      queryDefinition: {dataSource: "fakeQuery"}
     });
 
     var uqueryWithParams = new HelloQueryUnmanagedComponent({
@@ -117,10 +113,7 @@ define(["cdf/Dashboard.Clean",
       type: "HelloQueryUnmanaged",
       htmlObject: 'uquery',
       executeAtStart: true,
-      queryDefinition: {
-        path: "/fake/test2.cda",
-        dataAccessId: "2"
-      },
+      queryDefinition: {dataSource: "fakeQuery"},
       parameters: {
         "MYPARAM1": "myparam1",
         "MYPARAM2": "myparam2",
@@ -132,6 +125,7 @@ define(["cdf/Dashboard.Clean",
       dashboard = new Dashboard();
       dashboard.init();
       dashboard.addComponents([mhello, uhello, mquery, uquery, uqueryWithParams]);
+      dashboard.addDataSource("fakeQuery", {dataAccessId: "1", path: "/test/path"});
     });
 
     /**
@@ -201,7 +195,11 @@ define(["cdf/Dashboard.Clean",
     it("triggers query with the parameters of the unmanaged query component unchanged", function(done) {
       spyOn(uqueryWithParams, 'update').and.callThrough();
 
-      var myQuery = new Query(uqueryWithParams.queryDefinition, null, uqueryWithParams.dashboard);
+      var myQuery = new Query(
+        dashboard.getDataSource(uqueryWithParams.queryDefinition),
+        null,
+        uqueryWithParams.dashboard);
+
       spyOn(myQuery, 'fetchData').and.callThrough();
 
       spyOn(uqueryWithParams.dashboard, 'getQuery').and.returnValue(myQuery);
@@ -209,8 +207,11 @@ define(["cdf/Dashboard.Clean",
       // listen to cdf:postExecution event
       uqueryWithParams.once("cdf:postExecution", function() {
         expect(uqueryWithParams.update).toHaveBeenCalled();
-        expect(myQuery.fetchData).toHaveBeenCalledWith(uqueryWithParams.parameters,
-            jasmine.any(Function), jasmine.any(Function));
+        expect(myQuery.fetchData).toHaveBeenCalledWith(
+          uqueryWithParams.parameters,
+          jasmine.any(Function),
+          jasmine.any(Function)
+        );
         done();
       });
 

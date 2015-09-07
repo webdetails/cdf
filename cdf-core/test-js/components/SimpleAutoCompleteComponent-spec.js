@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/SimpleAutoCompleteComponent"],
-  function(Dashboard, SimpleAutoCompleteComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/SimpleAutoCompleteComponent"
+], function(Dashboard, SimpleAutoCompleteComponent) {
 
   /**
    * ## The Simple Auto Complete Component
@@ -22,6 +24,11 @@ define(["cdf/Dashboard.Clean", "cdf/components/SimpleAutoCompleteComponent"],
     var dashboard = new Dashboard();
     
     dashboard.addParameter("param1", "value1");
+
+    dashboard.addDataSource("simpleAutoCompQuery", {
+      dataAccessId: "dataAccessTestId",
+      path: "/fake/file.cda",
+    });
 
     dashboard.init();
 
@@ -33,8 +40,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SimpleAutoCompleteComponent"],
       parameters: [["arg1", "param1"]],
       minTextLength: 2,
       queryDefinition: {
-        dataAccessId: "dataAccessTestId",
-        path: "/fake/file.cda",
+        dataSource: "simpleAutoCompQuery",
         showValue: true
       },
       executeAtStart: true

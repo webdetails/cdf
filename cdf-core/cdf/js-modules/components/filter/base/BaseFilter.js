@@ -7,11 +7,12 @@ define([
          * MVC-based tree-like filter that supports
          * - multiple nested groups
          * - server-side pagination and searching
+         *
          * @module BaseFilter
          * @main
          */
 
-        /**
+        /*
          * Schmiede, mein Hammer, ein hartes Schwert!
          */
         var BaseFilter = {
@@ -40,7 +41,7 @@ define([
           /**
            * Controller-like set of classes design to encapsulate the selection strategy
            * and isolate that "business" logic from lower-level view interaction logic.
-          #
+           *
            * These classes are singletons passed as part of the configuration objects.
            * @submodule SelectionStrategies
            * @main

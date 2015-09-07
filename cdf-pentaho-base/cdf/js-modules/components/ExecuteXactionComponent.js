@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', 'amd!../lib/jquery.fancybox'],
-  function(XactionComponentExt, $, BaseComponent) {
+define([
+  './XactionComponent.ext',
+  '../lib/jquery',
+  './BaseComponent',
+  'amd!../lib/jquery.fancybox'
+], function(XactionComponentExt, $, BaseComponent) {
 
   var ExecuteXactionComponent = BaseComponent.extend({
     visible: false,

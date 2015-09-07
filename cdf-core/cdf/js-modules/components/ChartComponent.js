@@ -83,8 +83,18 @@ define([
 
     renderChart: function() {
       var cd = this.chartDefinition;
+
+      // check if we should use a data source
+      var dataSource = this.dashboard.getDataSource(cd);
+      if(dataSource) {
+        // merge options, query definition options override options duplicated in the data source
+        cd = $.extend({}, dataSource, cd);
+        // remove the data source name from the query definition
+        delete cd.dataSource;
+      }
+
       if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
-        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
+        this.triggerQuery(cd, _.bind(this.render, this));
       } else if(this.valuesArray != undefined) {
         this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
       } else {

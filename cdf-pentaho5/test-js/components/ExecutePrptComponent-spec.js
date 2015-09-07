@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/ExecutePrptComponent", "cdf/lib/jquery"],
-  function(Dashboard, ExecutePrptComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/ExecutePrptComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, ExecutePrptComponent, $) {
 
   /**
    * ## The Execute Prpt Component

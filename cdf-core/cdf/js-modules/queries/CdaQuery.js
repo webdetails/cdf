@@ -12,12 +12,14 @@
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
 
 /**
- * Class that represents a CDA query
+ * Class that represents a CDA query.
+ *
  * @class CdaQuery
  * @extends BaseQuery
  */
@@ -50,7 +52,7 @@ define([
     },
 
     /**
-     * Init method for the Cda query
+     * Init method for the Cda query.
      *
      * @method init
      * @param opts Options is an object with the following properties: path, dataAccessId, sortBy, pageSize, outputIndexId
@@ -76,11 +78,11 @@ define([
     },
 
     /**
-     * Builds the query definition object
+     * Builds the query definition object.
      *
      * @method buildQueryDefinition
      * @param overrides Overrides to the existing options
-     * @returns {{}} Query definition object
+     * @return {{}} Query definition object
      *
      * @private
      */
@@ -131,7 +133,7 @@ define([
     },
 
     /**
-     * Exports the data, according to a specific output type
+     * Exports the data, according to a specific output type.
      *
      * @method exportData
      * @param outputType Output type (csv, xls, xml, html)
@@ -179,13 +181,13 @@ define([
         _exportIframe.detach();
         _exportIframe[0].src = CdaQueryExt.getUnwrapQuery({"path": queryDefinition.path, "uuid": uuid});
         _exportIframe.appendTo($('body'));
-      }).fail(function(jqXHR,textStatus,errorThrown) {
+      }).fail(function(jqXHR, textStatus, errorThrown) {
         Logger.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown);
       });
     },
 
     /**
-     * Sets the sort by columns
+     * Sets the sort by columns.
      *
      * CDA expects an array of terms consisting of a number and a letter
      * that's either 'A' or 'D'. Each term denotes, in order, a column
@@ -199,7 +201,7 @@ define([
      *
      * @method setSortBy
      * @param sortBy  Sort By columns
-     * @returns {Boolean} _true_ if the sort by condition has changed, _false_ if it remained the same
+     * @return {Boolean} _true_ if the sort by condition has changed, _false_ if it remained the same
      * @throws   InvalidSortExpression if the sort by columns are not correctly defined
      */
     setSortBy: function(sortBy) {
@@ -263,7 +265,7 @@ define([
      * @method sortBy
      * @param sortBy Sort By Columns
      * @param outsideCallback  Callback to call after the sorting has been processed
-     * @returns _false_ if the sort by conditions have not changed, the result of calling doQuery otherwise
+     * @return _false_ if the sort by conditions have not changed, the result of calling doQuery otherwise
      */
     sortBy: function(sortBy, outsideCallback) {
       /* If the parameter is not the same, and we have a valid state,

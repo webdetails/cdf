@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/SchedulePrptComponent"],
-  function(Dashboard, SchedulePrptComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/SchedulePrptComponent"
+], function(Dashboard, SchedulePrptComponent) {
 
   /**
    * ## The Schedule Pentaho Reporting Component

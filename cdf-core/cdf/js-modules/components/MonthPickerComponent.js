@@ -14,33 +14,33 @@
 define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
   var MonthPickerComponent = BaseComponent.extend({
-    update : function() {
+    update: function() {
       var myself = this;
       var selectHTML = myself.getMonthPicker(myself.name, myself.size, myself.initialDate, myself.minDate, myself.maxDate, myself.months);
       myself.placeholder().html(selectHTML);
-      $("#"+myself.name).change(function() {
+      $("#" + myself.name).change(function() {
         myself.dashboard.processChange(myself.name);
       });
       myself._doAutoFocus();
     },
-    getValue : function() {
+    getValue: function() {
       var myself = this;
       var value = $("#" + myself.name).val();
 
-      var year = value.substring(0,4);
-      var month = parseInt(value.substring(5,7) - 1);
-      var d = new Date(year,month,1);
+      var year = value.substring(0, 4);
+      var month = parseInt(value.substring(5, 7) - 1);
+      var d = new Date(year, month, 1);
 
       // rebuild picker
       var selectHTML = myself.getMonthPicker(myself.name, myself.size, d, myself.minDate, myself.maxDate, myself.months);
       myself.placeholder().html(selectHTML);
       
-      $("#"+myself.name).change(function() {
+      $("#" + myself.name).change(function() {
         myself.dashboard.processChange(myself.name);
       });
       return value;
     },
-    parseDate : function(aDateString) {
+    parseDate: function(aDateString) {
       //This works assuming the Date comes in this format -> yyyy-mm-dd or yyyy-mm
       //Date.UTC(year[year after 1900],month[0 to 11],day[1 to 31], hours[0 to 23], min[0 to 59], sec[0 to 59], ms[0 to 999])
       var parsedDate = null;
@@ -52,16 +52,16 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
         year = parseInt(split[yearIndex]);
         month = parseInt(split[monthIndex]);
         day = parseInt(split[dayindex]);
-        parsedDate = new Date(Date.UTC(year,(month-1),day));
+        parsedDate = new Date(Date.UTC(year, (month - 1), day));
       } else if(split.length == 2) {
         year = parseInt(split[yearIndex]);
         month = parseInt(split[monthIndex]);
-        parsedDate = new Date(Date.UTC(year,(month-1)));
+        parsedDate = new Date(Date.UTC(year, (month - 1)));
       }
 
       return parsedDate;
     },
-    getMonthsAppart : function(aDateOne, aDateTwo) {
+    getMonthsAppart: function(aDateOne, aDateTwo) {
       var min, max;
       if(aDateOne < aDateTwo) {
         min = aDateOne;
@@ -77,7 +77,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       
       return monthCount;
     },
-    normalizeDateToCompare : function(dateObject) {
+    normalizeDateToCompare: function(dateObject) {
       var normalizedDate = dateObject;
       normalizedDate.setDate(1);
       normalizedDate.setHours(0);
@@ -88,8 +88,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       return normalizedDate;
 
     },
-    getMonthPicker : function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
-
+    getMonthPicker: function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
 
       var selectHTML = "<select";
       selectHTML += " id='" + object_name + "'";
@@ -114,7 +113,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       // if monthCount is not defined we'll use everything between max and mindate
       var monthCountUndefined = false;
       if(monthCount == undefined || monthCount == 0) {
-        monthCount = this.getMonthsAppart(minDate,maxDate);
+        monthCount = this.getMonthsAppart(minDate, maxDate);
         monthCountUndefined = true;
       }
 
@@ -139,7 +138,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       var normalizedMinDate = this.normalizeDateToCompare(minDate);
       var normalizedMaxDate = this.normalizeDateToCompare(maxDate);
 
-      for(var i= 0; i <= monthCount; i++) {
+      for(var i = 0; i <= monthCount; i++) {
 
         currentDate.setMonth(currentDate.getMonth() + 1);
 
@@ -147,7 +146,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
           selectHTML += "<option value = '" 
             + currentDate.getFullYear() + "-" 
-            + this.zeroPad((currentDate.getMonth() + 1),2) + "' ";
+            + this.zeroPad((currentDate.getMonth() + 1), 2) + "' ";
 
           if(currentDate.getFullYear() == initialDate.getFullYear() 
             && currentDate.getMonth() == initialDate.getMonth()) {
@@ -156,7 +155,7 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
           }
 
           selectHTML += ">" + this.dashboard.monthNames[currentDate.getMonth()] + " "
-            + currentDate.getFullYear()  + "</option>";
+            + currentDate.getFullYear() + "</option>";
         }
       }
 
@@ -164,9 +163,9 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
       return selectHTML;
     },
-    zeroPad : function(num,size) {
+    zeroPad: function(num,size) {
       var n = "00000000000000" + num;
-      return n.substring(n.length-size,n.length);
+      return n.substring(n.length - size, n.length);
     }
   });
 

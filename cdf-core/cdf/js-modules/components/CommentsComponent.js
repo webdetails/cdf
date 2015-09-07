@@ -279,7 +279,7 @@ define([
         },
 
         render: function() {
-          var $renderElem = $('#'+myself.options.htmlObject);
+          var $renderElem = $('#' + myself.options.htmlObject);
           var $commentsElem = $('<div/>').addClass('commentsGroup');
           _(this.collection.models).each(function(comment) {
             $commentsElem.append(this.renderSingeComment(comment));
@@ -292,7 +292,7 @@ define([
         },
 
         renderComments: function() {
-          var $commentsElem = $('#'+myself.options.htmlObject+' > div .commentsGroup');
+          var $commentsElem = $('#' + myself.options.htmlObject + ' > div .commentsGroup');
           $commentsElem.empty();
           _(this.collection.models).each(function(comment) {
             $commentsElem.append(this.renderSingeComment(comment));
@@ -441,9 +441,9 @@ define([
   
     },
   
-    /*****
-     Process component
-    *****/
+    /*
+     * Process component
+     */
   
     update: function() {
       // Set page start and length for pagination

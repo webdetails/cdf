@@ -61,7 +61,7 @@
      * @method getHighestId
      * @for Output
      * @private
-     * @params {Object} selectionState
+     * @param {Object} selectionState
      * @return {Array} Returns a list of ids
      */
     getHighestId: function(selectionState) {
@@ -88,7 +88,7 @@
      * @method getLowestId
      * @for Output
      * @private
-     * @params {Object} selectionState
+     * @param {Object} selectionState
      * @return {Array} Returns a list of ids
      */
     getLowestId: function(selectionState) {
