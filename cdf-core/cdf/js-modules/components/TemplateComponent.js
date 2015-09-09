@@ -92,7 +92,7 @@ define([
         applyFormatter: function(model, formatter) {
           var formatHandler = Utils.propertiesArrayToObject(this.formatters)[formatter];
           if(_.isFunction(formatHandler)) {
-            return formatHandler(model);
+            return formatHandler.call(this, model);
           } else {
             return model;
           }
