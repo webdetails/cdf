@@ -12,10 +12,11 @@
  */
 
 define([
+  '../dashboard/Utils',
   '../dashboard/Dashboard.ext',
   'common-ui/util/URLEncoder',
   '../lib/jquery'
-], function(DashboardExt, Encoder, $) {
+], function(Utils, DashboardExt, Encoder, $) {
 
   var XactionComponentExt = {
 
@@ -23,7 +24,7 @@ define([
       if(params) {
         var parameters = {};
         for(var key in params) if(params.hasOwnProperty(key)) {
-          parameters[key] = (typeof params[key]=='function') ? params[key]() : params[key];
+          parameters[key] = Utils.ev(params[key]);
         }
         return Encoder.encode(
           DashboardExt.getCdfBase() + "/viewAction",

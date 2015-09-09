@@ -111,12 +111,11 @@ define([
       if(qd) {
         // check if we should use a data source
         if(_.isString(qd.dataSource) && !_.isEmpty(qd.dataSource)) {
-          var dataSource = this.dataSources[qd.dataSource];
-          if(!_.isEmpty(dataSource)) {
-            // merge options, query definition options override options duplicated in the data source
-            qd = _.extend({}, dataSource, qd);
+          var ds = this.getDataSource(qd.dataSource);
+          if(!_.isUndefined(ds)) {
+            qd = ds;
           } else {
-            Logger.error("Invalid data source name " + qd.dataSource);
+            Logger.error("Invalid data source name '" + qd.dataSource + "'");
             return;
           }
         }
@@ -126,6 +125,7 @@ define([
           (qd.path && qd.dataAccessId) ? 'cda'        :
           undefined;
 
+        // update query type value
         qd.queryType = qt;
 
         return this.hasQuery(qt) ? qt : undefined;
@@ -148,26 +148,28 @@ define([
         type = 'cda';
       } else if(_.isObject(type)) {
         opts = type;
-
-        // check if we should use a data source
-        if(_.isString(opts.dataSource) && !_.isEmpty(opts.dataSource)) {
-          var dataSource = this.dataSources[opts.dataSource];
-          if(!_.isEmpty(dataSource)) {
-            // merge options, query definition options override options duplicated in the data source
-            opts = _.extend({}, dataSource, opts);
-            // remove the data source name from the query definition
-            delete opts.dataSource;
-          } else {
-            Logger.error("Invalid data source name " + opts.dataSource);
-            return;
-          }
-        }
-
-        type = opts.queryType || 'cda';
+        type = undefined;
       }
+
+      // check if we should use a data source
+      if(_.isString(opts.dataSource) && !_.isEmpty(opts.dataSource)) {
+        var ds = this.getDataSource(opts.dataSource);
+        if(!_.isUndefined(ds)) {
+          // merge options, query definition options override options duplicated in the data source
+          opts = _.extend({}, ds, opts);
+          // remove the data source name from the query definition
+          delete opts.dataSource;
+        } else {
+          Logger.error("Invalid data source name '" + qd.dataSource + "'");
+          return;
+        }
+      }
+
+      type = type || opts.queryType || 'cda';
 
       var query = this.queryFactories.getNew('Query', type, opts);
       query.dashboard = this;
+
       return query;
     },
 

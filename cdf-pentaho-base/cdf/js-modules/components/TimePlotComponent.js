@@ -110,8 +110,7 @@ define([
         cd.showValues = true;
       }
 
-
-      var cols = typeof cd['columns'] == 'function' ? cd['columns']() : cd['columns'];
+      var cols = Utils.ev(cd['columns']);
       if(cols == undefined || cols.length == 0) {
         Logger.log("Fatal - No 'columns' property passed in chartDefinition", "error");
         return;
@@ -193,10 +192,9 @@ define([
       var allData = undefined;
 
       // check if we should use a data source
-      var dataSource = this.dashboard.getDataSource(cd);
-      if(dataSource) {
+      if(typeof cd.dataSource == "string" && cd.dataSource) {
         // merge options, query definition options override options duplicated in the data source
-        cd = $.extend({}, dataSource, cd);
+        cd = $.extend({}, this.dashboard.getDataSource(cd.dataSource), cd);
         // remove the data source name from the query definition
         delete cd.dataSource;
       }

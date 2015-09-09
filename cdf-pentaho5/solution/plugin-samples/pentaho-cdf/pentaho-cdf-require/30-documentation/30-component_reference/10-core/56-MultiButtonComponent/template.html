@@ -113,28 +113,30 @@
 
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/MultiButtonComponent'],
-  function(Dashboard, MultiButtonComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/MultiButtonComponent'
+], function(Dashboard, MultiButtonComponent) {
 
-    var dashboard = new Dashboard();
-    dashboard.addParameter("region", "");
+  var dashboard = new Dashboard();
+  dashboard.addParameter("region", "");
 
-    dashboard.addComponent(new MultiButtonComponent({
-      name: "multiButtonComponent",
-      type: "multiButtonComponent",
-      parameters:[],
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
-      parameter: "region",
-      separator: ",&nbsp;",
-      valueAsId: true,
-      isMultiple: false,
-      htmlObject: "sampleObject",
-      executeAtStart: true,
-      postChange: function() {
-        alert("you chose: " + this.dashboard.getParameterValue(this.parameter));
-      }
-    }));
-    dashboard.init();
+  dashboard.addComponent(new MultiButtonComponent({
+    name: "multiButtonComponent",
+    type: "multiButtonComponent",
+    parameters: [],
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
+    parameter: "region",
+    separator: ",&nbsp;",
+    valueAsId: true,
+    isMultiple: false,
+    htmlObject: "sampleObject",
+    executeAtStart: true,
+    postChange: function() {
+      alert("you chose: " + this.dashboard.getParameterValue(this.parameter));
+    }
+  }));
+  dashboard.init();
 });
         </textarea>
         <br/>

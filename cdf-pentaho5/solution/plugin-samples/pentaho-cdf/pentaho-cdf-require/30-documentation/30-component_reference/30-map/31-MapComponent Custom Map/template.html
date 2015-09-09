@@ -114,52 +114,55 @@
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextComponent', 'cdf/components/MapComponent'],
-    function(Dashboard, TextComponent, MapComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/TextComponent',
+  'cdf/components/MapComponent'
+], function(Dashboard, TextComponent, MapComponent) {
 
-    var dashboard = new Dashboard();
+  var dashboard = new Dashboard();
 
-    dashboard.addParameter("bottomThreshold", 1000000);
-    dashboard.addParameter("topThreshold", 2000000);
-    dashboard.addParameter("selectedPoint", "");
+  dashboard.addParameter("bottomThreshold", 1000000);
+  dashboard.addParameter("topThreshold", 2000000);
+  dashboard.addParameter("selectedPoint", "");
 
-    dashboard.addComponent(new TextComponent({
-      name: "regionSelector",
-      type: "textComponent",
-      listeners:["selectedPoint"],
-      parameters:[],
-      expression: function() { return "" + this.dashboard.getParameterValue('selectedPoint'); },
-      htmlObject: "sampleObject",
-      executeAtStart: true
-    }));
+  dashboard.addComponent(new TextComponent({
+    name: "regionSelector",
+    type: "textComponent",
+    listeners: ["selectedPoint"],
+    parameters: [],
+    expression: function() { return "" + this.dashboard.getParameterValue('selectedPoint'); },
+    htmlObject: "sampleObject",
+    executeAtStart: true
+  }));
 
-    dashboard.addComponent(new MapComponent({
-      name: "mapComponent",
-      type: "mapComponent",
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetPoints.xaction",
-      parameters: [],
-      listeners: [],
-      messageElementId: "messages",
-      htmlObject: "map",
-      executeAtStart: true,
-      initPosLon: -7.5,
-      initPosLat: 39.8,
-      initZoom: 1,
-      mapDiv: "myMap",
-      showCustomMap: true,
-      customMapCode: "map = new OpenLayers.Map( map_div );layer = new OpenLayers.Layer.MapServer('OpenLayers WMS', 'http://vmap0.tiles.osgeo.org/wms/vmap0', {layers: 'basic'},{gutter: 15}); map.addLayer(layer);",
-      useMercator: false,
-      expression: function() { return "var icon=''; if (value < this.dashboard.getParameterValue('bottomThreshold')){icon = markers[2];} else if (value > this.dashboard.getParameterValue('topThreshold')){icon = markers[0];} else {icon = markers[1];}; icon"; },
-      preExecution:function() {},
-      postExecution:function() {},
-      markers: [
-        ["js/lib/OpenMap/OpenLayers/img/marker-green.png",42,50],
-        "js/lib/OpenMap/OpenLayers/img/marker-gold.png",
-        "js/lib/OpenMap/OpenLayers/img/marker.png"
-      ]
-    }));
-    dashboard.init();
-  });
+  dashboard.addComponent(new MapComponent({
+    name: "mapComponent",
+    type: "mapComponent",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/map_dashboard/GetPoints.xaction",
+    parameters: [],
+    listeners: [],
+    messageElementId: "messages",
+    htmlObject: "map",
+    executeAtStart: true,
+    initPosLon: -7.5,
+    initPosLat: 39.8,
+    initZoom: 1,
+    mapDiv: "myMap",
+    showCustomMap: true,
+    customMapCode: "map = new OpenLayers.Map( map_div );layer = new OpenLayers.Layer.MapServer('OpenLayers WMS', 'http://vmap0.tiles.osgeo.org/wms/vmap0', {layers: 'basic'},{gutter: 15}); map.addLayer(layer);",
+    useMercator: false,
+    expression: function() { return "var icon=''; if (value < this.dashboard.getParameterValue('bottomThreshold')){icon = markers[2];} else if (value > this.dashboard.getParameterValue('topThreshold')){icon = markers[0];} else {icon = markers[1];}; icon"; },
+    preExecution:function() {},
+    postExecution:function() {},
+    markers: [
+      ["js/lib/OpenMap/OpenLayers/img/marker-green.png",42,50],
+      "js/lib/OpenMap/OpenLayers/img/marker-gold.png",
+      "js/lib/OpenMap/OpenLayers/img/marker.png"
+    ]
+  }));
+  dashboard.init();
+});
         </textarea>
         <br/>
         <button id="tryMe">Try me</button>
