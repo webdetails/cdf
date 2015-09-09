@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', 'amd!../lib/jquery.fancybox'],
-  function(PivotLinkComponentExt, BaseComponent, $) {
+define([
+  '../dashboard/Utils',
+  './PivotLinkComponent.ext',
+  './BaseComponent',
+  '../lib/jquery',
+  'amd!../lib/jquery.fancybox'
+], function(Utils, PivotLinkComponentExt, BaseComponent, $) {
 
   var PivotLinkComponent = BaseComponent.extend({
     update: function() {
@@ -38,19 +43,18 @@ define(['./PivotLinkComponent.ext', './BaseComponent', '../lib/jquery', 'amd!../
     openPivotLink: function(object) {
       var url = PivotLinkComponentExt.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
       var qd = object.pivotDefinition;
+
       // check if we should use a data source
-      var dataSource = object.dashboard.getDataSource(qd);
-      if(dataSource) {
+      if(typeof qd.dataSource == "string" && qd.dataSource) {
         // merge options, query definition options override options duplicated in the data source
-        qd = $.extend({}, dataSource, qd);
+        qd = $.extend({}, object.dashboard.getDataSource(qd.dataSource), qd);
         // remove the data source name from the query definition
         delete qd.dataSource;
       }
+
       var parameters = [];
       for(var p in qd) if(qd.hasOwnProperty(p)) {
-        var key = p;
-        var value = typeof qd[p] == 'function' ? qd[p]() : qd[p];
-        parameters.push(key + "=" + encodeURIComponent(value));
+        parameters.push(p + "=" + encodeURIComponent(Utils.ev(qd[p])));
       }
       url += parameters.join("&");
       url = url.replace(/'/g, "&#39;");

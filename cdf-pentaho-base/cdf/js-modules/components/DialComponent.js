@@ -19,21 +19,21 @@ define(['../Logger', './JFreeChartComponent'], function(Logger, JFreeChartCompon
 
       var cd = this.chartDefinition;
       if(cd == undefined) {
-        Logger.log("Fatal - No chartDefinition passed","error");
+        Logger.log("Fatal - No chartDefinition passed", "error");
         return;
       }
-      
+ 
       cd.chartType = 'DialChart';
 
       var intervals = cd.intervals;
 
       var colors = cd.colors;
       if(colors != undefined && intervals.length != colors.length) {
-        Logger.log("Fatal - Number of intervals differs from number of colors","error");
+        Logger.log("Fatal - Number of intervals differs from number of colors", "error");
         return;
       }
 
-      this.callPentahoAction(cd.queryType == 'cda' ? "jfreechartdial-cda.xaction" : "jfreechartdial.xaction");
+      this.callPentahoAction(this.dashboard.detectQueryType(cd) == 'cda' ? "jfreechartdial-cda.xaction" : "jfreechartdial.xaction");
     }
   });
 
