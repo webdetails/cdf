@@ -77,27 +77,29 @@
 
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/ExecuteXactionComponent'],
-  function(Dashboard, ExecuteXactionComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/ExecuteXactionComponent'
+], function(Dashboard, ExecuteXactionComponent) {
 
-    var dashboard = new Dashboard();
-    dashboard.addParameter( "productLineParam", "null");
-    dashboard.addParameter( "territoryParam", "null");
+  var dashboard = new Dashboard();
+  dashboard.addParameter("productLineParam", "null");
+  dashboard.addParameter("territoryParam", "null");
 
-    dashboard.addComponent(new ExecuteXactionComponent({
-      name: "executeTopTenCustomers",
-      type: "executeXaction",
-      path: "/public/plugin-samples/pentaho-cdf/20-samples/home_dashboard/topTenCustomers.xaction",
-      listeners:["productLineParam", "territoryParam"],
-      parameters: [["productLine", "productLineParam"], ["territory", "territoryParam"]],
-      htmlObject: "sampleObject",
-      label: "Execute XAction",
-      executeAtStart: true,
-      preChange: function() { return true; },
-      postChange: function() { return true; },
-      tooltip: "My first dashboard"
-    }));
-    dashboard.init();
+  dashboard.addComponent(new ExecuteXactionComponent({
+    name: "executeTopTenCustomers",
+    type: "executeXaction",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/home_dashboard/topTenCustomers.xaction",
+    listeners: ["productLineParam", "territoryParam"],
+    parameters: [["productLine", "productLineParam"], ["territory", "territoryParam"]],
+    htmlObject: "sampleObject",
+    label: "Execute XAction",
+    executeAtStart: true,
+    preChange: function() { return true; },
+    postChange: function() { return true; },
+    tooltip: "My first dashboard"
+  }));
+  dashboard.init();
 });
         </textarea>
         <br/>
