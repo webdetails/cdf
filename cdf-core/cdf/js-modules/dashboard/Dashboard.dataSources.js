@@ -44,26 +44,19 @@ define([
      * @private
      */
     _getDataSourceName: function(obj) {
-      if(!obj) {
-        Logger.error("Invalid data source");
-        return;
-      } else if(_.isObject(obj)) { // data source is an object
-        if(obj.name && _.isString(obj.name)) {
-          // got a data source object, name is set and is a String
-          return obj.name;
-        } else if(obj.dataSource && _.isString(obj.dataSource)) {
-          // got a query definition object, name is set and is a String
-          return obj.dataSource;
-        } else {
-          Logger.error("Data source name not found");
-          return;
-        }
-      } else if(_.isString(obj)) { // obj is a data source name
-        return obj;
+      var name;
+      // check if obj is a data source object
+      if(_.isObject(obj)) {
+        name = obj.dataSource;
       } else {
-        Logger.error("The data source provided should either be an object or an name string");
-        return;
+        name = obj;
       }
+      // validate name
+      if(_.isString(name) && !_.isEmpty(name)) {
+        return name;
+      }
+
+      Logger.warn("Invalid data source name");
     },
 
     /**
@@ -85,12 +78,12 @@ define([
         name = obj.name;
       }
       // validate data source object
-      if(!obj || !_.isObject(obj)) {
+      if(!_.isObject(obj)) {
         Logger.error("Invalid data source object");
         return;
       }
       // validate name
-      if(!name || !_.isString(name)) {
+      if(!(_.isString(name) && !_.isEmpty(name))) {
         Logger.error("Invalid data source name");
         return;
       }
@@ -118,7 +111,7 @@ define([
     },
 
     /**
-     * Gets a data source according to the provided name or data source object containing a name property.
+     * Gets a data source according to the provided name or object with a dataSource property.
      *
      * @method getDataSource
      * @for Dashboard
@@ -126,12 +119,9 @@ define([
      * @return {Object|undefined} the data source or undefined if none is found
      */
     getDataSource: function(obj) {
-      var dataSource;
-      if(!(dataSource = this.dataSources[this._getDataSourceName(obj)])) {
-        Logger.warn("Invalid data source name");
-      } else {
-        // return the data source
-        return dataSource;
+      var name = this._getDataSourceName(obj);
+      if(name && this.dataSources.hasOwnProperty(name)) {
+        return this.dataSources[name];
       }
     },
 
@@ -144,11 +134,11 @@ define([
      * return {Object|undefined} the query built using the target data source or undefined if no data source was found
      */
     getDataSourceQuery: function(obj) {
-      var dataSource = _.extend({}, this.dataSources[this._getDataSourceName(obj)]);
+      var dataSource = this.getDataSource(obj);
       if(_.isEmpty(dataSource)) {
-        Logger.warn("Invalid data source name");
+        Logger.error("Invalid data source");
       } else {
-        // create a new query of type data source.queryType
+        // create a new query of type dataSource.queryType
         return this.getQuery(dataSource);
       }
     },
@@ -172,7 +162,7 @@ define([
     },
 
     /**
-     * Removes a data source according to the name provided.
+     * Removes a data source according to the provided name or object with a dataSource property.
      *
      * @method removeDataSource
      * @for Dashboard

@@ -11,8 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', 'amd!../lib/underscore', './UnmanagedComponent', '../lib/jquery', 'css!./TrafficComponent'],
-  function(Logger, _, UnmanagedComponent, $) {
+define([
+  '../dashboard/Utils',
+  '../Logger',
+  'amd!../lib/underscore',
+  './UnmanagedComponent',
+  '../lib/jquery',
+  'css!./TrafficComponent'
+], function(Utils, Logger, _, UnmanagedComponent, $) {
 
   var TrafficComponent = UnmanagedComponent.extend({
     trafficLight: function(result, xaction) {
@@ -57,10 +63,9 @@ define(['../Logger', 'amd!../lib/underscore', './UnmanagedComponent', '../lib/jq
       var cd = myself.trafficDefinition;
 
       // check if we should use a data source
-      var dataSource = myself.dashboard.getDataSource(cd);
-      if(dataSource) {
+      if(_.isString(cd.dataSource) && !_.isEmpty(cd.dataSource)) {
         // merge options, query definition options override options duplicated in the data source
-        cd = $.extend({}, dataSource, cd);
+        cd = _.extend({}, myself.dashboard.getDataSource(cd.dataSource), cd);
         // remove the data source name from the query definition
         delete cd.dataSource;
       }
@@ -82,9 +87,7 @@ define(['../Logger', 'amd!../lib/underscore', './UnmanagedComponent', '../lib/jq
          // go through parameter array and update values
         var parameters = [];
         for(var p in cd) if(cd.hasOwnProperty(p)) {
-          var key = p;
-          var value = typeof cd[p] == 'function' ? cd[p]() : cd[p];
-          parameters.push([key,value]);
+          parameters.push([p, Utils.ev(cd[p])]);
         }
         
         var handler = _.bind(function() {

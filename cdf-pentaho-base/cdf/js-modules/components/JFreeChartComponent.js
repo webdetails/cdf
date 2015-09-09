@@ -69,10 +69,9 @@ define([
       }
 
       // check if we should use a data source
-      var dataSource = this.dashboard.getDataSource(cd);
-      if(dataSource) {
+      if(typeof cd.dataSource == "string" && cd.dataSource) {
         // merge options, query definition options override options duplicated in the data source
-        cd = $.extend({}, dataSource, cd);
+        cd = $.extend({}, this.dashboard.getDataSource(cd.dataSource), cd);
         // remove the data source name from the query definition
         delete cd.dataSource;
       }
