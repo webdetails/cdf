@@ -88,7 +88,7 @@ wd.cdf.endpoints = {
 
   getRenderHTML: function () { return wd.cdf.endpoints.getCdfBase() + "/RenderHtml"; },
 
-  getExport: function () { return wd.cdf.endpoints.getCdfBase() + "/Export"; },
+  getExport: function () { return wd.cdf.endpoints.getCdfBase() + "/export"; },
 
   getResource: function() { return wd.cdf.endpoints.getCdfBase() + "/getResource"; },
 
