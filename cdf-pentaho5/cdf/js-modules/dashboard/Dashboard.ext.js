@@ -142,7 +142,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     },
 
     getExport: function() {
-      return this.getCdfBase() + "/Export";
+      return this.getCdfBase() + "/export";
     },
 
     getPluginEndpoint: function(plugin, endpoint) {

@@ -158,6 +158,20 @@ public class CdfApi {
     }
   }
 
+  @POST
+  @Path( "/export" )
+  @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
+  public void doPostExport( @FormParam( Parameter.SOLUTION ) String solution,
+                            @FormParam( Parameter.PATH ) String path,
+                            @FormParam( Parameter.ACTION ) String action,
+                            @FormParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                            @FormParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE )
+                            String exportType,
+                            @Context HttpServletRequest request,
+                            @Context HttpServletResponse response ) throws Exception {
+
+    export( solution, path, action, contentType, exportType, request, response );
+  }
   @GET
   @Path( "/export" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
