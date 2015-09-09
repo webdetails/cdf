@@ -17,17 +17,19 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     samplesBasePath: "/public/plugin-samples/",
 
     /**
+     * Gets the base path of the provided plugin.
      *
-     * @param plugin
-     * @return {string}
+     * @param {string} plugin the plugin
+     * @return {string} the base path of the plugin
      */
     getPluginBase: function(plugin) {
       return CONTEXT_PATH + "plugin/" + plugin + "/api";
     },
 
     /**
+     * Gets the base path of the CDF plugin.
      *
-     * @return {string}
+     * @return {string} the base path of CDF
      */
     getCdfBase: function() {
       return this.getPluginBase( this.pluginName );
@@ -65,6 +67,8 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     /**
      * Returns the full path to an explicit action.
      *
+     * @param {string} path the path
+     * @param {string} action the action
      * @return {string} the full path
      */
     getFullPath: function(path, action) {
@@ -107,11 +111,14 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
       return fullPath;
     },
 
-
-
-
-    /* ToDo: Documentation */
-
+    /**
+     * Gets a string containing the path that allows to execute a settings action given
+     * the action to execute (e.g. get or set) and an optional key.
+     *
+     * @param {string} action the action to execute
+     * @param {string} key the key parameter
+     * @return {string} the path that allows to execute an action given an optional key
+     */
     getSettings: function(action, key) {
       if(key) {
         return this.getCdfBase() + "/settings/" + action + "?" + $.param({key: key});
@@ -120,6 +127,15 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
       }
     },
 
+    /**
+     * Gets a string containing the path that allows to execute a xaction.
+     *
+     * @param {string} method service method to execute (deprecated)
+     * @param {string} solution the solution folder (deprecated)
+     * @param {string} path the path to the xaction
+     * @param {string} action the xaction name
+     * @return {string} the path that allows to execute a xaction
+     */
     getServiceAction: function(method, solution, path, action) { 
 
       var arr = {};
@@ -133,14 +149,30 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
       return arr; 
     },
 
+    /**
+     * Gets a string containing the path for a given resource.
+     *
+     * @param {string} resource the resource to which the path should point
+     * @return {string} the path to the provided resource
+     */
     getStaticResource: function(resource) {
       return this.getCdfBase() + "/resources/" + resource;
     },
 
+    /**
+     * Gets a string containing the path for the zoom HTML file.
+     *
+     * @return {string} the zoom HTML file path
+     */
     getCaptifyZoom: function() {
       return this.getStaticResource("js/lib/captify/zoom.html");
     },
 
+    /**
+     * Gets a string containing the export endpoint path.
+     *
+     * @return {string} the export endpoint path
+     */
     getExport: function() {
       return this.getCdfBase() + "/export";
     },
@@ -149,10 +181,20 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
       return this.getPluginBase(plugin) + "/" + endpoint;
     },
 
+    /**
+     * Gets a string containing the getJSONSolution endpoint path.
+     *
+     * @return {string} the getJSONSolution endpoint path
+     */
     getJSONSolution: function() {
       return this.getCdfBase() + "/getJSONSolution";
     },
 
+    /**
+     * Gets a string containing the RenderHtml endpoint path.
+     *
+     * @return {string} the RenderHtml endpoint path
+     */
     getRenderHTML: function() {
       return this.getCdfBase() + "/RenderHtml";
     }
