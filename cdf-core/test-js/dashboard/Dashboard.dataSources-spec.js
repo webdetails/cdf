@@ -62,15 +62,6 @@ define(["cdf/Dashboard.Clean", "amd!cdf/lib/underscore"], function(Dashboard, _)
     });
 
     /*
-     * ## The CDF framework # gets a data source given a data source object with a name property
-     */
-    it("gets a data source given a data source object with a name property", function() {
-      dashboard.addDataSource("sampleDataSource", sampleDataSourceObj);
-
-      expect(dashboard.getDataSource({name: "sampleDataSource"})).toEqual(sampleDataSourceObj);
-    });
-
-    /*
      * ## The CDF framework # gets a data source given a definition object with a dataSource property holding a data source name
      */
     it("gets a data source given a definition object with a dataSource property holding a data source name", function() {
@@ -192,20 +183,6 @@ define(["cdf/Dashboard.Clean", "amd!cdf/lib/underscore"], function(Dashboard, _)
     });
 
     /*
-     * ## The CDF framework # generates a new query object given an object with a name property holding an existing data source name
-     */
-    it("generates a new query object given an object with a name property holding an existing data source name", function() {
-      dashboard.addDataSource("sampleDataSource", sampleDataSourceObj);
-
-      var query = dashboard.getDataSourceQuery({name: "sampleDataSource"});
-
-      expect(query.getOption("queryDef").queryType).toEqual(sampleDataSourceObj.queryType);
-      expect(query.getOption("queryDef").catalog).toEqual(sampleDataSourceObj.catalog);
-      expect(query.getOption("queryDef").jndi).toEqual(sampleDataSourceObj.jndi);
-      expect(query.getOption("queryDef").query()).toEqual(sampleDataSourceObj.query());
-    });
-
-    /*
      * ## The CDF framework # generates a new query object given a definition object with a dataSource property holding an existing data source name
      */
     it("generates a new query object given a definition object with a dataSource property holding an existing data source name", function() {
@@ -227,17 +204,6 @@ define(["cdf/Dashboard.Clean", "amd!cdf/lib/underscore"], function(Dashboard, _)
       expect(dashboard.getDataSource("sampleDataSource")).toEqual(sampleDataSourceObj);
 
       dashboard.removeDataSource("sampleDataSource");
-      expect(dashboard.getDataSource("sampleDataSource")).toEqual(undefined);
-    });
-
-    /*
-     * ## The CDF framework # removes a data source given a data source object with a name property
-     */
-    it("removes a data source given a data source object with a name property", function() {
-      dashboard.addDataSource("sampleDataSource", sampleDataSourceObj);
-      expect(dashboard.getDataSource({name: "sampleDataSource"})).toEqual(sampleDataSourceObj);
-
-      dashboard.removeDataSource({name: "sampleDataSource"});
       expect(dashboard.getDataSource("sampleDataSource")).toEqual(undefined);
     });
 
