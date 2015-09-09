@@ -109,8 +109,10 @@
 
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectMultiComponent'],
-  function(Dashboard, SelectMultiComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/SelectMultiComponent'
+], function(Dashboard, SelectMultiComponent) {
 
   var dashboard = new Dashboard();
   dashboard.addParameter("region", "");
@@ -118,9 +120,9 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectMultiComponent'],
   dashboard.addComponent(new SelectMultiComponent({
     name: "selectMultiComponent",
     type: "selectMultiComponent",
-    parameters:[],
-    path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
-    parameter:"region",
+    parameters: [],
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
+    parameter: "region",
     size: "5",
     valueAsId: true,
     isMultiple: true,

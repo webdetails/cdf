@@ -11,7 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../Logger', './JFreeChartComponent'], function(Logger, JFreeChartComponent) {
+define([
+  '../Logger',
+  './JFreeChartComponent'
+], function(Logger, JFreeChartComponent) {
 
   var DialComponent = JFreeChartComponent.extend({
 
