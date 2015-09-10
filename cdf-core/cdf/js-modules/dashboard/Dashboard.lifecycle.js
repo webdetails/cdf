@@ -42,7 +42,8 @@ define([
 
       // Object properties used to keep the server track and identify if the session did expired
       this.lastServerResponse = (Date.now) ? Date.now() : new Date().valueOf();
-      this.serverCheckResponseTimeout = 1800000; //ms, will be overridden at init
+      // [BACKLOG-5131] default disabled, value in milliseconds, will be overridden during init via dashboard context
+      this.serverCheckResponseTimeout = Infinity;
     },
 
     /**
