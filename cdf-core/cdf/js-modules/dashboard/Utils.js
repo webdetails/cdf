@@ -205,11 +205,8 @@ define([
    */
   function _pa2obj(pArray) {
     var obj = {};
-    for(var p in pArray) {
-      if(pArray.hasOwnProperty(p)) {
-        var prop = pArray[p];
-        obj[prop[0]] = prop[1];
-      }
+    for(var p in pArray) if(pArray.hasOwnProperty(p)) {
+      obj[pArray[p][0]] = pArray[p][1];
     }
     return obj;
   }
