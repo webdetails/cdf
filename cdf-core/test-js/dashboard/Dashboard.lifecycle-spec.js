@@ -81,6 +81,17 @@ define([
     });
 
     /**
+     * ## The CDF framework Dashboard Lifecycle # by default doesn't ping the server and show timeout notifications [BACKLOG-5131]
+     */
+    it("by default doesn't ping the server and show timeout notifications [BACKLOG-5131]", function() {
+      // default value
+      expect(dashboard.serverCheckResponseTimeout).toEqual(Infinity);
+      dashboard.init();
+      // during init the value of context.sessionTimeout is passed via the "cdf/dasboard/Dashboard" AMD module configuration (see context.js)
+      expect(dashboard.serverCheckResponseTimeout).toEqual(contextObj.sessionTimeout * 900); // 90% converted to milliseconds
+    });
+
+    /**
      * ## The CDF framework Dashboard Lifecycle # lets preExecution cancel updates
      */
     it("lets preExecution cancel updates",function(done) {
