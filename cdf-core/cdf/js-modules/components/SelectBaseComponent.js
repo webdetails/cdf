@@ -40,6 +40,10 @@ define([
 
     draw: function(myArray) {
       var ph = this.placeholder();
+      if(ph.length === 0) {
+        Logger.warn("Placeholder not in DOM - Will not draw");
+        return false;
+      }
       var name = this.name;
 
       // Build the HTML
