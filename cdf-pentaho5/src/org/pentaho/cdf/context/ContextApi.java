@@ -76,7 +76,7 @@ public class ContextApi {
       config = ContextEngine.getInstance().getConfig( path, user, Parameter.asHashMap( servletRequest ),
         servletRequest.getSession().getMaxInactiveInterval() );
     } catch ( JSONException e ) {
-      config = "Error ocurred getting context configuration";
+      config = "An error occurred while getting the context configuration";
     }
     CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), config );

@@ -41,8 +41,9 @@ define([
       this.runningCalls = 0;
 
       // Object properties used to keep the server track and identify if the session did expired
-      this.lastServerResponse = (Date.now) ? Date.now() : new Date().valueOf();
-      this.serverCheckResponseTimeout = 1800000; //ms, will be overridden at init
+      this.lastServerResponse = Date.now ? Date.now() : new Date().getTime();
+      // [BACKLOG-5131] default disabled, value in milliseconds, will be overridden during init via dashboard context
+      this.serverCheckResponseTimeout = Infinity;
     },
 
     /**
@@ -584,7 +585,7 @@ define([
      * @for Dashboard
      */
     updateComponent: function(object) {
-      if(Date.now() - this.lastServerResponse > this.serverCheckResponseTimeout) {
+      if((Date.now ? Date.now() : new Date().getTime()) - this.lastServerResponse > this.serverCheckResponseTimeout) {
         //too long in between ajax communications
         if(!this.checkServer()) {
           this.hideProgressIndicator();

@@ -125,7 +125,7 @@ define([
   
             dataFilter: function(data, dtype) {
               // just tagging date
-              myself.lastServerResponse = Date.now();
+              myself.lastServerResponse = Date.now ? Date.now() : new Date().getTime();
               return data;
             }
           });
