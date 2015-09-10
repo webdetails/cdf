@@ -56,7 +56,7 @@
       var args = {
         user: this.context.user,
         action: "read",
-        ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+        ts: Date.now ? Date.now() : new Date().getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
       };
 
       $.ajax({
@@ -90,7 +90,7 @@
         user: this.context.user,
         action: "store",
         storageValue: JSON.stringify(this.storage),
-        ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+        ts: Date.now ? Date.now() : new Date().getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
       };
 
       $.ajax({

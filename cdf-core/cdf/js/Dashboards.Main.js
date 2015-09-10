@@ -63,7 +63,7 @@ var dash, Dashboards = dash = {
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 
-  lastServerResponse: (Date.now) ? Date.now() : new Date().valueOf(),
+  lastServerResponse: Date.now ? Date.now() : new Date().getTime(),
   serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
@@ -454,7 +454,7 @@ Dashboards.update = function(component) {
 };
 
 Dashboards.updateComponent = function(object) {
-  if(Date.now() - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
+  if((Date.now ? Date.now() : new Date().getTime()) - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
     //too long in between ajax communications
     if(!Dashboards.checkServer()) {
       Dashboards.hideProgressIndicator();
@@ -1466,7 +1466,7 @@ Dashboards.loadStorage = function(){
 
   var args = {
     action: "read",
-    _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+    _: Date.now ? Date.now() : new Date().getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
 
   $.ajax({
@@ -1493,7 +1493,7 @@ Dashboards.saveStorage = function(){
   var args = {
     action: "store",
     storageValue: JSON.stringify(this.storage),
-    _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+    _: Date.now ? Date.now() : new Date().getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
 
   $.ajax({

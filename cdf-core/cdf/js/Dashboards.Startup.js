@@ -21,7 +21,7 @@ $.ajaxSetup({
   dataFilter: function(data, dtype) {
     // just tagging date
     if( !(typeof Dashboards === 'undefined') ){
-      Dashboards.lastServerResponse = Date.now();
+      Dashboards.lastServerResponse = Date.now ? Date.now() : new Date().getTime();
     }
     return data;
   }

@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './Dashboard', './Dashboard.ext', './Dashboard.context.ext'],
-  function($, Dashboard, DashboardExt, DashboardContextExt) {
+define([
+  '../lib/jquery',
+  './Dashboard',
+  './Dashboard.ext',
+  './Dashboard.context.ext'
+], function($, Dashboard, DashboardExt, DashboardContextExt) {
   
   /**
    * A module representing an extension to the Dashboard module for context.
@@ -29,7 +33,6 @@ define(['../lib/jquery', './Dashboard', './Dashboard.ext', './Dashboard.context.
      * @private
      */
     _initContext: function() {
-      var myself = this;
       if(!this.context) {
         this.context = {};
         $.extend(this.context, this.contextObj);
