@@ -13,10 +13,8 @@
 
 define([
   "cdf/Dashboard.Clean",
-  "cdf/lib/jquery",
-  "amd!cdf/lib/underscore",
   "cdf/components/ManagedFreeformComponent"
-], function(Dashboard, $, _, ManagedFreeformComponent) {
+], function(Dashboard, ManagedFreeformComponent) {
 
   /**
    * ## The CDF framework Dashboard Lifecycle
@@ -33,7 +31,7 @@ define([
       dashboard = new Dashboard();
     });
     //#end
-  
+
     /**
      * Our setup consists of adding a bunch of components to CDF.
      */
@@ -53,7 +51,6 @@ define([
       postExecution: function() {}
     });
 
-
     /************************
      * Test Core Lifecycle *
      ************************/
@@ -61,14 +58,14 @@ define([
     /**
      * ## The CDF framework Dashboard Lifecycle # updates components
      */
-    it("updates components",function(done) {
+    it("updates components", function(done) {
       dashboard.init();
       dashboard.addComponents([shouldUpdate, shouldNotUpdate]);
 
       spyOn(shouldUpdate, "preExecution").and.callThrough();
       //spyOn(shouldUpdate, "customfunction").and.callThrough();
       spyOn(shouldUpdate, "postExecution").and.callThrough();
-  
+
       // listen to cdf:postExecution event
       shouldUpdate.once("cdf:postExecution", function() {
         expect(shouldUpdate.preExecution).toHaveBeenCalled();
@@ -94,7 +91,7 @@ define([
     /**
      * ## The CDF framework Dashboard Lifecycle # lets preExecution cancel updates
      */
-    it("lets preExecution cancel updates",function(done) {
+    it("lets preExecution cancel updates", function(done) {
       dashboard.init();
       dashboard.addComponents([shouldUpdate, shouldNotUpdate]);
 
@@ -109,7 +106,7 @@ define([
         expect(shouldNotUpdate.customfunction).not.toHaveBeenCalled();
         done();
       });
-  
+
       dashboard.update(shouldNotUpdate);
       dashboard.update(shouldUpdate);
     });
@@ -415,7 +412,7 @@ define([
 
         // call dashboard.updateAll
         dashboard.updateAll([comp3priority10]); 
-     
+
         // although comp3priority10 has been triggered for updating, it *should* be discarded from this execution cycle due to lower priority rate
         // (read: 1rst is comp1priority5, then is comp3priority10)
         expect(dashboard.othersAwaitExecution).toBeTruthy();
@@ -440,7 +437,7 @@ define([
 
         spyOn(dashboard, 'othersAwaitExecution').and.callThrough();
         spyOn(dashboard, 'updateComponent').and.callThrough();
-        
+
         spyOn(comp1priority5, 'preExecution').and.callThrough();
         spyOn(comp1priority5, 'update').and.callThrough();
         spyOn(comp1priority5, 'postExecution').and.callThrough();
@@ -502,7 +499,7 @@ define([
 
         // call dashboard.updateAll
         dashboard.updateAll([comp2priority5]); 
-     
+
         // although comp3priority10 has been triggered for updating, it *should* be discarded from this execution cycle due to lower priority rate
         // (read: 1rst is comp2priority5, then is comp3priority10)
         expect(dashboard.othersAwaitExecution).toBeTruthy();
