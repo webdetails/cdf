@@ -19,11 +19,15 @@
     <script language="javascript" type="text/javascript">
 require([
   'cdf/Dashboard.Blueprint',
-  'cdf/components/TableComponent',
-  'cdf/lib/jquery'
-], function(Dashboard, TableComponent, $) {
+  'cdf/components/TableComponent'
+], function(Dashboard, TableComponent) {
 
   var dashboard = new Dashboard();
+
+  dashboard.addDataSource("queryMQL", {
+    dataAccessId: "mqlQuery",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/queries/MQL/mqlDash.cda"
+  });
 
   dashboard.addComponent(new TableComponent({
     type: "TableComponent",
@@ -37,8 +41,7 @@ require([
     expandParameters: [],
     expandOnClick: false,
     chartDefinition:  {
-      dataAccessId: "mqlQuery",
-      path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/queries/MQL/mqlDash.cda",
+      dataSource: "queryMQL",
       colHeaders: ["BC_ORDERS_ORDENATE","BC_ORDERS_ORDERNUMBER"],
       colTypes: ["string","numeric"],
       colFormats: [],

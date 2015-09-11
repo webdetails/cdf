@@ -27,26 +27,25 @@ require([
   
   dashboard.addParameter("result", "");
   
-  var MetaLayer = {
-    queryDefinition: {
-      queryType: 'mdx',
-      jndi: "SampleData",
-      catalog: "mondrian:/SteelWheels",
-      query: function() {
-        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-               "NON EMPTY TopCount([Customers].[All Customers].Children," +
-               "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-      }
+  dashboard.addDataSource("queryMDX", {
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SteelWheels",
+    query: function() {
+      return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+             "NON EMPTY TopCount([Customers].[All Customers].Children," +
+             "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
     }
-  };
+  });
 
   dashboard.addComponent(new QueryComponent({
     name: "executeQueryComponent",
     type: "queryComponent",
     htmlObject: "sampleObject",
     executeAtStart: true,
+    asynchronousMode: true,
     resultvar: "result",
-    queryDefinition: MetaLayer.queryDefinition,
+    queryDefinition: {dataSource: "queryMDX"},
     postFetch: function(data) {
       $('#sampleObjectResult').html(JSON.stringify(data));
     }

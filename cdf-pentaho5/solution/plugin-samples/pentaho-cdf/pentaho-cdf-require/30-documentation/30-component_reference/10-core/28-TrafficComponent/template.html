@@ -94,34 +94,37 @@
 
       <div id="code">
         <textarea cols="80" rows="40" id="samplecode">
-require(['cdf/Dashboard.Blueprint', 'cdf/components/TrafficComponent'],
-  function(Dashboard, TrafficComponent) {
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/TrafficComponent'
+], function(Dashboard, TrafficComponent) {
 
-    var trafficDefinition = {
-      queryType: 'mdx',
-      jndi: "SampleData",
+  var dashboard = new Dashboard();
+
+  dashboard.addDataSource("queryTraffic", {
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SampleData",
+    query: function() {
+      return " SELECT NON EMPTY [Measures].[Budget] ON COLUMNS,"
+        + " NON EMPTY ([Department].[All Departments]) ON ROWS"
+        + " FROM [Quadrant Analysis]";
+    }
+  });
+
+  dashboard.addComponent(new TrafficComponent({
+    name: "trafficComponent",
+    type: "trafficComponent",
+    trafficDefinition: {
+      dataSource: "queryTraffic",
       title: "Check current budget",
-      catalog: "mondrian:/SampleData",
-      intervals: [70000000,150000000],
+      intervals: [70000000, 150000000],
       showValue: true,
-      query: function() {
-        var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-        " NON EMPTY ([Department].[All Departments]) ON ROWS " +
-        " from [Quadrant Analysis]";
-        return query;
-      }
-    };
-
-    var dashboard = new Dashboard();
-
-    dashboard.addComponent(new TrafficComponent({
-      name: "trafficComponent",
-      type: "trafficComponent",
-      trafficDefinition: trafficDefinition,
-      htmlObject: "sampleObject",
-      executeAtStart: true
-    }));
-    dashboard.init();
+    },
+    htmlObject: "sampleObject",
+    executeAtStart: true
+  }));
+  dashboard.init();
 });
         </textarea>
         <br/>

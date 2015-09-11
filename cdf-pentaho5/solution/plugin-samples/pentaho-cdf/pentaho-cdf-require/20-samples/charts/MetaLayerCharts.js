@@ -34,12 +34,27 @@ MetaLayerCharts = {
   },
   
   barChartClicked: function(value) {
-  
     MetaLayerCharts.departmentMeasure = "[Department].[All Departments].[" + value + "]";
     dashboard.fireChange("MetaLayerCharts.departmentMeasure", MetaLayerCharts.departmentMeasure);
   },
 
+  pieChartDataSource: {
+    name: "pieChartDataSource",
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SampleData",
+    query: function() {
+      return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
+        " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
+        " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
+        " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
+        " NON EMPTY ( " + MetaLayerCharts.regionsMeasure + " ) ON ROWS " +
+        " from [Quadrant Analysis]";
+    }
+  },
+
   pieChartDefinition: {
+    dataSource: "pieChartDataSource",
     width: 300,
     height: 200,
     chartType: "PieChart",
@@ -48,24 +63,29 @@ MetaLayerCharts = {
     isStacked: "true",
     includeLegend: "false",
     foregroundAlpha: 0.7,
-    queryType: 'mdx',
-    jndi: "SampleData",
-    catalog: "mondrian:/SampleData",
     urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) { MetaLayerCharts.pieChartClicked( Utf8Encoder.encode_prepare('{region}') ) })",
     parameterName: "region",
-    title: "First choose region:",
-    query: function() {
+    title: "First choose region:"
+  },
 
+  barChartDataSource: {
+    name: "barChartDataSource",
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SampleData",
+    query: function() {
       return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
-        " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," + 
+        " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
         " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
         " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
-        " NON EMPTY ( " + MetaLayerCharts.regionsMeasure + " ) ON ROWS " +
-        " from [Quadrant Analysis]";
+        " NON EMPTY ([Department].[All Departments].Children ) ON ROWS " +
+        " from [Quadrant Analysis]" +
+        " where (" + MetaLayerCharts.selectedRegionMeasure + ")";
     }
   },
-    
+
   barChartDefinition: {
+    dataSource: "barChartDataSource",
     width: 300,
     height: 250,
     chartType: "BarChart",
@@ -74,42 +94,32 @@ MetaLayerCharts = {
     isStacked: "true",
     includeLegend: "false",
     foregroundAlpha: 0.7,
-    queryType: 'mdx',
-    jndi: "SampleData",
-    catalog: "mondrian:/SampleData",
     title: "Then analyse departments:",
     urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {MetaLayerCharts.barChartClicked( Utf8Encoder.encode_prepare('{department}') ) })",
-    parameterName: "department",
-    query: function() {
-
-      return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])',"+
-        " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\","+ 
-        " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
-        " select NON EMPTY {[Measures].[Actual], [Measures].[Budget], [Measures].[Variance], [Measures].[Variance Percent]} ON COLUMNS," +
-        " NON EMPTY ([Department].[All Departments].Children ) ON ROWS " +
-        " from [Quadrant Analysis]" +
-        " where (" + MetaLayerCharts.selectedRegionMeasure + ")";
-    }
+    parameterName: "department"
   },
-  
-  dialChartDefinition: {
-    width: 300,
-    height: 200,
-    chartType: "DialChart",
-    queryType: 'mdx',
-    is3d: 'true',
+
+  dialChartDataSource: {
+    name: "dialChartDataSource",
+    queryType: "mdx",
     jndi: "SampleData",
-    title: "Check current budget",
     catalog: "mondrian:/SampleData",
-    //colors: ["#F16C3A","#FFFF00","#B0D837"],
-    intervals: [7000000, 70000000, 150000000],
-    includeLegend: true,
-    
     query: function() {
-      
       return " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
         " NON EMPTY (" + MetaLayerCharts.departmentMeasure + " ) ON ROWS " +
         " from [Quadrant Analysis]";
     }
+  },
+  
+  dialChartDefinition: {
+    dataSource: "dialChartDataSource",
+    width: 300,
+    height: 200,
+    chartType: "DialChart",
+    is3d: 'true',
+    title: "Check current budget",
+    //colors: ["#F16C3A","#FFFF00","#B0D837"],
+    intervals: [7000000, 70000000, 150000000],
+    includeLegend: true
   }
 };

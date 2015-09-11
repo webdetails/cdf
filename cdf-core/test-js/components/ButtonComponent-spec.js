@@ -46,6 +46,10 @@ define([
     beforeEach(function() {
       dashboard = new Dashboard();
       dashboard.init();
+      dashboard.addDataSource("buttonQuery", {
+        dataAccessId: "myDataSource",
+        path: "/public/CDF-236/CDF-236.cda"
+      });
       // add an element where the button will be inserted
       $('body').append($htmlObject);
     });
@@ -75,7 +79,6 @@ define([
      * ## The Button Component # disables the button after it has been clicked
      */
     it("disables the button after it has been clicked", function(done) {
-      
       var $btn;
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentExpr = $.extend({}, buttonComponent);
@@ -105,14 +108,12 @@ define([
      * ## The Button Component # re-enables the button after the expression has executed when clicked
      */
     it("re-enables the button after the expression has executed when clicked", function(done) {
-      
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentExpr = $.extend({}, buttonComponent);
       buttonComponentExpr.expression = function() { };
 
       spyOn(buttonComponentExpr, 'update').and.callThrough();
       spyOn(buttonComponentExpr, 'expression').and.callThrough();
-      
 
       dashboard.addComponent(buttonComponentExpr);
 
@@ -135,7 +136,6 @@ define([
      * ## The Button Component # runs the expression when clicked
      */
     it("runs the expression when clicked", function(done) {
-      
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentExpr = $.extend({}, buttonComponent, {
         expression: function() {
@@ -164,14 +164,10 @@ define([
      * ## The Button Component # disables the button after it has been pressed and re-enables it after executing the action
      */
     it("disables the button after it has been pressed and re-enables it after executing the action", function(done) {
-     
       var $btn;
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentAct = $.extend({}, buttonComponent, {
-        actionDefinition: {
-          dataAccessId: "myDataSource",
-          path: "/public/CDF-236/CDF-236.cda"
-        },
+        actionDefinition: {dataSource: "buttonQuery"},
         successCallback: function() {
           // this callback function will be called after the closure successCallback function
           // enables the button
@@ -205,14 +201,10 @@ define([
      * ## The Button Component # re-enables the button in error case after executing the action
      */
     it("re-enables the button in error case after executing the action", function(done) {
-      
       var $btn;
       // create a new button with an expression based on the base buttonComponent
       var buttonComponentAct = $.extend({}, buttonComponent, {
-        actionDefinition: {
-          dataAccessId: "myDataSource",
-          path: "/public/CDF-236/CDF-236.cda"
-        },
+        actionDefinition: {dataSource: "buttonQuery"},
         failureCallback: function() {
           // this callback function will be called after the closure failureCallback function
           // enables the button

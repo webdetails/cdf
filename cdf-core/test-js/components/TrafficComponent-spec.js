@@ -11,39 +11,47 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent", "cdf/lib/jquery"],
-  function(Dashboard, TrafficComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/TrafficComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, TrafficComponent, $) {
   
   /**
    * ## The Traffic Component
    */
   describe("The Traffic Component #", function() {
     var dashboard;
+    var trafficComponent;
 
     beforeEach(function() {
       dashboard = new Dashboard();
       dashboard.init();
       dashboard.addParameter('trafficTestParameter', 1);
-    });
 
-    var trafficComponent = new TrafficComponent({
-      name: "trafficComponentCDA",
-      type: "trafficComponent",
-      trafficDefinition: {
-        dataAccessId: "1",
-        intervals: [10, 20],
-        path: "/test/path",
-        showValue: true
-      },
-      htmlObject: "sampleObject",
-      parameter: "trafficTestParameter",
-      executeAtStart: true
+      trafficComponent = new TrafficComponent({
+        name: "trafficComponentCDA",
+        type: "trafficComponent",
+        trafficDefinition: {
+          dataSource: "queryTraffic",
+          title: "Check current budget",
+          intervals: [10, 20],
+          showValue: true
+        },
+        htmlObject: "sampleObject",
+        parameter: "trafficTestParameter",
+        executeAtStart: true
+      });
     });
 
     /**
      * ## The Traffic Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
+      dashboard.addDataSource("queryTraffic", {
+        dataAccessId: "1",
+        path: "/test/path"
+      });
       dashboard.addComponent(trafficComponent);
 
       spyOn(trafficComponent, 'update').and.callThrough();
@@ -66,6 +74,10 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent", "cdf/lib/jquer
      * ## The Traffic Component # executes CDA queries
      */
     it("executes CDA queries", function(done) {
+      dashboard.addDataSource("queryTraffic", {
+        dataAccessId: "1",
+        path: "/test/path"
+      });
       dashboard.addComponent(trafficComponent);
 
       spyOn(trafficComponent, 'doQuery').and.callThrough();
@@ -92,25 +104,15 @@ define(["cdf/Dashboard.Clean", "cdf/components/TrafficComponent", "cdf/lib/jquer
      * ## The Traffic Component # executes XActions if trafficDefinition's path or dataAccessId is falsy
      */
     it("executes XActions if trafficDefinition's path or dataAccessId is falsy", function(done) {
-      // override trafficComponent
-      var trafficComponent = new TrafficComponent({
-        name: "trafficComponentXAction",
-        type: "trafficComponent",
-        trafficDefinition: {
-          queryType: 'mdx',
-          jndi: "SampleData",
-          title: "Check current budget",
-          catalog: "mondrian:/SampleData",
-          intervals: [70, 150],
-          query: function() {
-            return " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-                   " NON EMPTY ([Department].[All Departments]) ON ROWS " +
-                   " from [Quadrant Analysis]";
-          }
-        },
-        htmlObject: "sampleObject",
-        parameter: "trafficTestParameter",
-        executeAtStart: true
+      dashboard.addDataSource("queryTraffic", {
+        queryType: 'mdx',
+        jndi: "SampleData",
+        catalog: "mondrian:/SampleData",
+        query: function() {
+          return "select NON EMPTY [Measures].[Budget] ON COLUMNS, "
+               + "NON EMPTY ([Department].[All Departments]) ON ROWS "
+               + "from [Quadrant Analysis]";
+        }
       });
       dashboard.addComponent(trafficComponent);
 
