@@ -98,9 +98,10 @@
       <dt>reloadOnUpdate</dt>
       <dd>on update event the component should be reloaded or only update the list of values</dd>
 
+      <dt>silent</dt>
+      <dd>If true no UI blocking will happen on load and when fetching data</dd>
+
     </dl>
-
-
 
     <h3>MetaLayer options</h3>
 
@@ -167,101 +168,61 @@
       <div id="code">
 
         <textarea cols="80" rows="40" id="samplecode">
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/AutocompleteBoxComponent'
+], function(Dashboard, AutocompleteBoxComponent) {
 
-require(['cdf/Dashboard.Blueprint', 'cdf/components/AutocompleteBoxComponent'],
+  var dashboard = new Dashboard();
 
-  function(Dashboard, AutocompleteBoxComponent) {
+  dashboard.addParameter("clients", "");
+  
+  dashboard.addDataSource("clientQuery", {
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SteelWheels",
+    query: function() {
+      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+        + " NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"
+        + " (Left([Customers].CurrentMember.Name, Len(\""
+        + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \""
+        + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")), 100.0, [Measures].[Sales]) ON ROWS"
+        + " FROM [SteelWheelsSales]";
+    }
+  });
 
+  dashboard.addComponent(new AutocompleteBoxComponent({
 
+    name: "autocompleteBox",
+    type: "autocompleteBox",
+    matchType: "fromStart",
+    queryDefinition: {dataSource: "clientQuery"},
+    selectMulti: true,
+    showApplyButton: true,
+    minTextLength: 0,
+    scrollHeight: 250,
+    parameter: "clients",
+    htmlObject: "sampleObject",
+    reloadOnUpdate: true,
+    autoUpdateTimeout: 3000,
+    executeAtStart: true,
+    silent: true,
+    autoUpdateFunction: function() {
 
-    var dashboard = new Dashboard();
-
-    dashboard.addParameter("clients", "");
-
-
-
-    var clientSelectorDefinition = {
-
-      queryType: 'mdx',
-
-      jndi: "SampleData",
-
-      catalog: "mondrian:/SteelWheels",
-
-      query: function() {
-
-        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-
-        "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
-
-        "(Left([Customers].CurrentMember.Name, Len(\"" +
-
-        dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \"" +
-
-        dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")),100.0,[Measures].[Sales]) ON ROWS "+
-
-        "from [SteelWheelsSales]";
-
+      if(!this.dashboard.getParameterValue(this.parameter)) {
+        this.dashboard.setParameter(this.parameter, "");
       }
 
-    };
-
-
-
-    dashboard.addComponent(new AutocompleteBoxComponent({
-
-      name: "autocompleteBox",
-
-      type: "autocompleteBox",
-
-      matchType: "fromStart",
-
-      queryDefinition: clientSelectorDefinition,
-
-      selectMulti: true,
-
-      showApplyButton: true,
-
-      minTextLength: 0,
-
-      scrollHeight: 250,
-
-      parameter: "clients",
-
-      htmlObject: "sampleObject",
-
-      reloadOnUpdate: true,
-
-      autoUpdateTimeout: 3000,
-
-      executeAtStart: true,
-
-      autoUpdateFunction:function() {
-
-        if(!this.dashboard.getParameterValue(this.parameter)) {
-
-          this.dashboard.setParameter(this.parameter, "");
-
-        }
-
-        var inputValue = this._getTextBoxValue();
-
-        if(this.dashboard.getParameterValue(this.parameter) != inputValue) {
-
-          this.dashboard.setParameter(this.parameter, inputValue);
-
-          this.dashboard.update(this);
-
-        }
-
+      if(this.dashboard.getParameterValue(this.parameter) != this._getTextBoxValue()) {
+        this.dashboard.setParameter(this.parameter, this._getTextBoxValue());
+        this.dashboard.update(this);
       }
+    }
+  }));
 
-    }));
-
-    dashboard.init();
+  dashboard.init();
 
 });
-
         </textarea>
 
         <br/>

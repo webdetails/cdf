@@ -39,23 +39,12 @@ MetaLayerCharts = {
     dashboard.fireChange("MetaLayerCharts.departmentMeasure", MetaLayerCharts.departmentMeasure);
   },
 
-  pieChartDefinition: {
-    width: 300,
-    height: 200,
-    chartType: "PieChart",
-    datasetType: "CategoryDataset",
-    is3d: "true",
-    isStacked: "true",
-    includeLegend: "false",
-    foregroundAlpha: 0.7,
-    queryType: 'mdx',
+  pieChartDataSource: {
+    name: "pieChartDataSource",
+    queryType: "mdx",
     jndi: "SampleData",
     catalog: "mondrian:/SampleData",
-    urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) { MetaLayerCharts.pieChartClicked( Utf8Encoder.encode_prepare('{region}') ) })",
-    parameterName: "region",
-    titleKey: "chartsamples.piechart.title",
     query: function() {
-
       return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
         " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
         " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
@@ -65,23 +54,27 @@ MetaLayerCharts = {
     }
   },
 
-  barChartDefinition: {
+  pieChartDefinition: {
+    dataSource: "pieChartDataSource",
     width: 300,
-    height: 250,
-    chartType: "BarChart",
+    height: 200,
+    chartType: "PieChart",
     datasetType: "CategoryDataset",
     is3d: "true",
     isStacked: "true",
     includeLegend: "false",
     foregroundAlpha: 0.7,
-    queryType: 'mdx',
+    urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) { MetaLayerCharts.pieChartClicked( Utf8Encoder.encode_prepare('{region}') ) })",
+    parameterName: "region",
+    titleKey: "chartsamples.piechart.title"
+  },
+
+  barChartDataSource: {
+    name: "barChartDataSource",
+    queryType: "mdx",
     jndi: "SampleData",
     catalog: "mondrian:/SampleData",
-    titleKey: "chartsamples.barchart.title",
-    urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {MetaLayerCharts.barChartClicked( Utf8Encoder.encode_prepare('{department}') ) })",
-    parameterName: "department",
     query: function() {
-
       return "with member [Measures].[Variance Percent] as '([Measures].[Variance] / [Measures].[Budget])'," +
         " format_string = IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) > 2.0), \"|#.00%|style='green'\"," +
         " IIf(((([Measures].[Variance] / [Measures].[Budget]) * 100.0) < 0.0), \"|#.00%|style='red'\", \"#.00%\"))" +
@@ -92,24 +85,42 @@ MetaLayerCharts = {
     }
   },
 
-  dialChartDefinition: {
+  barChartDefinition: {
+    dataSource: "barChartDataSource",
     width: 300,
-    height: 200,
-    chartType: "DialChart",
-    queryType: 'mdx',
-    is3d: 'true',
+    height: 250,
+    chartType: "BarChart",
+    datasetType: "CategoryDataset",
+    is3d: "true",
+    isStacked: "true",
+    includeLegend: "false",
+    foregroundAlpha: 0.7,
+    titleKey: "chartsamples.barchart.title",
+    urlTemplate: "javascript: require(['cdf/dashboard/Utf8Encoder'], function(Utf8Encoder) {MetaLayerCharts.barChartClicked( Utf8Encoder.encode_prepare('{department}') ) })",
+    parameterName: "department"
+  },
+
+  dialChartDataSource: {
+    name: "dialChartDataSource",
+    queryType: "mdx",
     jndi: "SampleData",
-    titleKey: "chartsamples.dialchart.title",
     catalog: "mondrian:/SampleData",
-    //colors: ["#F16C3A","#FFFF00","#B0D837"],
-    intervals: [7000000, 70000000, 150000000],
-    includeLegend: true,
-
     query: function() {
-
       return " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
         " NON EMPTY (" + MetaLayerCharts.departmentMeasure + " ) ON ROWS " +
         " from [Quadrant Analysis]";
     }
+  },
+
+  dialChartDefinition: {
+    dataSource: "dialChartDataSource",
+    width: 300,
+    height: 200,
+    chartType: "DialChart",
+    is3d: 'true',
+    titleKey: "chartsamples.dialchart.title",
+    //colors: ["#F16C3A","#FFFF00","#B0D837"],
+    intervals: [7000000, 70000000, 150000000],
+    includeLegend: true
   }
 };

@@ -185,6 +185,16 @@ define(['./XactionComponent.ext', '../Logger', '../lib/jquery', './BaseComponent
       myself.geometry = timePlotTimeGeometry;
 
       var allData = undefined;
+
+      // check if we should use a data source
+      var dataSource = this.dashboard.getDataSource(cd);
+      if(dataSource) {
+        // merge options, query definition options override options duplicated in the data source
+        cd = $.extend({}, dataSource, cd);
+        // remove the data source name from the query definition
+        delete cd.dataSource;
+      }
+
       var timePlotEventSourceUrl = XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction", null, cd);
       if(cd.events && cd.events.show == true) {
         var eventUrl = XactionComponentExt.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction", null, cd.events);

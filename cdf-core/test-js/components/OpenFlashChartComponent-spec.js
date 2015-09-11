@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/OpenFlashChartComponent", "cdf/lib/jquery"],
-  function(Dashboard, OpenFlashChartComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/OpenFlashChartComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, OpenFlashChartComponent, $) {
 
   /**
    * ## The Open Flash Chart Component
@@ -23,10 +26,22 @@ define(["cdf/Dashboard.Clean", "cdf/components/OpenFlashChartComponent", "cdf/li
 
     dashboard.init();
 
+    dashboard.addDataSource("topTenQuery", {
+      queryType: "mdx",
+      catalog: "mondrian:/SteelWheels",
+      jndi: "SampleData",
+      query: function() {
+        return "SELECT NON EMPTY [Measures].[Sales] ON COLUMNS, "
+             + "NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales]) "
+             + "ON ROWS FROM [SteelWheelsSales]";
+      }
+    });
+
     var openFlashChartComponent = new OpenFlashChartComponent({
       name: "openFlashChartComponent",
       type: "openFlashChartComponent",
       chartDefinition: {
+        dataSource: "topTenQuery",
         width: "500",
         height: "500",
         chartType: "PieChart",
@@ -37,15 +52,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/OpenFlashChartComponent", "cdf/li
         title: "Top 10 Customers",
         parameterName: "PRODUCTLINE",
         urlTemplate: "alert('clicked')",
-        orientation: "horizontal",
-        queryType: "mdx",
-        catalog: "mondrian:/SteelWheels",
-        jndi: "SampleData",
-        query: function() {
-          return "select NON EMPTY [Measures].[Sales] ON COLUMNS," +
-                 "NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales]) " +  
-                 "ON ROWS from [SteelWheelsSales]";
-        }
+        orientation: "horizontal"
       },
       htmlObject: "sampleObject",
       executeAtStart: true

@@ -118,15 +118,19 @@
 var dashboard;
 
 require([
-    'cdf/Dashboard.Blueprint',
-    'cdf/components/TextComponent',
-    'cdf/components/JFreeChartComponent',
-    'cdf/components/DialComponent'],
-  function(Dashboard, TextComponent, JFreeChartComponent, DialComponent) {
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/TextComponent',
+  'cdf/components/JFreeChartComponent',
+  'cdf/components/DialComponent'
+], function(Dashboard, TextComponent, JFreeChartComponent, DialComponent) {
 
   dashboard = new Dashboard();
   dashboard.addParameter("productLine", "null");
   dashboard.addParameter("territory", "null");
+  
+  dashboard.addDataSource(MetaLayerCharts.pieChartDataSource);
+  dashboard.addDataSource(MetaLayerCharts.barChartDataSource);
+  dashboard.addDataSource(MetaLayerCharts.dialChartDataSource);
 
   dashboard.addComponent(new TextComponent({
     name: "title",

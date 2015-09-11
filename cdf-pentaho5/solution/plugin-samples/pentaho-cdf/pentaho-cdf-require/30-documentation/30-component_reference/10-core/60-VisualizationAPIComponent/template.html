@@ -44,13 +44,13 @@
       <dt>type</dt>
       <dd><code>visualizationAPIComponent</code></dd>
 
-      <dt>vizId</dt> 
+      <dt>vizId</dt>
       <dd>Id of the visualization to be rendered</dd>
 
       <dt>listeners</dt>
       <dd><i>Array - </i> Parameters who this component will react to</dd>
 
-      <dt>vizOptions</dt> 
+      <dt>vizOptions</dt>
       <dd><i>Array - </i>Parameters to pass as options to the visualization</dd>
 
       <dt>queryDefinition</dt>
@@ -88,16 +88,16 @@
       <dt>queryType</dt>
       <dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
 
-      <dt>jndi</dt> 
+      <dt>jndi</dt>
       <dd>Connection to use for the query</dd>
 
-      <dt>query</dt> 
+      <dt>query</dt>
       <dd>sql or mdx Query to execute</dd>
 
-      <dt>cube</dt> 
+      <dt>cube</dt>
       <dd>Cube name to use when queryType is mdx</dd>
 
-      <dt>catalog</dt> 
+      <dt>catalog</dt>
       <dd>Mondrian schema to use when queryType is mdx</dd>
 
     </dl>
@@ -120,49 +120,53 @@
 require([
   'cdf/Dashboard.Blueprint',
   'cdf/components/VisualizationAPIComponent',
-  'common-ui/vizapi/ccc/sample/sampleVisualization'],
-  function(Dashboard, VisualizationAPIComponent) {
+  'common-ui/vizapi/ccc/sample/sampleVisualization'
+], function(Dashboard, VisualizationAPIComponent) {
 
-    var dashboard = new Dashboard();
+  var dashboard = new Dashboard();
 
-    dashboard.setParameter("optionParam", "MAX");
+  dashboard.setParameter("optionParam", "MAX");
 
-    dashboard.addComponent(new VisualizationAPIComponent({
-      name: "sampleVisualization",
-      type: "visualizationAPIComponent",
-      listeners: [],
-      queryDefinition: {
-        queryType: 'mdx',
-        jndi: "SampleData",
-        catalog: "mondrian:/SteelWheels",
-        opts: {},
-        query: function() {
-          return "select " +
-          "NON EMPTY {[Measures].[Quantity]} ON COLUMNS, " +
-          "NON EMPTY {[Markets].[Country].Members} ON ROWS " +
-          "from [SteelWheelsSales]";
-        }
-      },
-      vizId: "sample_calc",
-      vizOptions: [["calc", "optionParam"]],
-      htmlObject: "sampleObject",
-      executeAtStart: true,
-      postFetch: function(data) {
-        //Using postFetch to convert data types, because the query is passing 
-        //a Numeric field as String and that breaks the sample visualization
-        var metaQuantity = data.metadata[1];
-        var resultset = data.resultset;
+  dashboard.addDataSource("queryViz", {
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SteelWheels",
+    query: function() {
+      return "select " +
+      "NON EMPTY {[Measures].[Quantity]} ON COLUMNS, " +
+      "NON EMPTY {[Markets].[Country].Members} ON ROWS " +
+      "from [SteelWheelsSales]";
+    }
+  });
 
-        metaQuantity.colType = "Numeric";
-        for(var i = 0; i < resultset.length; i++) {
-          resultset[i][1] = parseInt(resultset[i][1]);
-        }
+  dashboard.addComponent(new VisualizationAPIComponent({
+    name: "sampleVisualization",
+    type: "visualizationAPIComponent",
+    listeners: [],
+    queryDefinition: {
+      dataSource: "queryViz",
+      opts: {}
+    },
+    vizId: "sample_calc",
+    vizOptions: [["calc", "optionParam"]],
+    htmlObject: "sampleObject",
+    executeAtStart: true,
+    postFetch: function(data) {
+      // Using postFetch to convert data types, because the query is passing
+      //a Numeric field as String and that breaks the sample visualization
+      var metaQuantity = data.metadata[1];
+      var resultset = data.resultset;
+
+      metaQuantity.colType = "Numeric";
+      for(var i = 0; i < resultset.length; i++) {
+        resultset[i][1] = parseInt(resultset[i][1]);
       }
-    }));
+    }
+  }));
 
-    dashboard.init();
+  dashboard.init();
 
-    dashboard.finishedInit = false;
+  dashboard.finishedInit = false;
 });
         </textarea>
         <br/>

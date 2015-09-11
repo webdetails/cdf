@@ -84,41 +84,41 @@
 
         <div id="code">
           <textarea cols="80" rows="20" id="samplecode">
-require(['cdf/Dashboard.Blueprint','cdf/components/QueryComponent'], function(Dashboard, QueryComponent){
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/QueryComponent'
+], function(Dashboard, QueryComponent) {
   
   var dashboard = new Dashboard();
   
   dashboard.addParameter("result", "");
   
-  var MetaLayerHome2 = {
-    executeQueryComponentDefinition: {
-      queryType: 'mdx',
-      jndi: "SampleData",
-      catalog: "mondrian:/SteelWheels",
-      query: function() {
-        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-        "NON EMPTY TopCount([Customers].[All Customers].Children," +
-        "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-        }
-      }
-    };
+  dashboard.addDataSource("queryQ", {
+    queryType: "mdx",
+    jndi: "SampleData",
+    catalog: "mondrian:/SteelWheels",
+    query: function() {
+      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+        + " NON EMPTY TopCount([Customers].[All Customers].Children,"
+        + " 10.0, [Measures].[Sales]) ON ROWS FROM [SteelWheelsSales]";
+    }
+  });
 
-  dashboard.addComponent( new QueryComponent({
+  dashboard.addComponent(new QueryComponent({
     name: "executeQueryComponent",
     type: "queryComponent",
     htmlObject: "sampleObject",
     asynchronousMode: true,
     executeAtStart: true,
     resultvar: "result",
-    queryDefinition: MetaLayerHome2.executeQueryComponentDefinition,
+    queryDefinition: {dataSource: "queryQ"},
     postFetch: function(data) {
       $('#sampleObjectResult').html("" + data.resultset[3]);
     }
   }));
   dashboard.init();
-  
-});
 
+});
           </textarea>
           <br />
           <button id="tryMe">Try me</button>
