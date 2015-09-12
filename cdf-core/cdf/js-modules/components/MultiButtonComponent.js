@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseComponent', '../dashboard/Utils'],
-  function(MultiButtonComponentExt, $, ToggleButtonBaseComponent, Utils) {
+define([
+  './MultiButtonComponent.ext',
+  '../lib/jquery',
+  './ToggleButtonBaseComponent',
+  '../dashboard/Utils'
+], function(MultiButtonComponentExt, $, ToggleButtonBaseComponent, Utils) {
 
   var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     indexes: [],//used as static
@@ -34,11 +38,11 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
       for(var i = 0, len = myArray.length; i < len; i++) {
         var value = myArray[i][valIdx],
           label = myArray[i][lblIdx],
-          classes = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i,len,myself.verticalOrientation),
+          classes = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i, len, myself.verticalOrientation),
           selector;
 
-        value = (value == null ? null : value.replace('"','&quot;'));
-        label = (label == null ? null : label.replace('"','&quot;'));
+        value = (value == null ? null : value.replace('"', '&quot;'));
+        label = (label == null ? null : label.replace('"', '&quot;'));
 
         if(i == 0) { firstVal = value; }
 
@@ -149,7 +153,7 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
         if(indexes.length == undefined) {
           a.push(myself.getValueByIdx(indexes));
         } else {
-          for(var i=0; i < indexes.length; i++) {
+          for(var i = 0; i < indexes.length; i++) {
             a.push(myself.getValueByIdx(indexes[i]));
           }
         }
@@ -167,8 +171,8 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
     // This method should be broken up so the UI state code is reusable outside of event processing
     clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly) {
 
-      var cssWrapperClass= MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
-      var cssWrapperClassSelected= MultiButtonComponentExt.getSelectedCss(verticalOrientation);
+      var cssWrapperClass = MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
+      var cssWrapperClassSelected = MultiButtonComponentExt.getSelectedCss(verticalOrientation);
 
       var buttons = $("#" + htmlObject + " button");
       if(isMultiple) {//toggle button
@@ -187,9 +191,9 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
           }
         }
         if(disable) {
-          buttons[index].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
+          buttons[index].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(index, buttons.length, verticalOrientation);
         } else {
-          buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
+          buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index, buttons.length, verticalOrientation);
           this.indexes[name].push(index);
         }
       } else if (this.indexes[name] === index) {
@@ -197,7 +201,7 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
       } else {//de-select old, select new
         this.clearSelections(htmlObject, name, verticalOrientation);
         this.indexes[name] = index;
-        buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index,buttons.length,verticalOrientation);
+        buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index, buttons.length, verticalOrientation);
       }
       if(!updateUIOnly) {
         this.callAjaxAfterRender(this, name);
@@ -208,7 +212,7 @@ define(['./MultiButtonComponent.ext', '../lib/jquery', './ToggleButtonBaseCompon
       var buttons = $("#" + htmlObject + " button");
       var cssWrapperClass = MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
       for(var i = 0; i < buttons.length; i++) {
-        buttons[i].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i,buttons.length,verticalOrientation);
+        buttons[i].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i, buttons.length, verticalOrientation);
       }
 
       this.indexes[name] = [];

@@ -20,7 +20,8 @@ define([
   '../lib/cdf.jquery.i18n'
 ], function(Logger, Dashboard, DashboardExt, moment, cdo, $) {
   /**
-   * A module representing a extension to Dashboard module for i18n.
+   * A module representing an extension to the Dashboard module for i18n.
+   *
    * @module Dashboard.i18n
    */
   Dashboard.implement({
@@ -28,7 +29,7 @@ define([
     /**
      * Method used by the Dashboard constructor for i18n initialization
      * Reference to current language code . Used in every place where jquery
-     * plugins used in CDF has native internationalization support (ex: Datepicker)
+     * plugins used in CDF has native internationalization support (ex: Datepicker).
      *
      * @method _initI18n
      * @for Dashboard
@@ -80,7 +81,7 @@ define([
     },
   
     /**
-     * Sets the current locale and i18n options
+     * Sets the current locale and i18n options.
      *
      * @method setI18nSupport
      * @for Dashboard

@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent", "cdf/lib/jquery"],
-  function(Dashboard, JFreeChartComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/JFreeChartComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, JFreeChartComponent, $) {
   
   /**
    * ## The JFreeChart Component
@@ -23,10 +26,22 @@ define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent", "cdf/lib/jq
 
     dashboard.init();
 
+    dashboard.addDataSource("topTenQuery", {
+      queryType: 'mdx',
+      catalog: 'mondrian:/SteelWheels',
+      jndi: "SampleData",
+      query: function() {
+        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS, "
+             + "NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) "
+             + "ON ROWS from [SteelWheelsSales]";
+      }
+    });
+
     var jFreeChartComponent = new JFreeChartComponent({
       name: "topTenCustomers",
       type: "jFreeChartComponent",
       chartDefinition: {
+        dataSource: "topTenQuery",
         width: 500,
         height: 300,
         chartType: "BarChart",
@@ -41,15 +56,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/JFreeChartComponent", "cdf/lib/jq
         title: "Top 10 Customers",
         parameterName: "PRODUCTLINE",
         urlTemplate: "alert('clicked')",
-        orientation: "horizontal",
-        queryType: "mdx",
-        catalog: "mondrian:/SteelWheels",
-        jndi: "SampleData",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
-               + "NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) "
-               + "ON ROWS from [SteelWheelsSales]";
-        }
+        orientation: "horizontal"
       },
       htmlObject: "sampleObject",
       executeAtStart: true

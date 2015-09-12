@@ -24,18 +24,17 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
 
     //an exact copy of this object is set in context.js
     var contextObj = {
-        "locale": "en_US",
-        "params": {},
-        "path": "/test/fake_from_module_configuration.xcdf",
-        "queryData": {},
-        "roles": ["Administrator",
-                  "Authenticated"],
-        "serverLocalDate": 1412605395782,
-        "serverUTCDate": 1412601795782,
-        "sessionAttributes": {},
-        "sessionTimeout": 7200,
-        "user": "admin"
-      };
+      "locale": "en_US",
+      "params": {},
+      "path": "/test/fake_from_module_configuration.xcdf",
+      "queryData": {},
+      "roles": ["Administrator", "Authenticated"],
+      "serverLocalDate": 1412605395782,
+      "serverUTCDate": 1412601795782,
+      "sessionAttributes": {},
+      "sessionTimeout": 7200,
+      "user": "admin"
+    };
 
     /**
      * ## The CDF context # is correctly read through the module configuration
@@ -49,10 +48,7 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
      */
     it("is correctly read through the Dashboard constructor", function() {
       contextObj.path = "/test/fake_from_dashboard_constructor.xcdf";
-      var options = {
-        context: contextObj
-      };
-      var dashboard2 = new Dashboard(options);
+      var dashboard2 = new Dashboard({context: contextObj});
       expect(dashboard2.context).toEqual(contextObj);
     });
   });

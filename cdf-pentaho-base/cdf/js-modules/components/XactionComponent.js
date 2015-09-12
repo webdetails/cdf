@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent'],
-  function(XactionComponentExt, $, BaseComponent) {
+define([
+  './XactionComponent.ext',
+  '../lib/jquery',
+  './BaseComponent'
+], function(XactionComponentExt, $, BaseComponent) {
 
   var XactionComponent = BaseComponent.extend({
     update: function() {
@@ -23,7 +26,9 @@ define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent'],
           var p = new Array(this.parameters ? this.parameters.length : 0);
           for(var i = 0, len = p.length; i < len; i++) {
             var key = this.parameters[i][0];
-            var value = this.parameters[i][1] == "" ? this.parameters[i][2] : this.dashboard.getParameterValue(this.parameters[i][1]);
+            var value = this.parameters[i][1] == ""
+              ? this.parameters[i][2]
+              : this.dashboard.getParameterValue(this.parameters[i][1]);
             if(this.value == "NIL") {
               this.value = this.parameters[i][2];
             }
@@ -73,7 +78,7 @@ define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent'],
           $("#" + this.htmlObject).empty().append(iframe);
           iframe[0].contentWindow.location = url;
         }
-      } catch (e) {
+      } catch(e) {
         // don't cause the rest of CDF to fail if xaction component fails for whatever reason
       }
     }

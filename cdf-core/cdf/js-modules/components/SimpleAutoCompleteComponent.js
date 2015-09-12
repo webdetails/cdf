@@ -25,18 +25,16 @@ define(['./BaseComponent', '../lib/jquery'], function(BaseComponent, $) {
         myself.input = $("<input type='text'>").appendTo(myself.ph);
         myself.query = myself.dashboard.getQuery(myself.queryDefinition);
         myself.input.autocomplete({
-          source:function(obj, callback) { return myself.triggerQuery(obj.term,callback); }
+          source: function(obj, callback) { return myself.triggerQuery(obj.term, callback); }
         });
 
-        myself.input
-          .change(function() {
+        myself.input.change(function() {
+          myself.dashboard.processChange(myself.name);
+        }).keyup(function(event) {
+          if(event.keyCode == 13) {
             myself.dashboard.processChange(myself.name);
-          })
-          .keyup(function(event) {
-            if(event.keyCode == 13) {
-              myself.dashboard.processChange(myself.name);
-            }
-          });
+          }
+        });
       }
     },
 

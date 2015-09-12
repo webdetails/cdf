@@ -11,16 +11,18 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["../lib/jquery", "./ToggleButtonBaseComponent"],
-  function($, ToggleButtonBaseComponent) {
+define([
+  "../lib/jquery",
+  "./ToggleButtonBaseComponent"
+], function($, ToggleButtonBaseComponent) {
 
   var CheckComponent = ToggleButtonBaseComponent.extend({
-    getValue : function() {
+    getValue: function() {
       if(this.currentVal != 'undefined' && this.currentVal != null) {
         return this.currentVal;
       } else {
         var a = new Array();
-        this.placeholder("." + this.name + ":checked").each(function(i,val) {
+        this.placeholder("." + this.name + ":checked").each(function(i, val) {
           a.push($(this).val());
         });
         return a;

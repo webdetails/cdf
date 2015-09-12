@@ -43,6 +43,10 @@ require([
   function(Dashboard, TextComponent, JFreeChartComponent, PivotLinkComponent, DialComponent) {
 
   dashboard = new Dashboard();
+
+  dashboard.addDataSource(MetaLayerHome2.territorySalesDataSource);
+  dashboard.addDataSource(MetaLayerHome2.productLineSalesDataSource);
+  dashboard.addDataSource(MetaLayerHome2.topTenCustomerDataSource);
   
   dashboard.addComponent(new TextComponent({
     name: "titleString",

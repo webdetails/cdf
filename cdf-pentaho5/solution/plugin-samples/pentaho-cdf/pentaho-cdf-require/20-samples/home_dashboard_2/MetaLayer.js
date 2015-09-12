@@ -42,8 +42,21 @@ var MetaLayerHome2 = {
     dashboard.fireChange("MetaLayerHome2.filterMeasure",MetaLayerHome2.filterMeasure);
 
   },
+
+  territorySalesDataSource: {
+    name: "territorySalesDataSource",
+    //queryType: "sql",
+    queryType: "mdx",
+    catalog: "mondrian:/SteelWheels",
+    jndi: "SampleData",
+    query: function() {
+      // return "SELECT OFFICES.TERRITORY, SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) SOLD_PRICE FROM ORDERS INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE  INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER  INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE  GROUP BY OFFICES.TERRITORY ORDER BY 2 DESC";
+      return "select NON EMPTY{[Markets].children} ON ROWS, [Measures].[Sales] on columns from [SteelWheelsSales]";
+    }
+  },
   
   territorySalesDefinition: {
+    dataSource: "territorySalesDataSource",
     width: 420,
     height: 240,
     chartType: "PieChart",
@@ -55,22 +68,23 @@ var MetaLayerHome2 = {
     title: "Click on territory",
     urlTemplate: "javascript:MetaLayerHome2.pieChartClicked('territory','{TERRITORY}')",
     parameterName: "TERRITORY",
-    foregroundAlpha: 1,
-    //queryType: 'sql',
-    queryType: 'mdx',
-    catalog: 'mondrian:/SteelWheels',
+    foregroundAlpha: 1
+  },
+
+  productLineSalesDataSource: {
+    name: "productLineSalesDataSource",
+    //queryType: "sql",
+    queryType: "mdx",
     jndi: "SampleData",
+    catalog: "mondrian:/SteelWheels",
     query: function() {
-
-      // var query = "SELECT OFFICES.TERRITORY, SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) SOLD_PRICE FROM ORDERS INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE  INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER  INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE  GROUP BY OFFICES.TERRITORY ORDER BY 2 DESC";
-
-      var query = "select NON EMPTY{[Markets].children} ON ROWS, [Measures].[Sales] on columns from [SteelWheelsSales]";
-
-      return query;
+      // return "SELECT PRODUCTS.PRODUCTLINE, SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) REVENUE FROM ORDERS INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE  INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER  INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE GROUP BY PRODUCTS.PRODUCTLINE ORDER BY 2 DESC";
+      return "select NON EMPTY{[Product].children} ON ROWS, [Measures].[Sales] on columns from [SteelWheelsSales]";
     }
   },
 
   productLineSalesDefinition: {
+    dataSource: "productLineSalesDataSource",
     width: 420,
     height: 240,
     chartType: "PieChart",
@@ -82,22 +96,23 @@ var MetaLayerHome2 = {
     title: "Click on territory",
     urlTemplate: "javascript:MetaLayerHome2.pieChartClicked('productLine', '{PRODUCTLINE}')",
     parameterName: "PRODUCTLINE",
-    foregroundAlpha: 1,
-    //queryType: 'sql',
-    queryType: 'mdx',
+    foregroundAlpha: 1
+  },
+
+  topTenCustomerDataSource: {
+    name: "topTenCustomerDataSource",
+    queryType: "mdx",
+    catalog: "mondrian:/SteelWheels",
     jndi: "SampleData",
-    catalog: 'mondrian:/SteelWheels',
     query: function() {
-
-      // var query = "SELECT PRODUCTS.PRODUCTLINE, SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) REVENUE FROM ORDERS INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE  INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER  INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE GROUP BY PRODUCTS.PRODUCTLINE ORDER BY 2 DESC";
-
-      var query = "select NON EMPTY{[Product].children} ON ROWS, [Measures].[Sales] on columns from [SteelWheelsSales]";
+      var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS, NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) ON ROWS from [SteelWheelsSales]" +
+      MetaLayerHome2.filterMeasure;
       return query;
     }
   },
 
-
   topTenCustomerDefinition: {
+    dataSource: "topTenCustomerDataSource",
     width: 500,
     height: 600,
     chartType: "BarChart",
@@ -110,15 +125,6 @@ var MetaLayerHome2 = {
     title: "Top 10 Customers",
     parameterName: "PRODUCTLINE",
     foregroundAlpha: 1,
-    queryType: 'mdx',
-    catalog: 'mondrian:/SteelWheels',
-    orientation: 'horizontal',
-    jndi: "SampleData",
-    query: function() {
-
-      var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS, NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) ON ROWS from [SteelWheelsSales]" +
-      MetaLayerHome2.filterMeasure;
-      return query;
-    }
+    orientation: 'horizontal'
   }
 }

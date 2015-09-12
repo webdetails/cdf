@@ -57,22 +57,21 @@ require([
   
   dashboard.addParameter("result", "");
   
-  var MetaLayer = {
-    queryDefinition: {
-      queryType: 'xmlaDiscover',
-      query: function() {
-        return Xmla.DBSCHEMA_CATALOGS;
-      }
+  dashboard.addDataSource("queryXMLADiscover", {
+    queryType: "xmlaDiscover",
+    query: function() {
+      return Xmla.DBSCHEMA_CATALOGS;
     }
-  };
+  });
 
   dashboard.addComponent(new QueryComponent({
     name: "executeQueryComponent",
     type: "queryComponent",
     htmlObject: "sampleObject",
     executeAtStart: true,
+    asynchronousMode: true,
     resultvar: "result",
-    queryDefinition: MetaLayer.queryDefinition,
+    queryDefinition: {dataSource: "queryXMLADiscover"},
     postFetch: function(data) {
       $('#sampleObjectResult').html(JSON.stringify(data));
     }

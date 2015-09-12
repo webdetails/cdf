@@ -49,14 +49,15 @@ define([
        * Über-filter: one filter to rule them all
        */
 
-      /**
+      /*
        * Interface Mixin for a filter
        */
       var IConfiguration, IFilter, Filter;
       IFilter = {
 
         /**
-         * Gets the current selection state
+         * Gets the current selection state.
+         *
          * @method getValue
          * @public
          * @for FilterComponent
@@ -68,7 +69,8 @@ define([
         },
 
         /**
-         * Updates the selection state of the filter
+         * Updates the selection state of the filter.
+         *
          * @method setValue
          * @public
          * @for FilterComponent
@@ -83,7 +85,8 @@ define([
 
         /**
          * Implement's CDF logic for updating the state of the parameter, by
-         * invoking Dashboards.processChange()
+         * invoking Dashboards.processChange().
+         *
          * @method processChange
          * @public
          * @for FilterComponent
@@ -97,7 +100,7 @@ define([
         }
       };
 
-      /**
+      /*
        * Interface mixin for the configuration
        */
       IConfiguration = {
@@ -124,6 +127,7 @@ define([
          * }
          * </code>
          * </pre>
+         *
          * @property defaults
          * @for FilterComponent
          * @type {Object}
@@ -150,6 +154,7 @@ define([
          * - component's {{#crossLink "FilterComponent/defaults:property"}}{{/crossLink}}
          * - properties set by the user at design time, via the CDE interface
          * - options programmatically defined at run time
+         *
          * @method getConfiguration
          * @for FilterComponent
          * @public
@@ -216,7 +221,7 @@ define([
             styles.push('no-icons');
           }
 
-          /**
+          /*
            * validate pagination
            */
           pageSize = Infinity;
@@ -246,7 +251,7 @@ define([
             }
           });
 
-          /**
+          /*
            * Localize strings, if they are defined
            */
           i18nMap = this.dashboard.i18nSupport.map || {};
@@ -264,7 +269,7 @@ define([
           strategy = new BaseFilter.SelectionStrategies[selectionStrategyConfig.type](selectionStrategyConfig);
           configuration.component.selectionStrategy.strategy = strategy;
 
-          /**
+          /*
            * Patches
            */
           if (selectionStrategyConfig !== 'SingleSelect') {
@@ -275,7 +280,7 @@ define([
             }
           }
 
-          /**
+          /*
            *  Add input/output options to configuration object
            */
           $.extend(true, configuration.input, this.componentInput, {
@@ -304,13 +309,14 @@ define([
          * }
          * </pre>
          * </code>
+         *
          * @property addIns
          * @type Object
          * @public
          */
         _mapAddInsToConfiguration: function() {
 
-          /**
+          /*
            * Traverse the list of declared addIns,
            * Get the addIns, the user-defined options, wrap this into a function
            * Create a hash map { slot: [ function($tgt, model, options) ]}
@@ -341,7 +347,7 @@ define([
             return [slot, addIns];
           }).object().value();
 
-          /**
+          /*
            * Place the functions in the correct location in the configuration object
            */
           addInHash = {
@@ -365,7 +371,7 @@ define([
           };
           _.each(addInList, function(functionList, addInSlot) {
 
-            /**
+            /*
              * I just wish we could do something like
              *   configuration['compoent.Root.renderers.selection'] = foo
              */
@@ -405,7 +411,8 @@ define([
          */
 
         /**
-         * Object responsible for storing the MVC model, which contains both the data and the state of the component
+         * Object responsible for storing the MVC model, which contains both the data and the state of the component.
+         *
          * @property model
          * @public
          * @type SelectionTree
@@ -413,7 +420,8 @@ define([
         model: void 0,
 
         /**
-         * Object responsible for managing the MVC hierarchy of views and controllers associated with the model
+         * Object responsible for managing the MVC hierarchy of views and controllers associated with the model.
+         *
          * @property manager
          * @public
          * @type Manager
@@ -421,7 +429,8 @@ define([
         manager: void 0,
 
         /**
-         * Object that handles writing to the MVC model
+         * Object that handles writing to the MVC model.
+         *
          * @property inputDataHandler
          * @public
          * @type Input
@@ -430,6 +439,7 @@ define([
 
         /**
          * Object that handles reading from the MVC model.
+         *
          * @property outputDataHandler
          * @public
          * @type Output
@@ -470,20 +480,20 @@ define([
          * - MVC manager
          * - input data handler
          * - output data handler
-        #
+         *
          * @method initialize
          * @return {Promise} Returns a $.Deferred().promise() object
          */
         initialize: function() {
 
-          /**
+          /*
            * Transform user-defined CDF settings to our own configuration object
            */
           var configuration, deferred;
           configuration = this.getConfiguration();
           this.close();
 
-          /**
+          /*
            * Initialize our little MVC world
            */
           this.model = new BaseFilter.Models.SelectionTree(configuration.input.defaultModel);
@@ -492,7 +502,7 @@ define([
             configuration: configuration.component
           });
 
-          /**
+          /*
            * Initialize the CDF interface
            */
           this.inputDataHandler = new BaseFilter.DataHandlers.Input({
@@ -512,6 +522,7 @@ define([
         /**
          * Abstract the origin of the data used to populate the component.
          * Precedence order for importing data: query -> parameter -> valuesArray
+         *
          * @method getData
          * @return {Promise} Returns promise that is fulfilled when the data is available
          */
@@ -543,7 +554,7 @@ define([
           return deferred.promise();
         },
 
-        /**
+        /*
          * Launch an event equivalent to postExecution
          */
 

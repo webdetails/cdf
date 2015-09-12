@@ -23,6 +23,7 @@ define([
   './dashboard/Dashboard.notifications',
   './dashboard/Dashboard.parameters',
   './dashboard/Dashboard.storage',
+  './dashboard/Dashboard.dataSources',
   './dashboard/Dashboard.query',
   './dashboard/Dashboard.views',
   './queries/BaseQuery',

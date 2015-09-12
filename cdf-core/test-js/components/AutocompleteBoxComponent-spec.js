@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/lib/jquery"],
-  function(Dashboard, AutocompleteBoxComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/AutocompleteBoxComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, AutocompleteBoxComponent, $) {
 
   /**
    * ## The Autocomplete Box Component
@@ -25,27 +28,25 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
 
     dashboard.addParameter("autocompleteBoxParameter", "");
 
-    var MetaLayerHome2 = {
-      clientSelectorDefinition: {
-        queryType: "mdx",
-        jndi: "SampleData",
-        catalog: "mondrian:/SteelWheels",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-                 "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
-                 "(Left([Customers].CurrentMember.Name, Len(\"" +
-                 dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")) = \"" +
-                 dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\"))," +
-                 "100.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-        }
+    dashboard.addDataSource("clientQuery", {
+      queryType: "mdx",
+      jndi: "SampleData",
+      catalog: "mondrian:/SteelWheels",
+      query: function() {
+        return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+          + " NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"
+          + " (Left([Customers].CurrentMember.Name, Len(\""
+          + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \""
+          + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")), 100.0, [Measures].[Sales]) ON ROWS"
+          + " FROM [SteelWheelsSales]";
       }
-    };
+    });
 
     var autocompleteBox = new AutocompleteBoxComponent({
       name: "autocompleteBox",
       type: "autocompleteBox",
       matchType: "fromStart",
-      queryDefinition: MetaLayerHome2.clientSelectorDefinition,
+      queryDefinition: {dataSource: "clientQuery"},
       selectMulti: true,
       showApplyButton: true,
       minTextLength: 0,
@@ -94,14 +95,14 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
         "Auto Canal+ Petit"
       ];
 
-      spyOn(autocompleteBox, '_queryServer').and.callFake(function(){
-        this.result = [
+      spyOn(autocompleteBox, '_queryServer').and.callFake(function(searchString, successCallback) {
+        successCallback([
           ["AV Stores, Co."],
           ["Anna's Decorations"],
           ["Auto Canal+ Petit"],
           ["Euro+ Shopping Channel"],
           ["La Rochelle Gifts"]
-        ]
+        ]);
       });
 
       var returnedList = [];

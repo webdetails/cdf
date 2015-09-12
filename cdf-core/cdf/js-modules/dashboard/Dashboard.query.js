@@ -12,12 +12,13 @@
  */
 
 define([
+  '../Logger',
   '../lib/Base',
   './Dashboard',
   './Container',
   'amd!../lib/underscore',
   './Utils'
-], function(Base, Dashboard, Container, _, Utils) {
+], function(Logger, Base, Dashboard, Container, _, Utils) {
 
   var _BaseQuery = Base;
   
@@ -46,7 +47,7 @@ define([
      * Gets the base query object, from where other query types can be extended
      *
      * @method getBaseQuery
-     * @returns {*} the base query object
+     * @return {*} the base query object
      *
      * @for Dashboard
      */
@@ -89,7 +90,7 @@ define([
      *
      * @method hasQuery
      * @param type query type
-     * @returns {boolean} _true_ if the query type has been registered for this dashboard
+     * @return {boolean} _true_ if the query type has been registered for this dashboard
      *
      * @for Dashboard
      */
@@ -102,17 +103,29 @@ define([
      *
      * @method detectQueryType
      * @param qd - Query definition object
-     * @returns {queryType} Query type associated with the query definition object
+     * @return {queryType} Query type associated with the query definition object
      *
      * @for Dashboard
      */
     detectQueryType: function(qd) {
       if(qd) {
+        // check if we should use a data source
+        if(_.isString(qd.dataSource) && !_.isEmpty(qd.dataSource)) {
+          var ds = this.getDataSource(qd.dataSource);
+          if(!_.isUndefined(ds)) {
+            qd = ds;
+          } else {
+            Logger.error("Invalid data source name '" + qd.dataSource + "'");
+            return;
+          }
+        }
+
         var qt = qd.queryType          ? qd.queryType : // cpk goes here
           qd.query                     ? 'legacy'     :
-          (qd.path && qd.dataAccessId) ? 'cda'        : 
+          (qd.path && qd.dataAccessId) ? 'cda'        :
           undefined;
 
+        // update query type value
         qd.queryType = qt;
 
         return this.hasQuery(qt) ? qt : undefined;
@@ -120,12 +133,13 @@ define([
     },
 
     /**
-     * Given a type and options, returns the query object for running that particular query
+     * Given a type and options, returns the query object for running that particular query.
+     * If a data source name is provided as an option, also include all options from it.
      *
      * @method getQuery
      * @param type Query type
      * @param opts Options object
-     * @returns {*} the query object
+     * @return {*} the query object
      *
      * @for Dashboard
      */
@@ -134,11 +148,28 @@ define([
         type = 'cda';
       } else if(_.isObject(type)) {
         opts = type;
-        type = opts.queryType || 'cda';
+        type = undefined;
       }
+
+      // check if we should use a data source
+      if(_.isString(opts.dataSource) && !_.isEmpty(opts.dataSource)) {
+        var ds = this.getDataSource(opts.dataSource);
+        if(!_.isUndefined(ds)) {
+          // merge options, query definition options override options duplicated in the data source
+          opts = _.extend({}, ds, opts);
+          // remove the data source name from the query definition
+          delete opts.dataSource;
+        } else {
+          Logger.error("Invalid data source name '" + qd.dataSource + "'");
+          return;
+        }
+      }
+
+      type = type || opts.queryType || 'cda';
 
       var query = this.queryFactories.getNew('Query', type, opts);
       query.dashboard = this;
+
       return query;
     },
 
@@ -146,7 +177,7 @@ define([
      * Lists the registered query types in this dashboard
      *
      * @method listQueries
-     * @returns {Array} Array of registered query types
+     * @return {Array} Array of registered query types
      *
      * @for Dashboard
      */

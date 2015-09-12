@@ -12,19 +12,19 @@
  */
 
 /**
- * Auxiliary UTF8 encoder . Request as cdf/dashboard/Utf8Encoder
+ * Auxiliary UTF8 encoder. Request as 'cdf/dashboard/Utf8Encoder'.
  *
  * @module Utf8Encoder
  * @class Utf8Encoder
  */
 define(["../lib/jquery"], function($) {
 
-  /**
+  /*
    *
    * UTF-8 data encode / decode
    * http://www.webtoolkit.info/
    *
-   **/
+   */
   var Utf8 = {
 
     // public method for url encoding
@@ -76,17 +76,17 @@ define(["../lib/jquery"], function($) {
     }
   };
 
-  /**
+  /*
    * UTF-8 data encode / decode
    * http://www.webtoolkit.info/
-   **/
+   */
   var Utf8Encoder = {
     /**
      * Prepares an UTF8 string to be used in Opera or Internet Explorer
      *
      * @method encode_prepare
      * @param s String to be prepared
-     * @returns {*} Encoded/Prepared String
+     * @return {*} Encoded/Prepared String
      *
      * @static
      */
@@ -109,7 +109,7 @@ define(["../lib/jquery"], function($) {
      *
      * @method encode_prepare_arr
      * @param value Array to be encoded
-     * @returns {Array} Array with encoded/prepared elements
+     * @return {Array} Array with encoded/prepared elements
      *
      * @static
      */

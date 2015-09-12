@@ -15,15 +15,17 @@
  * OlapUtils is a collection of functions allowing client side CDF to issue MDX queries.
  * This functionality is completely deprecated now and only used by the MdxQueryGroupComponent,
  * which is deprecated as well.
+ *
  * @class OlapUtils
  * @module OlapUtils
  * @deprecated
  */
 
-
-
-define(['./Dashboard', './Utf8Encoder'],
-    function (Dashboard, Utf8Encoder) {
+define([
+    './Dashboard',
+    './dashboard/Utf8Encoder',
+    './dashboard/Utils'
+], function(Dashboard, Utf8Encoder, Utils) {
 
     var OlapUtils = {
 	    mdxGroups: {},
@@ -83,7 +85,7 @@ define(['./Dashboard', './Utf8Encoder'],
          *SERIES, otherwise it's PARAM.					   */
     
         if(param2 != undefined && param3 != undefined){
-          cType = Dashboard.ev(param1.chartType);
+          cType = Utils.ev(param1.chartType);
     
             if(cType == "AreaChart")
               value = Utf8Encoder.encode_prepare(param3);
@@ -149,9 +151,9 @@ define(['./Dashboard', './Utf8Encoder'],
     }
 
 	
-/******************************************************************************************************/
-/***************************************** MDX QUERY ************************************************/
-/******************************************************************************************************/
+/*
+ * MDX QUERY
+ */
 
 
     OlapUtils.mdxQuery = function(hash){
@@ -174,7 +176,7 @@ define(['./Dashboard', './Utf8Encoder'],
     }
     
     OlapUtils.mdxQuery.prototype.resetFilters = function(){
-        this.query["filters"] = Dashboard.clone((this.originalHash["filters"] || {rows:[],columns: []}));
+        this.query["filters"] = Utils.clone((this.originalHash["filters"] || {rows:[],columns: []}));
     }
     
     OlapUtils.mdxQuery.prototype.resetCondition = function(key){
@@ -189,7 +191,7 @@ define(['./Dashboard', './Utf8Encoder'],
     
     OlapUtils.mdxQuery.prototype.update = function(hash){
     
-        this.originalHash = Dashboard.clone(hash);
+        this.originalHash = Utils.clone(hash);
         this.query["members"] = hash["members"]||[];
         this.query["sets"] = hash["sets"] || [];
         this.query["rows"] = hash["rows"]||"";
@@ -212,7 +214,7 @@ define(['./Dashboard', './Utf8Encoder'],
     
     
     OlapUtils.mdxQuery.prototype.clone = function() {
-        var c = Dashboard.clone(this);
+        var c = Utils.clone(this);
         return c;
     };
     
@@ -360,7 +362,7 @@ define(['./Dashboard', './Utf8Encoder'],
         this.resetCondition(key);
     }
     
-    /**** NEXT FUNCTIONS ARE FOR INTERNAL USE ONLY *******/
+    /* NEXT FUNCTIONS ARE FOR INTERNAL USE ONLY */
     OlapUtils.mdxQuery.prototype.replaceConditionsByDrill = function(key,value){
     
         //Clear previous focus and excludes
@@ -452,9 +454,9 @@ define(['./Dashboard', './Utf8Encoder'],
         this.query["members"][key] = member;
     }
 
-/******************************************************************************************************/
-/************************************ MDX QUERYGROUP ***********************************************/
-/******************************************************************************************************/
+/*
+ * MDX QUERYGROUP
+ */
 
     OlapUtils.lastClickedMdxQueryGroup;
     
@@ -791,9 +793,9 @@ define(['./Dashboard', './Utf8Encoder'],
         this.fireChange("OlapUtils.evolutionType",value);
     }
 
-/******************************************************************************************************/
-/************************************ GENERIC QUERIES **********************************************/
-/******************************************************************************************************/
+/*
+ * GENERIC QUERIES
+ */
 
 
     OlapUtils.GenericMdxQuery = Base.extend({
@@ -895,10 +897,10 @@ define(['./Dashboard', './Utf8Encoder'],
                     swapRowsAndColumns: false,
                     orderBy: options.orderBy,
                     sets: {
-                        "now": function(){return "now as [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(30.0)" + ":" + " [Date].[Date].[" + Dashboard.ev(options.baseDate) + "]" },
-                        "oneMonthAgo": function(){return "oneMonthAgo as [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(60.0)" + ":" + " [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(30.0)" },
-                        "oneYearAgo": function(){return "oneYearAgo as [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(395.0)" + ":" + " [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(365.0)" },
-                        "last12Months":	function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboard.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
+                        "now": function(){return "now as [Date].[Date].[" + Utils.ev(options.baseDate) + "].Lag(30.0)" + ":" + " [Date].[Date].[" + Utils.ev(options.baseDate) + "]" },
+                        "oneMonthAgo": function(){return "oneMonthAgo as [Date].[Date].[" + Utils.ev(options.baseDate) + "].Lag(60.0)" + ":" + " [Date].[Date].[" + Utils.ev(options.baseDate) + "].Lag(30.0)" },
+                        "oneYearAgo": function(){return "oneYearAgo as [Date].[Date].[" + Utils.ev(options.baseDate) + "].Lag(395.0)" + ":" + " [Date].[Date].[" + Utils.ev(options.baseDate) + "].Lag(365.0)" },
+                        "last12Months":	function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Utils.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
                     },
                     members: {
                         todaysMonth: function(){return "[Date].[TodaysMonth] as Aggregate( now )"},
@@ -1023,7 +1025,7 @@ define(['./Dashboard', './Utf8Encoder'],
     
                     sets: {
                         "a":
-                        function(){return "a as '("+options.dateDim+"."+options.dateLevel+".[" + Dashboard.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateLevel+".["+ Dashboard.ev(options.endDate) + "])'"}
+                        function(){return "a as '("+options.dateDim+"."+options.dateLevel+".[" + Utils.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateLevel+".["+ Utils.ev(options.endDate) + "])'"}
                     },
                     members: {
                         daterange: ""+options.dateDim+".[Date Range] as Aggregate(a)",
@@ -1034,7 +1036,7 @@ define(['./Dashboard', './Utf8Encoder'],
                 };
     
                 // pass the properties of this to the chartDefaults
-                var _chart = Dashboard.clone(this);
+                var _chart = Utils.clone(this);
                 delete _chart.chartDefaults;
                 this.chartDefaults.parent = _chart;
                 

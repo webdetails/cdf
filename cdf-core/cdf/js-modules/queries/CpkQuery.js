@@ -12,12 +12,14 @@
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
 
 /**
- * Class that represents a CPK query
+ * Class that represents a CPK query.
+ *
  * @class CpkQuery
  * @extends BaseQuery
  */
@@ -50,11 +52,10 @@ define([
     },
 
     /**
-     * Init method for the CPK query
+     * Init method for the CPK query.
      *
      * @method init
-     * @param opts Options is an object with the following properties: pluginId, endpoint, kettleOutput, stepName, systemParams
-     * ajaxOptions
+     * @param opts Options is an object with the following properties: pluginId, endpoint, kettleOutput, stepName, systemParams, ajaxOptions
      */
     init: function(opts) {
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
@@ -74,11 +75,11 @@ define([
     },
 
     /**
-     * Builds the query definition object
+     * Builds the query definition object.
      *
      * @method buildQueryDefinition
      * @param overrides Overrides to the existing options
-     * @returns {{}} Query definition object
+     * @return {{}} Query definition object
      *
      * @private
      */
@@ -132,12 +133,11 @@ define([
     },
 
     /**
-     * Gets the success handler for the query, given a fallback to call
+     * Gets the success handler for the query, given a fallback to call.
      *
      * @method getSuccessHandler
      * @param callback Callback to cal after the query is successful
-     * @returns Success handler
-     *
+     * @return Success handler
      */
     getSuccessHandler: function(callback) {
       // copy-pasted from BaseQuery + added errorCallback

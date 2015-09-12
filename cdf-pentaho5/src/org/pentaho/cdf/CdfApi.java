@@ -85,7 +85,8 @@ public class CdfApi {
   @Path( "/getResource" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public void getResource( @QueryParam( Parameter.RESOURCE ) String resource,
-                           @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response )
+                           @QueryParam( Parameter.PATH ) String path,
+                           @Context HttpServletResponse response )
     throws Exception {
     try {
 
@@ -128,7 +129,8 @@ public class CdfApi {
   @POST
   @Path( "/getResource" )
   public void postResource( @QueryParam( Parameter.RESOURCE ) String resource,
-                            @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response )
+                            @QueryParam( Parameter.PATH ) String path,
+                            @Context HttpServletResponse response )
     throws Exception {
     getResource( resource, path, response );
   }
@@ -138,7 +140,7 @@ public class CdfApi {
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
                             @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
-                            @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
+                            @QueryParam( Parameter.VIEW_ID ) @DefaultValue( StringUtils.EMPTY ) String viewId,
                             @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     return ContextEngine.getInstance()
@@ -156,20 +158,41 @@ public class CdfApi {
     }
   }
 
+  @POST
+  @Path( "/export" )
+  @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
+  public void doPostExport( @FormParam( Parameter.SOLUTION ) String solution,
+                            @FormParam( Parameter.PATH ) String path,
+                            @FormParam( Parameter.ACTION ) String action,
+                            @FormParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                            @FormParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE )
+                            String exportType,
+                            @Context HttpServletRequest request,
+                            @Context HttpServletResponse response ) throws Exception {
+
+    export( solution, path, action, contentType, exportType, request, response );
+  }
   @GET
   @Path( "/export" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
-  public void export( @QueryParam( Parameter.SOLUTION ) String solution, @QueryParam( Parameter.PATH ) String path,
+  public void export( @QueryParam( Parameter.SOLUTION ) String solution,
+                      @QueryParam( Parameter.PATH ) String path,
                       @QueryParam( Parameter.ACTION ) String action,
                       @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
                       @QueryParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE )
-                      String exportType,
-                      @Context HttpServletRequest request, @Context HttpServletResponse response ) throws Exception {
+                        String exportType,
+                      @Context HttpServletRequest request,
+                      @Context HttpServletResponse response ) throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
 
-    if ( ActionEngine.getInstance().executeAction( value, contentType, request, response,
-        PentahoSessionHolder.getSession(), Parameter.asHashMap( request ) ) ) {
+    if ( ActionEngine.getInstance().executeAction(
+        value,
+        contentType,
+        request,
+        response,
+        PentahoSessionHolder.getSession(),
+        Parameter.asHashMap( request ) ) ) {
       Export export;
 
       if ( IExport.EXPORT_TYPE_CSV.equalsIgnoreCase( exportType ) ) {
@@ -190,10 +213,12 @@ public class CdfApi {
 
   @GET
   @Path( "/callAction" )
-  public void callAction( @QueryParam( Parameter.SOLUTION ) String solution, @QueryParam( Parameter.PATH ) String path,
+  public void callAction( @QueryParam( Parameter.SOLUTION ) String solution,
+                          @QueryParam( Parameter.PATH ) String path,
                           @QueryParam( Parameter.ACTION ) String action,
                           @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-                          @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse )
+                          @Context HttpServletRequest servletRequest,
+                          @Context HttpServletResponse servletResponse )
     throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
@@ -211,7 +236,7 @@ public class CdfApi {
                                @QueryParam( Parameter.ACTION ) String action,
                                @QueryParam( Parameter.DEPTH ) @DefaultValue( "-1" ) int depth,
                                @QueryParam( Parameter.SHOW_HIDDEN_FILES ) @DefaultValue( "false" )
-                               boolean showHiddenFiles,
+                                 boolean showHiddenFiles,
                                @QueryParam( Parameter.MODE ) @DefaultValue( "*" ) String mode,
                                @Context HttpServletResponse servletResponse )
     throws InvalidCdfOperationException {
@@ -248,7 +273,7 @@ public class CdfApi {
                                 @QueryParam( Parameter.PATH ) String path,
                                 @QueryParam( Parameter.ACTION ) String action,
                                 @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML )
-                                String contentType,
+                                  String contentType,
                                 @FormParam( Parameter.QUERY_TYPE ) String queryType,
                                 @FormParam( Parameter.QUERY ) String query,
                                 @FormParam( Parameter.CATALOG ) String catalog,
@@ -306,9 +331,14 @@ public class CdfApi {
   @Produces( "text/javascript" )
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
                                      @Context HttpServletResponse servletResponse ) throws Exception {
-    buildCdfEmbedContext( servletRequest.getProtocol(), servletRequest.getServerName(),
-        servletRequest.getServerPort(), servletRequest.getSession().getMaxInactiveInterval(),
-        servletRequest.getParameter( "locale" ), servletRequest, servletResponse );
+    buildCdfEmbedContext(
+        servletRequest.getProtocol(),
+        servletRequest.getServerName(),
+        servletRequest.getServerPort(),
+        servletRequest.getSession().getMaxInactiveInterval(),
+        servletRequest.getParameter( "locale" ),
+        servletRequest,
+        servletResponse );
   }
 
   // CDE will call buildCdfEmbedContext via InterPluginCall
@@ -321,8 +351,9 @@ public class CdfApi {
                                     @Context HttpServletResponse servletResponse ) throws Exception {
     try {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
-          new EmbeddedHeadersGenerator( buildFullServerUrl( protocol, name, port ),
-          getConfiguration( "", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
+          new EmbeddedHeadersGenerator(
+            buildFullServerUrl( protocol, name, port ),
+            getConfiguration( "", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
       }
@@ -333,7 +364,9 @@ public class CdfApi {
     }
   }
 
-  protected String getConfiguration( String path, String viewId, HashMap<String, String> parameterMap,
+  protected String getConfiguration( String path,
+                                     String viewId,
+                                     HashMap<String, String> parameterMap,
                                      int inactiveInterval ) throws JSONException {
     return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
   }

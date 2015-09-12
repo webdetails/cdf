@@ -15,13 +15,15 @@
 define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '../lib/jquery'],
   function(Dashboard, Backbone, Mustache, Logger, $) {
   /**
-   * A module representing a extension to Dashboard module for storage.
+   * A module representing an extension to the Dashboard module for components.
+   *
    * @module Dashboard.components
    */
   Dashboard.implement({
   
     /**
-     * Method used by the Dashboard constructor for components initialization
+     * Method used by the Dashboard constructor for components initialization.
+     *
      * @method _initComponents
      * @for Dashboard
      * @private
@@ -31,12 +33,12 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Gets the component with a given name
+     * Gets the component with a given name.
      *
      * @method getComponent
      * @for Dashboard
      * @param name of the component
-     * @returns the component or undefined if it does not exists
+     * @return the component or undefined if it does not exists
      */
     getComponent: function(name) {
       if(!name) { return; }
@@ -48,31 +50,31 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
+     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}.
      *
      * @method getComp
      * @for Dashboard
      * @param name of the component
-     * @returns the component or undefined if it does not exists
+     * @return the component or undefined if it does not exists
      */
     getComp: function(name) {
       return this.getComponent(name);
     },
   
     /**
-     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}
+     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}.
      *
      * @method getComponentByName
      * @for Dashboard
      * @param name of the component
-     * @returns the component or undefined if it does not exists
+     * @return the component or undefined if it does not exists
      */
     getComponentByName: function(name) {
       return this.getComponent(name);
     },
   
     /**
-     * Adds a set of components
+     * Adds a set of components.
      *
      * @method addComponents
      * @for Dashboard
@@ -89,7 +91,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Add a component
+     * Add a component.
      *
      * @method addComponent
      * @for Dashboard
@@ -109,12 +111,13 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Gets a component given a name or a index
+     * Gets a component given a name or a index.
+     *
      * @method getComponentIndex
      * @for Dashboard
      *
      * @param compOrNameOrIndex
-     * @returns component index
+     * @return component index
      */
     getComponentIndex: function(compOrNameOrIndex) {
       if(compOrNameOrIndex != null) {
@@ -138,12 +141,12 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     },
   
     /**
-     * Remove a component
+     * Remove a component.
      *
      * @method removeComponent
      * @for Dashboard
      * @param compOrNameOrIndex
-     * @returns the component removed
+     * @return the component removed
      */
     removeComponent: function(compOrNameOrIndex) {
       var index = this.getComponentIndex(compOrNameOrIndex);
@@ -165,9 +168,10 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _bindControl
      * @param control
      * @private
-     * @returns {*}
+     * @return {*}
      */
     _bindControl: function(control) {
 
@@ -181,10 +185,11 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _bindExistingControl
      * @param control
      * @param Class
      * @private
-     * @returns {*}
+     * @return {*}
      *
      * @deprecated
      */
@@ -194,7 +199,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
         delete control.initInstance;
   
         // Ensure BaseComponent's methods
-//          this._castControlToComponent(control, Class);
+        //this._castControlToComponent(control, Class);
   
         // Make sure we clean all events in the case we're redefining the control.
         if(typeof control.off === "function") { control.off("all"); }
@@ -216,6 +221,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _castControlToClass
      * @param control
      * @param Class
      * @private
@@ -231,8 +237,9 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _getControlClass
      * @param control
-     * @returns {*}
+     * @return {*}
      * @private
      */
     _getControlClass: function(control) {
@@ -240,7 +247,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
       var typeName = control.type;
       if(typeof typeName === 'function') { typeName = typeName.call(control); } // <=> control.type() ; the _this_ in the call is _control_
   
-      var TypeName = typeName.substring(0,1).toUpperCase() + typeName.substring(1);
+      var TypeName = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
   
       // try _TypeComponent_, _type_ and _Type_ as class names
       var typeNames = [TypeName + 'Component', typeName, TypeName];
@@ -258,9 +265,10 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _makeInstance
      * @param Class
      * @param args
-     * @returns {Class}
+     * @return {Class}
      * @private
      */
     _makeInstance: function(Class, args) {
@@ -271,6 +279,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _castControlToComponent
      * @param control
      * @param Class
      * @private
@@ -305,6 +314,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
   
     /**
      *
+     * @method _addLogLifecycleToControl
      * @param control
      * @private
      */

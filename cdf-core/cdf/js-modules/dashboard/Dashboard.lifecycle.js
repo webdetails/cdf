@@ -20,13 +20,14 @@ define([
 ], function(Dashboard, Logger, _, UnmanagedComponent, $) {
 
   /**
-   * A module representing a extension to Dashboard module for lifecycle.
+   * A module representing an extension to the Dashboard module for lifecycle.
+   *
    * @module Dashboard.lifecycle
    */
   Dashboard.implement({
 
     /**
-     * Inits the lifecycle module
+     * Inits the lifecycle module.
      *
      * @method _initLifecycle
      * @private
@@ -40,12 +41,13 @@ define([
       this.runningCalls = 0;
 
       // Object properties used to keep the server track and identify if the session did expired
-      this.lastServerResponse = (Date.now) ? Date.now() : new Date().valueOf();
-      this.serverCheckResponseTimeout = 1800000; //ms, will be overridden at init
+      this.lastServerResponse = Date.now ? Date.now() : new Date().getTime();
+      // [BACKLOG-5131] default disabled, value in milliseconds, will be overridden during init via dashboard context
+      this.serverCheckResponseTimeout = Infinity;
     },
 
     /**
-     * Resets the running calls counter and hides the progress indicator
+     * Resets the running calls counter and hides the progress indicator.
      *
      * @method resetRunningCalls
      * @for Dashboard
@@ -58,8 +60,9 @@ define([
     },
 
     /**
+     * Returns the number of running calls.
      *
-     * @returns {number} Number of actual running calls to the server
+     * @return {number} Number of actual running calls to the server
      *
      * @method getRunningCalls
      * @for Dashboard
@@ -69,7 +72,7 @@ define([
     },
 
     /**
-     * Increments the running calls counter
+     * Increments the running calls counter.
      *
      * @method incrementRunningCalls
      * @for Dashboard
@@ -81,7 +84,7 @@ define([
     },
 
     /**
-     * Decrements the running calls counter. If the counter reaches 0, hides the progress indicator
+     * Decrements the running calls counter. If the counter reaches 0, hides the progress indicator.
      *
      * @method decrementRunningCalls
      * @for Dashboard
@@ -98,7 +101,7 @@ define([
     },
 
     /**
-     * Init function for the dashboard. Calling this method will trigger the dashboard execution and render
+     * Init function for the dashboard. Calling this method will trigger the dashboard execution and render.
      *
      * @method init
      * @param components - Components to be added to the dashboard
@@ -142,7 +145,7 @@ define([
       // initInstance to all
       _.chain(myself.components)
         .where({initInstance: undefined})
-        .each(function(c) { c.initInstance = initInstance});
+        .each(function(c) { c.initInstance = initInstance; });
 
       $(function() { myself._initEngine(initInstance); });
     },
@@ -208,14 +211,14 @@ define([
           silent: true
         },
         executeAtStart: true,
-        priority:999999999
+        priority: 999999999
       });
       myself.addComponent(postInitComponent);  //TODO: check this!!!!
       updating.push(postInitComponent);
 
       myself.waitingForInit = updating.slice();
 
-      var callback = function(comp,isExecuting) {
+      var callback = function(comp, isExecuting) {
         /*
          * The `preExecution` event will pass two arguments (the component proper
          * and a flag telling us whether the preExecution test passed), so we can
@@ -233,7 +236,7 @@ define([
         myself._handlePostInit(initInstance);
       };
 
-      for(var i= 0, len = updating.length; i < len; i++) {
+      for(var i = 0, len = updating.length; i < len; i++) {
         var component = updating[i];
         component.on('cdf:postExecution cdf:preExecution cdf:error', callback, myself);
       }
@@ -244,7 +247,7 @@ define([
     },
 
     /**
-     * Handles the postInit section of the dashboard initialization
+     * Handles the postInit section of the dashboard initialization.
      *
      * @method _handlePostInit
      * @param initInstance
@@ -302,7 +305,7 @@ define([
             var params = suffixes[s];
             $.each(dupes, function(i, e) {
               var p;
-              for(p = 0; p < e.parameters.length;p++) {
+              for(p = 0; p < e.parameters.length; p++) {
                 if(!params.hasOwnProperty(e.parameters[p]) && myself.isBookmarkable(e.parameters[p])) {
                   return;
                 }
@@ -333,7 +336,6 @@ define([
 
     /**
      * Update algorithm for a managed component. Calls preExecution, update and postExecution.
-     *
      *
      * @method updateLifecycle
      * @param object Component to update
@@ -395,7 +397,7 @@ define([
         } catch(e) {
           var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
             msg = this.getErrorObj('COMPONENT_ERROR').msg + ' (' + object.name.replace('render_', '') + ')';
-          this.errorNotification( { msg: msg  } , ph );
+          this.errorNotification({msg: msg}, ph);
           Logger.error("Error updating " + object.name + ":");
           Logger.exception(e);
         } finally {
@@ -407,8 +409,8 @@ define([
         // Triggering the event for the rest of the process
         object.trigger('cdf cdf:postExecution', object);
 
-      },this);
-      setTimeout(handler,1);
+      }, this);
+      setTimeout(handler, 1);
     },
 
     /**
@@ -429,7 +431,7 @@ define([
      * Note that even though `updateAll` expects `components` to have numerical
      * keys, and that it does work if you pass it an array, `components` should be
      * an object, rather than an array, so as to allow negative keys (and so that
-     * we can use it as a sparse array of sorts)
+     * we can use it as a sparse array of sorts).
      *
      * @method updateAll
      * @param components Components to update
@@ -438,7 +440,7 @@ define([
      * @private
      */
     updateAll: function(components) {
-      /**
+      /*
        * Add all components in priority list 'source' into priority list 'target'
        */
       var _mergePriorityLists = function(target,source) {
@@ -521,7 +523,7 @@ define([
          * so as to avoid messing up the indices.
          */
         var comps = this.updating.current.components.slice();
-        for(var i = 0; i < comps.length;i++) {
+        for(var i = 0; i < comps.length; i++) {
           var component = comps[i];
           // Start timer
 
@@ -575,7 +577,7 @@ define([
     },
 
     /**
-     * Updates a specific component
+     * Updates a specific component.
      *
      * @method updateComponent
      * @param object component to update
@@ -583,7 +585,7 @@ define([
      * @for Dashboard
      */
     updateComponent: function(object) {
-      if(Date.now() - this.lastServerResponse > this.serverCheckResponseTimeout) {
+      if((Date.now ? Date.now() : new Date().getTime()) - this.lastServerResponse > this.serverCheckResponseTimeout) {
         //too long in between ajax communications
         if(!this.checkServer()) {
           this.hideProgressIndicator();
@@ -602,13 +604,12 @@ define([
     },
 
     /**
-     *
      * Given a list of component priority tiers, returns the highest priority
      * non-empty tier of components awaiting update, or null if no such tier exists.
      *
      * @method getFirstTier
      * @param tiers
-     * @returns {*}
+     * @return {*}
      * @for Dashboard
      * @private
      */
@@ -648,7 +649,7 @@ define([
     },
 
     /**
-     * Forces a process change on a component's parameter
+     * Forces a process change on a component's parameter.
      *
      * @method processChange
      * @param object_name Component name on which the fireChange should be triggered
@@ -721,7 +722,7 @@ define([
 
     /*
      * Checks if there are any other components of equal or higher 
-     * priority than the one that is currently being executed
+     * priority than the one that is currently being executed.
      *
      * @method othersAwaitExecution
      * @for Dashboard

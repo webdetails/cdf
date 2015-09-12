@@ -85,6 +85,10 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
   draw: function(myArray) {
     var ph = this.placeholder();
+    if(ph.length === 0) {
+      Dashboards.log("Placeholder not in DOM - Will not draw", "warn");
+      return false;
+    }
     var name = this.name;
 
     // Build the HTML

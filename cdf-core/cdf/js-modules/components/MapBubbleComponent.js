@@ -11,12 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./MapBaseComponent'],
-  function(MapBaseComponent) {
+define(['./MapBaseComponent'], function(MapBaseComponent) {
 
   var MapBubbleComponent  = MapBaseComponent.extend({
 
-    update : function() {
+    update: function() {
       this.selectedPointDetails = null;
       var data = this.dashboard.getParameterValue('mapData');
 
