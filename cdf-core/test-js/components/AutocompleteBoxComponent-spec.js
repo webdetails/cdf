@@ -52,7 +52,7 @@ define([
       minTextLength: 0,
       scrollHeight: 250,
       parameter: "autocompleteBoxParameter",
-      htmlObject: "sampleObject",
+      htmlObject: "autoCompleteSpecObj",
       reloadOnUpdate: true,
       autoUpdateTimeout: 3000,
       executeAtStart: true,
@@ -67,8 +67,17 @@ define([
         }
       }
     });
+    var $htmlObject = $('<div />').attr('id', autocompleteBox.htmlObject);
 
     dashboard.addComponent(autocompleteBox);
+
+    beforeEach(function() {
+      $('body').append($htmlObject);
+    });
+
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
     /**
      * ## The Autocomplete Box Component # allows a dashboard to execute update
@@ -140,7 +149,7 @@ define([
     it("Get Options", function() {
       var options = autocompleteBox._getOptions();
 
-      expect(options.appendTo).toEqual('.autocomplete-container');
+      expect(options.appendTo.attr("class")).toMatch('autocomplete-container');
       expect(options.minLength).toEqual(autocompleteBox.minTextLength);
       expect(typeof options.source).toEqual('function');
       expect(typeof options.focus).toEqual('function');
