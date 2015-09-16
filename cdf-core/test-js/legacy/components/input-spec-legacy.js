@@ -32,7 +32,17 @@ describe("The Autocomplete Component #", function() {
     }
   });
 
+  var $htmlObject = $('<div />').attr('id', autocompleteComponent.htmlObject);
+
   myDashboard.addComponent(autocompleteComponent);
+
+  beforeEach(function() {
+    $('body').append($htmlObject);
+  });
+
+  afterEach(function() {
+    $htmlObject.remove();
+  });
 
   /**
    * ## The Autocomplete Component # Update Called
@@ -103,7 +113,7 @@ describe("The Autocomplete Component #", function() {
   it("Get Options", function() {
     var options = autocompleteComponent.getOptions();
 
-    expect(options.appendTo).toEqual('.autocomplete-container');
+    expect(options.appendTo.attr("class")).toMatch('autocomplete-container');
     expect(options.minLength).toEqual(autocompleteComponent.minTextLength);
     expect(typeof options.source).toEqual('function');
     expect(typeof options.focus).toEqual('function');

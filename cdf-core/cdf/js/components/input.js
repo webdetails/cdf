@@ -1304,13 +1304,21 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
 var AutocompleteBoxComponent = BaseComponent.extend({
 
-  searchedWord : '',
+  constructor: function(){
+      this.base.apply(this, arguments)
+      this.selectedValues = [];
+    },
+
   result: [],
-  selectedValues: [],
+
 
   queryServer: function(searchString) {
     if(!this.parameters) {
       this.parameters = [];
+    }
+
+    if(_.isString(searchString)) {
+      this.searchParam =  searchString;
     }
 
     if(this.searchParam) {
@@ -1345,17 +1353,29 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
     if(initialValue != null && _.isArray(initialValue)) {
       for(var i = 0, L = initialValue.length; i < L; i++) {
-        this._selectValue(initialValue[i]);
+        this.selectValue(initialValue[i]);
       }
     }
   },
 
   update: function() {
-    this.placeholder().empty();
+    this.ph = this.placeholder().empty();
+
+    if(this.ph.length === 0) {
+      Dashboards.log("Placeholder not in DOM - Will not draw", "warn");
+      return false;
+    }
+    this.processChange = this.processChange == null ?
+        function() {
+          myself.value = myself.selectedValues;
+          Dashboards.processChange(myself.name);
+        } :
+        function() {
+          myself.processChange();
+        };
 
     var myself = this;
     var isMultiple = this.selectMulti || false;
-    var options = this.getOptions();
 
 
     //init parameter
@@ -1368,7 +1388,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
     if(isMultiple) {
       var title = this.tooltipMessage || "Click it to Apply";
-      var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="S"/>')
+      var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="' + ( this.submitLabel || "S" ) + '"/>')
           .click(function() {
             myself.endSearch();
           });
@@ -1380,33 +1400,40 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         .append('<ul class="list-data-selection">')
         .appendTo(this.placeholder());
 
-    this.textbox.autocomplete(options);
+    this.textbox.autocomplete(this.getOptions());
 
-    $('.autocomplete-container .ui-autocomplete').off('menuselect');
+    this.ph.find('.autocomplete-container .ui-autocomplete').off('menuselect');
+    this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui){
+      var checkbox = ui ? ui.item.find('input') : $(event.target).find('input');
+      if(checkbox.length > 0) {
+        checkbox.prop('checked', !checkbox.is(':checked'))
+      }
+      var label = ui ? ui.item.find('a').text() : $(event.target).text();
+
+      if(!isMultiple) {
+        myself.selectValue(label);
+        myself.endSearch();
+      } else if(checkbox.is(':checked')) {
+        myself.selectValue(label);
+      } else {
+        myself.removeValue(label);
+      }
+    });
     this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
       var listItem = $('<li class="list-item">');
 
-      var content = $('<a>' + (isMultiple ? '<input type="checkbox"/>' : '') + item.label + '</a>').click(function(event) {
-        var checkbox = $(this).find('input');
-        if($(event.srcElement).is('a')) {
-          checkbox.prop('checked', !checkbox.is(':checked'))
-        }
-        if(!isMultiple) {
-          myself.selectValue(item.label);
-          myself.endSearch();
-        } else if(checkbox.is(':checked')) {
-          myself.selectValue(item.label);
-        } else {
-          myself.removeValue(item.label);
-        }
-      });
-
+      var content = $('<a>' + item.label + '</a>');
+      if(isMultiple) {
+        $('<input type="checkbox"/>').click(function() {
+          $(this).parent().trigger('menuselect');
+        }).prependTo(content);
+      }
       content.appendTo(listItem);
       return listItem.appendTo(ul);
     };
 
     //if defined and it exists bind a click event to this button
-    $('#' + this.externalApplyButtonId).click(function() {
+    this.ph.find('#' + this.externalApplyButtonId).click(function() {
       myself.endSearch();
     });
 
@@ -1416,18 +1443,8 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   getOptions: function() {
     var myself = this;
 
-    var processChange = this.processChange == null ?
-        function() {
-          var object = _.extend({}, myself);
-          object.value = myself.selectedValues;
-          Dashboards.processChange(object.name);
-        } :
-        function() {
-          myself.processChange();
-        };
-
     var options = {
-      appendTo: '.autocomplete-container',
+      appendTo: this.ph.find('.autocomplete-container'),
       minLength: this.minTextLength || 0,
       source: function(search, callback) {
         myself.search(search, callback);
@@ -1441,14 +1458,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         var scroll = myself.scrollHeight || 0;
 
         if(scroll > 0) {
-          $('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
+          this.ph.find('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
         }
 
         myself.filterData();
       },
 
       close: function(event, ui) {
-        processChange();
+        myself.processChange();
       }
     };
 
@@ -1459,19 +1476,19 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var myself = this;
     var addTextElements = this.addTextElements != null ? this.addTextElements : true;
     var showApplyButton = this.showApplyButton != null ? this.showApplyButton : true;
-    var list = $('.autocomplete-container .list-data-selection');
+    var list = this.ph.find('.autocomplete-container .list-data-selection');
     var listItem = $('<li id="' + label + '"><input type="button" class="close-button" value="x"/>' + label + '</li>');
 
     if(!this.selectMulti) {
       list.empty();
       this.selectedValues = [];
     } else if(showApplyButton) {
-      $('.autocomplete-container').addClass('show-apply-button');
-      $('.autocomplete-input-apply').show();
+      this.ph.find('.autocomplete-container').addClass('show-apply-button');
+      this.ph.find('.autocomplete-input-apply').show();
     }
 
     listItem.find('input').click(function() {
-      myself.removeValue(label);
+      myself.removeValue(label, true);
     });
 
     if(addTextElements) {
@@ -1480,13 +1497,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     this.selectedValues.push(label);
   },
 
-  removeValue: function(id) {
+  removeValue: function(id, change) {
     this.selectedValues = _.without(this.selectedValues, id);
-    $('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+    this.ph.find('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+    if(change) {
+      this.processChange();
+    }
   },
 
   filterData: function() {
-    var menu = $('.autocomplete-container .ui-autocomplete');
+    var menu = this.ph.find('.autocomplete-container .ui-autocomplete');
     var data = this.selectedValues || [];
     var addTextElements = this.addTextElements != null ? this.addTextElements : true;
 
@@ -1530,7 +1550,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   },
 
   endSearch: function() {
-    var container = $('.autocomplete-container');
+    var container = this.ph.find('.autocomplete-container');
 
     container.removeClass('show-apply-button');
     container.find('.autocomplete-input-apply').hide();
