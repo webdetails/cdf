@@ -21,8 +21,12 @@ define([
 
   var AutocompleteBoxComponent = UnmanagedComponent.extend({
 
+    constructor: function(){
+      this.base.apply(this, arguments)
+      this.selectedValues = [];
+    },
+
     result: [],
-    selectedValues: [],
 
     /**
      *
@@ -33,6 +37,10 @@ define([
     _queryServer: function(searchString, successCallback) {
       if(!this.parameters) {
         this.parameters = [];
+      }
+
+      if(_.isString(searchString)) {
+        this.searchParam =  searchString;
       }
 
       if(this.searchParam) {
@@ -98,7 +106,6 @@ define([
      * @method update
      */
     update: function() {
-
       // Allow the component to be silent
       if(this.lifecycle) { this.lifecycle.silent = this.silent === true; }
       else { this.lifecycle = {silent: this.silent === true}; }
@@ -111,12 +118,25 @@ define([
         this.block();
       }
 
-      this.placeholder().empty();
+      this.ph = this.placeholder().empty();
+
+      if(this.ph.length === 0) {
+        Logger.warn("Placeholder not in DOM - Will not draw");
+        return false;
+      }
+
+      this.processChange = this.processChange == null
+          ? function() {
+              myself.value = myself.selectedValues;
+              myself.dashboard.processChange(myself.name);
+            }
+          : function() {
+              myself.processChange();
+            };
 
       var myself = this;
 
       var isMultiple = this.selectMulti || false;
-      var options = this._getOptions();
 
       //init parameter
       if(!this.dashboard.getParameterValue(this._getInnerParameterName())) {
@@ -128,7 +148,7 @@ define([
 
       if(isMultiple) {
         var title = this.tooltipMessage || "Click it to Apply";
-        var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="S"/>')
+        var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="' + ( this.submitLabel || "S" ) +'"/>')
           .click(function() {
             myself._endSearch();
           });
@@ -138,35 +158,41 @@ define([
       autoComplete
         .append(this.textbox)
         .append('<ul class="list-data-selection">')
-        .appendTo(this.placeholder());
+        .appendTo(this.ph);
 
-      this.textbox.autocomplete(options);
+      this.textbox.autocomplete(this._getOptions());
 
-      $('.autocomplete-container .ui-autocomplete').off('menuselect');
-      this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
-        var listItem = $('<li class="list-item">');
-
-        var content = $('<a>' + (isMultiple ? '<input type="checkbox"/>' : '') + item.label + '</a>').click(function(event) {
-          var checkbox = $(this).find('input');
-          if($(event.srcElement).is('a')) {
+      this.ph.find('.autocomplete-container .ui-autocomplete').off('menuselect');
+      this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui){
+          var checkbox = ui ? ui.item.find('input') : $(event.target).find('input');
+          if(checkbox.length > 0) {
             checkbox.prop('checked', !checkbox.is(':checked'))
           }
+          var label = ui ? ui.item.find('a').text() : $(event.target).text();
+
           if(!isMultiple) {
-            myself._selectValue(item.label);
+            myself._selectValue(label);
             myself._endSearch();
           } else if(checkbox.is(':checked')) {
-            myself._selectValue(item.label);
+            myself._selectValue(label);
           } else {
-            myself._removeValue(item.label);
+            myself._removeValue(label);
           }
         });
-
+      this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
+        var listItem = $('<li class="list-item">');
+        var content = $('<a>' + item.label + '</a>');
+        if(isMultiple) {
+          $('<input type="checkbox"/>').click(function() {
+            $(this).parent().trigger('menuselect');
+          }).prependTo(content);
+        }
         content.appendTo(listItem);
         return listItem.appendTo(ul);
       };
 
       //if defined and it exists bind a click event to this button
-      $('#' + this.externalApplyButtonId).click(function() {
+      this.ph.find('#' + this.externalApplyButtonId).click(function() {
         myself._endSearch();
       });
 
@@ -197,18 +223,8 @@ define([
     _getOptions: function() {
       var myself = this;
 
-      var processChange = this.processChange == null
-        ? function() {
-            var object = _.extend({}, myself);
-            object.value = myself.selectedValues;
-            myself.dashboard.processChange(object.name);
-          }
-        : function() {
-            myself.processChange();
-          };
-
       var options = {
-        appendTo: '.autocomplete-container',
+        appendTo: this.ph.find('.autocomplete-container'),
         minLength: this.minTextLength || 0,
         source: function(search, callback) {
           myself._search(search, callback);
@@ -222,14 +238,14 @@ define([
           var scroll = myself.scrollHeight || 0;
 
           if(scroll > 0) {
-            $('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
+            myself.ph.find('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
           }
 
           myself._filterData();
         },
 
         close: function(event, ui) {
-          processChange();
+          myself.processChange();
         }
       };
 
@@ -246,19 +262,19 @@ define([
       var myself = this;
       var addTextElements = this.addTextElements != null ? this.addTextElements : true;
       var showApplyButton = this.showApplyButton != null ? this.showApplyButton : true;
-      var list = $('.autocomplete-container .list-data-selection');
+      var list = this.ph.find('.autocomplete-container .list-data-selection');
       var listItem = $('<li id="' + label + '"><input type="button" class="close-button" value="x"/>' + label + '</li>');
 
       if(!this.selectMulti) {
         list.empty();
         this.selectedValues = [];
       } else if(showApplyButton) {
-        $('.autocomplete-container').addClass('show-apply-button');
-        $('.autocomplete-input-apply').show();
+        this.ph.find('.autocomplete-container').addClass('show-apply-button');
+        this.ph.find('.autocomplete-input-apply').show();
       }
 
       listItem.find('input').click(function() {
-        myself._removeValue(label);
+        myself._removeValue(label, true);
       });
 
       if(addTextElements) {
@@ -273,13 +289,16 @@ define([
      * @param id
      * @private
      */
-    _removeValue: function(id) {
+    _removeValue: function(id, change) {
       this.selectedValues = _.without(this.selectedValues, id);
-      $('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+      this.ph.find('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+      if(change) {
+        this.processChange();
+      }
     },
 
     _filterData: function() {
-      var menu = $('.autocomplete-container .ui-autocomplete');
+      var menu = this.ph.find('.autocomplete-container .ui-autocomplete');
       var data = this.selectedValues || [];
       var addTextElements = this.addTextElements != null ? this.addTextElements : true;
 
@@ -323,11 +342,9 @@ define([
           if(value != null
             && (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0)
             || (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
-
             list.push(value);
           }
         }
-
         callback(list);
       });
 
@@ -339,7 +356,7 @@ define([
      * @private
      */
     _endSearch: function() {
-      var container = $('.autocomplete-container');
+      var container = this.ph.find('.autocomplete-container');
 
       container.removeClass('show-apply-button');
       container.find('.autocomplete-input-apply').hide();
