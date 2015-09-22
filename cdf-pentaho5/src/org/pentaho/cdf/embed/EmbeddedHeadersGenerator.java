@@ -31,30 +31,30 @@ public class EmbeddedHeadersGenerator {
   // embedded constants
   private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n"
       + "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
-  private final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
+  private static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
       + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n\n";
 
-  private final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
+  private static final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
       "requireCfg.config[''cdf/dashboard/Dashboard''] = {0};\n";
 
-  private final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
-  private final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
+  private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
+  private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
 
-  private final String URL_CONTEXT_BUILDER =
+  private static final String URL_CONTEXT_BUILDER =
       "var CONTEXT_PATH = ''{0}'';\n\nvar FULL_QUALIFIED_URL = ''{1}'';\n\nvar SERVER_PROTOCOL = ''{2}'';\n\n";
-  private final String SESSION_NAME_BUILDER = "var SESSION_NAME = ''{0}'';\n";
-  private final String LOCALE_BUILDER =
+  private static final String SESSION_NAME_BUILDER = "var SESSION_NAME = ''{0}'';\n";
+  private static final String LOCALE_BUILDER =
       "//Providing computed Locale for session\nvar SESSION_LOCALE = ''{0}'';\n";
-  private final String HOME_FOLDER_BUILDER =
+  private static final String HOME_FOLDER_BUILDER =
       "//Providing home folder location for UI defaults\nvar HOME_FOLDER = ''{0}'';\n";
-  private final String RESERVED_CHARS_BUILDER = "var RESERVED_CHARS = ''{0}'';\n";
-  private final String RESERVED_CHARS_DISPLAY_BUILDER = "var RESERVED_CHARS_DISPLAY = ''{0}'';\n";
-  private final String RESERVED_CHARS_REGEX_PATTERN_BUILDER = "var RESERVED_CHARS_REGEX_PATTERN = /{0}/;\n";
+  private static final String RESERVED_CHARS_BUILDER = "var RESERVED_CHARS = ''{0}'';\n";
+  private static final String RESERVED_CHARS_DISPLAY_BUILDER = "var RESERVED_CHARS_DISPLAY = ''{0}'';\n";
+  private static final String RESERVED_CHARS_REGEX_PATTERN_BUILDER = "var RESERVED_CHARS_REGEX_PATTERN = /{0}/;\n";
 
-  private final String DOCUMENT_SCRIPT =
+  private static final String DOCUMENT_SCRIPT =
       "document.write(\"<script language=''javascript'' type=''text/javascript'' src=''{0}''></script>\");\n";
-  private final String REQUIRE_JS = "requirejs";
-  private final String JS = ".js";
+  private static final String REQUIRE_JS = "requirejs";
+  private static final String JS = ".js";
 
   protected Locale locale;
   protected String fullQualifiedURL;

@@ -30,9 +30,9 @@
      *     }
      *
      * @method walkDown
-     * @param {function} itemCallBack
-     * @param {function} combineCallBack
-     * @param {function} alwaysCallBack
+     * @param {function} itemCallback
+     * @param {function} combineCallback
+     * @param {function} alwaysCallback
      */
     walkDown: function(itemCallback, combineCallback, alwaysCallback) {
       var result;

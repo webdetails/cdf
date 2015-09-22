@@ -112,9 +112,7 @@ define([
               ascending: true
             },
             implementation: function($tgt, st, options) {
-              var result, zCode;
-              result = st.model.get('label');
-              return result;
+              return st.model.get('label');
             }
           });
           Dashboards.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);

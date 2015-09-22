@@ -74,7 +74,6 @@
      */
     setSelection: function(newState, model) {
       throw new Error("NotImplemented");
-      return this;
     },
 
     /**

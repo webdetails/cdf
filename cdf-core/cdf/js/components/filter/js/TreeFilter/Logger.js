@@ -33,7 +33,7 @@
     /**
      * Outputs a message to the console (using console.log), if the logLevel is right
      * @method log
-     * @param {String} message
+     * @param {String} msg
      * @chainable
      */
     log: function(msg) {
@@ -50,7 +50,7 @@
     /**
      * Outputs a debugg message to the console (using console.debug), if the logLevel is right
      * @method debug
-     * @param {String} message
+     * @param {String} msg
      * @chainable
      */
     debug: function(msg) {
@@ -67,7 +67,7 @@
     /**
      * Outputs a warning message to the console (using console.warn), if the logLevel is right
      * @method warn
-     * @param {String} message
+     * @param {String} msg
      * @chainable
      */
     warn: function(msg) {
@@ -83,7 +83,7 @@
      * Outputs an informative message to the console (using console.info)
      * @method info
      * @chainable
-     * @param {String} message
+     * @param {String} msg
      */
     info: function(msg) {
       if (typeof console !== "undefined" && console !== null) {
@@ -97,7 +97,7 @@
     /**
      * Outputs an error message to the console (using console.error)
      * @method error
-     * @param {String} message
+     * @param {String} msg
      * @chainable
      */
     error: function(msg) {
