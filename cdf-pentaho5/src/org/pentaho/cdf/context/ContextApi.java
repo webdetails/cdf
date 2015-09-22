@@ -13,14 +13,7 @@
 
 package org.pentaho.cdf.context;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.pentaho.cdf.util.Parameter;
-import org.pentaho.cdf.utils.CorsUtil;
-import pt.webdetails.cpf.utils.PluginIOUtils;
-
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -29,14 +22,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import java.io.IOException;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.pentaho.cdf.util.Parameter;
+import org.pentaho.cdf.utils.CorsUtil;
+import org.pentaho.cdf.utils.JsonUtil;
+import pt.webdetails.cpf.utils.CharsetHelper;
+import pt.webdetails.cpf.utils.PluginIOUtils;
 
 @Path( "/pentaho-cdf/api/context" )
 public class ContextApi {
@@ -46,39 +42,76 @@ public class ContextApi {
   @GET
   @Path( "/get" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  @Produces( MediaType.APPLICATION_JSON )
+  @Produces( APPLICATION_JSON )
   public Response get( @QueryParam( Parameter.PATH ) String path,
-      @QueryParam( Parameter.USER ) String user,
-      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
+                       @QueryParam( Parameter.USER ) String user,
+                       @Context HttpServletRequest servletRequest,
+                       @Context HttpServletResponse servletResponse ) {
 
-    JSONObject context = ContextEngine.getInstance().buildContext( path, user, Parameter.asHashMap( servletRequest ),
-        servletRequest.getSession().getMaxInactiveInterval() );
-    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
-    try {
-      return Response.ok( context.toString( 2 ) ).build();
-    } catch ( JSONException e ) {
-      logger.error( e );
-      return Response.serverError().build();
-    }
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    return buildContext( path, user, servletRequest );
   }
 
   @GET
   @Path( "/getConfig" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  @Produces( MediaType.APPLICATION_JSON )
+  @Produces( APPLICATION_JSON )
   public void getConfig( @QueryParam( Parameter.PATH ) String path,
-                           @QueryParam( Parameter.USER ) String user,
-                           @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse )
-    throws IOException {
-    String config;
+                         @QueryParam( Parameter.USER ) String user,
+                         @Context HttpServletRequest servletRequest,
+                         @Context HttpServletResponse servletResponse ) throws IOException {
+
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    writeConfig( path, user, servletRequest, servletResponse );
+  }
+
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {
+    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
+  }
+
+  protected Response buildContext( String path, String user, HttpServletRequest servletRequest ) {
+    try {
+      return Response
+        .ok( ContextEngine.getInstance().buildContext(
+          path,
+          user,
+          Parameter.asHashMap( servletRequest ),
+          servletRequest.getSession().getMaxInactiveInterval() ).toString( 2 ) )
+        .build();
+    } catch ( JSONException e ) {
+      logger.error( "Error getting context", e );
+      return Response.serverError().build();
+    }
+  }
+
+  protected void writeConfig(
+      String path,
+      String user,
+      HttpServletRequest servletRequest,
+      HttpServletResponse servletResponse ) throws IOException {
 
     try {
-      config = ContextEngine.getInstance().getConfig( path, user, Parameter.asHashMap( servletRequest ),
-        servletRequest.getSession().getMaxInactiveInterval() );
+      PluginIOUtils.writeOutAndFlush(
+          servletResponse.getOutputStream(),
+          ContextEngine.getInstance().getConfig(
+            path,
+            user,
+            Parameter.asHashMap( servletRequest ),
+            servletRequest.getSession().getMaxInactiveInterval()
+          )
+      );
     } catch ( JSONException e ) {
-      config = "An error occurred while getting the context configuration";
+      logger.error( "Error getting config", e );
+      PluginIOUtils.writeOutAndFlush(
+          servletResponse.getOutputStream(),
+          JsonUtil.makeJsonErrorResponse( "Error getting config: " + e.getMessage(), false ).toString()
+      );
     }
-    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
-    PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), config );
   }
 }

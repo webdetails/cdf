@@ -15,7 +15,6 @@ package org.pentaho.cdf.views;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -28,13 +27,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-
+import pt.webdetails.cpf.utils.CharsetHelper;
 import pt.webdetails.cpf.utils.PluginIOUtils;
 
 @Path( "/pentaho-cdf/api/views" )
@@ -46,14 +44,14 @@ public class ViewsApi {
   @Path( "/" )
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
-  public void listViews( @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
-    try {
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
-          ViewsEngine.getInstance().listViews( getUserName() ).toString( 2 ) );
-      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
-    } catch ( Exception ex ) {
-      logger.error( "Error listing views", ex );
-    }
+  public void listViews( @Context HttpServletRequest servletRequest,
+                             @Context HttpServletResponse servletResponse ) {
+
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    listViews( servletResponse );
   }
 
   @PUT
@@ -61,14 +59,15 @@ public class ViewsApi {
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
   public void saveView( @DefaultValue( "" ) @PathParam( Parameter.NAME ) String name,
-                        @DefaultValue( "" ) @FormParam( Parameter.VIEW ) String view,
-                        @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
-    try {
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
-          ViewsEngine.getInstance().saveView( name, view, getUserName() ).toString( 2 ) );
-    } catch ( Exception ex ) {
-      logger.error( "Error saving view '" + view + "'", ex );
-    }
+                            @DefaultValue( "" ) @FormParam( Parameter.VIEW ) String view,
+                            @Context HttpServletRequest servletRequest,
+                            @Context HttpServletResponse servletResponse ) {
+
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    saveView( name, view, servletResponse );
   }
 
   @DELETE
@@ -76,13 +75,14 @@ public class ViewsApi {
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
   public void deleteView( @DefaultValue( "" ) @PathParam( Parameter.NAME ) String name,
-                          @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
-    try {
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
-          ViewsEngine.getInstance().deleteView( name, getUserName() ).toString( 2 ) );
-    } catch ( Exception ex ) {
-      logger.error( "Error deleting view '" + name + "'", ex );
-    }
+                              @Context HttpServletRequest servletRequest,
+                              @Context HttpServletResponse servletResponse ) {
+
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    deleteView( name, servletResponse );
   }
 
   @GET
@@ -90,17 +90,65 @@ public class ViewsApi {
   @Consumes( { APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
   public void getView( @DefaultValue( "" ) @PathParam( Parameter.NAME ) String name,
-                       @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) {
-    try {
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(),
-          ViewsEngine.getInstance().getView( name, getUserName() ).toString( 2 ) );
-      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
-    } catch ( Exception ex ) {
-      logger.error( "Error getting view '" + name + "'", ex );
-    }
+                           @Context HttpServletRequest servletRequest,
+                           @Context HttpServletResponse servletResponse ) {
+
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    getView( name, servletResponse );
   }
 
   private String getUserName() {
     return PentahoSessionHolder.getSession().getName();
+  }
+
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {
+    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
+  }
+
+  protected void listViews( HttpServletResponse servletResponse ) {
+    try {
+      PluginIOUtils.writeOutAndFlush(
+          servletResponse.getOutputStream(),
+          ViewsEngine.getInstance().listViews( getUserName() ).toString( 2 )
+      );
+    } catch ( Exception ex ) {
+      logger.error( "Error listing views", ex );
+    }
+  }
+
+  protected void saveView( String name, String view, HttpServletResponse servletResponse ) {
+    try {
+      PluginIOUtils.writeOutAndFlush(
+          servletResponse.getOutputStream(),
+          ViewsEngine.getInstance().saveView( name, view, getUserName() ).toString( 2 )
+      );
+    } catch ( Exception ex ) {
+      logger.error( "Error saving view '" + view + "'", ex );
+    }
+  }
+
+  protected void deleteView( String name, HttpServletResponse servletResponse ) {
+    try {
+      PluginIOUtils.writeOutAndFlush(
+          servletResponse.getOutputStream(),
+          ViewsEngine.getInstance().deleteView( name, getUserName() ).toString( 2 )
+      );
+    } catch ( Exception ex ) {
+      logger.error( "Error deleting view '" + name + "'", ex );
+    }
+  }
+
+  protected void getView( String name, HttpServletResponse servletResponse ) {
+    try {
+      PluginIOUtils.writeOutAndFlush(
+          servletResponse.getOutputStream(),
+          ViewsEngine.getInstance().getView( name, getUserName() ).toString( 2 )
+      );
+    } catch ( Exception ex ) {
+      logger.error( "Error getting view '" + name + "'", ex );
+    }
   }
 }
