@@ -480,7 +480,7 @@ define([
       var recurrenceDiv =
         '<div id = "recurrenceDiv">' +
         '<br><span class="dialog-title" style="width: 100px; display: inline-block;">Recurrence:</span>' +
-        '<select id="recurrId" onChange="changeOpts()" style="margin-left: 0px;">' +
+        '<select id="recurrId" style="margin-left: 0px;">' +
         '<option value = "once" selected>Run Once</option>' +
         '<option value = "seconds">Seconds</option>' +
         '<option value = "minutes">Minutes</option>' +
@@ -691,7 +691,12 @@ define([
           }
         }
       };
-      $.prompt(promp, {classes: 'scheduler'});
+      $.prompt(promp, {
+        box: 'scheduler',
+        loaded: function(){
+          $("#recurrId").on("change", function(){changeOpts();});
+        }
+      });
       $(".scheduler #jqi").css("width", "510px");
       $(document).ready(function(ev) {
         $("#startDateIn").datepicker({minDate: 0});
