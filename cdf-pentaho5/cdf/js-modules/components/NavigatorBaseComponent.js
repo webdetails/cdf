@@ -24,7 +24,7 @@ define([
 
     template: Utils.getQueryParameter("template"),
 
-    navigatorResponse : -1,
+    navigatorResponse: -1,
 
     getSolutionJSON: function(solution) {
       var json = NavigatorBaseComponent.navigatorResponse;

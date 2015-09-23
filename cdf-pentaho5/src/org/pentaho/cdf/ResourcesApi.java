@@ -1,7 +1,8 @@
 package org.pentaho.cdf;
 
-import java.io.IOException;
+import static javax.ws.rs.core.MediaType.WILDCARD;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -9,10 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.utils.CorsUtil;
@@ -25,7 +24,7 @@ public class ResourcesApi {
 
   @GET
   @Path( "/{path: [^?]+ }" )
-  @Produces( { MediaType.WILDCARD } )
+  @Produces( { WILDCARD } )
   public Response getSystemResource( @PathParam( "path" ) String path, @Context HttpServletRequest request,
                                      @Context HttpServletResponse response )
     throws IOException {

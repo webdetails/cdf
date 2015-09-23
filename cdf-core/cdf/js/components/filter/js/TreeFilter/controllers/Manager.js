@@ -278,7 +278,6 @@
     },
     removeChild: function(model) {
       throw new Error("NotImplemented");
-      return this;
     },
     sortSiblings: function(model) {
       this.debug("sortSiblings: " + (this.get('model').get('label')) + " was triggered from " + (model.get('label')) + ":" + (model.getSelection()));

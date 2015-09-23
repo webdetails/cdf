@@ -110,7 +110,7 @@ define([
 
         } else {
           s += "<li><a " + classString + " title=\"" + file.title + "\" onClick=\"return false;\" href=\"" +
-            DashboardExt.getRenderHTML() + "?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+            DashboardExt.getRenderHTML() + "?solution=" + file.solution + "&amp;" + _path + _template + "\">" + file.title + "</a>";
         }
 
         var files = file.folders || [];

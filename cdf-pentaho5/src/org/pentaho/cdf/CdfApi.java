@@ -16,14 +16,17 @@ package org.pentaho.cdf;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static pt.webdetails.cpf.utils.MimeTypes.CSV;
+import static pt.webdetails.cpf.utils.MimeTypes.JAVASCRIPT;
+import static pt.webdetails.cpf.utils.MimeTypes.XLS;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -36,7 +39,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,10 +58,9 @@ import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.util.web.MimeHelper;
-
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IReadAccess;
-import pt.webdetails.cpf.utils.MimeTypes;
+import pt.webdetails.cpf.utils.CharsetHelper;
 import pt.webdetails.cpf.utils.PluginIOUtils;
 
 @Path( "/pentaho-cdf/api" )
@@ -69,14 +70,14 @@ public class CdfApi {
 
   @GET
   @Path( "/ping" )
-  @Produces( "text/plain" )
+  @Produces( TEXT_PLAIN )
   public Response doGetPing() throws InvalidCdfOperationException {
     return Response.ok( "{\"ping\":\"ok\"}" ).build();
   }
 
   @POST
   @Path( "/ping" )
-  @Produces( "text/plain" )
+  @Produces( TEXT_PLAIN )
   public Response doPostPing() throws InvalidCdfOperationException {
     return Response.ok( "{\"ping\":\"ok\"}" ).build();
   }
@@ -154,35 +155,35 @@ public class CdfApi {
       ContextEngine.clearCache();
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), "Cache Cleared" );
     } catch ( IOException e ) {
-      logger.error( "failed to clear CDFcache" );
+      logger.error( "failed to clear CDF cache" );
     }
   }
 
   @POST
   @Path( "/export" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
-  public void doPostExport( @FormParam( Parameter.SOLUTION ) String solution,
-                            @FormParam( Parameter.PATH ) String path,
-                            @FormParam( Parameter.ACTION ) String action,
-                            @FormParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-                            @FormParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE )
-                            String exportType,
-                            @Context HttpServletRequest request,
-                            @Context HttpServletResponse response ) throws Exception {
+  public void doPostExport(
+      @FormParam( Parameter.SOLUTION ) String solution,
+      @FormParam( Parameter.PATH ) String path,
+      @FormParam( Parameter.ACTION ) String action,
+      @FormParam( Parameter.CONTENT_TYPE ) @DefaultValue( TEXT_HTML ) String contentType,
+      @FormParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE ) String exportType,
+      @Context HttpServletRequest request,
+      @Context HttpServletResponse response ) throws Exception {
 
     export( solution, path, action, contentType, exportType, request, response );
   }
   @GET
   @Path( "/export" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
-  public void export( @QueryParam( Parameter.SOLUTION ) String solution,
-                      @QueryParam( Parameter.PATH ) String path,
-                      @QueryParam( Parameter.ACTION ) String action,
-                      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-                      @QueryParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE )
-                        String exportType,
-                      @Context HttpServletRequest request,
-                      @Context HttpServletResponse response ) throws Exception {
+  public void export(
+      @QueryParam( Parameter.SOLUTION ) String solution,
+      @QueryParam( Parameter.PATH ) String path,
+      @QueryParam( Parameter.ACTION ) String action,
+      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( TEXT_HTML ) String contentType,
+      @QueryParam( Parameter.EXPORT_TYPE ) @DefaultValue( IExport.DEFAULT_EXPORT_TYPE ) String exportType,
+      @Context HttpServletRequest request,
+      @Context HttpServletResponse response ) throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
 
@@ -197,11 +198,11 @@ public class CdfApi {
 
       if ( IExport.EXPORT_TYPE_CSV.equalsIgnoreCase( exportType ) ) {
         export = new ExportCSV( response.getOutputStream() );
-        response.setHeader( "Content-Type", MimeTypes.CSV );
+        response.setHeader( "Content-Type", CSV );
 
       } else {
         export = new ExportExcel( response.getOutputStream() );
-        response.setHeader( "Content-Type", MimeTypes.XLS );
+        response.setHeader( "Content-Type", XLS );
       }
 
       response.setHeader( "Cache-Control", "max-age=0, no-store" );
@@ -216,7 +217,7 @@ public class CdfApi {
   public void callAction( @QueryParam( Parameter.SOLUTION ) String solution,
                           @QueryParam( Parameter.PATH ) String path,
                           @QueryParam( Parameter.ACTION ) String action,
-                          @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                          @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( TEXT_HTML ) String contentType,
                           @Context HttpServletRequest servletRequest,
                           @Context HttpServletResponse servletResponse )
     throws Exception {
@@ -229,37 +230,40 @@ public class CdfApi {
 
   @GET
   @Path( "/getJSONSolution" )
-  @Produces( APPLICATION_JSON )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public void getJSONSolution( @QueryParam( Parameter.SOLUTION ) String solution,
-                               @QueryParam( Parameter.PATH ) @DefaultValue( "/" ) String path,
-                               @QueryParam( Parameter.ACTION ) String action,
-                               @QueryParam( Parameter.DEPTH ) @DefaultValue( "-1" ) int depth,
-                               @QueryParam( Parameter.SHOW_HIDDEN_FILES ) @DefaultValue( "false" )
-                                 boolean showHiddenFiles,
-                               @QueryParam( Parameter.MODE ) @DefaultValue( "*" ) String mode,
-                               @Context HttpServletResponse servletResponse )
-    throws InvalidCdfOperationException {
+  @Produces( APPLICATION_JSON )
+  public void getJSONSolution(
+      @QueryParam( Parameter.SOLUTION ) String solution,
+      @QueryParam( Parameter.PATH ) @DefaultValue( "/" ) String path,
+      @QueryParam( Parameter.ACTION ) String action,
+      @QueryParam( Parameter.DEPTH ) @DefaultValue( "-1" ) int depth,
+      @QueryParam( Parameter.SHOW_HIDDEN_FILES ) @DefaultValue( "false" ) boolean showHiddenFiles,
+      @QueryParam( Parameter.MODE ) @DefaultValue( "*" ) String mode,
+      @Context HttpServletResponse servletResponse ) throws InvalidCdfOperationException {
 
-    String value = determineCorrectPath( solution, action, path );
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
 
     try {
-      JSONObject jsonRoot = NavigateComponent.getJSONSolution( value, depth, showHiddenFiles, mode );
-
-      final PrintWriter pw = new PrintWriter( servletResponse.getOutputStream() );
-      pw.println( jsonRoot );
-      pw.flush();
-
-    } catch ( Throwable t ) {
-      throw new InvalidCdfOperationException( t.getMessage() );
+      writeJSONSolution(
+          determineCorrectPath( solution, action, path ),
+          depth,
+          showHiddenFiles,
+          mode,
+          servletResponse
+      );
+    } catch ( Exception e ) {
+      logger.error( "Error retrieving json solution", e );
+      throw new InvalidCdfOperationException( e.getMessage() );
     }
   }
 
   @GET
   @Path( "/viewAction" )
   public void doGetViewAction( @QueryParam( Parameter.SOLUTION ) String solution,
-                               @QueryParam( Parameter.PATH ) String path, @QueryParam( Parameter.ACTION ) String action,
-                               @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+                               @QueryParam( Parameter.PATH ) String path,
+                               @QueryParam( Parameter.ACTION ) String action,
+                               @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( TEXT_HTML ) String contentType,
                                @Context HttpServletRequest servletRequest,
                                @Context HttpServletResponse servletResponse ) throws Exception {
 
@@ -269,17 +273,17 @@ public class CdfApi {
 
   @POST
   @Path( "/viewAction" )
-  public void doPostViewAction( @QueryParam( Parameter.SOLUTION ) String solution,
-                                @QueryParam( Parameter.PATH ) String path,
-                                @QueryParam( Parameter.ACTION ) String action,
-                                @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML )
-                                  String contentType,
-                                @FormParam( Parameter.QUERY_TYPE ) String queryType,
-                                @FormParam( Parameter.QUERY ) String query,
-                                @FormParam( Parameter.CATALOG ) String catalog,
-                                @FormParam( Parameter.JNDI ) String jndi,
-                                @Context HttpServletRequest servletRequest,
-                                @Context HttpServletResponse servletResponse ) throws Exception {
+  public void doPostViewAction(
+      @QueryParam( Parameter.SOLUTION ) String solution,
+      @QueryParam( Parameter.PATH ) String path,
+      @QueryParam( Parameter.ACTION ) String action,
+      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( TEXT_HTML ) String contentType,
+      @FormParam( Parameter.QUERY_TYPE ) String queryType,
+      @FormParam( Parameter.QUERY ) String query,
+      @FormParam( Parameter.CATALOG ) String catalog,
+      @FormParam( Parameter.JNDI ) String jndi,
+      @Context HttpServletRequest servletRequest,
+      @Context HttpServletResponse servletResponse ) throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
 
@@ -306,29 +310,27 @@ public class CdfApi {
         PentahoSessionHolder.getSession(), paramMap );
 
     if ( success ) {
-      servletResponse.getOutputStream().flush(); // flush
+      servletResponse.getOutputStream().flush();
     }
   }
 
   private String determineCorrectPath( String solution, String action, String path ) {
 
-    String value = StringUtils.EMPTY;
-
     if ( !StringUtils.isEmpty( solution ) || !StringUtils.isEmpty( action ) ) {
       // legacy call using solution, path, action request parameters
-      value = Util.joinPath( solution, path, action );
+      return Util.joinPath( solution, path, action );
 
     } else if ( !StringUtils.isEmpty( path ) ) {
       // 5.0 call using path
-      value = path;
+      return path;
     }
 
-    return value;
+    return StringUtils.EMPTY;
   }
 
   @GET
   @Path( "/cdf-embed.js" )
-  @Produces( "text/javascript" )
+  @Produces( JAVASCRIPT )
   public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
                                      @Context HttpServletResponse servletResponse ) throws Exception {
     buildCdfEmbedContext(
@@ -374,10 +376,25 @@ public class CdfApi {
   protected String buildFullServerUrl( String protocol, String serverName, int serverPort  ) {
     String p = "http";
     if ( !StringUtils.isEmpty( protocol ) ) {
-      String[] bits = protocol.split( "/" );
-      p = bits[ 0 ].toLowerCase();
+      p = protocol.split( "/" )[ 0 ].toLowerCase();
     }
-    String webAppPath = PentahoRequestContextHolder.getRequestContext().getContextPath();
-    return p + "://" + serverName + ":" + serverPort + webAppPath;
+    return p + "://" + serverName + ":" + serverPort + PentahoRequestContextHolder.getRequestContext().getContextPath();
+  }
+
+  protected void writeJSONSolution(
+      String path,
+      int depth,
+      boolean showHiddenFiles,
+      String mode,
+      HttpServletResponse servletResponse ) throws Exception {
+
+    PluginIOUtils.writeOutAndFlush(
+        servletResponse.getOutputStream(),
+        NavigateComponent.getJSONSolution(
+          path,
+          depth,
+          showHiddenFiles,
+          mode ).toString( 2 )
+    );
   }
 }

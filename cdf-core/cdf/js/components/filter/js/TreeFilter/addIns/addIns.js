@@ -103,17 +103,7 @@
       ascending: true
     },
     implementation: function($tgt, st, options) {
-      var result, zCode;
-      result = st.model.get('label');
-      return result;
-      if (options.ascending) {
-        return result;
-      } else {
-        zCode = 'z'.codePointAt(0);
-        return _.chain(result).map(function(c) {
-          return zCode - c.codePointAt(0);
-        }).join(' ').value();
-      }
+      return st.model.get('label');
     }
   });
   Dashboards.registerAddIn('FilterComponent', 'sortItem', myAddIn);

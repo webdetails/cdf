@@ -72,9 +72,11 @@ public class CdfEngine {
   private static void initialize() throws InitializationException {
     if ( instance.environment == null ) {
 
-      IBeanFactory factory = new AbstractBeanFactory(){
+      IBeanFactory factory = new AbstractBeanFactory() {
         @Override
-        public String getSpringXMLFilename(){ return "cdf.spring.xml"; }
+        public String getSpringXMLFilename() {
+          return "cdf.spring.xml";
+        }
       };
 
       // try to get the environment from the configuration

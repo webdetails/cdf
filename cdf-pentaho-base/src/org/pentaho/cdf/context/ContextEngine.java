@@ -186,7 +186,7 @@ public class ContextEngine {
           + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
 
     } catch ( JSONException e ) {
-      logger.error( "Error building context" );
+      logger.error( "Error building context", e );
     }
 
     return contextObj;

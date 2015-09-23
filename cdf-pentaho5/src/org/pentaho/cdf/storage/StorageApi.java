@@ -25,76 +25,95 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.pentaho.cdf.InvalidCdfOperationException;
 import org.pentaho.cdf.PluginHibernateException;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.CorsUtil;
-import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import pt.webdetails.cpf.utils.CharsetHelper;
 
 @Path( "/pentaho-cdf/api/storage" )
 public class StorageApi {
 
-  private static final Log logger = LogFactory.getLog( StorageApi.class );
-
   @GET
   @Path( "/store" )
-  @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
+  @Produces( APPLICATION_JSON )
   public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue,
                          @QueryParam( Parameter.USER ) String user,
-                         @Context HttpServletRequest request,
-                         @Context HttpServletResponse response )
+                         @Context HttpServletRequest servletRequest,
+                         @Context HttpServletResponse servletResponse )
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
-    JSONObject json =
-        StorageEngine.getInstance().store( storageValue, StringUtils.isEmpty( user ) ? getUserName() : user );
-    CorsUtil.getInstance().setCorsHeaders( request, response );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
-      : Response.serverError().build();
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    return store( storageValue, user );
   }
 
   @GET
   @Path( "/read" )
-  @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
+  @Produces( APPLICATION_JSON )
   public String read( @QueryParam( Parameter.USER ) String user,
-                      @Context HttpServletRequest request,
-                      @Context HttpServletResponse response ) throws JSONException, InvalidCdfOperationException,
-    PluginHibernateException {
+                        @Context HttpServletRequest servletRequest,
+                        @Context HttpServletResponse servletResponse )
+    throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
-    JSONObject json = StorageEngine.getInstance().read( StringUtils.isEmpty( user ) ? getUserName() : user );
-    CorsUtil.getInstance().setCorsHeaders( request, response );
-    if ( json != null ) {
-      return json.toString();
-    } else {
-      logger.error( "json object is null" );
-      return JsonUtil.JsonStatus.ERROR.getValue();
-    }
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    return read( user );
   }
 
   @GET
   @Path( "/delete" )
-  @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
+  @Produces( APPLICATION_JSON )
   public Response delete( @QueryParam( Parameter.USER ) String user,
-                          @Context HttpServletRequest request,
-                          @Context HttpServletResponse response )
-    throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+                          @Context HttpServletRequest servletRequest,
+                          @Context HttpServletResponse servletResponse )
+    throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
-    JSONObject json = StorageEngine.getInstance().delete( StringUtils.isEmpty( user ) ? getUserName() : user );
-    CorsUtil.getInstance().setCorsHeaders( request, response );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
-      : Response.serverError().build();
+    servletResponse.setContentType( APPLICATION_JSON );
+    servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
+    setCorsHeaders( servletRequest, servletResponse );
+
+    return delete( user );
   }
 
   private String getUserName() {
     return PentahoSessionHolder.getSession().getName();
+  }
+
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {
+    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
+  }
+
+  protected Response store( String storageValue, String user )
+    throws PluginHibernateException, JSONException, InvalidCdfOperationException {
+
+    return Response
+      .ok( StorageEngine.getInstance().store(
+          storageValue,
+          StringUtils.isEmpty( user ) ? getUserName() : user ).toString( 2 ) )
+      .build();
+  }
+
+  protected String read( String user ) throws PluginHibernateException, JSONException, InvalidCdfOperationException {
+    return StorageEngine.getInstance().read( StringUtils.isEmpty( user ) ? getUserName() : user ).toString( 2 );
+  }
+
+  protected Response delete( String user )
+    throws PluginHibernateException, JSONException, InvalidCdfOperationException {
+
+    return Response
+      .ok( StorageEngine.getInstance().delete(
+        StringUtils.isEmpty( user ) ? getUserName() : user ).toString( 2 ) )
+      .build();
   }
 }
