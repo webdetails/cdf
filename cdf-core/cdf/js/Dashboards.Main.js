@@ -583,7 +583,8 @@ Dashboards.addComponent = function(component, options) {
  * @return {number} the index where the component is at or <tt>-1</tt> if not found
  */
 Dashboards.getComponentIndex = function(compOrNameOrIndex) {
-  if(compOrNameOrIndex) {
+  // validate if null or undefined
+  if(compOrNameOrIndex != null) {
     switch(typeof compOrNameOrIndex) {
       case 'string':
         for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {

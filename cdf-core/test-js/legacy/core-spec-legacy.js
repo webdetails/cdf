@@ -201,6 +201,7 @@ describe("The CDF framework #", function() {
      * ## The CDF framework # getComponentIndex returns the number itself when a number is provided
      */
     it("returns the number itself when a number is provided",function(done) {
+      expect(myDashboard.getComponentIndex(0)).toEqual(0);
       expect(myDashboard.getComponentIndex(1)).toEqual(1);
       done();
     });

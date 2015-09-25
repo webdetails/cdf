@@ -20,7 +20,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
    * @module Dashboard.components
    */
   Dashboard.implement({
-  
+
     /**
      * Method used by the Dashboard constructor for components initialization.
      *
@@ -31,7 +31,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     _initComponents: function() {
       this.components = [];
     },
-  
+
     /**
      * Gets the component with a given name.
      *
@@ -41,14 +41,17 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      * @return the component or undefined if it does not exists
      */
     getComponent: function(name) {
-      if(!name) { return; }
+      if(!name || typeof name !== "string") {
+        Logger.warn('getComponent: invalid component name');
+        return;
+      }
       for(var i in this.components) {
-        if(this.components[i].name == name) {
+        if(this.components[i].name === name) {
           return this.components[i];
         }
       }
     },
-  
+
     /**
      * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}.
      *
@@ -60,7 +63,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     getComp: function(name) {
       return this.getComponent(name);
     },
-  
+
     /**
      * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}.
      *
@@ -72,7 +75,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
     getComponentByName: function(name) {
       return this.getComponent(name);
     },
-  
+
     /**
      * Adds a set of components.
      *
@@ -89,7 +92,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
         this.addComponent(component);
       }, this);
     },
-  
+
     /**
      * Add a component.
      *
@@ -99,15 +102,33 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      * @param options to append to the component
      */
     addComponent: function(component, options) {
-      this.removeComponent(component);
-  
+      // validate new component's name
+      if(!component || !component.name) {
+        throw new Error("addComponent: invalid component");
+      }
+
+      // check if a component with the same name exists
+      var existing = this.getComponentByName(component.name);
+      if(existing) {
+        // check if it is a different component
+        if(existing !== component) {
+          throw new Error("addComponent: duplicate component name '" + component.name + "'");
+        }
+        return this;
+      }
+
       // Attempt to convert over to component implementation
       this._bindControl(component);
   
-      var index = options && options.index;
-      var L = this.components.length;
-      if(index == null || index < 0 || index > L) { index = L; } // <=> push
-      this.components[index] = component;
+      var index = options && options.index,
+          L = this.components.length;
+      // validate the index
+      if(index == null || index < 0 || index >= L) {
+        this.components.push(component);
+      } else {
+        this.components.splice(index, 0, component);
+      }
+      return this;
     },
   
     /**
@@ -139,7 +160,7 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
       }
       return -1;
     },
-  
+
     /**
      * Remove a component.
      *
@@ -150,18 +171,19 @@ define(['./Dashboard', 'amd!../lib/backbone', '../lib/mustache', '../Logger', '.
      */
     removeComponent: function(compOrNameOrIndex) {
       var index = this.getComponentIndex(compOrNameOrIndex);
-      var comp = null;
-      if(index >= 0) {
-        var cs = this.components;
-        comp = cs[index];
-        cs.splice(index, 1);
-        comp.dashboard = null;
-  
-        comp.off('cdf:postExecution');
-        comp.off('cdf:preExecution');
-        comp.off('cdf:error');
-        comp.off('all');
+      if(index === -1) {
+        Logger.warn("removeComponent: component not found");
+        return;
       }
+
+      var comp = this.components[index];
+      this.components.splice(index, 1);
+      comp.dashboard = null;
+
+      comp.off('cdf:postExecution');
+      comp.off('cdf:preExecution');
+      comp.off('cdf:error');
+      comp.off('all');
   
       return comp;
     },
