@@ -543,12 +543,12 @@ Dashboards.addComponents = function(components) {
 /**
  * Adds a component to the dashboard, replacing the first component that has the same name if any exist.
  * If <i>component</i> doesn't have a property <i>component.name</i> or it isn't a valid string name undefined is returned.
- * If <i>options.index</i> is <i>nuly</i> the component is appended to the end of the <i>Dashboards.components</i> array.
- * If <i>options.index</i> is <i>truly</i> the component is appended to the <i>Dashboards.components</i> array at position <i>options.index</i>.
+ * If <i>options.index</i> is falsy the component is appended to the end of the <i>Dashboards.components</i> array.
+ * If <i>options.index</i> is truthy the component is appended to the <i>Dashboards.components</i> array at position <i>options.index</i>.
  * If <i>Dashboards.globalContext</i> is <tt>true</tt> it will also add the component into the global <i>window</i> object.
  *
  * @param {object} component the new component to be added
- * @param {object} options an object containing the property <i>options.index</i>
+ * @param {object} [options] an object containing the property <i>options.index</i>
  * @return {boolean} <tt>true</tt> if the component was added and <tt>false</tt> otherwise
  */
 Dashboards.addComponent = function(component, options) {
@@ -583,7 +583,8 @@ Dashboards.addComponent = function(component, options) {
  * @return {number} the index where the component is at or <tt>-1</tt> if not found
  */
 Dashboards.getComponentIndex = function(compOrNameOrIndex) {
-  if(compOrNameOrIndex) {
+  // validate if null or undefined
+  if(compOrNameOrIndex != null) {
     switch(typeof compOrNameOrIndex) {
       case 'string':
         for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {

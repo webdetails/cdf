@@ -8,20 +8,18 @@ describe("The CDF framework #", function() {
    * - beforeEach
    * - afterEach
    */
-  beforeEach(function(done){
+  beforeEach(function(){
     var a = 0;
     setTimeout(function(){
       a = 1;
     }, 50);
-    done();
   });
 
-  afterEach(function(done){
+  afterEach(function(){
     var a = 0;
     setTimeout(function(){
       a = 1;
     }, 50);
-    done();
   });
   //#end
 
@@ -101,45 +99,38 @@ describe("The CDF framework #", function() {
     /**
      * ## The CDF framework # getComponentName returns a string with the component's name when the component is provided
      */
-    it("returns a string with the component's name when the component is provided",function(done) {
+    it("returns a string with the component's name when the component is provided",function() {
       expect(myDashboard.getComponentName(shouldUpdate)).toEqual("shouldUpdate");
-      done();
     });
     /**
      * ## The CDF framework # getComponentName returns a string with the component's name when the name is provided
      */
-    it("returns a string with the component's name when the name is provided",function(done) {
+    it("returns a string with the component's name when the name is provided",function() {
       expect(myDashboard.getComponentName(shouldUpdate.name)).toEqual("shouldUpdate");
-      done();
     });
     /**
      * ## The CDF framework # getComponentName returns undefined when a component with no name property is provided
      */
-    it("returns undefined when a component with no name property is provided",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("returns undefined when a component with no name property is provided",function() {
+      var tmp = $.extend( {}, shouldUpdate );
       tmp.name = null;
       expect(myDashboard.getComponentName(tmp)).toEqual(undefined);
       tmp.name = shouldUpdate.name;
       expect(myDashboard.getComponentName(tmp)).toEqual(shouldUpdate.name);
-      done();
     });
     /**
      * ## The CDF framework # getComponentName returns undefined when an empty string is provided
      */
-    it("returns undefined when an empty string is provided",function(done) {
+    it("returns undefined when an empty string is provided",function() {
       expect(myDashboard.getComponentName("")).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # getComponentName returns undefined when a component has an empty string in property name
      */
-    it("returns undefined when a component has an empty string in property name",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("returns undefined when a component has an empty string in property name",function() {
+      var tmp = $.extend( {}, shouldUpdate );
       tmp.name = "";
       expect(myDashboard.getComponentName(tmp)).toEqual(undefined);
-      done();
     });
   });
   /**
@@ -149,41 +140,35 @@ describe("The CDF framework #", function() {
     /**
      * ## The CDF framework # getComponent returns undefined if no component is found
      */
-    it("returns undefined if no component is found",function(done) {
+    it("returns undefined if no component is found",function() {
       expect(myDashboard.getComponent("fake")).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # getComponent searches for a component when a string with the name is provided
      */
-    it("searches for a component when a string with the name is provided",function(done) {
+    it("searches for a component when a string with the name is provided",function() {
       expect(myDashboard.getComponent("shouldUpdate")).toEqual(shouldUpdate);
-      done();
     });
     /**
      * ## The CDF framework # getComponent searches for a component when a component with string property name is provided
      */
-    it("searches for a component when a component with string property name is provided",function(done) {
+    it("searches for a component when a component with string property name is provided",function() {
       expect(shouldUpdate.name).toEqual("shouldUpdate");
       expect(myDashboard.getComponent(shouldUpdate)).toEqual(shouldUpdate);
-      done();
     });
     /**
      * ## The CDF framework # getComponent returns undefined when an empty string is provided
      */
-    it("returns undefined when an empty string is provided",function(done) {
+    it("returns undefined when an empty string is provided",function() {
       expect(myDashboard.getComponent("")).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # getComponent returns undefined when a component has an empty string in property name
      */
-    it("returns undefined when a component has an empty string in property name",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("returns undefined when a component has an empty string in property name",function() {
+      var tmp = $.extend( {}, shouldUpdate );
       tmp.name = "";
       expect(myDashboard.getComponent(tmp)).toEqual(undefined);
-      done();
     });
   });
   /**
@@ -193,32 +178,29 @@ describe("The CDF framework #", function() {
     /**
      * ## The CDF framework # getComponentIndex returns -1 if a string is provided with a name of an unexisting component
      */
-    it("returns -1 if a string is provided with a name of an unexisting component",function(done) {
+    it("returns -1 if a string is provided with a name of an unexisting component",function() {
       expect(myDashboard.getComponentIndex("unexistingComponent")).toEqual(-1);
-      done();
     });
     /**
      * ## The CDF framework # getComponentIndex returns the number itself when a number is provided
      */
-    it("returns the number itself when a number is provided",function(done) {
+    it("returns the number itself when a number is provided",function() {
+      expect(myDashboard.getComponentIndex(0)).toEqual(0);
       expect(myDashboard.getComponentIndex(1)).toEqual(1);
-      done();
     });
     /**
      * ## The CDF framework # getComponentIndex returns the index of a component in the components array if the component is provided
      */
-    it("returns the index of a component in the components array if the component is provided",function(done) {
+    it("returns the index of a component in the components array if the component is provided",function() {
       var tmp = myDashboard.components[0];
       expect(myDashboard.getComponentIndex(tmp)).toEqual(0);
-      done();
     });
     /**
      * ## The CDF framework # getComponentIndex returns the index of a component in the components array when the component's name is provided
      */
-    it("returns the index of a component in the components array when the component's name is provided",function(done) {
+    it("returns the index of a component in the components array when the component's name is provided",function() {
       var tmp = myDashboard.components[1];
       expect(myDashboard.getComponentIndex(tmp.name)).toEqual(1);
-      done();
     });
   });
   /**
@@ -228,39 +210,33 @@ describe("The CDF framework #", function() {
     /**
      * ## The CDF framework # getComponentByName returns undefined if null is provided
      */
-    it("returns undefined if null is provided",function(done) {
+    it("returns undefined if null is provided",function() {
       expect(myDashboard.getComponentByName(null)).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # getComponentByName returns undefined if undefined is provided
      */
-    it("returns undefined if undefined is provided",function(done) {
+    it("returns undefined if undefined is provided",function() {
       expect(myDashboard.getComponentByName(undefined)).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # getComponentByName returns undefined when an empty string is provided
      */
-    it("returns undefined when an empty string is provided",function(done) {
+    it("returns undefined when an empty string is provided",function() {
       expect(myDashboard.getComponentByName("")).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # getComponentByName returns the component when the component's name is provided
      */
-    it("returns the component when the component's name is provided",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("returns the component when the component's name is provided",function() {
+      $.extend( {}, shouldUpdate );
       expect(myDashboard.getComponentByName(shouldUpdate.name)).toEqual(shouldUpdate);
-      done();
     });
     /**
      * ## The CDF framework # getComponentByName returns the component from the global object window when the component's name is provided and globalContext is true
      */
-    it("returns the component from the global object window when the component's name is provided and globalContext is true",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("returns the component from the global object window when the component's name is provided and globalContext is true",function() {
+      var tmp = $.extend( {}, shouldUpdate );
       tmp.type = "dummy";
       var globalContext_ = myDashboard.globalContext;
       myDashboard.globalContext = true;
@@ -271,7 +247,6 @@ describe("The CDF framework #", function() {
       expect(myDashboard.getComponentByName(shouldUpdate.name)).not.toEqual(shouldUpdate);
       myDashboard.globalContext = globalContext_;
       window[shouldUpdate.name] = tmp2;
-      done();
     });
   });
   /**
@@ -281,21 +256,19 @@ describe("The CDF framework #", function() {
     /**
      * ## The CDF framework # addComponent replaces components when adding components with duplicate names
      */
-    it("replaces components when adding components with duplicate names",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("replaces components when adding components with duplicate names",function() {
+      var tmp = $.extend( {}, shouldUpdate );
       tmp.type="dummy";
       expect(myDashboard.getComponent(shouldUpdate.name).type).toEqual("managedFreeform");
       myDashboard.addComponent(tmp);
       expect(myDashboard.getComponent(shouldUpdate.name).type).toEqual("dummy");
-      done();
     });
     /**
      * ## The CDF framework # addComponent also adds component to global object window when globalContext is true
      */
-    it("also adds component to global object window when globalContext is true",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("also adds component to global object window when globalContext is true",function() {
+      var tmp = $.extend( {}, shouldUpdate );
+      
       tmp.type="dummy";
       var globalContext_ = myDashboard.globalContext;
       myDashboard.globalContext = true;
@@ -309,7 +282,6 @@ describe("The CDF framework #", function() {
       myDashboard.globalContext = globalContext_;
       //remove tmp and add shouldUpdate
       myDashboard.addComponent(shouldUpdate);
-      done();
     });
   });
   /**
@@ -319,32 +291,28 @@ describe("The CDF framework #", function() {
     /**
      * ## The CDF framework # removeComponent returns undefined when removing a component that doesn't exist
      */
-    it("returns undefined when removing a component that doesn't exist",function(done) {
+    it("returns undefined when removing a component that doesn't exist",function() {
       expect(myDashboard.removeComponent("fakeComponent")).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # removeComponent returns undefined when removing a component at an invalid index of Dashboards.components
      */
-    it("returns undefined when removing a component at an invalid index of Dashboards.components",function(done) {
+    it("returns undefined when removing a component at an invalid index of Dashboards.components",function() {
       var invalidIndex = Dashboards.components.length;
       expect(myDashboard.removeComponent(invalidIndex)).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # removeComponent returns undefined when removing a component that doesn't exist in Dashboards.components
      */
-    it("returns undefined when removing a component that doesn't exist in Dashboards.components",function(done) {
-      var tmp = {};
-      $.extend( tmp, shouldUpdate );
+    it("returns undefined when removing a component that doesn't exist in Dashboards.components",function() {
+      var tmp = $.extend( {}, shouldUpdate );
       tmp.name="unexistingComponent";
       expect(myDashboard.removeComponent(tmp)).toEqual(undefined);
-      done();
     });
     /**
      * ## The CDF framework # removeComponent removes components with the same name, if the component object with property name is provided
      */
-    it("removes a component with the same name as the component object with property name provided",function(done) {
+    it("removes a component with the same name as the component object with property name provided",function() {
       expect(myDashboard.getComponent(shouldUpdate)).toEqual(shouldUpdate);
       expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(shouldUpdate);
       expect(myDashboard.removeComponent(shouldUpdate)).toEqual(shouldUpdate);
@@ -352,12 +320,11 @@ describe("The CDF framework #", function() {
       expect(myDashboard.getComponent(shouldUpdate)).toEqual(undefined);
       expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(undefined);
       myDashboard.addComponent(shouldUpdate);
-      done();
     });
     /**
      * ## The CDF framework # removeComponent removes a component with the same name as the name provided
      */
-    it("removes a component with the same name as the name provided",function(done) {
+    it("removes a component with the same name as the name provided",function() {
       expect(myDashboard.getComponentIndex(shouldUpdate)).not.toEqual(-1);
       expect(myDashboard.getComponent(shouldUpdate)).toEqual(shouldUpdate);
       expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(shouldUpdate);
@@ -366,12 +333,11 @@ describe("The CDF framework #", function() {
       expect(myDashboard.getComponent(shouldUpdate)).toEqual(undefined);
       expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(undefined);
       myDashboard.addComponent(shouldUpdate);
-      done();
     });
     /**
      * ## The CDF framework # removeComponent also removes a component from the global object window when globalContext is true
      */
-    it("removes a component from the global object window when globalContext is true",function(done) {
+    it("removes a component from the global object window when globalContext is true",function() {
       var globalContext_ = myDashboard.globalContext;
       myDashboard.globalContext = true;
       myDashboard.addComponent(shouldUpdate);
@@ -381,7 +347,6 @@ describe("The CDF framework #", function() {
       expect(window[shouldUpdate.name]).toEqual((undefined));
       expect(myDashboard.components[myDashboard.getComponentIndex(shouldUpdate.name)]).toEqual(undefined);
       myDashboard.globalContext = globalContext_;
-      done();
     });
 
   });

@@ -184,15 +184,15 @@ define(["cdf/Dashboard.Clean", "cdf/components/SelectComponent", "cdf/dashboard/
         });
       };
   
-      var select2Select = makeSelect("mySelect", "select2", {opt1: "val1"}, dashboard);
+      var select2Select = makeSelect("select2Select", "select2", {opt1: "val1"}, dashboard);
       dashboard.addComponent(select2Select);
       mockDraw("select2");
   
-      var chosenSelect = makeSelect("mySelect", "chosen", {opt1: "val1"}, dashboard);
+      var chosenSelect = makeSelect("chosenSelect", "chosen", {opt1: "val1"}, dashboard);
       dashboard.addComponent(chosenSelect);
       mockDraw("chosen");
   
-      var hyndsSelect = makeSelect("mySelect", "hynds", dashboard);
+      var hyndsSelect = makeSelect("hyndsSelect", "hynds", dashboard);
       dashboard.addComponent(hyndsSelect);
       mockDraw("hynds");
   
