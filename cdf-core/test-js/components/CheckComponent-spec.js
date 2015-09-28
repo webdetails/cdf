@@ -30,7 +30,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent", "cdf/lib/jquery"
       type: "checkComponent",
       parameters: [],
       path: "/fake/test.xaction",
-      parameter: "region",
+      parameter: "input",
       separator: ",&nbsp;",
       valueAsId: true,
       htmlObject: "sampleObject",
@@ -44,6 +44,44 @@ define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent", "cdf/lib/jquery"
      * ## The Check Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
+      spyOn(checkComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      checkComponent.once("cdf:postExecution", function() {
+        expect(checkComponent.update).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(checkComponent);
+    });
+
+    /**
+     * ## The Check Component # behaves correctly with parameter as null
+     */
+    it("behaves correctly with parameter as null", function(done) {
+      dashboard.setParameter("input", null);
+      spyOn(checkComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      checkComponent.once("cdf:postExecution", function() {
+        expect(checkComponent.update).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(checkComponent);
+    });
+
+    /**
+     * ## The Check Component # behaves correctly with parameter as undefined
+     */
+    it("behaves correctly with parameter as undefined", function(done) {
+      dashboard.setParameter("input", undefined);
       spyOn(checkComponent, 'update').and.callThrough();
       spyOn($, "ajax").and.callFake(function() {
         return {responseXML: "<test/>"};
