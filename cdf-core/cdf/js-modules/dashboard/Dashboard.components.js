@@ -120,6 +120,7 @@ define([
     addComponent: function(component, options) {
       // validate new component's name
       if(!component || !component.name) {
+        Logger.error("addComponent: invalid component");
         throw new Error("addComponent: invalid component");
       }
 
@@ -128,6 +129,7 @@ define([
       if(existing) {
         // check if it is a different component
         if(existing !== component) {
+          Logger.error("addComponent: duplicate component name '" + component.name + "'");
           throw new Error("addComponent: duplicate component name '" + component.name + "'");
         }
         return this;
