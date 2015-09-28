@@ -171,6 +171,7 @@ var PrptComponent = BaseComponent.extend({
       renderMode: 'REPORT',
       htmlProportionalWidth: false
     };
+    var myself = this;
     if(this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
       options['accept-page'] = 0;
@@ -181,38 +182,15 @@ var PrptComponent = BaseComponent.extend({
 
     // update options with report parameters
     _.each(this.parameters, function( param, index ) {
-      // param: [<prptParam>, <dashParam>, <default>]
-      var name = param[0];
-      var value = param[1];
-
-      var paramValue;
-      try {
-        paramValue = Dashboards.getParameterValue(value);
-      } catch( e ) {
-        if(!_.isObject(value) || _.isFunction(value)) {
-          printValue = value;
-        } else {
-          printValue = JSON.stringify(value);
-        }
-        Dashboards.log("GetOptions detected static parameter " + name + "=" + printValue + ". " +
-            "The parameter will be used as value instead its value obtained from getParameterValue");
-        paramValue = value;
-      }
-      if (paramValue == null && param.length == 3) {
-        paramValue = param[2];
-      } else if (paramValue === undefined) {
-        paramValue = value;
-      }
-      if (_.isFunction(paramValue)) {
-        paramValue = paramValue();
-      }
-      options[name] = paramValue;
+      var extractedParameter = myself.extractParameter(param);
+      options[extractedParameter.name] = extractedParameter.value;
     });
 
     return options;
   },
   getParams: function() {
     var options = {};
+    var myself = this;
     if(this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
       options['accept-page'] = 0;
@@ -223,34 +201,40 @@ var PrptComponent = BaseComponent.extend({
 
     // update options with report parameters
     _.each(this.parameters, function( param, index ) {
-      // param: [<prptParam>, <dashParam>, <default>]
-      var name = param[0];
-      var value = param[1];
-      var paramValue;
-      try {
-        paramValue = Dashboards.getParameterValue(value);
-      } catch( e ) {
-        if(!_.isObject(value) || _.isFunction(value)) {
-          printValue = value;
-        } else {
-          printValue = JSON.stringify(value);
-        }
-        Dashboards.log("GetParams detected static parameter " + name + "=" + printValue + ". " +
-            "The parameter will be used as value instead its value obtained from getParameterValue");
-        paramValue = value;
-      }
-      if (paramValue == null && param.length == 3) {
-        paramValue = param[2];
-      } else if (paramValue === undefined) {
-        paramValue = value;
-      }
-      if (_.isFunction(paramValue)) {
-        paramValue = paramValue();
-      }
-      options[name] = paramValue;
+      var extractedParameter = myself.extractParameter(param);
+      options[extractedParameter.name] = extractedParameter.value;
     });
     return options;
   },
+
+  extractParameter: function(param) {
+    // param: [<prptParam>, <dashParam>, <default>]
+    var name = param[0];
+    var value = param[1];
+    var paramValue;
+    try {
+      paramValue = Dashboards.getParameterValue(value);
+    } catch( e ) {
+      if(!_.isObject(value) || _.isFunction(value)) {
+        printValue = value;
+      } else {
+        printValue = JSON.stringify(value);
+      }
+      Dashboards.log("extractParameter detected static parameter " + name + "=" + printValue + ". " +
+          "The parameter will be used as value instead its value obtained from getParameterValue");
+      paramValue = value;
+    }
+    if (paramValue == null && param.length == 3) {
+      paramValue = param[2];
+    } else if (paramValue === undefined) {
+      paramValue = value;
+    }
+    if (_.isFunction(paramValue)) {
+      paramValue = paramValue();
+    }
+    return {name: name, value: paramValue};
+  },
+
   getReportOptions: function() {
     var options = {
       paginate: this.paginate || false,
@@ -781,11 +765,12 @@ var SchedulePrptComponent = PrptComponent.extend({
           break;
       }
     };
-    createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
+    createJobParameter = function(paramName, defaultValue, paramType, forceDefault, trueArray) {
       if(!forceDefault && (myself.getReportOptions()[paramName] != undefined)) {
-        return {name: paramName, stringValue: new Array("" + myself.getReportOptions()[paramName]), type: paramType};
+        return {name: paramName, stringValue:
+          (trueArray ? myself.getReportOptions()[paramName] : new Array("" + myself.getReportOptions()[paramName])), type: paramType};
       } else {
-        return {name: paramName, stringValue: new Array("" + defaultValue), type: paramType};
+        return {name: paramName, stringValue: (trueArray ? defaultValue : new Array("" + defaultValue)), type: paramType};
       }
     };
     var myself = this;
@@ -927,7 +912,9 @@ var SchedulePrptComponent = PrptComponent.extend({
         jobParameters[k++] = createJobParameter("_SCH_EMAIL_ATTACHMENT_NAME", $("#attachmentNameInput").val(), "string");
       }
       for(var i = 0; i < myself.parameters.length; i++) {
-        jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string", true);
+        var extParam = myself.extractParameter(myself.parameters[i]);
+        var isArray = _.isArray(extParam.value);
+        jobParameters[k++] = createJobParameter(extParam.name, extParam.value, isArray ? "string[]" : "string", true, isArray);
       }
       parameters["jobParameters"] = jobParameters;
       var success = false;
