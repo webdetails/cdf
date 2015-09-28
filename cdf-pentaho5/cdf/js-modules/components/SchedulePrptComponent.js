@@ -15,9 +15,10 @@ define([
   './SchedulePrptComponent.ext',
   './PrptComponent',
   '../lib/jquery',
+  'amd!../lib/underscore',
   'amd!../lib/jquery.impromptu',
   'css!./SchedulePrptComponent'
-], function(SchedulePrptComponentExt, PrptComponent, $) {
+], function(SchedulePrptComponentExt, PrptComponent, $, _) {
 
   var SchedulePrptComponent = PrptComponent.extend({
     visible: false,
@@ -448,11 +449,12 @@ define([
             break;
         }
       };
-      var createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
+      var createJobParameter = function(paramName, defaultValue, paramType, forceDefault, trueArray) {
         if(!forceDefault && (myself.getReportOptions()[paramName] != undefined)) {
-          return {name: paramName, stringValue: new Array("" + myself.getReportOptions()[paramName]), type: paramType};
+          return {name: paramName, stringValue:
+            (trueArray ? myself.getReportOptions()[paramName] : new Array("" + myself.getReportOptions()[paramName])), type: paramType};
         } else {
-          return {name: paramName, stringValue: new Array("" + defaultValue), type: paramType};
+          return {name: paramName, stringValue: (trueArray ? defaultValue : new Array("" + defaultValue)), type: paramType};
         }
       };
       var myself = this;
@@ -597,7 +599,9 @@ define([
           jobParameters[k++] = createJobParameter("_SCH_EMAIL_ATTACHMENT_NAME", $("#attachmentNameInput").val(), "string");
         }
         for(var i = 0; i < myself.parameters.length; i++) {
-          jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string", true);
+          var extParam = myself.extractParameter(myself.parameters[i]);
+          var isArray = _.isArray(extParam.value);
+          jobParameters[k++] = createJobParameter(extParam.name, extParam.value, isArray ? "string[]" : "string", true, isArray);
         }
         parameters["jobParameters"] = jobParameters;
         var success = false;
