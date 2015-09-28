@@ -59,5 +59,43 @@ define(["cdf/Dashboard.Clean", "cdf/components/RadioComponent", "cdf/lib/jquery"
 
       dashboard.update(radioComponent);
     });
+
+    /**
+     * ## The Radio Component # behaves correctly with parameter as null
+     */
+    it("behaves correctly with parameter as null", function(done) {
+      dashboard.setParameter("region", null);
+      spyOn(radioComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      radioComponent.once("cdf:postExecution", function() {
+        expect(radioComponent.update).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(radioComponent);
+    });
+
+    /**
+     * ## The Radio Component # behaves correctly with parameter as undefined
+     */
+    it("behaves correctly with parameter as undefined", function(done) {
+      dashboard.setParameter("region", undefined);
+      spyOn(radioComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      radioComponent.once("cdf:postExecution", function() {
+        expect(radioComponent.update).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(radioComponent);
+    });
   });
 });

@@ -82,5 +82,43 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
         done();
       }, 1);
     });
+
+    /**
+     * ## The Multi Button Component # behaves correctly with parameter as null
+     */
+    it("behaves correctly with parameter as null", function(done) {
+      dashboard.setParameter("region", null);
+      spyOn(multiButtonComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      multiButtonComponent.once("cdf:postExecution", function() {
+        expect(multiButtonComponent.update).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(multiButtonComponent);
+    });
+
+    /**
+     * ## The Multi Button Component # behaves correctly with parameter as undefined
+     */
+    it("behaves correctly with parameter as undefined", function(done) {
+      dashboard.setParameter("region", undefined);
+      spyOn(multiButtonComponent, 'update').and.callThrough();
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+
+      // listen to cdf:postExecution event
+      multiButtonComponent.once("cdf:postExecution", function() {
+        expect(multiButtonComponent.update).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(multiButtonComponent);
+    });
   });
 });
