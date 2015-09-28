@@ -73,7 +73,7 @@ define([
       var isSelected = false;
 
       var currentValArray;
-      if(currentVal == null) {
+      if(currentVal == null || currentVal == undefined) {
         currentValArray = [];
       } else if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
         currentValArray = currentVal;
