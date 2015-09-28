@@ -125,7 +125,7 @@ define([
      * @method setLabel
      */
     setLabel: function(label) {
-      var validatedLabel = typeof label === 'function' ? label.call(this) : label;
+      var validatedLabel = typeof label === 'function' ? label.call(this) : (label || "");
       this.label = validatedLabel.toString();
       
       // if we have a jQueryUi button change the text with appropriate method
