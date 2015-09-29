@@ -27,7 +27,7 @@ define([
     name: "dataBar",
     label: "Data Bar",
     defaults: {
-      width: '98%',
+      width: undefined,
       widthRatio: 1,
       height: undefined,
       align: null,
@@ -122,6 +122,7 @@ define([
         options.processVal = function(val){return val};
         options.scale = wtmp;
         options.barHeight = htmp;
+        options.legacy = true;
         c = this.drawPaper(min, max, options);
       }
 
@@ -135,7 +136,9 @@ define([
         var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
         var valph = $("<span></span>").addClass('value');
         valph.append(valueStr);
-        if ( hasSVG && opt.align == "right") {
+        if(options.legacy) {
+          valph.appendTo(ph)
+        } else if(hasSVG && opt.align == "right") {
           valph.addClass('alignRight').appendTo(ph);
           ph.find("svg").css('float', 'right');
         } else {
@@ -147,8 +150,9 @@ define([
       // xx = x axis
       var xx = pv.Scale.linear(min,max).range(0, opts.scale);
 
-      var paper = Raphael(opts.target, opts.wtmp , opts.htmp);
-      if(opts.hasSVG && opts.align == "right") {
+      var paper = Raphael(opts.target, opts.legacy ? xx(Math.min(opts.r,max)) - xx(min)
+       : opts.wtmp , opts.htmp);
+      if(!opts.legacy && opts.hasSVG && opts.align == "right") {
         return paper.rect( opts.processVal(xx(max) - xx(opts.r)), opts.processVal(0),
           opts.processVal(xx(opts.r) - xx(opts.l)), opts.processVal(opts.barHeight));
       }

@@ -168,7 +168,7 @@
     name: "dataBar",
     label: "Data Bar",
     defaults: {
-      width: '98%',
+      width: undefined,
       widthRatio: 1,
       height: undefined,
       align: null,
@@ -263,6 +263,7 @@
         options.processVal = function(val){return val};
         options.scale = wtmp;
         options.barHeight = htmp;
+        options.legacy = true;
         c = this.drawPaper(min, max, options);
       }
 
@@ -276,7 +277,9 @@
         var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
         var valph = $("<span></span>").addClass('value');
         valph.append(valueStr);
-        if ( hasSVG && opt.align == "right") {
+        if(options.legacy) {
+          valph.appendTo(ph);
+        } else if(hasSVG && opt.align == "right") {
           valph.addClass('alignRight').appendTo(ph);
           ph.find("svg").css('float', 'right');
         } else {
@@ -288,8 +291,9 @@
       // xx = x axis
       var xx = pv.Scale.linear(min,max).range(0, opts.scale);
 
-      var paper = Raphael(opts.target, opts.wtmp , opts.htmp);
-      if(opts.hasSVG && opts.align == "right") {
+      var paper = Raphael(opts.target, opts.legacy ? xx(Math.min(opts.r,max)) - xx(min)
+       : opts.wtmp , opts.htmp);
+      if(!opts.legacy && opts.hasSVG && opts.align == "right") {
         return paper.rect( opts.processVal(xx(max) - xx(opts.r)), opts.processVal(0),
           opts.processVal(xx(opts.r) - xx(opts.l)), opts.processVal(opts.barHeight));
       }
@@ -523,9 +527,9 @@
     implementation: function(tgt, st, opt){
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
         var text = this.defaults.localize(st.value, st, opt) ;
-      	$(tgt).empty().append(text);
-      	//change data, too, in order for search and sorting to work correctly on the localized text
-      	st.tableData[st.rowIdx][st.colIdx] = text;
+        $(tgt).empty().append(text);
+        //change data, too, in order for search and sorting to work correctly on the localized text
+        st.tableData[st.rowIdx][st.colIdx] = text;
       }
     }
 
