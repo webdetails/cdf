@@ -1656,7 +1656,7 @@ var ButtonComponent = ActionComponent.extend({
     /**
     * Changes the label shown on the button
     */
-    var validatedLabel = typeof label === 'function' ? label.call(this) : label;
+    var validatedLabel = typeof label === 'function' ? label.call(this) : (label || "");
     this.label = validatedLabel.toString();
       
       // if we have a jQueryUi button change the text with appropriate method
