@@ -121,7 +121,8 @@ var SelectBaseComponent = InputBaseComponent.extend({
     // ------
 
     var currentVal  = this._getParameterValue();
-    var currentVals = Dashboards.parseMultipleValues(currentVal); // may be null
+    var currentVals = Dashboards.parseMultipleValues(
+    (!_.isNaN(currentVal) && _.isNumber(currentVal)) ? currentVal + "" : currentVal); // may be null
     var valuesIndex = {};
     var firstVal;
 
