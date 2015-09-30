@@ -11,9 +11,32 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/components/SelectBaseComponent"], function(SelectBaseComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/SelectBaseComponent",
+  "cdf/lib/jquery"
+  ], function(Dashboard, SelectBaseComponent, $) {
 
   describe("The Select Base Component #", function() {
+
+    var dashboard = new Dashboard();
+    dashboard.init();
+    var selectBaseComponent = new SelectBaseComponent({
+      type: "SelectBaseComponent",
+      name: "selectBaseComponent",
+      priority: 5,
+      parameter: "parameter",
+      htmlObject: "selectBaseComponentObj",
+      listeners: ['parameter'],
+      parameters: [],
+      valuesArray: [["0","zero"],["1","one"],["2","two"],["3","three"]],
+      valueAsId: false,
+      executeAtStart: false,
+      extraOptions: [],
+      queryDefinition:  {}
+    });
+    dashboard.addParameter("parameter", "0");
+    dashboard.addComponent(selectBaseComponent);
 
     describe("scrolling style", function() {
 
@@ -72,6 +95,20 @@ define(["cdf/components/SelectBaseComponent"], function(SelectBaseComponent) {
 
     });
 
+    /**
+     * ## The Select Base Component # uses its parameter to update
+     */
+    it("uses its parameter to update", function(done) {
+      var htmlObject = $('<div id="' + selectBaseComponent.htmlObject + '"></div>');
+      $("body").append(htmlObject);
+      selectBaseComponent.getValue = function(){return htmlObject.find("select").val();};
+      selectBaseComponent.once("cdf:postExecution", function() {
+        expect(selectBaseComponent.getValue()).toEqual("3");
+        htmlObject.remove();
+        done();
+      });
+      dashboard.fireChange("parameter", 3);
+    });
   });
 
 });
