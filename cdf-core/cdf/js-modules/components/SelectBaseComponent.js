@@ -76,7 +76,8 @@ define([
       // ------
 
       var currentVal  = this._getParameterValue();
-      var currentVals = Utils.parseMultipleValues(currentVal); // may be null
+      var currentVals = Utils.parseMultipleValues(
+      (!_.isNaN(currentVal) && _.isNumber(currentVal)) ? currentVal + "" : currentVal); // may be null
       var valuesIndex = {};
       var firstVal;
 
