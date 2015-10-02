@@ -125,11 +125,11 @@ define([
         attachEvents: function($placeholder, events, info) {
           var myself = this;
           _.each(events, function(elem) {
-            var separator = ' ',
+            var separator = ',',
                 handler = _.first(elem).split(separator),
                 eventHandler = _.last(elem),
-                event = _.first(handler),
-                selector = _.last(handler);
+                event = _.first(handler).trim(),
+                selector = _.last(handler).trim();
             if (_.isFunction(eventHandler)) {
               $placeholder.find(selector).on(event, info, eventHandler);
             }
