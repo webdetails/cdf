@@ -217,5 +217,26 @@ define([
 
       dashboard.update(uqueryWithParams);
     });
+
+    /**
+     * ## Unmanaged Component # getSuccessHandler
+     */
+    describe("getSuccessHandler", function() {
+
+      /**
+       * ## Unmanaged Component # getSuccessHandler # returns a callback function that returns the processed data after calling postFetch on a successful data request
+       */
+      it("returns a callback function that returns the processed data after calling postFetch on a successful data request", function() {
+        var unprocessedData = {},
+            processedData = {data: [1, 2, 3]};
+        // set postFetch function that does the data transformation
+        uquery.postFetch = function(data) { return processedData; };
+        // set fake counter values to allow to proceed with the simulated successful execution
+        uquery.counter = 0;
+        uquery.runCounter = 0;
+        // test with a simulated successful data request
+        expect(uquery.getSuccessHandler(function success(){})(unprocessedData)).toEqual(processedData);
+      });
+    });
   });
 });

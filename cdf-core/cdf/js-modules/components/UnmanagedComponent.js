@@ -684,9 +684,10 @@ define([
       }
 
       function fetchDataSuccessHandler(data) {
+        var dataPost;
         if(counter >= this.runCounter) {
           try {
-            var dataPost = this.postFetchData(data);
+            dataPost = this.postFetchData(data);
             success.call(this, dataPost);
           } catch(ex) {
             this.failExec(ex);
@@ -696,6 +697,8 @@ define([
         }
 
         if(typeof always === "function") always.call(this);
+
+        return dataPost;
       }
 
       return _.bind(fetchDataSuccessHandler, this);

@@ -349,7 +349,7 @@ define([
    * @static
    */
   Utils.ev = function(o) {
-    return typeof o == 'function' ? o() : o;
+    return typeof o === 'function' ? o() : o;
   };
 
   /**
