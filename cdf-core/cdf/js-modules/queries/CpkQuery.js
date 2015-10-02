@@ -136,7 +136,7 @@ define([
      * Gets the success handler for the query, given a fallback to call.
      *
      * @method getSuccessHandler
-     * @param callback Callback to cal after the query is successful
+     * @param callback Callback to call after the query is successful
      * @return Success handler
      */
     getSuccessHandler: function(callback) {
@@ -144,14 +144,18 @@ define([
       var myself = this;
       return function(json) {
         myself.setOption('lastResultSet', json);
-        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         if(json && json.result == false) {
           // the ajax call might have been successful (no network errors),
           // but the endpoint might have failed, which is signalled by json.result
           var errorCallback = myself.getErrorHandler(myself.getOption('errorCallback'));
           errorCallback(clone);
         } else {
-          callback(clone);
+          var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
+          myself.setOption('lastProcessedResultSet', clone);
+          json = callback(clone);
+          if(json !== undefined && json !== clone) {
+            myself.setOption('lastProcessedResultSet', json);
+          }
         }
       };
     }
