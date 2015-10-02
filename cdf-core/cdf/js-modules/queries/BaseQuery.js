@@ -40,6 +40,7 @@ define([
         }
       },
       lastResultSet: null,
+      lastProcessedResultSet: null,
       page: 0,
       pageSize: 0,
       params: {},
@@ -139,8 +140,14 @@ define([
       var myself = this;
       return function(json) {
         myself.setOption('lastResultSet', json);
+        
         var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
-        callback(clone);
+        myself.setOption('lastProcessedResultSet', clone);
+
+        json = callback(clone);
+        if(json !== undefined && json !== clone) {
+          myself.setOption('lastProcessedResultSet', json);
+        }
       };
     },
 
@@ -286,15 +293,30 @@ define([
     },
 
     /**
-     * Gets last retrieved results.
+     * Gets the last retrieved result.
      *
      * @method lastResults
-     * @return {*} the last result set obtained from the server
+     * @return {object} a deep copy of the last result set obtained from the server
      * @throws  NoCachedResults error if there haven't been previous calls to the server
      */
     lastResults: function() {
       if(this.getOption('lastResultSet') !== null) {
         return $.extend(true, {}, this.getOption('lastResultSet'));
+      } else {
+        throw "NoCachedResults";
+      }
+    },
+
+    /**
+     * Gets the last retrieved result after being processed by postFetch.
+     *
+     * @method lastProcessedResultSet
+     * @return {object} a deep copy of the the last result set obtained from the server after being processed by postFetch
+     * @throws  NoCachedResults error if there haven't been previous calls to the server
+     */
+    lastProcessedResults: function() {
+      if(this.getOption('lastProcessedResultSet') !== null) {
+        return $.extend(true, {}, this.getOption('lastProcessedResultSet'));
       } else {
         throw "NoCachedResults";
       }
@@ -312,7 +334,13 @@ define([
       if(this.getOption('lastResultSet') !== null) {
         var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = outerCallback || this.getOption('successCallback');
-        return callback(clone);
+
+        myself.setOption('lastProcessedResultSet', clone);
+        var result = callback(clone);
+        if(result !== undefined && result !== clone) {
+          myself.setOption('lastProcessedResultSet', result);
+        }
+        return result;
       } else {
         throw "NoCachedResults";
       }

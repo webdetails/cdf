@@ -48,6 +48,7 @@
       },
       errorCallback: Dashboards.handleServerError,
       lastResultSet: null,
+      lastProcessedResultSet: null,
       page: 0,
       pageSize: 0,
       params: {},
@@ -92,7 +93,11 @@
       return function(json) {
         myself.setOption('lastResultSet', json);
         var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
-        callback(clone);
+        myself.setOption('lastProcessedResultSet', clone);
+        json = callback(clone);
+        if(json !== undefined && json !== clone) {
+          myself.setOption('lastProcessedResultSet', json);
+        }
       };
     },
 
@@ -200,11 +205,25 @@
       }
     },
 
+    lastProcessedResults: function() {
+      if(this.getOption('lastProcessedResultSet') !== null) {
+        return $.extend(true, {}, this.getOption('lastProcessedResultSet'));
+      } else {
+        throw "NoCachedResults";
+      }
+    },
+
     reprocessLastResults: function(outerCallback) {
       if(this.getOption('lastResultSet') !== null) {
         var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = outerCallback || this.getOption('successCallback');
-        return callback(clone);
+
+        myself.setOption('lastProcessedResultSet', clone);
+        var result = callback(clone);
+        if(result !== undefined && result !== clone) {
+          myself.setOption('lastProcessedResultSet', result);
+        }
+        return result;
       } else {
         throw "NoCachedResults";
       }
@@ -414,14 +433,18 @@
       var myself = this;
       return function(json) {
         myself.setOption('lastResultSet', json);
-        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         if(json && json.result == false) {
           // the ajax call might have been successful (no network errors),
           // but the endpoint might have failed, which is signalled by json.result
           var errorCallback = myself.getErrorHandler(myself.getOption('errorCallback'));
-          errorCallback(clone);
+          errorCallback(json);
         } else {
-          callback(clone);
+          var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
+          myself.setOption('lastProcessedResultSet', clone);
+          json = callback(clone);
+          if(json !== undefined && json !== clone) {
+            myself.setOption('lastProcessedResultSet', json);
+          }
         }
       };
     }
@@ -658,7 +681,7 @@
       lastResultSet: {
         reader: function(json) {
           json = eval("(" + json + ")");
-          var result = {metadata: [makeMetadataElement(0)], resultset:json.values || []};
+          var result = {metadata: [makeMetadataElement(0)], resultset: json.values || []};
           _.each(json.metadata, function(el, idx) {
             return result.metadata.push(makeMetadataElement(idx + 1, el));
           });
@@ -679,9 +702,7 @@
         } catch(e) {
           if(this.async) {
             // async + legacy errors while parsing json response aren't caught
-            var msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
-            Dashboards.error(msg);
-            json = {"metadata": [msg], "values": []};
+            Dashboards.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message);
           }else{
             //exceptions while parsing json response are
             //already being caught+handled in updateLifecycle()
@@ -689,7 +710,11 @@
           }
         }
         var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
-        callback(clone);
+        myself.setOption('lastProcessedResultSet', clone);
+        json = callback(clone);
+        if(json !== undefined && json !== clone) {
+          myself.setOption('lastProcessedResultSet', json);
+        }
       }
     },
 

@@ -188,11 +188,19 @@
           errorCallback = this.getOption('errorCallback');
 
       try {      
-        var result = _sharedXmla.execute(this.queryDefinition);
+        var result = this.transformXMLAresults(_sharedXmla.execute(this.queryDefinition));
+        this.setOption('lastResultSet', result);
+
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
+        this.setOption('lastProcessedResultSet', clone);
+        result = callback(clone);
+        if(result !== undefined && result !== clone) {
+          this.setOption('lastProcessedResultSet', result);
+        }
+
       } catch(e) {
         Dashboards.error('unable to execute xmla addin query: ' + e +' :');
       }
-      callback(this.transformXMLAresults(result));
     }
   };
   Dashboards.registerQuery("xmla", xmlaOpts);
@@ -262,11 +270,18 @@
           errorCallback = this.getOption('errorCallback');
 
       try {      
-        var result = _sharedXmla.discover(this.queryDefinition);
+        var result = this.transformDiscoverresults(_sharedXmla.discover(this.queryDefinition));
+        this.setOption('lastResultSet', result);
+
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
+        this.setOption('lastProcessedResultSet', clone);
+        result = callback(clone);
+        if(result !== undefined && result !== clone) {
+          this.setOption('lastProcessedResultSet', result);
+        }
       } catch(e) {
         Dashboards.error('unable to execute xmla addin query: ' + e + ' :');
       }
-      callback(this.transformDiscoverresults(result));
     }
   };
   Dashboards.registerQuery("xmlaDiscover", xmlaDiscoverOpts);
