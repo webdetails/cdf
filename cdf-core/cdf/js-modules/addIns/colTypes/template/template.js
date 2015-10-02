@@ -28,8 +28,11 @@ define([
           templateType: 'mustache',
           template: '<div>{{items}}</div>',
           rootElement: 'items',
-          formatters: {},
+          formatters: [],
           events: [],
+          modelHandler: function(data) {
+            return $.parseJSON(data);
+          },
           postProcess: function() {}
         },
 
@@ -71,7 +74,7 @@ define([
         },
 
         implementation: function(tgt, st, opt) {
-          opt = $.extend(true, this.defaults, opt);
+          opt = $.extend(true, {messages: this.messages}, this.defaults, opt);
           var html = this.renderTemplate(tgt, st, opt);
           $(tgt).empty().html(html);
           var info = {target: tgt, status: st, options: opt};
@@ -86,7 +89,7 @@ define([
               html = "",
               model = {};
           try {
-            data = $.parseJSON(st.value);
+            data = opt.modelHandler(st.value);
           } catch(e) {
             data = st.value;
           }
@@ -108,16 +111,14 @@ define([
                   html = Mustache.render((_.isFunction(opt.template) ? opt.template() : opt.template), model);
                   break;
                 default:
-                  html = this.processMessage(this.messages.error.invalidTemplateType, 'error');
+                  html = this.processMessage(opt, 'invalidTemplateType', 'error');
                   break;
               }
             } catch (e) {
-              html = this.processMessage(this.messages.error.invalidTemplate, 'error');
-              Logger.log(this.messages.error.invalidTemplate, 'info');
+              html = this.processMessage(opt, 'invalidTemplate', 'error');
             }
           } else {
-            html = this.processMessage(this.messages.error.noData, 'error');
-            Logger.log(this.messages.error.noData, 'info');
+            html = this.processMessage(opt, 'noData', 'error');
           }
           return html;
         },

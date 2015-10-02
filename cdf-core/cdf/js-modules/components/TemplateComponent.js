@@ -165,16 +165,14 @@ define([
               html = Mustache.render(Utils.ev(template), model);
               break;
             default:
-              html = this.processMessage(this.messages.error.invalidTemplateType, 'error');
+              html = this.processMessage('invalidTemplateType', 'error');
               break;
           }
         } catch(e) {
-          html = this.processMessage(this.messages.error.invalidTemplate, 'error');
-          Logger.log(this.messages.error.invalidTemplate, 'error');
+          html = this.processMessage('invalidTemplate', 'error');
         }
       } else {
-        html = this.processMessage(this.messages.error.noData, 'error');
-        Logger.log(this.messages.error.noData, 'error');
+        html = this.processMessage('noData', 'error');
       }
       return html;
     },
@@ -196,10 +194,11 @@ define([
 
     processMessage: function(message, type) {
       var completeMsg = {
-        msg: message || "",
+        msg: this.messages.error[message] || "",
         type: this.messages.config.style[type].type || "info",
         icon: this.messages.config.style[type].icon || "comment"
       };
+      Logger.log(completeMsg.msg, type);
       return _.template(this.messages.config.template, completeMsg)
     }
 
