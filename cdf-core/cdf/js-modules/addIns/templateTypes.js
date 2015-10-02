@@ -12,7 +12,17 @@
  */
 
 define([
-      './templateTypes/template/template'],
+       './templateTypes/template/template'
+      ,'./templateTypes/bubble/bubble'
+      ,'./templateTypes/trendArrow/trendArrow'
+      ,'./templateTypes/formatted/formatted'
+      ,'./templateTypes/sparkline/sparkline'
+      ,'./templateTypes/localizedText/localizedText'
+      ,'./templateTypes/hyperlink/hyperlink'
+      ,'./templateTypes/clippedText/clippedText'
+      ,'./templateTypes/bulletChart/bulletChart'
+      ,'./templateTypes/cccChart/cccChart'
+      ],
     function() {
 
 });
