@@ -188,11 +188,11 @@ define([
     /**
      * Formats the XML/A query result as an object with metadata and resultset properties.
      *
-     * @method transformXMLAresults
-     * @param results Object with the XML/A query result.
-     * @return {{}} Object with the XML/A query metadata and resultset as properties.
+     * @method transformXMLAResults
+     * @param {object} results The XML/A query result.
+     * @return {object} The XML/A query metadata and resultset as properties.
      */
-    transformXMLAresults: function(results) {
+    transformXMLAResults: function(results) {
       var rows,
           cols,
           col,
@@ -231,7 +231,9 @@ define([
     },
 
     /**
-     * Executes a XML/A query.
+     * Executes {{#crossLink "XmlaQuery/_executeQuery:method"}}_executeQuery{{/crossLink}} and
+     * {{#crossLink "XmlaQuery/transformXMLAResults:method"}}transformXMLAResults{{/crossLink}}
+     * before finally persisting the original and the processed results of the XML/A query.
      *
      * @method doQuery
      * @param outsideCallback Function to be called with the XML/A query result.
@@ -242,11 +244,29 @@ define([
           errorCallback = this.getOption('errorCallback');
 
       try {      
-        var result = _sharedXmla.execute(this.queryDefinition);
+        var result = this.transformXMLAResults(this._executeQuery());
+        this.setOption('lastResultSet', result);
+
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
+        this.setOption('lastProcessedResultSet', clone);
+        result = callback(clone);
+        if(result !== undefined && result !== clone) {
+          this.setOption('lastProcessedResultSet', result);
+        }
       } catch(e) {
         Logger.error('unable to execute the XML/A query: ' + e + ' :');
       }
-      callback(this.transformXMLAresults(result));
+    },
+
+    /**
+     * Executes a XML/A query.
+     *
+     * @method _executeQuery
+     * @return {object} The XML/A query execution result.
+     * @private
+     */
+    _executeQuery: function() {
+      return _sharedXmla.execute(this.queryDefinition);
     }
   };
   // Registering an object that will be used to create a class, by extending BaseQuery,
@@ -257,7 +277,7 @@ define([
   /**
    * Class that represents a XML/A Discover query.
    *
-   * @class XmlaQuery
+   * @class XmlaDiscoverQuery
    * @extends BaseQuery
    */
   var xmlaDiscoverOpts = {
@@ -294,11 +314,11 @@ define([
     /**
      * Formats the XML/A Discover query result as an object with metadata and resultset properties.
      *
-     * @method transformDiscoverresults
+     * @method transformXMLADiscoverResults
      * @param results Object with the XML/A Discover query result.
-     * @return {{}} Object with the XML/A Discover query metadata and resultset as properties.
+     * @return {object} The XML/A Discover query metadata and resultset as properties.
      */
-    transformDiscoverresults: function(results) {
+    transformXMLADiscoverResults: function(results) {
       var cols = results.getFields(),
           col,
           res = {resultset: [], metadata: []};
@@ -327,10 +347,12 @@ define([
     },
 
     /**
-     * Executes a XML/A Discover query.
+     * Executes {{#crossLink "XmlaDiscoverQuery/_executeDiscoverQuery:method"}}_executeDiscoverQuery{{/crossLink}} and
+     * {{#crossLink "XmlaDiscoverQuery/transformXMLADiscoverResults:method"}}transformXMLADiscoverResults{{/crossLink}}
+     * before finally persisting the original and the processed results of the XML/A query.
      *
      * @method doQuery
-     * @param outsideCallback Function to be called with the XML/A Discover query result.
+     * @param outsideCallback Function to be called with the XML/A query result.
      */
     doQuery: function(outsideCallback) {
       var url = this.getOption('url'),
@@ -338,11 +360,29 @@ define([
           errorCallback = this.getOption('errorCallback');
 
       try {      
-        var result = _sharedXmla.discover(this.queryDefinition);
+        var result = this.transformXMLADiscoverResults(this._executeDiscoverQuery());
+        this.setOption('lastResultSet', result);
+
+        var clone = $.extend(true, {}, this.getOption('lastResultSet'));
+        this.setOption('lastProcessedResultSet', clone);
+        result = callback(clone);
+        if(result !== undefined && result !== clone) {
+          this.setOption('lastProcessedResultSet', result);
+        }
       } catch(e) {
-        Logger.error('unable to execute the XML/A Discover query: ' + e + ' :');
+        Logger.error('unable to execute the XML/A query: ' + e + ' :');
       }
-      callback(this.transformDiscoverresults(result));
+    },
+
+    /**
+     * Executes a XML/A discover query.
+     *
+     * @method _executeDiscoverQuery
+     * @return {object} The XML/A discover query execution result.
+     * @private
+     */
+    _executeDiscoverQuery: function() {
+      return _sharedXmla.discover(this.queryDefinition);
     }
   };
 

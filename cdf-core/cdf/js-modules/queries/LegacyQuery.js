@@ -75,7 +75,7 @@ define([
      * Gets the success handler for the query, given a fallback to call.
      *
      * @method getSuccessHandler
-     * @param callback Callback to cal after the query is successful
+     * @param callback Callback to call after the query is successful
      * @return {Function} success handler
      */
     getSuccessHandler: function(callback) {
@@ -86,9 +86,7 @@ define([
         } catch(e) {
           if(this.async) {
             // async + legacy errors while parsing json response aren't caught
-            var msg = myself.dashboard.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
-            Logger.error(msg);
-            json = {"metadata": [msg], "values": []};
+            Logger.error(myself.dashboard.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message);
           } else {
             //exceptions while parsing json response are
             //already being caught+handled in updateLifecycle()
@@ -96,7 +94,11 @@ define([
           }
         }
         var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
-        callback(clone);
+        myself.setOption('lastProcessedResultSet', clone);
+        json = callback(clone);
+        if(json !== undefined && json !== clone) {
+          myself.setOption('lastProcessedResultSet', json);
+        }
       };
     },
 
