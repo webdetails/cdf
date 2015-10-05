@@ -58,7 +58,7 @@ define([
         urlTemplate: "alert('clicked')",
         orientation: "horizontal"
       },
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectJFreeChart",
       executeAtStart: true
     });
 

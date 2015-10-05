@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard.Clean', 'cdf/components/DateRangeInputComponent', 'cdf/lib/jquery'],
-  function(Dashboard, DateRangeInputComponent, $) {
+define([
+  'cdf/Dashboard.Clean',
+  'cdf/components/DateRangeInputComponent',
+  'cdf/lib/jquery'
+], function(Dashboard, DateRangeInputComponent, $) {
 
   /**
    * ## The Date Range Input Component
@@ -29,7 +32,7 @@ define(['cdf/Dashboard.Clean', 'cdf/components/DateRangeInputComponent', 'cdf/li
     var dateRangeInputComponent = new DateRangeInputComponent({
       name: "dateRangeInputComponent",
       type: "dateRangeInputComponent",
-      htmlObject: "dateRangeInputComponent",
+      htmlObject: "sampleObjectDateRangeInput",
       parameter: ["startDate", "endDate"],
       singleInput: false,
       inputSeparator: "<br />",

@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/XactionComponent", "cdf/lib/jquery"],
-  function(Dashboard, XactionComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/XactionComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, XactionComponent, $) {
 
   /**
    * ## The Xaction Component
@@ -29,7 +32,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/XactionComponent", "cdf/lib/jquer
       path: "/public/plugin-samples/pentaho-cdf/20-samples/home_dashboard/topTenCustomers.xaction",
       listeners: ["productLineParam", "territoryParam"],
       parameters: [["productLine", "productLineParam"], ["territory", "territoryParam"]],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectXaction",
       executeAtStart: true,
       tooltip: "My first dashboard"
     });

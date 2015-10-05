@@ -29,7 +29,7 @@ define([
       name: "pageTitle",
       type: "pageTitle",
       listeners: [],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectPageTitle",
       executeAtStart: true
     });
 

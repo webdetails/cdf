@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/SelectMultiComponent", "cdf/lib/jquery"],
-  function(Dashboard, SelectMultiComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/SelectMultiComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, SelectMultiComponent, $) {
 
   /**
    * ## The Select Multi Component
@@ -28,7 +31,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SelectMultiComponent", "cdf/lib/j
     var selectMultiComponent = new SelectMultiComponent({
       name: "selectMultiComponent",
       type: "selectMultiComponent",
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectSelectMulti",
       parameter: "selectMultiComponentParameter" 
     });
   

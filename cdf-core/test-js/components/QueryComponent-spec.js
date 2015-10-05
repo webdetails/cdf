@@ -42,7 +42,7 @@ define([
     var queryComponentSync = new QueryComponent({
       name: "executeQueryComponent",
       type: "queryComponent",
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectQueryComp",
       executeAtStart: true,
       asynchronousMode: false,
       resultvar: "result",

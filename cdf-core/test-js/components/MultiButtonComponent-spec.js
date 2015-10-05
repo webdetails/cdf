@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/jquery"],
-  function(Dashboard, MultiButtonComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/MultiButtonComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, MultiButtonComponent, $) {
 
   /**
    * ## The Multi Button Component
@@ -22,7 +25,6 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
     var dashboard = new Dashboard();
     var htmlObject = "sampleMultiButtonComponentObject";
     var componentName = "multiButtonComponent";
-    $("body").append('<div id="' + htmlObject + '"></div>');
 
     dashboard.addParameter("region", "");
 
@@ -46,6 +48,17 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
 
     dashboard.addComponent(multiButtonComponent);
     dashboard.init();
+
+    var $htmlObject = $('<div />').attr('id', htmlObject);
+
+    beforeEach(function() {
+      // add an element where the button will be inserted
+      $('body').append($htmlObject);
+    });
+    
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
 
     /**

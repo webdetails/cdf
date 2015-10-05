@@ -47,7 +47,7 @@ define([
         colWidths: ['500px', null],
         displayLength: 10
       },
-      htmlObject: "tableSampleObject",
+      htmlObject: "sampleObjectTable",
       executeAtStart: true
     });
 
@@ -55,14 +55,20 @@ define([
 
     // DataTables manages it's own events, the event 'aoInitComplete' executes
     // the table component's fnInitComplete() callback function which executes postExec() and unblock() 
-    $htmlObject = $('<div />').attr('id', tableComponent.htmlObject);
+    var $htmlObject = $('<div />').attr('id', tableComponent.htmlObject);
+
+    beforeEach(function() {
+      $('body').append($htmlObject);
+    });
+
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
     /**
      * ## The Table Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
-      $('body').append($htmlObject);
-
       spyOn(tableComponent, 'update').and.callThrough();
       spyOn(tableComponent, 'triggerQuery').and.callThrough();
       spyOn($, 'ajax').and.callFake(function(params) {
@@ -72,7 +78,6 @@ define([
       // listen to cdf:postExecution event
       tableComponent.once("cdf:postExecution", function() {
         expect(tableComponent.update).toHaveBeenCalled();
-        $htmlObject.remove();
         done();
       });
 

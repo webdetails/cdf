@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent", "cdf/lib/jquery"],
-  function(Dashboard, CheckComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/CheckComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, CheckComponent, $) {
   
   /**
    * ## The Check Component
@@ -33,7 +36,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/CheckComponent", "cdf/lib/jquery"
       parameter: "input",
       separator: ",&nbsp;",
       valueAsId: true,
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectCheck",
       executeAtStart: true,
       postChange: function() { return; }
     });

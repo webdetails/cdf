@@ -15,8 +15,8 @@ define([
   "cdf/Dashboard.Clean",
   "cdf/lib/jquery",
   "amd!cdf/lib/underscore",
-  "cdf/components/FreeformComponent"],
-  function(Dashboard, $, _, FreeformComponent) {
+  "cdf/components/FreeformComponent"
+], function(Dashboard, $, _, FreeformComponent) {
 
   /**
    * ## Freeform Component
