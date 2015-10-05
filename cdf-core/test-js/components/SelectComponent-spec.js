@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/SelectComponent", "cdf/dashboard/Query", "cdf/lib/jquery"],
-  function(Dashboard, SelectComponent, Query, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/SelectComponent",
+  "cdf/dashboard/Query",
+  "cdf/lib/jquery"
+], function(Dashboard, SelectComponent, Query, $) {
 
   /**
    * ## The Select Component
@@ -32,7 +36,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/SelectComponent", "cdf/dashboard/
       valuesArray: [["1", "Lisbon"], ["2", "Dusseldorf"]],
       parameter: "selectComponentParameter",
       valueAsId: false,
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectSelect",
       executeAtStart: true,
       postChange: function() {
         return "You chose: " + this.dashboard.getParameterValue(this.parameter);

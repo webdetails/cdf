@@ -35,7 +35,7 @@ define([
     var simpleAutoCompleteComponent = new SimpleAutoCompleteComponent({
       name: "simpleAC",
       type: "SimpleAutoComplete",
-      htmlObject: "simpleAC",
+      htmlObject: "sampleObjectSimpleAC",
       searchParam: "searching",
       parameters: [["arg1", "param1"]],
       minTextLength: 2,

@@ -31,7 +31,7 @@ define([
       name: "commentsComponent",
       type: "commentsComponent",
       page: "generic",
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectComments",
       executeAtStart: true,
       preChange: function() { return true; },
       postChange: function() { return true; },

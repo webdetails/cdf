@@ -54,7 +54,7 @@ define([
         urlTemplate: "alert('clicked')",
         orientation: "horizontal"
       },
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectOpenFlashChart",
       executeAtStart: true
     });
 

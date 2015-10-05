@@ -44,7 +44,7 @@ define([
     var prptComponent = new PrptComponent({
       name: "prptComponent",
       type: "prptComponent",
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectPrpt",
       path: optionData.path,
       parameters: [['funcValue', 'funcValue'],
                    ['value', 'value'],

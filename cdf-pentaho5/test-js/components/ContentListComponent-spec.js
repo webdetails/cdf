@@ -29,7 +29,7 @@ define([
       name: "folderContentComponent",
       type: "contentList",
       listeners: [],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectContentList",
       executeAtStart: true,
       mode: "3"
     });

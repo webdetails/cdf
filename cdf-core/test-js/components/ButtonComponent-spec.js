@@ -32,7 +32,7 @@ define([
       name: "buttonComponent",
       type: "button",
       listeners: ["productLine", "territory"],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectButton",
       label: "A button",
       executeAtStart: true,
       preChange: function() { return true; },

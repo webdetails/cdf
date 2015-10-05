@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/TextComponent"],
-  function(Dashboard, TextComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/TextComponent"
+], function(Dashboard, TextComponent) {
 
   /**
    * ## The Text Component
@@ -26,7 +28,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TextComponent"],
     var textComponent = new TextComponent({
       name: "textComponent",
       type: "textComponent",
-      htmlObject: 'textComponent',
+      htmlObject: "sampleObjectText",
       listeners: [],
       expression: function() { return "My text generated in " + new Date(); },
       executeAtStart: true

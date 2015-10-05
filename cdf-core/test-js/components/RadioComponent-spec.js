@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/RadioComponent", "cdf/lib/jquery"],
-  function(Dashboard, RadioComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/RadioComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, RadioComponent, $) {
 
   /**
    * ## The Radio Component
@@ -33,7 +36,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/RadioComponent", "cdf/lib/jquery"
       parameter: "region",
       separator: ",&nbsp;",
       valueAsId: true,
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectRadio",
       executeAtStart: true,
       postChange: function() {
         return "you chose: " + this.dashboard.getParameterValue(this.parameter);

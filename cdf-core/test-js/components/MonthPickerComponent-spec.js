@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/MonthPickerComponent"],
-  function(Dashboard, MonthPickerComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/MonthPickerComponent"
+], function(Dashboard, MonthPickerComponent) {
 
   /**
    * ## The Month Picker Component
@@ -31,7 +33,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/MonthPickerComponent"],
     var monthPickerComponent = new MonthPickerComponent({
       name: "monthPickerComponent",
       type: "monthPickerComponent",
-      htmlObject: 'monthPickerComponent',
+      htmlObject: "sampleObjectMonthPicker",
       parameter: "input",
       months: 10,
       size: 1,

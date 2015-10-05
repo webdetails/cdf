@@ -32,7 +32,7 @@ define([
       path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
       listeners: ["productLine", "territory"],
       parameters: [["productLine", '""'], ["territory", '""']],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectExecutePrpt",
       paginate: false,
       showParameters: true,
       label: "Execute Prpt",

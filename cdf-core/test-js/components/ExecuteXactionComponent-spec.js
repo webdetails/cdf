@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/ExecuteXactionComponent"],
-  function(Dashboard, ExecuteXactionComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/ExecuteXactionComponent"
+], function(Dashboard, ExecuteXactionComponent) {
 
   /**
    * ## The Execute Xaction Component
@@ -29,7 +31,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/ExecuteXactionComponent"],
       path: "/public/plugin-samples/pentaho-cdf/20-samples/home_dashboard/topTenCustomers.xaction",
       listeners: ["productLineParam", "territoryParam"],
       parameters: [["productLine", "productLineParam"], ["territory", "territoryParam"]],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectExecXaction",
       label: "Execute XAction",
       executeAtStart: true,
       preChange: function() { return true; },

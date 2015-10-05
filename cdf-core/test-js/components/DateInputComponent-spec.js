@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/Dashboard.Clean', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'],
-  function(Dashboard, $, DateInputComponent) {
+define([
+  'cdf/Dashboard.Clean',
+  'cdf/lib/jquery',
+  'cdf/components/DateInputComponent'
+], function(Dashboard, $, DateInputComponent) {
 
   /**
    * ## The Date Input Component
@@ -31,7 +34,7 @@ define(['cdf/Dashboard.Clean', 'cdf/lib/jquery', 'cdf/components/DateInputCompon
     var dateInputComponent = new DateInputComponent({
       name: "dateInputComponent",
       type: "dateInputComponent",
-      htmlObject: 'dateInputComponent',
+      htmlObject: "sampleObjectDateInput",
       parameter: "dateInputTestParameter",
       dateFormat: "yy-mm-dd",
       startDate: "2006-05-31",

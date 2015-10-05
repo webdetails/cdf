@@ -15,7 +15,7 @@ define([
   "cdf/Dashboard.Clean",
   "cdf/components/SelectBaseComponent",
   "cdf/lib/jquery"
-  ], function(Dashboard, SelectBaseComponent, $) {
+], function(Dashboard, SelectBaseComponent, $) {
 
   describe("The Select Base Component #", function() {
 
@@ -26,7 +26,7 @@ define([
       name: "selectBaseComponent",
       priority: 5,
       parameter: "parameter",
-      htmlObject: "selectBaseComponentObj",
+      htmlObject: "sampleObjectSelectBase",
       listeners: ['parameter'],
       parameters: [],
       valuesArray: [["0","zero"],["1","one"],["2","two"],["3","three"]],

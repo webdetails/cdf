@@ -49,7 +49,7 @@ define([
         colors: ["#F16C3A", "#FFFF00", "#B0D837"],
         intervals: [7, 70, 630]
       },
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectDial",
       executeAtStart: true
     });
 

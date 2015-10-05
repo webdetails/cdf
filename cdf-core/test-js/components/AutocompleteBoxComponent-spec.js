@@ -52,7 +52,7 @@ define([
       minTextLength: 0,
       scrollHeight: 250,
       parameter: "autocompleteBoxParameter",
-      htmlObject: "autoCompleteSpecObj",
+      htmlObject: "sampleObjectAutocompleteBox",
       reloadOnUpdate: true,
       autoUpdateTimeout: 3000,
       executeAtStart: true,

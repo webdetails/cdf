@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/TextareaInputComponent"],
-  function(Dashboard, TextareaInputComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/TextareaInputComponent"
+], function(Dashboard, TextareaInputComponent) {
   
   /**
    * ## The Textarea Input Component
@@ -30,7 +32,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/TextareaInputComponent"],
       type: "textareaInputComponent",
       parameters: [],
       parameter: "input",
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectTextareaInput",
       executeAtStart: true,
       postChange: function() {
         return "you typed: " + this.dashboard.getParameterValue(this.parameter);

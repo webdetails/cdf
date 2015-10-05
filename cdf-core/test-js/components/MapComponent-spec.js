@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/MapComponent", "cdf/lib/jquery"],
-  function(Dashboard, MapComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/MapComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, MapComponent, $) {
 
   /**
    * ## The Map Component
@@ -33,7 +36,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/MapComponent", "cdf/lib/jquery"],
       parameters: [],
       listeners: [],
       messageElementId: "messages",
-      htmlObject: "map",
+      htmlObject: "sampleObjectMap",
       executeAtStart: true,
       initPosLon: -7.5,
       initPosLat: 39.8,

@@ -54,12 +54,12 @@ define([
             '</div>';
       },
       templateType: "mustache",
-      formatters: [["testF", function(value) {return value.toUpperCase();}]],
+      formatters: [["testF", function(value) { return value.toUpperCase(); }]],
 
       rootElement: "items",
       extendableOptions: "",
       chartDefinition: {dataSource: "templateQuery"},
-      htmlObject: "templateSampleObject",
+      htmlObject: "sampleObjectTemplate",
       executeAtStart: true,
       preExecution: function() {},
       postFetch: function() {},
@@ -67,8 +67,6 @@ define([
     });
 
     dashboard.addComponent(templateComponent, {});
-
-    //var $htmlObject = $('<div/>').attr('id', templateComponent.htmlObject);
 
     /**
      * ## The Template Component # allows a dashboard to execute update

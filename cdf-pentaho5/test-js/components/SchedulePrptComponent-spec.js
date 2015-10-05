@@ -29,7 +29,7 @@ define([
     var schedulePrpt = new SchedulePrptComponent({
       name: "schedulePrpt",
       type: "schedulePrpt",
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectSchedulePrpt",
       executeAtStart: true,
       parameters: [["parameter", "parameter"], ["parameterArray", "parameterArray"]]
     });

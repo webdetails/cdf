@@ -29,7 +29,7 @@ define([
       name: "navigatorMenu",
       type: "navigator",
       listeners: [],
-      htmlObject: "sampleObject",
+      htmlObject: "sampleObjectNavigator",
       executeAtStart: true,
       mode: "horizontal",
       includeSolutions: true

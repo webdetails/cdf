@@ -38,7 +38,7 @@ define([
           intervals: [10, 20],
           showValue: true
         },
-        htmlObject: "sampleObject",
+        htmlObject: "sampleObjectTraffic",
         parameter: "trafficTestParameter",
         executeAtStart: true
       });
