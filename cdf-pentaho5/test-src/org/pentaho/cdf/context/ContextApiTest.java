@@ -30,8 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContextApiTest {
-  private static final String PATH = "fake";
-  private static final String USER = "fake";
+  private static final String PATH = "fakePath";
+  private static final String USER = "fakeUserName";
+  private static final String VIEW = "fakeViewName";
   private ContextApi contextApi;
   private MockHttpServletRequest servletRequest;
   private MockHttpServletResponse servletResponse;
@@ -69,10 +70,10 @@ public class ContextApiTest {
     Assert.assertEquals( servletResponse.getContentType(), null );
     Assert.assertEquals( servletResponse.getCharacterEncoding(), null );
 
-    contextApi.getConfig( PATH, USER, servletRequest, servletResponse );
+    contextApi.getConfig( PATH, VIEW, servletRequest, servletResponse );
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( contextApi, times(1) ).writeConfig( PATH, USER, servletRequest, servletResponse );
+    verify( contextApi, times(1) ).writeConfig( PATH, VIEW, servletRequest, servletResponse );
   }
 }

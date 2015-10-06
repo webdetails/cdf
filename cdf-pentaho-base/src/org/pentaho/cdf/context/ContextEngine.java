@@ -123,7 +123,7 @@ public class ContextEngine {
     String file = StringUtils.defaultIfEmpty( paramMap.get( Parameter.FILE ), StringUtils.EMPTY );
     String action = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ACTION ), StringUtils.EMPTY );
     // TODO: why does view default to action?
-    String viewId = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
+    String view = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
     String fullPath = RepositoryHelper.joinPaths( solution, path, file );
 
     // old xcdf dashboards use solution + path + action
@@ -131,7 +131,7 @@ public class ContextEngine {
       fullPath = RepositoryHelper.joinPaths( fullPath, action );
     }
 
-    String dashboardContext = getContext( fullPath, viewId, action, paramMap, inactiveInterval );
+    String dashboardContext = getContext( fullPath, view, action, paramMap, inactiveInterval );
 
     if ( StringUtils.isEmpty( dashboardContext ) ) {
       logger.error( "empty dashboardContext" );
@@ -144,12 +144,12 @@ public class ContextEngine {
     return PentahoSessionHolder.getSession();
   }
 
-  public String getContext( String path, String viewId, String action, Map<String, String> parameters,
+  public String getContext( String path, String view, String action, Map<String, String> parameters,
                             int inactiveInterval ) {
     String username = getUserSession().getName();
 
     try {
-      return buildContextScript( buildContext( path, username, parameters, inactiveInterval ), viewId, action,
+      return buildContextScript( buildContext( path, username, parameters, inactiveInterval ), view, action,
         username );
     } catch ( JSONException e ) {
       return "";
@@ -287,19 +287,19 @@ public class ContextEngine {
     return contextObj;
   }
 
-  public String getConfig( String path, String viewId, Map<String, String> parameters,
+  public String getConfig( String path, String view, Map<String, String> parameters,
                            int inactiveInterval ) throws JSONException {
-    String username = getUserSession().getName();
+    final String username = getUserSession().getName();
     final StringBuilder s = new StringBuilder();
     s.append( "{\n" );
     s.append( "context: " ).append( buildContext( path, username, parameters, inactiveInterval ) );
-    if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( username ) ) {
-      JSONObject view = ViewsEngine.getInstance().getView( viewId, username );
-      if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
-        s.append( ",\nview: " ).append( view.toString( 2 ) );
+    if ( !StringUtils.isEmpty( view ) && !StringUtils.isEmpty( username ) ) {
+      JSONObject viewObj = ViewsEngine.getInstance().getView( view, username );
+      if ( viewObj.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
+        s.append( ",\nview: " ).append( viewObj.toString( 2 ) );
       }
     }
-    String storage = getStorage();
+    final String storage = getStorage();
     if ( !StringUtils.isEmpty( storage ) ) {
       s.append( ",\nstorage: " ).append( storage );
     }
@@ -307,7 +307,7 @@ public class ContextEngine {
     return s.toString();
   }
 
-  protected String buildContextScript( JSONObject contextObj, String viewId, String action, String user )
+  protected String buildContextScript( JSONObject contextObj, String view, String action, String user )
     throws JSONException {
     final StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
@@ -316,13 +316,13 @@ public class ContextEngine {
     s.append( "Dashboards.context = " ).append( contextObj.toString( 2 ) ).append( "\n" );
 
     // append views
-    if ( !StringUtils.isEmpty( viewId ) && !StringUtils.isEmpty( user ) ) {
-      JSONObject view = ViewsEngine.getInstance().getView( viewId, user );
-      if ( view.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
-        view = (JSONObject) view.get( JsonUtil.JsonField.RESULT.getValue() );
-        s.append( "Dashboards.view = " ).append( view.toString( 2 ) ).append( "\n" );
+    if ( !StringUtils.isEmpty( view ) && !StringUtils.isEmpty( user ) ) {
+      JSONObject viewObj = ViewsEngine.getInstance().getView( view, user );
+      if ( viewObj.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
+        viewObj = (JSONObject) viewObj.get( JsonUtil.JsonField.RESULT.getValue() );
+        s.append( "Dashboards.view = " ).append( viewObj.toString( 2 ) ).append( "\n" );
       } else {
-        logger.debug( "View not found: " + viewId );
+        logger.debug( "View not found: " + view );
       }
     }
     // append storage
