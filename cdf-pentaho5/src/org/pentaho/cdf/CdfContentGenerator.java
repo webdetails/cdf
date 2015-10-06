@@ -244,11 +244,11 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   // InterPluginBroker calls this method within bean id 'xcdf'
   public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
                             @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
-                            @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
+                            @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW ) String view,
                             @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     return ContextEngine.getInstance()
-      .getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
+      .getContext( path, view, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   // InterPluginBroker calls this method within bean id 'xcdf'

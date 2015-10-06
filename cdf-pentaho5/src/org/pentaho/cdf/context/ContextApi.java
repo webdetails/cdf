@@ -60,7 +60,7 @@ public class ContextApi {
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
   public void getConfig( @QueryParam( Parameter.PATH ) String path,
-                         @QueryParam( Parameter.USER ) String user,
+                         @QueryParam( Parameter.VIEW ) String view,
                          @Context HttpServletRequest servletRequest,
                          @Context HttpServletResponse servletResponse ) throws IOException {
 
@@ -68,7 +68,7 @@ public class ContextApi {
     servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
     setCorsHeaders( servletRequest, servletResponse );
 
-    writeConfig( path, user, servletRequest, servletResponse );
+    writeConfig( path, view, servletRequest, servletResponse );
   }
 
   protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {
@@ -92,7 +92,7 @@ public class ContextApi {
 
   protected void writeConfig(
       String path,
-      String user,
+      String view,
       HttpServletRequest servletRequest,
       HttpServletResponse servletResponse ) throws IOException {
 
@@ -101,7 +101,7 @@ public class ContextApi {
           servletResponse.getOutputStream(),
           ContextEngine.getInstance().getConfig(
             path,
-            user,
+            view,
             Parameter.asHashMap( servletRequest ),
             servletRequest.getSession().getMaxInactiveInterval()
           )
