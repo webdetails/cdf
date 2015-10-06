@@ -140,11 +140,11 @@ public class CdfApi {
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
                             @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
-                            @QueryParam( Parameter.VIEW_ID ) @DefaultValue( StringUtils.EMPTY ) String viewId,
+                            @QueryParam( Parameter.VIEW ) @DefaultValue( StringUtils.EMPTY ) String view,
                             @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     return ContextEngine.getInstance()
-      .getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
+      .getContext( path, view, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   @GET
@@ -365,10 +365,10 @@ public class CdfApi {
   }
 
   protected String getConfiguration( String path,
-                                     String viewId,
+                                     String view,
                                      HashMap<String, String> parameterMap,
                                      int inactiveInterval ) throws JSONException {
-    return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
+    return ContextEngine.getInstance().getConfig( path, view, parameterMap, inactiveInterval );
   }
 
   protected String buildFullServerUrl( String protocol, String serverName, int serverPort  ) {

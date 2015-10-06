@@ -19,7 +19,7 @@ define('cdf/dashboard/Dashboard.views.ext', ['./Dashboard.ext'],
       return "";
     },
 
-    getViewIdFromUrl: function() {
+    getViewFromUrl: function() {
       return "2";
     }
   };
