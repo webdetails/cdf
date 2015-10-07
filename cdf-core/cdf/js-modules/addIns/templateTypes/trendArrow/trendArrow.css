@@ -1,0 +1,50 @@
+/*
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('../fonts/fontawesome-webfont.eot?v=4.2.0');
+  src: url('../fonts/fontawesome-webfont.eot?#iefix&v=4.2.0') format('embedded-opentype'), url('../fonts/fontawesome-webfont.woff?v=4.2.0') format('woff'), url('../fonts/fontawesome-webfont.ttf?v=4.2.0') format('truetype'), url('../fonts/fontawesome-webfont.svg?v=4.2.0#fontawesomeregular') format('svg');
+ font-weight: normal;
+  font-style: normal;
+}
+*/
+
+.trendArrowContainer .arrow {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.trendArrowContainer .arrow {
+  font-size: 25px;
+}
+
+.trendArrowContainer .arrow.up:before {
+  content: "\f01b";
+}
+
+.trendArrowContainer .arrow.down:before {
+  content: "\f01a";
+}
+
+.trendArrowContainer .arrow.equal:before {
+  content: "\f10c";
+}
+
+.trendArrowContainer .arrow.good.up {
+  color: #457313;
+}
+
+.trendArrowContainer .arrow.good.down {
+  color: #ef2e2e;
+}
+
+.trendArrowContainer .arrow.bad.up {
+  color: #ef2e2e;
+}
+
+.trendArrowContainer .arrow.bad.down {
+  color: #457313;
+}

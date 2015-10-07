@@ -15,10 +15,11 @@ define([
       '../../../AddIn',
       '../../../Dashboard',
       '../../../Logger',
+      '../../../dashboard/Utils',
       'amd!../../../lib/underscore',
       'amd!../../../lib/mustache-wax',
       'amd!../../../lib/datatables'],
-    function(AddIn, Dashboard, Logger, _, Mustache, $) {
+    function(AddIn, Dashboard, Logger, Utils, _, Mustache, $) {
 
       var template = {
         name: "template",
@@ -28,8 +29,13 @@ define([
           templateType: 'mustache',
           template: '<div>{{items}}</div>',
           rootElement: 'items',
-          formatters: {},
+          formatters: [],
           events: [],
+          modelHandler: function(data, opt) {
+          	var model = {};
+          	model[opt.rootElement] = $.parseJSON(data)
+            return model;
+          },
           postProcess: function() {}
         },
 
@@ -57,12 +63,13 @@ define([
           }
         },
 
-        processMessage: function(message, type) {
+        processMessage: function(opt, message, type) {
           var completeMsg = {
-            msg: message || "",
-            type: this.messages.config.style[type].type || "info",
-            icon: this.messages.config.style[type].icon || "comment"};
-          return _.template(this.messages.config.template, completeMsg)
+            msg: opt.messages.error[message] || "",
+            type: opt.messages.config.style[type].type || "info",
+            icon: opt.messages.config.style[type].icon || "comment"};
+          Logger.log(opt.messages.error[message] || "", type);
+          return _.template(opt.messages.config.template, completeMsg)
         },
 
         init: function() {
@@ -71,12 +78,12 @@ define([
         },
 
         implementation: function(tgt, st, opt) {
-          opt = $.extend(true, this.defaults, opt);
-          var html = this.renderTemplate(tgt, st, opt);
+          opts = $.extend(true, {messages: this.messages}, this.defaults, opt);
+          var html = this.renderTemplate(tgt, st, opts);
           $(tgt).empty().html(html);
-          var info = {target: tgt, status: st, options: opt};
-          this.attachEvents($(tgt), opt.events, info);
-          if ((typeof opt.postProcess != "undefined") && (_.isFunction())) {
+          var info = {target: tgt, status: st, options: opts};
+          this.attachEvents($(tgt), opts.events, info);
+          if ((typeof opts.postProcess != "undefined") && (_.isFunction())) {
             this.postProcess.call(this, info);
           }
         },
@@ -84,52 +91,64 @@ define([
         renderTemplate: function(tgt, st, opt) {
           var data = "",
               html = "",
-              model = {};
+              model = {},
+              myself = this;
+
           try {
-            data = $.parseJSON(st.value);
+            model = opt.modelHandler(st.value, opt);
           } catch(e) {
             data = st.value;
+            model[opt.rootElement] = data;
           }
 
-          if ((!_.isEmpty(data))) {
-            _.each(opt.formatters, function(value, key){
-              if ((!_.isUndefined(data[key])) && (_.isFunction(value))) {
-                data[key] = value(data[key], tgt, st, opt) || data[key];
-              }
-            });
-            model[opt.rootElement] = data;
+	      	if((!_.isEmpty(model))) {
+	        	var helpers = {
+	          	formatter: function(data, formatter, id) {
+	            	return myself.applyFormatter(opt, data, formatter, id);
+	          	}
+	        	};
+	        
             st.model = model;
             try {
               switch (opt.templateType.toUpperCase()) {
                 case 'UNDERSCORE':
-                  html = _.template((_.isFunction(opt.template) ? opt.template() : opt.template), model);
-                  break;
+                	model = _.defaults({}, model, Utils.propertiesArrayToObject(helpers));
+                  	html = _.template((_.isFunction(opt.template) ? opt.template() : opt.template), model);
+                  	break;
                 case 'MUSTACHE':
-                  html = Mustache.render((_.isFunction(opt.template) ? opt.template() : opt.template), model);
-                  break;
+                	Mustache.Formatters = helpers;
+                  	html = Mustache.render((_.isFunction(opt.template) ? opt.template() : opt.template), model);
+                  	break;
                 default:
-                  html = this.processMessage(this.messages.error.invalidTemplateType, 'error');
-                  break;
+                  	html = this.processMessage(opt, 'invalidTemplateType', 'error');
+                  	break;
               }
             } catch (e) {
-              html = this.processMessage(this.messages.error.invalidTemplate, 'error');
-              Logger.log(this.messages.error.invalidTemplate, 'info');
+              html = this.processMessage(opt, 'invalidTemplate', 'error');
             }
           } else {
-            html = this.processMessage(this.messages.error.noData, 'error');
-            Logger.log(this.messages.error.noData, 'info');
+            html = this.processMessage(opt, 'noData', 'error');
           }
           return html;
         },
 
+        applyFormatter: function(opt, model, formatter, id) {
+      		var formatHandler = Utils.propertiesArrayToObject(opt.formatters)[formatter];
+      		if(_.isFunction(formatHandler)) {
+        		return formatHandler.call(this, model, id);
+      		} else {
+        		return model;
+      		}
+    		},
+
         attachEvents: function($placeholder, events, info) {
           var myself = this;
           _.each(events, function(elem) {
-            var separator = ' ',
+            var separator = ',',
                 handler = _.first(elem).split(separator),
                 eventHandler = _.last(elem),
-                event = _.first(handler),
-                selector = _.last(handler);
+                event = _.first(handler).trim(),
+                selector = _.last(handler).trim();
             if (_.isFunction(eventHandler)) {
               $placeholder.find(selector).on(event, info, eventHandler);
             }
