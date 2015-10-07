@@ -14,16 +14,16 @@
 define(['./Dashboard.ext'], function(DashboardExt) {
 
   var DashboardViewsExt = {
-    getView: function(viewId) {
-      return DashboardExt.getCdfBase() + "/views/" + viewId;
+    getView: function(view) {
+      return DashboardExt.getCdfBase() + "/views/" + view;
     },
 
-    getViewIdFromUrl: function() {
+    getViewFromUrl: function() {
       var url = window.location.search;
-      if(url.indexOf("viewId") == -1) {
+      if(url.indexOf("view") == -1) {
         return "";
       } else {
-        var regExp = url.match("[?|&]viewId=([^&]+)");
+        var regExp = url.match("[?|&]view=([^&]+)");
         if(regExp[1]) {
           return regExp[1];
         }

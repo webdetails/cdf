@@ -179,10 +179,10 @@ public class CdfHtmlRenderer {
         logger.error( "Error in cdf storage.", e );
       }
     } else {
-      String viewId = StringUtils.defaultIfEmpty( parameterMap.get( Parameter.VIEW ), StringUtils.EMPTY );
+      String view = StringUtils.defaultIfEmpty( parameterMap.get( Parameter.VIEW ), StringUtils.EMPTY );
       out.write( MessageFormat.format( CdfConstants.INLINE_SCRIPT, "requireCfg.config = requireCfg.config || {};\n"
           + "requireCfg.config['cdf/dashboard/Dashboard'] = "
-          + getConfiguration( path, viewId, parameterMap, inactiveInterval ) + ";\n"
+          + getConfiguration( path, view, parameterMap, inactiveInterval ) + ";\n"
           + "requirejs.config(requireCfg);" ).getBytes( CharsetHelper.getEncoding() ) );
     }
 
@@ -193,9 +193,9 @@ public class CdfHtmlRenderer {
     out.write( footer.getBytes( CharsetHelper.getEncoding() ) );
   }
 
-  protected String getConfiguration( String path, String viewId, HashMap<String, String> parameterMap,
+  protected String getConfiguration( String path, String view, HashMap<String, String> parameterMap,
                                      int inactiveInterval ) throws JSONException {
-    return ContextEngine.getInstance().getConfig( path, viewId, parameterMap, inactiveInterval );
+    return ContextEngine.getInstance().getConfig( path, view, parameterMap, inactiveInterval );
   }
 
   protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {
