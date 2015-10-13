@@ -200,7 +200,7 @@ define([
         kettleOutput: "Inferred",
         queryType: "cpk"
       }, null, d);
-      //debugger;
+
       var cpkQueryDefinition = CpkQuery.buildQueryDefinition(params);
 
       var CdaQuery = new Query({

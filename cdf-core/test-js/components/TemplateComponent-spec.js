@@ -119,12 +119,21 @@ define([
     });
 
     /**
-     * ## The Template Component # process a message to be displayed to the user
+     * ## The Template Component # processes a predefined message to be displayed to the user
      */
-    it("process a message to be displayed to the user", function() {
+    it("processes a predefined message to be displayed to the user", function() {
+      var result = templateComponent.processMessage('noData', 'error');
+      var expectedResult = "<div class='alert alert-danger' role='alert'> <span class='glyphicon glyphicon-remove-sign' aria-hidden='true'></span> <span> No data available. </span></div>";
+      expect(result.replace(/\s+/g, ' ')).toEqual(expectedResult);
+    });
+
+    /**
+     * ## The Template Component # processes a custom message to be displayed to the user
+     */
+    it("processes a custom message to be displayed to the user", function() {
       var result = templateComponent.processMessage('Error Message', 'error');
       var expectedResult = "<div class='alert alert-danger' role='alert'> <span class='glyphicon glyphicon-remove-sign' aria-hidden='true'></span> <span> Error Message </span></div>";
       expect(result.replace(/\s+/g, ' ')).toEqual(expectedResult);
-    })
+    });
   });
 });
