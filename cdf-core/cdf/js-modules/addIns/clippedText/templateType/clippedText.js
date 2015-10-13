@@ -12,16 +12,22 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../clippedTextBase',
+  '../../../Dashboard',
+  '../../../lib/jquery',
+  'css!./clippedText'
+], function(AddIn, clippedTextBase, Dashboard, $) {
+
+  var clippedText = new AddIn($.extend(true, {}, clippedTextBase, {
+    defaults: {
+      useTipsy: true
+    },
+
+    init: function() { }
+  }));
+
+  Dashboard.registerGlobalAddIn("Template", "templateType", clippedText);
+
+  return clippedText;
+});

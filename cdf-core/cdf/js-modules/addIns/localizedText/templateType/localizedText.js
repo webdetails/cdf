@@ -12,16 +12,28 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../localizedTextBase',
+  '../../../Dashboard',
+  '../../../lib/jquery'
+], function(AddIn, localizedTextBase, Dashboard, $) {
+  
+  var localizedText = new AddIn($.extend(true, {}, localizedTextBase, {
+
+    defaults: {
+      cssClass: 'localizedTextContainer',
+      layout: '<div></div>'
+    },
+
+    // set text and related content
+    setText: function(text, tgt, opts) {
+      $(tgt).empty()
+            .html($(opts.layout).append(text)
+                                .addClass(opts.cssClass));
+    }
+  }));
+
+  Dashboard.registerGlobalAddIn("Template", "templateType", localizedText);
+
+  return localizedText;
+});

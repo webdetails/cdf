@@ -12,16 +12,15 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../templateBase',
+  '../../../Dashboard'
+], function(AddIn, templateBase, Dashboard) {
+
+  var template = new AddIn(templateBase);
+
+  Dashboard.registerGlobalAddIn("Template", "templateType", template);
+
+  return template;
+
+});

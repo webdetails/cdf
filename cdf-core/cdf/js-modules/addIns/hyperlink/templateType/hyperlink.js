@@ -12,16 +12,19 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../hyperlinkBase',
+  '../../../Dashboard',
+  '../../../lib/jquery'
+], function(AddIn, hyperlinkBase, Dashboard, $) {
+  var hyperlink = new AddIn($.extend(true, {}, hyperlinkBase, {
+    defaults: {
+      urlReference: 1,
+      labelReference: 0
+    }
+  }));
+
+  Dashboard.registerGlobalAddIn("Template", "templateType", hyperlink);
+
+  return hyperlink;
+});
