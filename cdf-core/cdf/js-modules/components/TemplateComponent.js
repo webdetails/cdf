@@ -75,7 +75,7 @@ define([
       var htmlResult = this.renderTemplate(this.template, this.templateType, this.model);
       var $target = this.placeholder();
       $target.empty().append(htmlResult);
-      this.processAddins($target);
+      this.processAddins($target, data);
       if(!_.isEmpty(this.events)) {
         this.attachEvents(this.eventSelector, this.eventType, this.eventHandler);
       }
@@ -88,32 +88,32 @@ define([
       });
     },
 
-    applyFormatter: function(model, formatter) {
+    applyFormatter: function(model, formatter, id) {
       var formatHandler = Utils.propertiesArrayToObject(this.formatters)[formatter];
       if(_.isFunction(formatHandler)) {
-        return formatHandler.call(this, model);
+        return formatHandler.call(this, model, id);
       } else {
         return model;
       }
     },
 
-    applyAddin: function(model, addin) {
+    applyAddin: function(model, addin, id) {
       var UID = this.name + "_" + addin + this.getUID();
       this.addins = this.addins || [];
-      this.addins.push({uid: UID, model: model, addin: addin});
+      this.addins.push({uid: UID, model: model, addin: addin, id: id});
       return '<div id="' + UID + '" class="' + addin + '"/>';
     },
 
-    processAddins: function($target) {
+    processAddins: function($target, data) {
       var myself = this;
       _.each(this.addins, function(elem) {
-        myself.handleAddin(_.first($target.find('#' + elem.uid)), elem.model, elem.addin);
+        myself.handleAddin(_.first($target.find('#' + elem.uid)), elem.model, elem.addin, data, elem.id);
       });
     },
 
-    handleAddin: function(target, model, addInName) {
+    handleAddin: function(target, model, addInName, data, id) {
       var addIn = this.getAddIn("templateType", addInName);
-      var state = {value: model};
+      var state = {value: model, data: data, id: id};
       addIn.call(target, state, this.getAddInOptions("templateType", addIn.getName()));
     },
 
@@ -146,11 +146,11 @@ define([
       var myself = this;
       if((!_.isEmpty(model))) {
         var helpers = {
-          formatter: function(data, formatter) {
-            return myself.applyFormatter(data, formatter);
+          formatter: function(data, formatter, id) {
+            return myself.applyFormatter(data, formatter, id);
           },
-          addin: function(data, addin) {
-            return myself.applyAddin(data, addin);
+          addin: function(data, addin, id) {
+            return myself.applyAddin(data, addin, id);
           }
         };
 
@@ -183,11 +183,11 @@ define([
     attachEvents: function() {
       var myself = this;
       _.each(this.events, function(elem) {
-        var separator = ' ',
+        var separator = ',',
             handler = _.first(elem).split(separator),
             eventHandler = _.last(elem),
-            event = _.first(handler),
-            selector = _.last(handler);
+            event = _.first(handler).trim(),
+            selector = _.last(handler).trim();
         if(_.isFunction(eventHandler)) {
           myself.placeholder(selector).on(event, _.bind(eventHandler, myself));
         }
@@ -196,11 +196,12 @@ define([
 
     processMessage: function(message, type) {
       var completeMsg = {
-        msg: message || "",
+        msg: this.messages.error[message] || "",
         type: this.messages.config.style[type].type || "info",
         icon: this.messages.config.style[type].icon || "comment"
       };
-      return _.template(this.messages.config.template, completeMsg)
+      Logger.log(completeMsg.msg, type);
+      return _.template(this.messages.config.template, completeMsg);
     }
 
   });

@@ -12,16 +12,28 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../sparklineBase',
+  '../../../Dashboard',
+  'amd!../../../lib/underscore',
+  '../../../lib/jquery',
+  'css!./sparkline'
+], function(AddIn, sparklineBase, Dashboard, _, $) {
+
+  var sparkline = new AddIn($.extend(true, {}, sparklineBase, {
+
+    defaults: {
+      type: 'bar'
+    },
+
+    getData: function(st, opt) {
+      return _.map(st.value.split(','), function(elem) {
+        return elem.trim();
+      })
+    }
+  }));
+
+  Dashboard.registerGlobalAddIn("Template", "templateType", sparkline);
+
+  return sparkline;
+});

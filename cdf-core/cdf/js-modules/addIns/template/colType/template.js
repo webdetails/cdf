@@ -12,16 +12,22 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../templateBase',
+  '../../../Dashboard',
+  'amd!../../../lib/datatables'
+], function(AddIn, templateBase, Dashboard, $) {
+
+  var template = new AddIn($.extend(true, {}, templateBase, {
+
+    init: function() {
+      $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+    }
+  }));
+
+  Dashboard.registerGlobalAddIn("Table", "colType", template);
+
+  return template;
+
+});
