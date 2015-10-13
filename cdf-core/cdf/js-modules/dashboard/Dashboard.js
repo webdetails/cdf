@@ -250,6 +250,20 @@ define([
     getWcdfSettings: function() {
       Logger.info("getWcdfSettings was not overriden, returning empty object");
       return {};
+    },
+
+    /**
+     * Normalizes an htmlObject id
+     *
+     * This method is meant to be used when we need to directly manipulate an htmlObject.
+     * It will be overriden returning the proper id in embedded scenarios.
+     *
+     * @method normalizeId
+     * @param {String} id the htmlObject id to normalize
+     * @return {String} the normalized id
+     */
+    normalizeId: function(id) {
+      return id;
     }
   });
 
