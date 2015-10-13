@@ -11,7 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger, $) {
+define([
+  './dashboard/Utils',
+  './Logger',
+  './lib/jquery'
+], function(Utils, Logger, $) {
 
   /**
    * Creates a new AddIn.
@@ -22,7 +26,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
    * there should also be an options.defaults member containing the
    * default values for the configurable settings.
    *
-   *  AddIns come in two varieties: Static AddIns
+   * AddIns come in two varieties: Static AddIns
    * represent static data or behaviour, whereas Scriptable AddIns
    * represent dynamic, context-dependent behaviour.
    *
@@ -31,8 +35,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
    * @constructor
    * @param options {Object} The options for the AddIn.
    */
-  return function (options) {
-  
+  return function(options) {
     var myself = options;
     if(typeof options != "object") {
       throw TypeError;
@@ -43,16 +46,17 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
     }
 
     /**
-     *  The internal identifier for the AddIn. (read only)
-     *  @property name
-     *  @type String
+     * The internal identifier for the AddIn. (read only)
+     * @property _name
+     * @type String
+     * @private
      */
-
     var _name = options.name,
         /**
-         *  The AddIn's human-readable label. (read only)
-         *  @property label
-         *  @type String
+         * The AddIn's human-readable label. (read only)
+         * @property _label
+         * @type String
+         * @private
          */
         _label = options.label,
         _type = options.implementation ? "scriptable" : "static",
@@ -76,7 +80,6 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
       return _label;
     };
 
-
     /**
      * Returns the AddIn name
      *
@@ -86,7 +89,7 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
     this.getName = function() {
       return _name;
     };
-    
+
     /**
      * Call the AddIn. If the AddIn is static, all parameters are
      * irrelevant, and this method will simply return the value.
@@ -111,23 +114,21 @@ define(['./dashboard/Utils', './Logger', './lib/jquery'], function(Utils, Logger
       if(!_implementation) {
         return Utils.clone(_value);
       }
-      options = typeof options == "function" ? options(state) : options;
-      var evaluatedDefaults = typeof _defaults == "function" ? _defaults(state) : _defaults;
+      options = typeof options === "function" ? options(state) : options;
+      var evaluatedDefaults = typeof _defaults === "function" ? _defaults(state) : _defaults;
       var compiledOptions = $.extend(true, {}, evaluatedDefaults, options);
       try{
-        return _implementation.call(myself, target, state, compiledOptions);    
-      }
-      catch(e) {
+        return _implementation.call(myself, target, state, compiledOptions);
+      } catch(e) {
         Logger.log("Addin Error [" + this.getName() + "]: " + e, "error");
       }
     };
-  
+
     this.setDefaults = function(defaults) {
-      
-      if(typeof defaults == 'function') {
+      if(typeof defaults === 'function') {
         _defaults = defaults;
       } else {
-        _defaults = $.extend(true, {}, _defaults,defaults);
+        _defaults = $.extend(true, {}, _defaults, defaults);
       }
     };
   };
