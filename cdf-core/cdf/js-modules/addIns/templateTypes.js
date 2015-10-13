@@ -12,17 +12,14 @@
  */
 
 define([
-       './templateTypes/template/template'
-      ,'./templateTypes/bubble/bubble'
-      ,'./templateTypes/trendArrow/trendArrow'
-      ,'./templateTypes/formatted/formatted'
-      ,'./templateTypes/sparkline/sparkline'
-      ,'./templateTypes/localizedText/localizedText'
-      ,'./templateTypes/hyperlink/hyperlink'
-      ,'./templateTypes/clippedText/clippedText'
-      ,'./templateTypes/bulletChart/bulletChart'
-      ,'./templateTypes/cccChart/cccChart'
-      ],
-    function() {
-
-});
+  './template/templateType/template',
+  './bubble/templateType/bubble',
+  './cccBulletChart/templateType/cccBulletChart',
+  './trendArrow/templateType/trendArrow',
+  './formatted/templateType/formatted',
+  './sparkline/templateType/sparkline',
+  './localizedText/templateType/localizedText',
+  './hyperlink/templateType/hyperlink',
+  './clippedText/templateType/clippedText',
+  './cccChart/templateType/cccChart'
+]);

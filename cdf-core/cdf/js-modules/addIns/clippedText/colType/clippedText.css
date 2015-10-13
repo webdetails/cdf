@@ -11,17 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+.clippedTextContainer {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
