@@ -178,11 +178,13 @@ define([
           _getPage = function(page, searchPattern) {
             var callback, deferred, error, pattern;
             deferred = $.Deferred();
+            var isPaginated = this.query.getOption('pageSize') > 0;
+            var searchServerSide = configuration.component.search.serverSide;
 
             /*
              * Handle empty datasets
              */
-            if (this.query.getOption('pageSize') === 0) {
+            if (!searchServerSide && !isPaginated) {
               deferred.resolve({});
               return deferred;
             }
