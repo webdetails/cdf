@@ -145,7 +145,7 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
         /*
          * Handle empty datasets
          */
-        if (this.query.getOption('pageSize') === 0) {
+        if (!this.query || (!configuration.component.search.serverSide && this.query.getOption('pageSize') === 0)) {
           deferred.resolve({});
           return deferred;
         }
