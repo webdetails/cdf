@@ -182,7 +182,7 @@ define([
             /*
              * Handle empty datasets
              */
-            if (!configuration.component.search.serverSide && this.query.getOption('pageSize') === 0) {
+            if (!this.query || (!configuration.component.search.serverSide && this.query.getOption('pageSize') === 0)) {
               deferred.resolve({});
               return deferred;
             }
