@@ -178,7 +178,7 @@ define([
           _getPage = function(page, searchPattern) {
             var callback, deferred, error, pattern;
             deferred = $.Deferred();
-            var isPaginated = this.query.getOption('pageSize') > 0;
+            var isPaginated = !!this.query && this.query.getOption('pageSize') > 0;
             var searchServerSide = configuration.component.search.serverSide;
 
             /*
