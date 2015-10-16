@@ -316,7 +316,7 @@
 }
 .filter-item-only-this {
   color: #808080;
-  right: 15px;
+  right: 5px;
   visibility: hidden;
 }
 .filter-item-container:hover .filter-item-only-this {
