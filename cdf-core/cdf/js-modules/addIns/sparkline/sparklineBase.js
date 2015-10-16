@@ -12,16 +12,31 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../lib/jquery',
+  'amd!../../lib/jquery.sparkline'
+], function($) {
+  
+  return {
+
+    name: "sparkline",
+    label: "Sparkline",
+    defaults: {
+      type: 'line',
+      cssClass: 'sparklineContainer',
+      layout: '<div></div>'
+    },
+
+    init: function() { },
+    
+    implementation: function(tgt, st, opt) {
+      opt = $.extend(true, this.defaults, opt);
+      $(tgt).sparkline(this.getData(st, opt), opt)
+            .removeClass("sparkline")
+            .addClass(opt.cssClass);
+    },
+
+    getData: function(st, opt) {
+      return st.value;
+    }
+  };
+});

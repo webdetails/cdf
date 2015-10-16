@@ -12,16 +12,28 @@
  */
 
 define([
-  './cccBulletChart/colType/cccBulletChart',
-  './circle/colType/circle',
-  './clippedText/colType/clippedText',
-  './dataBar/colType/dataBar',
-  './formattedText/colType/formattedText',
-  './groupHeaders/colType/groupHeaders',
-  './hyperlink/colType/hyperlink',
-  './localizedText/colType/localizedText',
-  './pvSparkline/colType/pvSparkline',
-  './sparkline/colType/sparkline',
-  './trendArrow/colType/trendArrow',
-  './template/colType/template'
-]);
+  '../../../AddIn',
+  '../cccBulletChartBase',
+  '../../../Dashboard',
+  '../../../lib/jquery'
+], function(AddIn, cccBulletChartBase, Dashboard, $) {
+  
+  var cccBulletChart = new AddIn($.extend(true, {}, cccBulletChartBase, {
+    defaults: {
+      chartOptions: {
+        compatVersion: 2,
+        height: 60,
+        bulletTitle: "",
+        extensionPoints: {
+          "bulletMarker_shape": "circle",
+          "bulletTitle_textStyle": "#fff",
+          "bulletMeasure_fillStyle": "#666"
+        }
+      }
+    }
+  }));
+  
+  Dashboard.registerGlobalAddIn("Template", "templateType", cccBulletChart);
+  
+  return cccBulletChart;
+});

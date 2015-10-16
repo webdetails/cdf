@@ -12,7 +12,14 @@
  */
 
 define([
-      './templateTypes/template/template'],
-    function() {
-
-});
+  './template/templateType/template',
+  './bubble/templateType/bubble',
+  './cccBulletChart/templateType/cccBulletChart',
+  './trendArrow/templateType/trendArrow',
+  './formatted/templateType/formatted',
+  './sparkline/templateType/sparkline',
+  './localizedText/templateType/localizedText',
+  './hyperlink/templateType/hyperlink',
+  './clippedText/templateType/clippedText',
+  './cccChart/templateType/cccChart'
+]);
