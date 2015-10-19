@@ -31,7 +31,8 @@ module.exports = function(config) {
       'config/require-config.js',
       // fix 404 messages
       {pattern: 'bin/test-js/cdf/js/**/*.png', watched: false, included: false, served: true},
-      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true}
+      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true},
+      {pattern: 'bin/test-js/cdf/js/**/*.svg', watched: false, included: false, served: true}
     ],
 
     // list of files to exclude
