@@ -23,9 +23,9 @@ define([
    */
   describe("The Filter Component #", function() {
 
-    var dashboard, filterComponent, $htmlObject;
+    var dashboard, filterComponent, $htmlObject, testFilterDefaults;
 
-    filterComponent = new FilterComponent({
+    testFilterDefaults = {
       type: "FilterComponent",
       name: "render_singleFilter_simple",
       priority: 5,
@@ -63,19 +63,26 @@ define([
         sortGroup: [],
         sortItem: []
       }
-    });
+    };
+
+    filterComponent = new FilterComponent(testFilterDefaults);
 
     $htmlObject = $('<div />').attr('id', filterComponent.htmlObject);
 
-    beforeEach(function() {
-      dashboard = new Dashboard();
+    var getNewDashboard = function() {
+      var dashboard = new Dashboard();
       dashboard.init();
       dashboard.addParameter("singleSelectionParam_simple",_.bind(function() {
         return [];
       }, {"dashboard": dashboard}));
+      return dashboard;
+    };
+
+    beforeEach(function() {
+      dashboard = getNewDashboard();
       $('body').append($htmlObject);
     });
-    
+
     afterEach(function() {
       $htmlObject.remove();
     });
@@ -97,10 +104,10 @@ define([
       dashboard.update(filterComponent);
     });
 
-    describe("Filter Component # RootCtl controller", function() {
+    describe("RootCtrl controller #", function() {
 
       /**
-       * ## The Filter Component # RootCtl controller # clears search input if no match is found and component is being expanded
+       * ## The Filter Component # RootCtrl controller # clears search input if no match is found and component is being expanded
        */
       it("clears search input if no match is found and component is being expanded", function(done) {
         dashboard.addComponent(filterComponent);
@@ -123,6 +130,144 @@ define([
           done();
         });
       });
+    });
+
+    describe("Get Page Mechanism #", function() {
+
+      var testMetadata = [
+        {
+          colIndex: 0,
+          colType: "Numeric",
+          colName: "group"
+        },
+        {
+          colIndex: 1,
+          colType: "String",
+          colName: "type"
+        },
+        {
+          colIndex: 2,
+          colType: "String",
+          colName: "empty"
+        }
+      ];
+
+      var getCdaJson = function(resultset) {
+        return {
+          resultset: resultset,
+          metadata: testMetadata,
+          status: "success"
+        };
+      };
+      var defaultCdaJson = getCdaJson([[1.1, "Default1", ""], [1.2, "Default2", ""]]);
+      var onFilterChangeCdaJson = getCdaJson([[1.3, "ServerSide", ""], [1.4, "PageSize", ""]]);
+      var testPageSize = 10;
+
+      it("works with searchServerSide = true and pageSize > 0", function(done) {
+        runGetPageMechanismTest(true, testPageSize, done);
+      });
+
+      it("works with searchServerSide = false and pageSize > 0", function(done) {
+        runGetPageMechanismTest(false, testPageSize, done);
+      });
+
+      it("works with searchServerSide = true and pageSize = Infinity", function(done) {
+        runGetPageMechanismTest(true, Infinity, done);
+      });
+
+      it("works with searchServerSide = false and pageSize = Infinity", function(done) {
+        runGetPageMechanismTest(false, Infinity, done);
+      });
+
+      var runGetPageMechanismTest = function(serverSide, pageSize, done) {
+        var dashboard = getNewDashboard();
+        var testFilterComponent = getTestFilterComponent(serverSide, pageSize);
+
+        makeAjaxSpy();
+
+        dashboard.addComponent(testFilterComponent);
+
+        testFilterComponent.once("getData:success", function() {
+          if(serverSide) {
+            addEvaluateExpectationsAfterGetPage(testFilterComponent, serverSide, pageSize, done);
+          } else {
+            addEvaluateExpectationsInsteadOfFilter(testFilterComponent, serverSide, pageSize, done);
+          }
+          testFilterComponent.manager.onFilterChange('');
+        });
+
+        dashboard.update(testFilterComponent);
+      };
+
+      var getTestFilterComponent = function(serverSide, pageSize) {
+        return new FilterComponent($.extend(true, {}, testFilterDefaults, {
+          queryDefinition: {
+            dataAccessId: "testId",
+            path: "/test.cda",
+            pageSize: pageSize
+          },
+          componentInput: {
+            valuesArray: []
+          },
+          options: function() {
+            return {
+              component: {
+                search: {
+                  serverSide: serverSide
+                }
+              }
+            };
+          }
+        }));
+      };
+
+      var makeAjaxSpy = function() {
+        var firstCallToServer = true;
+        spyOn($, 'ajax').and.callFake(function(params) {
+          if(firstCallToServer) {
+            params.success(defaultCdaJson);
+            firstCallToServer = false;
+          } else {
+            params.success(onFilterChangeCdaJson);
+          }
+        });
+      };
+
+      addEvaluateExpectationsAfterGetPage = function(component, serverSide, pageSize, done) {
+        component.manager.get('configuration').pagination.getPage =
+          (function(originalGetPage) {
+            return function() {
+              return originalGetPage.apply(component, arguments).then(function(json) {
+                evaluateExpectations(serverSide, pageSize, component.manager.get("model").children().models,
+                  component.manager.get('configuration'));
+                done();
+                return json;
+              });
+            };
+          })(component.manager.get('configuration').pagination.getPage);
+      };
+
+      addEvaluateExpectationsInsteadOfFilter = function(component, serverSide, pageSize, done) {
+        component.manager.filter = function() {
+          evaluateExpectations(serverSide, pageSize, component.manager.get("model").children().models,
+            component.manager.get('configuration'));
+          done();
+        };
+      };
+
+      var evaluateExpectations = function(serverSide, pageSize, models, configuration) {
+        expect(models[0].get("label")).toEqual("Default1");
+        expect(models[1].get("label")).toEqual("Default2");
+        expect(configuration.search.serverSide).toEqual(serverSide);
+        expect(configuration.pagination.pageSize).toEqual(pageSize);
+        if (serverSide) {
+          expect(models.length).toEqual(4);
+          expect(models[2].get("label")).toEqual("ServerSide");
+          expect(models[3].get("label")).toEqual("PageSize");
+        } else {
+          expect(models.length).toEqual(2);
+        }
+      };
     });
   });
 });
