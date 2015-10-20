@@ -96,6 +96,12 @@ define([
             oldState = model.get('isCollapsed');
             newState = !oldState;
           }
+          var hasVisibleNode = !!model.nodes() && _.some(model.nodes().models, function(model) {
+            return model.get('isVisible');
+          });
+          if (!hasVisibleNode && oldState) {
+            this.view.onFilterClear();
+          }
           model.set('isCollapsed', newState);
           return this;
         },

@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/jquery"],
-  function(Dashboard, MultiButtonComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/MultiButtonComponent",
+  "cdf/lib/jquery",
+  "amd!cdf/lib/underscore"
+], function(Dashboard, MultiButtonComponent, $, _) {
 
   /**
    * ## The Multi Button Component
@@ -22,7 +26,6 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
     var dashboard = new Dashboard();
     var htmlObject = "sampleMultiButtonComponentObject";
     var componentName = "multiButtonComponent";
-    $("body").append('<div id="' + htmlObject + '"></div>');
 
     dashboard.addParameter("region", "");
 
@@ -47,6 +50,17 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
     dashboard.addComponent(multiButtonComponent);
     dashboard.init();
 
+    var $htmlObject = $('<div />').attr('id', htmlObject);
+
+    beforeEach(function() {
+      // add an element where the button will be inserted
+      $('body').append($htmlObject);
+    });
+    
+    afterEach(function() {
+      $htmlObject.remove();
+    });
+
 
     /**
      * ## The Multi Button Component # allows a dashboard to execute update
@@ -67,9 +81,9 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
     });
 
     /**
-     * ## The Multi Button Component # doesn't trigger postChange N times for N clicks in same button
+     * ## The Multi Button Component # doesn't trigger postChange N times for N clicks on the same button
      */
-    it("doesn't trigger postChange N times for N clicks in same button", function(done) {
+    it("doesn't trigger postChange N times for N clicks on the same button", function(done) {
       multiButtonComponent.clickButton(htmlObject, componentName, 1);
       multiButtonComponent.clickButton(htmlObject, componentName, 2);
       multiButtonComponent.clickButton(htmlObject, componentName, 0);
@@ -77,16 +91,16 @@ define(["cdf/Dashboard.Clean", "cdf/components/MultiButtonComponent", "cdf/lib/j
       multiButtonComponent.clickButton(htmlObject, componentName, 0);
       multiButtonComponent.clickButton(htmlObject, componentName, 0);
       // sending the expect to the end of the call stack
-      setTimeout(function(){
+      _.defer(function() {
         expect(multiButtonComponent.testCounter).toEqual(3);
         done();
-      }, 1);
+      });
     });
 
     /**
-     * ## The Multi Button Component # behaves correctly with parameter as null
+     * ## The Multi Button Component # behaves correctly using a parameter with a null
      */
-    it("behaves correctly with parameter as null", function(done) {
+    it("behaves correctly using a parameter with a null", function(done) {
       dashboard.setParameter("region", null);
       spyOn(multiButtonComponent, 'update').and.callThrough();
       spyOn($, "ajax").and.callFake(function() {
