@@ -85,7 +85,7 @@
         oldState = model.get('isCollapsed');
         newState = !oldState;
       }
-      var hasVisibleNode = _.some(model.nodes().models, function(model) {
+      var hasVisibleNode = !!model.nodes() && _.some(model.nodes().models, function(model) {
         return model.get('isVisible');
       });
       if (!hasVisibleNode && oldState) {
