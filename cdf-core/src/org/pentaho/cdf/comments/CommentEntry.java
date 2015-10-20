@@ -17,7 +17,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 
  * @author pedro
  */
 public class CommentEntry implements Serializable {
@@ -57,8 +56,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param commentId
-   *          the commentId to set
+   * @param commentId the commentId to set
    */
   public void setCommentId( int commentId ) {
     this.commentId = commentId;
@@ -72,8 +70,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param page
-   *          the page to set
+   * @param page the page to set
    */
   public void setPage( String page ) {
     this.page = page;
@@ -87,8 +84,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param user
-   *          the user to set
+   * @param user the user to set
    */
   public void setUser( String user ) {
     this.user = user;
@@ -102,8 +98,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param comment
-   *          the comment to set
+   * @param comment the comment to set
    */
   public void setComment( String comment ) {
     this.comment = comment;
@@ -117,8 +112,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param deleted
-   *          the deleted to set
+   * @param deleted the deleted to set
    */
   public void setDeleted( boolean deleted ) {
     this.deleted = deleted;
@@ -132,8 +126,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param archived
-   *          the archived to set
+   * @param archived the archived to set
    */
   public void setArchived( boolean archived ) {
     this.archived = archived;
@@ -147,8 +140,7 @@ public class CommentEntry implements Serializable {
   }
 
   /**
-   * @param createdDate
-   *          the createdDate to set
+   * @param createdDate the createdDate to set
    */
   public void setCreatedDate( Date createdDate ) {
     this.createdDate = createdDate;

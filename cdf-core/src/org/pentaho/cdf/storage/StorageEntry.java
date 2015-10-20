@@ -43,8 +43,7 @@ public class StorageEntry implements Serializable {
   }
 
   /**
-   * @param storageId
-   *          the storageId to set
+   * @param storageId the storageId to set
    */
   public void setStorageId( int storageId ) {
     this.storageId = storageId;
@@ -58,8 +57,7 @@ public class StorageEntry implements Serializable {
   }
 
   /**
-   * @param user
-   *          the user to set
+   * @param user the user to set
    */
   public void setUser( String user ) {
     this.user = user;
@@ -73,8 +71,7 @@ public class StorageEntry implements Serializable {
   }
 
   /**
-   * @param storageValue
-   *          the storage to set
+   * @param storageValue the storage to set
    */
   public void setStorageValue( String storageValue ) {
     this.storageValue = storageValue;
@@ -88,8 +85,7 @@ public class StorageEntry implements Serializable {
   }
 
   /**
-   * @param lastUpdatedDate
-   *          the createdDate to set
+   * @param lastUpdatedDate the createdDate to set
    */
   public void setLastUpdatedDate( Date lastUpdatedDate ) {
     this.lastUpdatedDate = lastUpdatedDate;

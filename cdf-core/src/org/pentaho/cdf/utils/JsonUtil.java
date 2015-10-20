@@ -89,7 +89,7 @@ public class JsonUtil {
 
   public static boolean isSuccessResponse( JSONObject json ) {
     try {
-      return json != null && JsonStatus.SUCCESS.value.equals( json.get( JsonField.STATUS.value ) );
+      return json != null && JsonStatus.SUCCESS.getValue().equals( json.get( JsonField.STATUS.getValue() ) );
     } catch ( JSONException e ) {
       logger.error( e );
     }

@@ -31,11 +31,10 @@ public class CdfHeadersProviderTest extends TestCase {
 
   @Test
   public void testGetHeaders() {
-
-    String blueprintHeaders =  getHeadersByType( "blueprint" );
-    String mobileHeaders =  getHeadersByType( "mobile" );
-    String bootstrapHeaders =  getHeadersByType( "bootstrap" );
-    String cleanHeaders =  getHeadersByType( "clean" );
+    String blueprintHeaders = getHeadersByType( "blueprint" );
+    String mobileHeaders = getHeadersByType( "mobile" );
+    String bootstrapHeaders = getHeadersByType( "bootstrap" );
+    String cleanHeaders = getHeadersByType( "clean" );
 
     String blueprintExpectedHeaders = "<!-- cdf-blueprint-script-includes -->cdf-blueprint-script-includes<!--"
         + " cdf-blueprint-style-includes -->cdf-blueprint-style-includes<!-- cdf-blueprint-ie8style-includes -->"
@@ -58,8 +57,38 @@ public class CdfHeadersProviderTest extends TestCase {
     assertEquals( mobileExpectedHeaders, mobileHeaders );
     assertEquals( bootstrapExpectedHeaders, bootstrapHeaders );
     assertEquals( cleanExpectedHeaders, cleanHeaders );
-
   }
+
+  @Test
+  public void testGetHeadersSimple() throws Exception {
+    List<String> componentTypes = new ArrayList<String>();
+    componentTypes.add( "testComponent" );
+
+    String blueprintHeaders = cdfHeadersProvider.getHeaders( "blueprint", false, componentTypes );
+
+    String blueprintExpectedHeaders = "<!-- cdf-blueprint-script-includes -->cdf-blueprint-script-includes<!--"
+        + " cdf-blueprint-style-includes -->cdf-blueprint-style-includes<!-- cdf-blueprint-ie8style-includes -->"
+        + "cdf-blueprint-ie8style-includes<!-- cdf-cdf-dashboard-script-includes -->cdf-cdf-dashboard-script-includes"
+        + "<!-- cdf-cdf-dashboard-style-includes -->cdf-cdf-dashboard-style-includes";
+
+    assertEquals( blueprintExpectedHeaders, blueprintHeaders );
+  }
+
+  @Test
+  public void testGetHeadersInvalidType() throws Exception {
+    List<String> componentTypes = new ArrayList<String>();
+    componentTypes.add( "testComponent" );
+
+    String blueprintHeaders = cdfHeadersProvider.getHeaders( "", false, componentTypes );
+
+    String blueprintExpectedHeaders = "<!-- cdf-blueprint-script-includes -->cdf-blueprint-script-includes<!--"
+        + " cdf-blueprint-style-includes -->cdf-blueprint-style-includes<!-- cdf-blueprint-ie8style-includes -->"
+        + "cdf-blueprint-ie8style-includes<!-- cdf-cdf-dashboard-script-includes -->cdf-cdf-dashboard-script-includes"
+        + "<!-- cdf-cdf-dashboard-style-includes -->cdf-cdf-dashboard-style-includes";
+
+    assertEquals( blueprintExpectedHeaders, blueprintHeaders );
+  }
+
 
   private String getHeadersByType( String type ) {
     List<String> componentTypes = new ArrayList<String>();
