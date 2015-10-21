@@ -111,7 +111,6 @@ define([
        */
       it("clears search input if no match is found and component is being expanded", function(done) {
         dashboard.addComponent(filterComponent);
-        dashboard.update(filterComponent);
 
         // listen to cdf:postExecution event
         filterComponent.once("cdf:postExecution", function() {
@@ -129,6 +128,8 @@ define([
 
           done();
         });
+
+        dashboard.update(filterComponent);
       });
     });
 
@@ -171,12 +172,12 @@ define([
         runGetPageMechanismTest(false, testPageSize, done);
       });
 
-      it("works with searchServerSide = true and pageSize = Infinity", function(done) {
-        runGetPageMechanismTest(true, Infinity, done);
+      it("works with searchServerSide = true and pageSize = 0", function(done) {
+        runGetPageMechanismTest(true, 0, done);
       });
 
-      it("works with searchServerSide = false and pageSize = Infinity", function(done) {
-        runGetPageMechanismTest(false, Infinity, done);
+      it("works with searchServerSide = false and pageSize = 0", function(done) {
+        runGetPageMechanismTest(false, 0, done);
       });
 
       var runGetPageMechanismTest = function(serverSide, pageSize, done) {
@@ -204,7 +205,8 @@ define([
           queryDefinition: {
             dataAccessId: "testId",
             path: "/test.cda",
-            pageSize: pageSize
+            // BaseQuery will not accept pageSize <= 0, it will default to it though
+            pageSize: (pageSize > 0) ? pageSize : null
           },
           componentInput: {
             valuesArray: []
@@ -259,7 +261,7 @@ define([
         expect(models[0].get("label")).toEqual("Default1");
         expect(models[1].get("label")).toEqual("Default2");
         expect(configuration.search.serverSide).toEqual(serverSide);
-        expect(configuration.pagination.pageSize).toEqual(pageSize);
+        expect(configuration.pagination.pageSize).toEqual((pageSize > 0) ? pageSize : Infinity );
         if (serverSide) {
           expect(models.length).toEqual(4);
           expect(models[2].get("label")).toEqual("ServerSide");
