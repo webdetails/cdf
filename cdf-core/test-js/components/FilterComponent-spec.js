@@ -64,8 +64,11 @@ define([
         sortItem: []
       }
     };
+    var getNewFilterComponent = function(options) {
+      return new FilterComponent($.extend(true, {}, testFilterDefaults, options));
+    }
 
-    filterComponent = new FilterComponent(testFilterDefaults);
+    filterComponent = getNewFilterComponent();
 
     $htmlObject = $('<div />').attr('id', filterComponent.htmlObject);
 
@@ -131,6 +134,34 @@ define([
 
         dashboard.update(filterComponent);
       });
+
+      it("updates the count of selected items when triggering onOnlyThis", function(done) {
+        var selectionLimit = 5;
+        filterComponent = getNewFilterComponent({
+          componentDefinition: {
+            multiselect: true,
+            selectionLimit: selectionLimit
+          }
+        });
+
+        dashboard.addComponent(filterComponent);
+
+        filterComponent.once("cdf:postExecution", function() {
+          var controller = filterComponent.manager.get('controller');
+          var rootModel = filterComponent.model;
+          var childrenModels = rootModel.children().models;
+          expect(rootModel.get('numberOfSelectedItems')).toEqual(0);
+          for(var i = 0; i < selectionLimit; i++) {
+            controller.onSelection(childrenModels[i]);
+          }
+          expect(rootModel.get('numberOfSelectedItems')).toEqual(selectionLimit);
+          controller.onOnlyThis(childrenModels[0]);
+          expect(rootModel.get('numberOfSelectedItems')).toEqual(1);
+          done();
+        });
+
+        dashboard.update(filterComponent);
+      });
     });
 
     describe("Get Page Mechanism #", function() {
@@ -182,6 +213,11 @@ define([
 
       var runGetPageMechanismTest = function(serverSide, pageSize, done) {
         var dashboard = getNewDashboard();
+        dashboard.addDataSource("testFilterComponentDataSource", {
+          dataAccessId: "testId",
+          path: "/test.cda"
+        });
+
         var testFilterComponent = getTestFilterComponent(serverSide, pageSize);
 
         makeAjaxSpy();
@@ -201,12 +237,11 @@ define([
       };
 
       var getTestFilterComponent = function(serverSide, pageSize) {
-        return new FilterComponent($.extend(true, {}, testFilterDefaults, {
+        return getNewFilterComponent({
           queryDefinition: {
-            dataAccessId: "testId",
-            path: "/test.cda",
+            dataSource: "testFilterComponentDataSource",
             // BaseQuery will not accept pageSize <= 0, it will default to it though
-            pageSize: (pageSize > 0) ? pageSize : null
+            pageSize: ((pageSize > 0) ? pageSize : null)
           },
           componentInput: {
             valuesArray: []
@@ -220,7 +255,7 @@ define([
               }
             };
           }
-        }));
+        });
       };
 
       var makeAjaxSpy = function() {
