@@ -111,7 +111,7 @@ define([
         },
         onOnlyThis: function(model) {
           this.debug("Setting Only This");
-          this.model.root().setSelection(BaseFilter.Enum.select.NONE);
+          this.model.root().setAndUpdateSelection(BaseFilter.Enum.select.NONE);
           this.configuration.selectionStrategy.strategy.setSelection(BaseFilter.Enum.select.ALL, model);
           return this;
         }
