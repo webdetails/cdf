@@ -38,8 +38,8 @@ define([
       queryDefinition: {},
       componentInput: {
         valueAsId: false,
-        valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],[1.5,"Five","Ones"],[1.6,"Six","Ones"],[1.7,"Seven","Ones"],[1.8,"Eight","Ones"],[1.9,"Nine","Ones"],
-                      [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"],[2.5,"Five","Twos"],[2.6,"Six","Twos"],[2.7,"Seven","Twos"],[2.8,"Eight","Twos"],[2.9,"Nine","Twos"]]
+        valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],
+                      [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"]]
       },
       componentOutput: {
         outputFormat: "lowestID"
@@ -107,6 +107,13 @@ define([
       dashboard.update(filterComponent);
     });
 
+    it('disables the "only" button when using the SingleSelect strategy', function() {
+      expect(filterComponent.getConfiguration().component.selectionStrategy.type).toEqual("SingleSelect");
+      expect(filterComponent.getConfiguration().component.Root.options.showButtonOnlyThis).toEqual(false);
+      expect(filterComponent.getConfiguration().component.Group.options.showButtonOnlyThis).toEqual(false);
+      expect(filterComponent.getConfiguration().component.Item.options.showButtonOnlyThis).toEqual(false);
+    });
+
     describe("RootCtrl controller #", function() {
 
       /**
@@ -115,7 +122,6 @@ define([
       it("clears search input if no match is found and component is being expanded", function(done) {
         dashboard.addComponent(filterComponent);
 
-        // listen to cdf:postExecution event
         filterComponent.once("cdf:postExecution", function() {
           // simulate a search term that doesn't have any matches
           expect(filterComponent.model.root().get('isCollapsed')).toEqual(true);
