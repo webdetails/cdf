@@ -237,7 +237,11 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       /**
        * Patches
        */
-      if (selectionStrategyConfig !== 'SingleSelect') {
+      if (selectionStrategyConfig.type === 'SingleSelect') {
+        configuration.component.Root.options.showButtonOnlyThis = false;
+        configuration.component.Group.options.showButtonOnlyThis = false;
+        configuration.component.Item.options.showButtonOnlyThis = false;
+      } else {
         if (cd.showButtonOnlyThis === true || cd.showButtonOnlyThis === false) {
           configuration.component.Root.options.showButtonOnlyThis = cd.showButtonOnlyThis;
           configuration.component.Group.options.showButtonOnlyThis = cd.showButtonOnlyThis;
