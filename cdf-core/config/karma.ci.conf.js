@@ -24,6 +24,7 @@ module.exports = function(config) {
     files: [
       {pattern: 'bin/test-js/cdf/js/**/*.css', included: false},
       {pattern: 'bin/test-js/cdf/js/**/*.js', included: false},
+      {pattern: 'bin/test-js/cdf/js/components/filter/**/*.html', included: false},
       'config/context.js',
       {pattern: 'test-js/**/*.ext.js', included: true},
       {pattern: 'test-js/**/*-spec.js', included: false},
