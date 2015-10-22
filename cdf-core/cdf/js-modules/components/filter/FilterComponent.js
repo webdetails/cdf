@@ -1,6 +1,6 @@
 /*!
  * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
- * 
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
@@ -24,8 +24,8 @@
 define([
   'cdf/lib/jquery',
   'amd!cdf/lib/underscore',
-  'amd!cdf/lib/backbone', 
-  'cdf/Dashboard.Clean', 
+  'amd!cdf/lib/backbone',
+  'cdf/Dashboard.Clean',
   'cdf/components/UnmanagedComponent',
   './filter/filter-implementation',
   'css!./filter/styles/filter'],

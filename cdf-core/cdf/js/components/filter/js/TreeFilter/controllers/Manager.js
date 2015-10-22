@@ -370,7 +370,7 @@
       this._searchPattern = text.trim().toLowerCase();
       filter = _.bind(function() {
         var isMatch;
-        isMatch = this.filter(this._searchPattern);
+        isMatch = this.filter(this._searchPattern, "", this.get('configuration').search.matcher);
         return this.get('model').setVisibility(true);
       }, this);
       if (this.get('configuration').search.serverSide === true) {
@@ -381,7 +381,7 @@
       }
       _.defer(filter);
     },
-    filter: function(text, prefix) {
+    filter: function(text, prefix, customMatcher) {
 
       /**
        * decide on item visibility based on a match to a filter string
@@ -400,14 +400,18 @@
       if (this.children()) {
         isMatch = _.any(this.children().map(function(manager) {
           var childIsMatch;
-          childIsMatch = manager.filter(text, fullString);
+          childIsMatch = manager.filter(text, fullString, customMatcher);
           manager.get('model').setVisibility(childIsMatch);
           return childIsMatch;
         }));
       } else if (_.isEmpty(text)) {
         isMatch = true;
       } else {
-        isMatch = fullString.toLowerCase().match(text.toLowerCase()) != null;
+        if (_.isFunction(customMatcher)) {
+          isMatch = customMatcher(fullString, text);
+        } else {
+          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1 ;
+        }
         this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
       }
       this.get('model').setVisibility(isMatch);

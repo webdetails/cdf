@@ -257,6 +257,13 @@ define([
               component: {
                 search: {
                   serverSide: serverSide
+                },
+                Root: {
+                  view: { // preventing the scrollbar from being rendered, due to its implementation, it will sometimes break this test
+                    scrollbar: {
+                      engine: "fake_engine"
+                    }
+                  }
                 }
               }
             };
@@ -311,6 +318,85 @@ define([
           expect(models.length).toEqual(2);
         }
       };
+    });
+
+    describe("Search Mechanism #", function() {
+      var _Defer = _.defer;
+
+      beforeEach(function() {
+        // the component will use defer before the actual filtering
+        // bypassing this behaviour when testing
+        _.defer = function(func) {
+          func.apply(null, []);
+        };
+      });
+
+      afterEach(function() {
+        _.defer = _Defer;
+      });
+
+      var getTestSearchFilterComponent = function(matcher) {
+        return getNewFilterComponent({
+          componentInput: {
+            valuesArray:
+            [[0, "Twenty-One", "Twenties"], [1, "Twenty-Two", "Twenties"], [2, "Twenty-Three", "Twenties"], [3, "Twenty-Four", "Twenties"],
+             [4, "Fourty-Seven", "Fourties"], [5, "Fourty-Nine", "Fourties"], [6, "Fourty-Five", "Fourties"], [7, "Fourty-One", "Fourties"]]
+          },
+          options: function() {
+            return {
+              component: {
+                search: {
+                  matcher: matcher
+                }
+              }
+            };
+          }
+        });
+      };
+
+      var testSearch = function(filterComponent, searchTerm, matchCount) {
+        filterComponent.manager.onFilterChange(searchTerm);
+        expect(_.filter(filterComponent.model.children().models, function(model) {
+          return model.getVisibility();
+        }).length).toEqual(matchCount);
+      };
+
+      var searchTerms = ["ve", "went", "our", "twenty-one"];
+
+      it("works correctly", function(done) {
+        var filterComponent = getTestSearchFilterComponent();
+        dashboard.addComponent(filterComponent);
+        var searchCount = [2, 4, 5, 1];
+        filterComponent.once('getData:success', function() {
+          // need to make sure the manager is already fully initialized
+          filterComponent.manager.once('post:update:children', function() {
+            for(var i = 0; i < searchTerms.length; i++) {
+              testSearch(filterComponent, searchTerms[i], searchCount[i]);
+            }
+            done();
+          });
+        });
+        dashboard.update(filterComponent);
+      });
+
+      it("allows defining a specific matcher", function(done) {
+        // overriding the matcher, will filter the opposite of what is typed:
+        // ex. "a"  yields ["b", "c"] in ["a", "b", "c"]
+        var filterComponent = getTestSearchFilterComponent(function(entry, fragment) {
+          return entry.toLowerCase().indexOf(fragment.toLowerCase()) == -1;
+        });
+        dashboard.addComponent(filterComponent);
+        var searchCount = [6, 4, 3, 7];
+        filterComponent.once('getData:success', function() {
+          filterComponent.manager.once('post:update:children', function() {
+            for(var i = 0; i < searchTerms.length; i++) {
+              testSearch(filterComponent, searchTerms[i], searchCount[i]);
+            }
+            done();
+          });
+        });
+        dashboard.update(filterComponent);
+      });
     });
   });
 });
