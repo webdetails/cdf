@@ -89,7 +89,6 @@
       if (renderers == null) {
         return;
       }
-      this.debug("injecting");
       if (!_.isArray(renderers)) {
         renderers = [renderers];
       }
