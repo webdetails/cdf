@@ -237,7 +237,7 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       /**
        * Patches
        */
-      if (selectionStrategyConfig !== 'SingleSelect') {
+      if (selectionStrategyConfig.type !== 'SingleSelect') {
         if (cd.showButtonOnlyThis === true || cd.showButtonOnlyThis === false) {
           configuration.component.Root.options.showButtonOnlyThis = cd.showButtonOnlyThis;
           configuration.component.Group.options.showButtonOnlyThis = cd.showButtonOnlyThis;
