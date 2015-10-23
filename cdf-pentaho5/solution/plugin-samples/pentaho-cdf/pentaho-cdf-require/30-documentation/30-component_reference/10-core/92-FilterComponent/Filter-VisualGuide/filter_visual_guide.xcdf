@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>CDF-Filter-Accordion</title>
+	<title>cdf_filter_visual_guide</title>
 	<author>Webdetails</author>
-	<description>CDF-Filter-Accordion</description>
+	<description>CDF-Filter Component Visual Guide</description>
 	<icon></icon>
 	<template>template.html</template>
 	<style>mantle</style>
