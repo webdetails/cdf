@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>CDF-Filter-Reference</title>
+	<title>cdf_filter_addIn_reference_accordion</title>
 	<author>Webdetails</author>
-	<description>CDF-Filter-Reference</description>
+	<description>CDF Filter AddIn Reference: Accordion</description>
 	<icon></icon>
 	<template>template.html</template>
 	<style>mantle</style>
