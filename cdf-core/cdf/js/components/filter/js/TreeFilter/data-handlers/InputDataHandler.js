@@ -73,7 +73,6 @@
      * @public
      */
     updateModel: function(whatever) {
-      var model, options, ref;
       if (_.isArray(whatever)) {
         this._updateModelFromBidimensionalArray(whatever);
       } else if (this.isCdaJson(whatever)) {
@@ -81,11 +80,14 @@
       } else {
         this._updateModelJson(whatever);
       }
-      model = this.get('model');
+      var model = this.get('model');
       model.set('isBusy', false);
       model.set('isDisabled', this.get('model').children() === null);
-      options = this.get('options');
-      if ((ref = options.hooks) != null ? ref.postUpdate : void 0) {
+      var options = this.get('options');
+      if (options.root && options.root.id) {
+        model.set('id', options.root.id);
+      }
+      if (options.hooks && options.hooks.postUpdate) {
         _.each(options.hooks.postUpdate, function(hook) {
           return hook.call(null, null, model, options);
         });
@@ -94,27 +96,22 @@
       return this;
     },
     _updateModelFromCdaJson: function(json) {
-      var data, numberOfItems, options, pageData, ref, ref1, searchPattern;
-      options = $.extend(true, {}, this.get('options'));
-      pageData = getPageData(json.queryInfo, options.query.getOption('pageSize'));
+      var options = $.extend(true, {}, this.get('options'));
+      var pageData = getPageData(json.queryInfo, options.query.getOption('pageSize'));
+      var data;
       if (_.chain(options.indexes).map(_.identity).max().value() < json.metadata.length) {
         data = _.chain(json.resultset).groupBy(function(row) {
           return row[options.indexes.parentId];
         }).map(groupGenerator(options.indexes, pageData)).value();
       } else {
         data = itemGenerator(options.indexes, pageData)(json.resultset);
-        if (((ref = options.root) != null ? ref.id : void 0) != null) {
-          this.info("Setting root id to: " + options.root.id);
-          this.get('model').set('id', options.root.id);
-        }
       }
       this.get('model').add(data);
-      if (((ref1 = json.queryInfo) != null ? ref1.pageStart : void 0) != null) {
+      var numberOfItems;
+      if (json.queryInfo && json.queryInfo.pageStart) {
         numberOfItems = parseInt(json.queryInfo.totalRows);
-      } else {
-        numberOfItems = void 0;
       }
-      searchPattern = options.query.getOption('searchPattern');
+      var searchPattern = options.query.getOption('searchPattern');
       if (_.isEmpty(searchPattern)) {
         this.get('model').set('numberOfItemsAtServer', numberOfItems);
       }
