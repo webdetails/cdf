@@ -38,8 +38,8 @@ define([
       queryDefinition: {},
       componentInput: {
         valueAsId: false,
-        valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],[1.5,"Five","Ones"],[1.6,"Six","Ones"],[1.7,"Seven","Ones"],[1.8,"Eight","Ones"],[1.9,"Nine","Ones"],
-                      [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"],[2.5,"Five","Twos"],[2.6,"Six","Twos"],[2.7,"Seven","Twos"],[2.8,"Eight","Twos"],[2.9,"Nine","Twos"]]
+        valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],
+                      [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"]]
       },
       componentOutput: {
         outputFormat: "lowestID"
@@ -107,6 +107,13 @@ define([
       dashboard.update(filterComponent);
     });
 
+    it('disables the "only" button when using the SingleSelect strategy', function() {
+      expect(filterComponent.getConfiguration().component.selectionStrategy.type).toEqual("SingleSelect");
+      expect(filterComponent.getConfiguration().component.Root.options.showButtonOnlyThis).toEqual(false);
+      expect(filterComponent.getConfiguration().component.Group.options.showButtonOnlyThis).toEqual(false);
+      expect(filterComponent.getConfiguration().component.Item.options.showButtonOnlyThis).toEqual(false);
+    });
+
     describe("RootCtrl controller #", function() {
 
       /**
@@ -115,7 +122,6 @@ define([
       it("clears search input if no match is found and component is being expanded", function(done) {
         dashboard.addComponent(filterComponent);
 
-        // listen to cdf:postExecution event
         filterComponent.once("cdf:postExecution", function() {
           // simulate a search term that doesn't have any matches
           expect(filterComponent.model.root().get('isCollapsed')).toEqual(true);
@@ -251,6 +257,13 @@ define([
               component: {
                 search: {
                   serverSide: serverSide
+                },
+                Root: {
+                  view: { // preventing the scrollbar from being rendered, due to its implementation, it will sometimes break this test
+                    scrollbar: {
+                      engine: "fake_engine"
+                    }
+                  }
                 }
               }
             };
@@ -305,6 +318,108 @@ define([
           expect(models.length).toEqual(2);
         }
       };
+    });
+
+    describe("Search Mechanism #", function() {
+      var _Defer = _.defer;
+
+      beforeEach(function() {
+        // the component will use defer before the actual filtering
+        // bypassing this behaviour when testing
+        _.defer = function(func) {
+          func.apply(null, []);
+        };
+      });
+
+      afterEach(function() {
+        _.defer = _Defer;
+      });
+
+      var getTestSearchFilterComponent = function(matcher) {
+        return getNewFilterComponent({
+          componentInput: {
+            valuesArray:
+            [[0, "Twenty-One", "Twenties"], [1, "Twenty-Two", "Twenties"], [2, "Twenty-Three", "Twenties"], [3, "Twenty-Four", "Twenties"],
+             [4, "Fourty-Seven", "Fourties"], [5, "Fourty-Nine", "Fourties"], [6, "Fourty-Five", "Fourties"], [7, "Fourty-One", "Fourties"]]
+          },
+          options: function() {
+            return {
+              component: {
+                search: {
+                  matcher: matcher
+                }
+              }
+            };
+          }
+        });
+      };
+
+      var testSearch = function(filterComponent, searchTerm, matchCount) {
+        filterComponent.manager.onFilterChange(searchTerm);
+        expect(_.filter(filterComponent.model.children().models, function(model) {
+          return model.getVisibility();
+        }).length).toEqual(matchCount);
+      };
+
+      var searchTerms = ["ve", "went", "our", "twenty-one"];
+
+      it("works correctly", function(done) {
+        var filterComponent = getTestSearchFilterComponent();
+        dashboard.addComponent(filterComponent);
+        var searchCount = [2, 4, 5, 1];
+        filterComponent.once('getData:success', function() {
+          // need to make sure the manager is already fully initialized
+          filterComponent.manager.once('post:update:children', function() {
+            for(var i = 0; i < searchTerms.length; i++) {
+              testSearch(filterComponent, searchTerms[i], searchCount[i]);
+            }
+            done();
+          });
+        });
+        dashboard.update(filterComponent);
+      });
+
+      it("allows defining a specific matcher", function(done) {
+        // overriding the matcher, will filter the opposite of what is typed:
+        // ex. "a"  yields ["b", "c"] in ["a", "b", "c"]
+        var filterComponent = getTestSearchFilterComponent(function(entry, fragment) {
+          return entry.toLowerCase().indexOf(fragment.toLowerCase()) == -1;
+        });
+        dashboard.addComponent(filterComponent);
+        var searchCount = [6, 4, 3, 7];
+        filterComponent.once('getData:success', function() {
+          filterComponent.manager.once('post:update:children', function() {
+            for(var i = 0; i < searchTerms.length; i++) {
+              testSearch(filterComponent, searchTerms[i], searchCount[i]);
+            }
+            done();
+          });
+        });
+        dashboard.update(filterComponent);
+      });
+
+      it("respects user input", function(done) {
+        var filterComponent = getTestSearchFilterComponent();
+        dashboard.addComponent(filterComponent);
+        filterComponent.once('getData:success', function() {
+          var userInput;
+          filterComponent.manager.filter = function(text) {
+            expect(text).toEqual(userInput);
+          };
+
+          userInput = "lowercase";
+          filterComponent.manager.onFilterChange(userInput);
+          userInput = "UPPERCASE";
+          filterComponent.manager.onFilterChange(userInput);
+          userInput = "mixedCase";
+          filterComponent.manager.onFilterChange(userInput);
+          userInput = "special \"#$%& Characters";
+          filterComponent.manager.onFilterChange(userInput);
+
+          done();
+        });
+        dashboard.update(filterComponent);
+      });
     });
   });
 });

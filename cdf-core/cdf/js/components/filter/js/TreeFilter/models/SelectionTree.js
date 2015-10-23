@@ -20,7 +20,7 @@
      */
     defaults: {
       id: void 0,
-      label: "Label",
+      label: "",
       isSelected: false,
       isVisible: true,
       isCollapsed: true,
