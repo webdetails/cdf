@@ -81,6 +81,32 @@ define([
       return dashboard;
     };
 
+    var testMetadata = [
+      {
+        colIndex: 0,
+        colType: "Numeric",
+        colName: "group"
+      },
+      {
+        colIndex: 1,
+        colType: "String",
+        colName: "type"
+      },
+      {
+        colIndex: 2,
+        colType: "String",
+        colName: "empty"
+      }
+    ];
+
+    var getCdaJson = function(resultset) {
+      return {
+        resultset: resultset,
+        metadata: testMetadata,
+        status: "success"
+      };
+    };
+
     beforeEach(function() {
       dashboard = getNewDashboard();
       $('body').append($htmlObject);
@@ -172,31 +198,6 @@ define([
 
     describe("Get Page Mechanism #", function() {
 
-      var testMetadata = [
-        {
-          colIndex: 0,
-          colType: "Numeric",
-          colName: "group"
-        },
-        {
-          colIndex: 1,
-          colType: "String",
-          colName: "type"
-        },
-        {
-          colIndex: 2,
-          colType: "String",
-          colName: "empty"
-        }
-      ];
-
-      var getCdaJson = function(resultset) {
-        return {
-          resultset: resultset,
-          metadata: testMetadata,
-          status: "success"
-        };
-      };
       var defaultCdaJson = getCdaJson([[1.1, "Default1", ""], [1.2, "Default2", ""]]);
       var onFilterChangeCdaJson = getCdaJson([[1.3, "ServerSide", ""], [1.4, "PageSize", ""]]);
       var testPageSize = 10;
@@ -418,6 +419,124 @@ define([
 
           done();
         });
+        dashboard.update(filterComponent);
+      });
+    });
+
+    describe("Selection Mechanism #", function() {
+
+      var rootId = "TestRoot";
+
+      var getSelectionFilterComponent = function(options) {
+        return getNewFilterComponent($.extend(true, {
+          componentDefinition: {
+            multiselect: true
+          },
+          componentOutput: {
+            outputFormat: "highestID"
+          },
+          options: function() {
+            return {
+              input: {
+                root: {
+                  id: rootId
+                }
+              }
+            };
+          }
+        }, options));
+      };
+
+      var getSelectedModels = function(models) {
+        return _.filter(models, function(model) {
+            return model.getSelection();
+          });
+      };
+
+      var expectSelections = function(controller, models, single) {
+        for(var i = 0; i < models.length; i++) {
+          controller.onSelection(models[i]);
+          expect(getSelectedModels(models).length).toEqual(single ? 1 : (i + 1));
+        }
+      };
+
+      var doSelectionTest = function(filterComponent, dashboard, options) {
+        options = options || {};
+        var childrenModels = filterComponent.model.children().models;
+        expectSelections(filterComponent.manager.get("controller"), childrenModels, options.single);
+        filterComponent.model.updateSelectedItems();
+        expect(dashboard.getParameterValue(filterComponent.parameter).length).toEqual(
+          (options.root || options.single) ? 1 : childrenModels.length);
+        if(options.root) {
+          expect(dashboard.getParameterValue(filterComponent.parameter)).toEqual([rootId]);
+        }
+      };
+
+      it("works as intended in single select mode", function(done) {
+        var filterComponent = getNewFilterComponent();
+        dashboard.addComponent(filterComponent);
+
+        filterComponent.once('getData:success', function() {
+          doSelectionTest(filterComponent, dashboard, {single: true});
+          done();
+        });
+
+        dashboard.update(filterComponent);
+      });
+
+      it("works as intended in multi select mode", function(done) {
+        var filterComponent = getNewFilterComponent({
+          componentDefinition: {
+            multiselect: true
+          }
+        });
+        dashboard.addComponent(filterComponent);
+
+        filterComponent.once('getData:success', function() {
+          doSelectionTest(filterComponent, dashboard);
+          done();
+        });
+
+        dashboard.update(filterComponent);
+      });
+
+      it("works with valuesArray and a root.id defined", function(done) {
+        var filterComponent = getSelectionFilterComponent();
+        dashboard.addComponent(filterComponent);
+
+        filterComponent.once('getData:success', function() {
+          doSelectionTest(filterComponent, dashboard, {root: true});
+          done();
+        });
+
+        dashboard.update(filterComponent);
+      });
+
+      it("works with dataSource and a root.id defined", function(done) {
+        var filterComponent = getSelectionFilterComponent({
+          queryDefinition: {
+            dataSource: "selectionDataSource"
+          },
+          componentInput: {
+            valuesArray: []
+          }
+        });
+
+        dashboard.addComponent(filterComponent);
+        dashboard.addDataSource("selectionDataSource", {
+          dataAccessId: "testId",
+          path: "/test.cda"
+        })
+
+        spyOn($, 'ajax').and.callFake(function(params) {
+          params.success(getCdaJson(testFilterDefaults.componentInput.valuesArray));
+        });
+
+        filterComponent.once('getData:success', function() {
+          doSelectionTest(filterComponent, dashboard, {root: true});
+          done();
+        });
+
         dashboard.update(filterComponent);
       });
     });
