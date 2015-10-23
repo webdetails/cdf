@@ -17,26 +17,6 @@ a disabled filter.
 
           <div class='col-xs-12 col-sm-6 well last'><div id='filterObj_defaults' >
           </div></div>
-<p>
-Here, we created two filters that differ only
-<ul>
-    <li>on the value of the "Multi Select" property </li>
-    <li>on the parameter they read from/write to</li>    
-</ul>
-By default, both filter have filters (search boxes) enabled.
-</p>
-    
-<ul>
-    <li>
-        If the filter is configured as single-select (default behaviour), 
-        clicking on a option immediately closes the filter and writes the selection to a parameter.  
-    </li>
-   <li>
-        If the filter is configured as multi-select, 
-        the filter only closes if the user clicks outside, cancels or commits the current selection.
-        The parameter is only updated when the user presses the "Apply" button.
-   </li> 
-</ul>
     
 
 <h3>Adding data: simple lists of options</h3> 
@@ -74,6 +54,8 @@ Here, we created two filters that differ only
     <li>on the value of the "Multi Select" property </li>
     <li>on the parameter they read from/write to</li>    
 </ul>
+</p>
+<p>
 By default, both filter have filters (search boxes) enabled.
 </p>
     
@@ -198,7 +180,7 @@ a new page is requested to the server, and more items are added to the filter.
 <h2>Advanced configuration</h2>
 <p>
 CDE only exposes the most relevant options, the one that are most likely to be used.
-Specific dashboards may have custom requirements, some of which can even the dynamic.
+Specific dashboards may have custom requirements, some of which can even be dynamic.
 Just because there is no visual way of defining a behaviour, it does not mean it cannot be done.
 <br/>
 To modify or extend the default behaviour of the filter, you can:
@@ -222,7 +204,7 @@ For more information, look into the filter reference page.
 <h3>Using add-ins</h3>
 <p>
 An add-in is basically a snippet of code wrapped in a reusable way that modifies the component.
-Below, we used added the addIns "randomColor" and "template" to the slot "renderItemSelection".
+Below, we used the addIns "randomColor" and "template" to the slot "renderItemSelection".
 </p> 
 
               <div class='col-xs-12 col-sm-6 well'><div id='singleFilterObj_addIn' >
@@ -423,27 +405,27 @@ var dashboard = new Dashboard();
 
   dashboard.addDataSource("getData_IdValue", {
     dataAccessId: "getData_IdValue",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visualGuide.cda"
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
   });
 
   dashboard.addDataSource("getData_IdValue_IdGroup", {
     dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visualGuide.cda"
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
   });
 
   dashboard.addDataSource("getData_IdValueGroup", {
     dataAccessId: "getData_IdValueGroup",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visualGuide.cda"
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
   });
 
   dashboard.addDataSource("getData_idValue_long", {
     dataAccessId: "getData_idValue_long",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visualGuide.cda"
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
   });
 
   dashboard.addDataSource("getDataSearchable", {
     dataAccessId: "getDataSearchable",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visualGuide.cda"
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
   });
 
 var render_defaultFilter = new FilterComponent({
