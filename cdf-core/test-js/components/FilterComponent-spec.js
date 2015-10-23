@@ -397,6 +397,29 @@ define([
         });
         dashboard.update(filterComponent);
       });
+
+      it("respects user input", function(done) {
+        var filterComponent = getTestSearchFilterComponent();
+        dashboard.addComponent(filterComponent);
+        filterComponent.once('getData:success', function() {
+          var userInput;
+          filterComponent.manager.filter = function(text) {
+            expect(text).toEqual(userInput);
+          };
+
+          userInput = "lowercase";
+          filterComponent.manager.onFilterChange(userInput);
+          userInput = "UPPERCASE";
+          filterComponent.manager.onFilterChange(userInput);
+          userInput = "mixedCase";
+          filterComponent.manager.onFilterChange(userInput);
+          userInput = "special \"#$%& Characters";
+          filterComponent.manager.onFilterChange(userInput);
+
+          done();
+        });
+        dashboard.update(filterComponent);
+      });
     });
   });
 });
