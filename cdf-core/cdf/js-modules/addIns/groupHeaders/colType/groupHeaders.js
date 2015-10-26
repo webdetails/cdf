@@ -19,7 +19,7 @@ define([
   'amd!../../../lib/datatables',
   'css!./groupHeaders'],
   function(AddIn, Dashboard, sprintf, $) {
-  
+
   var groupHeaders = new AddIn({
     name: "groupHeaders",
     label: "Group Headers",
@@ -27,8 +27,8 @@ define([
       hide: true,
       columnHeadersInGroups: false,
       replaceFirstHeader: true,
-      textFormat: function(st, opt) {
-        return st.colFormat ? sprintf(st.colFormat, st.value) : st.value;
+      textFormat: function(v, st, opt) {
+        return st.colFormat ? sprintf(st.colFormat,v) : v;
       }
     },
 
@@ -36,7 +36,7 @@ define([
       $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];
       $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
-    
+
     implementation: function(tgt, st, opt) {
       var dt = $(tgt).parents('table').eq(0).dataTable(),
           visColIdx = $(tgt).index();
@@ -46,7 +46,7 @@ define([
          dt.find('.groupHeaders:nth-child(' + (visColIdx + 1) + ')').addClass('hiddenCol');
       }
 
-      
+
       if(opt.columnHeadersInGroups) {
         var header = dt.find("thead").eq(0);
         header.find("tr").clone
@@ -68,14 +68,14 @@ define([
           $group = this.buildHeader(tgt,st, opt);
           $group.insertBefore($row);
       }
- 
+
     },
 
     buildHeader: function(tgt, st, opt) {
       var $header,
           $dt = $(tgt).parents('table').eq(0).dataTable(),
           $theader,
-          headerText = opt.textFormat.call(this, st, opt);
+          headerText = opt.textFormat.call(this, st.value, st, opt);
 
       if(opt.columnHeadersInGroups) {
         $theader = $dt.find("thead").eq(0);

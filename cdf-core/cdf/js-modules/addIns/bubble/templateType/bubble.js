@@ -14,7 +14,7 @@
 define([
   '../../../AddIn',
   '../../../Dashboard',
-  '../../../lib/jquery', 
+  '../../../lib/jquery',
   'amd!../../../lib/underscore',
   '../../../lib/CCC/tipsy'
 ], function(AddIn, Dashboard, $, _) {
@@ -41,17 +41,16 @@ define([
       color: function(st) {
         return "rgba(200, 200, 200, 0.6)";
       },
-      title: function(st, opt) { 
-        return "Value: " + st.value; 
+      title: function(st, opt) {
+        return "Value: " + st.value;
       },
       cssClass: "bubbleContainer",
       layout: '<div></div>'
     },
 
     init: function() { },
-    
+
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       var data = st.value,
           options = {},
           key,
@@ -68,9 +67,9 @@ define([
           .addClass(options.cssClass)
           .append($(opt.layout)
             .attr('title', options.title)
-            .css({'width': options.radius + "%", 
-                  'height': options.radius + "%", 
-                  'border-radius': '100%', 
+            .css({'width': options.radius + "%",
+                  'height': options.radius + "%",
+                  'border-radius': '100%',
                   'background-color': options.color,
                   'display': 'inline-block',
                   'text-align': 'center',

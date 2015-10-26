@@ -46,7 +46,6 @@ define([
     sort: function() { },
 
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, {}, this.defaults, opt);
       var chartOptions = opt.chartOptions,
           $html = $(opt.layout).addClass(opt.cssClass),
           $tgt = $(tgt).empty().append($html),
@@ -56,7 +55,7 @@ define([
       chartOptions.width = chartOptions.width || $tgt.width();
       chartOptions.bulletMeasures = [values[0]];
       chartOptions.bulletMarkers = [values[1]];
- 
+
       var chart = new pvc.BulletChart(chartOptions);
       chart.setData(this.getData(values), {});
       chart.render();
