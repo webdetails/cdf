@@ -18,7 +18,7 @@ define([
   '../../../lib/jquery'
 ], function(AddIn, Dashboard, Utils, $) {
 
-  var formatted = new AddIn({ 
+  var formatted = new AddIn({
     name: "formatted",
     label: "Formatted Value",
 
@@ -35,9 +35,8 @@ define([
     },
 
     init: function() { },
-    
+
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       var data = typeof opt.applyFormat === "function"
         ? opt.applyFormat(st.value)
         : st.value;
