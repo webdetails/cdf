@@ -39,8 +39,8 @@ define([
       min: undefined,
       includeValue: false,
       absValue: true,
-      valueFormat: function(st, opt) {
-        return "" + sprintf(st.colFormat || "%.1f", st.value);
+      valueFormat: function(v, format, st, opt) {
+        return "" + sprintf(format || "%.1f", v);
       }
     },
     init: function() {
@@ -132,7 +132,7 @@ define([
       });
 
       if(opt.includeValue) {
-        var valueStr = opt.valueFormat(st, opt);
+        var valueStr = opt.valueFormat(st.value, st.colFormat, st, opt);
         var valph = $("<span></span>").addClass('value');
         valph.append(valueStr);
         if(options.legacy) {
