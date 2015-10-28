@@ -161,13 +161,9 @@ define([
          * @return {Object} Returns a configuration object
          */
         getConfiguration: function() {
-          var _getPage, cd, ci, co, configuration, i18nMap, pageSize, selectionStrategy, selectionStrategyConfig, strategy, styles, that;
-          cd = this.componentDefinition;
-          ci = this.componentInput;
-          co = this.componentOutput;
-          that = this;
-          selectionStrategy = cd.multiselect ? 'LimitedSelect' : 'SingleSelect';
-          configuration = {
+          var cd = this.componentDefinition;
+          var selectionStrategy = cd.multiselect ? 'LimitedSelect' : 'SingleSelect';
+          var configuration = {
             input: {},
             output: {},
             component: $.extend(true, {}, BaseFilter.defaults, BaseFilter.Enum.selectionStrategy[selectionStrategy], {
@@ -175,9 +171,8 @@ define([
             })
           };
           $.extend(true, configuration, _.result(this, 'defaults'));
-          _getPage = function(page, searchPattern) {
-            var callback, deferred, error, pattern;
-            deferred = $.Deferred();
+          var _getPage = function(page, searchPattern) {
+            var deferred = $.Deferred();
             var isPaginated = !!this.query && this.query.getOption('pageSize') > 0;
             var searchServerSide = configuration.component.search.serverSide;
 
@@ -188,7 +183,7 @@ define([
               deferred.resolve({});
               return deferred;
             }
-            callback = _.bind(function(data) {
+            var callback = _.bind(function(data) {
               this.inputDataHandler.updateModel(data);
               this.model.setBusy(false);
               deferred.resolve(data);
@@ -196,7 +191,7 @@ define([
             }, this);
             this.model.setBusy(true);
             try {
-              pattern = _.isEmpty(searchPattern) ? '' : searchPattern;
+              var pattern = _.isEmpty(searchPattern) ? '' : searchPattern;
               this.query.setSearchPattern(pattern);
               switch (page) {
                 case 'previous':
@@ -212,13 +207,12 @@ define([
                   this.query.doQuery(callback);
               }
             } catch (_error) {
-              error = _error;
               deferred.reject({});
               this.model.setBusy(false);
             }
             return deferred;
           };
-          styles = [];
+          var styles = [];
           if (!cd.showIcons) {
             styles.push('no-icons');
           }
@@ -226,7 +220,7 @@ define([
           /*
            * validate pagination
            */
-          pageSize = Infinity;
+          var pageSize = Infinity;
           if (this.queryDefinition.pageSize != null) {
             if (_.isFinite(this.queryDefinition.pageSize) && this.queryDefinition.pageSize > 0) {
               pageSize = this.queryDefinition.pageSize;
@@ -256,8 +250,8 @@ define([
           /*
            * Localize strings, if they are defined
            */
-          i18nMap = this.dashboard.i18nSupport.map || {};
-          that = this;
+          var i18nMap = this.dashboard.i18nSupport.map || {};
+          var that = this;
           _.each(['Root', 'Group', 'Item'], function(level) {
             return _.each(configuration.component[level].strings, function(value, token, list) {
               var fullToken;
@@ -267,8 +261,8 @@ define([
               }
             });
           });
-          selectionStrategyConfig = configuration.component.selectionStrategy;
-          strategy = new BaseFilter.SelectionStrategies[selectionStrategyConfig.type](selectionStrategyConfig);
+          var selectionStrategyConfig = configuration.component.selectionStrategy;
+          var strategy = new BaseFilter.SelectionStrategies[selectionStrategyConfig.type](selectionStrategyConfig);
           configuration.component.selectionStrategy.strategy = strategy;
 
           /*
