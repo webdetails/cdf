@@ -103,6 +103,12 @@
   padding-bottom: 0;
   font-size: 13px;
 }
+.filter-root-body.filter-expand-relative {
+  position: relative;
+}
+.filter-root-body.filter-expand-absolute {
+  position: absolute;
+}
 .filter-root-container.always-expanded > .filter-root-body {
   position: relative;
 }
