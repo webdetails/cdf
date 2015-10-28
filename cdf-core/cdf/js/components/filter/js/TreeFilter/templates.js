@@ -297,7 +297,7 @@
       '<div class="filter-root-collapse-icon" />',
       '</div>',
       '',
-      '<div class="filter-root-body" >',
+      '<div class="filter-root-body filter-expand-{{expandMode}}" >',
       '<div class="filter-root-control" />',
       '<div class="filter-root-items-container">',
       '<div class="filter-root-items" />',
