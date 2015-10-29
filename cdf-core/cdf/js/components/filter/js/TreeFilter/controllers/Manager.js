@@ -301,15 +301,21 @@
           return customSorter(null, model, configuration);
         };
       } else if (_.isArray(customSorter)) {
+        if (customSorter.length === 1) {
+          return function(model, idx) {
+            return customSorter[0](null, model, configuration);
+          };
+        } else {
 
-        /**
-         * Use multiple sorters, one after the other
-         */
-        return function(model, idx) {
-          return _.chain(customSorter).map(function(sorter) {
-            return sorter(null, model, configuration);
-          }).join('').value();
-        };
+          /**
+           * Use multiple sorters, one after the other
+           */
+          return function(model, idx) {
+            return _.chain(customSorter).map(function(sorter) {
+              return sorter(null, model, configuration);
+            }).join('').value();
+          };
+        }
       }
     },
     sortChildren: function() {
