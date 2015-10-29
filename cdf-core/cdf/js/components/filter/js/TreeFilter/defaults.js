@@ -106,7 +106,8 @@
           showIcons: true,
           scrollThreshold: 12,
           isResizable: true,
-          useOverlay: true
+          useOverlay: true,
+          expandMode: 'absolute'
         },
         strings: {
           isDisabled: 'Unavailable',
