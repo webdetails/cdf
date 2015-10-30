@@ -92,7 +92,7 @@ define([
           return that.listenTo(that.attributes[object], event, _.bind(method, that));
         });
       });
-      this.on('post:child:selection request:child:sort', this.sortChildren);
+      this.on('post:child:selection request:child:sort', this.renderSortedChildren);
       this.on('post:child:add', _.throttle(this.onUpdateChildren, 1000, {
         leading: false
       }));
@@ -193,25 +193,13 @@ define([
      * Pagination
      */
     getNextPage: function(model, event) {
-      var orderedChildren, ref, sorter;
-      sorter = this.getSorter();
-      if (_.isFunction(sorter)) {
-        orderedChildren = this.children().sortBy(function(m, idx) {
-          return sorter(m.get('model'), idx);
-        });
-        this.previousPosition = (ref = _.last(orderedChildren, 2)[0]) != null ? ref.get('view').$el : void 0;
-      }
+      var ref;
+      this.previousPosition = (ref = _.last(this.sortChildren(this.children()), 2)[0]) != null ? ref.get('view').$el : void 0;
       return this.getPage('next', model, event);
     },
     getPreviousPage: function(model, event) {
-      var orderedChildren, ref, sorter;
-      sorter = this.getSorter();
-      if (_.isFunction(sorter)) {
-        orderedChildren = this.children().sortBy(function(m, idx) {
-          return sorter(m.get('model'), idx);
-        });
-        this.previousPosition = (ref = _.first(orderedChildren, 2)[1]) != null ? ref.get('view').$el : void 0;
-      }
+      var ref;
+      this.previousPosition = (ref = _.first(this.sortChildren(this.children()), 2)[1]) != null ? ref.get('view').$el : void 0;
       return this.getPage('previous', model, event);
     },
     getPage: function(page, model, event) {
@@ -260,7 +248,7 @@ define([
             }
           };
         })(this));
-        this.sortChildren();
+        this.renderSortedChildren();
         this.get('view').updateScrollBar();
       }
       return this;
@@ -293,53 +281,72 @@ define([
         return this.parent().trigger('request:child:sort');
       }
     },
-    getSorter: function() {
-      var configuration, customSorter, type;
-      type = this.children().first().get('view').type;
-      customSorter = this.get('configuration')[type].sorter;
-      if (!customSorter) {
-        return void 0;
+    /**
+     * Gets an array containing the sorter functions. The most significant
+     * sorter function should be placed at the beginning of the array.
+     *
+     * @method getSorters
+     * @return {Array|} the array of sorter functions or undefined
+     */
+    getSorters: function() {
+      var type = this.children().first().get('view').type;
+      var customSorters = this.get('configuration')[type].sorter;
+      if (!customSorters) {
+        return;
       }
-      configuration = this.get('configuration');
-      if (_.isFunction(customSorter)) {
-        return function(model, idx) {
-          return customSorter(null, model, configuration);
-        };
-      } else if (_.isArray(customSorter)) {
-        if (customSorter.length === 1) {
-          return function(model, idx) {
-            return customSorter[0](null, model, configuration);
-          };
-        } else {
-
-          /*
-           * Use multiple sorters, one after the other
-           */
-          return function(model, idx) {
-            return _.chain(customSorter).map(function(sorter) {
-              return sorter(null, model, configuration);
-            }).join('').value();
-          };
-        }
+      if (_.isFunction(customSorters)) {
+        return [customSorters];
+      } else if (_.isArray(customSorters)) {
+        return customSorters;
       }
     },
-    sortChildren: function() {
-      var $nursery, children, customSorter, orderedChildren, sorter;
+    /**
+     * Sorts a collection according to one or more custom sorter functions.
+     * This function uses underscore's sortBy function. In order to
+     * support multiple sorter functions we need to apply them in reverse order,
+     * starting with the least significant and ending with the most significant.
+     * The most significant should be placed at the beginning of the custom sorter
+     * functions array.
+     *
+     * @method sortChildren
+     * @param {Array} children the array to be sorted
+     * @return {Array} the sorted array
+     */
+    sortChildren: function(children) {
+      var customSorters = this.getSorters();
+      if (!(_.isArray(customSorters) && !_.isEmpty(customSorters))) {
+        return children;
+      }
+
+      var sorterIdx = customSorters.length;
+      var configuration = this.get('configuration');
+      var orderedChildren = _.chain(children);
+
+      // apply sorters in reverse order, from least to most important sorter
+      while(sorterIdx--) {
+        orderedChildren = orderedChildren.sortBy(function(child, idx) {
+          return customSorters[sorterIdx](null, child.item.get('model'), configuration);
+        });
+      }
+      return orderedChildren.value();
+    },
+    /**
+     * Renders an array of sorted children.
+     *
+     * @method renderSortedChildren
+     * @chainable
+     */
+    renderSortedChildren: function() {
+      var $nursery;
       if (!this.children()) {
         return this;
       }
-      customSorter = this.getSorter();
-      if (_.isFunction(customSorter)) {
-        sorter = function(child, idx) {
-          return customSorter(child.item.get('model'), idx);
-        };
-        $nursery = this.get('view').getChildrenContainer();
-        $nursery.hide();
-        children = this._detachChildren();
-        orderedChildren = _.sortBy(children, sorter);
-        this._appendChildren(orderedChildren);
-        $nursery.show();
-      }
+      
+      $nursery = this.get('view').getChildrenContainer();
+      $nursery.hide();
+      this._appendChildren(this.sortChildren(this._detachChildren()));
+      $nursery.show();
+
       return this;
     },
     _detachChildren: function() {
@@ -373,7 +380,7 @@ define([
      * React to the user typing in the search box.
      *
      * @method onFilterChange
-     * @param {String} text
+     * @param {String} text the new search pattern
      * @for Manager
      */
     onFilterChange: function(text) {
