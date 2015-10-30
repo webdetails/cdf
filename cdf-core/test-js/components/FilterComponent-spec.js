@@ -99,10 +99,10 @@ define([
       }
     ];
 
-    var getCdaJson = function(resultset) {
+    var getCdaJson = function(resultset, metadata) {
       return {
         resultset: resultset,
-        metadata: testMetadata,
+        metadata: metadata,
         status: "success"
       };
     };
@@ -138,6 +138,64 @@ define([
       expect(filterComponent.getConfiguration().component.Root.options.showButtonOnlyThis).toEqual(false);
       expect(filterComponent.getConfiguration().component.Group.options.showButtonOnlyThis).toEqual(false);
       expect(filterComponent.getConfiguration().component.Item.options.showButtonOnlyThis).toEqual(false);
+    });
+
+    describe("Manager controller #", function() {
+      it("sorts children according to an array of custom sorting functions", function(done) {
+        dashboard.addDataSource("selectionDataSource", {
+          dataAccessId: "testId",
+          path: "/test.cda"
+        });
+        var filterComponent = getNewFilterComponent({
+          queryDefinition: {dataSource: "selectionDataSource"},
+          componentInput: {valuesArray: []},
+          options: function() {
+            return {
+              component: {
+                search: {serverSide: true},
+                Root: {view: {scrollbar: {engine: "fake_engine"}}}
+              }
+            };
+          },
+          addIns: {sortItem: ["sortByValue", "sortByLabel"]}
+        });
+        dashboard.addComponent(filterComponent);
+
+        filterComponent.setAddInOptions('sortItem', 'sortByValue', {ascending: true});
+        filterComponent.setAddInOptions('sortItem', 'sortByLabel', {ascending: true});
+
+        spyOn($, 'ajax').and.callFake(function(params) {
+          params.success(getCdaJson(
+            [["One", "label1", null, null, 60],
+             ["Two", "label2", null, null, 7],
+             ["Three", "label1", null, null, 7]],
+            [{colIndex: 0, colType: "String", colName: "id"},
+             {colIndex: 1, colType: "String", colName: "name"},
+             {colIndex: 4, colType: "Numeric", colName: "value"}]));
+        });
+
+        filterComponent.once("getData:success", function() {
+          spyOn(filterComponent.manager, "renderSortedChildren").and.callFake(function() {
+            var orderedChildren = this._detachChildren();
+            expect(orderedChildren[0].item.get('model').get('value')).toEqual(60);
+            expect(orderedChildren[0].item.get('model').get('label')).toEqual("label1");
+            expect(orderedChildren[1].item.get('model').get('value')).toEqual(7);
+            expect(orderedChildren[1].item.get('model').get('label')).toEqual("label2");
+            expect(orderedChildren[2].item.get('model').get('value')).toEqual(7);
+            expect(orderedChildren[2].item.get('model').get('label')).toEqual("label1");
+            orderedChildren = this.sortChildren(orderedChildren);
+            expect(orderedChildren[0].item.get('model').get('value')).toEqual(7);
+            expect(orderedChildren[0].item.get('model').get('label')).toEqual("label1");
+            expect(orderedChildren[1].item.get('model').get('value')).toEqual(7);
+            expect(orderedChildren[1].item.get('model').get('label')).toEqual("label2");
+            expect(orderedChildren[2].item.get('model').get('value')).toEqual(60);
+            expect(orderedChildren[2].item.get('model').get('label')).toEqual("label1");
+            done();
+          });
+        });
+
+        dashboard.update(filterComponent);
+      });
     });
 
     describe("RootCtrl controller #", function() {
@@ -198,8 +256,8 @@ define([
 
     describe("Get Page Mechanism #", function() {
 
-      var defaultCdaJson = getCdaJson([[1.1, "Default1", ""], [1.2, "Default2", ""]]);
-      var onFilterChangeCdaJson = getCdaJson([[1.3, "ServerSide", ""], [1.4, "PageSize", ""]]);
+      var defaultCdaJson = getCdaJson([[1.1, "Default1", ""], [1.2, "Default2", ""]], testMetadata);
+      var onFilterChangeCdaJson = getCdaJson([[1.3, "ServerSide", ""], [1.4, "PageSize", ""]], testMetadata);
       var testPageSize = 10;
 
       it("works with searchServerSide = true and pageSize > 0", function(done) {
@@ -526,10 +584,10 @@ define([
         dashboard.addDataSource("selectionDataSource", {
           dataAccessId: "testId",
           path: "/test.cda"
-        })
+        });
 
         spyOn($, 'ajax').and.callFake(function(params) {
-          params.success(getCdaJson(testFilterDefaults.componentInput.valuesArray));
+          params.success(getCdaJson(testFilterDefaults.componentInput.valuesArray, testMetadata));
         });
 
         filterComponent.once('getData:success', function() {
