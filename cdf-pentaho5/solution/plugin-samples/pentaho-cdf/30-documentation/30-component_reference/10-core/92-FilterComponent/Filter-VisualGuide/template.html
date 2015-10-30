@@ -1,4 +1,4 @@
-<h1>Visual Guide to the Filter Component</h1>
+<h1>Filter Component Visual Guide</h1>
 <h2>Introduction </h2>
 <p>
 Reading documentation is usually boring.
@@ -22,7 +22,7 @@ a disabled filter.
 <h3>Adding data: simple lists of options</h3> 
 <p>
 Without data there is not much a filter can do. 
-To populate the filter with a a list of options, you can:
+To populate the filter with a list of options, you can:
 <ol>
     <li>Define a datasource a query and assign it to the component</li>
     <li>Fill in the property <tt>valuesArray</tt>, which is useful if you have a static dataset</li>
@@ -162,7 +162,14 @@ delegating to the server the task of filtering the items. To do so, you will nee
         </code></pre>
     </li>
     <li>
-        set the filter's property <tt>Server supports search</tt> to <tt>True</tt>
+        as mentioned in filter reference page add the following section in <tt>Advanced Settings</tt>:
+        <pre><code>
+        component: {
+            search: {
+                serverSide: true
+            }
+        }
+        </code></pre>
     </li>
 </ul>
 
@@ -879,13 +886,7 @@ var render_multiFilter_simple_paginated = {
   parameter: "multiSelectionParam_simple",
   parameters: [],
   options: function(){
-    return {
-        component: {
-            search: {
-                serverSide: true
-            }
-        }
-    };
+    return {};
 } ,
   queryDefinition:  {
     dataAccessId: "getDataSearchable",
