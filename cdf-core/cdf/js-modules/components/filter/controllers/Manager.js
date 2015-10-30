@@ -283,18 +283,18 @@ define([
      * sorter function should be placed at the beginning of the array.
      *
      * @method getSorters
-     * @return {Array|} the array of sorter functions or undefined
+     * @return {Array} an array with the available sorter functions
      */
     getSorters: function() {
       var type = this.children().first().get('view').type;
       var customSorters = this.get('configuration')[type].sorter;
-      if (!customSorters) {
-        return;
-      }
+
       if (_.isFunction(customSorters)) {
         return [customSorters];
       } else if (_.isArray(customSorters)) {
         return customSorters;
+      } else {
+        return [];
       }
     },
     /**
@@ -311,7 +311,7 @@ define([
      */
     sortChildren: function(children) {
       var customSorters = this.getSorters();
-      if (!(_.isArray(customSorters) && !_.isEmpty(customSorters))) {
+      if (_.isEmpty(customSorters)) {
         return children;
       }
 
