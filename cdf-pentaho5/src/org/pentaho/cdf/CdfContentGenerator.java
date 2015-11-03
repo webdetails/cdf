@@ -16,7 +16,6 @@ package org.pentaho.cdf;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,7 +41,6 @@ import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
-import org.pentaho.platform.engine.services.runtime.ParameterManager;
 import pt.webdetails.cpf.SimpleContentGenerator;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.audit.CpfAuditHelper;
@@ -67,7 +65,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     boolean loadTheme = false;
 
     logger.info( "[Timing] CDF content generator took over: "
-      + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
       if ( getPathParameters() != null ) {
 
@@ -132,8 +130,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       }
 
       if ( getRequestParameters() != null ) {
-        renderXcdfDashboard( out, getRequestParameters(), FilenameUtils.separatorsToUnix( filePath ), template,
-          loadTheme );
+        renderXcdfDashboard(
+            out,
+            getRequestParameters(),
+            FilenameUtils.separatorsToUnix( filePath ),
+            template,
+            loadTheme );
       }
 
     } catch ( Exception e ) {
@@ -146,24 +148,36 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     long start = System.currentTimeMillis();
 
     UUID uuid =
-      CpfAuditHelper.startAudit( PLUGIN_ID, xcdfFilePath, getObjectName(), this.userSession, this, requestParams );
+        CpfAuditHelper.startAudit( PLUGIN_ID, xcdfFilePath, getObjectName(), this.userSession, this, requestParams );
     try {
 
       XcdfRenderer renderer = new XcdfRenderer();
 
       boolean success = renderer.determineDashboardTemplating( xcdfFilePath, defaultTemplate )
-        && renderer.determineRequireDashboard( xcdfFilePath );
+          && renderer.determineRequireDashboard( xcdfFilePath );
 
       if ( success ) {
 
         String templatePath = Util.joinPath( FilenameUtils.getPath( xcdfFilePath ), renderer.getTemplate() );
 
         if ( !StringUtils.isEmpty( defaultTemplate ) ) { // If style defined in URL parameter 'template'
-          renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, renderer.getMessagesBaseFilename(),
-            renderer.getIsRequire(), loadTheme );
+          renderHtmlDashboard(
+              out,
+              xcdfFilePath,
+              templatePath,
+              defaultTemplate,
+              renderer.getMessagesBaseFilename(),
+              renderer.getIsRequire(),
+              loadTheme );
         } else { // use style provided via .xcdf or default
-          renderHtmlDashboard( out, xcdfFilePath, templatePath, renderer.getStyle(),
-            renderer.getMessagesBaseFilename(), renderer.getIsRequire(), loadTheme );
+          renderHtmlDashboard(
+              out,
+              xcdfFilePath,
+              templatePath,
+              renderer.getStyle(),
+              renderer.getMessagesBaseFilename(),
+              renderer.getIsRequire(),
+              loadTheme );
         }
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
@@ -184,9 +198,15 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
   public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
                                    String defaultTemplate,
-                                   String dashboardsMessagesBaseFilename) throws Exception {
-    renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, false,
-      false );
+                                   String dashboardsMessagesBaseFilename ) throws Exception {
+    renderHtmlDashboard(
+        out,
+        xcdfFilePath,
+        templatePath,
+        defaultTemplate,
+        dashboardsMessagesBaseFilename,
+        false,
+        false );
   }
 
   public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
@@ -205,8 +225,16 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     int inactiveInterval = request.getSession().getMaxInactiveInterval();
     renderer
-      .execute( out, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, paramMap, userSession.getName(),
-        inactiveInterval, isRequire, loadTheme );
+        .execute(
+          out,
+          templatePath,
+          defaultTemplate,
+          dashboardsMessagesBaseFilename,
+          paramMap,
+          userSession.getName(),
+          inactiveInterval,
+          isRequire,
+          loadTheme );
   }
 
   public String getPluginName() {
@@ -214,13 +242,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   // InterPluginBroker calls this method within bean id 'xcdf'
-  public String getContext( @QueryParam(Parameter.PATH) @DefaultValue(StringUtils.EMPTY) String path,
-                            @QueryParam(Parameter.ACTION) @DefaultValue(StringUtils.EMPTY) String action,
-                            @DefaultValue(StringUtils.EMPTY) @QueryParam(Parameter.VIEW_ID) String viewId,
+  public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
+                            @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
+                            @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW ) String view,
                             @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     return ContextEngine.getInstance()
-      .getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
+      .getContext( path, view, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   // InterPluginBroker calls this method within bean id 'xcdf'
@@ -233,8 +261,14 @@ public class CdfContentGenerator extends SimpleContentGenerator {
                             @Context HttpServletRequest servletRequest,
                             @Context HttpServletResponse servletResponse ) throws Exception {
     try {
-      CdfHtmlRenderer.getHeaders( dashboardContent, dashboardType, Boolean.parseBoolean( absolute ), root, scheme,
-        Boolean.parseBoolean( debug ), servletResponse.getOutputStream() );
+      CdfHtmlRenderer.getHeaders(
+          dashboardContent,
+          dashboardType,
+          Boolean.parseBoolean( absolute ),
+          root,
+          scheme,
+          Boolean.parseBoolean( debug ),
+          servletResponse.getOutputStream() );
     } catch ( IOException ex ) {
       logger.error( "getHeaders: " + ex.getMessage(), ex );
       throw ex;

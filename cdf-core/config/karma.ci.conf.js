@@ -24,6 +24,7 @@ module.exports = function(config) {
     files: [
       {pattern: 'bin/test-js/cdf/js/**/*.css', included: false},
       {pattern: 'bin/test-js/cdf/js/**/*.js', included: false},
+      {pattern: 'bin/test-js/cdf/js/components/filter/**/*.html', included: false},
       'config/context.js',
       {pattern: 'test-js/**/*.ext.js', included: true},
       {pattern: 'test-js/**/*-spec.js', included: false},
@@ -31,7 +32,8 @@ module.exports = function(config) {
       'config/require-config.js',
       // fix 404 messages
       {pattern: 'bin/test-js/cdf/js/**/*.png', watched: false, included: false, served: true},
-      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true}
+      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true},
+      {pattern: 'bin/test-js/cdf/js/**/*.svg', watched: false, included: false, served: true}
     ],
 
     // list of files to exclude

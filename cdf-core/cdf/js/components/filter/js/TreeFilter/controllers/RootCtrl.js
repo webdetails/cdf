@@ -85,6 +85,12 @@
         oldState = model.get('isCollapsed');
         newState = !oldState;
       }
+      var hasVisibleNode = !!model.nodes() && _.some(model.nodes().models, function(model) {
+        return model.get('isVisible');
+      });
+      if (!hasVisibleNode && oldState) {
+        this.view.onFilterClear();
+      }
       model.set('isCollapsed', newState);
       return this;
     },
@@ -94,7 +100,7 @@
     },
     onOnlyThis: function(model) {
       this.debug("Setting Only This");
-      this.model.root().setSelection(TreeFilter.Enum.select.NONE);
+      this.model.root().setAndUpdateSelection(TreeFilter.Enum.select.NONE);
       this.configuration.selectionStrategy.strategy.setSelection(TreeFilter.Enum.select.ALL, model);
       return this;
     }

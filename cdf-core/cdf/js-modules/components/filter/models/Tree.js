@@ -35,9 +35,9 @@ define([
          *     }
          *
          * @method walkDown
-         * @param {function} itemCallBack
-         * @param {function} combineCallBack
-         * @param {function} alwaysCallBack
+         * @param {function} itemCallback
+         * @param {function} combineCallback
+         * @param {function} alwaysCallback
          */
         walkDown: function(itemCallback, combineCallback, alwaysCallback) {
           var result;
@@ -62,7 +62,7 @@ define([
         /**
          * Returns self and descendants as a flat list
          * @method flatten
-         * @return { wrappedList } Returns a list wrapped by _.chain()
+         * @return {Underscore} Returns a wrapped Underscore object using _.chain()
          */
         flatten: function() {
           var list;

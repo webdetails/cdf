@@ -11,57 +11,58 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/ButtonComponent", "cdf/lib/jquery"],
-  function(Dashboard, ButtonComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/ButtonComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, ButtonComponent, $) {
 
   /**
    * ## The Button Component
    */
   describe("The Button Component #", function() {
 
-    var dashboard;
-    var buttonComponent;
-    
     /**
      * ## Global settings for all suites.
      * #begin
      * - beforeEach
      */
-
-    dashboard = new Dashboard();
-    dashboard.init();
-      
-    buttonComponent = new ButtonComponent({
+    var dashboard;
+    var buttonComponent = new ButtonComponent({
       name: "buttonComponent",
       type: "button",
       listeners: ["productLine", "territory"],
       htmlObject: "sampleObject",
       label: "A button",
-      //expression: function() { this.setLabel('Yes, a clickable button'); },
       executeAtStart: true,
       preChange: function() { return true; },
       postChange: function() { return true; },
-      successCallback: function(data) {},
+      successCallback: function() {},
       failureCallback: function() {},
-      tooltip: "My first dashboard",
-      // actionDefinition:  {
-      //   dataAccessId: "myDataSource",
-      //   path: "/public/CDF-236/CDF-236.cda"
-      // }
+      tooltip: "My first dashboard"
+    });
+    var $htmlObject = $('<div />').attr('id', buttonComponent.htmlObject);
+
+    beforeEach(function() {
+      dashboard = new Dashboard();
+      dashboard.init();
+      dashboard.addDataSource("buttonQuery", {
+        dataAccessId: "myDataSource",
+        path: "/public/CDF-236/CDF-236.cda"
+      });
+      // add an element where the button will be inserted
+      $('body').append($htmlObject);
     });
     
-    // add an element where the button will be inserted    
-    $htmlObject = $('<div />').attr('id', buttonComponent.htmlObject);
-    $('body').append($htmlObject);
-
-    dashboard.addComponent(buttonComponent);
-   
-
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
     /**
      * ## The Button Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
+      dashboard.addComponent(buttonComponent);
       
       spyOn(buttonComponent, 'update').and.callThrough();
 
@@ -74,118 +75,163 @@ define(["cdf/Dashboard.Clean", "cdf/components/ButtonComponent", "cdf/lib/jquery
       dashboard.update(buttonComponent);
     });
 
-
     /*
-     * ## The Button Component # is disabled after being pressed 
+     * ## The Button Component # disables the button after it has been clicked
      */
-    it("disables the button after it has been pressed", function(done) {
-      
+    it("disables the button after it has been clicked", function(done) {
+      var $btn;
       // create a new button with an expression based on the base buttonComponent
-      var buttonComponentExpr = buttonComponent.extend({
-        expression: function() { 
-			this.setLabel('Yes, a clickable button'); 
-		}
+      var buttonComponentExpr = $.extend({}, buttonComponent);
+
+      spyOn(buttonComponentExpr, 'update').and.callThrough();
+
+      dashboard.addComponent(buttonComponentExpr);
+
+      // listen to cdf:postExecution event
+      buttonComponentExpr.once("cdf:postExecution", function() {
+        expect(buttonComponentExpr.update).toHaveBeenCalled();
+
+        // make sure expression executes after postExecution being triggered and button clicked
+        buttonComponentExpr.expression = function() {
+          expect($btn.attr('disabled')).toEqual('disabled');
+          expect($btn.css('opacity')).toEqual('0.5');
+          done();
+        };
+        $btn = $('div#' + buttonComponentExpr.htmlObject + ' > button');
+        $btn.click();
       });
 
       dashboard.update(buttonComponentExpr);
-
-	  var btn = $('button');			
-		
-	  buttonComponentExpr.expression = function() {
-		expect(btn.attr('disabled')).toEqual('disabled');
-		expect(btn.css('opacity')).toEqual('0.5');
-	  }
-		
-	  btn.click();	  
-	  done();
     });
-	
-	
-	/*
-     * ## The Button Component # is disabled after being pressed 
+
+    /*
+     * ## The Button Component # re-enables the button after the expression has executed when clicked
      */
-    it("re-enables the button after the expression has executed", function(done) {
-      
+    it("re-enables the button after the expression has executed when clicked", function(done) {
       // create a new button with an expression based on the base buttonComponent
-      var buttonComponentExpr = buttonComponent.extend({
-        expression: function() { 
-			this.setLabel('Yes, a clickable button'); 
-		}
+      var buttonComponentExpr = $.extend({}, buttonComponent);
+      buttonComponentExpr.expression = function() { };
+
+      spyOn(buttonComponentExpr, 'update').and.callThrough();
+      spyOn(buttonComponentExpr, 'expression').and.callThrough();
+
+      dashboard.addComponent(buttonComponentExpr);
+
+      // listen to cdf:postExecution event
+      buttonComponentExpr.once("cdf:postExecution", function() {
+        expect(buttonComponentExpr.update).toHaveBeenCalled();
+
+        spyOn(buttonComponentExpr, 'enable').and.callFake(function() {
+          expect(buttonComponentExpr.expression).toHaveBeenCalled();
+          done();
+        });
+
+        $('div#' + buttonComponentExpr.htmlObject + ' > button').click();
       });
 
       dashboard.update(buttonComponentExpr);
-
-	  buttonComponentExpr.once("cdf:postExecution", function() {
-		  var btn = $('button');
-		  
-		  expect(btn.attr('disabled')).toEqual(undefined);
-          expect(btn.css('opacity')).toEqual('1');
-	  });
-		
-	  $('button').click();
-	  done();
     });
 
+    /*
+     * ## The Button Component # runs the expression when clicked
+     */
+    it("runs the expression when clicked", function(done) {
+      // create a new button with an expression based on the base buttonComponent
+      var buttonComponentExpr = $.extend({}, buttonComponent, {
+        expression: function() {
+          return true;
+        }
+      });
+
+      spyOn(buttonComponentExpr, 'update').and.callThrough();
+      spyOn(buttonComponentExpr, 'expression').and.callFake(function() {
+        expect(buttonComponentExpr.expression).toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.addComponent(buttonComponentExpr);
+
+      // listen to cdf:postExecution event
+      buttonComponentExpr.once("cdf:postExecution", function() {
+        expect(buttonComponentExpr.update).toHaveBeenCalled();
+        $('div#' + buttonComponentExpr.htmlObject + ' > button').click();
+      });
+
+      dashboard.update(buttonComponentExpr);
+    });
 
     /*
-     * ## The Button Component # is disabled after being pressed and re-enabled 
-     *    on the execution of the callback using an action
+     * ## The Button Component # disables the button after it has been pressed and re-enables it after executing the action
      */
     it("disables the button after it has been pressed and re-enables it after executing the action", function(done) {
-     
+      var $btn;
       // create a new button with an expression based on the base buttonComponent
-      var buttonComponentAct = buttonComponent.extend({
-        actionDefinition:  {
-          dataAccessId: "myDataSource",
-          path: "/public/CDF-236/CDF-236.cda"
+      var buttonComponentAct = $.extend({}, buttonComponent, {
+        actionDefinition: {dataSource: "buttonQuery"},
+        successCallback: function() {
+          // this callback function will be called after the closure successCallback function
+          // enables the button
+          expect($btn.attr('disabled')).toEqual(undefined);
+          expect($btn.css('opacity')).toEqual('1');
+          done();
         }
       });
 
-      dashboard.update(buttonComponentAct);
+      spyOn(buttonComponentAct, 'triggerAction').and.callFake(function() {
+        expect($btn.attr('disabled')).toEqual('disabled');
+        // explicitly call the successCallback
+        buttonComponentAct.successCallback();
+      });
 
+      spyOn(buttonComponentAct, 'update').and.callThrough();
+
+      dashboard.addComponent(buttonComponentAct);
+
+      // listen to cdf:postExecution event
       buttonComponentAct.once("cdf:postExecution", function() {
+        expect(buttonComponentAct.update).toHaveBeenCalled();
+        $btn = $('div#' + buttonComponentAct.htmlObject + ' > button');
+        $btn.click();
+      });
 
-        spyOn(buttonComponentAct, "triggerAction").and.callFake(function(params) {
-          var btn = $('button');
-
-          expect(btn.attr('disabled')).toEqual('disabled');
-          buttonComponentAct.successCallback();        
-          expect(btn.attr('disabled')).toEqual(undefined);
-          expect(btn.css('opacity')).toEqual('1');
-          done();
-        });
-
-        $('button').click();
-      });  
+      dashboard.update(buttonComponentAct); 
     });
 
-
-    it("re-enables the button in error case after executing the action", function() {
-      
+    /*
+     * ## The Button Component # re-enables the button in error case after executing the action
+     */
+    it("re-enables the button in error case after executing the action", function(done) {
+      var $btn;
       // create a new button with an expression based on the base buttonComponent
-      var buttonComponentAct = buttonComponent.extend({
-        actionDefinition:  {
-          dataAccessId: "myDataSource",
-          path: "/public/CDF-236/CDF-236.cda"
+      var buttonComponentAct = $.extend({}, buttonComponent, {
+        actionDefinition: {dataSource: "buttonQuery"},
+        failureCallback: function() {
+          // this callback function will be called after the closure failureCallback function
+          // enables the button
+          expect($btn.attr('disabled')).toEqual(undefined);
+          expect($btn.css('opacity')).toEqual('1');
+          done();
         }
       });
 
-      dashboard.update(buttonComponentAct);
-
-      buttonComponentAct.once("cdf:postExecution", function() {
-
-        spyOn(buttonComponentAct, "triggerAction").and.callFake(function(params) {
-          var btn = $('button');
-
-          expect(btn.attr('disabled')).toEqual('disabled');
-          buttonComponentAct.failureCallback();        
-          expect(btn.attr('disabled')).toEqual(undefined);
-          expect(btn.css('opacity')).toEqual('1');
-          done();
-        });
-
-        $('button').click();
+      spyOn(buttonComponentAct, 'triggerAction').and.callFake(function() {
+        expect($btn.attr('disabled')).toEqual('disabled');
+        // explicitly call the failureCallback
+        buttonComponentAct.failureCallback();
       });
-    })
+
+      spyOn(buttonComponentAct, 'update').and.callThrough();
+
+      dashboard.addComponent(buttonComponentAct);
+
+      // listen to cdf:postExecution event
+      buttonComponentAct.once("cdf:postExecution", function() {
+        expect(buttonComponentAct.update).toHaveBeenCalled();
+        $btn = $('div#' + buttonComponentAct.htmlObject + ' > button');
+        $btn.click();
+      });
+
+      dashboard.update(buttonComponentAct); 
+    });
   });
 });

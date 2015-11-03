@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard.Clean"],
-  function(Query, $, Dashboard) {
+define([
+  "cdf/dashboard/Query",
+  "cdf/lib/jquery",
+  "cdf/Dashboard.Clean"
+], function(Query, $, Dashboard) {
 
   /**
    * ## The Query class
@@ -197,7 +200,7 @@ define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard.Clean"],
         kettleOutput: "Inferred",
         queryType: "cpk"
       }, null, d);
-      //debugger;
+
       var cpkQueryDefinition = CpkQuery.buildQueryDefinition(params);
 
       var CdaQuery = new Query({

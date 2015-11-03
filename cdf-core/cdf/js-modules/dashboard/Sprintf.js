@@ -12,26 +12,27 @@
  */
 
 /**
- * Sprintf implementation for javascript . Request as cdf/dashboard/Sprintf.
- * The module returns a function that can be called to format a string according to the Sprintf specs
+ * Sprintf implementation for javascript. Request as 'cdf/dashboard/Sprintf'.
+ * The module returns a function that can be called to format a string according to the Sprintf specs.
  *
  * @module Sprintf
  */
 
 define(['./Utils'], function(utils) {
 
-  /**
-  *
-  * Javascript sprintf
-  * http://www.webtoolkit.info/
-  *
-  *
-  **/
+  /*
+   *
+   * Javascript sprintf
+   * http://www.webtoolkit.info/
+   *
+   *
+   */
   var sprintfWrapper = {
 
     /**
      *
-     * @returns {*}
+     * @method init
+     * @return {*}
      */
     init: function () {
   
@@ -99,8 +100,8 @@ define(['./Utils'], function(utils) {
       match = null;
       var i = null;
   
-      for(i=0; i<matches.length; i++) {
-        var m =matches[i];
+      for(i = 0; i < matches.length; i++) {
+        var m = matches[i];
         var substitution;
         if(m.code == '%') {
           substitution = '%'

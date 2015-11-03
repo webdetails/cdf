@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['amd!../lib/underscore', './UnmanagedComponent', '../dashboard/Utils'],
-  function(_, UnmanagedComponent, Utils) {
+define([
+  'amd!../lib/underscore',
+  './UnmanagedComponent',
+  '../dashboard/Utils'
+], function(_, UnmanagedComponent, Utils) {
 
   var ActionComponent = UnmanagedComponent.extend({
     _docstring: function() {
@@ -20,7 +23,9 @@ define(['amd!../lib/underscore', './UnmanagedComponent', '../dashboard/Utils'],
     },
 
     /**
-     *  Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
+     * Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
+     *
+     * @method update
      */
     update: function() {
       var render = _.bind(this.render, this);
@@ -32,22 +37,34 @@ define(['amd!../lib/underscore', './UnmanagedComponent', '../dashboard/Utils'],
     },
 
     /**
-     *  Calls the endpoint, passing any parameters.
-     *  This method is typically bound to the "click" event of the component.
+     * Calls the endpoint, passing any parameters.
+     * This method is typically bound to the "click" event of the component.
+     *
+     * @method triggerAction
      */
     triggerAction: function() {
       var params = Utils.propertiesArrayToObject(this.actionParameters);
-      var failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function() {};
-      var successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function() {};
-
-      return this.dashboard.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+      var failureCallback =  (this.failureCallback) ?  this.failureCallback : function() {};
+      var successCallback = this.successCallback ?  this.successCallback : function() {};
+      var success = _.bind(function() {
+        this.unblock();
+        successCallback.apply(this, arguments);
+      }, this);
+      var failure = _.bind(function() {
+        this.unblock();
+        failureCallback.apply(this, arguments);
+      }, this);
+      this.block();
+      return this.dashboard.getQuery(this.actionDefinition).fetchData(params, success, failure);
     },
 
     /**
-     *  Detect if the endpoint associated with the Action is defined
+     * Detect if the endpoint associated with the Action is defined.
+     *
+     * @method hasAction
      */
     hasAction: function() {
-      if(!this.actionDefinition){
+      if(!this.actionDefinition) {
         return false;
       }
       if(this.dashboard.detectQueryType) {

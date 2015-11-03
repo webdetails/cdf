@@ -60,7 +60,7 @@ define([
         (function(Dashboards, AddIn, Sorters) {
           'use strict';
 
-          /**
+          /*
            * Sorts items, by keeping the selected items on top
            */
           var myAddIn;
@@ -81,7 +81,7 @@ define([
         (function(Dashboards, AddIn, Sorters) {
           'use strict';
 
-          /**
+          /*
            * Sorts items, by keeping the insertion order
            */
           var myAddIn;
@@ -101,7 +101,7 @@ define([
         (function(Dashboards, AddIn) {
           'use strict';
 
-          /**
+          /*
            * Sorts items/groups by label
            */
           var myAddIn;
@@ -115,14 +115,6 @@ define([
               var result, zCode;
               result = st.model.get('label');
               return result;
-              if (options.ascending) {
-                return result;
-              } else {
-                zCode = 'z'.codePointAt(0);
-                return _.chain(result).map(function(c) {
-                  return zCode - c.codePointAt(0);
-                }).join(' ').value();
-              }
             }
           });
           Dashboards.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
@@ -132,7 +124,7 @@ define([
         (function(Dashboards, AddIn) {
           'use strict';
 
-          /**
+          /*
            * Sorts items/groups by value
            */
           var myAddIn;
@@ -159,7 +151,7 @@ define([
         (function(Dashboards, Mustache, AddIn) {
           'use strict';
 
-          /**
+          /*
            * Sums the values of all the descendants
            */
           var myAddIn;
@@ -198,7 +190,7 @@ define([
         (function(Dashboards, Mustache, AddIn) {
           'use strict';
 
-          /**
+          /*
            * Renders a Mustache template
            */
           var myAddIn;
@@ -235,9 +227,9 @@ define([
         (function(Dashboards, AddIn) {
           'use strict';
 
-          /**
+          /*
            * Emulate accordion behaviour on a group of filters
-          #
+           *
            * When the user expands a filter, a global event on the "Dashboards" object is issued.
            * The filters configured to use this addIn will listen to the event and
            * close themselves accordingly
@@ -252,10 +244,10 @@ define([
             implementation: function($tgt, st, options) {
               st.model.on('change:isCollapsed', function(model, newState) {
                 if (newState === false) {
-                  return dashboard.trigger('filters:close', model, options);
+                  return st.dashboard.trigger('filters:close', model, options);
                 }
               });
-              st.model.listenTo(dashboard, 'filters:close', function(model, opts) {
+              st.model.listenTo(st.dashboard, 'filters:close', function(model, opts) {
                 if (opts.group === options.group) {
                   if (model !== st.model) {
                     if (st.model.get('isDisabled') === false) {

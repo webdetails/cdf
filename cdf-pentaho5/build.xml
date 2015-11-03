@@ -331,6 +331,7 @@ de
         &lt;/description&gt;
         &lt;build_id&gt;${sequential.build.id}&lt;/build_id&gt;
         &lt;min_parent_version&gt;${marketplace.metadata.min_parent_version}&lt;/min_parent_version&gt;
+        &lt;max_parent_version&gt;${marketplace.metadata.max_parent_version}&lt;/max_parent_version&gt;
         &lt;development_stage&gt;
           &lt;lane&gt;${marketplace.metadata.development_stage.lane}&lt;/lane&gt;
           &lt;phase&gt;${marketplace.metadata.development_stage.phase}&lt;/phase&gt;
@@ -367,10 +368,16 @@ de
       <fileset dir='${core-js.dir}'>
         <include name="*-require-js-cfg.js" />
       </fileset>
+      <fileset dir="${core-js-lib.dir}">
+        <include name="*-require-js-cfg.js" />
+      </fileset>
       <fileset dir='${pentaho-base-js.dir}'>
          <include name="*-require-js-cfg.js" />
       </fileset>
       <fileset dir="${pentaho-js.dir}">
+        <include name="*-require-js-cfg.js" />
+      </fileset>
+      <fileset dir="${js-legacy.dir}">
         <include name="*-require-js-cfg.js" />
       </fileset>
     </concat>
@@ -445,10 +452,7 @@ de
     <!-- copy require cfg files to subfloor default lookup folder -->
     <copy todir="${bin.dir}/js-source/cdf/" overwrite="true">
       <fileset dir="${js.module.script.agg.dir}/cdf/js">
-        <include name="*-require-js-cfg.js"/>
-      </fileset>
-      <fileset dir="${js.module.script.agg.dir}/cdf/js/lib">
-        <include name="*-require-js-cfg.js"/>
+        <include name="cdf-require-js-cfg.js"/>
       </fileset>
     </copy>
 
@@ -520,13 +524,6 @@ de
     <antcall target="replace-static-resource-labels">
       <param name="base.js.path" value="${bin.dir}/js-source/cdf/js-legacy" />
     </antcall>
-
-    <!-- copy/rename require cfg files to subfloor default lookup folder -->
-    <copy tofile="${bin.dir}/js-source/cdf/cdf-legacy-require-js-cfg.js" overwrite="true">
-      <fileset dir="${pentaho-js-legacy.dir}">
-        <include name="cdf-require-js-cfg.js"/>
-      </fileset>
-    </copy>
   </target>
 
   <target name="write-resources">

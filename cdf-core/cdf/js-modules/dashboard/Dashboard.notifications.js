@@ -22,7 +22,7 @@ define([
 ], function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
 
   /**
-   * A module representing an extension to Dashboard module for notifications.
+   * A module representing an extension to the Dashboard module for notifications.
    * @module Dashboard.notifications
    */
   Dashboard.implement({
@@ -38,23 +38,24 @@ define([
 
       /**
        * Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
-       * are registered and assigned to a specific error message
+       * are registered and assigned to a specific error message.
+       *
        * @property ERROR_CODES
        * @type Object
        * @for Dashboard
        */
       this.ERROR_CODES = {
-        'QUERY_TIMEOUT' : {
+        'QUERY_TIMEOUT': {
           msg: "Query timeout reached"
         },
-        "COMPONENT_ERROR" : {
+        "COMPONENT_ERROR": {
           msg: "Error processing component"
         }
       };
     },
 
     /**
-     * Renders a blocking div that can be dragged
+     * Renders a blocking div that can be dragged.
      *
      * @method blockUIwithDrag
      * @for Dashboard
@@ -75,7 +76,7 @@ define([
     },
 
     /**
-     * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner
+     * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner.
      *
      * @method showProgressIndicator
      * @for Dashboard
@@ -85,10 +86,10 @@ define([
     },
 
     /**
-     * Hides the progress indicator. Optionally, resets the running calls counter
+     * Hides the progress indicator. Optionally, resets the running calls counter.
      *
      * @method hideProgressIndicator
-     * @param {Boolean} _true_ if the running calls counter should be reset, _false_ otherwise
+     * @param {Boolean} force _true_ if the running calls counter should be reset, _false_ otherwise
      * @for Dashboard
      */
     hideProgressIndicator: function(force) {
@@ -100,11 +101,11 @@ define([
     },
 
     /**
-     * Given an error code, returns the registered error object associated with that code
+     * Given an error code, returns the registered error object associated with that code.
      * 
      * @method getErrorObj
      * @param errorCode errorCode to translate
-     * @returns {*|{}} error object or the empty object if the code is not registered
+     * @return {*|{}} error object or the empty object if the code is not registered
      *
      * @for Dashboard
      */
@@ -113,13 +114,13 @@ define([
     },
 
     /**
-     * Parses a server error response and creates an error object
+     * Parses a server error response and creates an error object.
      *
      * @method	parseServerError
      * @param resp Server response
      * @param txtStatus Response status
      * @param error Error object to encapsulate
-     * @returns {Object} an error object containing detailed error message
+     * @return {Object} an error object containing detailed error message
      *
      * @for Dashboard
      * @deprecated
@@ -150,7 +151,7 @@ define([
     },
 
     /**
-     * Handles a server error
+     * Handles a server error.
      *
      * @method handleServerError
      * @for Dashboard
@@ -162,7 +163,7 @@ define([
     },
 
     /**
-     * Displays an error notification
+     * Displays an error notification.
      *
      * @method errorNotification
      * @param err Error message to display
@@ -205,33 +206,26 @@ define([
     },
 
     /**
-     * Check if we're able to connect to the server correctly, using post to avoid cache
+     * Check if we're able to connect to the server correctly, using post to avoid cache.
      *
      * @method checkServer
-     * @returns {Boolean} _true_ if able to connect, _false_ otherwise
+     * @return {Boolean} _true_ if able to connect, _false_ otherwise
      *
      * @for Dashboard
      */
     checkServer: function() {
-      var retVal = false;
       $.ajax({
         type: 'POST',
         async: false,
         dataType: 'json',
         url: DashboardNotificationsExt.getPing(),
         success: function(result) {
-          if(result && result.ping == 'ok') {
-            retVal = true;
-          }
-          else {
-            retVal = false;
-          }
+          return result && result.ping == 'ok';
         },
         error: function() {
-          retVal = false;
+          return false;
         }
       });
-      return retVal;
     }
   });
 });

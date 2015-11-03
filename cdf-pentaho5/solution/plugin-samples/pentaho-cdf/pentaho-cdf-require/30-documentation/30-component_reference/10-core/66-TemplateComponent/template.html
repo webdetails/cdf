@@ -109,61 +109,61 @@
 require(['cdf/Dashboard.Blueprint', 'cdf/dashboard/Utils', 'cdf/components/TemplateComponent'],
   function(Dashboard, Utils, TemplateComponent) {
 
-    var dashboard = new Dashboard();
+  var dashboard = new Dashboard();
 
-    var metaLayerOptions = {
-      queryType: 'mdx',
-      catalog: 'mondrian:/SteelWheels',
-      jndi: "SampleData",
-      query: function() {
-        return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-          " NON EMPTY TopCount([Customers].[All Customers].Children, 6.0, [Measures].[Sales])" +
-          " ON ROWS from [SteelWheelsSales]";
+  dashboard.addDataSource("templateQuery", {
+    queryType: "mdx",
+    catalog: "mondrian:/SteelWheels",
+    jndi: "SampleData",
+    query: function() {
+      return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+        + " NON EMPTY TopCount([Customers].[All Customers].Children, 6.0, [Measures].[Sales])"
+        + " ON ROWS from [SteelWheelsSales]";
+    }
+  });
+
+  dashboard.addComponent(new TemplateComponent({
+    name: "template_component",
+    type: "TemplateComponent",
+
+    chartDefinition: {dataSource: "templateQuery"},
+    htmlObject: "sampleObject",
+    executeAtStart: true,
+
+    parameters: [],
+    modelHandler: "",
+    template: function() {
+      var template = ''+
+        '<div class="templateWrapper clearfix">' +
+        '   {{#items}} ' +
+        '       <div class="templateRow">' +
+        '           <div class="title"> {{0 | formatter : "reduceF"}} </div>' +
+        '           <div class="desc"> {{0}} </div>' +
+        '           <div class="value"> {{1 | formatter : "floatF"}} </div>' +
+        '       </div>' +
+        '   {{/items}} '+
+        '</div>';
+      return template;
+    },
+    templateType: "mustache",
+    formatters: [
+      ["floatF", function(value){
+        return Utils.numberFormat(value, '0.0A');
+      }],
+      ["reduceF", function(value) {
+        var arr = value.split(" ", 3);
+        var result = "";
+        for(var i = 0; i < arr.length; i++) {
+          result += arr[i].charAt(0).toUpperCase();
         }
-      };
+        return result;
+      }]
+    ],
+    rootElement: "items",
+    extendableOptions: ""
+  }));
 
-    dashboard.addComponent(new TemplateComponent({
-      name: "template_component",
-      type: "TemplateComponent",
-
-      chartDefinition: metaLayerOptions,
-      htmlObject: "sampleObject",
-      executeAtStart: true,
-
-      parameters: [],
-      modelHandler: "",
-      template: function() {
-        var template = ''+
-          '<div class="templateWrapper clearfix">' +
-          '   {{#items}} ' +
-          '       <div class="templateRow">' +
-          '           <div class="title"> {{0 | formatter : "reduceF"}} </div>' +
-          '           <div class="desc"> {{0}} </div>' +
-          '           <div class="value"> {{1 | formatter : "floatF"}} </div>' +
-          '       </div>' +
-          '   {{/items}} '+
-          '</div>';
-        return template;
-      },
-      templateType: "mustache",
-      formatters: [
-        ["floatF", function(value){
-          return Utils.numberFormat(value, '0.0A');
-        }],
-        ["reduceF", function(value) {
-          var arr = value.split(" ", 3);
-          var result = "";
-          for(var i = 0; i < arr.length; i++) {
-            result += arr[i].charAt(0).toUpperCase();
-          }
-          return result;
-        }]
-      ],
-      rootElement: "items",
-      extendableOptions: ""
-    }));
-
-    dashboard.init();
+  dashboard.init();
 });
         </textarea>
         <br/>

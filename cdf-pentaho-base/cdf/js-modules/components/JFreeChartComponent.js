@@ -11,19 +11,20 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./JFreeChartComponent.ext',
+define([
+  './JFreeChartComponent.ext',
   '../dashboard/Dashboard.ext',
+  '../dashboard/Utils',
   '../Logger',
   '../lib/jquery',
   './BaseComponent',
   'amd!../lib/captify',
-  'css!./JFreeChartComponent',
-  '../dashboard/Utils'],
-  function(JFreeChartComponentExt, DashboardExt, Logger, $, BaseComponent, Utils) {
+  'css!./JFreeChartComponent'
+], function(JFreeChartComponentExt, DashboardExt, Utils, Logger, $, BaseComponent) {
 
   var JFreeChartComponent = BaseComponent.extend({
-    update : function() {
-      var xactionFile = (this.chartDefinition.queryType == 'cda') ? "jfreechart-cda.xaction" : "jfreechart.xaction";
+    update: function() {
+      var xactionFile = (this.dashboard.detectQueryType(this.chartDefinition) == 'cda') ? "jfreechart-cda.xaction" : "jfreechart.xaction";
       this.callPentahoAction(xactionFile);
     },
 
@@ -43,7 +44,7 @@ define(['./JFreeChartComponent.ext',
 
       //set parameters string if using cda
       var cdaParameterString = null;
-      if(cd.queryType == "cda") {
+      if(this.dashboard.detectQueryType(cd) == "cda") {
         if($.isArray(this.parameters)) {
           var param;
           for(var i = 0; i < this.parameters.length; i++) {
@@ -67,15 +68,23 @@ define(['./JFreeChartComponent.ext',
         }
       }
 
-      var cd0 = cd.chartOptions != undefined ? $.extend({},this.dashboard.ev(cd.chartOptions), cd) : cd;
+      // check if we should use a data source
+      if(typeof cd.dataSource == "string" && cd.dataSource) {
+        // merge options, query definition options override options duplicated in the data source
+        cd = $.extend({}, this.dashboard.getDataSource(cd.dataSource), cd);
+        // remove the data source name from the query definition
+        delete cd.dataSource;
+      }
+
+      var cd0 = cd.chartOptions != undefined ? $.extend({}, Utils.ev(cd.chartOptions), cd) : cd;
 
       // go through parameters array and update values
       var parameters = [];
-      for(p in cd0) {
+      for(var p in cd0) if(cd0.hasOwnProperty(p)) {
         var key = p;
-        var value = typeof cd0[p] == 'function' ? cd0[p]() : cd0[p];
+        var value = Utils.ev(cd0[p]);
         // alert("key: " + key + "; Value: " + value);
-        parameters.push([key,value]);
+        parameters.push([key, value]);
       }
       if(cdaParameterString != null) {
         parameters.push(["cdaParameterString", cdaParameterString]);
@@ -92,7 +101,7 @@ define(['./JFreeChartComponent.ext',
       myself.dashboard.incrementRunningCalls();
 
       // callback async mode
-      myself.dashboard.callPentahoAction(myself,"system", "pentaho-cdf/actions", action, myself.getParameters(), function(jXML) {
+      myself.dashboard.callPentahoAction(myself, "system", "pentaho-cdf/actions", action, myself.getParameters(), function(jXML) {
 
         if(jXML != null) {
           if(myself.chartDefinition.caption != undefined) {
@@ -106,19 +115,19 @@ define(['./JFreeChartComponent.ext',
       });
     },
 
-    buildCaptionWrapper: function(chart,cdfComponent) {
+    buildCaptionWrapper: function(chart, cdfComponent) {
 
       var myself = this;
 
-      var exportFile = function(type,cd) {
-        var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
+      var exportFile = function(type, cd) {
+        var xactionFile = (myself.dashboard.detectQueryType(cd) == 'cda') ? "jtable-cda.xaction" : "jtable.xaction";
         var obj = $.extend({
           solution: "system",
           path: "pentaho-cdf/actions",
           action: xactionFile,
           exportType: type
-        },cd);
-        myself.dashboard.post(DashboardExt.getExport() ,obj);
+        }, cd);
+        Utils.post(DashboardExt.getExport(), obj);
       };
 
       var cd = myself.chartDefinition;
@@ -127,31 +136,29 @@ define(['./JFreeChartComponent.ext',
       var captionId = myself.htmlObject + 'caption';
       var caption = $('<div id="' + captionId + '" ></div>');
 
-      chart.attr("id",myself.htmlObject + 'image');
-      chart.attr("rel",myself.htmlObject + "caption");
-      chart.attr("class","captify");
+      chart.attr("id", myself.htmlObject + 'image');
+      chart.attr("rel", myself.htmlObject + "caption");
+      chart.attr("class", "captify");
 
-      for(o in captionOptions) {
-        var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show == 'function'
-          ? captionOptions[o].show()
-          : captionOptions[o].show) ? true : false;
+      for(var o in captionOptions) if(captionOptions.hasOwnProperty(o)) {
+        var show = captionOptions[o].show == undefined || Utils.ev(captionOptions[o].show) ? true : false;
 
-        if(myself.chartDefinition.queryType != "mdx" && captionOptions[o].title == "Details") {
+        if(myself.dashboard.detectQueryType(myself.chartDefinition) != "mdx" && captionOptions[o].title == "Details") {
           show = false;
         }
         if(show) {
           var icon = captionOptions[o].icon != undefined 
-            ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon)
+            ? (Utils.ev(captionOptions[o].icon))
             : undefined;
           
           var op = icon != undefined
             ? $('<div id ="' + captionId + o + '" class=" img ' + icon + '"></div>') 
-            : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+            : $('<span id ="' + captionId + o + '">' + captionOptions[o].title + '</span>');
 
           if(captionOptions[o].oclass != undefined) {
             op.addClass(captionOptions[o].oclass);
           }
-          op.attr("title",captionOptions[o].title);
+          op.attr("title", captionOptions[o].title);
           caption.append(op);
         }
       }
@@ -167,9 +174,9 @@ define(['./JFreeChartComponent.ext',
       $('img.captify').captify($.extend({
         bDetails:bDetails,
         spanWidth: '95%',
-        hideDelay:3000,
-        hasButton:false,
-        opacity:'0.5'
+        hideDelay: 3000,
+        hasButton: false,
+        opacity: '0.5'
       }, cd.caption));
 
       //Add events after captify has finished.
@@ -181,15 +188,15 @@ define(['./JFreeChartComponent.ext',
           bDetails.bind("mouseenter",function() {
             $("#" + myself.htmlObject + 'image').trigger('detailsClick',[this]);
           });
-          bDetails.css("left",bDetails.position().left + $(chart[1]).width() - bDetails.width() - 5);
-          bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height() );
+          bDetails.css("left", bDetails.position().left + $(chart[1]).width() - bDetails.width() - 5);
+          bDetails.css("top", bDetails.position().top + $(chart[1]).height() - bDetails.height());
           // Use UNIQUE ids (chart[0] vs chart[1])
           chart[0].id = chart[0].id + "Map";
         }
 
-        for(o in captionOptions) {
+        for(var o in captionOptions) if(captionOptions.hasOwnProperty(o)) {
           if(captionOptions[o].callback != undefined) {
-            $("#" + captionId + o).bind("click",captionOptions[o].callback);
+            $("#" + captionId + o).bind("click", captionOptions[o].callback);
           }
         }
       });

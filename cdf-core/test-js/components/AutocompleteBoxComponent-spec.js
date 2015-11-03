@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/lib/jquery"],
-  function(Dashboard, AutocompleteBoxComponent, $) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/AutocompleteBoxComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, AutocompleteBoxComponent, $) {
 
   /**
    * ## The Autocomplete Box Component
@@ -25,33 +28,31 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
 
     dashboard.addParameter("autocompleteBoxParameter", "");
 
-    var MetaLayerHome2 = {
-      clientSelectorDefinition: {
-        queryType: "mdx",
-        jndi: "SampleData",
-        catalog: "mondrian:/SteelWheels",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-                 "NON EMPTY TopCount( Filter([Customers].[All Customers].Children," +
-                 "(Left([Customers].CurrentMember.Name, Len(\"" +
-                 dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")) = \"" +
-                 dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\"))," +
-                 "100.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-        }
+    dashboard.addDataSource("clientQuery", {
+      queryType: "mdx",
+      jndi: "SampleData",
+      catalog: "mondrian:/SteelWheels",
+      query: function() {
+        return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
+          + " NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"
+          + " (Left([Customers].CurrentMember.Name, Len(\""
+          + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \""
+          + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")), 100.0, [Measures].[Sales]) ON ROWS"
+          + " FROM [SteelWheelsSales]";
       }
-    };
+    });
 
     var autocompleteBox = new AutocompleteBoxComponent({
       name: "autocompleteBox",
       type: "autocompleteBox",
       matchType: "fromStart",
-      queryDefinition: MetaLayerHome2.clientSelectorDefinition,
+      queryDefinition: {dataSource: "clientQuery"},
       selectMulti: true,
       showApplyButton: true,
       minTextLength: 0,
       scrollHeight: 250,
       parameter: "autocompleteBoxParameter",
-      htmlObject: "sampleObject",
+      htmlObject: "autoCompleteSpecObj",
       reloadOnUpdate: true,
       autoUpdateTimeout: 3000,
       executeAtStart: true,
@@ -66,8 +67,17 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
         }
       }
     });
+    var $htmlObject = $('<div />').attr('id', autocompleteBox.htmlObject);
 
     dashboard.addComponent(autocompleteBox);
+
+    beforeEach(function() {
+      $('body').append($htmlObject);
+    });
+
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
     /**
      * ## The Autocomplete Box Component # allows a dashboard to execute update
@@ -94,14 +104,14 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
         "Auto Canal+ Petit"
       ];
 
-      spyOn(autocompleteBox, '_queryServer').and.callFake(function(){
-        this.result = [
+      spyOn(autocompleteBox, '_queryServer').and.callFake(function(searchString, successCallback) {
+        successCallback([
           ["AV Stores, Co."],
           ["Anna's Decorations"],
           ["Auto Canal+ Petit"],
           ["Euro+ Shopping Channel"],
           ["La Rochelle Gifts"]
-        ]
+        ]);
       });
 
       var returnedList = [];
@@ -139,7 +149,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/AutocompleteBoxComponent", "cdf/l
     it("Get Options", function() {
       var options = autocompleteBox._getOptions();
 
-      expect(options.appendTo).toEqual('.autocomplete-container');
+      expect(options.appendTo.attr("class")).toMatch('autocomplete-container');
       expect(options.minLength).toEqual(autocompleteBox.minTextLength);
       expect(typeof options.source).toEqual('function');
       expect(typeof options.focus).toEqual('function');

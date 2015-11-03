@@ -11,40 +11,61 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/jquery', 'css!./AutocompleteBoxComponent'],
-  function(QueryComponent, BaseComponent, _, $) {
+define([
+  '../Logger',
+  './UnmanagedComponent',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  'css!./AutocompleteBoxComponent'
+], function(Logger, UnmanagedComponent, _, $) {
 
-  var AutocompleteBoxComponent = BaseComponent.extend({
+  var AutocompleteBoxComponent = UnmanagedComponent.extend({
+
+    constructor: function(){
+      this.base.apply(this, arguments)
+      this.selectedValues = [];
+    },
 
     result: [],
-    selectedValues: [],
 
     /**
      *
+     * @method _queryServer
      * @param searchString
      * @private
      */
-    _queryServer : function(searchString) {
+    _queryServer: function(searchString, successCallback) {
       if(!this.parameters) {
-        this.parameters = []
+        this.parameters = [];
+      }
+
+      if(_.isString(searchString)) {
+        this.searchParam =  searchString;
       }
 
       if(this.searchParam) {
-        this.parameters = [ [this.searchParam, this._getInnerParameterName()] ];
-      } else if (this.parameters.length > 0) {
+        this.parameters = [[this.searchParam, this._getInnerParameterName()]];
+      } else if(this.parameters.length > 0) {
         this.parameters[0][1] = this._getInnerParameterName();
       }
 
       if(this.maxResults) {
         this.queryDefinition.pageSize = this.maxResults;
       }
-      this.dashboard.setParameter(this._getInnerParameterName(),this._getTextBoxValue());
-      QueryComponent.makeQuery(this);
+      this.dashboard.setParameter(this._getInnerParameterName(), this._getTextBoxValue());
+
+      if(this.queryDefinition) {
+        this.triggerQuery(this.queryDefinition, successCallback);
+      } else {
+        Logger.error("No query definition found");
+      }
     },
 
     /**
      *
-     * @returns {*}
+     * @method _getTextBoxValue
+     * @return {*}
+     * @private
      */
     _getTextBoxValue: function() {
       return this.textbox.val();
@@ -52,14 +73,17 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
     /**
      *
-     * @returns {string}
+     * @method _getInnerParameterName
+     * @return {string}
+     * @private
      */
-    _getInnerParameterName : function() {
+    _getInnerParameterName: function() {
       return this.parameter + '_textboxValue';
     },
 
     /**
      *
+     * @method _setInitialValue
      * @private
      */
     _setInitialValue: function() {
@@ -79,13 +103,40 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
     /**
      *
+     * @method update
      */
-    update : function() {
-      this.placeholder().empty();
+    update: function() {
+      // Allow the component to be silent
+      if(this.lifecycle) { this.lifecycle.silent = this.silent === true; }
+      else { this.lifecycle = {silent: this.silent === true}; }
+
+      if(!this.preExec()) {
+        return;
+      }
+
+      if(!this.isSilent()) {
+        this.block();
+      }
+
+      this.ph = this.placeholder().empty();
+
+      if(this.ph.length === 0) {
+        Logger.warn("Placeholder not in DOM - Will not draw");
+        return false;
+      }
+
+      this.processChange = this.processChange == null
+          ? function() {
+              myself.value = myself.selectedValues;
+              myself.dashboard.processChange(myself.name);
+            }
+          : function() {
+              myself.processChange();
+            };
 
       var myself = this;
+
       var isMultiple = this.selectMulti || false;
-      var options = this._getOptions();
 
       //init parameter
       if(!this.dashboard.getParameterValue(this._getInnerParameterName())) {
@@ -97,79 +148,83 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
       if(isMultiple) {
         var title = this.tooltipMessage || "Click it to Apply";
-        var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="S"/>')
-            .click(function() {
-              myself._endSearch();
-            });
-        autoComplete.append(apply)
+        var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="' + ( this.submitLabel || "S" ) +'"/>')
+          .click(function() {
+            myself._endSearch();
+          });
+        autoComplete.append(apply);
       }
 
       autoComplete
-          .append(this.textbox)
-          .append('<ul class="list-data-selection">')
-          .appendTo(this.placeholder());
+        .append(this.textbox)
+        .append('<ul class="list-data-selection">')
+        .appendTo(this.ph);
 
-      this.textbox.autocomplete(options);
+      this.textbox.autocomplete(this._getOptions());
 
-      $('.autocomplete-container .ui-autocomplete').off('menuselect');
-      this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
-        var listItem = $('<li class="list-item">');
-
-        var content = $('<a>' + (isMultiple ? '<input type="checkbox"/>' : '') + item.label + '</a>').click(function(event) {
-          var checkbox = $(this).find('input');
-          if($(event.srcElement).is('a')) {
+      this.ph.find('.autocomplete-container .ui-autocomplete').off('menuselect');
+      this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui){
+          var checkbox = ui ? ui.item.find('input') : $(event.target).find('input');
+          if(checkbox.length > 0) {
             checkbox.prop('checked', !checkbox.is(':checked'))
           }
+          var label = ui ? ui.item.find('a').text() : $(event.target).text();
+
           if(!isMultiple) {
-            myself._selectValue(item.label);
+            myself._selectValue(label);
             myself._endSearch();
           } else if(checkbox.is(':checked')) {
-            myself._selectValue(item.label);
+            myself._selectValue(label);
           } else {
-            myself._removeValue(item.label);
+            myself._removeValue(label);
           }
         });
-
+      this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
+        var listItem = $('<li class="list-item">');
+        var content = $('<a>' + item.label + '</a>');
+        if(isMultiple) {
+          $('<input type="checkbox"/>').click(function() {
+            $(this).parent().trigger('menuselect');
+          }).prependTo(content);
+        }
         content.appendTo(listItem);
         return listItem.appendTo(ul);
       };
 
       //if defined and it exists bind a click event to this button
-      $('#' + this.externalApplyButtonId).click(function() {
+      this.ph.find('#' + this.externalApplyButtonId).click(function() {
         myself._endSearch();
       });
 
       this._setInitialValue();
+
+      this.postExec();
+
+      if(!this.isSilent()) {
+        this.unblock();
+      }
     },
 
     /**
      *
-     * @returns {*}
+     * @method getValue
+     * @return {*}
      */
-    getValue : function() {
+    getValue: function() {
       return this.value;
     },
 
     /**
      *
-     * @returns {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|*|number), source: Function, focus: Function, open: Function, close: Function}}
+     * @method _getOptions
+     * @return {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|*|number), source: Function, focus: Function, open: Function, close: Function}}
      * @private
      */
     _getOptions: function() {
       var myself = this;
 
-      var processChange = this.processChange == null ?
-          function() {
-            var object = _.extend({}, myself);
-            object.value = myself.selectedValues;
-            myself.dashboard.processChange(object.name);
-          } :
-          function() {
-            myself.processChange();
-          };
-
       var options = {
-        appendTo: '.autocomplete-container',
+        appendTo: this.ph.find('.autocomplete-container'),
         minLength: this.minTextLength || 0,
         source: function(search, callback) {
           myself._search(search, callback);
@@ -183,14 +238,14 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
           var scroll = myself.scrollHeight || 0;
 
           if(scroll > 0) {
-            $('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
+            myself.ph.find('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
           }
 
           myself._filterData();
         },
 
         close: function(event, ui) {
-          processChange();
+          myself.processChange();
         }
       };
 
@@ -199,6 +254,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
     /**
      *
+     * @method _selectValue
      * @param label
      * @private
      */
@@ -206,19 +262,19 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
       var myself = this;
       var addTextElements = this.addTextElements != null ? this.addTextElements : true;
       var showApplyButton = this.showApplyButton != null ? this.showApplyButton : true;
-      var list = $('.autocomplete-container .list-data-selection');
+      var list = this.ph.find('.autocomplete-container .list-data-selection');
       var listItem = $('<li id="' + label + '"><input type="button" class="close-button" value="x"/>' + label + '</li>');
 
       if(!this.selectMulti) {
         list.empty();
         this.selectedValues = [];
       } else if(showApplyButton) {
-        $('.autocomplete-container').addClass('show-apply-button');
-        $('.autocomplete-input-apply').show();
+        this.ph.find('.autocomplete-container').addClass('show-apply-button');
+        this.ph.find('.autocomplete-input-apply').show();
       }
 
       listItem.find('input').click(function() {
-        myself._removeValue(label);
+        myself._removeValue(label, true);
       });
 
       if(addTextElements) {
@@ -229,16 +285,20 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
     /**
      *
+     * @method _removeValue
      * @param id
      * @private
      */
-    _removeValue: function(id) {
+    _removeValue: function(id, change) {
       this.selectedValues = _.without(this.selectedValues, id);
-      $('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+      this.ph.find('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+      if(change) {
+        this.processChange();
+      }
     },
 
     _filterData: function() {
-      var menu = $('.autocomplete-container .ui-autocomplete');
+      var menu = this.ph.find('.autocomplete-container .ui-autocomplete');
       var data = this.selectedValues || [];
       var addTextElements = this.addTextElements != null ? this.addTextElements : true;
 
@@ -263,6 +323,7 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
     /**
      *
+     * @method _search
      * @param search
      * @param callback
      * @private
@@ -270,29 +331,32 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
     _search: function(search, callback) {
       var matchType = this.matchType || 'fromStart';
       var val = search.term.toLowerCase();
-      this._queryServer(val);
 
-      var result = this.result;
-      var list = [];
+      this._queryServer(val, function(data) {
 
-      for(var p in result) if(result.hasOwnProperty(p)) {
-        var value = result[p][0];
-        if(value != null &&
-            (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0) ||
-            (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
-          list.push(value);
+        var result = data.resultset ? data.resultset : data;
+        var list = [];
+
+        for(var p in result) if(result.hasOwnProperty(p)) {
+          var value = result[p][0];
+          if(value != null
+            && (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0)
+            || (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
+            list.push(value);
+          }
         }
-      }
+        callback(list);
+      });
 
-      callback(list);
     },
 
     /**
      *
+     * @method _endSearch
      * @private
      */
     _endSearch: function() {
-      var container = $('.autocomplete-container');
+      var container = this.ph.find('.autocomplete-container');
 
       container.removeClass('show-apply-button');
       container.find('.autocomplete-input-apply').hide();
@@ -303,9 +367,10 @@ define(['./QueryComponent', './BaseComponent', 'amd!../lib/underscore', '../lib/
 
     /**
      *
+     * @method _processAutoBoxChange
      * @private
      */
-    _processAutoBoxChange : function() {
+    _processAutoBoxChange: function() {
       this.textbox.autocomplete("change");
     }
   });

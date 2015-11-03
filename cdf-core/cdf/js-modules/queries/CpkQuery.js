@@ -12,24 +12,26 @@
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
 
 /**
- * Class that represents a CPK query
+ * Class that represents a CPK query.
+ *
  * @class CpkQuery
  * @extends BaseQuery
  */
-
-define(['../dashboard/Dashboard.ext',
+define([
+  '../dashboard/Dashboard.ext',
   './BaseQuery',
   '../dashboard/Dashboard.query',
   'amd!../lib/underscore',
   '../dashboard/Utils',
   '../Logger',
-  '../lib/jquery'],
-  function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
+  '../lib/jquery'
+], function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
   var CpkEndpointsOpts = {
     name: "cpk",
@@ -40,8 +42,8 @@ define(['../dashboard/Dashboard.ext',
       endpoint: '',
       systemParams: {},
       ajaxOptions: {
-          dataType:'json',
-        type:'POST',
+        dataType: 'json',
+        type: 'POST',
         async: true,
         xhrFields: {
           withCredentials: true
@@ -50,11 +52,10 @@ define(['../dashboard/Dashboard.ext',
     },
 
     /**
-     * Init method for the CPK query
+     * Init method for the CPK query.
      *
      * @method init
-     * @param opts Options is an object with the following properties: pluginId, endpoint, kettleOutput, stepName, systemParams
-     * ajaxOptions
+     * @param opts Options is an object with the following properties: pluginId, endpoint, kettleOutput, stepName, systemParams, ajaxOptions
      */
     init: function(opts) {
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
@@ -74,11 +75,11 @@ define(['../dashboard/Dashboard.ext',
     },
 
     /**
-     * Builds the query definition object
+     * Builds the query definition object.
      *
      * @method buildQueryDefinition
      * @param overrides Overrides to the existing options
-     * @returns {{}} Query definition object
+     * @return {{}} Query definition object
      *
      * @private
      */
@@ -132,19 +133,18 @@ define(['../dashboard/Dashboard.ext',
     },
 
     /**
-     * Gets the success handler for the query, given a fallback to call
+     * Gets the success handler for the query, given a fallback to call.
      *
      * @method getSuccessHandler
      * @param callback Callback to cal after the query is successful
-     * @returns Success handler
-     *
+     * @return Success handler
      */
     getSuccessHandler: function(callback) {
       // copy-pasted from BaseQuery + added errorCallback
       var myself = this;
       return function(json) {
         myself.setOption('lastResultSet', json);
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet'));
+        var clone = $.extend(true, {}, myself.getOption('lastResultSet'));
         if(json && json.result == false) {
           // the ajax call might have been successful (no network errors),
           // but the endpoint might have failed, which is signalled by json.result

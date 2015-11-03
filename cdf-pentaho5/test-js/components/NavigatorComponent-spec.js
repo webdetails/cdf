@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/NavigatorComponent"],
-  function(Dashboard, NavigatorComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/NavigatorComponent"
+], function(Dashboard, NavigatorComponent) {
 
   /**
    * ## The Navigator Component

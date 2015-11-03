@@ -16,8 +16,12 @@
  * @module Components
  */
 
-define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'],
-  function(BaseComponent, _, $, Logger) {
+define([
+  './BaseComponent',
+  'amd!../lib/underscore',
+  '../lib/jquery',
+  '../Logger'
+], function(BaseComponent, _, $, Logger) {
 
   /**
    * UnmanagedComponent is an advanced version of the BaseComponent that allows
@@ -36,6 +40,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    *    following is a guide to converting old components and dashboards to the new
    *    async style, and developing new ones based on asynchronous querying.</p>
    *
+   *
    * <h2>Rationale</h2>
    *
    * <p>The first step to understanding the changes in the async patch is understanding
@@ -53,7 +58,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    *
    * <p>This is a more typical lifecycle, and one that has some important limitations.
    * First, preExeuction and postExecution are entirely the responsibility of CDF
-   * itself, rather than the  component. Because CDF has no control over the contents
+   * itself, rather than the component. Because CDF has no control over the contents
    * of the update method, it has no way of ensuring that, should the component
    * execute an asynchronous query, postExecution only runs after redraw. In this
    * case, you're likely to see this instead:</p>
@@ -72,6 +77,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * <p>Our objective here was to retool the base component so as to deal with both
    * of these issues, thus allowing queries to be performed asynchronously while
    * reducing the developer effort involved in creating a component.</p>
+   *
    *
    * <h2>Component Execution Order and Priority</h2>
    *
@@ -101,7 +107,6 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * components will have a default priority of 5</strong>. This may break the old behavior.
    * If you need to change a dashboard, make sure you tweak the priorities, if
    * needed.</p>
-   *
    *
    *
    * <h2>Developing Components</h2>
@@ -134,19 +139,20 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * details), you can use subclass UnmanagedComponent and use the <code>synchronous</code>
    * lifecycle method to emulate BaseComponent's behaviour:</p>
    *
-   * <pre><code>update: function() {
-   * 		this.synchronous(this.redraw);
-   * 	}
+   * <pre><code>
+   *   update: function() {
+   *     this.synchronous(this.redraw);
+   *   }
    * </code></pre>
    *
    * <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
    * <code>synchronous</code>:</p>
    *
    * <pre><code>
-   * update: function() {
-   * 		// Will call this.redraw(1,2,3)
-   * 		   this.synchronous(this.redraw, [1,2,3]);
-   * }
+   *   update: function() {
+   *     // Will call this.redraw(1, 2, 3)
+   *     this.synchronous(this.redraw, [1, 2, 3]);
+   *   }
    * </code></pre>
    *
    * <h3>Use <code>triggerQuery</code> When You Want Your Component To Use CDA/Query Objects</h3>
@@ -157,10 +163,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * query definition is an object of the form:</p>
    *
    * <pre><code>
-   * {
-   * dataAccessId: 'myQuery',
-   * file: '/path/to/my/datasourceDefinition.cda'
-   * }
+   *   {
+   *     dataAccessId: 'myQuery',
+   *     file: '/path/to/my/datasourceDefinition.cda'
+   *   }
    * </code></pre>
    *
    * <p>Typically, if you're using CDE, these properties will be added to one of either
@@ -168,10 +174,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    * pattern:</p>
    *
    * <pre><code>
-   * update: function() {
-   * var redraw = _.bind(this.redraw,this);
-   * this.triggerQuery(this.queryDefinition, redraw);
-   * }
+   *   update: function() {
+   *     var redraw = _.bind(this.redraw, this);
+   *     this.triggerQuery(this.queryDefinition, redraw);
+   *   }
    * </code></pre>
    *
    * <h3>Alternating Between Static And Query-Based Data</h3>
@@ -180,16 +186,16 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
    *   them at will, deciding on an appropriate lifecycle at runtime. A common pattern
    *   (used e.g. in SelectComponent, and the CccComponent family) is exposing a
    * <code>valuesArray</code> property, and using static data if <code>valuesArray</code> is provided, or
-   * a query if it is not. Using UnmanagedComponent, this convention would like like
+   * a query if it is not. Using UnmanagedComponent, this convention would look like
    *     this:</p>
    *
    * <pre><code>
-   * update: function() {
-   *     var redraw = _.bind(this.redraw,this);
+   *   update: function() {
+   *     var redraw = _.bind(this.redraw, this);
    *     if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
-   *       this.synchronous(redraw,this.valuesArray);
+   *       this.synchronous(redraw, this.valuesArray);
    *     } else {
-   *       this.triggerQuery(this.queryDefinition,redraw);
+   *       this.triggerQuery(this.queryDefinition, redraw);
    *     }
    *   }
    * </code></pre>
@@ -236,7 +242,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       // runCounter gets incremented every time we run a query, allowing us to
       // determine whether the query has been called again after us.
       if(this.runCounter == null) this.runCounter = 0;
-      
+
       var execute = true;
       if(typeof this.preExecution === "function") {
         try {
@@ -247,13 +253,13 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
           this.failExec(ex);
         }
       }
-      
+
       // TODO: event should be cancellable!
       this.trigger('cdf cdf:preExecution', this, execute);
       
       return execute;
     },
-    
+
     /**
      * Handles calling postExecution when it exists. All components extending
      * UnmanagedComponent should either use one of the three lifecycles declared
@@ -266,10 +272,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
       if(typeof this.postExecution === "function") {
         this.postExecution();
       }
-      
+
       this.trigger('cdf cdf:postExecution', this);
     },
-  	
+
     /**
      * Handles calling `postFetch`, when it exists,
      * and of triggering the "cdf:postFetch" event.
@@ -280,20 +286,20 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     postFetchData: function(data) {
       if(typeof this.postFetch == "function") {
-          var newData = this.postFetch(data);
-          
-          data = (newData === undefined) ? data : newData;
-          
-          // TODO: postFetch event should allow transformation of data
-          // TODO: shouldn't postFetch event be called even when `postFetch` 
-          //   is not declared? 
-          this.trigger('cdf cdf:postFetch', this, data);
+        var newData = this.postFetch(data);
+
+        data = (newData === undefined) ? data : newData;
+        
+        // TODO: postFetch event should allow transformation of data
+        // TODO: shouldn't postFetch event be called even when `postFetch` 
+        //   is not declared? 
+        this.trigger('cdf cdf:postFetch', this, data);
       }
       return data;
     },
 
     /**
-     * Draws a tooltip, if one is defined in the component options
+     * Draws a tooltip, if one is defined in the component options.
      *
      * @method drawTooltip
      */
@@ -306,8 +312,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
     },
 
     /**
-     * Shows a tooltip attached to the component, 
-     * if one is defined in the `_tooltip` option
+     * Shows a tooltip attached to the component,
+     * if one is defined in the `_tooltip` option.
      *
      * @method showTooltip
      */
@@ -354,8 +360,8 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * This method handles parsing, signaling and logging of the error and 
      * unblocking the UI, if necessary.
      * 
-     * @method beginExec
-     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     * @method failExec
+     * @param {Error|*} arg An error object or the arguments of a `jQuery.ajax` error callback.
      */
     failExec: function(arg) {
       // NOTE: #error() already unblocks
@@ -373,21 +379,20 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * Ends a successful execution of the component.
      * 
      * This method handles 
-     * drawing and showing the component's tooltip, if any, 
+     * drawing and showing the component's tooltip, if any,
      * calling `postExec` and 
      * unblocking the UI, if necessary.
      * 
-     * @method beginExec
-     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     * @method endExec
      */
     endExec: function() {
       try {
         this.drawTooltip();
-      
+
         this.postExec();
-        
+
         this.showTooltip();
-        
+
         this._maybeUnblock();
       } catch(ex) {
         // already unblocks
@@ -414,8 +419,9 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      *       } catch(ex) {
      *         this.failExec(ex);
      *       }
-     *     } 
-     * 
+     *     }
+     *
+     * @method execute
      * @param {function} executor The executor function.
      *   This function receives two arguments:
      *   1. resolve - call this function to signal that core execution has ended.
@@ -449,14 +455,15 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     synchronous: function(callback, arg) {
       if(!this.beginExec()) return;
-      
+
       function synchronousInner() {
         try {
           callback.call(this, arg || []);
         } catch(ex) {
-          return void this.failExec(ex);
+          this.failExec(ex);
+          return;
         }
-        
+
         this.endExec();
       }
 
@@ -474,10 +481,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * ensures that only the redraw of the most recent update is performed.
      *
      * @method triggerQuery
-     * @params queryDef query definition
-     * @params callback Callback to run after query has ran.
+     * @param queryDef query definition
+     * @param callback Callback to run after query has ran.
      *    Receives the fetched data as argument. 
-     * @params queryOptions User options for the query
+     * @param queryOptions User options for the query
      */
     triggerQuery: function(queryDef, callback, queryOptions) {
       this.beginQuery(
@@ -488,25 +495,25 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
         },
         queryOptions);
     },
-    
+
     /**
      * The beginQuery lifecycle handler implements the begin phase of a lifecycle around Query objects.
      * It implements the lifecycle:
-     * preExecution->block?->doQuery->postFetch->(callback)->.
+     * preExecution->block?->doQuery->postFetch->(callback)->
      * 
      * Ending the execution, is the responsibility of the specified callback,
      * by calling `endExec` (resulting in: ->postExecution->unblock?)
      * or `failExec`.
      * 
      * @method beginQuery
-     * @params {Object} queryDef query definition
-     * @params {function} callback Callback to run after query has ran
+     * @param {Object} queryDef query definition
+     * @param {function} callback Callback to run after query has ran
      *    Receives as arguments: the fetched data object, a resolve function and a reject function.
-     * @params {Object} queryOptions User options for the query
+     * @param {Object} queryOptions User options for the query
      */
     beginQuery: function(queryDef, callback, queryOptions) {
       this.execute(function() {
-        var query  = this._setQuery(queryDef, queryOptions);
+        var query = this._setQuery(queryDef, queryOptions);
         
         // `getSuccessHandler`:
         // * if this execution is subsumed by a following one,
@@ -541,10 +548,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * If passed, the supplied _ajaxParameters_ will be passed to the default ajax call.
      *
      * @method triggerAjax
-     * @params url url to call
-     * @params params Parameters for the call
-     * @params callback Render callback, called with the response data.
-     * @params ajaxParameters Parameters specific to the ajax call definition
+     * @param url url to call
+     * @param params Parameters for the call
+     * @param callback Render callback, called with the response data.
+     * @param ajaxParameters Parameters specific to the ajax call definition
      */
     triggerAjax: function(url, params, callback, ajaxParameters) {
       // Process parameters
@@ -566,28 +573,28 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
     },
 
     /**
-     * The beginAjax lifecycle handler implements the begin phase of 
+     * The beginAjax lifecycle handler implements the begin phase of
      * a lifecycle based on generic AJAX calls.
      * It implements the lifecycle:
-     * preExecution->block?->ajax->postFetch->(callback)->.
+     * preExecution->block?->ajax->postFetch->(callback)->
      * 
      * Ending the execution, is the responsibility of the specified callback,
      * by calling `endExec` (resulting in: ->postExecution->unblock?)
      * or `failExec`.
      * 
      * @method beginAjax
-     * @params {Object} ajaxParameters Parameters for `jQuery.ajax`, 
+     * @param {Object} ajaxParameters Parameters for `jQuery.ajax`,
      *    including, at a minimum, the `url` option.
-     *    `beginAjax` will take control over the `success` and `error` callbacks, 
-     *     and default `async` to `true`.
+     *    `beginAjax` will take control over the `success` and `error` callbacks,
+     *    and default `async` to `true`.
      *
-     * @params {function} callback Render callback, called with the response data.
+     * @param {function} callback Render callback, called with the response data.
      */
     beginAjax: function(ajaxParameters, callback) {
       this.execute(function() {
         var ajaxOptions = $.extend(
           {async: true}, 
-          ajaxParameters, // requires url 
+          ajaxParameters, // requires url
           {
             success: this.getSuccessHandler(callback, undefined, this._maybeUnblock),
             error:   this.getErrorHandler()
@@ -615,14 +622,14 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     _setQuery: function(queryDef, queryOptions) {
       var query = this.queryState = this.query = this.dashboard.getQuery(queryDef);
-      
+
       // Ajax Options
       var ajaxOptions = {async: true};
       if(queryOptions && queryOptions.ajax)
         _.extend(ajaxOptions, queryOptions.ajax);
-      
+
       query.setAjaxOptions(ajaxOptions);
-      
+
       // Other Query Options
       if(queryOptions && queryOptions.pageSize)
         query.setPageSize(queryOptions.pageSize);
@@ -635,7 +642,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * requests were made.
      *
      * @method callCounter
-     * @returns the incremented counter
+     * @return the incremented counter
      */
     callCounter: function() {
       return ++this.runCounter;
@@ -703,7 +710,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * This method returns a `this` free version of the `failExec` method.
      * 
      * @method getErrorHandler
-     * @returns {Function} Error handler
+     * @return {Function} Error handler
      */
     getErrorHandler: function() {
       return _.bind(this.failExec, this);
@@ -714,23 +721,23 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * message and, optionally, a `cause` object.
      *
      * @method error
-     * @params msg Error message
-     * @params cause Cause for the error
+     * @param msg Error message
+     * @param cause Cause for the error
      */
     error: function(msg, cause) {
       if(!msg) msg = this.dashboard.getErrorObj('COMPONENT_ERROR').msg;
-      
+
       this._maybeUnblock();
-      
+
       this.errorNotification({msg: msg, error: cause});
-      
+
       this.trigger("cdf cdf:error", this, msg, cause || null);
-      
+
       if(cause) Logger.log(cause, "error");
     },
 
     /**
-     * Triggers an error notification
+     * Triggers an error notification.
      *
      * @method errorNotification
      * @param {Object} err A CDF error object containing `msg` and `error` properties.
@@ -738,7 +745,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      */
     errorNotification: function(err, ph) {
       if(!ph) ph = this.htmlObject ? this.placeholder() : undefined;
-      
+
       var name = this.name.replace('render_', '');
       err.msg = err.msg + ' (' + name + ')';
       this.dashboard.errorNotification(err, ph);
@@ -748,7 +755,7 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
      * Trigger UI blocking while the component is updating. Default implementation
      * uses the global CDF blockUI, but implementers are encouraged to override
      * with per-component blocking where appropriate (or no blocking at all in
-     * components that support it!)
+     * components that support it!).
      *
      * @method block
      */
@@ -774,10 +781,10 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
     },
 
     /**
-     * Returns _true_ if the component's lifecycle is marked as silent (does not trigger UI block when updating)
+     * Returns _true_ if the component's lifecycle is marked as silent (does not trigger UI block when updating).
      *
      * @method isSilent
-     * @returns {boolean} _true_ if the component should not trigger an UI block when updating
+     * @return {boolean} _true_ if the component should not trigger an UI block when updating
      */
     isSilent: function() {
       return !!(this.lifecycle && this.lifecycle.silent);
@@ -785,7 +792,9 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
 
     /**
      * Blocks the UI if it isn't silent.
+     *
      * @method _maybeBlock 
+     *
      * @private
      */
     _maybeBlock: function() {
@@ -794,7 +803,9 @@ define(['./BaseComponent', 'amd!../lib/underscore', '../lib/jquery', '../Logger'
 
     /**
      * Unblocks the UI if it isn't silent.
+     *
      * @method _maybeUnblock 
+     *
      * @private
      */
     _maybeUnblock: function() {

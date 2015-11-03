@@ -12,11 +12,11 @@
  */
 
 define([
-  'cdf/Dashboard.Clean',
-  'amd!cdf/lib/underscore',
-  'cdf/lib/jquery',
-  'cdf/components/VisualizationAPIComponent'],
-  function(Dashboard, _, $, VisualizationAPIComponent) {
+  'cdf/Dashboard.Clean', 
+  'amd!cdf/lib/underscore', 
+  'cdf/lib/jquery', 
+  'cdf/components/VisualizationAPIComponent'
+], function(Dashboard, _, $, VisualizationAPIComponent) {
 
   /**
    * ## The VisualizationAPI Component
@@ -27,6 +27,11 @@ define([
 
     dashboard.addParameter("optionParam", "value");
 
+    dashboard.addDataSource("vizQuery", {
+      dataAccessId: "dataAccessTestId",
+      path: "/test/path.cda"
+    });
+
     dashboard.init();
 
     var visualizationAPIComponent = new VisualizationAPIComponent({
@@ -36,8 +41,7 @@ define([
       vizOptions: [["param1", "optionParam"]],
       htmlObject: 'visualizationAPIComponent',
       queryDefinition: {
-        dataAccessId: "dataAccessTestId",
-        path: "/test/path",
+        dataSource: "vizQuery",
         showValue: true
       },
       executeAtStart: true

@@ -23,7 +23,9 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
       var isSelected = false;
 
       var currentValArray = [];
-      if(currentVal instanceof Array || (typeof currentVal == "object" && currentVal.join)) {
+      if(currentVal == null || currentVal == undefined) {
+        currentValArray = [];
+      } else if(currentVal instanceof Array || (typeof currentVal == "object" && currentVal.join)) {
         currentValArray = currentVal;
       } else if(typeof currentVal == "string") {
         currentValArray = currentVal.split("|");
@@ -32,21 +34,21 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
       // check to see if current selected values are in the current values array. If not check to see if we should default to the first
       var vid = myself.valueAsId == false ? 0 : 1;
       var hasCurrentVal = false;
-        outer:
-        for(var i = 0; i < currentValArray.length; i++) {
-          for(var y = 0; y < myArray.length; y++) {
-            if(currentValArray[i] == myArray[y][vid]) {
-              hasCurrentVal = true;
-              break outer;
-            }
+      outer:
+      for(var i = 0; i < currentValArray.length; i++) {
+        for(var y = 0; y < myArray.length; y++) {
+          if(currentValArray[i] == myArray[y][vid]) {
+            hasCurrentVal = true;
+            break outer;
           }
         }
+      }
       // if there will be no selected value, but we're to default if empty, select the first
       if(!hasCurrentVal && myself.defaultIfEmpty) {
         currentValArray = [myArray[0][vid]];
 
         myself.currentVal = currentValArray;
-        myself.dashboard.setParameter(myself.parameter,currentValArray);
+        myself.dashboard.setParameter(myself.parameter, currentValArray);
         myself.dashboard.processChange(myself.name);
       }
       // (currentValArray == null && myself.defaultIfEmpty)? firstVal : null
@@ -101,9 +103,9 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
     },
     callAjaxAfterRender: function(m, name) {
       var myself = m;
-      setTimeout(function(){
+      setTimeout(function() {
         myself.dashboard.processChange(name);
-      },1);
+      }, 1);
     }
   });
 

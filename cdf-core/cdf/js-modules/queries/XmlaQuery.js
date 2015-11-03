@@ -11,36 +11,38 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
+/*
  * Purpose: Provide extensible datasources via Dashboard Addins
  * Author: Andy Grohe
  * Contact: agrohe21@gmail.com
  */
 
 /**
- * Module that holds query related objects
+ * Module that holds query related objects.
+ *
  * @module Query
  */
-
-define(['amd!../lib/xmla',
+define([
+  'amd!../lib/xmla',
   './XmlaQuery.ext',
   '../lib/Base',
   './BaseQuery',
   '../dashboard/Dashboard.query',
   '../Logger',
-  '../lib/jquery'], 
-function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
+  '../lib/jquery'
+], function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
   /**
    * Class that will be used by both XML/A and XML/A Discover classes.
+   *
    * @class SharedXmla
    * @extends Base
    */
   var SharedXmla = Base.extend({
-      xmla: null,
-      //cache the datasource as there should be only one xmla server
-      datasource: null,
-      catalogs: null,
+    xmla: null,
+    //cache the datasource as there should be only one xmla server
+    datasource: null,
+    catalogs: null,
 
     /**
      * Fetches the available datasources from the server.
@@ -131,8 +133,8 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
           properties[Xmla.PROP_CATALOG]        = queryDefinition.catalog;
           properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT || Xmla.PROP_FORMAT_TABULAR; // Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
           var result = this.xmla.execute({
-              statement: queryDefinition.query(),
-              properties: properties
+            statement: queryDefinition.query(),
+            properties: properties
           });
           return result;
         }
@@ -146,6 +148,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
   /**
    * Class that represents a XML/A query.
+   *
    * @class XmlaQuery
    * @extends BaseQuery
    */
@@ -159,7 +162,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
     },
 
     /**
-     * Init method for the XML/A query
+     * Init method for the XML/A query.
      *
      * @method init
      * @param queryDefinition Object with the following properties: queryType, catalog, query
@@ -187,7 +190,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
      *
      * @method transformXMLAresults
      * @param results Object with the XML/A query result.
-     * @returns {{}} Object with the XML/A query metadata and resultset as properties.
+     * @return {{}} Object with the XML/A query metadata and resultset as properties.
      */
     transformXMLAresults: function(results) {
       var rows,
@@ -200,7 +203,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
         cols = results.getFields();
       }
       // Xmla.PROP_FORMAT_MULTIDIMENSIONAL
-      else if (results instanceof Xmla.Dataset) {
+      else if(results instanceof Xmla.Dataset) {
         // TODO support multi dimensional datasets
       }
 
@@ -241,7 +244,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       try {      
         var result = _sharedXmla.execute(this.queryDefinition);
       } catch(e) {
-        Logger.error('unable to execute the XML/A query: ' + e +' :');
+        Logger.error('unable to execute the XML/A query: ' + e + ' :');
       }
       callback(this.transformXMLAresults(result));
     }
@@ -253,6 +256,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
   /**
    * Class that represents a XML/A Discover query.
+   *
    * @class XmlaQuery
    * @extends BaseQuery
    */
@@ -292,7 +296,7 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
      *
      * @method transformDiscoverresults
      * @param results Object with the XML/A Discover query result.
-     * @returns {{}} Object with the XML/A Discover query metadata and resultset as properties.
+     * @return {{}} Object with the XML/A Discover query metadata and resultset as properties.
      */
     transformDiscoverresults: function(results) {
       var cols = results.getFields(),
@@ -341,8 +345,8 @@ function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
       callback(this.transformDiscoverresults(result));
     }
   };
+
   // Registering an object that will be used to create a class, by extending BaseQuery,
   // that will allow to generate new XML/A Discover queries.
   Dashboard.registerGlobalQuery("xmlaDiscover", xmlaDiscoverOpts);
-
 });

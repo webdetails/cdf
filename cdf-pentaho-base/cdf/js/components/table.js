@@ -232,7 +232,9 @@ var TableComponent = UnmanagedComponent.extend({
       return this.error("TableComponent requires an htmlObject");
     }
     try {
-      this.block();
+      if(!this.isSilent()) {
+        this.block();
+      }
       this.setup();
       if(this.chartDefinition.paginateServerside) {
         this.paginatingUpdate();
@@ -255,7 +257,9 @@ var TableComponent = UnmanagedComponent.extend({
        * that will trigger unblock, meaning we need to trigger unblock manually.
        */
       Dashboards.log(e,'exception');
-      this.unblock();
+      if(!this.isSilent()) {
+        this.unblock();
+      }
     }
   },
   
@@ -290,7 +294,19 @@ var TableComponent = UnmanagedComponent.extend({
       Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
+
+    // Make sure we have a tableStyle in place
+    if(typeof cd.tableStyle === "undefined") {
+      cd.tableStyle = typeof wcdfSettings != "undefined" && wcdfSettings.rendererType === "bootstrap" ?
+      "bootstrap" : "classic";
+    }
+
     cd["tableId"] = this.htmlObject + "Table";
+
+    // make sure we have no expand parameters set
+    $(this.expandParameters).each(function f(i, elt) {
+      Dashboards.setParameter(elt[1], "");
+    });
 
     // Clear previous table
     this.ph = $("#"+this.htmlObject).empty();
@@ -418,7 +434,9 @@ var TableComponent = UnmanagedComponent.extend({
    */
   fnInitComplete: function() {
     this.postExec();
-    this.unblock();
+    if(!this.isSilent()) {
+      this.unblock();
+    }
   },
 
   /* 
@@ -540,10 +558,10 @@ var TableComponent = UnmanagedComponent.extend({
         state.target = target;
 
         if(myself.expandOnClick) {
-        	myself.handleExpandOnClick(state);
+          myself.handleExpandOnClick(state);
         }
         if(cd.clickAction ) {
-	        cd.clickAction.call(myself,state);
+          cd.clickAction.call(myself,state);
         }
       }
     });

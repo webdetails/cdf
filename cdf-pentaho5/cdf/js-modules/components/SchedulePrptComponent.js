@@ -11,8 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!../lib/jquery.impromptu', 'css!./SchedulePrptComponent'],
-  function(SchedulePrptComponentExt, PrptComponent, $) {
+define([
+  './SchedulePrptComponent.ext',
+  './PrptComponent',
+  '../lib/jquery',
+  'amd!../lib/underscore',
+  'amd!../lib/jquery.impromptu',
+  'css!./SchedulePrptComponent'
+], function(SchedulePrptComponentExt, PrptComponent, $, _) {
 
   var SchedulePrptComponent = PrptComponent.extend({
     visible: false,
@@ -43,8 +49,60 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         }
       });
     },
+    createJobParameter: function(paramName, defaultValue, paramType, forceDefault, trueArray) {
+      if(!forceDefault && (this.getReportOptions()[paramName] != undefined)) {
+        return {name: paramName, stringValue:
+          (trueArray ? this.getReportOptions()[paramName] : new Array("" + this.getReportOptions()[paramName])), type: paramType};
+      } else {
+        return {name: paramName, stringValue: (trueArray ? defaultValue : new Array("" + defaultValue)), type: paramType};
+      }
+    },
+    scheduleRequest: function(sendMail) {
+      var outTarget = this.outputTarget ? this.outputTarget : "table/html;page-mode=page";
+      var jobParameters = new Array();
+      var k = 0;
+      jobParameters[k++] = this.createJobParameter("output-target", outTarget, "string", true);
+      jobParameters[k++] = this.createJobParameter("accepted-page", "0", "string");
+      jobParameters[k++] = this.createJobParameter("showParameters", "true", "string");
+      jobParameters[k++] = this.createJobParameter("renderMode", "XML", "string");
+      jobParameters[k++] = this.createJobParameter("htmlProportionalWidth", "false", "string");
+      if(sendMail) {
+        jobParameters[k++] = this.createJobParameter("_SCH_EMAIL_TO", $("#toInput").val(), "string");
+        jobParameters[k++] = this.createJobParameter("_SCH_EMAIL_CC", "", "string");
+        jobParameters[k++] = this.createJobParameter("_SCH_EMAIL_BCC", "", "string");
+        jobParameters[k++] = this.createJobParameter("_SCH_EMAIL_SUBJECT", $("#subjectInput").val(), "string");
+        jobParameters[k++] = this.createJobParameter("_SCH_EMAIL_MESSAGE", $("#messageInput").val(), "string");
+        jobParameters[k++] = this.createJobParameter("_SCH_EMAIL_ATTACHMENT_NAME", $("#attachmentNameInput").val(), "string");
+      }
+      for(var i = 0; i < this.parameters.length; i++) {
+        var extParam = this.extractParameter(this.parameters[i]);
+        var isArray = _.isArray(extParam.value);
+        jobParameters[k++] = this.createJobParameter(extParam.name, extParam.value, isArray ? "string[]" : "string", true, isArray);
+      }
+      this.scheduleParameters = this.scheduleParameters || {};
+      this.scheduleParameters["jobParameters"] = jobParameters;
+      var success = false;
+      $.ajax({
+        url: SchedulePrptComponentExt.getScheduledJob(),
+        async: false,
+        type: "POST",
+        data: JSON.stringify(this.scheduleParameters),
+        contentType: "application/json",
+        success: function(response) {
+          alert("Successfully scheduled.");
+          success = true;
+          this.scheduleParameters = {};
+        },
+        error: function(response) {
+          alert(response.responseText);
+          success = false;
+          this.scheduleParameters = {};
+        }
+      });
+      return success;
+    },
     schedulePrptComponent: function() {
-      var parameters = {};
+      this.scheduleParameters = {};
       var sharedUuid;
       var error = false;
       var guid = function() {
@@ -193,7 +251,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
         return dayOfMonth;
       };
       var setParameters = function() {
-        parameters = {
+        myself.scheduleParameters = {
           inputFile: myself.path,
           jobName: $('#nameIn').val(),
           outputFile: $('#locationIn').val()
@@ -211,7 +269,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               startTime: start,
               uiPassParam: "RUN_ONCE"
             };
-            parameters["simpleJobTrigger"] = simpleJobTrigger;
+            myself.scheduleParameters["simpleJobTrigger"] = simpleJobTrigger;
             break;
           case "seconds":
               var start = startTimeGetter();
@@ -229,7 +287,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
                 startTime: start,
                 uiPassParam: "SECONDS"
               };
-              parameters["simpleJobTrigger"] = simpleJobTrigger;
+              myself.scheduleParameters["simpleJobTrigger"] = simpleJobTrigger;
               break;
           case "minutes":
             var start = startTimeGetter();
@@ -247,7 +305,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               startTime: start,
               uiPassParam: "MINUTES"
             };
-            parameters["simpleJobTrigger"] = simpleJobTrigger;
+            myself.scheduleParameters["simpleJobTrigger"] = simpleJobTrigger;
             break;
           case "hours":
             var start = startTimeGetter();
@@ -265,7 +323,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               startTime: start,
               uiPassParam: "HOURS"
             };
-            parameters["simpleJobTrigger"] = simpleJobTrigger;
+            myself.scheduleParameters["simpleJobTrigger"] = simpleJobTrigger;
             break;
           case "daily":
             if($("#endByRadio").is(":checked")) {
@@ -279,7 +337,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
                 startTime: start,
                 uiPassParam: "DAILY"
               };
-              parameters["complexJobTrigger"] = complexJobTrigger;
+              myself.scheduleParameters["complexJobTrigger"] = complexJobTrigger;
             } else if($("#dayRadio").is(":checked")) {
               var repeatDays = $("#recurrPatternInDay").val();
               if(repeatDays < 1) {
@@ -292,7 +350,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
                 startTime: start,
                 uiPassParam: "DAILY"
               };
-              parameters["simpleJobTrigger"] = simpleJobTrigger;
+              myself.scheduleParameters["simpleJobTrigger"] = simpleJobTrigger;
             }
             break;
           case "weekly":
@@ -306,7 +364,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               startTime: start,
               uiPassParam: "WEEKLY"
             };
-            parameters["complexJobTrigger"] = complexJobTrigger;
+            myself.scheduleParameters["complexJobTrigger"] = complexJobTrigger;
             break;
           case "monthly":
             var start = startTimeGetter();
@@ -324,7 +382,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
                 complexJobTrigger["daysOfWeek"] = $("#monthOpt2Select").val();
                 complexJobTrigger["weeksOfMonth"] = $("#monthOpt1Select").val();
             }
-            parameters["complexJobTrigger"] = complexJobTrigger;
+            myself.scheduleParameters["complexJobTrigger"] = complexJobTrigger;
             break;
           case "yearly":
             var start = startTimeGetter();
@@ -344,7 +402,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               complexJobTrigger["monthsOfYear"] = $("#yearMonthSelect").val();
               complexJobTrigger["weeksOfMonth"] = $("#yearOpt1Select").val();
             }
-            parameters["complexJobTrigger"] = complexJobTrigger;
+            myself.scheduleParameters["complexJobTrigger"] = complexJobTrigger;
             break;
           case "cron":
             var cron = $("#cronString").val();
@@ -359,7 +417,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               startTime: start,
               uiPassParam: "CRON"
             };
-            parameters["cronJobTrigger"] = cronJobTrigger;
+            myself.scheduleParameters["cronJobTrigger"] = cronJobTrigger;
             break;
         }
       };
@@ -443,13 +501,6 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
             break;
         }
       };
-      var createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
-        if(!forceDefault && (myself.getReportOptions()[paramName] != undefined)) {
-          return {name: paramName, stringValue: new Array("" + myself.getReportOptions()[paramName]), type: paramType};
-        } else {
-          return {name: paramName, stringValue: new Array("" + defaultValue), type: paramType};
-        }
-      };
       var myself = this;
       var monthOpts =
         '<option value="0">January</option>' + '<option value="1">February</option>' +
@@ -475,7 +526,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
       var recurrenceDiv =
         '<div id = "recurrenceDiv">' +
         '<br><span class="dialog-title" style="width: 100px; display: inline-block;">Recurrence:</span>' +
-        '<select id="recurrId" onChange="changeOpts()" style="margin-left: 0px;">' +
+        '<select id="recurrId" style="margin-left: 0px;">' +
         '<option value = "once" selected>Run Once</option>' +
         '<option value = "seconds">Seconds</option>' +
         '<option value = "minutes">Minutes</option>' +
@@ -574,51 +625,6 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
       var showHideMailDiv = function(show){
         show ? $("#mailInfoDiv").show(350) : $("#mailInfoDiv").hide(350);
       };
-      var scheduleRequest = function(sendMail) {
-        var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
-        var jobParameters = new Array();
-        var k = 0;
-        jobParameters[k++] = createJobParameter("output-target", outTarget, "string", true);
-        jobParameters[k++] = createJobParameter("accepted-page", "0", "string");
-        jobParameters[k++] = createJobParameter("showParameters", "true", "string");
-        jobParameters[k++] = createJobParameter("renderMode", "XML", "string");
-        jobParameters[k++] = createJobParameter("htmlProportionalWidth", "false", "string");
-        if(sendMail) {
-          jobParameters[k++] = createJobParameter("_SCH_EMAIL_TO", $("#toInput").val(), "string");
-          jobParameters[k++] = createJobParameter("_SCH_EMAIL_CC", "", "string");
-          jobParameters[k++] = createJobParameter("_SCH_EMAIL_BCC", "", "string");
-          jobParameters[k++] = createJobParameter("_SCH_EMAIL_SUBJECT", $("#subjectInput").val(), "string");
-          jobParameters[k++] = createJobParameter("_SCH_EMAIL_MESSAGE", $("#messageInput").val(), "string");
-          jobParameters[k++] = createJobParameter("_SCH_EMAIL_ATTACHMENT_NAME", $("#attachmentNameInput").val(), "string");
-        }
-        for(var i = 0; i < myself.parameters.length; i++) {
-          jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string", true);
-        }
-        parameters["jobParameters"] = jobParameters;
-        var success = false;
-        var x = $.ajaxSettings.async;
-        $.ajaxSetup({
-          async: false
-        });
-        $.ajax({
-          url: SchedulePrptComponentExt.getScheduledJob(),
-          type: "POST",
-          data: JSON.stringify(parameters),
-          contentType: "application/json",
-          success: function(response) {
-            alert("Successfully scheduled.");
-            success = true;
-          },
-          error: function(response) {
-            alert(response.responseText);
-            success = false;
-          }
-        });
-        $.ajaxSetup({
-          async: x
-        });
-        return success;
-      };
       var fullPage = nameDiv + locationDiv + recurrenceDiv + cronString + startTime + recurrencePattern + rangeOfRecurrence + rangeOfRecurrenceOnce;
       var mailPage = mailQuestion + mailInfo;
       var validEmailConfig = false;
@@ -653,7 +659,7 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
                 $.prompt.goToState('mailState');
                 return false;
               } else {
-                return scheduleRequest();
+                return myself.scheduleRequest();
               }
             }
           }
@@ -671,14 +677,14 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
               return false;
             } else if(v == 1) {
               if($("#mailRadioNo").is(':checked')) {
-                  return scheduleRequest();
+                  return myself.scheduleRequest();
               } else if($("#mailRadioYes").is(':checked')) {
                 var pattern = /^\S+@\S+$/;
                 if(!$("#toInput").val().match(pattern)) {
                   triggerError("Invalid email", "#toInput");
                   return false;
                 }
-                return scheduleRequest(true);
+                return myself.scheduleRequest(true);
               } else {
                 return false;
               }
@@ -686,7 +692,12 @@ define(['./SchedulePrptComponent.ext', './PrptComponent', '../lib/jquery', 'amd!
           }
         }
       };
-      $.prompt(promp, {classes: 'scheduler'});
+      $.prompt(promp, {
+        box: 'scheduler',
+        loaded: function(){
+          $("#recurrId").on("change", function(){changeOpts();});
+        }
+      });
       $(".scheduler #jqi").css("width", "510px");
       $(document).ready(function(ev) {
         $("#startDateIn").datepicker({minDate: 0});

@@ -23,7 +23,7 @@ define([
      */
     defaults: {
       id: void 0,
-      label: "Label",
+      label: "",
       isSelected: false,
       isVisible: true,
       isCollapsed: true,
@@ -248,7 +248,7 @@ define([
     },
     inferSelection: function(logic, callback) {
 
-      /**
+      /*
        * calculate the current state based on the state of the children
        * and optionally execute a callback
        */

@@ -11,12 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
+/*
  * Generic container class for registering and fetching objects according to a key, using a factory pattern.
  * Used for add-ins and queries, this is mostly an internal use only module.
  * Should not appear by now in yui-documentation
  */
-
 define(function() {
 
   // Shared/Static stuff
@@ -160,8 +159,7 @@ define(function() {
       if(holdersByName) {
         holder = holdersByName[name || ''];
         if(!holder && !isTry) {
-          throw new Error(
-            "There is no registration for type '" + type + "'" +
+          throw new Error("There is no registration for type '" + type + "'" +
             (name ? (" and name '" + name + "'") : "") + ".");
         }
       }
@@ -197,5 +195,5 @@ define(function() {
       }
       return instances;
     }
-  }
+  };
 });

@@ -11,8 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/underscore', './BaseComponent'],
-  function(PrptComponentExt, Logger, $, _, BaseComponent) {
+define([
+  './PrptComponent.ext',
+  '../Logger',
+  '../lib/jquery',
+  'amd!../lib/underscore',
+  './BaseComponent'
+], function(PrptComponentExt, Logger, $, _, BaseComponent) {
 
   var PrptComponent = BaseComponent.extend({
     getIframeName: function() {
@@ -176,34 +181,9 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
 
       // update options with report parameters
       var myself = this;
-      _.each(this.parameters, function( param, index ) {
-        // param: [<prptParam>, <dashParam>, <default>]
-        var name = param[0];
-        var value = param[1];
-
-        var paramValue;
-        try {
-          paramValue = myself.dashboard.getParameterValue(value);
-        } catch( e ) {
-          var printValue;
-          if(!_.isObject(value) || _.isFunction(value)) {
-            printValue = value;
-          } else {
-            printValue = JSON.stringify(value);
-          }
-          Logger.log("GetOptions detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used as value instead its value obtained from getParameterValue");
-          paramValue = value;
-        }
-        if (paramValue == null && param.length == 3) {
-          paramValue = param[2];
-        } else if (paramValue === undefined) {
-          paramValue = value;
-        }
-        if (_.isFunction(paramValue)) {
-          paramValue = paramValue();
-        }
-        options[name] = paramValue;
+      _.each(this.parameters, function(param, index) {
+        var extractedParameter = myself.extractParameter(param);
+        options[extractedParameter.name] = extractedParameter.value;
       });
 
       return options;
@@ -221,36 +201,43 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
       // update options with report parameters
       var myself = this;
       _.each(this.parameters, function( param, index ) {
-        // param: [<prptParam>, <dashParam>, <default>]
-        var name = param[0];
-        var value = param[1];
-
-        var paramValue;
-        try {
-          paramValue = myself.dashboard.getParameterValue(value);
-        } catch( e ) {
-          if(!_.isObject(value) || _.isFunction(value)) {
-            printValue = value;
-          } else {
-            printValue = JSON.stringify(value);
-          }
-          Logger.log("GetParams detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used as value instead its value obtained from getParameterValue");
-          paramValue = value;
-        }
-        if (paramValue == null && param.length == 3) {
-          paramValue = param[2];
-        } else if (paramValue === undefined) {
-          paramValue = value;
-        }
-        if (_.isFunction(paramValue)) {
-          paramValue = paramValue();
-        }
-        options[name] = paramValue;
+        var extractedParameter = myself.extractParameter(param);
+        options[extractedParameter.name] = extractedParameter.value;
       });
 
       return options;
     },
+
+    extractParameter: function(param) {
+      // param: [<prptParam>, <dashParam>, <default>]
+      var name = param[0];
+      var value = param[1];
+
+      var paramValue;
+      try {
+        paramValue = this.dashboard.getParameterValue(value);
+      } catch( e ) {
+        var printValue;
+        if(!_.isObject(value) || _.isFunction(value)) {
+          printValue = value;
+        } else {
+          printValue = JSON.stringify(value);
+        }
+        Logger.log("extractParameter detected static parameter " + name + "=" + printValue + ". "
+          + "The parameter will be used as value instead its value obtained from getParameterValue");
+        paramValue = value;
+      }
+      if(paramValue == null && param.length == 3) {
+        paramValue = param[2];
+      } else if (paramValue === undefined) {
+        paramValue = value;
+      }
+      if(_.isFunction(paramValue)) {
+        paramValue = paramValue();
+      }
+      return {name: name, value: paramValue};
+    },
+
     getReportOptions: function() {
       var options = {
         paginate: this.paginate || false,
@@ -321,7 +308,7 @@ define(['./PrptComponent.ext', '../Logger', '../lib/jquery', 'amd!../lib/undersc
             htmlObj.width(sized.scrollWidth + wMargin);
           }
         }
-      } catch (e) {
+      } catch(e) {
         Logger.log(e);
       }
     },

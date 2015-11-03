@@ -12,12 +12,12 @@
  */
 
 /**
- * A module representing an extension to Dashboard class for handling legacy calls.
- * The methods here handle calling xactions and other legacy related actions
- * All the methods in this module are deprecated
+ * A module representing an extension to the Dashboard module for handling legacy calls.
+ * The methods here handle calling xactions and other legacy related actions.
+ * All the methods in this module are deprecated.
+ *
  * @module Dashboard.legacy
  */
-
 define([
   '../queries/CdaQuery.ext',
   '../components/XactionComponent.ext',
@@ -30,7 +30,7 @@ define([
   Dashboard.implement({
 
     /**
-     * Calls an xaction
+     * Calls a xaction.
      *
      * @method callPentahoAction
      * @param obj Dom object where the response from the xaction should be written
@@ -39,7 +39,7 @@ define([
      * @param action xaction name
      * @param parameters Parameter object to send to the xaction
      * @param callback Callback function to call when the xaction responds
-     * @returns {*} The xaction result
+     * @return {*} The xaction result
      *
      * @for Dashboard
      * @deprecated
@@ -50,22 +50,22 @@ define([
       // Encapsulate pentahoAction call
       // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
       if(typeof callback == 'function') {
-        return myself.pentahoAction( solution, path, action, parameters, function(json) {
-          callback(myself.parseXActionResult(obj,json));
+        return myself.pentahoAction(solution, path, action, parameters, function(json) {
+          callback(myself.parseXActionResult(obj, json));
         });
       } else {
-        return myself.parseXActionResult(obj,myself.pentahoAction(solution, path, action, parameters, callback));
+        return myself.parseXActionResult(obj, myself.pentahoAction(solution, path, action, parameters, callback));
       }
     },
 
     /**
-     * Calls an arbitrary URL expecting the result content type to be xml
+     * Calls an arbitrary URL expecting the result content type to be xml.
      *
      * @method urlAction
      * @param url Url to call
      * @param params Parameters object
      * @param func Callback function
-     * @returns {*} The parsed invocation result if no callback was supplied. Otherwise, null
+     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null
      *
      * @for Dashboard
      * @deprecated
@@ -82,7 +82,7 @@ define([
      * @param url Url to call
      * @param params Parameters object
      * @param func Callback function
-     * @returns {*} The parsed invocation result if no callback was supplied. Otherwise, null
+     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null
      *
      * @for Dashboard
      * @deprecated
@@ -117,7 +117,7 @@ define([
       var result = $.ajax({
         url: url,
         type: "POST",
-        dataType:returnType,
+        dataType: returnType,
         async: false,
         data: params,
         error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -138,7 +138,7 @@ define([
     },
 
     /**
-     * Another way to call an xaction
+     * Another way to call an xaction.
      *
      * @method pentahoAction
      * @param solution Solution folder
@@ -146,7 +146,7 @@ define([
      * @param action xaction name
      * @param params Parameter object to send to the xaction
      * @param func Callback function to call when the xaction responds
-     * @returns {*} The xaction result
+     * @return {*} The xaction result
      *
      * @for Dashboard
      * @deprecated
@@ -156,10 +156,9 @@ define([
     },
 
     /**
-     * Calls an xaction
+     * Calls an xaction.
      *
      * @method pentahoServiceAction
-     *
      * @param serviceMethod Dom object where the response from the xaction should be written
      * @param returntype Expected return type of the response
      * @param solution Solution folder
@@ -167,7 +166,7 @@ define([
      * @param action xaction name
      * @param params Parameter object to send to the xaction
      * @param func Callback function to call when the xaction responds
-     * @returns {*} The xaction result
+     * @return {*} The xaction result
      *
      * @for Dashboard
      * @deprecated
@@ -175,7 +174,7 @@ define([
     pentahoServiceAction: function(serviceMethod, returntype, solution, path, action, params, func) {
       // execute an Action Sequence on the server
     
-      var arr = DashboardExt.getServiceAction(serviceMethod, solution, path , action);
+      var arr = DashboardExt.getServiceAction(serviceMethod, solution, path, action);
       var url = arr.url;
       delete arr.url;
     
@@ -198,7 +197,7 @@ define([
       $(function() {
         if($.tooltip) {
           $(".cdf_error").tooltip({
-            delay:0,
+            delay: 0,
             track: true,
             fade: 250,
             showBody: " -- "
@@ -208,8 +207,7 @@ define([
     },
 
     /**
-     * Parses the xaction result
-     *
+     * Parses the xaction result.
      *
      * @method parseXActionResult
      * @param obj DOM object where the response will be written to
@@ -219,7 +217,7 @@ define([
      * @deprecated
      * @private
      */
-    parseXActionResult: function(obj,html) {
+    parseXActionResult: function(obj, html) {
     
       var jXML = $(html);
       var error = jXML.find("SOAP-ENV\\:Fault");
@@ -241,20 +239,21 @@ define([
       }
       //<img src='"+ ERROR_IMAGE + "'>
       // TODO errorDetails in title: is this right?
-      var out = "<table class='errorMessageTable' border='0'><tr><td class='errorIcon'></td><td><span class='cdf_error' title=\"" + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
+      var out = "<table class='errorMessageTable' border='0'><tr><td class='errorIcon'></td><td><span class='cdf_error' title=\""
+        + errorDetails.join('<br/>').replace(/"/g,"'") + "\" >" + errorMessage + " </span></td></tr></table/>";
     
       // if this is a hidden component, we'll place this in the error div
       if(obj.visible == false) {
         $("#" + this.CDF_ERROR_DIV).append("<br />" + out);
       } else{
-        $('#'+obj.htmlObject).html(out);
+        $('#' + obj.htmlObject).html(out);
       }
     
       return null;
     },
 
     /**
-     * Sets a setting in the server
+     * Sets a setting in the server.
      *
      * @method setSettingsValue
      * @param name Name of the setting
@@ -263,7 +262,7 @@ define([
      * @for Dashboard
      * @deprecated
      */
-    setSettingsValue: function(name,object) {
+    setSettingsValue: function(name, object) {
     
       var data = {
         method: "set",
@@ -274,7 +273,7 @@ define([
     },
 
     /**
-     * Gets a setting value from the server
+     * Gets a setting value from the server.
      *
      * @method getSettingsValue
      * @param key Key to the setting
@@ -283,7 +282,7 @@ define([
      * @for Dashboard
      * @deprecated
      */
-    getSettingsValue: function(key,value) {
+    getSettingsValue: function(key, value) {
     
       $.ajax({
         type: 'GET',
@@ -301,7 +300,8 @@ define([
 
     /**
      * Fetches data from the server according to a ChartDefinition object.
-     * This method is deprecated. {{#crossLink "Query"}}Query{{/crossLink}} object should be used instead
+     * This method is deprecated. {{#crossLink "Query"}}Query{{/crossLink}} object should be used instead.
+     *
      * @method fetchData
      * @param cd Chart Definition object
      * @param params Parameter object
@@ -311,27 +311,35 @@ define([
      * @deprecated
      */
     fetchData: function(cd, params, callback) {
-      Logger.warn('Dashboards.fetchData() is deprecated. Use Query objects instead');
+      Logger.warn('Dashboard fetchData() is deprecated. Use Query objects instead');
       // Detect and handle CDA data sources
       if(cd != undefined && cd.dataAccessId != undefined) {
         for(var param in params) {
           cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
         }
     
-        $.post(CdaQueryExt.getDoQuery(), cd,
+        $.post(
+          CdaQueryExt.getDoQuery(),
+          cd,
           function(json) {
             callback(json);
-          },'json').error(this.handleServerError);
+          },
+          'json'
+        ).error(this.handleServerError);
       }
       // When we're not working with a CDA data source, we default to using jtable to fetch the data...
       else if(cd != undefined) {
     
         var xactionFile = (cd.queryType == 'cda') ? "jtable-cda.xaction" : "jtable.xaction";
     
-        $.post(XactionComponentExt.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
+        $.post(
+          XactionComponentExt.getCdfXaction("pentaho-cdf/actions", xactionFile),
+          cd,
           function(result) {
             callback(result.values);
-          },'json');
+          },
+          'json'
+        );
       }
       // ... or just call the callback when no valid definition is passed
       else {

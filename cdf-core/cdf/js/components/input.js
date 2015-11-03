@@ -85,6 +85,10 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
   draw: function(myArray) {
     var ph = this.placeholder();
+    if(ph.length === 0) {
+      Dashboards.log("Placeholder not in DOM - Will not draw", "warn");
+      return false;
+    }
     var name = this.name;
 
     // Build the HTML
@@ -117,7 +121,8 @@ var SelectBaseComponent = InputBaseComponent.extend({
     // ------
 
     var currentVal  = this._getParameterValue();
-    var currentVals = Dashboards.parseMultipleValues(currentVal); // may be null
+    var currentVals = Dashboards.parseMultipleValues(
+    (!_.isNaN(currentVal) && _.isNumber(currentVal)) ? currentVal + "" : currentVal); // may be null
     var valuesIndex = {};
     var firstVal;
 
@@ -1018,7 +1023,9 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     var isSelected = false;
 
     var currentValArray = [];
-    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
+    if(currentVal == null || currentVal == undefined) {
+      currentValArray = [];
+    } else if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
       currentValArray = currentVal.split("|");
@@ -1164,7 +1171,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var isSelected = false;
 
     var currentValArray;
-    if(currentVal == null) {
+    if(currentVal == null || currentVal == undefined) {
       currentValArray = [];
     } else if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
@@ -1270,8 +1277,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
         this.indexes[name].push(index);
       }
-    }
-    else {//de-select old, select new
+    } else if (this.indexes[name] === index) {
+        return false;
+    } else { //de-select old, select new
       this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
       buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
@@ -1299,13 +1307,21 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
 var AutocompleteBoxComponent = BaseComponent.extend({
 
-  searchedWord : '',
+  constructor: function(){
+      this.base.apply(this, arguments)
+      this.selectedValues = [];
+    },
+
   result: [],
-  selectedValues: [],
+
 
   queryServer: function(searchString) {
     if(!this.parameters) {
       this.parameters = [];
+    }
+
+    if(_.isString(searchString)) {
+      this.searchParam =  searchString;
     }
 
     if(this.searchParam) {
@@ -1340,17 +1356,29 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
     if(initialValue != null && _.isArray(initialValue)) {
       for(var i = 0, L = initialValue.length; i < L; i++) {
-        this._selectValue(initialValue[i]);
+        this.selectValue(initialValue[i]);
       }
     }
   },
 
   update: function() {
-    this.placeholder().empty();
+    this.ph = this.placeholder().empty();
+
+    if(this.ph.length === 0) {
+      Dashboards.log("Placeholder not in DOM - Will not draw", "warn");
+      return false;
+    }
+    this.processChange = this.processChange == null ?
+        function() {
+          myself.value = myself.selectedValues;
+          Dashboards.processChange(myself.name);
+        } :
+        function() {
+          myself.processChange();
+        };
 
     var myself = this;
     var isMultiple = this.selectMulti || false;
-    var options = this.getOptions();
 
 
     //init parameter
@@ -1363,7 +1391,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
     if(isMultiple) {
       var title = this.tooltipMessage || "Click it to Apply";
-      var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="S"/>')
+      var apply = $('<input type="button" class="autocomplete-input-apply" style="display: none" title="' + title + '" value="' + ( this.submitLabel || "S" ) + '"/>')
           .click(function() {
             myself.endSearch();
           });
@@ -1375,33 +1403,40 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         .append('<ul class="list-data-selection">')
         .appendTo(this.placeholder());
 
-    this.textbox.autocomplete(options);
+    this.textbox.autocomplete(this.getOptions());
 
-    $('.autocomplete-container .ui-autocomplete').off('menuselect');
+    this.ph.find('.autocomplete-container .ui-autocomplete').off('menuselect');
+    this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui){
+      var checkbox = ui ? ui.item.find('input') : $(event.target).find('input');
+      if(checkbox.length > 0) {
+        checkbox.prop('checked', !checkbox.is(':checked'))
+      }
+      var label = ui ? ui.item.find('a').text() : $(event.target).text();
+
+      if(!isMultiple) {
+        myself.selectValue(label);
+        myself.endSearch();
+      } else if(checkbox.is(':checked')) {
+        myself.selectValue(label);
+      } else {
+        myself.removeValue(label);
+      }
+    });
     this.textbox.data('ui-autocomplete')._renderItem = function(ul, item) {
       var listItem = $('<li class="list-item">');
 
-      var content = $('<a>' + (isMultiple ? '<input type="checkbox"/>' : '') + item.label + '</a>').click(function(event) {
-        var checkbox = $(this).find('input');
-        if($(event.srcElement).is('a')) {
-          checkbox.prop('checked', !checkbox.is(':checked'))
-        }
-        if(!isMultiple) {
-          myself.selectValue(item.label);
-          myself.endSearch();
-        } else if(checkbox.is(':checked')) {
-          myself.selectValue(item.label);
-        } else {
-          myself.removeValue(item.label);
-        }
-      });
-
+      var content = $('<a>' + item.label + '</a>');
+      if(isMultiple) {
+        $('<input type="checkbox"/>').click(function() {
+          $(this).parent().trigger('menuselect');
+        }).prependTo(content);
+      }
       content.appendTo(listItem);
       return listItem.appendTo(ul);
     };
 
     //if defined and it exists bind a click event to this button
-    $('#' + this.externalApplyButtonId).click(function() {
+    this.ph.find('#' + this.externalApplyButtonId).click(function() {
       myself.endSearch();
     });
 
@@ -1411,18 +1446,8 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   getOptions: function() {
     var myself = this;
 
-    var processChange = this.processChange == null ?
-        function() {
-          var object = _.extend({}, myself);
-          object.value = myself.selectedValues;
-          Dashboards.processChange(object.name);
-        } :
-        function() {
-          myself.processChange();
-        };
-
     var options = {
-      appendTo: '.autocomplete-container',
+      appendTo: this.ph.find('.autocomplete-container'),
       minLength: this.minTextLength || 0,
       source: function(search, callback) {
         myself.search(search, callback);
@@ -1436,14 +1461,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         var scroll = myself.scrollHeight || 0;
 
         if(scroll > 0) {
-          $('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
+          this.ph.find('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
         }
 
         myself.filterData();
       },
 
       close: function(event, ui) {
-        processChange();
+        myself.processChange();
       }
     };
 
@@ -1454,19 +1479,19 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var myself = this;
     var addTextElements = this.addTextElements != null ? this.addTextElements : true;
     var showApplyButton = this.showApplyButton != null ? this.showApplyButton : true;
-    var list = $('.autocomplete-container .list-data-selection');
+    var list = this.ph.find('.autocomplete-container .list-data-selection');
     var listItem = $('<li id="' + label + '"><input type="button" class="close-button" value="x"/>' + label + '</li>');
 
     if(!this.selectMulti) {
       list.empty();
       this.selectedValues = [];
     } else if(showApplyButton) {
-      $('.autocomplete-container').addClass('show-apply-button');
-      $('.autocomplete-input-apply').show();
+      this.ph.find('.autocomplete-container').addClass('show-apply-button');
+      this.ph.find('.autocomplete-input-apply').show();
     }
 
     listItem.find('input').click(function() {
-      myself.removeValue(label);
+      myself.removeValue(label, true);
     });
 
     if(addTextElements) {
@@ -1475,13 +1500,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     this.selectedValues.push(label);
   },
 
-  removeValue: function(id) {
+  removeValue: function(id, change) {
     this.selectedValues = _.without(this.selectedValues, id);
-    $('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+    this.ph.find('.autocomplete-container .list-data-selection li[id="' + id + '"]').remove();
+    if(change) {
+      this.processChange();
+    }
   },
 
   filterData: function() {
-    var menu = $('.autocomplete-container .ui-autocomplete');
+    var menu = this.ph.find('.autocomplete-container .ui-autocomplete');
     var data = this.selectedValues || [];
     var addTextElements = this.addTextElements != null ? this.addTextElements : true;
 
@@ -1525,7 +1553,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   },
 
   endSearch: function() {
-    var container = $('.autocomplete-container');
+    var container = this.ph.find('.autocomplete-container');
 
     container.removeClass('show-apply-button');
     container.find('.autocomplete-input-apply').hide();
@@ -1554,30 +1582,51 @@ var ButtonComponent = ActionComponent.extend({
   },
 
   render: function() {
-    var myself = this;
-    var b = $("<button type='button'/>")
-        .addClass('buttonComponent')
-        .addClass('enabled')
-        .text(this.label)
+      var myself = this;
+
+      // making sure the button plugin we have loaded is the jquery one
+      if($.fn.button.noConflict) {
+        $.fn.button.noConflict();
+      }
+
+      // store the original success and failure callback functions and
+      // set a new function to re-enable the button and call the original function
+      if(typeof this.successCallback === 'function') {
+        var orSuccessCallback = this.successCallback;
+        this.successCallback = function() {
+          myself.enable();
+          orSuccessCallback.apply(myself, arguments);
+        };
+      } else {
+        this.successCallback = function() { myself.enable(); };
+      }
+      if(typeof this.failureCallback === 'function') {
+        var orFailureCallback = this.failureCallback;
+        this.failureCallback = function() {
+          myself.enable();
+          orFailureCallback.apply(myself, arguments);
+        };
+      } else {
+        this.failureCallback = function() { myself.enable(); };
+      }
+
+      if (typeof this.buttonStyle === "undefined") {
+        this.buttonStyle = typeof wcdfSettings != "undefined" && wcdfSettings.rendererType === "bootstrap" ?
+          "bootstrap" : "themeroller";
+      }
+      var cssClass = this.cssClass || "";
+      if (this.buttonStyle === "bootstrap") {
+        cssClass = "btn-default " + cssClass;
+      }
+
+      var b = $("<button type='button'/>")
+        .addClass('buttonComponent ' + cssClass)
         .unbind("click")
-        .bind("click", function(){
+        .bind("click", function() {
           var proceed = true;
 
           // disable button to prevent unwanted presses
           myself.disable();
-          
-          // override success and failure callbacks to re-enable the button
-          var orSuccessCallback = myself.successCallback;
-          myself.successCallback = function() {
-            myself.enable();
-            orSuccessCallback.apply(myself);
-          }
-
-          var orFailureCallback = myself.failureCallback;
-          myself.failureCallback = function() {
-            myself.enable();
-            orFailureCallback.apply(myself);
-          }
 
           if(_.isFunction(myself.expression)) {
             proceed = myself.expression.apply(myself, arguments);
@@ -1596,14 +1645,19 @@ var ButtonComponent = ActionComponent.extend({
 
           if(myself.hasAction() && !(proceed === false)) {
             return myself.triggerAction.apply(myself);
-          }
-      });
-    if ( _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller"){
-      b.button();
-    }
-    b.appendTo(this.placeholder().empty());
-    this._doAutoFocus();
-  },
+          } 
+        });
+
+      if(this._isJQueryUiButton()) {
+        b.button();
+      }
+      b.appendTo(this.placeholder().empty());
+
+      this.setLabel(this.label);
+      this.enable();
+
+      this._doAutoFocus();
+    },
 
   disable: function(){
     /**
@@ -1625,7 +1679,22 @@ var ButtonComponent = ActionComponent.extend({
     /**
     * Changes the label shown on the button
     */
-    this.label = label.toString();
-    this.placeholder('button').text(this.label);
+    var validatedLabel = typeof label === 'function' ? label.call(this) : (label || "");
+    this.label = validatedLabel.toString();
+      
+      // if we have a jQueryUi button change the text with appropriate method
+    if(this._isJQueryUiButton()) {
+      this.placeholder('button').button('option', 'label', this.label);
+    } else {
+      this.placeholder('button').text(this.label);
+    }  
+  },
+
+  /**
+   * Returns whether or not the button is a jQueryUi button
+   * @private
+   */
+  _isJQueryUiButton: function(){
+    return _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller";
   }
 });

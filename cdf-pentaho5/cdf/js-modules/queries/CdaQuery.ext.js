@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', '../lib/jquery'],
-  function(DashboardExt, $) {
+define([
+  '../dashboard/Dashboard.ext',
+  '../lib/jquery'
+], function(DashboardExt, $) {
 
   var CdaQueryExt = {
     getDoQuery: function() {

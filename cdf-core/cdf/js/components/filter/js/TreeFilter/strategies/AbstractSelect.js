@@ -26,7 +26,7 @@
      * Calculates the new state of an item, after the user clicked on it
      * @method getNewState
      * @public
-     * @params {Enum} oldState
+     * @param {Enum} oldState
      * @return {Enum} Returns the next state
      */
     getNewState: function(oldState) {
@@ -44,7 +44,7 @@
      * Infers the state of a node, based on the current state of its children
      * @method inferSelectionFromChildren
      * @private
-     * @params {Array of Enum} childrenStates
+     * @param {Array of Enum} childrenStates
      * @return {Enum} Returns the inferred state
      */
     inferSelectionFromChildren: function(childrenStates) {
@@ -68,8 +68,8 @@
      * Sets a node in the selection tree to a particular state
      * @method setSelection
      * @protected
-     * @params {Enum} newState
-     * @params {Object} model
+     * @param {Enum} newState
+     * @param {Object} model
      * @chainable
      */
     setSelection: function(newState, model) {
@@ -81,7 +81,7 @@
      * Perform operations on the model, associated with the user clicking on an item
      * @method changeSelection
      * @public
-     * @params {Object} model
+     * @param {Object} model
      * @chainable
      */
     changeSelection: function(model) {
@@ -101,7 +101,7 @@
      * Perform operations on the model, associated with commiting the current selection
      * @method applySelection
      * @public
-     * @params {Object} model
+     * @param {Object} model
      * @chainable
      */
     applySelection: function(model) {
@@ -114,8 +114,8 @@
      * Default getSelectedItems behaviour is do defer to the model's one
      * @method getSelectedItems
      * @public
-     * @params {Object} model
-     * @params {Object} field
+     * @param {Object} model
+     * @param {Object} field
      * @chainable
      */
     getSelectedItems: function(model,field) {

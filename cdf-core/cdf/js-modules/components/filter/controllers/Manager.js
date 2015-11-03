@@ -12,10 +12,10 @@ define([
 
    /**
    * Controller responsible for managing the hierarchy of views and controllers.
-  #
+   *
    * When data is added to the model, the Manager reacts by creating
    * the appropriate views and respective controllers
-  #
+   *
    * @class Manager
    * @constructor
    * @extends Tree
@@ -67,7 +67,7 @@ define([
         });
       };
 
-      /**
+      /*
        * Declare bindings to model and view
        */
       bindings = {
@@ -83,7 +83,7 @@ define([
         }
       };
 
-      /**
+      /*
        * Create listeners
        */
       that = this;
@@ -100,14 +100,14 @@ define([
     },
     addViewAndController: function(newModel) {
 
-      /**
+      /*
        * Decide which view to use
        */
       var Controller, View, childConfig, configuration, controller, newController, newView, shareController, target, that;
       shareController = true;
       if (this.parent() != null) {
 
-        /**
+        /*
          * This node is either a Group or an Item
          * Use the parent's configuration
          */
@@ -124,7 +124,7 @@ define([
         controller = that.get('controller');
       } else {
 
-        /**
+        /*
          * This node is the Root.
          * A configuration object must have been passed as an option
          */
@@ -135,7 +135,7 @@ define([
         controller = null;
       }
 
-      /**
+      /*
        * Create new view
        */
       newView = new View({
@@ -145,7 +145,7 @@ define([
       });
       this.set('view', newView);
 
-      /**
+      /*
        * Reuse the existing controller, or create a new one, if needed
        */
       if (shareController === true && controller !== null) {
@@ -189,7 +189,7 @@ define([
       }
     },
 
-    /**
+    /*
      * Pagination
      */
     getNextPage: function(model, event) {
@@ -237,7 +237,7 @@ define([
       return deferred;
     },
 
-    /**
+    /*
      * Child management
      */
     updateChildren: function() {
@@ -267,7 +267,8 @@ define([
     },
 
     /**
-     * Create a new manager for this MVC tuple
+     * Create a new manager for this MVC tuple.
+     *
      * @method addChild
      * @chainable
      */
@@ -282,7 +283,6 @@ define([
     },
     removeChild: function(model) {
       throw new Error("NotImplemented");
-      return this;
     },
     sortSiblings: function(model) {
       this.debug("sortSiblings: " + (this.get('model').get('label')) + " was triggered from " + (model.get('label')) + ":" + (model.getSelection()));
@@ -307,7 +307,7 @@ define([
         };
       } else if (_.isArray(customSorter)) {
 
-        /**
+        /*
          * Use multiple sorters, one after the other
          */
         return function(model, idx) {
@@ -364,17 +364,18 @@ define([
     },
 
     /**
-     * React to the user typing in the search box
+     * React to the user typing in the search box.
+     *
      * @method onFilterChange
      * @param {String} text
      * @for Manager
      */
     onFilterChange: function(text) {
       var filter, that;
-      this._searchPattern = text.trim().toLowerCase();
+      this._searchPattern = text.trim();
       filter = _.bind(function() {
         var isMatch;
-        isMatch = this.filter(this._searchPattern);
+        isMatch = this.filter(this._searchPattern, "", this.get('configuration').search.matcher);
         return this.get('model').setVisibility(true);
       }, this);
       if (this.get('configuration').search.serverSide === true) {
@@ -385,9 +386,9 @@ define([
       }
       _.defer(filter);
     },
-    filter: function(text, prefix) {
+    filter: function(text, prefix, customMatcher) {
 
-      /**
+      /*
        * decide on item visibility based on a match to a filter string
        * The children are processed first in order to ensure the visibility is reset correctly
        * if the user decides to delete/clear the search box
@@ -404,21 +405,25 @@ define([
       if (this.children()) {
         isMatch = _.any(this.children().map(function(manager) {
           var childIsMatch;
-          childIsMatch = manager.filter(text, fullString);
+          childIsMatch = manager.filter(text, fullString, customMatcher);
           manager.get('model').setVisibility(childIsMatch);
           return childIsMatch;
         }));
       } else if (_.isEmpty(text)) {
         isMatch = true;
       } else {
-        isMatch = fullString.toLowerCase().match(text.toLowerCase()) != null;
+        if (_.isFunction(customMatcher)) {
+          isMatch = customMatcher(fullString, text);
+        } else {
+          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1 ;
+        }
         this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
       }
       this.get('model').setVisibility(isMatch);
       return isMatch;
     },
 
-    /**
+    /*
      * Management of selected items
      */
     onApply: function(model) {

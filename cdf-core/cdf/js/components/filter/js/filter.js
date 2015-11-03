@@ -141,11 +141,13 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       _getPage = function(page, searchPattern) {
         var callback, deferred, error, pattern;
         deferred = $.Deferred();
+        var isPaginated = !!this.query && this.query.getOption('pageSize') > 0;
+        var searchServerSide = configuration.component.search.serverSide;
 
         /*
          * Handle empty datasets
          */
-        if (this.query.getOption('pageSize') === 0) {
+        if (!searchServerSide && !isPaginated) {
           deferred.resolve({});
           return deferred;
         }
@@ -235,9 +237,11 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       /**
        * Patches
        */
-      if (selectionStrategyConfig !== 'SingleSelect') {
+      if (selectionStrategyConfig.type !== 'SingleSelect') {
         if (cd.showButtonOnlyThis === true || cd.showButtonOnlyThis === false) {
           configuration.component.Root.options.showButtonOnlyThis = cd.showButtonOnlyThis;
+          configuration.component.Group.options.showButtonOnlyThis = cd.showButtonOnlyThis;
+          configuration.component.Item.options.showButtonOnlyThis = cd.showButtonOnlyThis;
         }
       }
 
@@ -416,8 +420,10 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
     close: function() {
       if (this.manager != null) {
         this.manager.walkDown(function(m) {
+          if ( !m.isRoot() /* CDF-598 */ ){
           m.close();
           return m.remove();
+          }
         });
       }
       if (this.model != null) {

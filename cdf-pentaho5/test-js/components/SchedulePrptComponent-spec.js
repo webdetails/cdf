@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard.Clean", "cdf/components/SchedulePrptComponent"],
-  function(Dashboard, SchedulePrptComponent) {
+define([
+  "cdf/Dashboard.Clean",
+  "cdf/components/SchedulePrptComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, SchedulePrptComponent, $) {
 
   /**
    * ## The Schedule Pentaho Reporting Component
@@ -27,9 +30,13 @@ define(["cdf/Dashboard.Clean", "cdf/components/SchedulePrptComponent"],
       name: "schedulePrpt",
       type: "schedulePrpt",
       htmlObject: "sampleObject",
-      executeAtStart: true
+      executeAtStart: true,
+      parameters: [["parameter", "parameter"], ["parameterArray", "parameterArray"]]
     });
-
+    var dashboardSimpleParameter = "parameterValue";
+    dashboard.addParameter("parameter", dashboardSimpleParameter);
+    var dashboardParameterArray = ["paramVal1", "paramVal2"];
+    dashboard.addParameter("parameterArray", dashboardParameterArray);
     dashboard.addComponent(schedulePrpt);
 
     /**
@@ -45,6 +52,33 @@ define(["cdf/Dashboard.Clean", "cdf/components/SchedulePrptComponent"],
       });
 
       dashboard.update(schedulePrpt);
+    });
+
+    /**
+     * ## The Schedule Pentaho Reporting Component # properly creates job parameters
+     */
+    it("properly creates job parameters", function(done) {
+      var createVal = function(val) {
+        return new Array("" + val);
+      };
+      var testNames = ["output-target", "accepted-page", "showParameters", "renderMode", "htmlProportionalWidth",
+      "parameter", "parameterArray"];
+      var testValues = [createVal("table/html;page-mode=page"), createVal(-1), createVal(schedulePrpt.showParameters || false),
+      createVal("REPORT"), createVal(false), createVal(dashboardSimpleParameter), dashboardParameterArray];
+      var testTypes = ["string", "string", "string", "string", "string", "string", "string[]"];
+
+      spyOn($, "ajax").and.callFake(function() {
+        var jobParams = schedulePrpt.scheduleParameters.jobParameters;
+        for(var i = 0; i < jobParams.length; i++) {
+          expect(jobParams[i].name).toEqual(testNames[i]);
+          expect(jobParams[i].stringValue).toEqual(testValues[i]);
+          expect(jobParams[i].type).toEqual(testTypes[i]);
+        }
+        done();
+        return false;
+      });
+
+      schedulePrpt.scheduleRequest();
     });
   });
 });

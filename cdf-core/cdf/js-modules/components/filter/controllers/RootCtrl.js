@@ -15,7 +15,8 @@ define([
     function( $, _, BaseComponent, BaseEvents, BaseView, BaseFilter ) {
 
       /**
-       * General-purpose controller
+       * General-purpose controller.
+       *
        * @class RootCtrl
        * @constructor
        * @uses BaseFilter.Logger
@@ -46,13 +47,14 @@ define([
           return this;
         },
 
-        /**
+        /*
          * Event handling
          */
 
         /**
          * Acts upon the model whenever the user selected something.
-         * Delegates work to the current selection strategy
+         * Delegates work to the current selection strategy.
+         *
          * @method onSelection
          * @chainable
          */
@@ -62,8 +64,9 @@ define([
         },
 
         /**
-         * Informs the model that the user chose to commit the current selection
-         * Delegates work to the current selection strategy
+         * Informs the model that the user chose to commit the current selection.
+         * Delegates work to the current selection strategy.
+         *
          * @method onApply
          * @chainable
          */
@@ -73,8 +76,9 @@ define([
         },
 
         /**
-         * Informs the model that the user chose to revert to the last saved selection
-         * Delegates work to the current selection strategy
+         * Informs the model that the user chose to revert to the last saved selection.
+         * Delegates work to the current selection strategy.
+         *
          * @method onCancel
          * @chainable
          */
@@ -92,6 +96,12 @@ define([
             oldState = model.get('isCollapsed');
             newState = !oldState;
           }
+          var hasVisibleNode = !!model.nodes() && _.some(model.nodes().models, function(model) {
+            return model.get('isVisible');
+          });
+          if (!hasVisibleNode && oldState) {
+            this.view.onFilterClear();
+          }
           model.set('isCollapsed', newState);
           return this;
         },
@@ -101,7 +111,7 @@ define([
         },
         onOnlyThis: function(model) {
           this.debug("Setting Only This");
-          this.model.root().setSelection(BaseFilter.Enum.select.NONE);
+          this.model.root().setAndUpdateSelection(BaseFilter.Enum.select.NONE);
           this.configuration.selectionStrategy.strategy.setSelection(BaseFilter.Enum.select.ALL, model);
           return this;
         }

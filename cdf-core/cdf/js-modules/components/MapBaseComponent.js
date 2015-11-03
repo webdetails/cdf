@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStreetMap'],
-  function(BaseComponent, $, OpenLayers) {
+define([
+  './BaseComponent',
+  '../lib/jquery',
+  '../lib/OpenLayers',
+  '../lib/OpenStreetMap'
+], function(BaseComponent, $, OpenLayers) {
 
   var MapBaseComponent = BaseComponent.extend({
 
@@ -36,11 +40,11 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     use_mercator: false,
 
     /** 
-     * Converts a LonLat Object using the Mercator formula
+     * Converts a LonLat Object using the Mercator formula.
      *
+     * @method lonLatToMercator
      * @param {OpenLayers.LonLat} ll the coordinate object.
-     * 
-     * @returns {OpenLayers.LonLat} the transformed coordinates
+     * @return {OpenLayers.LonLat} the transformed coordinates
      */
     lonLatToMercator: function(ll) {
       var lon = ll.lon * 20037508.34 / 180;
@@ -50,8 +54,9 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     },
 
     /** 
-     * Constructs and sets some inital values and calls show_map.
+     * Constructs and sets some initial values and calls show_map.
      *
+     * @method init_map
      * @param {String} div the id of the div that contains the map
      * @param {Float} lon The longitude coordinate.
      * @param {Float} lat The latitude coordinate.
@@ -80,9 +85,9 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       use_mercator = b_use_mercator;
       
       if(use_mercator == 'true') {
-        center_point = lonLatToMercator(new OpenLayers.LonLat(lon,lat));
+        center_point = lonLatToMercator(new OpenLayers.LonLat(lon, lat));
       } else {
-        center_point = new OpenLayers.LonLat(lon,lat);
+        center_point = new OpenLayers.LonLat(lon, lat);
       }
       
       //2010-07-14 Custom map support
@@ -96,9 +101,10 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       }
     },
 
-
     /** 
      * Sets the inital layer and displays the map.
+     *
+     * @method show_map
      */
     show_map: function() {
       var map = this.map;
@@ -109,7 +115,8 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
         //for now only one OpenStreetMap layer is supported
         map = new OpenLayers.Map(
           map_div,
-          { maxExtent: new OpenLayers.Bounds(-20037508,-20037508,20037508,20037508),
+          {
+            maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
             numZoomLevels: 18,
             maxResolution: 156543,
             units: 'm',
@@ -117,7 +124,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
           }
         );
         layer = new OpenLayers.Layer.TMS(
-          "OpenStreetMap","http://tile.openstreetmap.org/",
+          "OpenStreetMap", "http://tile.openstreetmap.org/",
           {
             type: 'png',
             getURL: this.osm_getTileURL,
@@ -125,11 +132,11 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
             displayOutsideMaxExtent: true
           }
         );
-        // add the OpenStreetMap layer to the map          
+        // add the OpenStreetMap layer to the map
         map.addLayer(layer);
       }
 
-      // add a layer for the markers                                             
+      // add a layer for the markers
       markers = new OpenLayers.Layer.Markers("Markers");
       map.addLayer(markers);
       
@@ -139,24 +146,31 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       this.map = map;
     },
 
-    /** 
+    /**
      * Adds a new marker - Not implemented.
+     *
+     * @method add_marker
      */
     add_marker: function(point, icon) {},
 
     /**
      * Deletes a marker - Not implemented.
+     *
+     * @method delete_marker
      */
     delete_marker: function(old_marker) {},
 
-    /** 
+    /**
      * Change the marker Icon - Not implemented.
+     *
+     * @method change_marker
      */
     change_marker: function(old_marker, new_icon) {},
 
-    /** 
+    /**
      * Shows a popup bubble with the html content provided
      *
+     * @method show_bubble
      * @param {String} html the popup html content
      */
     show_bubble: function(html) {
@@ -176,18 +190,22 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
       popup.setContentHTML(html);
       markers.map.addPopup(popup);
 
-      this.popup = popup; 
+      this.popup = popup;
     },
 
-    /** 
+    /**
      * Shows the mouse pointer coordinates when hovering over the map
+     *
+     * @method show_positon
      */
     show_positon: function() {
       this.map.addControl(new OpenLayers.Control.MousePosition());
     },
 
-    /** 
+    /**
      * Add the layer control to the map
+     *
+     * @method show_layers
      */
     show_layers: function() {
       this.map.addControl(new OpenLayers.Control.LayerSwitcher());
@@ -462,7 +480,7 @@ define(['./BaseComponent', '../lib/jquery', '../lib/OpenLayers', '../lib/OpenStr
     }
 
   });
-  
+
   return MapBaseComponent;
-    
+
 });

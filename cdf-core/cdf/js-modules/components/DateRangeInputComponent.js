@@ -11,11 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery', 'css!./DateRangeInputComponent'],
-  function($, BaseComponent) {
+define([
+  '../lib/jquery',
+  './BaseComponent',
+  'amd!../lib/daterangepicker.jQuery',
+  'css!./DateRangeInputComponent'
+], function($, BaseComponent) {
 
   var DateRangeInputComponent = BaseComponent.extend({
-    update : function() {
+    update: function() {
       var myself = this;
       var dr;
       var inputId = this.name;
@@ -31,18 +35,18 @@ define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery',
       }
 
       this.placeholder()
-          .addClass('date-range-input-container')
-          .html(dr);
+            .addClass('date-range-input-container')
+            .html(dr);
 
       //onOpen and onClose events
-      myself.on('onOpen:dateRangeInput', myself.onOpenEvent );
-      myself.on('onClose:dateRangeInput', myself.onCloseEvent );
+      myself.on('onOpen:dateRangeInput', myself.onOpenEvent);
+      myself.on('onClose:dateRangeInput', myself.onCloseEvent);
 
       var offset = dr.offset();
-      var earliestDate = myself.earliestDate != undefined  ?  myself.earliestDate : Date.parse('-1years');
-      var latestDate = myself.latestDate != undefined  ?  myself.latestDate : Date.parse('+1years');
-      var leftOffset = myself.leftOffset != undefined ?  myself.leftOffset : 0;
-      var topOffset = myself.topOffset != undefined ?  myself.topOffset : 15;
+      var earliestDate = myself.earliestDate != undefined ? myself.earliestDate : Date.parse('-1years');
+      var latestDate = myself.latestDate != undefined ? myself.latestDate : Date.parse('+1years');
+      var leftOffset = myself.leftOffset != undefined ? myself.leftOffset : 0;
+      var topOffset = myself.topOffset != undefined ? myself.topOffset : 15;
 
       var changed, closed;
       function triggerWhenDone() {
@@ -156,7 +160,7 @@ define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery',
       });
     },
 
-    fireInputChange : function(start, end) {
+    fireInputChange: function(start, end) {
       //TODO: review this!
       if(this.preChange) {
         this.preChange(start, end);
@@ -176,13 +180,13 @@ define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery',
       }
     },
 
-    storeChanges : function(start, end) {
+    storeChanges: function(start, end) {
       this.startValue = start;
       this.endValue = end;
     }
   },
   {
-    fireDateRangeInputChange : function(name, rangeA, rangeB) {
+    fireDateRangeInputChange: function(name, rangeA, rangeB) {
       // WPG: can we just use the parameter directly?
       var object = this.dashboard.getComponentByName(name);
       if(!(typeof(object.preChange) == 'undefined')) {
@@ -191,7 +195,7 @@ define(['../lib/jquery', './BaseComponent', 'amd!../lib/daterangepicker.jQuery',
       var parameters = eval(name + ".parameter");
       // set the second date and fireChange the first
       this.dashboard.setParameter(parameters[1], rangeB);
-      this.dashboard.fireChange(parameters[0],rangeA);
+      this.dashboard.fireChange(parameters[0], rangeA);
       if(!(typeof(object.postChange) == 'undefined')) {
         object.postChange(rangeA, rangeB);
       }

@@ -15,9 +15,10 @@ define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent,
   var SelectMultiComponent = SelectBaseComponent.extend({
 
     /**
-     * Gets the values selected of the select tag
+     * Gets the values selected of the select tag.
      *
-     * @returns {array|*} an empty array or the values selected
+     * @method getValue
+     * @return {array|*} an empty array or the values selected
      */
     getValue : function() {
       var ph = this.placeholder("select");
@@ -28,8 +29,10 @@ define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent,
     /**
      * Obtains the normalized and defaulted value of
      * the {@link #isMultiple} option.
-     * 
+     *
+     * @method _allowMultipleValues
      * @override
+     * @private
      * @return {boolean}
      */
     _allowMultipleValues: function() {
@@ -41,8 +44,10 @@ define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent,
      * and multiple values are allowed,
      * returns the number of items in the
      * provided possible values list.
-     * 
+     *
+     * @method _getListSize
      * @override
+     * @private
      */
     _getListSize: function(values) {
       var size = this.base(values);

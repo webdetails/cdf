@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent', 'amd!../lib/underscore', '../dashboard/Utils'],
-  function(UnmanagedComponent, _, Utils) {
+define([
+  './UnmanagedComponent',
+  'amd!../lib/underscore',
+  '../dashboard/Utils'
+], function(UnmanagedComponent, _, Utils) {
 
   var InputBaseComponent = UnmanagedComponent.extend({
     update: function() {
@@ -20,7 +23,7 @@ define(['./UnmanagedComponent', 'amd!../lib/underscore', '../dashboard/Utils'],
       if(this.valuesArray && this.valuesArray.length > 0) {
         var handler = _.bind(function() {
           this.draw(this.valuesArray);
-        },this);
+        }, this);
         this.synchronous(handler);
       } else if(qd) {
         var handler = _.bind(function(data) {
@@ -34,7 +37,7 @@ define(['./UnmanagedComponent', 'amd!../lib/underscore', '../dashboard/Utils'],
           }
           this.draw(filtered);
         }, this);
-        this.triggerQuery(qd,handler);
+        this.triggerQuery(qd, handler);
       } else {
         /* Legacy XAction-based components are a wasps' nest, so
          * we'll steer clear from updating those for the time being
@@ -42,11 +45,11 @@ define(['./UnmanagedComponent', 'amd!../lib/underscore', '../dashboard/Utils'],
         var handler = _.bind(function() {
           var data = this.getValuesArray();
           this.draw(data);
-        },this);
+        }, this);
         this.synchronous(handler);
       }
     },
-  
+
     // TODO: is the result of this.dashboard.getParameterValue subject or not to HTML encoding?
     // Some controls in this file do html encode the result while others don't.
   
@@ -59,6 +62,7 @@ define(['./UnmanagedComponent', 'amd!../lib/underscore', '../dashboard/Utils'],
      * Normalizes return values by using {@link Utils.normalizeValue}.
      * </p>
      *
+     * @method _getParameterValue
      * @return {*} the parameter value.
      */
     _getParameterValue: function() {

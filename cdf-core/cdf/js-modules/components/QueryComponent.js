@@ -11,7 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent', '../Logger', 'amd!../lib/underscore'], function(UnmanagedComponent, Logger, _) {
+define([
+  './UnmanagedComponent',
+  '../Logger',
+  'amd!../lib/underscore'
+], function(UnmanagedComponent, Logger, _) {
 
   var QueryComponent = UnmanagedComponent.extend({
     visible: false,
@@ -26,7 +30,7 @@ define(['./UnmanagedComponent', '../Logger', 'amd!../lib/underscore'], function(
       var asyncMode = myself.asynchronousMode || false;
       var redraw = _.bind(myself.render, myself);
       if(cd == undefined) {
-        Logger.log("Fatal - No query definition passed", "error");
+        Logger.error("Fatal - No query definition passed");
         return;
       }
       if(asyncMode) {
@@ -65,26 +69,30 @@ define(['./UnmanagedComponent', '../Logger', 'amd!../lib/underscore'], function(
 
     warnOnce: function() {
       Logger.log("Warning: QueryComponent behaviour is due to change. See "
-        + "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent"
+        + "http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent"
         + " for more information");
       delete(this.warnOnce);
     }
   }, {
 
     /**
+     * Generates a query object given a definition object and a success callback function.
+     *
+     * @method makeQuery
+     * @static
      * @deprecated
-     * @param object
-     * @param successCallback
+     * @param object the object containing the query definition
+     * @param successCallback the success callback function
      */
     makeQuery: function(object, successCallback) {
 
-      if (this.warnOnce) {this.warnOnce();}
+      if(this.warnOnce) { this.warnOnce(); }
       var cd = object.queryDefinition;
-      if (cd == undefined){
-        Logger.log("Fatal - No query definition passed","error");
+      if(cd == undefined) {
+        Logger.error("Fatal - No query definition passed");
         return;
       }
-      var query = object.dashboard.getQuery( cd );
+      var query = object.dashboard.getQuery(cd);
       object.queryState = query;
 
       // Force synchronous queries
@@ -95,22 +103,25 @@ define(['./UnmanagedComponent', '../Logger', 'amd!../lib/underscore'], function(
           // We need to make sure we're getting data from the right place,
           // depending on whether we're using CDA
 
-          var changedValues = undefined;
-          if((typeof(object.postFetch)=='function')) {
+          var changedValues;
+          if((typeof(object.postFetch) == 'function')) {
             changedValues = object.postFetch(values);
           }
 
-          if (changedValues != undefined) {
+          if(changedValues != undefined) {
             values = changedValues;
           }
 
-          if (object.resultvar != undefined){
+          if(object.resultvar != undefined) {
             object.dashboard.setParameter(object.resultvar, object.result);
           }
-          object.result = values.resultset != undefined ? values.resultset: values;
-          if (typeof values.resultset != "undefined"){
+          
+          if(typeof values.resultset != "undefined") {
             object.metadata = values.metadata;
             object.queryInfo = values.queryInfo;
+            object.result = values.resultset;
+          } else {
+            object.result = values;
           }
         }
       }

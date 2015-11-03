@@ -18,8 +18,8 @@ define([
     '../dashboard/Sprintf',
     '../lib/jquery',
     'amd!../lib/datatables',
-    '../addIns/colTypes'],
-  function(Logger, _, UnmanagedComponent, sprintf, $) {
+    '../addIns/colTypes'
+], function(Logger, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
   if($.fn.dataTableExt != undefined) {
@@ -28,7 +28,7 @@ define([
      * Changes the number of records on display
      * @param {object} oSettings DataTables settings object
      * @param iDisplay New display length
-     * @returns {array}
+     * @return {array}
      */
     $.fn.dataTableExt.oApi.fnLengthChange = function(oSettings, iDisplay) {
       oSettings._iDisplayLength = iDisplay;
@@ -238,7 +238,9 @@ define([
         return myself.error("TableComponent requires an htmlObject");
       }
       try {
-        myself.block();
+        if(!myself.isSilent()) {
+          myself.block();
+        }
         myself.setup();
         if(myself.chartDefinition.paginateServerside) {
           myself.paginatingUpdate();
@@ -274,7 +276,9 @@ define([
          * that will trigger unblock, meaning we need to trigger unblock manually.
          */
         Logger.exception(e);
-        myself.unblock();
+        if(!myself.isSilent()) {
+          myself.unblock();
+        }
       }
     },
     
@@ -309,7 +313,20 @@ define([
         Logger.log("Fatal - No chart definition passed", "error");
         return;
       }
+
+      // Make sure we have a tableStyle in place
+      if(typeof cd.tableStyle === "undefined") {
+        cd.tableStyle = this.dashboard.getWcdfSettings().rendererType === "bootstrap" ?
+        "bootstrap" : "classic";
+      }
+
       cd["tableId"] = this.htmlObject + "Table";
+
+      // make sure we have no expand parameters set
+      var myself = this;
+      $(this.expandParameters).each(function f(i, elt) {
+        myself.dashboard.setParameter(elt[1], "");
+      });
 
       // Clear previous table
       this.ph = $("#" + this.htmlObject).empty();
@@ -330,7 +347,7 @@ define([
       this.queryState.setSortBy(sortOptions);
     },
 
-    pagingCallback: function(url, params,callback,dataTable) {
+    pagingCallback: function(url, params, callback, dataTable) {
       function p(sKey) {
         for(var i = 0, iLen = params.length; i < iLen ; i++) {
           if(params[i].name == sKey) {
@@ -355,7 +372,7 @@ define([
       query.setSearchPattern(p("search") ? p("search").value : "");
       query.fetchData(function(d) {
         if(myself.postFetch) {
-          var mod = myself.postFetch(d,dataTable);
+          var mod = myself.postFetch(d, dataTable);
           if(typeof mod !== "undefined") {
             d = mod;
           }
@@ -382,16 +399,16 @@ define([
           myself = this;
           
       var tableRows = this.ph.find("tbody tr");
-          for (var k = 0; k < tableRows.length; k++) {
+          for(var k = 0; k < tableRows.length; k++) {
         /* 
          * Reject rows that are not actually part
          * of the datatable (e.g. nested tables)
          */
-        if (dataTable.fnGetPosition(tableRows[k]) == null) {
+        if(dataTable.fnGetPosition(tableRows[k]) == null) {
           return true;
         }
         var tableData = $(tableRows[k]).children("td");
-        for (var i = 0; i < tableData.length; i++) {
+        for(var i = 0; i < tableData.length; i++) {
           var td = tableData[i];
           var $td = $(td);
             var position = dataTable.fnGetPosition(td);
@@ -419,14 +436,14 @@ define([
         var td = $("#" + myself.htmlObject + " td:nth-child(1)"); 
         td.addClass('cdfClickable');
         td.bind("click", function(e) {
-          var regex = new RegExp("{" + cd.parameterName + "}","g");
+          var regex = new RegExp("{" + cd.parameterName + "}", "g");
           var f = cd.urlTemplate.replace(regex, $(this).text());
           eval(f);
         });
       }
       /* Handle post-draw callback the user might have provided */
       if(typeof cd.drawCallback == 'function') {
-        cd.drawCallback.apply(myself,arguments);
+        cd.drawCallback.apply(myself, arguments);
       }
     },
 
@@ -437,7 +454,9 @@ define([
      */
     fnInitComplete: function() {
       this.postExec();
-      this.unblock();
+      if(!this.isSilent()) {
+        this.unblock();
+      }
     },
 
     /* 
@@ -452,7 +471,7 @@ define([
           target = $td,
           results = this.rawData,
           addIn = this.getAddIn("colType", colType);
-      if (!addIn) {
+      if(!addIn) {
         return false;
       }
       try {
@@ -480,7 +499,7 @@ define([
       }
     },
 
-    processTableComponentResponse : function(json) {
+    processTableComponentResponse: function(json) {
       var myself = this,
           cd = myself.chartDefinition,
           extraOptions = {};
@@ -664,7 +683,7 @@ define([
     }
   },
   {
-    getDataTableOptions : function(options) {
+    getDataTableOptions: function(options) {
       var dtData = {};
 
       if(options.tableStyle == "themeroller") {

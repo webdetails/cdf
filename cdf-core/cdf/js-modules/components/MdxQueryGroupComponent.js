@@ -15,7 +15,7 @@ define(['./BaseComponent', '../OlapUtils'], function(BaseComponent, OlapUtils) {
 
   var MdxQueryGroupComponent = BaseComponent.extend({
     visible: false,
-    update : function() {
+    update: function() {
       OlapUtils.updateMdxQueryGroup(this);
     }
   });

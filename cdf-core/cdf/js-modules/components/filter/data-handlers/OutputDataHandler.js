@@ -65,12 +65,12 @@ define([
          * @method getHighestId
          * @for Output
          * @private
-         * @params {Object} selectionState
+         * @param {Object} selectionState
          * @return {Array} Returns a list of ids
          */
         getHighestId: function(selectionState) {
 
-          /**
+          /*
            * If a node with children is set to "all", return self and omit the children
            */
           var list;
@@ -92,12 +92,12 @@ define([
          * @method getLowestId
          * @for Output
          * @private
-         * @params {Object} selectionState
+         * @param {Object} selectionState
          * @return {Array} Returns a list of ids
          */
         getLowestId: function(selectionState) {
 
-          /**
+          /*
            * Return the id of selected children. Group ids are ignored
            */
           var list;

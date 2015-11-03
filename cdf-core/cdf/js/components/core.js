@@ -1320,10 +1320,18 @@ var ActionComponent = UnmanagedComponent.extend({
        This method is typically bound to the "click" event of the component.
     */
     var params = Dashboards.propertiesArrayToObject( this.actionParameters ),
-        failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function (){},
-        successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function (){};
-
-    return Dashboards.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+        failureCallback =  (this.failureCallback) ?  this.failureCallback : function (){},
+        successCallback = this.successCallback ?  this.successCallback : function (){};
+    var success = _.bind(function() {
+        this.unblock();
+        successCallback.apply(this, arguments);
+      }, this);
+    var failure = _.bind(function() {
+        this.unblock();
+        failureCallback.apply(this, arguments);
+      }, this);
+    this.block();
+    return Dashboards.getQuery(this.actionDefinition).fetchData(params, success, failure);
   },
 
   hasAction: function(){

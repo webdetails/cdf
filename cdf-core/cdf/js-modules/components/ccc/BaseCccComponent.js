@@ -12,13 +12,12 @@
  */
 
 define([
-    './ChartComponent',
-    '../lib/CCC/pvc',
-    '../lib/modernizr',
-    '../lib/jquery',
-    '../lib/CCC/protovis-compat!'
-  ],
-  function(ChartComponent, pvc, Modernizr, $, pv) {
+  './ChartComponent',
+  '../lib/CCC/pvc',
+  '../lib/modernizr',
+  '../lib/jquery',
+  '../lib/CCC/protovis-compat!'
+], function(ChartComponent, pvc, Modernizr, $, pv) {
 
   pvc.defaultCompatVersion(2);
 
@@ -33,9 +32,9 @@ define([
         // Obtain effective compatVersion
         var compatVersion = chartDef.compatVersion;
         if(compatVersion == null) {
-          compatVersion = typeof pvc.defaultCompatVersion === 'function' ?
-            pvc.defaultCompatVersion() :
-            1;
+          compatVersion = typeof pvc.defaultCompatVersion === 'function'
+            ? pvc.defaultCompatVersion()
+            : 1;
         }
 
         if(compatVersion <= 1) {
@@ -51,8 +50,7 @@ define([
           for(var p in chartDef) {
             var m = /^barLine(.*)$/.exec(p);
             if(m) {
-              p2 = 'secondAxis' + (m[1] || '');
-              chartDef[p2] = chartDef[p];
+              chartDef['secondAxis' + (m[1] || '')] = chartDef[p];
               delete chartDef[p];
             }
           }

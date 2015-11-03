@@ -12,20 +12,16 @@ define([
 
       var BaseController = BaseEvents.convertClass( SeedController, {
         addView: function() {
-          var ret = this.views.push.apply(this.views, arguments);
-          return ret;
+          return this.views.push.apply(this.views, arguments);
         },
         removeView: function() {
-          var ret = this.views.pop.apply(this.views, arguments);
-          return ret;
+          return this.views.pop.apply(this.views, arguments);
         },
         addModel: function() {
-          var ret = this.models.push.apply(this.models, arguments);
-          return ret;
+          return this.models.push.apply(this.models, arguments);
         },
         removeModel: function() {
-          var ret = this.models.pop.apply(this.models, arguments);
-          return ret;
+          return this.models.pop.apply(this.models, arguments);
         }
       });
 

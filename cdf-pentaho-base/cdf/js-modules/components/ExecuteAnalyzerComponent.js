@@ -11,8 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', 'amd!../lib/jquery.fancybox'],
-  function(AnalyzerComponentExt, $, AnalyzerComponent) {
+define([
+  './AnalyzerComponent.ext',
+  '../lib/jquery',
+  './AnalyzerComponent',
+  'amd!../lib/jquery.fancybox'
+], function(AnalyzerComponentExt, $, AnalyzerComponent) {
 
   var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
     
@@ -57,7 +61,7 @@ define(['./AnalyzerComponent.ext', '../lib/jquery', './AnalyzerComponent', 'amd!
       delete parameters.solution;
       delete parameters.path;
       delete parameters.action;
-      $.extend( parameters, {ts: new Date().getTime()});
+      $.extend(parameters, {ts: new Date().getTime()});
 
       $.fancybox({
         type: "iframe",

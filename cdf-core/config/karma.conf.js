@@ -24,6 +24,7 @@ module.exports = function(config) {
     files: [
       {pattern: 'bin/test-js/cdf/js/**/*.css', included: false},
       {pattern: 'bin/test-js/cdf/js/**/*.js', included: false},
+      {pattern: 'bin/test-js/cdf/js/components/filter/**/*.html', included: false},
       'config/context.js',
       {pattern: 'test-js/**/*.ext.js', included: true},
       {pattern: 'test-js/**/*-spec.js', included: false},
@@ -31,13 +32,14 @@ module.exports = function(config) {
       'config/require-config.js',
       // fix 404 messages
       {pattern: 'bin/test-js/cdf/js/**/*.png', watched: false, included: false, served: true},
-      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true}
+      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true},
+      {pattern: 'bin/test-js/cdf/js/**/*.svg', watched: false, included: false, served: true}
     ],
 
     // list of files to exclude
     exclude: ['test-js/legacy/**/*.js'],
 
-    preprocessors: {'bin/test-js/cdf/js/**/*.js': 'coverage'},
+    //preprocessors: {'bin/test-js/cdf/js/**/*.js': 'coverage'},
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -91,7 +93,7 @@ module.exports = function(config) {
     browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
-    captureTimeout: 60000,
+    captureTimeout: 600000,
 
     browserNoActivityTimeout: 600000,
     

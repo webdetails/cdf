@@ -11,12 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './BaseComponent',  'css!./DateInputComponent'], function($, BaseComponent) {
+define([
+  '../lib/jquery',
+  './BaseComponent',
+  'css!./DateInputComponent'
+], function($, BaseComponent) {
 
   var DateInputComponent = BaseComponent.extend({
     update: function() {
       var myself = this;
-      var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
+      var format = (myself.dateFormat == undefined || myself.dateFormat == null)
+        ? 'yy-mm-dd' : myself.dateFormat;
       var inputId = myself.name;
       var inputValue = myself.dashboard.getParameterValue(myself.parameter);
       var startDate, endDate;
@@ -24,25 +29,25 @@ define(['../lib/jquery', './BaseComponent',  'css!./DateInputComponent'], functi
       if(myself.startDate == 'TODAY') {
         startDate = new Date();
       } else if(myself.startDate) {
-        startDate = $.datepicker.parseDate( format, myself.startDate);
+        startDate = $.datepicker.parseDate(format, myself.startDate);
       }
 
       if(myself.endDate == 'TODAY') {
         endDate = new Date();
       } else if(myself.endDate) {
-        endDate = $.datepicker.parseDate( format, myself.endDate);
+        endDate = $.datepicker.parseDate(format, myself.endDate);
       }
 
       //onOpen and onClose events
-      myself.on('onOpen:dateInput', myself.onOpenEvent );
-      myself.on('onClose:dateInput', myself.onCloseEvent );
+      myself.on('onOpen:dateInput', myself.onOpenEvent);
+      myself.on('onClose:dateInput', myself.onCloseEvent);
 
       //ToDo: stretch interval to catch defaultValue?..
       //Dashboards.getParameterValue(myself.parameter))
 
       myself.placeholder()
-          .addClass('date-input-container')
-          .html('<input class="date-input" id="' + inputId + '" value="' + inputValue + '"/>');
+        .addClass('date-input-container')
+        .html('<input class="date-input" id="' + inputId + '" value="' + inputValue + '"/>');
 
       $(function() {
         myself.placeholder("input").datepicker({
@@ -86,7 +91,7 @@ define(['../lib/jquery', './BaseComponent',  'css!./DateInputComponent'], functi
       this.trigger('onClose:dateInput');
     },
 
-    getValue : function() {
+    getValue: function() {
       if(typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
         return $("#" + this.name + "_hidden").val();
       } else {

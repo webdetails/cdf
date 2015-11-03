@@ -67,16 +67,16 @@ public class ContextApi {
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
   @Produces( MediaType.APPLICATION_JSON )
   public void getConfig( @QueryParam( Parameter.PATH ) String path,
-                           @QueryParam( Parameter.USER ) String user,
-                           @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse )
-    throws IOException {
+                         @QueryParam( Parameter.VIEW ) String view,
+                         @Context HttpServletRequest servletRequest,
+                         @Context HttpServletResponse servletResponse ) throws IOException {
     String config;
 
     try {
-      config = ContextEngine.getInstance().getConfig( path, user, Parameter.asHashMap( servletRequest ),
+      config = ContextEngine.getInstance().getConfig( path, view, Parameter.asHashMap( servletRequest ),
         servletRequest.getSession().getMaxInactiveInterval() );
     } catch ( JSONException e ) {
-      config = "Error ocurred getting context configuration";
+      config = "An error occurred while getting the context configuration";
     }
     CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
     PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), config );

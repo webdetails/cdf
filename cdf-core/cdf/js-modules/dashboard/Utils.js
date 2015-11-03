@@ -13,11 +13,11 @@
 
 
 /**
- * A collection of utility functions. Require as cdf/dashboard/Utils.
+ * A collection of utility functions. Require as 'cdf/dashboard/Utils'.
+ *
  * @class Utils
  * @module Utils
  */
-
 define([
   '../Logger',
   'amd!../lib/underscore',
@@ -38,36 +38,27 @@ define([
    *
    * @method escapeHtml
    * @param input Input string to be escape
-   * @returns Escaped string
+   * @return Escaped string
    * @static
    */
   Utils.escapeHtml = function(input) {
-    // Check if the input is already escaped. It assumes that, if there is an escaped char in the input then, 
-    // the input is fully escaped. Using http://webdesign.about.com/od/localization/l/blhtmlcodes-ascii.htm 
-    // as characters example
-    var regexNumericTags = /&#([0-9][0-9]?[0-9]?[0-9]?);/;
-    var regexAlphabeticTags = /&([a-zA-Z]+);/;
-    var regexHexTags = /&#x[A-F0-9][A-F0-9];/;
-    if(regexNumericTags.test(input) || regexAlphabeticTags.test(input) || regexHexTags.test(input)) {
-      return input;
-    }
-    
+    // using Negative Lookahead when replacing '&' to make sure we don't
+    // double escape
     var escaped = input
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/'/g, "&#39;")
-      .replace(/"/g, "&#34;");
-
+    .replace(/&(?!amp;)(?!lt;)(?!gt;)(?!#34;)(?!#39;)/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/'/g, "&#39;")
+    .replace(/"/g, "&#34;");
     return escaped;
   };
 
   /**
-   * Given a url containing an encoded Pentaho path (:home:admin:Test.wcdf), returns the encoded path
+   * Given a url containing an encoded Pentaho path (:home:admin:Test.wcdf), returns the encoded path.
    *
    * @method getPathParameter
    * @param url url to parse
-   * @returns path parameter value or null if not available
+   * @return path parameter value or null if not available
    * @static
    */
   Utils.getPathParameter = function(url) {
@@ -83,10 +74,10 @@ define([
   };
 
   /**
-   * Returns the query string part of the url
+   * Returns the query string part of the url.
    *
    * @method getLocationSearchString
-   * @returns Query string
+   * @return Query string
    * @static
    */
   Utils.getLocationSearchString = function() {
@@ -94,11 +85,11 @@ define([
   };
 
   /**
-   * Returns the value of a query string parameter
+   * Returns the value of a query string parameter.
    *
    * @method getQueryParameter
    * @param parameterName parameter name
-   * @returns value of the query parameter or null
+   * @return value of the query parameter or null
    * @static
    */
   Utils.getQueryParameter = function(parameterName) {
@@ -112,13 +103,13 @@ define([
   /**
    * Format a number with the given mask using the Dashboard language
    * or the one that the user specified if it exists, otherwise
-   * uses the default language 'en-US'
+   * uses the default language 'en-US'.
    *
    * @method numberFormat
    * @param value number value to be formatted
    * @param mask mask with format for the value
    * @param langCode language to use in format
-   * @returns {string} formatted number
+   * @return {string} formatted number
    * @static
    */
   Utils.numberFormat = function(value, mask, langCode) {
@@ -160,13 +151,13 @@ define([
   /**
    * Format a date with a given mask using the Dashboard language
    * or the one that the user specified if it exists, otherwise
-   * uses the default language 'en-US'
+   * uses the default language 'en-US'.
    *
    * @method dateFormat
    * @param date date object to be formatted
    * @param mask mask with format for the date
    * @param langCode language to use in format
-   * @returns {string} formatted date
+   * @return {string} formatted date
    * @static
    */
   Utils.dateFormat = function(date, mask, langCode) {
@@ -189,12 +180,12 @@ define([
   };
 
   /**
-   * Parse a date with a given mask
+   * Parse a date with a given mask.
    *
    * @method dateParse
    * @param date string with date to be parsed
    * @param mask mask with format for date
-   * @returns {Date} parsed date as a Date object
+   * @return {Date} parsed date as a Date object
    * @static
    */
   Utils.dateParse = function(date, mask) {
@@ -204,29 +195,28 @@ define([
   // Conversion functions
 
   /**
-   * Converts an array to an object
+   * Converts an array to an object.
+   *
+   * @method _pa2obj
    * @param pArray array to be converted
-   * @returns an object with the same info as the array
+   * @return an object with the same info as the array
    * @private
    * @static
    */
   function _pa2obj(pArray) {
     var obj = {};
-    for(var p in pArray) {
-      if(pArray.hasOwnProperty(p)) {
-        var prop = pArray[p];
-        obj[prop[0]] = prop[1];
-      }
+    for(var p in pArray) if(pArray.hasOwnProperty(p)) {
+      obj[pArray[p][0]] = pArray[p][1];
     }
     return obj;
   }
 
   /**
-   * Converts an object to an array
+   * Converts an object to an array.
    *
    * @method _obj2pa
    * @param obj object to convert
-   * @returns {Array}
+   * @return {Array}
    * @private
    * @static
    */
@@ -239,11 +229,11 @@ define([
   }
 
   /**
-   * Converts an array to an object
+   * Converts an array to an object.
    *
    * @method propertiesArrayToObject
    * @param pArray Array to Convert
-   * @returns The object represented by the array or undefined if argument is not an array
+   * @return The object represented by the array or undefined if argument is not an array
    * @static
    */
   Utils.propertiesArrayToObject = function(pArray) {
@@ -253,11 +243,11 @@ define([
   };
 
   /**
-   * Converts an object to an array
+   * Converts an object to an array.
    *
    * @method objectToPropertiesArray
    * @param obj
-   * @returns An array or undefined if argument is not an object
+   * @return An array or undefined if argument is not an object
    * @static
    */
   Utils.objectToPropertiesArray = function(obj) {
@@ -269,11 +259,11 @@ define([
   /**
    * Gets the url parameters from a URL. CDF url parameters are defined as those that are present in the query
    * string with names starting with the string 'param'. So, for a query string like ?paramfoo=bar, you'd get
-   * a parameter foo with value bar
+   * a parameter foo with value bar.
    *
    * @method getURLParameters
    * @param sURL URL with the query string to be parsed
-   * @returns {Array} Array with the parsed parameters. Each element is an array with two positions, the first being
+   * @return {Array} Array with the parsed parameters. Each element is an array with two positions, the first being
    * the parameter name and the second the value
    * @static
    */
@@ -302,7 +292,7 @@ define([
    *
    * @method toFormatedString
    * @param value Value to be formatted
-   * @returns {string} Some piece of formatted string
+   * @return {string} Some piece of formatted string
    * @private
    * @static
    * @deprecated
@@ -320,13 +310,13 @@ define([
   };
 
   /**
-   * Quote csv values in a way compatible with CSVTokenizer
+   * Quote csv values in a way compatible with CSVTokenizer.
    *
    * @method doCsvQuoting
    * @param value Value quote
    * @param separator Separator to use when quoting
    * @param alwaysEscape Boolean that indicates if the value should always be escaped or just when needed
-   * @returns {*} The escaped value
+   * @return {*} The escaped value
    * @static
    *
    */
@@ -350,10 +340,11 @@ define([
   };
 
   /**
-   * Evaluates the argument. If it is a function, calls the function, otherwise returns the argument
+   * Evaluates the argument. If it is a function, calls the function, otherwise returns the argument.
+   *
    * @method ev
    * @param o the object to be evaluated
-   * @returns {*} the object if the object is not a function. Otherwise, invokes the function and returns the
+   * @return {*} the object if the object is not a function. Otherwise, invokes the function and returns the
    * result
    * @static
    */
@@ -362,7 +353,7 @@ define([
   };
 
   /**
-   * Performs a post to the server
+   * Performs a post to the server.
    *
    * @method post
    * @param url Url where to post
@@ -374,28 +365,28 @@ define([
     var form = '<form action="' + url + '" method="post">';
     for(var o in obj) {
   
-      var v = (typeof obj[o] == 'function') ? obj[o]() : obj[o];
+      var v = Utils.ev(obj[o]);
   
       if(typeof v == 'string') {
-        v = v.replace(/"/g , "\'")
+        v = v.replace(/"/g, "\'");
       }
   
       form += '"<input type="hidden" name="' + o + '" value="' + v + '"/>';
     }
     form += '</form>';
-    jQuery(form).appendTo('body').submit().remove();
+    $(form).appendTo('body').submit().remove();
   };
 
   /**
-   * Deep clones an object. This method is deprecated, use $.extend(true, {}, obj)
+   * Deep clones an object. This method is deprecated, use $.extend(true, {}, obj).
    *
    * @method clone
    * @param obj Object to clone
-   * @returns Cloned object
+   * @return Cloned object
    * @static
    * @deprecated
    */
-  Utils.clone = function clone(obj) {
+  Utils.clone = function(obj) {
   
     var c = obj instanceof Array ? [] : {};
   
@@ -425,7 +416,7 @@ define([
   };
 
   /**
-   * Adds the url parameters to a local object
+   * Adds the url parameters to a local object.
    *
    * @method addArgs
    * @param url
@@ -440,11 +431,11 @@ define([
 
   /**
    * Gets an argument value that was previously set by calling addArgs. This is deprecated, use
-   * {{#crossLink "Utils/getQueryParameter:method"}}getQueryParameter{{/crossLink}} or dashboard.context.params
+   * {{#crossLink "Utils/getQueryParameter:method"}}getQueryParameter{{/crossLink}} or dashboard.context.params.
    *
    * @method getArgValue
    * @param key Argument name
-   * @returns the argument value or null
+   * @return the argument value or null
    * @static
    * @deprecated
    */
@@ -564,6 +555,7 @@ define([
   /**
    * Normalizes a value so that <tt>undefined</tt>, empty string
    * and empty array, are all translated to <tt>null</tt>.
+   *
    * @method normalizeValue
    * @param {*} value the value to normalize.
    * @return {*} the normalized value.
@@ -578,6 +570,7 @@ define([
 
   /**
    * Determines if a value is considered an array.
+   *
    * @method isArray
    * @param {*} value the value.
    * @return {boolean}
@@ -592,6 +585,7 @@ define([
 
   /**
    * Determines if two values are considered equal.
+   *
    * @method equalValues
    * @param {*} a the first value.
    * @param {*} b the second value.
@@ -620,7 +614,8 @@ define([
   /**
    * Converts an HSV to an RGB color value.
    * Based on the algorithm described at http://en.wikipedia.org/wiki/HSL_and_HSV.
-   * 
+   *
+   * @method hsvToRgb
    * @param {number} h Hue as a value between 0 - 360 (degrees)
    * @param {number} s Saturation as a value between 0 - 100 (%)
    * @param {number} v Value as a value between 0 - 100 (%)

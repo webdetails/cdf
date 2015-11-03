@@ -81,7 +81,8 @@ define([
               pageSize: Infinity
             },
             search: {
-              serverSide: false
+              serverSide: false,
+              matcher: undefined // function(entry, fragment)
             },
             selectionStrategy: {
               type: 'LimitedSelect',

@@ -11,8 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./AnalyzerComponent.ext', '../lib/jquery', './BaseComponent'],
-  function(AnalyzerComponentExt, $, BaseComponent) {
+define([
+  './AnalyzerComponent.ext',
+  '../lib/jquery',
+  './BaseComponent'
+], function(AnalyzerComponentExt, $, BaseComponent) {
 
   var AnalyzerComponent = BaseComponent.extend({
     update: function() {
@@ -71,7 +74,7 @@ define(['./AnalyzerComponent.ext', '../lib/jquery', './BaseComponent'],
 
       var iFrameHTML = "<iframe id ='iframe_" + this.htmlObject + "' "
         + "style='height:100%;width:100%;border:0px' "
-        + "frameborder='0' src='" + url + "'/>"
+        + "frameborder='0' src='" + url + "'/>";
 
       return iFrameHTML;
     }
