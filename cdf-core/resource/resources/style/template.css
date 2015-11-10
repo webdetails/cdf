@@ -15,7 +15,7 @@
   src: local('Open Sans Light'), local('OpenSans-Light'), url('http://themes.googleusercontent.com/static/fonts/opensans/v4/DXI1ORHCpsQm3Vp6mXoaTXhCUOGz7vYGh680lGh-uXM.woff') format('woff');
 }
 
-body {
+body .webdetailsWrapper {
 	margin-top: 10px;
 	background-color: #f6f7f8;
 	min-height: 900px;
