@@ -15,7 +15,7 @@ define([
   '../../lib/jquery',
   '../../lib/CCC/tipsy'
 ], function($) {
-  
+
   return {
     name: "clippedText",
     label: "Clipped Text",
@@ -31,9 +31,8 @@ define([
     init: function() {
       // override
     },
-    
+
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       var data = typeof opt.applyFormat === "function"
             ? opt.applyFormat(st.value)
             : st.value,
