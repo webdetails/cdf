@@ -1,3 +1,148 @@
+<h1>
+        Release Notes - Community Dashboard Framework - Version 15.10.26
+</h1>
+    
+
+
+    
+<h2>        Bug
+</h2>
+<ul>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-308'>CDF-308</a>] -         CGG - update test cases
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-349'>CDF-349</a>] -         Dashboards.removeComponent does not remove components with the same name, if an object is passed.
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-351'>CDF-351</a>] -         Dashboards.addComponents does not check for components with the same name
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-578'>CDF-578</a>] -         Running Schedule Prpt require sample and selecting a recurrence does not add input fields
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-582'>CDF-582</a>] -         [UX] Add a waiting.gif animation to FilterComponent 
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-588'>CDF-588</a>] -         Sample Map Dashboard returns error when clicking in a bar chart
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-589'>CDF-589</a>] -         Incorrect file name for sample MetaLayer Home Dashboard
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-591'>CDF-591</a>] -         When updating a table component, with an open expanded row, the current expand is always empty
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-592'>CDF-592</a>] -         CDF views services don&#39;t check if CDF is initialized
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-593'>CDF-593</a>] -         CPF init requires that config.properties in repo be publicly readable
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-597'>CDF-597</a>] -         FilterComponent - search input behaviour when there&#39;s no match
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-598'>CDF-598</a>] -         FilterComponent deletes its placeholder when it is updated from an &quot;unavailable&quot; state to a state with data
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-600'>CDF-600</a>] -         Filter Component: &#39;Show &quot;Only&quot; Button&#39; property is not working properly
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-604'>CDF-604</a>] -         Inside callback formatters, Template Component, this is related window and Utils is not available.
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-608'>CDF-608</a>] -         cdf/dashboard/Utils#escapeHtml alows XSS and is dangerous
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-609'>CDF-609</a>] -         Filter Component only allows server-side searching if pagination is also enabled
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-614'>CDF-614</a>] -         In the ButtonComponent, the successCallback (and failureCallback) are not receiving any query result
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-617'>CDF-617</a>] -         use common-ui&#39;s RequireJS loader plugins when available
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-619'>CDF-619</a>] -         CDE xaction components doesn&#39;t work 
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-625'>CDF-625</a>] -         CDF Tutorial - The sample page of &quot;Table + Sparkline&quot; is always loading because the error &quot; &#39;wcdfSettings&#39; is undefined &quot;
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-626'>CDF-626</a>] -         autocomplete does not update associated parameter when selection is made
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-628'>CDF-628</a>] -         TableComponent sample is not render with bootstrap style
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-629'>CDF-629</a>] -         Map component does not pan when we try to drag over a map shape
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-634'>CDF-634</a>] -         inconsistent &quot;/export&quot; endpoint usage
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-641'>CDF-641</a>] -         Using FilterComponent with Values array instead of a Datasource logs an error.
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-642'>CDF-642</a>] -         “not well-formed” warning when loading client-side JSON in Firefox
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-644'>CDF-644</a>] -         On require dashboards, when embedding a dashboard, if the dashboard name has a space, the dashboard does not load properly
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-649'>CDF-649</a>] -         Can&#39;t use parameters on Schedule Prpt Component
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-651'>CDF-651</a>] -         Schedule Prpt sample makes reference to showParameters property
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-652'>CDF-652</a>] -         Using a single selector with a pre-determined value, if the parameter is an integer it returns null
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-653'>CDF-653</a>] -         ButtonComponent will no longer work without a label
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-654'>CDF-654</a>] -         DataBar Addin liquid default broke some expected behavior
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-655'>CDF-655</a>] -         Backport fix BACKLOG-5349 to legacy cdf js
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-660'>CDF-660</a>] -         Template addin is having problems applying formatters 
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-661'>CDF-661</a>] -         blockG selector in Filter Component CSS became too generic 
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-662'>CDF-662</a>] -         Unable to use a previously saved dashboard view object
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-663'>CDF-663</a>] -         FilterComponent uses the search pattern always as lowercase
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-665'>CDF-665</a>] -         Filter Component - &quot;Only&quot; button in SingleSelection filter has incorrect behavior
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-666'>CDF-666</a>] -         Filter Component - &quot;Only&quot; button behavior in limited MultiSelection filter
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-671'>CDF-671</a>] -         Incorrect behavior on Search bar of a Filter Component
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-676'>CDF-676</a>] -         Duplicated text and some grammatical mistakes in FilterComponent samples
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDE-570'>CDE-570</a>] -         In sample FilterComponent (filter_visual_guide) on Multiple selections the world Only is over the numbers
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDE-326'>CDE-326</a>] -         MultiButton component: if the same button is clicked N time, processChange is called N times
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDE-620'>CDE-620</a>] -         Minification is breaking Filter Component accordion
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDE-615'>CDE-615</a>] -         ButtonComponent doesn't show label
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDE-608'>CDE-608</a>] -         Unable to use custom components from external plugins in embedded scenarios
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDE-582'>CDE-582</a>] -         Table component does not respect lifecycle.silent tag and still runs the block function
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/BISERVER-12645'>BISERVER-12645</a>] -         Update Your BA Server Steps Break Analyzer in 5.4-GA
+</li>
+
+</ul>
+            
+<h2>        Improvement
+</h2>
+<ul>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-572'>CDF-572</a>] -         As a dashboard developer, in an embedding context, I want to have a way to normalize an html id inside each dashboard.
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-583'>CDF-583</a>] -         Refactor CDF&#39;s FilterComponent &#39;templates.js&#39; to break it down into a set of moustache template files
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-594'>CDF-594</a>] -         CPF config should have an option enable/disable starting the local OrientDB instance
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-602'>CDF-602</a>] -         Filter Component - General update to selector styles
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-611'>CDF-611</a>] -         As a developer, I would like the Action Component to show a blockUI while executing an action, so that the user is notified that some server-side action is taking place
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-613'>CDF-613</a>] -         The implementation of the ButtonComponent should be refactored to avoid duplicated code
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-615'>CDF-615</a>] -         Allow Databar addin alignment
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-623'>CDF-623</a>] -         promote datasources to dashboard &quot;first class citizens&quot;
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-639'>CDF-639</a>] -         Would like to be possible to use the same addin, on the template component, with different options on the same template, passing an id when setting when calling the addin.
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-659'>CDF-659</a>] -         Revamp to the template addin: exposing a function for model parsing and also allow to customize messages as part of the options. 
+</li>
+</ul>
+    
+<h2>        New Feature
+</h2>
+<ul>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-584'>CDF-584</a>] -         Create CDF Samples for FilterComponent
+</li>
+<li>[<a href='http://jira.pentaho.com/browse/CDF-637'>CDF-637</a>] -         As a web developer I want to be able to have more addins on the template component
+</li>
+</ul>
+                                                                        
+
+
 
 <h1>
         Release Notes - Community Dashboard Framework - Version 15.06.30
