@@ -81,5 +81,19 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       expect(Utils.escapeHtml(halfEscapedHtml)).toEqual(fullyEscapedHtml + escapedScript);
       expect(Utils.escapeHtml(fullyEscapedHtml)).toEqual(fullyEscapedHtml);
     });
+
+    /**
+     * ## The Utils class # doesn't re-escape html
+     */
+    it("already escaped html is not re-escaped", function() {
+      var alphabeticText = "&lt;&quot;&lsaquo;&Yuml;";
+      var numericText = "&#09;&#55203;";
+      var hexText = "&#x09;#D7A3;";
+
+      expect(Utils.escapeHtml(alphabeticText)).toEqual(alphabeticText);
+      expect(Utils.escapeHtml(numericText)).toEqual(numericText);
+      expect(Utils.escapeHtml(hexText)).toEqual(hexText);
+    });
+
   });
 });
