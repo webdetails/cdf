@@ -45,7 +45,7 @@ define([
     // using Negative Lookahead when replacing '&' to make sure we don't
     // double escape
     var escaped = input
-    .replace(/&(?!amp;)(?!lt;)(?!gt;)(?!#34;)(?!#39;)/g, "&amp;")
+    .replace(/&(?!#([0-9][0-9]?[0-9]?[0-9]?[0-9]?);)(?!([a-zA-Z]{2,8});)(?!#x[A-F0-9][A-F0-9][A-F0-9]?[A-F0-9]?;)/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/'/g, "&#39;")
