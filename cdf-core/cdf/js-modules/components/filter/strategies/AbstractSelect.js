@@ -6,9 +6,9 @@
 define([
    'cdf/lib/jquery',
    'amd!cdf/lib/underscore',
-   'cdf/components/BaseComponent',
+   'cdf/lib/Base',
    '../base/filter-base-implementation'],
-   function( $, _ , BaseComponent, BaseFilter ) {
+   function( $, _ , Base, BaseFilter ) {
 
   /**
    * Base class for handling the selection logic
@@ -19,7 +19,7 @@ define([
    * @uses BaseFilter.Logger
    * @constructor
    */
-  BaseFilter.SelectionStrategies.AbstractSelect = BaseComponent.extend( BaseFilter.Logger ).extend({
+  BaseFilter.SelectionStrategies.AbstractSelect = Base.extend( BaseFilter.Logger ).extend({
     ID: 'BaseFilter.SelectionStrategies.AbstractSelect',
     constructor: function(options) {
       return this.isLogicGlobal = true;

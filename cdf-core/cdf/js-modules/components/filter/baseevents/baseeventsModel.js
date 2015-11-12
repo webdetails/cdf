@@ -2,7 +2,7 @@
 
 define([
   'amd!cdf/lib/backbone',
-  './baseevents'],
+  'cdf/lib/BaseEvents'],
   function( Backbone, BaseEvents ) {
 
     // Base Model
