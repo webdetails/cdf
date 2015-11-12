@@ -5,13 +5,14 @@ define([
     'cdf/lib/mustache',
     'cdf/Dashboard.Clean',
     'cdf/AddIn',
-    '../extensions/renderers'],
-    function( $, _, Mustache, Dashboards, AddIn, BaseFilter ) {
+    '../extensions/renderers',
+    '../extensions/sorters'
+],
+    function( $, _, Mustache, Dashboard, AddIn, renderers, sorters ) {
 
-        (function(Dashboards, AddIn, Renderers) {
+        (function(Dashboard, AddIn, Renderers) {
           'use strict';
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'notificationSelectionLimit',
             label: 'Notification that the selection limit has been reached',
             help: 'Acts on the footer of the Root view',
@@ -22,27 +23,25 @@ define([
               return Renderers.notificationSelectionLimit.call(this, $tgt, st.model, st.configuration);
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
-        })(Dashboards, AddIn, BaseFilter.Extensions.Renderers);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
+        })(Dashboard, AddIn, renderers);
 
-        (function(Dashboards, AddIn, Renderers) {
+        (function(Dashboard, AddIn, Renderers) {
           'use strict';
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'sumSelected',
             label: 'Sum the values of the selected items',
             implementation: function($tgt, st, options) {
               return Renderers.sumSelected.call(this, $tgt, st.model, st.configuration);
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderGroupSelection', myAddIn);
-        })(Dashboards, AddIn, BaseFilter.Extensions.Renderers);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderGroupSelection', myAddIn);
+        })(Dashboard, AddIn, renderers);
 
-        (function(Dashboards, AddIn) {
+        (function(Dashboard, AddIn) {
           'use strict';
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'randomColor',
             label: 'Programmatically sets a random color',
             defaults: {
@@ -54,17 +53,16 @@ define([
               });
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderItemSelection', myAddIn);
-        })(Dashboards, AddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderItemSelection', myAddIn);
+        })(Dashboard, AddIn);
 
-        (function(Dashboards, AddIn, Sorters) {
+        (function(Dashboard, AddIn, Sorters) {
           'use strict';
 
           /*
            * Sorts items, by keeping the selected items on top
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'selectedOnTop',
             label: 'Keep selected items on top ',
             implementation: function($tgt, st, options) {
@@ -74,18 +72,17 @@ define([
               return result;
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
-        })(Dashboards, AddIn, BaseFilter.Extensions.Sorters);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
+        })(Dashboard, AddIn, sorters);
 
-        (function(Dashboards, AddIn, Sorters) {
+        (function(Dashboard, AddIn, Sorters) {
           'use strict';
 
           /*
            * Sorts items, by keeping the insertion order
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'insertionOrder',
             label: 'Keep insertion order',
             implementation: function($tgt, st, options) {
@@ -94,18 +91,17 @@ define([
               return result;
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
-        })(Dashboards, AddIn, BaseFilter.Extensions.Sorters);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
+        })(Dashboard, AddIn, sorters);
 
-        (function(Dashboards, AddIn) {
+        (function(Dashboard, AddIn) {
           'use strict';
 
           /*
            * Sorts items/groups by label
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'sortByLabel',
             label: 'Sort items by label, alphabetically',
             defaults: {
@@ -117,18 +113,17 @@ define([
               return result;
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
-        })(Dashboards, AddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
+        })(Dashboard, AddIn);
 
-        (function(Dashboards, AddIn) {
+        (function(Dashboard, AddIn) {
           'use strict';
 
           /*
            * Sorts items/groups by value
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'sortByValue',
             label: 'Sort items by value',
             defaults: {
@@ -144,18 +139,17 @@ define([
               }
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
-        })(Dashboards, AddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortItem', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'sortGroup', myAddIn);
+        })(Dashboard, AddIn);
 
-        (function(Dashboards, Mustache, AddIn) {
+        (function(Dashboard, Mustache, AddIn) {
           'use strict';
 
           /*
            * Sums the values of all the descendants
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'sumValues',
             label: 'Sums the values of the selected items',
             defaults: {
@@ -183,18 +177,17 @@ define([
               return $tgt.find(filter + ':eq(0)').html(html);
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderGroupSelection', myAddIn);
-        })(Dashboards, Mustache, AddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderGroupSelection', myAddIn);
+        })(Dashboard, Mustache, AddIn);
 
-        (function(Dashboards, Mustache, AddIn) {
+        (function(Dashboard, Mustache, AddIn) {
           'use strict';
 
           /*
            * Renders a Mustache template
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'template',
             label: 'Mustache template',
             defaults: {
@@ -217,25 +210,24 @@ define([
               }
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderRootHeader', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderRootFooter', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderGroupSelection', myAddIn);
-          Dashboards.registerGlobalAddIn('FilterComponent', 'renderItemSelection', myAddIn);
-        })(Dashboards, Mustache, AddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderRootHeader', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderRootFooter', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderRootSelection', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderGroupSelection', myAddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'renderItemSelection', myAddIn);
+        })(Dashboard, Mustache, AddIn);
 
-        (function(Dashboards, AddIn) {
+        (function(Dashboard, AddIn) {
           'use strict';
 
           /*
            * Emulate accordion behaviour on a group of filters
            *
-           * When the user expands a filter, a global event on the "Dashboards" object is issued.
+           * When the user expands a filter, a global event on the "Dashboard" object is issued.
            * The filters configured to use this addIn will listen to the event and
            * close themselves accordingly
            */
-          var myAddIn;
-          myAddIn = new AddIn({
+          var myAddIn = new AddIn({
             name: 'accordion',
             label: 'Makes all filters behave as an accordion',
             defaults: {
@@ -258,7 +250,7 @@ define([
               });
             }
           });
-          Dashboards.registerGlobalAddIn('FilterComponent', 'postUpdate', myAddIn);
-        })(Dashboards, AddIn);
+          Dashboard.registerGlobalAddIn('FilterComponent', 'postUpdate', myAddIn);
+        })(Dashboard, AddIn);
 
 });

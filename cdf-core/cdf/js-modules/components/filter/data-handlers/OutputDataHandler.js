@@ -7,8 +7,8 @@
 define([
     'amd!cdf/lib/underscore',
     '../baseevents/baseeventsModel',
-    '../base/filter-base-implementation'],
-    function( _, BaseModel, BaseFilter ) {
+    '../base/Logger'],
+    function( _, BaseModel, Logger ) {
 
       /**
        * The Output DataHandler:
@@ -22,7 +22,7 @@ define([
        * @constructor
        * @param {Object} options
        */
-      BaseFilter.DataHandlers.Output = BaseModel.extend( BaseFilter.Logger ).extend({
+      var Output = BaseModel.extend( Logger ).extend({
         ID: 'BaseFilter.DataHandlers.Output',
         initialize: function() {
           if (true || this.attributes.options.trigger === 'apply') {
@@ -138,5 +138,5 @@ define([
           return treatedSelection;
         }
       });
-    return BaseFilter;
+    return Output;
 });

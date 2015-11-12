@@ -1,12 +1,12 @@
-
 /**
  * @module BaseFilter
  * @submodule Views
  */
 
 define([
-    './Abstract'],
-    function( BaseFilter ) {
+  './Abstract',
+  '../base/templates'
+], function (AbstractView, templates) {
 
   /**
    * View for items
@@ -14,12 +14,12 @@ define([
    * @constructor
    * @extends AbstractView
    */
-  BaseFilter.Views.Item = BaseFilter.Views.AbstractView.extend({
+  var Item = AbstractView.extend({
     type: 'Item',
     ID: 'BaseFilter.Views.Root',
     template: {
-      selection: BaseFilter.templates['Item-template'],
-      skeleton: BaseFilter.templates['Item-template']
+      selection: templates['Item-template'],
+      skeleton: templates['Item-template']
     },
     events: {
       'mouseover .filter-item-body': 'onMouseOver',
@@ -27,16 +27,16 @@ define([
       'click     .filter-item-body': 'onSelection',
       'click     .filter-item-only-this': 'onClickOnlyThis'
     },
-    bindToModel: function(model) {
+    bindToModel: function (model) {
       this.base(model);
       this.onChange(model, 'isSelected', this.updateSelection);
       return this.onChange(model, 'isVisible', this.updateVisibility);
     },
-    onClickOnlyThis: function(event) {
+    onClickOnlyThis: function (event) {
       event.stopPropagation();
       return this.trigger('control:only-this', this.model);
     }
   });
 
-  return BaseFilter;
+  return Item;
 });
