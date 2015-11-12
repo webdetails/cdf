@@ -14,7 +14,7 @@
 define([
   '../../../AddIn',
   '../../../Dashboard',
-  '../../../lib/jquery', 
+  '../../../lib/jquery',
   'amd!../../../lib/underscore',
   '../../../lib/CCC/pvc',
 ], function(AddIn, Dashboard, $, _, pvc) {
@@ -60,7 +60,6 @@ define([
     init: function() { },
 
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       var data = _.isFunction(opt.transformData) ? opt.transformData(st.value) : st.value;
           $tgt = $(tgt).empty().append($(opt.layout).addClass(opt.cssClass).append(data));
 
