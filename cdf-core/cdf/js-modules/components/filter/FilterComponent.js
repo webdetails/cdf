@@ -27,8 +27,9 @@ define([
   'amd!cdf/lib/backbone',
   'cdf/Dashboard.Clean',
   'cdf/components/UnmanagedComponent',
-  './filter/filter-implementation',
-  'css!./filter/styles/filter'
+  './filter-implementation',
+  './addIns/addIns',
+  'css!./styles/filter'
 ], function ($, _, Backbone, Dashboards, UnmanagedComponent, BaseFilter) {
 
   /**

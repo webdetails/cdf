@@ -1,4 +1,30 @@
-define([], function () {
+define([
+  './Logger',
+  '../models/SelectionTree',
+  '../views/Abstract',
+  '../views/Root',
+  '../views/Group',
+  '../views/Item',
+  '../controllers/RootCtrl',
+  '../strategies/AbstractSelect',
+  '../strategies/LimitedSelect',
+  '../strategies/MultiSelect',
+  '../strategies/SingleSelect',
+  '../data-handlers/InputDataHandler',
+  '../data-handlers/OutputDataHandler',
+  '../extensions/sorters',
+  '../extensions/renderers',
+  './templates',
+  './defaults'
+], function (Logger,
+             SelectionTree,
+             AbstractView, Root, Group, Item,
+             RootCtrl,
+             AbstractSelect, LimitedSelect, MultiSelect, SingleSelect,
+             Input, Output,
+             sorters, renderers,
+             templates,
+             defaults) {
 
   /**
    * MVC-based tree-like filter that supports
@@ -14,26 +40,36 @@ define([], function () {
    */
   var BaseFilter = {
 
+    Logger: Logger,
     /**
      * MVC Models used internally to represent and manipulate information
      * @submodule Models
      * @main
      */
-    Models: {},
+    Models: {
+      SelectionTree: SelectionTree
+    },
 
     /**
      * MVC views that listen to changes in a model and trigger events that will eventually be handled by a Controller
      * @submodule Views
      * @main
      */
-    Views: {},
+    Views: {
+      AbstractView: AbstractView,
+      Root: Root,
+      Group: Group,
+      Item: Item
+    },
 
     /**
      * Set of Controllers responsible for handling the interaction between views and models
      * @submodule Controllers
      * @main
      */
-    Controllers: {},
+    Controllers: {
+      RootCtrl: RootCtrl
+    },
 
     /**
      * Controller-like set of classes design to encapsulate the selection strategy
@@ -43,7 +79,12 @@ define([], function () {
      * @submodule SelectionStrategies
      * @main
      */
-    SelectionStrategies: {},
+    SelectionStrategies: {
+      AbstractSelect: AbstractSelect,
+      LimitedSelect: LimitedSelect,
+      MultiSelect: MultiSelect,
+      SingleSelect: SingleSelect
+    },
 
     /**
      * The MVC component consumes data in a specific format.
@@ -53,7 +94,10 @@ define([], function () {
      * @submodule DataHandlers
      * @main
      */
-    DataHandlers: {},
+    DataHandlers: {
+      Input: Input,
+      Output: Output
+    },
 
     /**
      * Extension points: Sorters and Renderers
@@ -61,13 +105,11 @@ define([], function () {
      * @main
      */
     Extensions: {
-      Sorters: {},
-      Renderers: {}
+      Sorters: sorters,
+      Renderers: renderers
     },
-    defaults: {},
-    templates: {},
-    count: 0,
-
+    defaults: defaults,
+    templates: templates,
     /**
      * Enumerations
      * @module BaseFilter
@@ -83,11 +125,7 @@ define([], function () {
        * @class select
        * @static
        */
-      select: {
-        SOME: null,
-        NONE: false,
-        ALL: true
-      },
+      select: SelectionTree.SelectionStates,
       selectionStrategy: {
         'LimitedSelect': {
           Root: {

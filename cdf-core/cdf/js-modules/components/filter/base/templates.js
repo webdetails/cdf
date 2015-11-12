@@ -13,7 +13,6 @@
 
 define([
   'cdf/lib/mustache',
-  './BaseFilter',
   'text!../templates/Group-skeleton.html',
   'text!../templates/Group-template.html',
   'text!../templates/Item-template.html',
@@ -24,7 +23,6 @@ define([
   'text!../templates/Root-template.html'
 ], function(
   Mustache,
-  BaseFilter,
   GroupSkeleton,
   GroupTemplate,
   ItemTemplate,
@@ -34,9 +32,10 @@ define([
   RootSkeleton,
   RootTemplate
 ) {
+  var templates = {};
   function _loadTemplate(name, source) {
-    BaseFilter.templates[name] = source;
-    Mustache.parse(BaseFilter.templates[name]);
+    templates[name] = source;
+    Mustache.parse(templates[name]);
   }
 
   _loadTemplate("Group-skeleton", GroupSkeleton);
@@ -49,5 +48,5 @@ define([
   _loadTemplate("Root-template", RootTemplate);
   _loadTemplate(undefined, "No template");
 
-  return BaseFilter;
+  return templates;
 });

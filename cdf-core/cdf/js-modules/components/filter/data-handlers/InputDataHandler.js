@@ -8,11 +8,10 @@ define([
     'cdf/lib/jquery',
     'amd!cdf/lib/underscore',
     '../baseevents/baseeventsModel',
-    '../base/filter-base-implementation'],
-    function( $, _, BaseModel, BaseFilter ) {
+    '../base/Logger'],
+    function( $, _, BaseModel, Logger ) {
 
-      var getPageData, groupGenerator, itemGenerator;
-      getPageData = function(queryInfo, pageSize) {
+      var getPageData = function(queryInfo, pageSize) {
         var pageData;
         pageData = {};
         if ((queryInfo != null ? queryInfo.pageStart : void 0) != null) {
@@ -22,7 +21,7 @@ define([
         }
         return pageData;
       };
-      itemGenerator = function(idx, pageData) {
+      var itemGenerator = function(idx, pageData) {
         var createItems;
         if (!_.isObject(pageData)) {
           pageData = {};
@@ -43,7 +42,7 @@ define([
         };
         return createItems;
       };
-      groupGenerator = function(idx, pageData) {
+      var groupGenerator = function(idx, pageData) {
         var createGroup;
         createGroup = function(rows, group) {
           var groupData;
@@ -65,7 +64,7 @@ define([
        * @constructor
        * @param {Object} options
        */
-      BaseFilter.DataHandlers.Input = BaseModel.extend( BaseFilter.Logger ).extend({
+      var Input = BaseModel.extend( Logger ).extend({
         ID: 'BaseFilter.DataHandlers.Input',
         getModel: function() {
           return this.get('model');
@@ -189,5 +188,5 @@ define([
         }
       });
 
-  return BaseFilter;
+  return Input;
 });

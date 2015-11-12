@@ -11,11 +11,10 @@
 
 define([
     'amd!cdf/lib/underscore',
-    '../base/BaseFilter',
     'cdf/lib/BaseSelectionTree'],
-    function( _, BaseFilter, BaseSelectionTree ) {
+    function( _, BaseSelectionTree ) {
 
-  BaseFilter.Models.SelectionTree = BaseSelectionTree.extend({
+  var SelectionTree = BaseSelectionTree.extend({
 
     /**
      * @property {Object} [defaults]
@@ -43,5 +42,5 @@ define([
     SelectionStates: BaseSelectionTree.SelectionStates
   });
 
-  return BaseFilter;
+  return SelectionTree;
 });
