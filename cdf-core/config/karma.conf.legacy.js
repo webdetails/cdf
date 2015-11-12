@@ -65,7 +65,7 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress', 'junit', 'html', 'coverage'],
+    //reporters: ['progress', 'junit', 'html', 'coverage'],
 
     //reporter: coverage
     coverageReporter: {
@@ -113,6 +113,7 @@ module.exports = function(config) {
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
     browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
+    //browsers: ['PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 600000,
