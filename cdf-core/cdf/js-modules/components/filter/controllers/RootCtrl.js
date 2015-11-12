@@ -8,11 +8,9 @@
 define([
     'cdf/lib/jquery',
     'amd!cdf/lib/underscore',
-    'cdf/components/BaseComponent',
-    '../baseevents/baseevents',
-    '../baseevents/baseeventsView',
+    'cdf/lib/BaseEvents',
     '../base/filter-base-implementation'],
-    function( $, _, BaseComponent, BaseEvents, BaseView, BaseFilter ) {
+    function( $, _, BaseEvents, BaseFilter ) {
 
       /**
        * General-purpose controller.
@@ -22,7 +20,7 @@ define([
        * @uses BaseFilter.Logger
        * @extends Backbone.View
        */
-      BaseFilter.Controllers.RootCtrl = BaseEvents.extendWithEvents( BaseComponent ).extend( BaseFilter.Logger ).extend({
+      BaseFilter.Controllers.RootCtrl = BaseEvents.extend( BaseFilter.Logger ).extend({
         constructor: function(args) {
           $.extend(this, _.pick(args, ['model', 'view', 'configuration']));
           if (this.view) {
