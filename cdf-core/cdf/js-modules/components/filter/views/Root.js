@@ -56,8 +56,7 @@ define([
           return this.onChange(model, 'isDisabled', _.bind(this.updateAvailability, this));
         },
         getViewModel: function() {
-          var viewModel;
-          viewModel = this.base();
+          var viewModel = this.base();
           $.extend(viewModel, {
             selectedItems: _.map(
               this.configuration.selectionStrategy.strategy.getSelectedItems(this.model, 'label') /*this.model.getSelectedItems('label')*/, function(label) {
@@ -70,8 +69,7 @@ define([
           return viewModel;
         },
         render: function() {
-          var viewModel;
-          viewModel = this.getViewModel();
+          var viewModel = this.getViewModel();
           this.renderSkeleton(viewModel);
           this.renderOverlay(viewModel);
           this.renderHeader(viewModel);
@@ -82,20 +80,17 @@ define([
           return this;
         },
         updateHeader: function() {
-          var viewModel;
-          viewModel = this.getViewModel();
+          var viewModel = this.getViewModel();
           this.renderHeader(viewModel);
           return this;
         },
         updateFooter: function() {
-          var viewModel;
-          viewModel = this.getViewModel();
+          var viewModel = this.getViewModel();
           this.renderFooter(viewModel);
           return this;
         },
         updateCollapse: function() {
-          var viewModel;
-          viewModel = this.getViewModel();
+          var viewModel = this.getViewModel();
           this.renderHeader(viewModel);
           this.renderOverlay(viewModel);
           this.renderCollapse(viewModel);
@@ -115,8 +110,7 @@ define([
           return this;
         },
         updateAvailability: function() {
-          var viewModel;
-          viewModel = this.getViewModel();
+          var viewModel = this.getViewModel();
           this.renderAvailability(viewModel);
           return this;
         },
@@ -129,9 +123,8 @@ define([
           if (this.config.view.overlaySimulateClick === true) {
             this.$('.filter-overlay').toggleClass('expanded', false).toggleClass('collapsed', true);
             _.delay(function() {
-              var $element, item;
-              $element = $(document.elementFromPoint(event.clientX, event.clientY));
-              item = _.chain($element.parents()).filter(function(m) {
+              var $element = $(document.elementFromPoint(event.clientX, event.clientY));
+              var item = _.chain($element.parents()).filter(function(m) {
                 return $(m).hasClass('filter-root-header');
               }).first().value();
               if (item != null) {
