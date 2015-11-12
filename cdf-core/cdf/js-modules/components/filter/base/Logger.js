@@ -12,12 +12,8 @@
  * @main
  */
 
- define([
-    'cdf/Logger',
-    './BaseFilter'],
-    function( Logger, BaseFilter ) {
-
-      BaseFilter.Logger = Logger;
-
-      return BaseFilter;
+define([
+  'cdf/Logger'
+], function (Logger) {
+  return Logger;
 });

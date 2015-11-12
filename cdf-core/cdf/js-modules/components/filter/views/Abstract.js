@@ -7,10 +7,11 @@ define([
   'amd!cdf/lib/underscore',
   'cdf/lib/mustache',
   '../baseevents/baseeventsView',
-  '../base/filter-base-implementation',
+  '../base/Logger',
+  '../models/SelectionTree',
   'cdf/lib/jquery',
   'amd!cdf/lib/jquery.mCustomScrollbar'
-], function (_, Mustache, BaseView, BaseFilter, $) {
+], function (_, Mustache, BaseView, Logger, SelectionTree, $) {
 
   /**
    * Abstract base class for all Views
@@ -19,7 +20,8 @@ define([
    * @extends BaseView
    * @uses BaseFilter.Logger
    */
-  BaseFilter.Views.AbstractView = BaseView.extend(BaseFilter.Logger).extend({
+  var SelectionStates = SelectionTree.SelectionStates;
+  var AbstractView = BaseView.extend(Logger).extend({
     initialize: function (options) {
       this.configuration = options.configuration;
       this.config = this.configuration[this.type];
@@ -69,7 +71,7 @@ define([
           this.$(this.config.view.slots[slot]).replaceWith(html);
         }
         this.injectContent(slot);
-        return BaseFilter.count++;
+        return this;
       }, this);
     },
 
@@ -82,7 +84,7 @@ define([
       return $.extend(true, this.model.toJSON(), viewOptions, {
         strings: _.result(this.config, 'strings'),
         selectionStrategy: _.omit(this.configuration.selectionStrategy, 'strategy'),
-        isPartiallySelected: this.model.getSelection() === BaseFilter.Enum.select.SOME,
+        isPartiallySelected: this.model.getSelection() === SelectionStates.SOME,
         numberOfChildren: this.model.children() ? this.model.children().length : 0
       });
     },
@@ -119,7 +121,6 @@ define([
     },
     renderSkeleton: function (viewModel) {
       this.$el.html(Mustache.render(this.template.skeleton, viewModel));
-      BaseFilter.count++;
       return this;
     },
     updateSelection: function (model, options) {
@@ -133,7 +134,7 @@ define([
       var html = Mustache.render(this.template.selection, viewModel);
       this.$(this.config.view.slots.selection).replaceWith(html);
       this.injectContent('selection');
-      return BaseFilter.count++;
+      return this;
     },
     updateVisibility: function () {
       if (this.model.getVisibility()) {
@@ -276,5 +277,6 @@ define([
        */
     }
   });
-  return BaseFilter;
+
+  return AbstractView;
 });

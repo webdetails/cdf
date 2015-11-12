@@ -4,12 +4,13 @@
  */
 
 define([
-    'amd!cdf/lib/underscore',
-    './RootCtrl',
-    'cdf/lib/Tree'],
-    function( _, BaseFilter, Tree ) {
+  'amd!cdf/lib/underscore',
+  'cdf/lib/Tree',
+  '../base/Logger',
+  '../base/BaseFilter'
+], function (_, Tree, Logger, BaseFilter) {
 
-   /**
+  /**
    * Controller responsible for managing the hierarchy of views and controllers.
    *
    * When data is added to the model, the Manager reacts by creating
@@ -20,7 +21,7 @@ define([
    * @extends Tree
    */
 
-  BaseFilter.Controllers.Manager = Tree.extend(BaseFilter.Logger).extend({
+  var Manager = Tree.extend(Logger).extend({
     ID: 'BaseFilter.Controllers.Manager',
     defaults: {
       model: null,
@@ -28,19 +29,19 @@ define([
       controller: null,
       configuration: null
     },
-    constructor: function(options) {
+    constructor: function (options) {
       this.base.apply(this, arguments);
       this.updateChildren();
       return this;
     },
-    initialize: function(options) {
+    initialize: function (options) {
       if (this.get('view') == null) {
         this.addViewAndController(this.get('model'));
       }
       this.applyBindings();
       return this;
     },
-    close: function() {
+    close: function () {
       this.get('view').close();
       this.get('controller').stopListening().off();
       this.stopListening();
@@ -48,16 +49,15 @@ define([
       this.clear();
       return this;
     },
-    applyBindings: function() {
-      var bindings, that, throttleFilter, throttleScroll;
-      that = this;
-      throttleScroll = function(f) {
+    applyBindings: function () {
+      var that = this;
+      var throttleScroll = function (f) {
         var throttleTimeMilliseconds = that.get('configuration').pagination.throttleTimeMilliseconds;
         return _.throttle(f, throttleTimeMilliseconds || 0, {
           trailing: false
         });
       };
-      throttleFilter = function(f) {
+      var throttleFilter = function (f) {
         var throttleTimeMilliseconds = that.get('view').config.view.throttleTimeMilliseconds;
         return _.throttle(f, throttleTimeMilliseconds || 0, {
           leading: false
@@ -67,7 +67,7 @@ define([
       /*
        * Declare bindings to model and view
        */
-      bindings = {
+      var bindings = {
         model: {
           'add': this.onNewData,
           'change:selectedItems': this.onApply,
@@ -83,9 +83,8 @@ define([
       /*
        * Create listeners
        */
-      that = this;
-      _.each(bindings, function(bindingList, object) {
-        return _.each(bindingList, function(method, event) {
+      _.each(bindings, function (bindingList, object) {
+        return _.each(bindingList, function (method, event) {
           return that.listenTo(that.attributes[object], event, _.bind(method, that));
         });
       });
@@ -96,22 +95,22 @@ define([
       }));
       return this;
     },
-    addViewAndController: function(newModel) {
+    addViewAndController: function (newModel) {
 
       /*
        * Decide which view to use
        */
-      var Controller, View, childConfig, configuration, controller, newController, newView, shareController, target, that;
-      shareController = true;
+      var Controller, View, configuration, controller, newController, target;
+      var shareController = true;
       if (this.parent() != null) {
 
         /*
          * This node is either a Group or an Item
          * Use the parent's configuration
          */
-        that = this.parent();
+        var that = this.parent();
         configuration = that.get('configuration');
-        childConfig = configuration[that.get('view').type].view.childConfig;
+        var childConfig = configuration[that.get('view').type].view.childConfig;
         target = that.get('view').createChildNode();
         if (newModel.children()) {
           View = BaseFilter.Views[childConfig.withChildrenPrototype];
@@ -136,7 +135,7 @@ define([
       /*
        * Create new view
        */
-      newView = new View({
+      var newView = new View({
         model: newModel,
         configuration: configuration,
         target: target
@@ -160,7 +159,7 @@ define([
       this.debug("addViewAndController is done for " + (newModel.get('id')) + " : " + (newModel.get('label')));
       return this;
     },
-    onNewData: function(item, collection, obj) {
+    onNewData: function (item, collection, obj) {
       var itemParent;
       this.debug("New data (" + (item.get('label')) + ") caught by " + (this.get('model').get('label')));
       itemParent = this.where({
@@ -170,13 +169,13 @@ define([
         return itemParent[0].trigger("post:child:add");
       }
     },
-    onUpdateChildren: function() {
+    onUpdateChildren: function () {
       this.debug("New data added to " + (this.get('model').get('label')) + " : updating children");
       this.updateChildren();
       this.restoreScroll();
       return this.trigger('post:update:children', this);
     },
-    restoreScroll: function() {
+    restoreScroll: function () {
       if (this.get('view')._scrollBar != null) {
         this.debug("This group has a scrollbar");
         if (this.previousPosition != null) {
@@ -190,30 +189,30 @@ define([
     /*
      * Pagination
      */
-    getNextPage: function(model, event) {
+    getNextPage: function (model, event) {
       var ref;
       this.previousPosition = (ref = _.last(this.sortChildren(this.children()), 2)[0]) != null ? ref.get('view').$el : void 0;
       return this.getPage('next', model, event);
     },
-    getPreviousPage: function(model, event) {
+    getPreviousPage: function (model, event) {
       var ref;
       this.previousPosition = (ref = _.first(this.sortChildren(this.children()), 2)[1]) != null ? ref.get('view').$el : void 0;
       return this.getPage('previous', model, event);
     },
-    getPage: function(page, model, event) {
+    getPage: function (page, model, event) {
       var deferred;
       this.debug("Item " + (model.get('label')) + " requested page " + page);
       deferred = this.requestPage(page, this._searchPattern);
       return deferred;
     },
-    requestPage: function(page, searchPattern) {
+    requestPage: function (page, searchPattern) {
       var deferred, getPage, that;
       getPage = this.get('configuration').pagination.getPage;
       if (!_.isFunction(getPage)) {
         return this;
       }
       that = this;
-      deferred = getPage(page, searchPattern).then(function(json) {
+      deferred = getPage(page, searchPattern).then(function (json) {
         if (json.resultset != null) {
           return that.debug("getPage: got " + json.resultset.length + " more items");
         } else {
@@ -226,15 +225,15 @@ define([
     /*
      * Child management
      */
-    updateChildren: function() {
+    updateChildren: function () {
       var models;
       models = this.get('model').children();
       if (models != null) {
-        models.each((function(_this) {
-          return function(m) {
+        models.each((function (_this) {
+          return function (m) {
             var hasModel;
             if (_this.children()) {
-              hasModel = _.any(_this.children().map(function(child) {
+              hasModel = _.any(_this.children().map(function (child) {
                 return child.get('model') === m;
               }));
             } else {
@@ -258,7 +257,7 @@ define([
      * @method addChild
      * @chainable
      */
-    addChild: function(newModel) {
+    addChild: function (newModel) {
       var newManager;
       newManager = {
         model: newModel,
@@ -267,10 +266,10 @@ define([
       this.add(newManager);
       return this;
     },
-    removeChild: function(model) {
+    removeChild: function (model) {
       throw new Error("NotImplemented");
     },
-    sortSiblings: function(model) {
+    sortSiblings: function (model) {
       this.debug("sortSiblings: " + (this.get('model').get('label')) + " was triggered from " + (model.get('label')) + ":" + (model.getSelection()));
       if (this.get('model') !== model) {
         return this;
@@ -286,7 +285,7 @@ define([
      * @method getSorters
      * @return {Array} an array with the available sorter functions
      */
-    getSorters: function() {
+    getSorters: function () {
       var type = this.children().first().get('view').type;
       var customSorters = this.get('configuration')[type].sorter;
 
@@ -310,7 +309,7 @@ define([
      * @param {Array} children the array to be sorted
      * @return {Array} the sorted array
      */
-    sortChildren: function(children) {
+    sortChildren: function (children) {
       var customSorters = this.getSorters();
       if (_.isEmpty(customSorters)) {
         return children;
@@ -321,8 +320,8 @@ define([
       var orderedChildren = _.chain(children);
 
       // apply sorters in reverse order, from least to most important sorter
-      while(sorterIdx--) {
-        orderedChildren = orderedChildren.sortBy(function(child, idx) {
+      while (sorterIdx--) {
+        orderedChildren = orderedChildren.sortBy(function (child, idx) {
           return customSorters[sorterIdx](null, child.item.get('model'), configuration);
         });
       }
@@ -334,7 +333,7 @@ define([
      * @method renderSortedChildren
      * @chainable
      */
-    renderSortedChildren: function() {
+    renderSortedChildren: function () {
       var $nursery;
       if (!this.children()) {
         return this;
@@ -347,10 +346,10 @@ define([
 
       return this;
     },
-    _detachChildren: function() {
+    _detachChildren: function () {
       var children;
       if (this.children()) {
-        children = this.children().map(function(child) {
+        children = this.children().map(function (child) {
           var result;
           result = {
             item: child,
@@ -363,10 +362,10 @@ define([
       }
       return children;
     },
-    _appendChildren: function(children) {
+    _appendChildren: function (children) {
       if (children != null) {
-        _.each(children, (function(_this) {
-          return function(child) {
+        _.each(children, (function (_this) {
+          return function (child) {
             return _this.get('view').appendChildNode(child.target);
           };
         })(this));
@@ -381,23 +380,23 @@ define([
      * @param {String} text the new search pattern
      * @for Manager
      */
-    onFilterChange: function(text) {
+    onFilterChange: function (text) {
       var filter, that;
       this._searchPattern = text.trim();
-      filter = _.bind(function() {
+      filter = _.bind(function () {
         var isMatch;
         isMatch = this.filter(this._searchPattern, "", this.get('configuration').search.matcher);
         return this.get('model').setVisibility(true);
       }, this);
       if (this.get('configuration').search.serverSide === true) {
         that = this;
-        this.requestPage(0, this._searchPattern).then(function() {
+        this.requestPage(0, this._searchPattern).then(function () {
           _.defer(filter);
         });
       }
       _.defer(filter);
     },
-    filter: function(text, prefix, customMatcher) {
+    filter: function (text, prefix, customMatcher) {
 
       /*
        * decide on item visibility based on a match to a filter string
@@ -405,8 +404,8 @@ define([
        * if the user decides to delete/clear the search box
        */
       var fullString, isMatch;
-      fullString = _.chain(['label']).map((function(_this) {
-        return function(property) {
+      fullString = _.chain(['label']).map((function (_this) {
+        return function (property) {
           return _this.get('model').get(property);
         };
       })(this)).compact().value().join(' ');
@@ -414,7 +413,7 @@ define([
         fullString = prefix + fullString;
       }
       if (this.children()) {
-        isMatch = _.any(this.children().map(function(manager) {
+        isMatch = _.any(this.children().map(function (manager) {
           var childIsMatch;
           childIsMatch = manager.filter(text, fullString, customMatcher);
           manager.get('model').setVisibility(childIsMatch);
@@ -426,7 +425,7 @@ define([
         if (_.isFunction(customMatcher)) {
           isMatch = customMatcher(fullString, text);
         } else {
-          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1 ;
+          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1;
         }
         this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
       }
@@ -437,11 +436,12 @@ define([
     /*
      * Management of selected items
      */
-    onApply: function(model) {
+    onApply: function (model) {
       return this.onFilterChange('');
     }
 
   });
 
+  BaseFilter.Controllers.Manager = Manager;
   return BaseFilter;
 });

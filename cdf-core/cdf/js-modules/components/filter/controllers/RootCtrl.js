@@ -9,9 +9,11 @@ define([
     'cdf/lib/jquery',
     'amd!cdf/lib/underscore',
     'cdf/lib/BaseEvents',
-    '../base/filter-base-implementation'],
-    function( $, _, BaseEvents, BaseFilter ) {
+    '../base/Logger',
+  '../models/SelectionTree'
+], function( $, _, BaseEvents,  Logger, SelectionTree) {
 
+  var SelectionStates = SelectionTree.SelectionStates;
       /**
        * General-purpose controller.
        *
@@ -20,7 +22,7 @@ define([
        * @uses BaseFilter.Logger
        * @extends Backbone.View
        */
-      BaseFilter.Controllers.RootCtrl = BaseEvents.extend( BaseFilter.Logger ).extend({
+      var RootCtrl = BaseEvents.extend( Logger ).extend({
         constructor: function(args) {
           $.extend(this, _.pick(args, ['model', 'view', 'configuration']));
           if (this.view) {
@@ -109,11 +111,11 @@ define([
         },
         onOnlyThis: function(model) {
           this.debug("Setting Only This");
-          this.model.root().setAndUpdateSelection(BaseFilter.Enum.select.NONE);
-          this.configuration.selectionStrategy.strategy.setSelection(BaseFilter.Enum.select.ALL, model);
+          this.model.root().setAndUpdateSelection(SelectionStates.NONE);
+          this.configuration.selectionStrategy.strategy.setSelection(SelectionStates.ALL, model);
           return this;
         }
       });
   
-  return BaseFilter;
+  return RootCtrl;
 });
