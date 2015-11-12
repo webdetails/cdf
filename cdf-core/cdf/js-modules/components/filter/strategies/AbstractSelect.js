@@ -51,11 +51,10 @@ define([
      * @return {Enum} Returns the inferred state
      */
     inferSelectionFromChildren: function(childrenStates) {
-      var all, none;
-      all = _.every(childrenStates, function(el) {
+      var all = _.every(childrenStates, function(el) {
         return el === BaseFilter.Enum.select.ALL;
       });
-      none = _.every(childrenStates, function(el) {
+      var none = _.every(childrenStates, function(el) {
         return el === BaseFilter.Enum.select.NONE;
       });
       if (all) {
@@ -87,12 +86,11 @@ define([
      * @chainable
      */
     changeSelection: function(model) {
-      var c, d, newState, that;
-      d = $.now();
-      c = BaseFilter.count;
-      newState = this.getNewState(model.getSelection());
+      var d = $.now();
+      var c = BaseFilter.count;
+      var newState = this.getNewState(model.getSelection());
       newState = this.setSelection(newState, model);
-      that = this;
+      var that = this;
       _.delay(function() {
         return that.debug("Switching " + (model.get('label')) + " to " + newState + " took " + ($.now() - d) + " ms and " + (BaseFilter.count - c) + " renders");
       }, 0);

@@ -38,9 +38,9 @@ define([
           return this.selectionLimit = options.limit || Infinity;
         },
         setSelection: function(newState, model) {
-          var allow, numberOfUnselectedItems, oldState, selectedItems;
-          allow = true;
-          oldState = model.getSelection();
+          var numberOfUnselectedItems, selectedItems;
+          var allow = true;
+          var oldState = model.getSelection();
           newState = this.getNewState(oldState);
           if (newState !== BaseFilter.Enum.select.NONE) {
             selectedItems = model.root().get('numberOfSelectedItems');
