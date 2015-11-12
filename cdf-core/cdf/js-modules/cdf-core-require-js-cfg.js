@@ -66,6 +66,11 @@
   /*
    * Filter component is in a subfolder of its own
    */
-  requirePaths['cdf/components/FilterComponent'] = prefix + '/components/filter/FilterComponent';
+
+  requireCfg.map = requireCfg.map || {};
+  requireCfg.map['*'] = requireCfg.map['*'] || {};
+  requireCfg.map['*']['cdf/components/FilterComponent'] = 'cdf/components/filter/FilterComponent';
+
+
 
 })();
