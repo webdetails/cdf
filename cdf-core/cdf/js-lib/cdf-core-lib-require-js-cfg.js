@@ -182,6 +182,14 @@
   //Base 1.1a
   requirePaths['cdf/lib/Base'] = prefix + "/base/Base";
 
+  //BaseEvents
+  requirePaths['cdf/lib/BaseEvents'] = prefix + "/baseEvents/BaseEvents";
+
+  //BaseSelectionTree
+  requirePaths['cdf/lib/BaseSelectionTree'] = prefix + "/baseSelectionTree/BaseSelectionTree";
+  requirePaths['cdf/lib/Tree'] = prefix + "/baseSelectionTree/Tree";
+
+
   //datatables 1.10.1
   requirePaths['cdf/lib/datatables'] = prefix + "/dataTables/js/jquery.dataTables";
   amdShim["cdf/lib/datatables"] = {

@@ -1,4 +1,3 @@
-
 /**
  * @module BaseFilter
  * @submodule Controllers
@@ -7,8 +6,8 @@
 define([
     'amd!cdf/lib/underscore',
     './RootCtrl',
-    '../models/SelectionTree'],
-    function( _, BaseFilter ) {
+    'cdf/lib/Tree'],
+    function( _, BaseFilter, Tree ) {
 
    /**
    * Controller responsible for managing the hierarchy of views and controllers.
@@ -21,7 +20,7 @@ define([
    * @extends Tree
    */
 
-  BaseFilter.Controllers.Manager = BaseFilter.Models.Tree.extend({
+  BaseFilter.Controllers.Manager = Tree.extend(BaseFilter.Logger).extend({
     ID: 'BaseFilter.Controllers.Manager',
     defaults: {
       model: null,
@@ -53,15 +52,13 @@ define([
       var bindings, that, throttleFilter, throttleScroll;
       that = this;
       throttleScroll = function(f) {
-        var throttleTimeMilliseconds;
-        throttleTimeMilliseconds = that.get('configuration').pagination.throttleTimeMilliseconds;
+        var throttleTimeMilliseconds = that.get('configuration').pagination.throttleTimeMilliseconds;
         return _.throttle(f, throttleTimeMilliseconds || 0, {
           trailing: false
         });
       };
       throttleFilter = function(f) {
-        var throttleTimeMilliseconds;
-        throttleTimeMilliseconds = that.get('view').config.view.throttleTimeMilliseconds;
+        var throttleTimeMilliseconds = that.get('view').config.view.throttleTimeMilliseconds;
         return _.throttle(f, throttleTimeMilliseconds || 0, {
           leading: false
         });
