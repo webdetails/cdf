@@ -834,13 +834,7 @@ var render_singleFilter_simple_paginated = {
   parameter: "singleSelectionParam_simple",
   parameters: [],
   options: function(){
-    return {
-        component: {
-            search: {
-                serverSide: true
-            }
-        }
-    };
+	return {};
 } ,
   queryDefinition:  {
     dataAccessId: "getDataSearchable",
@@ -886,7 +880,13 @@ var render_multiFilter_simple_paginated = {
   parameter: "multiSelectionParam_simple",
   parameters: [],
   options: function(){
-    return {};
+	return {
+        component: {
+            search: {
+                serverSide: true
+            }
+        }
+    };
 } ,
   queryDefinition:  {
     dataAccessId: "getDataSearchable",
