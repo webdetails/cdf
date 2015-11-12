@@ -90,7 +90,8 @@ define([
         });
       });
       this.on('post:child:selection request:child:sort', this.renderSortedChildren);
-      this.on('post:child:add', _.throttle(this.onUpdateChildren, 1000, {
+      var throttleTimeMilliseconds = this.get('view').config.view.throttleTimeMilliseconds;
+      this.on('post:child:add', _.throttle(this.onUpdateChildren, throttleTimeMilliseconds, {
         leading: false
       }));
       return this;
@@ -338,7 +339,7 @@ define([
       if (!this.children()) {
         return this;
       }
-      
+
       $nursery = this.get('view').getChildrenContainer();
       $nursery.hide();
       this._appendChildren(this.sortChildren(this._detachChildren()));
