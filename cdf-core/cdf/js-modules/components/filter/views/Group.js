@@ -36,14 +36,12 @@ define([
           return this.onChange(model, 'isCollapsed', this.updateCollapse);
         },
         updateCollapse: function() {
-          var viewModel;
-          viewModel = this.getViewModel();
+          var viewModel = this.getViewModel();
           return this.renderCollapse(viewModel);
         },
         renderCollapse: function(viewModel) {
-          var collapsable;
           this.renderSelection(viewModel);
-          collapsable = ['.filter-group-body', '.filter-group-footer'].join(', ');
+          var collapsable = ['.filter-group-body', '.filter-group-footer'].join(', ');
           if (viewModel.isCollapsed) {
             return this.$(collapsable).hide();
           } else {
