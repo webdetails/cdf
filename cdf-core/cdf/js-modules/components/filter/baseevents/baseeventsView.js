@@ -4,7 +4,7 @@ define([
   'cdf/lib/jquery',
   'amd!cdf/lib/backbone',
   'cdf/lib/mustache',
-  './baseevents'],
+  'cdf/lib/BaseEvents'],
   function( $, Backbone, Mustache, BaseEvents ) {
 
      var BaseView = BaseEvents.convertClass( Backbone.View, {
