@@ -13,7 +13,7 @@
         
         <h3>A:</h3>
         <p>
-            In CDF we provide the function <b>Dashboards.numberFormat</b> to format numbers with a given mask using the dashboard default language or optionally with a specific language.<br>
+            In CDF we provide the function <b>Utils.numberFormat</b> to format numbers with a given mask using the dashboard default language or optionally with a specific language.<br>
 
             The mask syntax is mostly compatible with VB's <b>format</b> function <a target="_blank" href="http://apostate.com/programming/vb-format-syntax.html">mask syntax</a>, only the number related subset is relevant.<br>
             Other elements of this mask syntax are 'C' or 'Currency' and 'A' or 'Abbreviation' to insert the currency symbol and abbreviate the number.
@@ -60,7 +60,7 @@
         <h2>Q: How can I format dates in CDF?</h2>
         <h3>A:</h3>
         <p>
-            Similar to number format, here we provide the function <b>Dashboards.dateFormat</b> to format a date with a given mask.<br>
+            Similar to number format, here we provide the function <b>Utils.dateFormat</b> to format a date with a given mask.<br>
             For a detailed list of examples on how to use moment click <a target="_blank" href="http://momentjs.com/docs/">here</a>.<br> 
         			
             The mask syntax is explained in detail <a target="_blank" href="http://momentjs.com/docs/#/displaying/">here</a>.<br>
@@ -68,7 +68,7 @@
         </p>
         <ul>
             <li>
-                Manually configure a new language using the function <b>Dashboards.configLanguage</b> described in the next section with a configuration object
+                Manually configure a new language using the function <b>Utils.configLanguage</b> described in the next section with a configuration object
                 as described <a target="_blank" href="http://momentjs.com/docs/#/customization/">here</a>.
             </li>
             <li>
@@ -86,7 +86,7 @@
   require(['cdf/dashboard/Utils', 'cdf/lib/moment'], function(Utils, moment) {
     Utils.dateFormat(moment(), 'DD/MM/YY')                                            // -> "18/02/15"
     Utils.dateFormat(new Date(), 'dddd Do MMMM YYYY')                                 // -> "Wednesday 18th February 2015"
-    Utils.dateFormat(Dashboards.dateParse('13-08-1983', 'DD-MM-YYYY'), 'D MMM, YYYY') // -> "13 Aug, 1983"
+    Utils.dateFormat(Utils.dateParse('13-08-1983', 'DD-MM-YYYY'), 'D MMM, YYYY') // -> "13 Aug, 1983"
     Utils.dateFormat(null, 'dddd Do MMMM YYYY')                                       // -> Invalid Date
   });
               </pre>
@@ -108,7 +108,7 @@
         <h2>Q: How can I parse dates in CDF?</h2>
         <h3>A:</h3>
         <p>
-            As in the previous section, here we provide the function <b>Dashboards.dateParse</b> to parse a date with a given mask/format.<br>
+            As in the previous section, here we provide the function <b>Utils.dateParse</b> to parse a date with a given mask/format.<br>
             This function will always return a <b>Date</b> object containing the parsed date.<br>
         </p>
 
@@ -128,7 +128,7 @@
         <h3>A:</h3>
 
         <p>
-            To configure a new or existing language you can use the function <b>Dashboards.configLanguage</b> by specifying the language code and a configuration object with the keywords:
+            To configure a new or existing language you can use the function <b>Utils.configLanguage</b> by specifying the language code and a configuration object with the keywords:
         </p>
         <ul>
             <li>
