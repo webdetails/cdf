@@ -9,8 +9,7 @@ define([
          * @submodule defaults
          * @main
          */
-        var defaults, privateDefaults;
-        privateDefaults = {
+        var privateDefaults = {
           logLevel: 1,
           pagination: {
             throttleTimeMilliseconds: 500
@@ -70,7 +69,7 @@ define([
         };
 
 
-        BaseFilter.defaults = $.extend( true, {}, privateDefaults, {
+        var defaults = $.extend( true, {}, privateDefaults, {
 
             /**
              * @property pagination
@@ -175,5 +174,5 @@ define([
             }
         });
 
-     return BaseFilter;
+     return defaults;
 });
