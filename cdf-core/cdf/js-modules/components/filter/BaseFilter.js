@@ -1,25 +1,23 @@
 define([
-  './Logger',
-  '../models/SelectionTree',
-  '../views/Abstract',
-  '../views/Root',
-  '../views/Group',
-  '../views/Item',
-  '../controllers/RootCtrl',
-  '../strategies/AbstractSelect',
-  '../strategies/LimitedSelect',
-  '../strategies/MultiSelect',
-  '../strategies/SingleSelect',
-  '../data-handlers/InputDataHandler',
-  '../data-handlers/OutputDataHandler',
-  '../extensions/sorters',
-  '../extensions/renderers',
-  './templates',
-  './defaults'
+  './base/Logger',
+  './models/SelectionTree',
+  './views/Views',
+  './controllers/RootCtrl',
+  './controllers/Manager',
+  './strategies/AbstractSelect',
+  './strategies/LimitedSelect',
+  './strategies/MultiSelect',
+  './strategies/SingleSelect',
+  './data-handlers/InputDataHandler',
+  './data-handlers/OutputDataHandler',
+  './extensions/sorters',
+  './extensions/renderers',
+  './base/templates',
+  './base/defaults'
 ], function (Logger,
              SelectionTree,
-             AbstractView, Root, Group, Item,
-             RootCtrl,
+             Views,
+             RootCtrl, Manager,
              AbstractSelect, LimitedSelect, MultiSelect, SingleSelect,
              Input, Output,
              sorters, renderers,
@@ -55,12 +53,7 @@ define([
      * @submodule Views
      * @main
      */
-    Views: {
-      AbstractView: AbstractView,
-      Root: Root,
-      Group: Group,
-      Item: Item
-    },
+    Views: Views,
 
     /**
      * Set of Controllers responsible for handling the interaction between views and models
@@ -68,7 +61,8 @@ define([
      * @main
      */
     Controllers: {
-      RootCtrl: RootCtrl
+      RootCtrl: RootCtrl,
+      Manager: Manager
     },
 
     /**
