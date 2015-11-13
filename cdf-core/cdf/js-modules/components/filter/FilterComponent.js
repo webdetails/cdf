@@ -25,12 +25,12 @@ define([
   'cdf/lib/jquery',
   'amd!cdf/lib/underscore',
   'amd!cdf/lib/backbone',
-  'cdf/Dashboard.Clean',
   'cdf/components/UnmanagedComponent',
-  './filter-implementation',
+  'cdf/Logger',
+  './BaseFilter',
   './addIns/addIns',
   'css!./styles/filter'
-], function ($, _, Backbone, Dashboards, UnmanagedComponent, BaseFilter) {
+], function ($, _, Backbone, UnmanagedComponent, Logger, BaseFilter) {
 
   /**
    * An intuitive Filter Component with many out-of-the-box features:
@@ -500,7 +500,7 @@ define([
           ajax: {
             error: function () {
               deferred.reject({});
-              return BaseFilter.Logger.log("Query failed", 'debug');
+              return Logger.log("Query failed", 'debug');
             }
           }
         };
@@ -554,7 +554,7 @@ define([
      * @chainable
      */
     onDataFail: function (reason) {
-      BaseFilter.Logger.log('Component failed to retrieve data: ' + reason, 'debug');
+      Logger.log('Component failed to retrieve data: ' + reason, 'debug');
       this.trigger('getData:failed');
       return this;
     }

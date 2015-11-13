@@ -7,8 +7,9 @@ define([
   'amd!cdf/lib/underscore',
   'cdf/lib/Tree',
   '../base/Logger',
-  '../base/BaseFilter'
-], function (_, Tree, Logger, BaseFilter) {
+  '../views/Views',
+  './RootCtrl'
+], function (_, Tree, Logger, Views, RootCtrl) {
 
   /**
    * Controller responsible for managing the hierarchy of views and controllers.
@@ -113,11 +114,11 @@ define([
         var childConfig = configuration[that.get('view').type].view.childConfig;
         target = that.get('view').createChildNode();
         if (newModel.children()) {
-          View = BaseFilter.Views[childConfig.withChildrenPrototype];
+          View = Views[childConfig.withChildrenPrototype];
         } else {
-          View = BaseFilter.Views[childConfig.withoutChildrenPrototype];
+          View = Views[childConfig.withoutChildrenPrototype];
         }
-        Controller = BaseFilter.Controllers.RootCtrl;
+        Controller = RootCtrl;
         controller = that.get('controller');
       } else {
 
@@ -127,8 +128,8 @@ define([
          */
         configuration = this.get('configuration');
         target = configuration.target;
-        View = BaseFilter.Views.Root;
-        Controller = BaseFilter.Controllers.RootCtrl;
+        View = Views.Root;
+        Controller = RootCtrl;
         controller = null;
       }
 
@@ -442,6 +443,5 @@ define([
 
   });
 
-  BaseFilter.Controllers.Manager = Manager;
-  return BaseFilter;
+  return Manager;
 });
