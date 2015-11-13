@@ -2,7 +2,7 @@
 define([
   'cdf/lib/jquery',
   'amd!cdf/lib/underscore',
-  'cdf/components/filter/filter-implementation'
+  'cdf/components/filter/BaseFilter'
 ], function($ , _ , Filter) {
 
   describe('Filter.SelectionStrategies.SingleSelect', function() {
