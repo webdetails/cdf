@@ -64,11 +64,10 @@ define([
      * @return {Underscore} Returns a wrapped Underscore object using _.chain()
      */
     flatten: function () {
-      var list;
-      list = [this];
+      var list = [this];
       if (this.children()) {
-        this.children().each(function (node) {
-          return node.flatten().each(function (el) {
+        this.children().each(function (child) {
+          return child.flatten().each(function (el) {
             return list.push(el);
           });
         });
@@ -76,6 +75,10 @@ define([
       return _.chain(list);
     },
 
+    /**
+     * Returns just the leaf-level descendants of a given node
+     * @returns {Underscore} Returns a wrapped Underscore object using _.chain()
+     */
     leafs: function(){
       return this.flatten().filter(function(m){
         return m.children() === null;
