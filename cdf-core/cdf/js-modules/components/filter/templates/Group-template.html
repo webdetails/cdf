@@ -29,7 +29,7 @@
       </div>
     {{/showCommitButtons}}
   </div>
-  {{#allowGroupSelection}}
+  {{#showGroupSelection}}
     <div class="filter-group-selection">
       <div class="filter-group-selection-icon
                   {{#isPartiallySelected}} some-selected{{/isPartiallySelected}}
@@ -39,7 +39,7 @@
                   {{/isPartiallySelected}}" />
       <div class="filter-group-label">{{strings.groupSelection}}</div>
     </div>
-  {{/allowGroupSelection}}
+  {{/showGroupSelection}}
   {{#showValue}}
   <div class="filter-group-selection-value">{{{value}}}</div>
   {{/showValue}}
