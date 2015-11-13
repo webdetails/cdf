@@ -265,6 +265,7 @@
 }
 .filter-group-container .filter-group-selection {
   padding: 5px 10px;
+  position: relative;
 }
 .filter-item-container {
   padding: 0;
