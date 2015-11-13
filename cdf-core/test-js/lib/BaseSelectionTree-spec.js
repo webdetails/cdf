@@ -1,16 +1,16 @@
 define([
   'cdf/lib/jquery',
   'amd!cdf/lib/underscore',
-  'cdf/components/filter/BaseFilter'
-], function($ , _ , Filter) {
+  'cdf/lib/BaseSelectionTree'
+], function($ , _ , BaseSelectionTree) {
 
-  describe('Filter.Models.SelectionTree', function() {
+  describe('BaseSelectionTree', function() {
 
     var model;
     model = void 0;
     describe('accepts object literals nested around the "node" property', function() {
       beforeEach(function() {
-        return model = new Filter.Models.SelectionTree({
+        return model = new BaseSelectionTree({
           label: 'Parent',
           id: '#parent',
           nodes: [{
@@ -20,18 +20,18 @@ define([
         });
       });
       it('has the correct parent id', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > accepts object literals nested around the "node" property > has the correct parent id');
+        console.log('BaseSelectionTree > accepts object literals nested around the "node" property > has the correct parent id');
         expect(model.get('id')).toBe('#parent');
       });
       it('has a single child', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > accepts object literals nested around the "node" property > has a single child');
+        console.log('BaseSelectionTree > accepts object literals nested around the "node" property > has a single child');
         expect(model.children().models.length).toBe(1);
       });
     });
     /* commented-out */ xdescribe('accepts object literals nested around an arbitrary property', function() {
       beforeEach(function() {
         var attributes;
-        model = new Filter.Models.SelectionTree({
+        model = new BaseSelectionTree({
           label: 'Parent',
           id: '#parent',
           xchildren: [
@@ -60,7 +60,7 @@ define([
     });
     describe('propagates the selection state correctly at a depth of 1 level', function() {
       beforeEach(function() {
-        return model = new Filter.Models.SelectionTree({
+        return model = new BaseSelectionTree({
           label: 'Parent',
           id: '#parent',
           isSelected: false,
@@ -76,29 +76,29 @@ define([
         });
       });
       it('marks all children as selected upon selecting the root', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > at a depth of 1 level > marks all children as selected upon selecting the root');
+        console.log('BaseSelectionTree > at a depth of 1 level > marks all children as selected upon selecting the root');
         model.setSelection(true);
         expect(model.flatten().all(function(m) {
-          return m.getSelection() === Filter.Enum.select.ALL;
+          return m.getSelection() === BaseSelectionTree.SelectionStates.ALL;
         }).value()).toBe(true);
       });
       it('marks all children as unselected upon unselecting the root', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > at a depth of 1 level > marks all children as unselected upon unselecting the root');
+        console.log('BaseSelectionTree > at a depth of 1 level > marks all children as unselected upon unselecting the root');
         model.setSelection(false);
         expect(model.flatten().all(function(m) {
-          return m.getSelection() === Filter.Enum.select.NONE;
+          return m.getSelection() === BaseSelectionTree.SelectionStates.NONE;
         }).value()).toBe(true);
       });
       it('is partially selected if only some of its children are selected', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > at a depth of 1 level > is partially selected if only some of its children are selected');
+        console.log('BaseSelectionTree > at a depth of 1 level > is partially selected if only some of its children are selected');
         model.setSelection(false);
-        model.children().last().setSelection(Filter.Enum.select.ALL);
-        expect(model.getSelection()).toBe(Filter.Enum.select.SOME);
+        model.children().last().setSelection(BaseSelectionTree.SelectionStates.ALL);
+        expect(model.getSelection()).toBe(BaseSelectionTree.SelectionStates.SOME);
       });
     });
     describe('propagates the selection state correctly at a depth of 2 levels', function() {
       beforeEach(function() {
-        return model = new Filter.Models.SelectionTree({
+        return model = new BaseSelectionTree({
           label: 'Root',
           id: '#root',
           isSelected: false,
@@ -119,25 +119,25 @@ define([
         });
       });
       it('marks all children as selected upon selecting the root', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > at a depth of 2 level > marks all children as selected upon selecting the root');
+        console.log('BaseSelectionTree > at a depth of 2 level > marks all children as selected upon selecting the root');
         model.setSelection(true);
         expect(model.flatten().all(function(m) {
-          return m.getSelection() === Filter.Enum.select.ALL;
+          return m.getSelection() === BaseSelectionTree.SelectionStates.ALL;
         }).value()).toBe(true);
       });
       it('marks all children as unselected upon unselecting the root', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > at a depth of 2 level > marks all children as unselected upon unselecting the root');
+        console.log('BaseSelectionTree > at a depth of 2 level > marks all children as unselected upon unselecting the root');
         model.setSelection(false);
         expect(model.flatten().all(function(m) {
-          return m.getSelection() === Filter.Enum.select.NONE;
+          return m.getSelection() === BaseSelectionTree.SelectionStates.NONE;
         }).value()).toBe(true);
       });
       it('is partially selected if only some of its children are selected', function() {
-        console.log('Filter.SelectionStrategies.SelectionTree > at a depth of 2 level > is partially selected if only some of its children are selected');
+        console.log('BaseSelectionTree > at a depth of 2 level > is partially selected if only some of its children are selected');
         model.setSelection(false);
-        model.children().last().children().first().setSelection(Filter.Enum.select.ALL);
-        expect(model.getSelection()).toBe(Filter.Enum.select.SOME);
-        expect(model.children().last().getSelection()).toBe(Filter.Enum.select.SOME);
+        model.children().last().children().first().setSelection(BaseSelectionTree.SelectionStates.ALL);
+        expect(model.getSelection()).toBe(BaseSelectionTree.SelectionStates.SOME);
+        expect(model.children().last().getSelection()).toBe(BaseSelectionTree.SelectionStates.SOME);
       });
     });
   });
