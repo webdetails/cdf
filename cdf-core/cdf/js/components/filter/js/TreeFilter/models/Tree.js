@@ -70,6 +70,16 @@
         });
       }
       return _.chain(list);
+    },
+
+    /**
+     * Returns just the leaf-level descendants of a given node
+     * @returns {Underscore} Returns a wrapped Underscore object using _.chain()
+     */
+    leafs: function(){
+      return this.flatten().filter(function(m){
+        return m.children() === null;
+      });
     }
   });
 })(_, Backbone.TreeModel, BaseEvents, TreeFilter.Logger, TreeFilter.Models);
