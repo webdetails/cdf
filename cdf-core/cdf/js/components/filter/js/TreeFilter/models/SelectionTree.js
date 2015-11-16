@@ -2,6 +2,12 @@
 (function(_, TreeFilter, Models, Tree) {
   'use strict';
 
+  var SelectionStates = {
+    SOME: null,
+    NONE: false,
+    ALL: true
+  };
+
   /**
    * Represents the state of the filter as tree structure.
   #
@@ -343,5 +349,7 @@
     isBusy: function() {
       return this.root().get('isBusy');
     }
+  },{
+    SelectionStates: SelectionStates
   });
 })(_, TreeFilter, TreeFilter.Models, TreeFilter.Models.Tree);
