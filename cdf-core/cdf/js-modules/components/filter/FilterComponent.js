@@ -81,7 +81,7 @@ define([
 
     /**
      * Implement's CDF logic for updating the state of the parameter, by
-     * invoking Dashboards.processChange().
+     * invoking the dashboard's {{#crossLink "Dashboard/processChange:method"}}processChange{{/crossLink}} function.
      *
      * @method processChange
      * @public
