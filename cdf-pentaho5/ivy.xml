@@ -62,7 +62,7 @@
 
     <!-- Test -->
     <dependency org="org.slf4j"                 name="slf4j-api"                              rev="1.7.5"                                         transitive="false"                            conf="test, default->default"/>
-    <dependency org="commons-collections"       name="commons-collections"                    rev="3.2"                                           transitive="false"                            conf="test, default->default"/> 
+    <dependency org="commons-collections"       name="commons-collections"                    rev="3.2.2"                                           transitive="false"                            conf="test, default->default"/> 
     <dependency org="org.mockito"               name="mockito-all"                            rev="1.8.4"                                                                                       conf="test, default->default"/>
     <dependency org="junit"                     name="junit"                                  rev="4.10"                                                                                        conf="test, default->default"/>
     <dependency org="com.google.collections"    name="google-collections"                     rev="1.0"                                           transitive="false"                            conf="test, default->default"/>
