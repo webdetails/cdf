@@ -1,18 +1,5 @@
 # OS-generated files
 .DS_Store*
-# Here be passwords!
-/*/override.properties
-# Build/Staging related stuff
-/**/bin/
-/**/dist/
-/*/lib/
-/*/runtime-lib/
-/solution/system/
-/nbproject/private/
-/build
-/manifest.mf
-override.properties
-.ant*
 
 #Eclipse project files
 .classpath
@@ -24,25 +11,9 @@ override.properties
 .idea/
 *.iml
 
-cdf-core/js-lib
-cdf-core/test-lib
-cdf-core/build-res/module-scripts
-cdf-core/build-res/pentaho-js-build
-cdf-pentaho5/js-lib
-cdf-pentaho5/test-lib
-cdf-pentaho5/build-res/module-scripts
-cdf-pentaho5/build-res/pentaho-js-build
-cdf-pentaho5/build-res/script-output
-cdf-pentaho/js-lib
-cdf-pentaho/test-lib
-cdf-pentaho/build-res/pentaho-js-build
+#Output dir
+**/target
 
-/**/node_modules
-/**/test-res
-
-pentaho-js-build.zip
-requireCfg-raw.js
-
-requireCfg.js
-
-package-pom.xml
+#Node dirs
+**/node
+**/node_modules

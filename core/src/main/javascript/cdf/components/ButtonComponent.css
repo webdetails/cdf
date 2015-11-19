@@ -1,0 +1,7 @@
+.buttonComponent.enabled {
+  opacity: 1;
+}
+
+.buttonComponent.disabled {
+  opacity: 0.5;
+}
