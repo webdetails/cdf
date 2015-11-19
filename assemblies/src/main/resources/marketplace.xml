@@ -1,0 +1,20 @@
+<version>
+  <branch>${project.stage}</branch>
+  <version>${project.revision}</version>
+  <name>${marketplace.metadata.name}</name>
+  <package_url>
+    ${marketplace.metadata.package_url}
+  </package_url>
+  <samples_url>
+    ${marketplace.metadata.samples_url}
+  </samples_url>
+  <description>
+    ${marketplace.metadata.description}
+  </description>
+  <build_id>${marketplace.metadata.sequential.build.id}</build_id>
+  <min_parent_version>${marketplace.metadata.min_parent_version}</min_parent_version>
+  <development_stage>
+    <lane>${marketplace.metadata.development_stage.lane}</lane>
+    <phase>${marketplace.metadata.development_stage.phase}</phase>
+  </development_stage>
+</version>
