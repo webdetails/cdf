@@ -45,13 +45,6 @@
       <type>zip</type>
     </dependency>
     <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>cdf-core-js</artifactId>
-      <version>${project.version}</version>
-      <type>zip</type>
-    </dependency>
-
-    <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
     </dependency>
