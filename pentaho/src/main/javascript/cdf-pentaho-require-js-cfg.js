@@ -12,5 +12,5 @@
  */
 
 /**
- * Configuration file for cdf pentaho version 5
+ * Configuration file for cdf pentaho
  */

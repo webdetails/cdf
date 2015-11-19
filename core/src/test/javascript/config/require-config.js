@@ -17,13 +17,23 @@
 
   var tests = [];
   for(var file in karma.files) {
-    if((/test\-js.*\-spec\.js$/).test(file)) {
+    if((/test.*\-spec\.js$/).test(file)) {
       tests.push(file);
     }
   }
 
-  requireCfg['baseUrl'] = '/base';
-  requirejs.config(requireCfg);
+  requireCfg.baseUrl = '/base';
+
+  requireCfg.paths["common-ui"] = "src/test/javascript/cdf/mocks/common-ui";
+  requireCfg.paths["pentaho/visual"] = "src/test/javascript/cdf/mocks/common-ui/vizapi";
+  requireCfg.paths["cdf/lib/CCC"] = "target/dependency/ccc/amd";
+
+  require.config(requireCfg);
+
+  console.log = function() {};
+  console.info = function() {};
+  console.debug = function() {};
+  console.warn = function() {};
 
   // Ask Require.js to load all test files and start test run
   require(tests, karma.start);

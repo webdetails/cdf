@@ -11,10 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-@CDF_CCC_REQUIRE_HEADER@
-    @CDF_CCC_PUBLISHED_GLOBALLY@
+require(["cdf-legacy/lib/CCC/protovis","cdf-legacy/lib/CCC/cdo","cdf-legacy/lib/CCC/pvc-d1.0","cdf-legacy/lib/CCC/def","cdf-legacy/components/core"],function(_pv,_cdo,_pvc,_def) {
+    pvc = _pvc; pv  = _pv; def = _def; cdo = _cdo;
 
-    @CDF_CCC_VAR_DECLARATION@ ChartComponent =  UnmanagedComponent.extend({
+    ChartComponent =  UnmanagedComponent.extend({
         exportChart: function(outputType, overrides) {
             var me = this;
 
@@ -76,46 +76,46 @@
         },
 
         renderChart: function() {
-          var cd = this.chartDefinition;
-          if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
-            this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
-          } else if(this.valuesArray != undefined) {
-            this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
-          } else {
-            // initialize the component only
-            this.synchronous(_.bind(this.render, this));
-          }
+            var cd = this.chartDefinition;
+            if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
+                this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
+            } else if(this.valuesArray != undefined) {
+                this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
+            } else {
+                // initialize the component only
+                this.synchronous(_.bind(this.render, this));
+            }
         }
     });
 
-    @CDF_CCC_VAR_DECLARATION@ ProtovisComponent =  ChartComponent.extend({
+    ProtovisComponent =  ChartComponent.extend({
 
-      update : function() {
-        if (this.parameters == undefined) {
-          this.parameters = [];
-        };
+        update : function() {
+            if (this.parameters == undefined) {
+                this.parameters = [];
+            };
 
-        this.renderChart();
-      },
+            this.renderChart();
+        },
 
-      render: function(values) {
-        $("#" + this.htmlObject).html('<div id="'+ this.htmlObject +'protovis"></div>');
+        render: function(values) {
+            $("#" + this.htmlObject).html('<div id="'+ this.htmlObject +'protovis"></div>');
 
-        var vis = new pv.Panel()
-          .canvas(this.htmlObject + "protovis")
-          .width (this.width)
-          .height(this.height);
-        this.vis = vis;
-        this.customfunction(vis, values);
-        vis.root.render();
-      },
+            var vis = new pv.Panel()
+                .canvas(this.htmlObject + "protovis")
+                .width (this.width)
+                .height(this.height);
+            this.vis = vis;
+            this.customfunction(vis, values);
+            vis.root.render();
+        },
 
-      processdata: function(values) {
-        this.render(values);
-      }
+        processdata: function(values) {
+            this.render(values);
+        }
     });
 
-    @CDF_CCC_VAR_DECLARATION@ BaseCccComponent = ChartComponent.extend({
+    BaseCccComponent = ChartComponent.extend({
 
         query: null,
         chart: null,
@@ -127,8 +127,8 @@
                 var compatVersion = chartDef.compatVersion;
                 if(compatVersion == null){
                     compatVersion = typeof pvc.defaultCompatVersion === 'function' ?
-                                    pvc.defaultCompatVersion() :
-                                    1;
+                        pvc.defaultCompatVersion() :
+                        1;
                 }
 
                 if(compatVersion <= 1){
@@ -154,7 +154,7 @@
         }
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccComponent = BaseCccComponent.extend({
+    CccComponent = BaseCccComponent.extend({
 
         update: function() {
             if(this.parameters == null) {
@@ -213,7 +213,7 @@
     /*
      *   Modified version of CccComponent which loads 2 datasources.
      */
-    @CDF_CCC_VAR_DECLARATION@ CccComponent2 = BaseCccComponent.extend({
+    CccComponent2 = BaseCccComponent.extend({
 
         query: null,
         sQuery: null,  // second datasource
@@ -247,7 +247,7 @@
 
                     me.render(dataQuery, sDataQuery);
                     executed = true;   // safety in case both queries return
-                // simultaneously (is this possible in single-threaded Javascript?)
+                    // simultaneously (is this possible in single-threaded Javascript?)
                 }
 
             };
@@ -316,119 +316,119 @@
     });
 
 
-    @CDF_CCC_VAR_DECLARATION@ CccAreaChartComponent = CccComponent.extend({
+    CccAreaChartComponent = CccComponent.extend({
 
         cccType: pvc.AreaChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccStackedDotChart = CccComponent.extend({
+    CccStackedDotChart = CccComponent.extend({
 
         cccType: pvc.StackedDotChart
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccDotChartComponent = CccComponent.extend({
+    CccDotChartComponent = CccComponent.extend({
 
         cccType: pvc.DotChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccLineChartComponent = CccComponent.extend({
+    CccLineChartComponent = CccComponent.extend({
 
         cccType: pvc.LineChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccStackedLineChartComponent = CccComponent.extend({
+    CccStackedLineChartComponent = CccComponent.extend({
 
         cccType: pvc.StackedLineChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccStackedAreaChartComponent = CccComponent.extend({
+    CccStackedAreaChartComponent = CccComponent.extend({
 
         cccType: pvc.StackedAreaChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccBarChartComponent = CccComponent.extend({
+    CccBarChartComponent = CccComponent.extend({
 
         cccType: pvc.BarChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccPieChartComponent = CccComponent.extend({
+    CccPieChartComponent = CccComponent.extend({
 
         cccType: pvc.PieChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccHeatGridChartComponent = CccComponent.extend({
+    CccHeatGridChartComponent = CccComponent.extend({
 
         cccType: pvc.HeatGridChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccBulletChartComponent = CccComponent.extend({
+    CccBulletChartComponent = CccComponent.extend({
 
         cccType: pvc.BulletChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccWaterfallChartComponent = CccComponent.extend({
+    CccWaterfallChartComponent = CccComponent.extend({
 
         cccType: pvc.WaterfallChart
 
     });
 
 
-    @CDF_CCC_VAR_DECLARATION@ CccMetricDotChartComponent = CccComponent.extend({
+    CccMetricDotChartComponent = CccComponent.extend({
 
         cccType: pvc.MetricDotChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccMetricLineChartComponent = CccComponent.extend({
+    CccMetricLineChartComponent = CccComponent.extend({
 
         cccType: pvc.MetricLineChart
 
     });
 
 
-    @CDF_CCC_VAR_DECLARATION@ CccParCoordComponent = CccComponent.extend({
+    CccParCoordComponent = CccComponent.extend({
 
         cccType: pvc.ParallelCoordinates
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccDataTreeComponent = CccComponent2.extend({
+    CccDataTreeComponent = CccComponent2.extend({
 
         cccType: pvc.DataTree
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccBoxplotChartComponent = CccComponent.extend({
+    CccBoxplotChartComponent = CccComponent.extend({
 
         cccType: pvc.BoxplotChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccTreemapChartComponent = CccComponent.extend({
+    CccTreemapChartComponent = CccComponent.extend({
 
         cccType: pvc.TreemapChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccNormalizedBarChartComponent = CccComponent.extend({
+    CccNormalizedBarChartComponent = CccComponent.extend({
 
         cccType: pvc.NormalizedBarChart
 
     });
 
-    @CDF_CCC_VAR_DECLARATION@ CccSunburstChartComponent = CccComponent.extend({
+    CccSunburstChartComponent = CccComponent.extend({
 
         cccType: pvc.SunburstChart
 
     });
 
-@CDF_CCC_REQUIRE_FOOTER@
+});

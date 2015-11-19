@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/dashboard/Dashboard.views.ext', ['./Dashboard.ext'],
-  function(DashboardExt) {
+define('cdf/dashboard/Dashboard.views.ext',
+  function() {
 
   var DashboardViewsExt = {
     getView: function(action) {

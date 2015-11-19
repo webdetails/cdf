@@ -35,7 +35,7 @@ public class CdfHeadersProviderForTests extends CdfHeadersProvider {
   private IRWAccess mockRWAccess;
   private IUrlProvider mockUrlProvider;
 
-  private static final String resourceDir = System.getProperty( "user.dir" ) + "/test-resources/resource/";
+  private static final String resourceDir = System.getProperty( "user.dir" ) + "/src/test/resources/resource/";
 
   protected IContentAccessFactory getContentAccess() {
     mockFactory = mock( IContentAccessFactory.class );
@@ -68,7 +68,7 @@ public class CdfHeadersProviderForTests extends CdfHeadersProvider {
   }
 
   protected void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify,
-                                     String absRoot, final ArrayList<String> files ) {
+      String absRoot, final ArrayList<String> files ) {
     deps.append( pkg.getName() );
   }
 

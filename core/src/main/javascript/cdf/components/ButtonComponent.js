@@ -14,7 +14,8 @@
 define([
   'amd!../lib/underscore',
   '../lib/jquery',
-  './ActionComponent'
+  './ActionComponent',
+  'css!./ButtonComponent'
 ], function(_, $, ActionComponent) {
 
   var ButtonComponent = ActionComponent.extend({

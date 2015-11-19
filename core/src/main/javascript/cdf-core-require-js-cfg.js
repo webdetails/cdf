@@ -24,7 +24,7 @@
   if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" &&  ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
     prefix = requirePaths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
   } else if(typeof KARMA_RUN !== "undefined") { // unit tests
-    prefix = requirePaths['cdf'] = 'bin/test-js/cdf/js';
+    prefix = requirePaths['cdf'] = 'target/test-javascript/cdf';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
 
     //if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
@@ -36,7 +36,7 @@
 
     prefix = requirePaths['cdf'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
   } else { // build
-    prefix = requirePaths['cdf'] = "cdf/js";
+    prefix = requirePaths['cdf'] = "cdf";
   }
 
   /*

@@ -11,14 +11,42 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-var requireCfg = {
+requireCfg = {
   paths: {},
-  shim:  {},
-  map:   {}
+  shim: {},
+  config: {}
+};
+
+var contextObj = {
+  "locale": "en_US",
+  "params": {},
+  "path": "/test/fake_from_module_configuration.xcdf",
+  "queryData": {},
+  "roles": ["Administrator",
+    "Authenticated"],
+  "serverLocalDate": 1412605395782,
+  "serverUTCDate": 1412601795782,
+  "sessionAttributes": {},
+  "sessionTimeout": 7200,
+  "user": "admin"
+};
+
+var storageObj = {
+  test: 1
+};
+
+var viewObj = {
+  param: 1
+};
+
+requireCfg.config['cdf/dashboard/Dashboard'] = {
+  context: contextObj,
+  storage: storageObj,
+  view: viewObj
 };
 
 var KARMA_RUN = true;
 
 var SESSION_NAME = "dummy";
-var CONTEXT_PATH = "/pentaho/";
 var SESSION_LOCALE = "en-US";
+var CONTEXT_PATH = "/pentaho/";

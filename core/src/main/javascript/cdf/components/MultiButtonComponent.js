@@ -11,19 +11,54 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+debugger;
 define([
-  './MultiButtonComponent.ext',
   '../lib/jquery',
   './ToggleButtonBaseComponent',
   '../dashboard/Utils'
-], function(MultiButtonComponentExt, $, ToggleButtonBaseComponent, Utils) {
+], function($, ToggleButtonBaseComponent, Utils) {
+
+  getCssWrapperClass = function(verticalOrientation) {
+    return "pentaho-toggle-button pentaho-toggle-button-up " +
+        (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
+  };
+
+  getSelectedCss = function(verticalOrientation) {
+    return "pentaho-toggle-button pentaho-toggle-button-down " + (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
+  };
+
+  getUnselectedCss = function(verticalOrientation) {
+    return "pentaho-toggle-button pentaho-toggle-button-up " + (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
+  };
+
+  getExtraCss = function(index, count, verticalOrientation) {
+    var css = "";
+    if(index == 0 && count == 1) {
+      // both first & last
+      return " pentaho-toggle-button-single";
+    }
+    if(index == 0) {
+      css += " " + (verticalOrientation ? " pentaho-toggle-button-vertical-first" : " pentaho-toggle-button-horizontal-first");
+    } else if (index == count - 1) {
+      css += " " + (verticalOrientation ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
+    }
+    return css;
+  };
+
+  getToggleButtonClass = function() {
+    return "pentaho-toggle-button";
+  };
+
+  getToggleButtonHoveringClass = function() {
+    return "pentaho-toggle-button-up-hovering";
+  };
 
   var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     indexes: [],//used as static
     draw: function(myArray) {
       this.cachedArray = myArray;
       var myself = this;
-      var cssWrapperClass = MultiButtonComponentExt.getCssWrapperClass(myself.verticalOrientation);
+      var cssWrapperClass = getCssWrapperClass(myself.verticalOrientation);
       var selectHTML = "";
       var firstVal;
 
@@ -37,17 +72,17 @@ define([
 
       for(var i = 0, len = myArray.length; i < len; i++) {
         var value = myArray[i][valIdx],
-          label = myArray[i][lblIdx],
-          classes = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i, len, myself.verticalOrientation),
-          selector;
+            label = myArray[i][lblIdx],
+            classes = cssWrapperClass + getExtraCss(i, len, myself.verticalOrientation),
+            selector;
 
         value = (value == null ? null : value.replace('"', '&quot;'));
         label = (label == null ? null : label.replace('"', '&quot;'));
 
         if(i == 0) { firstVal = value; }
 
-        selectHTML = "<div class='" + classes +"'><button type='button' name='" + myself.name + "'>" 
-          + label + "</button  >" + "</div>";
+        selectHTML = "<div class='" + classes +"'><button type='button' name='" + myself.name + "'>"
+            + label + "</button  >" + "</div>";
         selector = $(selectHTML);
 
         // We wrap the click handler in a self-executing function so that we can capture 'i'.
@@ -60,7 +95,7 @@ define([
 
         var separator = myself.separator;
         if(!(separator == undefined || separator == null || separator == "null")
-          && i != myArray.length - 1) {
+            && i != myArray.length - 1) {
 
           ph.append(separator);
         }
@@ -94,15 +129,15 @@ define([
 
 
         if(($.isArray(currentVal) && isSelected || isSelected)
-          || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal)) {
+            || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal)) {
 
           myself.clickButton(
-            myself.htmlObject, 
-            myself.name, 
-            i, 
-            myself.isMultiple, 
-            myself.verticalOrientation, 
-            true
+              myself.htmlObject,
+              myself.name,
+              i,
+              myself.isMultiple,
+              myself.verticalOrientation,
+              true
           );
 
           foundDefault = true;
@@ -110,33 +145,33 @@ define([
         }
       }
       if(((!foundDefault && !myself.isMultiple) || (!foundDefault && myself.isMultiple && myself.defaultIfEmpty))
-        && myArray.length > 0) {
+          && myArray.length > 0) {
 
         //select first value
-        if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0)) 
-          && myself.parameter) {
+        if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0))
+            && myself.parameter) {
 
           myself.dashboard.fireChange(myself.parameter, (myself.isMultiple) ? [firstVal] : firstVal);
         }
 
         myself.clickButton(
-          myself.htmlObject, 
-          myself.name, 0, 
-          myself.isMultiple, 
-          myself.verticalOrientation, 
-          true
+            myself.htmlObject,
+            myself.name, 0,
+            myself.isMultiple,
+            myself.verticalOrientation,
+            true
         );
       }
 
       // set up hovering
-      $("." + MultiButtonComponentExt.getToggleButtonClass()).hover(function() {
-        $(myself).addClass(MultiButtonComponentExt.getToggleButtonHoveringClass());
+      $("." + getToggleButtonClass()).hover(function() {
+        $(myself).addClass(getToggleButtonHoveringClass());
       }, function() {
-        $(myself).removeClass(MultiButtonComponentExt.getToggleButtonHoveringClass());
+        $(myself).removeClass(getToggleButtonHoveringClass());
       });
       // set up hovering when inner button is hovered
-      $("." + MultiButtonComponentExt.getToggleButtonClass() + " button").hover(function() {
-        $(myself).parent().addClass(MultiButtonComponentExt.getToggleButtonHoveringClass());
+      $("." + getToggleButtonClass() + " button").hover(function() {
+        $(myself).parent().addClass(getToggleButtonHoveringClass());
       }, function() {
         // don't remove it, since it's inside the outer div it will handle that
       });
@@ -171,8 +206,8 @@ define([
     // This method should be broken up so the UI state code is reusable outside of event processing
     clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly) {
 
-      var cssWrapperClass = MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
-      var cssWrapperClassSelected = MultiButtonComponentExt.getSelectedCss(verticalOrientation);
+      var cssWrapperClass = getUnselectedCss(verticalOrientation);
+      var cssWrapperClassSelected = getSelectedCss(verticalOrientation);
 
       var buttons = $("#" + htmlObject + " button");
       if(isMultiple) {//toggle button
@@ -191,9 +226,9 @@ define([
           }
         }
         if(disable) {
-          buttons[index].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(index, buttons.length, verticalOrientation);
+          buttons[index].parentNode.className = cssWrapperClass + getExtraCss(index, buttons.length, verticalOrientation);
         } else {
-          buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index, buttons.length, verticalOrientation);
+          buttons[index].parentNode.className = cssWrapperClassSelected + getExtraCss(index, buttons.length, verticalOrientation);
           this.indexes[name].push(index);
         }
       } else if (this.indexes[name] === index) {
@@ -201,7 +236,7 @@ define([
       } else {//de-select old, select new
         this.clearSelections(htmlObject, name, verticalOrientation);
         this.indexes[name] = index;
-        buttons[index].parentNode.className = cssWrapperClassSelected + MultiButtonComponentExt.getExtraCss(index, buttons.length, verticalOrientation);
+        buttons[index].parentNode.className = cssWrapperClassSelected + getExtraCss(index, buttons.length, verticalOrientation);
       }
       if(!updateUIOnly) {
         this.callAjaxAfterRender(this, name);
@@ -210,9 +245,9 @@ define([
 
     clearSelections: function(htmlObject, name, verticalOrientation) {
       var buttons = $("#" + htmlObject + " button");
-      var cssWrapperClass = MultiButtonComponentExt.getUnselectedCss(verticalOrientation);
+      var cssWrapperClass = getUnselectedCss(verticalOrientation);
       for(var i = 0; i < buttons.length; i++) {
-        buttons[i].parentNode.className = cssWrapperClass + MultiButtonComponentExt.getExtraCss(i, buttons.length, verticalOrientation);
+        buttons[i].parentNode.className = cssWrapperClass + getExtraCss(i, buttons.length, verticalOrientation);
       }
 
       this.indexes[name] = [];
