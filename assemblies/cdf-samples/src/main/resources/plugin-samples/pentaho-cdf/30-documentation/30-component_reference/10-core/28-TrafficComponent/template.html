@@ -1,0 +1,144 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>TrafficComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		This is a component that can easily generate a traffic light image whithout needing a xaction file. The resultset is returned
+		from a mdx query. In case of mdx queries, a role will be passed to mondrian if the session variable 'role' is
+		defined, allowing row level security.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>trafficComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameters</dt>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
+
+			<dt>trafficDefinition</dt>
+			<dd>MetaLayer object with the definition of chart (see MetaLayer options)</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+		</dl>
+
+		<h3>MetaLayer options</h3>
+
+		The options related to charts map the ones described in pentaho wiki.
+
+		<dl class="documentation">
+
+			<dt>intervals</dt>
+			<dd><i>Array - </i> Intervals to use for the traffic light. Lower values will be displayed as red, higher values as green,
+			yellow in the middle. Default: : [-1,1]</dd>
+
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Only mdx supported for now. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
+
+			<dt>showValue</dt> 
+			<dd>True will show a tooltip with the returned value. Default: false</dd>
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+
+				<div id="sampleObject"></div>
+
+			</div>
+
+
+				<div id="code">
+					<textarea cols="80" rows="40" id="samplecode">
+var MetaLayer =  {
+trafficDefinition : {
+	queryType: 'mdx',
+	jndi: "SampleData",
+	title: "Check current budget",
+	catalog: "mondrian:/SampleData",
+	intervals: [70000000,150000000],
+	showValue: true,
+
+	query: function(){
+
+		var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
+			" NON EMPTY ([Department].[All Departments]) ON ROWS " +
+			" from [Quadrant Analysis]";
+
+		return query;
+	}
+}
+};
+
+var trafficLight = 
+{
+	name: "trafficLight",
+	type: "trafficComponent",
+	trafficDefinition: MetaLayer.trafficDefinition,
+	htmlObject: "sampleObject",
+	executeAtStart: true
+};
+Dashboards.init([trafficLight]);
+Dashboards.finishedInit = false;
+</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+	</script>

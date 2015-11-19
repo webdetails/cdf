@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<action-sequence>
+	<name>Pivot.xaction</name>
+	<title>Pivot Table</title>
+	<version>1</version>
+	<logging-level>TRACE</logging-level>
+	<documentation>
+		<author>Pedro Alves</author>
+		<description>Pivot table sample for Community Dashboard Framework</description>
+		<help/>
+		<result-type>none</result-type> 
+		<icon/>
+	</documentation>
+	<inputs>
+		<mode type="string"> 
+			<default-value/>  
+			<sources> 
+				<request>mode</request> 
+			</sources> 
+		</mode> 
+		<territory type="string">
+			<sources>
+				<request>territory</request>
+			</sources>
+		</territory>
+		<productLine type="string">
+			<sources>
+				<request>productLine</request>
+			</sources>
+		</productLine>
+	</inputs>
+	<outputs>
+		<model type="string"/>
+		<connection type="string"/>
+		<mdx type="string"/>
+		<options type="string"/>
+		<title type="string"/>
+		<url type="string">
+			<destinations>
+				<response>redirect</response>
+			</destinations>
+		</url>
+		<chartbackgroundg type="string"/>
+		<chartvertaxislabel type="string"/>
+		<chartslicerfontsize type="string"/>
+		<chartaxislabelfontfamily type="string"/>
+		<charttitlefontfamily type="string"/>
+		<chartshowslicer type="string"/>
+		<charttype type="string"/>
+		<chartbackgroundb type="string"/>
+		<actionreference type="string"/>
+		<showgrid type="string"/>
+		<chartslicerlocation type="string"/>
+		<chartaxistickfontstyle type="string"/>
+		<chartlocation type="string"/>
+		<role type="string"/>
+		<chartheight type="string"/>
+		<chartlegendfontsize type="string"/>
+		<chartwidth type="string"/>
+		<chartslicerfontfamily type="string"/>
+		<chartlegendlocation type="string"/>
+		<chartaxistickfontsize type="string"/>
+		<charttitlefontsize type="string"/>
+		<chartlegendfontstyle type="string"/>
+		<chartshowlegend type="string"/>
+		<chartaxislabelfontsize type="string"/>
+		<charttitlefontstyle type="string"/>
+		<chartaxistickfontfamily type="string"/>
+		<chartaxisticklabelrotation type="string"/>
+		<chartaxislabelfontstyle type="string"/>
+		<chartlegendfontfamily type="string"/>
+		<chartdrillthroughenabled type="string"/>
+		<charthorizaxislabel type="string"/>
+		<charttitle type="string"/>
+		<chartsliceralignment type="string"/>
+		<chartslicerfontstyle type="string"/>
+		<chartbackgroundr type="string"/>
+	</outputs>
+	<resources/>
+	<actions>
+		<action-definition>
+			<component-name>JavascriptRule</component-name>
+			<action-type>JavaScript</action-type>
+			<action-inputs>
+				<territory type="string"/>
+				<productLine type="string"/>
+			</action-inputs>
+			<action-outputs>
+				<condition type="string"/>
+			</action-outputs>
+			<component-definition>
+				<script><![CDATA[
+
+					productLineCondition="";
+					territoryCondition="";
+
+					// Where ([Product].[All Products].[Planes],Markets.[All Markets])
+
+					if (productLine.length >1){
+					productLineCondition += ".[" + productLine + "]";
+					}
+					if (territory.length >1){
+					territoryCondition += ".[" + territory + "]";
+					}
+					condition="Where ([Product].[All Products]" + productLineCondition + " ,Markets.[All Markets]" + territoryCondition + ")";
+
+					]]></script>
+			</component-definition>
+		</action-definition>
+		<action-definition>
+			<component-name>PivotViewComponent</component-name>
+			<action-type/>
+			<action-inputs>
+				<condition type="string"/>
+				<mode type="string"/> 
+				<territory type="string"/>
+				<productLine type="string"/>
+			</action-inputs>
+			<action-outputs>
+				<model type="string"/>
+				<connection type="string"/>
+				<mdx type="string"/>
+				<options type="list"/>
+				<title type="string"/>
+				<url type="string"/>
+				<chartbackgroundg type="string"/>
+				<chartvertaxislabel type="string"/>
+				<chartslicerfontsize type="string"/>
+				<chartaxislabelfontfamily type="string"/>
+				<charttitlefontfamily type="string"/>
+				<chartshowslicer type="string"/>
+				<charttype type="string"/>
+				<chartbackgroundb type="string"/>
+				<actionreference type="string"/>
+				<showgrid type="string"/>
+				<chartslicerlocation type="string"/>
+				<chartaxistickfontstyle type="string"/>
+				<chartlocation type="string"/>
+				<role type="string"/>
+				<chartheight type="string"/>
+				<chartlegendfontsize type="string"/>
+				<chartwidth type="string"/>
+				<chartslicerfontfamily type="string"/>
+				<chartlegendlocation type="string"/>
+				<chartaxistickfontsize type="string"/>
+				<charttitlefontsize type="string"/>
+				<chartlegendfontstyle type="string"/>
+				<chartshowlegend type="string"/>
+				<chartaxislabelfontsize type="string"/>
+				<charttitlefontstyle type="string"/>
+				<chartaxistickfontfamily type="string"/>
+				<chartaxisticklabelrotation type="string"/>
+				<chartaxislabelfontstyle type="string"/>
+				<chartlegendfontfamily type="string"/>
+				<chartdrillthroughenabled type="string"/>
+				<charthorizaxislabel type="string"/>
+				<charttitle type="string"/>
+				<chartsliceralignment type="string"/>
+				<chartslicerfontstyle type="string"/>
+				<chartbackgroundr type="string"/>
+			</action-outputs>
+			<component-definition>
+				<title>Pivot analysis</title>
+				<viewer><![CDATA[Pivot]]></viewer>
+				<model>/public/steel-wheels/analysis/steelwheels.mondrian.xml</model>  
+				<jndi><![CDATA[SampleData]]></jndi>
+				<options>
+					<personal/>
+					<cube-nav/>
+					<mdx-edit/>
+					<sort-conf/>
+					<level-style/>
+					<hide-spans/>
+					<properties/>
+					<non-empty/>
+					<swap-axes/>
+					<drill-member/>
+					<drill-position/>
+					<drill-replace/>
+					<drill-thru/>
+					<chart/>
+					<chart-conf/>
+					<print-conf/>
+					<print-pdf/>
+					<excel/>
+				</options>
+				<query>
+					with member
+					Measures.Weight as (  Measures.Sales / ( [Order Status].Parent,Measures.Sales) ),
+					FORMAT_STRING = '#,###.#%'
+					member Measures.[Val] as Measures.Sales,
+					FORMAT_STRING = Iif([Measures].[Sales] > (Time.PrevMember,Measures.Sales), '|#|style=green', '|#|style=red')
+					member Measures.[Qtd] as Measures.Quantity,
+					FORMAT_STRING = Iif([Measures].[Quantity] > (Time.PrevMember,Measures.Quantity), '|#|style=green', '|#|style=red')
+					select NON EMPTY 
+					(Union({[Time].[All Years]},[Time].Children)) * {[Measures].[Qtd],Measures.[Val], Measures.Weight}
+					ON COLUMNS,
+					NON EMPTY 
+					Order(
+					([Order Status].Children)
+					,Measures.Value,DESC
+					)
+					ON ROWS
+					from [SteelWheelsSales]
+					{condition}
+				</query>
+				<chartbackgroundg>255</chartbackgroundg>
+				<chartvertaxislabel/>
+				<chartslicerfontsize>12</chartslicerfontsize>
+				<chartaxislabelfontfamily>SansSerif</chartaxislabelfontfamily>
+				<charttitlefontfamily>SansSerif</charttitlefontfamily>
+				<chartshowslicer>true</chartshowslicer>
+				<charttype>1</charttype>
+				<chartbackgroundb>255</chartbackgroundb>
+				<showgrid>true</showgrid>
+				<chartslicerlocation>1</chartslicerlocation>
+				<chartaxistickfontstyle>0</chartaxistickfontstyle>
+				<chartlocation>none</chartlocation>
+				<role/>
+				<chartheight>300</chartheight>
+				<chartlegendfontsize>10</chartlegendfontsize>
+				<chartwidth>500</chartwidth>
+				<chartslicerfontfamily>SansSerif</chartslicerfontfamily>
+				<chartlegendlocation>3</chartlegendlocation>
+				<chartaxistickfontsize>12</chartaxistickfontsize>
+				<charttitlefontsize>18</charttitlefontsize>
+				<connection/>
+				<chartlegendfontstyle>0</chartlegendfontstyle>
+				<chartshowlegend>true</chartshowlegend>
+				<chartaxislabelfontsize>12</chartaxislabelfontsize>
+				<charttitlefontstyle>1</charttitlefontstyle>
+				<chartaxistickfontfamily>SansSerif</chartaxistickfontfamily>
+				<chartaxisticklabelrotation>30</chartaxisticklabelrotation>
+				<chartaxislabelfontstyle>0</chartaxislabelfontstyle>
+				<chartlegendfontfamily>SansSerif</chartlegendfontfamily>
+				<chartdrillthroughenabled>false</chartdrillthroughenabled>
+				<charthorizaxislabel/>
+				<charttitle/>
+				<chartsliceralignment>3</chartsliceralignment>
+				<chartslicerfontstyle>0</chartslicerfontstyle>
+				<chartbackgroundr>255</chartbackgroundr>
+			</component-definition>
+			<action-name>Pivot View</action-name>
+		</action-definition>
+	</actions>
+</action-sequence>

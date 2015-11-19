@@ -1,0 +1,14 @@
+<context>
+  <!-- Query auto-includes -->
+  <autoincludes>
+    <autoinclude>
+      <cda><![CDATA[/public/cdf/includes/(.*)/(.*?)\.cda]]></cda>
+      <ids>.*</ids>
+      <dashboards>
+        <include><![CDATA[.*/$1/.*\.wcdf]]></include>
+        <include><![CDATA[.*/$1/.*\.xcdf]]></include>
+        <include><![CDATA[.*/$1/.*\.cdfde]]></include>
+      </dashboards>
+    </autoinclude>
+  </autoincludes>
+</context>

@@ -1,0 +1,117 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>ExecutePrptComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		Excecutes a prpt and displays the result on a new pop-up window.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>executePrpt</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameters</dt>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the report</dd>
+
+			<dt>solution</dt>
+			<dd>Solution where the Pentaho Reporting file is</dd>
+
+			<dt>path</dt>
+			<dd>Path where the Pentaho Reporting file is</dd>
+
+			<dt>action</dt>
+			<dd>Pentaho Reporting file name (unified file format *.prpt)</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result. It can point to a button or link</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>label</dt>
+			<dd>Text to be used on the generated button (only used if htmlObject points to a div/span)</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed. The component will be executed only if the result of preChange equals true.</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>paginate</dt> 
+			<dd>Pentaho Report Viewer paginate option. Default: false</dd>
+			
+			<dt>showParameters</dt> 
+			<dd>Pentaho Report Viewer parameter option. Default: false</dd>
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+				<span id="sampleObject">Execute Xaction</span>
+			</div>
+
+			<div id="code">
+				<textarea cols="80" rows="20" id="samplecode">
+
+var executeTopTenCustomers = {
+  name: "executeTopTenCustomers",
+  type: "ExecutePrpt",
+  path: "/public/Steel Wheels/Widget Library/Report Snippets/InventorybyLine.prpt",
+  listeners:[],
+  parameters: [],
+  htmlObject: "sampleObject",
+  paginate: false,
+  showParameters: true,
+  label: "Execute Prpt",
+  executeAtStart: true,
+  preChange: function(){return true;},
+  postChange: function(){return true;},
+  tooltip: "Click to generate report"
+}
+
+Dashboards.init([executeTopTenCustomers]);
+Dashboards.finishedInit = false;
+				</textarea>
+				<br />
+				<button onclick="evaluateCode(true)">Try me</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+</script>
