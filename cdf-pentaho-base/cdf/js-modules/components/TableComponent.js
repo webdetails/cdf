@@ -13,13 +13,14 @@
 
 define([
     '../Logger',
+    '../dashboard/Utils',
     'amd!../lib/underscore',
     './UnmanagedComponent',
     '../dashboard/Sprintf',
     '../lib/jquery',
     'amd!../lib/datatables',
     '../addIns/colTypes'
-], function(Logger, _, UnmanagedComponent, sprintf, $) {
+], function(Logger, Utils, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
   if($.fn.dataTableExt != undefined) {
@@ -719,7 +720,7 @@ define([
           dtData.aoColumns[i].sClass = "column" + i;
         };
         $.each(options.colHeaders,function(i,val) {
-          dtData.aoColumns[i].sTitle = val;
+          dtData.aoColumns[i].sTitle = Utils.escapeHtml(val);
           if(val == "") { dtData.aoColumns[i].bVisible = false; }
         });  // colHeaders
         if(options.colTypes != undefined) {
