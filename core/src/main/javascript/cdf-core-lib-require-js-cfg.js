@@ -42,7 +42,7 @@
   if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" && ENVIRONMENT_CONFIG.paths["cdf/lib"] !== "undefined") { // environment is configured, checking
     prefix = requirePaths['cdf/lib'] = ENVIRONMENT_CONFIG.paths["cdf/lib"];
   } else if(typeof KARMA_RUN !== "undefined") { // unit tests
-    prefix = requirePaths['cdf/lib'] = 'bin/test-js/cdf/js/lib';
+    prefix = requirePaths['cdf/lib'] = 'target/test-javascript/lib';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
 
     //if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
@@ -54,7 +54,7 @@
 
     prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
   } else { // build
-    prefix = requirePaths['cdf/lib'] = "cdf/js/lib";
+    prefix = requirePaths['cdf/lib'] = "cdf/lib";
   }
 
   //RequireJS text! loader plugin 2.0.14
@@ -158,9 +158,9 @@
       "amd!cdf/lib/underscore" : "_"
     },
     prescript: "var root = {jQuery: jQuery, _: _};\n"
-      + "(function() {\n",
+    + "(function() {\n",
     postscript: "}.call(root));\n"
-      + "return root.Backbone;"
+    + "return root.Backbone;"
   };
 
   //mustache 0.8.1
@@ -174,9 +174,9 @@
       "cdf/lib/mustache": "Mustache"
     },
     prescript: "var root = {Mustache: Mustache};\n"
-      + "(function() {\n",
+    + "(function() {\n",
     postscript: "}.call(root));\n"
-      + "return root.Mustache;"
+    + "return root.Mustache;"
   };
 
   //Base 1.1a
@@ -379,9 +379,9 @@
       "amd!cdf/lib/backbone" : "Backbone"
     },
     prescript: "var root = { Backbone: Backbone, _: _ };\n"
-      + "(function() {\n",
+    + "(function() {\n",
     postscript: "}.call(root));\n"
-      + "return root.Backbone;"
+    + "return root.Backbone;"
   };
 
   // mCustomScrollbar: jquery mousewheel plugin v3.1.12, MIT License

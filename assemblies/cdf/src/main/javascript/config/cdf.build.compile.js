@@ -5,7 +5,7 @@
 
 ({
   //The directory path to save the output. All relative paths are relative to the build file.
-  dir: "../bin/scriptOutput",
+  dir: "${project.build.directory}/build-javascript/cdf",
 
   //As of RequireJS 2.0.2, the dir above will be deleted before the
   //build starts again. If you have a big build and are not doing
@@ -41,7 +41,7 @@
   //If this option is specified, then all the files from the app directory
   //will be copied to the dir: output area, and baseUrl will assume to be
   //a relative path under this directory.
-  appDir: "../build-res/module-scripts",
+  appDir: "${project.build.directory}/src-javascript",
 
   //Introduced in 2.1.3: Some situations do not throw and stop the optimizer
   //when an error occurs. However, you may want to have the optimizer stop
@@ -75,7 +75,7 @@
   //or require.config({}) call found in that file will be used.
   //As of 2.1.10, mainConfigFile can be an array of values, with the last
   //value's config take precedence over previous values in the array.
-  mainConfigFile: '../build-res/requireCfg.js',
+  mainConfigFile: "${project.build.directory}/requireCfg.js",
 
   //If using UglifyJS2 for script optimization, these config options can be
   //used to pass configuration values to UglifyJS2.
@@ -88,7 +88,7 @@
       max_line_len: 80,
       beautify: false
     },
-    warnings: true,
+    warnings: false,
     mangle: true
   },
 

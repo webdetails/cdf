@@ -15,68 +15,63 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '../',
+    basePath: '../../../../',
 
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
-    // list of files / patterns to load in the browser
     files: [
-      '../cdf-core/cdf/js-lib/shims.js',
-      '../cdf-core/cdf/js-lib/pen-shim.js',
-      '../cdf-core/test-js/legacy/testUtils.js',
-      '../cdf-core/cdf/js/wd.js',
-      '../cdf-core/cdf/js-lib/json.js',
-      '../cdf-core/cdf/js-lib/jQuery/jquery.js',
-      '../cdf-core/cdf/js-lib/jQuery/jquery.ui.js',
-      '../cdf-core/cdf/js-lib/blockUI/jquery.blockUI.js',
-      '../cdf-core/cdf/js-lib/uriQueryParser/jquery-queryParser.js',
-      '../cdf-core/cdf/js-lib/underscore/underscore.js',
-      '../cdf-core/cdf/js-lib/backbone/backbone.js',
-      '../cdf-core/cdf/js-lib/mustache/mustache.js',
-      '../cdf-core/cdf/js-lib/base/Base.js',
-      'cdf/js/cdf-base.js',
-      '../cdf-core/cdf/js/Dashboards.Main.js',
-      '../cdf-core/cdf/js/Dashboards.Query.js',
-      '../cdf-core/cdf/js/Dashboards.Bookmarks.js',
-      '../cdf-core/cdf/js/Dashboards.Startup.js',
-      '../cdf-core/cdf/js/Dashboards.Utils.js',
-      '../cdf-core/cdf/js/Dashboards.Legacy.js',
-      '../cdf-core/cdf/js/Dashboards.Notifications.js',
-      '../cdf-core/cdf/js/Dashboards.RefreshEngine.js',
-      '../cdf-core/cdf/js/components/core.js',
-      'cdf/js/components/Pentaho.Reporting.js',
-      '../cdf-core/cdf/js/components/input.js',
-      '../cdf-core/cdf/js/queries/coreQueries.js',
-      '../cdf-core/test-js/legacy/lib/test-components.js',
-      '../cdf-core/test-js/legacy/main.js',
-      {pattern: 'test-js/legacy/**/*.js', included: false}
+      'target/test-javascript/lib/shims.js',
+      'target/test-javascript/lib/pen-shim.js',
+      'src/main/javascript/cdf-legacy/testUtils.js',
+      'target/test-javascript/cdf-legacy/wd.js',
+      'target/test-javascript/lib/json.js',
+      'target/test-javascript/lib/jQuery/jquery.js',
+      'target/test-javascript/lib/jQuery/jquery.ui.js',
+      'target/test-javascript/lib/blockUI/jquery.blockUI.js',
+      'target/test-javascript/lib/uriQueryParser/jquery-queryParser.js',
+      'target/test-javascript/lib/underscore/underscore.js',
+      'target/test-javascript/lib/backbone/backbone.js',
+      'target/test-javascript/lib/mustache/mustache.js',
+      'target/test-javascript/lib/base/Base.js',
+      'src/main/javascript/cdf-legacy/cdf-base.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Main.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Query.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Bookmarks.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Startup.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Utils.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Legacy.js',
+      'target/test-javascript/cdf-legacy/Dashboards.Notifications.js',
+      'target/test-javascript/cdf-legacy/Dashboards.RefreshEngine.js',
+      'target/test-javascript/cdf-legacy/components/core.js',
+      'src/main/javascript/cdf-legacy/components/Pentaho.Reporting.js',
+      'target/test-javascript/cdf-legacy/components/input.js',
+      'target/test-javascript/cdf-legacy/queries/coreQueries.js',
+      'src/test/javascript/cdf-legacy/lib/test-components.js',
+      'src/test/javascript/cdf-legacy/main.js',
+      {pattern: 'src/test/javascript/cdf-legacy/**/*.js', included: false}
     ],
 
     // list of files to exclude
     exclude: [],
 
-    //preprocessors: {'cdf/js/*.js': 'coverage'},
-
-    // test results reporter to use
-    // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress', 'junit', 'html', 'coverage'],
+    preprocessors: {'src/main/javascript/cdf-legacy/**/*.js': 'coverage'},
 
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test-reports-legacy/coverage/reports/'
+      dir: 'target/coverage-reports/cdf-legacy-javascript'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test-reports-legacy/test-results.xml',
+      outputFile: 'target/js-reports/cdf-legacy-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test-reports-legacy/cdf-pentaho5/karma_html',
+      outputDir: 'target/coverage-reports/cdf-legacy-javascript',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 

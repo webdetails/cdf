@@ -15,29 +15,30 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '../',
+    basePath: '../../../../',
 
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
     // list of files / patterns to load in the browser
     files: [
-      {pattern: 'bin/test-js/cdf/js/**/*.css', included: false},
-      {pattern: 'bin/test-js/cdf/js/**/*.js',  included: false},
-      {pattern: 'test-js/**/*.ext.js', included: true},
-      'config/context.js',
-      {pattern: 'test-js/**/*.js', included: false},
-      'build-res/requireCfg-raw.js',
-      'config/require-config.js',
+      {pattern: 'target/test-javascript/cdf/**/*.css', included: false},
+      {pattern: 'target/test-javascript/cdf/**/*.js', included: false},
+      {pattern: 'target/test-javascript/lib/**/*.css', included: false},
+      {pattern: 'target/test-javascript/lib/**/*.js', included: false},
+      {pattern: 'target/dependency/ccc/amd/**/*.js', included: false},
+      {pattern: 'src/test/javascript/cdf/**/*.ext.js', included: true},
+      'src/test/javascript/config/context.js',
+      {pattern: 'src/test/javascript/cdf/**/*.js', included: false},
+      'target/test-javascript/cdf-core-require-js-cfg.js',
+      'src/test/javascript/config/require-config.js',
       // fix 404 messages
-      {pattern: 'bin/test-js/cdf/js/**/*.png', watched: false, included: false, served: true},
-      {pattern: 'bin/test-js/cdf/js/**/*.gif', watched: false, included: false, served: true}
+      {pattern: 'target/test-javascript/cdf/**/*.png', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/cdf/**/*.gif', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/cdf/**/*.svg', watched: false, included: false, served: true}
     ],
 
-    // list of files to exclude
-    exclude: ['test-js/legacy/**/*.js'],
-
-    //preprocessors: {'bin/test-js/cdf/js/**/*.js': 'coverage'},
+    preprocessors: {'src/test/javascript/cdf/**/*.js': 'coverage'},
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
