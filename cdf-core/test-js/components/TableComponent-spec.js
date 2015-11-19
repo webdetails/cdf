@@ -21,11 +21,8 @@ define([
    * ## The Table Component
    */
   describe("The Table Component #", function() {
-    var dashboard = new Dashboard();
-
-    dashboard.init();
-
-    dashboard.addDataSource("tableQuery", {
+    var dashboard;
+    var dataSource = {
       queryType: "mdx",
       catalog: "mondrian:/SteelWheels",
       jndi: "SampleData",
@@ -34,9 +31,8 @@ define([
              + "NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales]) "
              + "ON ROWS FROM [SteelWheelsSales]";
       }
-    });
-
-    var tableComponent = new TableComponent({
+    };
+    var tableComponentDefaults = {
       name: "tableComponent",
       type: "tableComponent",
       chartDefinition: {
@@ -49,13 +45,26 @@ define([
       },
       htmlObject: "tableSampleObject",
       executeAtStart: true
-    });
+    };
 
-    dashboard.addComponent(tableComponent);
+    var tableComponent;
 
     // DataTables manages it's own events, the event 'aoInitComplete' executes
-    // the table component's fnInitComplete() callback function which executes postExec() and unblock() 
-    $htmlObject = $('<div />').attr('id', tableComponent.htmlObject);
+    // the table component's fnInitComplete() callback function which executes postExec() and unblock()
+    var $htmlObject = $('<div />').attr('id', tableComponentDefaults.htmlObject);
+
+    beforeEach(function() {
+      $('body').append($htmlObject);
+      dashboard = new Dashboard();
+      dashboard.init();
+      dashboard.addDataSource("tableQuery", dataSource);
+      tableComponent = new TableComponent(tableComponentDefaults);
+      dashboard.addComponent(tableComponent);
+    });
+
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
     /**
      * ## The Table Component # allows a dashboard to execute update
@@ -73,6 +82,24 @@ define([
       tableComponent.once("cdf:postExecution", function() {
         expect(tableComponent.update).toHaveBeenCalled();
         $htmlObject.remove();
+        done();
+      });
+
+      dashboard.update(tableComponent);
+    });
+
+    it("properly escapes column headers", function(done) {
+      var scriptText = '<script>alert("Gotcha!")</script>';
+      tableComponent.chartDefinition.colHeaders[0] = scriptText;
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+      });
+
+      tableComponent.once("cdf:postExecution", function() {
+        //find the first column header, and make sure it is html escaped
+        var $firstHeader = $($("#" + tableComponentDefaults.htmlObject).find("thead tr th")[0]);
+        expect($firstHeader.html()).toEqual($("<div>").text(scriptText).html());
+        expect($firstHeader.text()).toEqual(scriptText);
         done();
       });
 
