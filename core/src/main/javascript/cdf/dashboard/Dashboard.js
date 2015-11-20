@@ -118,11 +118,12 @@ define([
         if(typeof $ == 'function') {
           //ajax
           $.ajaxSetup({
+            type: "POST",
             async: false,
             traditional: true,
             scriptCharset: "utf-8",
             contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-  
+
             dataFilter: function(data, dtype) {
               // just tagging date
               myself.lastServerResponse = Date.now ? Date.now() : new Date().getTime();
@@ -173,10 +174,10 @@ define([
 
     //trying to retrieve context from the module configuration
     contextObj: module.config().context || {},
-    
+
     //trying to retrieve storage from the module configuration
     storageObj: module.config().storage || {},
-    
+
     //trying to retrieve view from the module configuration
     viewObj: module.config().view,
 
