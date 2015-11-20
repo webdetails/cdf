@@ -41,6 +41,11 @@
       successCallback: function() {
         Dashboards.log('Query callback not defined. Override.');
       },
+      errorCallback: function() {
+        if(Dashboards != undefined && Dashboards.handleServerError != undefined) {
+          Dashboards.handleServerError();
+        }
+      },
       errorCallback: Dashboards.handleServerError,
       lastResultSet: null,
       page: 0,
@@ -99,13 +104,13 @@
       };
     },
 
-    doQuery: function(outsideCallback) {
+    doQuery: function(successCallback, errorCallback) {
       if(typeof this.getOption('successCallback') != 'function') {
         throw 'QueryNotInitialized';
       }
       var url = this.getOption('url'),
-          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
-          errorCallback = this.getOption('errorCallback'),
+          callback = (successCallback ? successCallback : this.getOption('successCallback')),
+          errorCallback = (errorCallback ? errorCallback : this.getOption('errorCallback')),
           queryDefinition = this.buildQueryDefinition();
 
       var settings = _.extend({}, this.getOption('ajaxOptions'), {
