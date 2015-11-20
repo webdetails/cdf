@@ -93,6 +93,47 @@ describe("CDF legacy core queries #", function() {
         expect(baseQuery.lastProcessedResults()).toEqual(processedData);
       });
     });
+
+    /**
+     * ## Base query # custom callbacks
+     */
+    describe("Base query # custom callbacks", function() {
+
+      /**
+       * ## Base query # supports a custom success callback
+       */
+      it("supports a custom success callback", function(done) {
+        baseQuery.buildQueryDefinition = function() {};
+        spyOn($, "ajax").and.callFake(function(params) {
+          params.success({result: true});
+        });
+        baseQuery.doQuery(
+          function(data) { /* success callback */
+            expect(data).toEqual({result: true});
+            done();
+          }
+        );
+      });
+
+      /**
+       * ## Base query # supports a custom error callback
+       */
+      it("supports a custom error callback", function(done) {
+        baseQuery.buildQueryDefinition = function() {};
+        spyOn($, "ajax").and.callFake(function(params) {
+          params.error({result: false}, "ajax error", "test error");
+        });
+        baseQuery.doQuery(
+          function(data) { /* success callback */ }, 
+          function(jqXHR, textStatus, errorThrown) { /* error callback */
+            expect(jqXHR).toEqual({result: false});
+            expect(textStatus).toEqual("ajax error");
+            expect(errorThrown).toEqual("test error");
+            done();
+          }
+        );
+      });
+    });
   });
 
   /**
