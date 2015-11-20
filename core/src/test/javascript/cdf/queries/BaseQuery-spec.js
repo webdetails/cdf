@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/queries/BaseQuery"], function(BaseQuery) {
+define(["cdf/queries/BaseQuery", "cdf/lib/jquery"], function(BaseQuery, $) {
 
   var unprocessedData = {data: 0},
       processedData = {data: [1, 2, 3]},
@@ -86,6 +86,47 @@ define(["cdf/queries/BaseQuery"], function(BaseQuery) {
         baseQuery.setOption('lastProcessedResultSet', processedData);
 
         expect(baseQuery.lastProcessedResults()).toEqual(processedData);
+      });
+    });
+
+    /**
+     * ## Base query # custom callbacks
+     */
+    describe("Base query # custom callbacks", function() {
+
+      /**
+       * ## Base query # supports a custom success callback
+       */
+      it("supports a custom success callback", function(done) {
+        baseQuery.buildQueryDefinition = function() {};
+        spyOn($, "ajax").and.callFake(function(params) {
+          params.success({result: true});
+        });
+        baseQuery.doQuery(
+          function(data) { /* success callback */
+            expect(data).toEqual({result: true});
+            done();
+          }
+        );
+      });
+
+      /**
+       * ## Base query # supports a custom error callback
+       */
+      it("supports a custom error callback", function(done) {
+        baseQuery.buildQueryDefinition = function() {};
+        spyOn($, "ajax").and.callFake(function(params) {
+          params.error({result: false}, "ajax error", "test error");
+        });
+        baseQuery.doQuery(
+          function(data) { /* success callback */ },
+          function(jqXHR, textStatus, errorThrown) { /* error callback */
+            expect(jqXHR).toEqual({result: false});
+            expect(textStatus).toEqual("ajax error");
+            expect(errorThrown).toEqual("test error");
+            done();
+          }
+        );
       });
     });
   });
