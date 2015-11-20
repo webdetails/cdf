@@ -203,7 +203,7 @@
     getPage: function(page, model, event) {
       var deferred;
       this.debug("Item " + (model.get('label')) + " requested page " + page);
-      deferred = this.requestPage(page, this._searchPattern);
+      deferred = this.requestPage(page, model.root().get('searchPattern'));
       return deferred;
     },
     requestPage: function(page, searchPattern) {
@@ -380,16 +380,13 @@
      * @for Manager
      */
     onFilterChange: function(text) {
-      var filter, that;
-      this._searchPattern = text.trim();
-      filter = _.bind(function() {
-        var isMatch;
-        isMatch = this.filter(this._searchPattern, "", this.get('configuration').search.matcher);
+      this.get('model').root().set('searchPattern', text);
+      var filter = _.bind(function () {
+        this.filter(text, "", this.get('configuration').search.matcher);
         return this.get('model').setVisibility(true);
       }, this);
       if (this.get('configuration').search.serverSide === true) {
-        that = this;
-        this.requestPage(0, this._searchPattern).then(function() {
+        this.requestPage(0, text).then(function () {
           _.defer(filter);
         });
       }
