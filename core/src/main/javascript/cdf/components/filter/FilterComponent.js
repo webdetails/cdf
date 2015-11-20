@@ -132,7 +132,8 @@ define([
       component: {},
       input: {
         defaultModel: {
-          isDisabled: true
+          isDisabled: true,
+          searchPattern: ''
         },
         indexes: {
           id: 0,
