@@ -461,8 +461,13 @@ define([
         var filterComponent = getTestSearchFilterComponent();
         dashboard.addComponent(filterComponent);
         filterComponent.once('getData:success', function() {
+
+          spyOn(filterComponent.manager.get('model').root(), 'set').and.callThrough();
+
           var userInput;
           filterComponent.manager.filter = function(text) {
+            expect(this.get('model').root().set).toHaveBeenCalledWith('searchPattern', userInput);
+            expect(this.get('model').root().get('searchPattern')).toEqual(userInput);
             expect(text).toEqual(userInput);
           };
 
