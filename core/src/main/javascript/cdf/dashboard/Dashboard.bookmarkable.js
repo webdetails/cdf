@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', './Utils'],
-  function(Dashboard, Logger, Utils) {
+define(['./Dashboard', '../Logger', './Utils', '../lib/jquery'],
+  function(Dashboard, Logger, Utils, $) {
 
   /**
    * A module representing an extension to the Dashboard module for bookmarkable parameters.
