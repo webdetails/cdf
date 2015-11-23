@@ -100,7 +100,8 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       component: {},
       input: {
         defaultModel: {
-          isDisabled: true
+          isDisabled: true,
+          searchPattern: ''
         },
         indexes: {
           id: 0,
