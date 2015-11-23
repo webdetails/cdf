@@ -1,21 +1,17 @@
 /*!
- * Copyright 2010 - 2014 Pentaho Corporation.  All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
  */
 
-//copied from jquery.i18n.properties.supported.languages.js due to jquery lib conflicts
+// copied from jquery.i18n.properties.supported.languages.js due to jquery lib conflicts
 // also fixed bug where the settings.path was not used to get the file path
 
 define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
@@ -31,7 +27,18 @@ define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
 
     settings.language = supportedLocale(settings);
     if (hasSupportedLanguages) {
+      // temporarily switching default type to GET, original_i18n will need it
+      // we can do this here because up until the actual ajax call,
+      // original_i18n is synchronous
+      $.ajaxSetup({
+        type: 'GET',
+      });
+
       original_i18n(settings);
+
+      $.ajaxSetup({
+        type: 'POST',
+      });
     }
   };
   $.i18n.browserLang = function() {
@@ -41,6 +48,7 @@ define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
   var supportedLocale = function(settings) {
     var resultLocale;
     $.ajax({
+      type:       'GET',
       url:        (settings.path != undefined ? settings.path : "") + settings.name + "_supported_languages.properties",
       async:      false,
       cache:      settings.cache,
