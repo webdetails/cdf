@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>cdf-plugin-assemblies</artifactId>
+    <groupId>pentaho</groupId>
+    <version>6.1-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>pentaho-cdf-js</artifactId>
+  <packaging>pom</packaging>
+
+  <properties>
+    <js.project.list>cdf-core-js,cdf-pentaho-js,ccc</js.project.list>
+    <requirejs.build.file>cdf.build.compile.js</requirejs.build.file>
+    <global.require.file>cdf-require-js-cfg.js</global.require.file>
+    <requirejs.config.files.pattern>**/*-require-js-cfg.js</requirejs.config.files.pattern>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>cdf-core-js</artifactId>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>cdf-pentaho-js</artifactId>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>ccc</artifactId>
+      <type>zip</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-cdf-global-requirejs-config</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <target>
+                <concat destfile="${project.build.directory}/${global.require.file}" append="true" force="yes">
+                  <fileset dir="${basedir}/target/dependency/" casesensitive="yes">
+                    <include name="${requirejs.config.files.pattern}"/>
+                  </fileset>
+                </concat>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-build-directory</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>${basedir}/src/assembly/descriptors/build.assembly.xml</descriptor>
+              </descriptors>
+              <finalName>src-javascript</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -4,7 +4,6 @@
   <id>cdf-js</id>
   <formats>
     <format>zip</format>
-    <format>dir</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
 
