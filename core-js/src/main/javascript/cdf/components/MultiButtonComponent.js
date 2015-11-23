@@ -11,7 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-debugger;
 define([
   '../lib/jquery',
   './ToggleButtonBaseComponent',

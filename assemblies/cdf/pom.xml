@@ -13,29 +13,14 @@
   <packaging>pom</packaging>
 
   <properties>
-    <js.project.list>cdf-core,cdf-pentaho</js.project.list>
-    <other.project.list>ccc</other.project.list>
-    <requirejs.build.file>cdf.build.compile.js</requirejs.build.file>
-    <global.require.file>cdf-require-js-cfg.js</global.require.file>
-    <requirejs.config.files.pattern>**/*-require-js-cfg.js</requirejs.config.files.pattern>
+    <js.project.list>pentaho-cdf-js</js.project.list>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
-      <artifactId>cdf-core</artifactId>
-      <classifier>js</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>cdf-pentaho</artifactId>
-      <classifier>js</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>ccc</artifactId>
+      <artifactId>pentaho-cdf-js</artifactId>
+      <version>${project.version}</version>
       <type>zip</type>
     </dependency>
 
@@ -146,45 +131,8 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-cdf-global-requirejs-config</id>
-            <phase>prepare-package</phase>
-            <configuration>
-              <target>
-                <concat destfile="${project.build.directory}/${global.require.file}" append="true" force="yes">
-                  <fileset dir="${basedir}/target/dependency/" casesensitive="yes">
-                    <include name="${requirejs.config.files.pattern}"/>
-                  </fileset>
-                </concat>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
-          <execution>
-            <id>generate-build-directory</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>${basedir}/src/assembly/descriptors/build.assembly.xml</descriptor>
-              </descriptors>
-              <finalName>src-javascript</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
           <execution>
             <id>pentaho-cdf</id>
             <phase>package</phase>

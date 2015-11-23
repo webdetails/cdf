@@ -12,19 +12,10 @@
 
   <artifactId>cdf-core</artifactId>
 
-  <properties>
-    <js.project.list>ccc</js.project.list>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>ccc</artifactId>
-      <type>zip</type>
     </dependency>
 
     <dependency>

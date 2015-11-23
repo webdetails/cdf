@@ -19,8 +19,6 @@
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
     <dependency.spring-core.revision>3.2.14.RELEASE</dependency.spring-core.revision>
     <dependency.spring-security-core.revision>2.0.8.RELEASE</dependency.spring-security-core.revision>
-
-    <js.project.list>ccc,cdf-core</js.project.list>
   </properties>
 
   <dependencies>
@@ -39,18 +37,7 @@
       <artifactId>cdf-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>cdf-core</artifactId>
-      <version>${project.version}</version>
-      <classifier>js</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>ccc</artifactId>
-      <type>zip</type>
-    </dependency>
+
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
@@ -173,31 +160,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-javascript-dependencies</id>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/test-javascript</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/target/dependency/cdf</directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
-
 </project>
