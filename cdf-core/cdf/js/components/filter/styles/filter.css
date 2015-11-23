@@ -144,10 +144,12 @@
 .filter-controls .filter-control-button:first-child {
   width: 40%;
   padding: 0 7px 0 0;
+  float: left;
 }
 .filter-controls .filter-control-button:last-child {
   width: 58%;
   padding: 0 0 0 7px;
+  float: right;
 }
 .filter-controls .filter-control-button > .pristine {
   cursor: default;
@@ -263,6 +265,7 @@
 }
 .filter-group-container .filter-group-selection {
   padding: 5px 10px;
+  position: relative;
 }
 .filter-item-container {
   padding: 0;
@@ -528,13 +531,16 @@
 
 .filter-busy-info {
   float: left;
+  font-size: 13px;
+  line-height: 17px;
+  color: #616161;
 }
 
 .filter-root-container .floatingBarsG{
   position: relative;
   width: 14px;
   height: 17px;
-  margin: 0;
+  margin: 0 9px 0 6px;
   float: left;
 }
 

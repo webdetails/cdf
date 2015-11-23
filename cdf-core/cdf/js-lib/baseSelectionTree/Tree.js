@@ -1,21 +1,25 @@
-'use strict';
-(function(_, TreeModel, BaseEvents, Logger, Models) {
+/**
+ * @module BaseFilter
+ * @submodule Models
+ * @class Tree
+ * @constructor
+ * @extends Backbone.TreeModel
+ * @uses Logger
+ * @uses BaseEvents
+ */
+define([
+  'amd!cdf/lib/underscore',
+  'amd!cdf/lib/backbone.treemodel',
+  'cdf/lib/BaseEvents',
+  'cdf/Logger'
+], function (_, Backbone, BaseEvents, Logger) {
 
-  /**
-   * @module TreeFilter
-   * @submodule Models
-   * @class Tree
-   * @constructor
-   * @extends Backbone.TreeModel
-   * @uses Logger
-   * @uses BaseEvents
-   */
-  return Models.Tree = BaseEvents.extendWithEvents(TreeModel).extend(Logger).extend({
+  var Tree = BaseEvents.extendWithEvents(Backbone.TreeModel).extend(Logger).extend({
     url: '',
-    children: function() {
+    children: function () {
       return this.nodes.apply(this, arguments);
     },
-    parse: function(response, options) {
+    parse: function (response, options) {
       return response;
     },
 
@@ -26,23 +30,23 @@
      *
      *
      *     function combineCallback(model, array){
-     *         return _.all(array);
-     *     }
+         *         return _.all(array);
+         *     }
      *
      * @method walkDown
-     * @param {function} itemCallBack
-     * @param {function} combineCallBack
-     * @param {function} alwaysCallBack
+     * @param {function} itemCallback
+     * @param {function} combineCallback
+     * @param {function} alwaysCallback
      */
-    walkDown: function(itemCallback, combineCallback, alwaysCallback) {
+    walkDown: function (itemCallback, combineCallback, alwaysCallback) {
       var result;
       if (!combineCallback) {
-        combineCallback = function(x) {
+        combineCallback = function (x) {
           return x;
         };
       }
       if (this.children()) {
-        result = combineCallback(this.children().map(function(child) {
+        result = combineCallback(this.children().map(function (child) {
           return child.walkDown(itemCallback, combineCallback, alwaysCallback);
         }));
       } else {
@@ -57,14 +61,13 @@
     /**
      * Returns self and descendants as a flat list
      * @method flatten
-     * @return { wrappedList } Returns a list wrapped by _.chain()
+     * @return {Underscore} Returns a wrapped Underscore object using _.chain()
      */
-    flatten: function() {
-      var list;
-      list = [this];
+    flatten: function () {
+      var list = [this];
       if (this.children()) {
-        this.children().each(function(node) {
-          return node.flatten().each(function(el) {
+        this.children().each(function (child) {
+          return child.flatten().each(function (el) {
             return list.push(el);
           });
         });
@@ -82,4 +85,6 @@
       });
     }
   });
-})(_, Backbone.TreeModel, BaseEvents, TreeFilter.Logger, TreeFilter.Models);
+
+  return Tree;
+});

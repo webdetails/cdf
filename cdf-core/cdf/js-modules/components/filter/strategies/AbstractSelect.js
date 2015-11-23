@@ -1,14 +1,14 @@
-
 /**
  * @module BaseFilter
  * @submodule SelectionStrategies
  */
 define([
-   'cdf/lib/jquery',
-   'amd!cdf/lib/underscore',
-   'cdf/components/BaseComponent',
-   '../base/filter-base-implementation'],
-   function( $, _ , BaseComponent, BaseFilter ) {
+  'cdf/lib/jquery',
+  'amd!cdf/lib/underscore',
+  'cdf/lib/Base',
+  '../base/Logger',
+  '../models/SelectionTree'
+], function ($, _, Base, Logger, SelectionTree) {
 
   /**
    * Base class for handling the selection logic
@@ -19,9 +19,12 @@ define([
    * @uses BaseFilter.Logger
    * @constructor
    */
-  BaseFilter.SelectionStrategies.AbstractSelect = BaseComponent.extend( BaseFilter.Logger ).extend({
+
+  var SelectionStates = SelectionTree.SelectionStates;
+
+  var AbstractSelect = Base.extend(Logger).extend({
     ID: 'BaseFilter.SelectionStrategies.AbstractSelect',
-    constructor: function(options) {
+    constructor: function (options) {
       return this.isLogicGlobal = true;
     },
 
@@ -32,14 +35,14 @@ define([
      * @param {Enum} oldState
      * @return {Enum} Returns the next state
      */
-    getNewState: function(oldState) {
+    getNewState: function (oldState) {
       switch (oldState) {
-        case BaseFilter.Enum.select.NONE:
-          return BaseFilter.Enum.select.ALL;
-        case BaseFilter.Enum.select.ALL:
-          return BaseFilter.Enum.select.NONE;
-        case BaseFilter.Enum.select.SOME:
-          return BaseFilter.Enum.select.NONE;
+        case SelectionStates.NONE:
+          return SelectionStates.ALL;
+        case SelectionStates.ALL:
+          return SelectionStates.NONE;
+        case SelectionStates.SOME:
+          return SelectionStates.NONE;
       }
     },
 
@@ -50,20 +53,19 @@ define([
      * @param {Array of Enum} childrenStates
      * @return {Enum} Returns the inferred state
      */
-    inferSelectionFromChildren: function(childrenStates) {
-      var all, none;
-      all = _.every(childrenStates, function(el) {
-        return el === BaseFilter.Enum.select.ALL;
+    inferSelectionFromChildren: function (childrenStates) {
+      var all = _.every(childrenStates, function (el) {
+        return el === SelectionStates.ALL;
       });
-      none = _.every(childrenStates, function(el) {
-        return el === BaseFilter.Enum.select.NONE;
+      var none = _.every(childrenStates, function (el) {
+        return el === SelectionStates.NONE;
       });
       if (all) {
-        return BaseFilter.Enum.select.ALL;
+        return SelectionStates.ALL;
       } else if (none) {
-        return BaseFilter.Enum.select.NONE;
+        return SelectionStates.NONE;
       } else {
-        return BaseFilter.Enum.select.SOME;
+        return SelectionStates.SOME;
       }
     },
 
@@ -75,7 +77,7 @@ define([
      * @param {Object} model
      * @chainable
      */
-    setSelection: function(newState, model) {
+    setSelection: function (newState, model) {
       throw new Error("NotImplemented");
     },
 
@@ -86,15 +88,13 @@ define([
      * @param {Object} model
      * @chainable
      */
-    changeSelection: function(model) {
-      var c, d, newState, that;
-      d = $.now();
-      c = BaseFilter.count;
-      newState = this.getNewState(model.getSelection());
+    changeSelection: function (model) {
+      var d = $.now();
+      var newState = this.getNewState(model.getSelection());
       newState = this.setSelection(newState, model);
-      that = this;
-      _.delay(function() {
-        return that.debug("Switching " + (model.get('label')) + " to " + newState + " took " + ($.now() - d) + " ms and " + (BaseFilter.count - c) + " renders");
+      var that = this;
+      _.delay(function () {
+        return that.debug("Switching " + (model.get('label')) + " to " + newState + " took " + ($.now() - d) + " ms ");
       }, 0);
       return this;
     },
@@ -106,7 +106,7 @@ define([
      * @param {Object} model
      * @chainable
      */
-    applySelection: function(model) {
+    applySelection: function (model) {
       model.updateSelectedItems();
       model.root().set('isCollapsed', true);
       return this;
@@ -120,10 +120,10 @@ define([
      * @param {Object} field
      * @chainable
      */
-    getSelectedItems: function(model,field) {
+    getSelectedItems: function (model, field) {
       return model.getSelectedItems(field);
     }
   });
 
-  return BaseFilter;
+  return AbstractSelect;
 });

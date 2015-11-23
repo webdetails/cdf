@@ -144,10 +144,12 @@
 .filter-controls .filter-control-button:first-child {
   width: 40%;
   padding: 0 7px 0 0;
+  float: left;
 }
 .filter-controls .filter-control-button:last-child {
-  width: 57%;
+  width: 58%;
   padding: 0 0 0 7px;
+  float: right;
 }
 .filter-controls .filter-control-button > .pristine {
   cursor: default;
@@ -263,6 +265,7 @@
 }
 .filter-group-container .filter-group-selection {
   padding: 5px 10px;
+  position: relative;
 }
 .filter-item-container {
   padding: 0;
