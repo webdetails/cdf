@@ -9,7 +9,7 @@
 
   <fileSets>
     <fileSet>
-      <directory>${basedir}/target/${project.artifactId}-${project.version}-js/cdf</directory>
+      <directory>${basedir}/target/dependency/cdf</directory>
       <outputDirectory>/pentaho-cdf</outputDirectory>
       <excludes>
         <exclude>cdf-require-js-cfg.js</exclude>
@@ -29,7 +29,6 @@
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <excludes>
         <exclude>*:zip</exclude>
-        <exclude>*:*:js</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
