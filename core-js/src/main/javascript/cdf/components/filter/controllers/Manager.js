@@ -90,10 +90,7 @@ define([
         });
       });
       this.on('post:child:selection request:child:sort', this.renderSortedChildren);
-      var throttleTimeMilliseconds = this.get('view').config.view.throttleTimeMilliseconds;
-      this.on('post:child:add', _.throttle(this.onUpdateChildren, throttleTimeMilliseconds, {
-        leading: false
-      }));
+      this.on('post:child:add', this.onUpdateChildren);
       return this;
     },
     addViewAndController: function (newModel) {
@@ -382,6 +379,9 @@ define([
      * @for Manager
      */
     onFilterChange: function (text) {
+      if(this.get('model').root().get('searchPattern') === text) {
+        return;
+      }
       this.get('model').root().set('searchPattern', text);
       var filter = _.bind(function () {
         this.filter(text, "", this.get('configuration').search.matcher);
@@ -389,10 +389,10 @@ define([
       }, this);
       if (this.get('configuration').search.serverSide === true) {
         this.requestPage(0, text).then(function () {
-          _.defer(filter);
+          filter();
         });
       }
-      _.defer(filter);
+      filter();
     },
     filter: function (text, prefix, customMatcher) {
 

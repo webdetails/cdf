@@ -78,7 +78,7 @@
       } else if (this.isCdaJson(whatever)) {
         this._updateModelFromCdaJson(whatever);
       } else {
-        this._updateModelJson(whatever);
+        this._updateModelFromJson(whatever);
       }
       var model = this.get('model');
       model.set('isBusy', false);
