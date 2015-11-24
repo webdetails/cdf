@@ -24,22 +24,23 @@
 define([
     './Dashboard',
     './dashboard/Utf8Encoder',
-    './dashboard/Utils'
+    './dashboard/Utils',
+    'css!./OlapUtils.css'
 ], function(Dashboard, Utf8Encoder, Utils) {
 
     var OlapUtils = {
 	    mdxGroups: {},
     	evolutionType: "Week"
     }
-	
+
     OlapUtils.initMdxQueryGroup = function(obj){
     	var mdxQueryGroup = new OlapUtils.mdxQueryGroup(obj.name);
 	    for(m in obj.mdxQueries){
-		    mdxQueryGroup.addMdxQuery( 
+		    mdxQueryGroup.addMdxQuery(
 			    obj.mdxQueries[m].name,
     			obj.mdxQueries[m].query,
 	    		obj.mdxQueries[m].dimension,
-		    	obj.mdxQueries[m].axis,   
+		    	obj.mdxQueries[m].axis,
 			    obj.mdxQueries[m].chart
     		);
 	    }
@@ -64,12 +65,12 @@ define([
     OlapUtils.buttonsDescription = {
     	"Drill Down": 'Drill down to the selected value and add the condition to the other charts',
 	    "Drill Up": 'Drill up and add the condition to the other charts',
-    	'Focus': "Focus on this value, adding the conditions to the other charts", 
+    	'Focus': "Focus on this value, adding the conditions to the other charts",
 	    'Exclude': "Exclude this value from the chart",
     	"Expand":'Expand the depth of the chart, showing an extra sublevel',
 	    "Collapse":'Collapse all previous expansions to the top most level',
     	"Reset All": 'Reset all filters and conditions from this chart group, returning to the original conditions',
-	    "Cancel": "Cancel" 
+	    "Cancel": "Cancel"
     }
 
 
@@ -83,47 +84,47 @@ define([
          *(query,idx,chartDefinition,PARAM,SERIES).			   *
          * When chartType == AreaChart, the value used to drill through is *
          *SERIES, otherwise it's PARAM.					   */
-    
+
         if(param2 != undefined && param3 != undefined){
           cType = Utils.ev(param1.chartType);
-    
+
             if(cType == "AreaChart")
               value = Utf8Encoder.encode_prepare(param3);
-            else 
+            else
               value = Utf8Encoder.encode_prepare(param2);
         }
         else
           value = Utf8Encoder.encode_prepare(param1);
-    
-    
+
+
         var mdxQueryGroup = OlapUtils.mdxGroups[mdxQueryGroup];
         if (value == 'Others')
             return; // do nothing
-    
+
         OlapUtils.lastClickedMdxQueryGroup = mdxQueryGroup;
         mdxQueryGroup.clickedIdx = idx;
         mdxQueryGroup.clickedValue = value;
-    
+
         var clickedObj = mdxQueryGroup.mdxQueries[idx];
-    
-        var buttonsHash = { 
+
+        var buttonsHash = {
             "Drill Down": 'drilldown',
             "Drill Up": 'drillup',
-            'Focus': "focus", 
+            'Focus': "focus",
             'Exclude': "filter",
             "Expand":'expand',
             "Collapse":'collapse',
             "Reset All": 'resetall',
-            "Cancel": "cancel" 
+            "Cancel": "cancel"
         };
-        
+
         if (clickedObj.mdxQuery.axisDepth == 0)
             delete buttonsHash.Collapse;
-    
+
         //get rowLevels
         var rl = clickedObj.mdxQuery.query.rowLevels;
         var d = typeof rl == "function"?rl():rl;
-    
+
         if (clickedObj.mdxQuery.axisPos + clickedObj.mdxQuery.axisDepth >= d.length - 1){
             delete buttonsHash["Drill Down"];
             delete buttonsHash.Expand;
@@ -131,26 +132,26 @@ define([
         else{
             delete buttonsHash.Focus;
         }
-        
+
         if(clickedObj.mdxQuery.axisPos == 0)
             delete buttonsHash["Drill Up"];
-    
+
         // Expanded ones can't drill || focus
         if (clickedObj.mdxQuery.axisDepth > 0){
             delete buttonsHash["Drill Down"];
             delete buttonsHash.Focus;
             delete buttonsHash.Exclude;
         }
-    
-    
+
+
         var msg = "Available conditions: <br/> <ul>" ;
         $.each(buttonsHash, function(key,value){msg+="<li>" + OlapUtils.buttonsDescription[key] + "</li>"});
         msg += "</ul>";
         $.prompt(msg, {buttons: buttonsHash, submit: OlapUtils.mdxQueryGroupActionCallback});
-    
+
     }
 
-	
+
 /*
  * MDX QUERY
  */
@@ -163,22 +164,22 @@ define([
         this.axisPos = 0;
         this.axisDepth = 0;
     };
-    
+
     OlapUtils.mdxQuery.prototype.reset = function(){
-        this.update(this.originalHash); 
+        this.update(this.originalHash);
     };
-    
+
     OlapUtils.mdxQuery.prototype.resetFilter = function(value){
         var rf = this.query["filters"]["rows"];
         var index = rf.indexOf(value);
         rf.splice(index,1);
         return index;
     }
-    
+
     OlapUtils.mdxQuery.prototype.resetFilters = function(){
         this.query["filters"] = Utils.clone((this.originalHash["filters"] || {rows:[],columns: []}));
     }
-    
+
     OlapUtils.mdxQuery.prototype.resetCondition = function(key){
         delete this.query["members"][key];
         delete this.query["sets"][key];
@@ -187,10 +188,10 @@ define([
         else
             delete this.query["where"][key];
     }
-    
-    
+
+
     OlapUtils.mdxQuery.prototype.update = function(hash){
-    
+
         this.originalHash = Utils.clone(hash);
         this.query["members"] = hash["members"]||[];
         this.query["sets"] = hash["sets"] || [];
@@ -211,19 +212,19 @@ define([
         this.query["conditions"] = [];
         this.query["drills"] = [];
     };
-    
-    
+
+
     OlapUtils.mdxQuery.prototype.clone = function() {
         var c = Utils.clone(this);
         return c;
     };
-    
-    
+
+
     OlapUtils.mdxQuery.prototype.generateAxisPart = function(axisDrill, axis, axisLevels, orderBy){
         if (axisDrill == false){
             return axis;
         }
-    
+
         //var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
         var dim = axis.indexOf("].") == -1?axis:axis.substr(0,axis.indexOf("].")+1);
         var axisLevel = this.axisPos + this.axisDepth;
@@ -233,12 +234,12 @@ define([
         var q = "Descendants("  + axis + ", "+ dim + ".["  + axisLevels[axisLevel] + "],SELF)"
         if (orderBy == "")
             return q;
-    
+
         return "Order(" + q + ", " + orderBy + " , BDESC)";
-    
+
     }
-    
-    
+
+
     OlapUtils.mdxQuery.prototype.getQuery = function(){
         var query = "with ";
         // We need to evaluate the hash
@@ -247,8 +248,8 @@ define([
             var key = p;
             var value = typeof this.query[p]=='function'?this.query[p]():this.query[p];
             _eh[key] = value;
-        } 
-    
+        }
+
         if(typeof _eh["sets"] == 'object' || typeof _eh["members"] == 'object' ){
             for(s in _eh["sets"]){
                 var value = typeof _eh["sets"][s]=='function'?_eh["sets"][s]():_eh["sets"][s];
@@ -268,7 +269,7 @@ define([
         var rowDrill = _eh["swapRowsAndColumns"]?_eh["columnDrill"]:_eh["rowDrill"] ;
         query += " set rowSet as {" + this.generateAxisPart(rowDrill,rows,rowLevels,_eh.orderBy) + "} \n";
         query += " set colSet as {" + this.generateAxisPart(columnDrill,columns,columnLevels,_eh.orderBy) + "} \n";
-    
+
         var colFilter = [];
         var rowFilter = [];
         $.each(_eh["filters"]["rows"],function(j,k){
@@ -282,12 +283,12 @@ define([
             query += " set rowFilter as " + (rowFilter.length > 0?"Filter(rowSet,"+ rowFilter.join(" and ") + " )":"rowSet") + "\n";
             query += " set colFilter as " + (colFilter.length > 0?"Filter(colSet,"+ colFilter.join(" and ") + " )":"colSet") + "\n";
         }
-    
-    
+
+
         query += "select " + (_eh["nonEmptyRows"]?" NON EMPTY ":"") + " rowFilter on rows,\n ";
         query += " " + (_eh["nonEmptyColumns"]?" NON EMPTY ":"") + " colFilter on columns\n ";
         query += " from " + _eh["from"] + "\n";
-    
+
         var whereArray = [];
         $.each(_eh["where"],function(key,obj){
                 var el = typeof obj == 'function'?obj():obj
@@ -298,39 +299,39 @@ define([
         }
         //alert(query);
         return query;
-    
+
     }
-    
+
     OlapUtils.mdxQuery.prototype.exclude = function(value){
         this.query["filters"]["rows"].push(value);
     }
-    
+
     OlapUtils.mdxQuery.prototype.drillDown = function(value){
-        
+
         //Clear previous excludes
         this.resetFilters();
-        
+
         this.query["drills"].push(this.query.rows);
         this.query.rows = value;
         this.axisPos++;
     }
-    
+
     OlapUtils.mdxQuery.prototype.drillUp = function(){
         this.axisPos--;
         return (this.query.rows = this.query["drills"].pop());
     }
-    
+
     OlapUtils.mdxQuery.prototype.addCondition = function(key,value){
         return this.addConditionAux(key,value,'focus');
     }
-    
+
     OlapUtils.mdxQuery.prototype.addInitialCondition = function(key,value){
         this.addConditionAux(key,value);
     }
-    
+
     OlapUtils.mdxQuery.prototype.removeFilter = function(key,value){
         this.removeCondition(key,value,'exclude');
-        
+
         //Re add previous foucs that was removed by exclude.
         var lastExclude = true
         for(v in this.query["conditions"][key]){lastExclude = false; break;}
@@ -339,9 +340,9 @@ define([
             delete this.query["conditions"][key+"previousDrillValue"];
         }
     }
-    
+
     OlapUtils.mdxQuery.prototype.removeCondition = function(key,value,op){
-        
+
         if(this.query["conditions"][key]!= undefined){
             if(this.query["conditions"][key][value]!= undefined)
                 delete this.query["conditions"][key][value];
@@ -351,61 +352,61 @@ define([
                 return true;
             }
         }
-        
-        var condition = value.substr(0,value.indexOf("]")+1) + ".[Filter]"; 
+
+        var condition = value.substr(0,value.indexOf("]")+1) + ".[Filter]";
         this.setCondition(key,condition,op);
         return false;
     }
-    
+
     OlapUtils.mdxQuery.prototype.removeConditions = function(key){
         this.query["conditions"][key] = [];
         this.resetCondition(key);
     }
-    
+
     /* NEXT FUNCTIONS ARE FOR INTERNAL USE ONLY */
     OlapUtils.mdxQuery.prototype.replaceConditionsByDrill = function(key,value){
-    
+
         //Clear previous focus and excludes
         if(this.query["conditions"][key] != undefined)
             this.query["conditions"][key] = [];
-        
+
         return this.addConditionAux(key,value,'drill');
     }
-    
+
     OlapUtils.mdxQuery.prototype.replaceConditionByExclude = function(key,value){
         return this.addConditionAux(key,value,'exclude');
     }
-    
+
     OlapUtils.mdxQuery.prototype.addConditionAux = function(key,value,op){
-    
+
         if(op == undefined){
             this.query["where"][key] = value;
             return;
         }
-        
-        var condition = value.substr(0,value.indexOf("]")+1) + ".[Filter]"; 
-        
+
+        var condition = value.substr(0,value.indexOf("]")+1) + ".[Filter]";
+
         //Store initial where cause for this key
         if(this.query["conditions"][key] == undefined){
             this.query["conditions"][key] = [];
             if(this.query["where"][key] != undefined)
                 this.query["conditions"][key+"InitialValue"] = this.query["where"][key];
         }
-        
+
         if(this.query["members"][key] == undefined){
             if (op == 'exclude'){
                 //this.addMember(key,condition + " as (( "+value+".parent) - ("+value+"))");
             }
             else
                 this.addMember(key,condition + " as Aggregate(" + key + "Filter)");
-        
+
         }
-            
+
         this.query["conditions"][key][value] = op
-        
+
         if(op != 'exclude')
             delete this.query["conditions"][key+"previousDrillValue"];
-        
+
         //Remove previous focus and drills for this value
         if(op != 'drill'){
             var aux = [];
@@ -418,17 +419,17 @@ define([
             }
             this.query["conditions"][key] = aux;
         }
-        
+
         return this.setCondition(key,condition,op);
     }
-    
-    
+
+
     OlapUtils.mdxQuery.prototype.setCondition = function(key,condition,op)
-    {	
+    {
         var set = [];
         for(v in this.query["conditions"][key])
             set.push(v);
-            
+
         if(set.length > 0){
             if(op == "focus" || op == "drill")
                 this.addSet(key,key + "Filter as {" + set.join(",") + "}");
@@ -440,17 +441,17 @@ define([
         }
         else
             this.resetCondition(key);
-    
+
         return set;
     }
-    
+
     OlapUtils.mdxQuery.prototype.addSet = function(key, set){
-    
+
         this.query["sets"][key] = set;
     }
-    
+
     OlapUtils.mdxQuery.prototype.addMember = function(key, member){
-    
+
         this.query["members"][key] = member;
     }
 
@@ -459,7 +460,7 @@ define([
  */
 
     OlapUtils.lastClickedMdxQueryGroup;
-    
+
     OlapUtils.mdxQueryGroup = function(name){
         this.name = name;
         this.mdxQueries = {};
@@ -468,23 +469,23 @@ define([
         this.activeFilters = {};
         this.activeConditions = {};
     };
-    
+
     OlapUtils.mdxQueryGroup.prototype.addMdxQuery = function(idx,mdxQuery,filterDimension, filterAxis, chartObject){
         this.mdxQueries[idx] = {mdxQuery: mdxQuery, filterDimension: filterDimension, filterAxis: filterAxis,chartObject:chartObject};
     };
-    
+
     OlapUtils.mdxQueryGroup.prototype.removeMdxQuery = function(idx){
         delete this.mdxQueries.idx;
     };
-    
-    
+
+
     OlapUtils.mdxQueryGroup.prototype.printConditions = function(){
-    
+
         var out = "";
         var filters = 0;
         var conds = 0;
         var i;
-    
+
         for (i in this.activeFilters){
             var a = this.activeFilters[i];
             if (a.length > 0 && ++filters == 1)
@@ -495,10 +496,10 @@ define([
                 o.push(k[1] + " <a class=\"resetFilterButton\" href='javascript:OlapUtils.mdxGroups[\"" + mdxGroupName + "\"].removeFilter(\"" + i + "\",\"" + k[0] + "\")'>X</a>");
                 ++filters;
             });
-            
+
             if(o.length > 0)
                 out+= o.join(" , ") + " ;";
-    
+
         }
         for (i in this.activeConditions){
             var a = this.activeConditions[i];
@@ -513,138 +514,138 @@ define([
             if(o.length > 0)
                 out+= o.join(" , ") + "; ";
         }
-    
+
         if ((conds + filters)>2)
             out += " <a  style=\"padding-left:15px;\" href='javascript:OlapUtils.mdxGroups[\"" + this.name + "\"].resetAll()'>Reset All</a>";
-    
+
         return out;
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.printEvolutionType = function(object){
         var out = "";
         var myArray = [["Week","Week"],["Month","Month"],["Year","Year"]];
-    
+
         for(var i= 0, len  = myArray.length; i < len; i++){
             out += "<input onclick='OlapUtils.changeEvolutionType(\"" + object + "radio\")'";
             if(i==0){
                 out += " CHECKED ";
-            }		
+            }
             out += "type='radio' id='" + object + "radio' name='" + object + "radio' value=" + myArray[i][1] + " /> " + myArray[i][1] + (object.separator == undefined?"":object.separator);
-        } 
-    
+        }
+
         return out;
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.drillDown = function(key,value){
-    
+
         Dashboard.incrementRunningCalls();
         var conditions = [];
-        
+
         //CLean previous conditions,drill, and exclude messages for this id
         if(this.activeFilters != undefined) delete this.activeFilters[key];
         if(this.activeConditions != undefined) delete this.activeConditions[key];
-                
+
         for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
-            
+
             if (i == key){
                 obj.mdxQuery.drillDown(value);
             }
             else
                 conditions = obj.mdxQuery.replaceConditionsByDrill(key,value);
-                    
+
             Dashboard.update(obj.chartObject);
         }
         if(conditions.length > 0)
             this.activeConditions[key] = conditions;
-            
+
         Dashboard.update(Dashboard.getComponent(this.name));
         Dashboard.decrementRunningCalls();
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.drillUp = function(key){
-    
+
         Dashboard.incrementRunningCalls();
         var conditions = [];
-        
+
         //CLean previous conditions,drill, and exclude messages for this id
         if(this.activeFilters != undefined) delete this.activeFilters[key];
         if(this.activeConditions != undefined) delete this.activeConditions[key];
-        
-        var keyObj = this.mdxQueries[key];	
+
+        var keyObj = this.mdxQueries[key];
         var value =  keyObj.mdxQuery.drillUp();
         for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
-            
+
             if (i != key){
                 if(keyObj.mdxQuery.axisPos > 0)
                     conditions = obj.mdxQuery.replaceConditionsByDrill(key,value);
                 else
                     obj.mdxQuery.removeCondition(key,value,'drill');
             }
-                    
+
             Dashboard.update(obj.chartObject);
         }
         if(conditions.length > 0)
             this.activeConditions[key] = conditions;
-    
-            
+
+
         Dashboard.update(Dashboard.getComponent(this.name));
         Dashboard.decrementRunningCalls();
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.replaceFocus = function(key,values){
         var i;
         for (i in this.mdxQueries)
             if(i != key)
-                this.mdxQueries[i].mdxQuery.removeConditions(key);		
-        
+                this.mdxQueries[i].mdxQuery.removeConditions(key);
+
         this.focus(key,values);
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.focus = function(key,values){
-        
+
         var conditions = [], i;
-        
+
         Dashboard.incrementRunningCalls();
-        
+
         //CLean previous conditions,drill, and exclude messages for this id
         if(this.activeFilters != undefined) delete this.activeFilters[key];
         if(this.activeConditions != undefined) delete this.activeConditions[key];
-                
+
         for (i in this.mdxQueries){
             if(i != key){
                 var obj = this.mdxQueries[i];
-                
+
                 for(i = 0; i < values.length; i++){
                     conditions = obj.mdxQuery.addCondition(key,values[i]);
                 }
-                    
+
                 Dashboard.update(obj.chartObject);
-                
+
             }
         }
         if(conditions.length > 0)
             this.activeConditions[key] = conditions;
-            
+
         Dashboard.update(Dashboard.getComponent(this.name));
         Dashboard.decrementRunningCalls();
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.exclude = function(key,value){
-    
+
             Dashboard.incrementRunningCalls();
             var members = value.split("].[");
             var memberValue = members[members.length-1].replace("]","");
             this.mdxQueries[key].mdxQuery.exclude(memberValue)
             Dashboard.update(this.mdxQueries[key].chartObject);
-            
+
             var a = this.activeFilters[key] || [];
             a.push([memberValue,value]);
             this.activeFilters[key] = a;
 
             var i;
-            
+
             //Replace focus from active conditions by exclude
             for (i in this.mdxQueries){
                 var query = this.mdxQueries[i];
@@ -653,29 +654,29 @@ define([
                     Dashboard.update(query.chartObject);
                 }
             }
-            
+
             //Remove previous focus message
             if(this.activeConditions[key] != undefined)
                 var indexCondition = this.activeConditions[key].indexOf(value);
                 if(indexCondition >= 0)
                     this.activeConditions[key].splice(indexCondition,1);
-            
+
             Dashboard.decrementRunningCalls();
-            
+
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.expand = function(key){
         this.mdxQueries[key].mdxQuery.axisDepth++;
         Dashboard.update(this.mdxQueries[key].chartObject);
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.collapse = function(key){
         this.mdxQueries[key].mdxQuery.axisDepth--;
         Dashboard.update(this.mdxQueries[key].chartObject);
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.resetAll = function(){
-    
+
         Dashboard.incrementRunningCalls();
         for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
@@ -688,13 +689,13 @@ define([
         this.activeConditions = {};
         Dashboard.update(Dashboard.getComponent(this.name));
         Dashboard.decrementRunningCalls();
-    
+
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.removeCondition = function(key,value){
-        
+
         Dashboard.incrementRunningCalls();
-        
+
         for (var i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             //Remove Conditions and related filters(because filters are added after drill down)
@@ -704,21 +705,21 @@ define([
             }
             else {
                 obj.mdxQuery.query.rows = typeof obj.mdxQuery.originalHash.rows == 'function'? obj.mdxQuery.originalHash.rows(): obj.mdxQuery.originalHash.rows;
-                obj.mdxQuery.axisPos = 0;	
+                obj.mdxQuery.axisPos = 0;
                 obj.mdxQuery.resetFilters();
             }
-            
+
             Dashboard.update(obj.chartObject);
         }
-    
+
         this.activeConditions[key].splice(this.activeConditions[key].indexOf(value),1);
-            
+
         Dashboard.update(Dashboard.getComponent(this.name));
         Dashboard.decrementRunningCalls();
     }
-    
+
     OlapUtils.mdxQueryGroup.prototype.removeFilter = function(key,value){
-        
+
         Dashboard.incrementRunningCalls();
         var index = this.mdxQueries[key].mdxQuery.resetFilter(value);
         for (var i in this.mdxQueries){
@@ -730,22 +731,22 @@ define([
         this.activeFilters[key].splice(index,1);
         if(this.activeFilters[key].length ==0)
             delete this.activeFilters[key];
-            
+
         Dashboard.update(Dashboard.getComponent(this.name));
         Dashboard.decrementRunningCalls();
     }
-    
+
     OlapUtils.mdxQueryGroupActionCallback = function(e,value,m){
-    
+
         if (value == "cancel")
             return;  // do nothing.
-    
+
         Dashboard.incrementRunningCalls();
-        
+
         var mqg = OlapUtils.lastClickedMdxQueryGroup;
         var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
         var axis = typeof clickedObj.mdxQuery.query.rows == 'function'?clickedObj.mdxQuery.query.rows():clickedObj.mdxQuery.query.rows;
-    
+
         if (value == "drilldown"){
             mqg.drillDown(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]");
         }
@@ -767,20 +768,20 @@ define([
         else if (value == "resetall"){
             mqg.resetAll();
         }
-        
+
         Dashboard.update(Dashboard.getComponent(mqg.name));
         Dashboard.decrementRunningCalls();
     }
-    
+
     OlapUtils.getAxisPathString = function(axis,axisPath){
         var a = [];
         $.each(axisPath, function(i,v){ a.push("["+ v +"]"); });
         return axis + "." + a.join(".");
     }
-    
+
     OlapUtils.changeEvolutionType = function(object){
-    
-    
+
+
         var value = "";
         var selector = document.getElementsByName(object);
         for(var i= 0, len  = selector.length; i < len; i++){
@@ -788,8 +789,8 @@ define([
                 value = selector[i].value;
                 continue;
             };
-        } 
-    
+        }
+
         this.fireChange("OlapUtils.evolutionType",value);
     }
 
@@ -799,13 +800,13 @@ define([
 
 
     OlapUtils.GenericMdxQuery = Base.extend({
-    
+
             mdxQuery : undefined,
-    
+
             options : {},
             tableDefaults: {},
             chartDefaults: {},
-    
+
             genericDefaults : {
                 dateDim: '[Date]',
                 dateLevel: '[Date]',
@@ -817,47 +818,47 @@ define([
                 orderBy: undefined,
                 debug: false
             },
-    
+
             constructor: function(options){
             },
-            
+
             getQuery: function(){
-    
+
                 /*for(o in this.options)
                     this.options[o] = OlapUtils.ev(this.options[o]);*/
-                    
+
                 this.query = this.mdxQuery.getQuery();
-                    
+
                 if(this.options.debug == true){
                     alert(this.query);
                 }
-                
-                
-                
+
+
+
                 return this.query;
             },
-    
+
             getDataTableOptions: function(options){
                 $.extend(this.tableDefaults,options);
                 return TableComponent.getDataTableOptions(this.tableDefaults);
             },
-    
+
             getChartOptions: function(options){
                 $.extend(this.chartDefaults,options);
                 return this.chartDefaults;
             }
-    
-    
-        }); 
-        
-    
+
+
+        });
+
+
     OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
-    
+
             mdxQuery : undefined,
             thisMonth :"",
             lastMonth :"",
             lastYearMonth :"",
-            
+
             specificDefaults : {
                 baseDate: '2008-10-01',
                 rows: '[Locale Codes]',
@@ -865,7 +866,7 @@ define([
                 measure: '[Total Month Requests]',
                 debug: false
             },
-            
+
             tableDefaults : {
                 colHeaders: ["Dimension",'Total', '% m/m', '% m/m-12', 'Last 12 months'],
                 colTypes: ['string', 'numeric', 'numeric', 'numeric', 'sparkline'],
@@ -875,18 +876,18 @@ define([
                 sparklineType: "line",
                 sortBy: [[1,'desc']]
             },
-            
-            
+
+
             constructor: function(options,object){
-    
+
                 this.options = jQuery.extend({}, this.genericDefaults, this.specificDefaults, options);
                 var options = this.options;
                 //options.baseDate = OlapUtils.ev(options.baseDate);
                 var thisPeriod = options.dateDim+".[This Period]";
                 var lastPeriod = options.dateDim+".[Previous Period]";
                 var lastYearPeriod = options.dateDim+".[Last Year Period]";
-                var nonEmptyMeasure = ".[Not Null Measure]";		
-                
+                var nonEmptyMeasure = ".[Not Null Measure]";
+
                 this.queryBase = {
                     from: options.from,
                     rows: options.rows,
@@ -915,29 +916,29 @@ define([
                     where:{
                         dateBase: ""+options.dateDim+".[TodaysMonth]"
                     }
-    
+
                 };
                 // Init this querybase
                 this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
-    
+
             },
-    
+
             queryBase : {}
-            
-    
+
+
         });
-    
-    
-    
+
+
+
     OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
-    
+
             chartTypesTranslation: {},
             translationHash: {},
             mdxQuery : undefined,
             thisMonth :"",
             lastMonth :"",
             lastYearMonth :"",
-            
+
             specificDefaults : {
                 startDate: '2008-10-01',
                 endDate: '2008-11-01',
@@ -948,7 +949,7 @@ define([
                 debug: false,
                 where: {}
             },
-            
+
             tableDefaults : {
                 colHeaders: ['Name','Value'],
                 colTypes: ['string','numeric'],
@@ -956,7 +957,7 @@ define([
                 sortBy:[[1,'desc']],
                 lengthChange: false
             },
-    
+
             chartDefaults : {
                     domainLabelRotationDir: "up",
                     domainLabelRotation: "0",
@@ -970,49 +971,49 @@ define([
                     datasetType: function(){return this.parent.queryBase.extra.translationHash.datasetType;},
                     includeLegend: function(){return this.parent.queryBase.extra.translationHash.includeLegend;},
                     topCountAxis: function(){return this.parent.queryBase.extra.translationHash.axis[1];}
-    
+
                 },
-            
+
             constructor: function(options,object){
-    
+
                 this.options = jQuery.extend({}, this.genericDefaults, this.specificDefaults, options);
                 var options = this.options;
-    
+
                 this.chartTypesTranslation= {
                     "pie": {
                         type: "jFreeChartComponent",
-                        chartType: "PieChart", 
-                        datasetType: "CategoryDataset", 
-                        axis:["columns","rows"], 
-                        member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])", 
+                        chartType: "PieChart",
+                        datasetType: "CategoryDataset",
+                        axis:["columns","rows"],
+                        member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])",
                         includeLegend: false
                     },
                     "bar": {
                         type: "jFreeChartComponent",
-                        chartType: "BarChart", 
-                        datasetType: "CategoryDataset", 
-                        axis:["columns","rows"], 
-                        member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])", 
+                        chartType: "BarChart",
+                        datasetType: "CategoryDataset",
+                        axis:["columns","rows"],
+                        member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])",
                         includeLegend: false
                     },
                     "table": {
                         type: "tableComponent",
-                        chartType: "PieChart", 
-                        datasetType: "CategoryDataset", 
-                        axis:["columns","rows"], 
-                        member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])", 
+                        chartType: "PieChart",
+                        datasetType: "CategoryDataset",
+                        axis:["columns","rows"],
+                        member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])",
                         includeLegend: false
                     },
                     "trend": {
                         type: "jFreeChartComponent",
                         chartType: "AreaChart",
                         datasetType: "TimeSeriesCollection",
-                        axis:["rows","columns"], 
+                        axis:["rows","columns"],
                         member: "a",
                         includeLegend: true
                     }
                 };
-    
+
                 this.queryBase= {
                     from: options.from,
                     rows: options.rows,
@@ -1022,7 +1023,7 @@ define([
                     columns:  function(){return this.extra.translationHash["member"]} ,
                     swapRowsAndColumns: function(){return this.extra.translationHash["axis"][0]=="rows" },
                     orderBy: "Avg(a,"+options.measuresDim+"."+options.measure+")",
-    
+
                     sets: {
                         "a":
                         function(){return "a as '("+options.dateDim+"."+options.dateLevel+".[" + Utils.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateLevel+".["+ Utils.ev(options.endDate) + "])'"}
@@ -1031,35 +1032,35 @@ define([
                         daterange: ""+options.dateDim+".[Date Range] as Aggregate(a)",
                         average: ""+options.measuresDim+".[Avg] as 'Avg(a,"+options.measuresDim+"."+options.measure+")'"
                     },
-                    where: options.where,				
+                    where: options.where,
                     extra: {}
                 };
-    
+
                 // pass the properties of this to the chartDefaults
                 var _chart = Utils.clone(this);
                 delete _chart.chartDefaults;
                 this.chartDefaults.parent = _chart;
-                
+
                 this.setChartType(options.defaultChartType);
-    
+
                 // Init this querybase
                 this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
-    
+
             },
-    
+
             setChartType: function(chartType){
                 this.queryBase.extra.translationHash = this.chartTypesTranslation[chartType];
                 this.chartDefaults.parent.queryBase.extra.translationHash = this.chartTypesTranslation[chartType];
             },
-    
+
             getComponentType: function(){
                 return this.chartDefaults.parent.queryBase.extra.translationHash.type;
             },
-    
+
             queryBase : {}
-            
-    
+
+
         });
-        
+
         return OlapUtils;
 });

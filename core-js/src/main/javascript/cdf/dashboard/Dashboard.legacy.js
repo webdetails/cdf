@@ -24,7 +24,8 @@ define([
   './Dashboard.ext',
   './Dashboard',
   '../Logger',
-  '../lib/jquery'
+  '../lib/jquery',
+  'css!./Dashboard.legacy.css'
 ], function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
   Dashboard.implement({

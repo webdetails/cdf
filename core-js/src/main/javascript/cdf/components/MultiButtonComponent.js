@@ -14,7 +14,8 @@
 define([
   '../lib/jquery',
   './ToggleButtonBaseComponent',
-  '../dashboard/Utils'
+  '../dashboard/Utils',
+  'css!./MultiButtonComponent.css'
 ], function($, ToggleButtonBaseComponent, Utils) {
 
   getCssWrapperClass = function(verticalOrientation) {

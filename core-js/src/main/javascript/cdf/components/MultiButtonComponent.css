@@ -1,0 +1,48 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.pentaho-toggle-button-up button {
+  background: #eee;
+  border: 1px outset white;
+}
+
+.pentaho-toggle-button-down button {
+  background: silver;
+  border: 1px inset gray;
+}
+
+
+.boxshadow .pentaho-toggle-button-up button {
+  background: #eee;
+  border: 1px solid gray;
+  box-shadow: inset 1px 1px 4px white,
+  inset -1px -1px 3px silver;
+  -webkit-box-shadow: inset 1px 1px 4px white,
+  inset -1px -1px 3px silver;
+  -moz-box-shadow: inset 1px 1px 4px white,
+  inset -1px -1px 3px silver;
+  -o-box-shadow: inset 1px 1px 4px white,
+  inset -1px -1px 3px silver;
+  -ms-box-shadow: inset 1px 1px 4px white,
+  inset -1px -1px 3px silver;
+}
+
+.boxshadow .pentaho-toggle-button-down button {
+  background: silver;
+  border: 1px solid black;
+  box-shadow: inset 1px 1px 1px gray;
+  -webkit-box-shadow: inset 1px 1px 1px gray;
+  -moz-box-shadow: inset 1px 1px 1px gray;
+  -o-box-shadow: inset 1px 1px 1px gray;
+  -ms-box-shadow: inset 1px 1px 1px gray;
+}
