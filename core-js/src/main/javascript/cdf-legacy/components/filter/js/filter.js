@@ -402,18 +402,13 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
      * @type Output
      */
     outputDataHandler: void 0,
-    update: function() {
-      var initMVC, that;
-      that = this;
-      initMVC = function(data) {
-        var deferred;
-        deferred = new $.Deferred();
-        that.initialize().then(function(configuration) {
-          deferred.resolve(data);
-        });
-        return deferred.promise();
-      };
-      this.getData().then(initMVC, _.bind(this.onDataFail, this)).then(_.bind(this.onDataReady, this));
+    update: function () {
+      this.getData()
+        .then(_.bind(function(data) {
+          this.initialize();
+          return data;
+        }, this), _.bind(this.onDataFail, this))
+        .then(_.bind(this.onDataReady, this));
       return this;
     },
     close: function() {
@@ -446,8 +441,7 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       /**
        * Transform user-defined CDF settings to our own configuration object
        */
-      var configuration, deferred;
-      configuration = this.getConfiguration();
+      var configuration = this.getConfiguration();
       this.close();
 
       /**
@@ -471,9 +465,8 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
         options: configuration.output
       });
       this.listenTo(this.outputDataHandler, 'changed', this.processChange);
-      deferred = new $.Deferred();
-      deferred.resolve(configuration);
-      return deferred.promise();
+      
+      return configuration;
     },
 
     /**

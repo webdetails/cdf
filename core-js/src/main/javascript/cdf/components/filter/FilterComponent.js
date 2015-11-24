@@ -419,16 +419,11 @@ define([
      */
     outputDataHandler: void 0,
     update: function () {
-      var that = this;
-      var initMVC = function (data) {
-        var deferred = new $.Deferred();
-        that.initialize().then(function (configuration) {
-          deferred.resolve(data);
-        });
-        return deferred.promise();
-      };
       this.getData()
-        .then(initMVC, _.bind(this.onDataFail, this))
+        .then(_.bind(function(data) {
+          this.initialize();
+          return data;
+        }, this), _.bind(this.onDataFail, this))
         .then(_.bind(this.onDataReady, this));
       return this;
     },
@@ -486,9 +481,8 @@ define([
         options: configuration.output
       });
       this.listenTo(this.outputDataHandler, 'changed', this.processChange);
-      var deferred = new $.Deferred();
-      deferred.resolve(configuration);
-      return deferred.promise();
+
+      return configuration;
     },
 
     /**
