@@ -192,6 +192,7 @@ define([
             expect(orderedChildren[2].item.get('model').get('label')).toEqual("label1");
             done();
           });
+          filterComponent.manager.renderSortedChildren();
         });
 
         dashboard.update(filterComponent);
@@ -276,6 +277,7 @@ define([
         runGetPageMechanismTest(false, 0, done);
       });
 
+      var count = 0;
       var runGetPageMechanismTest = function(serverSide, pageSize, done) {
         var dashboard = getNewDashboard();
         dashboard.addDataSource("testFilterComponentDataSource", {
@@ -295,7 +297,7 @@ define([
           } else {
             addEvaluateExpectationsInsteadOfFilter(testFilterComponent, serverSide, pageSize, done);
           }
-          testFilterComponent.manager.onFilterChange('');
+          testFilterComponent.manager.onFilterChange('unique_search_pattern_' + (count++));
         });
 
         dashboard.update(testFilterComponent);
@@ -428,12 +430,10 @@ define([
         var searchCount = [2, 4, 5, 1];
         filterComponent.once('getData:success', function() {
           // need to make sure the manager is already fully initialized
-          filterComponent.manager.once('post:update:children', function() {
-            for(var i = 0; i < searchTerms.length; i++) {
-              testSearch(filterComponent, searchTerms[i], searchCount[i]);
-            }
-            done();
-          });
+          for(var i = 0; i < searchTerms.length; i++) {
+            testSearch(filterComponent, searchTerms[i], searchCount[i]);
+          }
+          done();
         });
         dashboard.update(filterComponent);
       });
@@ -447,12 +447,10 @@ define([
         dashboard.addComponent(filterComponent);
         var searchCount = [6, 4, 3, 7];
         filterComponent.once('getData:success', function() {
-          filterComponent.manager.once('post:update:children', function() {
-            for(var i = 0; i < searchTerms.length; i++) {
-              testSearch(filterComponent, searchTerms[i], searchCount[i]);
-            }
-            done();
-          });
+          for(var i = 0; i < searchTerms.length; i++) {
+            testSearch(filterComponent, searchTerms[i], searchCount[i]);
+          }
+          done();
         });
         dashboard.update(filterComponent);
       });
