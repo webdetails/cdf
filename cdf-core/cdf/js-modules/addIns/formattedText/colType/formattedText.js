@@ -18,13 +18,13 @@ define([
   '../../../lib/jquery',
   'amd!../../../lib/datatables'
 ], function(AddIn, Dashboard, sprintf, $) {
-  
+
   var formattedText = new AddIn({
     name: "formattedText",
     label: "Formatted Text",
     defaults: {
-      textFormat: function(st, opt) {
-        return st.colFormat ? sprintf(st.colFormat, st.value) : st.value;
+      textFormat: function(v, st, opt) {
+        return st.colFormat ? sprintf(st.colFormat,v) : v;
       }
     },
 
@@ -32,11 +32,11 @@ define([
       $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];
       $.fn.dataTableExt.oSort[this.name + '-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
-    
+
     implementation: function(tgt, st, opt) {
-      $(tgt).empty().append(opt.textFormat.call(this, st, opt));
+      $(tgt).empty().append(opt.textFormat.call(this, st.value, st, opt));
     }
-    
+
   });
 
   Dashboard.registerGlobalAddIn("Table", "colType", formattedText);

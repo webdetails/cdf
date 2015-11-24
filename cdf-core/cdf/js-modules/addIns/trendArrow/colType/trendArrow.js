@@ -24,8 +24,8 @@ define([
   var trendArrow = new AddIn($.extend(true, {}, trendArrowBase, {
 
     defaults: {
-      valueFormat: function(st, opt) {
-        return sprintf(st.colFormat || "%.1f", st.value);
+      valueFormat: function(v,format,st, opt) {
+        return sprintf(format || "%.1f",v);
       },
       cssClass: 'trend',
       layout: '<div class="trend">&nbsp;</div>'

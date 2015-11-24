@@ -17,7 +17,7 @@ define([
   '../../../Dashboard',
   '../../../lib/jquery'
 ], function(AddIn, localizedTextBase, Dashboard, $) {
-  
+
   var localizedText = new AddIn($.extend(true, {}, localizedTextBase, {
 
     defaults: {

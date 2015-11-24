@@ -18,7 +18,7 @@ define([
   '../../../lib/jquery',
   'amd!../../../lib/datatables'
 ], function(AddIn, localizedTextBase, Dashboard, $) {
-  
+
   var localizedText = new AddIn($.extend(true, {}, localizedTextBase, {
 
     init: function() {

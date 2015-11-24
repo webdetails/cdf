@@ -14,13 +14,13 @@
 define([
   '../../lib/jquery'
 ], function($) {
-  
+
   return {
     name: "localizedText",
     label: "Localized Text",
     defaults: {
-      localize: function(st, opt) {
-        return st.dashboard.i18nSupport.prop(st.value);
+      localize: function(v, st, opt) {
+        return st.dashboard.i18nSupport.prop(v);
       }
     },
 
@@ -28,9 +28,8 @@ define([
 
     // reference to the dashboard needs to be passed via de state (st) input parameter
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       if(typeof opt.localize === "function" && st.dashboard && st.dashboard.i18nSupport) {
-        this.setText(this.defaults.localize(st, opt), tgt, opt);
+        this.setText(this.defaults.localize(st.value, st, opt), tgt, opt);
       } else {
         this.setText(st.value, tgt, opt);
       }

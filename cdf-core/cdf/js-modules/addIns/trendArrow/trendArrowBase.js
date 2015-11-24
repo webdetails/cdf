@@ -24,15 +24,14 @@ define([
       good: true,
       thresholds: {up: 0, down: 0},
       includeValue: false,
-      valueFormat: function(st, opt) {
-        return st.value || "";
+      valueFormat: function(v, format, st, opt) {
+        return v || "";
       }
     },
 
     init: function() { },
 
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       var qualityClass = opt.good ? "good" : "bad",
           /* Anything that's not numeric is an invalid value.
            * We consider "numeric" to mean either a number,
@@ -52,7 +51,7 @@ define([
           $tgt = $(tgt).empty();
 
       if(opt.includeValue) {
-        $tgt.append($("<div class='value'></div>").append(opt.valueFormat(st, opt)));
+        $tgt.append($("<div class='value'></div>").append(opt.valueFormat(st.value, st.colFormat, st, opt)));
       }
       $tgt.append($(opt.layout)).find('.' + opt.cssClass).addClass(trendClass).addClass(qualityClass);
     }

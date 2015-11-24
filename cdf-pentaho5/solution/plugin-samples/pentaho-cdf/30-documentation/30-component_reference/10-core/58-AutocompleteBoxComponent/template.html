@@ -129,7 +129,7 @@ clientSelectorDefinition: {
 	query: function() {
 		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
 		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+
-		"(Left([Customers].CurrentMember.Name, Len(\""+clients+"\")) = \""+clients+"\")),100.0,[Measures].[Sales]) ON ROWS "+
+		"(Left([Customers].CurrentMember.Name, Len(\"\")) = \"\")),100.0,[Measures].[Sales]) ON ROWS "+
 		"from [SteelWheelsSales]";
 		}
 	}

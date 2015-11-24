@@ -19,7 +19,7 @@ define([
   'amd!../../../lib/datatables',
   'css!./clippedText'
 ], function(AddIn, clippedTextBase, Dashboard, $) {
-  
+
   var clippedText = new AddIn($.extend(true, {}, clippedTextBase, {
     init: function() {
       $.fn.dataTableExt.oSort[this.name + '-asc'] = $.fn.dataTableExt.oSort['string-asc'];

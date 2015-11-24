@@ -21,7 +21,7 @@ define([
   'amd!../../../lib/jquery.sparkline',
   'css!./sparkline'
 ], function(AddIn, sparklineBase, Dashboard, Logger, $) {
-  
+
   var sparkline = new AddIn($.extend(true, {}, sparklineBase, {
 
     defaults: {
@@ -37,20 +37,20 @@ define([
       $.fn.dataTableExt.oSort[this.name + '-desc'] = function(a, b) {
         return myself.sort(b, a)
       };
-        
+
     },
-    
+
     sort: function(a, b) {
       return this.sumStrArray(a) - this.sumStrArray(b);
     },
-    
+
     sumStrArray: function(arr) {
-      return arr.split(',').reduce(function(prev, curr, index, array) {  
-        Logger.log("Current " + curr + "; prev " +  prev); 
+      return arr.split(',').reduce(function(prev, curr, index, array) {
+        Logger.log("Current " + curr + "; prev " +  prev);
         return parseFloat(curr) + (typeof(prev) === 'number' ? prev : parseFloat(prev));
       });
     },
-    
+
     getData: function(st, opt) {
       var data = st.value.split(/,/);
 
