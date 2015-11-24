@@ -1,0 +1,100 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.tableComponent{
+  margin-bottom:0em;
+}
+
+.tableComponent th{
+  text-align: center;
+}
+
+.tableComponent td.numeric{
+  text-align: right;
+  font-family: monospace;
+}
+
+.tableComponent td.string{
+  text-align: left;
+}
+
+.tableComponent td.sparkline{
+  text-align: center;
+}
+
+/* Overriding jquery.dataTable.css table.dataTable box-sizing style*/
+.dataTables_wrapper table.dataTable, .dataTables_wrapper table.dataTable th, .dataTables_wrapper table.dataTable td {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.dataTables_wrapper table.dataTable thead th, .dataTables_wrapper table.dataTable thead td {
+  border-bottom: 0;
+}
+
+/* Two-Button Classic Pagination */
+.paginate_disabled_previous, .paginate_enabled_previous,
+.paginate_disabled_next, .paginate_enabled_next {
+  height: 19px;
+  float: left;
+  cursor: pointer;
+  *cursor: hand;
+  color: #111;
+}
+.paginate_disabled_previous:hover, .paginate_enabled_previous:hover,
+.paginate_disabled_next:hover, .paginate_enabled_next:hover {
+  text-decoration: none !important;
+}
+.paginate_disabled_previous:active, .paginate_enabled_previous:active,
+.paginate_disabled_next:active, .paginate_enabled_next:active {
+  outline: none;
+}
+
+.paginate_disabled_previous,
+.paginate_disabled_next {
+  color: #666;
+}
+.paginate_disabled_previous, .paginate_enabled_previous {
+  padding-left: 23px;
+}
+.paginate_disabled_next, .paginate_enabled_next {
+  padding-right: 23px;
+  margin-left: 10px;
+}
+
+.paginate_disabled_previous {
+  background: url('../lib/dataTables/images/back_disabled.png') no-repeat top left;
+}
+
+.paginate_enabled_previous {
+  background: url('../lib/dataTables/images/back_enabled.png') no-repeat top left;
+}
+.paginate_enabled_previous:hover {
+  background: url('../lib/dataTables/images/back_enabled_hover.png') no-repeat top left;
+}
+
+.paginate_disabled_next {
+  background: url('../lib/dataTables/images/forward_disabled.png') no-repeat top right;
+}
+
+.paginate_enabled_next {
+  background: url('../lib/dataTables/images/forward_enabled.png') no-repeat top right;
+}
+.paginate_enabled_next:hover {
+  background: url('../lib/dataTables/images/forward_enabled_hover.png') no-repeat top right;
+}
+
+.cdfClickable{
+  cursor: pointer;
+}

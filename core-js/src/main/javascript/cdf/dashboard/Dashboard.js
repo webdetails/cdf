@@ -25,8 +25,7 @@ define([
   '../lib/jquery',
   'module',
   'amd!../lib/jquery.impromptu',
-  '../lib/shims',
-  'css!../lib/cdf.css'],
+  '../lib/shims'],
   function(Base, Logger, RefreshEngine, _, Backbone, $, module) {
 
   var Dashboard = Base.extend({

@@ -18,7 +18,8 @@ define([
   '../Logger',
   'amd!../lib/underscore',
   '../lib/jquery',
-  'amd!../lib/jquery.blockUI'
+  'amd!../lib/jquery.blockUI',
+  'css!./Dashboard.notifications.css'
 ], function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
 
   /**

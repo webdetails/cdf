@@ -22,7 +22,8 @@ define([
   '../lib/mustache',
   'amd!../lib/underscore',
   '../lib/jquery',
-  'amd!../lib/jquery.blockUI'
+  'amd!../lib/jquery.blockUI',
+  'css!./Popups.css'
 ], function(Mustache, _, $) {
 
   var Popups = {};

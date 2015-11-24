@@ -1,0 +1,155 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.cdfNotification.component * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+}
+
+.cdfNotification.component {
+  text-align:center;
+  padding:10px;
+  min-height:100%;
+}
+.cdfNotificationBody{
+  display:inline-block;
+  padding-left:33px;
+  text-align: left;
+  max-width:100%;
+  position:relative;
+  min-height:30px;
+}
+.cdfNotificationImg {
+  width:30px;
+  height:30px;
+  position:absolute;
+  top:0px;
+  left:0px;
+}
+.cdfNotificationTitle {
+  font-size:14px;
+  line-height:1.2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.cdfNotificationDesc {
+  font-size:11px;
+  line-height:1.2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.cdfNotification.small {
+  padding:5px;
+}
+
+.cdfNotification.small .cdfNotificationBody{
+  display:inline-block;
+  padding-left:17px;
+  text-align: left;
+  min-height:15px;
+}
+
+.cdfNotification.small .cdfNotificationImg {
+  height:15px;
+  width:15px;
+}
+
+.cdfNotification.small .cdfNotificationTitle {
+  font-size:11px;
+  line-height:1.1;
+  white-space:nowrap;}
+
+.cdfNotification.small .cdfNotificationDesc {
+  font-size:9px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+.cdfNotificationContainer {
+  z-index:2100;
+  position:fixed;
+  top:0px;
+  right:0px;
+  width:100%;
+}
+
+.cdfNotificationContainer .cdfNotification.growl {
+  float: right;
+}
+
+.img {
+  /* img class for divs posing as img ( TODO: use an alt-text replacement? ) */
+  display:inline-block;
+}
+
+
+
+.cdfPopupContainer * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+}
+.cdfPopupContainer {
+  position:fixed;
+  top: 30%;
+  left:50%;
+  z-index:2000;
+}
+.cdfPopup {
+  width: 390px;
+  margin-left: -195px;
+  background: #D0D0D1;
+  border:solid 2px #000000;
+  overflow:hidden;
+}
+.cdfPopupHeader {
+  height:42px;
+  line-height:42px;
+  width:100%;
+  text-align:center;
+  cursor:default;
+  font-size: 14px;
+  font-weight:bold;
+}
+.cdfPopupBody {
+  height:150px;
+  font-size:12px;
+}
+.cdfPopupDesc {
+  height: 90px;
+  padding-left:20px;
+  padding-right:20px;
+  text-align:center;
+  cursor:default;
+  text-overflow:ellipsis;
+  overflow:hidden;
+  white-space:pre;
+  margin-bottom:10px;
+}
+.cdfPopupButton {
+  height:35px;
+  line-height:35px;
+  border: solid 1px #000000;
+  border-radius: 2px;
+  margin-left:27px;
+  margin-right:27px;
+  text-align:center;
+  cursor:pointer;
+}
+.cdfPopupButton:hover {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
