@@ -42,7 +42,10 @@ module.exports = function(config) {
       {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true}
     ],
 
-    preprocessors: {'src/test/javascript/cdf/**/*.js': 'coverage'},
+    preprocessors: {
+      'target/test-javascript/cdf/**/*.js': 'coverage',
+      'target/test-javascript/lib/**/*.js': 'coverage',
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'

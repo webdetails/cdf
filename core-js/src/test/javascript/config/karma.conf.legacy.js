@@ -54,11 +54,6 @@ module.exports = function(config) {
       'src/test/javascript/cdf-legacy/main.js'
     ],
 
-    preprocessors: {
-      "src/javascript/cdf-legacy/*.js" : 'coverage',
-      "src/javascript/cdf-legacy/components/*.js" : 'coverage'
-    },
-
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
     //reporters: ['progress', 'junit', 'html', 'coverage'],
