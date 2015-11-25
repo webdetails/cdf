@@ -140,6 +140,65 @@ define([
       expect(filterComponent.getConfiguration().component.Item.options.showButtonOnlyThis).toEqual(false);
     });
 
+    it("sanitizes values and labels", function(done) {
+      dashboard.addDataSource("sanitizationDatasource", {
+        dataAccessId: "testId",
+        path: "/test.cda"
+      });
+      var modelData = [["One", "Label", "Value"],
+                       ["Two", "<script>Label</script>", "<script>Value</script>"],
+                       ["Three", "<b>Label</b>", "<b>Value</b>"],
+                       ["Three", "<b><script>Label</script></b>", "<b><script>Value</script></b>"]];
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success(getCdaJson(modelData,
+          [{colIndex: 0, colType: "String", colName: "id"},
+           {colIndex: 1, colType: "String", colName: "name"},
+           {colIndex: 2, colType: "String", colName: "value"}]));
+      });
+
+      var filterComponent = getNewFilterComponent({
+        queryDefinition: {dataSource: "sanitizationDatasource"},
+        componentInput: {valuesArray: []},
+        options: function() {
+          return {
+            component: {
+              search: {serverSide: true},
+              Root: {view: {scrollbar: {engine: "fake_engine"}}}
+            },
+            input: {
+              indexes: {
+                id: 0,
+                label: 1,
+                value: 2
+              }
+            }
+          };
+        }
+      });
+
+      dashboard.addComponent(filterComponent);
+
+      var evaluateExpectations = function(models, override) {
+        for(var i = 0; i < models.length; i++) {
+          var data = override[i] || modelData[i];
+          expect(models[i].get("label")).toEqual(data[1]);
+          expect(models[i].get("value")).toEqual(data[2]);
+        }
+      };
+
+      filterComponent.once("getData:success", function() {
+        filterComponent.dashboard.parameter;
+        var childrenModels = filterComponent.model.children().models;
+        var override = [];
+        override[1] = ["", "&lt;script&gt;Label&lt;/script&gt;", "&lt;script&gt;Value&lt;/script&gt;"];
+        override[3] = ["", "<b>&lt;script&gt;Label&lt;/script&gt;</b>", "<b>&lt;script&gt;Value&lt;/script&gt;</b>"];
+        evaluateExpectations(childrenModels, override);
+        done();
+      });
+
+      dashboard.update(filterComponent);
+    });
+
     describe("Manager controller #", function() {
       it("sorts children according to an array of custom sorting functions", function(done) {
         dashboard.addDataSource("selectionDataSource", {
