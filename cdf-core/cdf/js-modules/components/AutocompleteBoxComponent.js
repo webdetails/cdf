@@ -21,8 +21,8 @@ define([
 
   var AutocompleteBoxComponent = UnmanagedComponent.extend({
 
-    constructor: function(){
-      this.base.apply(this, arguments)
+    constructor: function() {
+      this.base.apply(this, arguments);
       this.selectedValues = [];
     },
 

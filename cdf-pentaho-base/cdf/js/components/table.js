@@ -702,7 +702,7 @@ var TableComponent = UnmanagedComponent.extend({
         dtData.aoColumns[i].sClass="column"+i;
       };
       $.each(options.colHeaders,function(i,val){
-        dtData.aoColumns[i].sTitle=val;
+        dtData.aoColumns[i].sTitle=Dashboards.escapeHtml(val);
         if(val == "") dtData.aoColumns[i].bVisible=false;
       });  // colHeaders
       if(options.colTypes!=undefined){

@@ -100,7 +100,8 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       component: {},
       input: {
         defaultModel: {
-          isDisabled: true
+          isDisabled: true,
+          searchPattern: ''
         },
         indexes: {
           id: 0,
@@ -146,11 +147,15 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
           deferred.resolve({});
           return deferred;
         }
-        var callback = _.bind(function(data) {
+        var successCallback = _.bind(function(data) {
           this.inputDataHandler.updateModel(data);
           this.model.setBusy(false);
           deferred.resolve(data);
           return data;
+        }, this);
+        var errorCallback = _.bind(function () {
+          this.model.setBusy(false);
+          deferred.reject();
         }, this);
         this.model.setBusy(true);
         try {
@@ -159,15 +164,15 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
           switch (page) {
             case 'previous':
               if (this.query.getOption('page') !== 0) {
-                this.query.previousPage(callback);
+                this.query.previousPage(successCallback);
               }
               break;
             case 'next':
-              this.query.nextPage(callback);
+              this.query.nextPage(successCallback);
               break;
             default:
               this.query.setOption('page', page);
-              this.query.doQuery(callback);
+              this.query.doQuery(successCallback, errorCallback);
           }
         } catch (_error) {
           deferred.reject({});

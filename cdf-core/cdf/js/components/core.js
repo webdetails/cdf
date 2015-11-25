@@ -1106,6 +1106,7 @@ var UnmanagedComponent = BaseComponent.extend({
         if(typeof always == "function") {
           always();
         }
+        return data;
     },
     this);
   },

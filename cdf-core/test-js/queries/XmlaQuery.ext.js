@@ -14,7 +14,7 @@
 define('cdf/queries/XmlaQuery.ext', [], function() {
 
   var XmlaQueryExt = {
-    getXmla: function() { return CONTEXT_PATH + "/Xmla"; }
+    getXmla: function() { return CONTEXT_PATH + "Xmla"; }
   };
   
   return XmlaQueryExt;
