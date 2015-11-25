@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence>
+  <title>timelineeventfeeder</title>
+  <version>1</version>
+  <logging-level>ERROR</logging-level>
+  <documentation>
+    <author>WebDetails</author>
+    <description>Reads timeplot events from table</description>
+    <help/>
+    <result-type/>
+    <icon/>
+  </documentation>
+  <inputs>
+    <TABLE type="string">
+      <sources>
+        <request>table</request>
+      </sources>
+      <default-value/>
+    </TABLE>
+    <JNDI type="string">
+      <sources>
+        <request>jndi</request>
+      </sources>
+      <default-value/>
+    </JNDI>
+    <GROUP type="string">
+      <sources>
+        <request>group</request>
+      </sources>
+      <default-value/>
+    </GROUP>
+    <SUBGROUP type="string">
+      <sources>
+        <request>subgroup</request>
+      </sources>
+      <default-value/>
+    </SUBGROUP>
+    <STARTDATE type="string">
+      <sources>
+        <request>startDate</request>
+      </sources>
+      <default-value/>
+    </STARTDATE>
+    <ENDDATE type="string">
+      <sources>
+        <request>endDate</request>
+      </sources>
+      <default-value/>
+    </ENDDATE>
+  </inputs>
+  <outputs>
+    <results type="string">
+      <destinations>
+        <response>content</response>
+      </destinations>
+    </results>
+  </outputs>
+  <actions>
+    <action-definition>
+      <component-name>JavascriptRule</component-name>
+      <action-type>JavaScript</action-type>
+      <action-inputs>
+        <TABLE type="string"/>
+        <STARTDATE type="string"/>
+        <ENDDATE type="string"/>
+        <GROUP type="string"/>
+        <SUBGROUP type="string"/>
+      </action-inputs>
+      <action-outputs>
+        <QUERY type="string"/>
+      </action-outputs>
+      <component-definition>
+        <script><![CDATA[
+
+					var queryCond = [];
+
+					// out.println("Event query - Group: " + GROUP  + "; Subgroup: " + SUBGROUP + ";");
+					queryCond.push( (GROUP == null || GROUP.length==0)?" e.event_group is null ": " e.event_group = '" + GROUP.replace(/'/g,"''") + "'"  );
+					(SUBGROUP == null || SUBGROUP.length==0)?"": queryCond.push( " e.event_subgroup = '" + SUBGROUP.replace(/'/g,"''") + "'");
+
+
+					var dateCond = "";
+					if (STARTDATE.length>0 && ENDDATE.length >0){
+					queryCond.push( "e.startDate between '" + STARTDATE + "' and '" + ENDDATE + "'");
+					}
+
+					var QUERY = "SELECT e.event_id, e.startDate, e.endDate, e.title, e.description, e.link FROM " + TABLE + " e where true and " + queryCond.join(" and ");
+
+					"e.event_group='main' and e.event_subgroup is null " + dateCond;
+
+					out.println(QUERY);
+					QUERY;
+
+					]]></script>
+      </component-definition>
+    </action-definition>
+    <action-definition>
+      <component-name>SQLLookupRule</component-name>
+      <action-type>Relational</action-type>
+      <action-inputs>
+        <JNDI type="string"/>
+        <QUERY type="string"/>
+      </action-inputs>
+      <action-outputs>
+        <query-result type="result-set" mapping="qry"/>
+      </action-outputs>
+      <component-definition>
+        <jndi>{JNDI}</jndi>
+        <live><![CDATA[false]]></live>
+        <query>{QUERY}</query>
+      </component-definition>
+    </action-definition>
+    <action-definition>
+      <component-name>JavascriptRule</component-name>
+      <action-type>JavaScript</action-type>
+      <action-inputs>
+        <qry type="result-set"/>
+      </action-inputs>
+      <action-outputs>
+        <results type="string"/>
+      </action-outputs>
+      <component-definition>
+        <script><![CDATA[
+
+					var r = new Packages.org.json.JSONStringer();
+					r.object();
+					r.key("dateTimeFormat").value("iso8601");
+
+
+					if (qry != null)
+					{
+
+					var rowCount = qry.getRowCount() ;
+
+					if(rowCount> 0)
+					{
+					r.key("events");
+					r.array();
+
+					for (i=0; i<rowCount; i++)
+						{
+						r.object();
+						r.key("start").value(qry.getValueAt(i,1));
+						r.key("end").value(qry.getValueAt(i,2));
+						r.key("title").value(qry.getValueAt(i,3));
+						r.key("description").value(qry.getValueAt(i,4));
+						r.key("link").value(qry.getValueAt(i,5));
+						r.endObject();
+						}
+
+						r.endArray();
+
+						}
+						}
+						r.endObject();
+
+						var results = r.toString();
+						results;
+
+						]]></script>
+      </component-definition>
+    </action-definition>
+  </actions>
+</action-sequence>

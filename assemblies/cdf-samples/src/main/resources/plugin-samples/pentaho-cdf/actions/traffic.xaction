@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+	<title>Drillable Bar Chart sourced from OLAP Source</title>
+	<version>1</version>
+	<logging-level>WARN</logging-level>
+	<documentation> 
+		<author>Pedro Alves</author>
+		<description>This demonstrates a chart with the ChartComponent in the action sequence with data is sourced from an OLAP cube. Common settings are specified in the associated resource xml file.</description>  
+		<help/>  
+		<result-type/> 
+	</documentation>
+
+	<inputs> 
+		<ROLE type="string"> 
+			<sources> 
+				<session>role</session> 
+			</sources> 
+			<default-value/>
+		</ROLE>  
+		<INTERVALS type="string"> 
+			<sources> 
+				<request>intervals</request> 
+			</sources>  
+			<default-value/> 
+		</INTERVALS>  
+		<JNDI type="string"> 
+			<sources> 
+				<request>jndi</request> 
+			</sources>  
+			<default-value/> 
+		</JNDI>  
+		<QUERY type="string"> 
+			<sources> 
+				<request>query</request> 
+			</sources>  
+			<default-value/> 
+		</QUERY>  
+		<CUBE type="string"> 
+			<sources> 
+				<request>cube</request> 
+			</sources>  
+			<default-value/> 
+		</CUBE>  
+		<CATALOG type="string"> 
+			<sources> 
+				<request>catalog</request> 
+			</sources>  
+			<default-value/>
+		</CATALOG>  
+
+	</inputs>
+
+	<outputs> 
+		<VALUE type="string"> 
+			<destinations> 
+				<response>content</response> 
+			</destinations> 
+		</VALUE> 
+	</outputs>
+
+	<actions>
+		<action-definition> 
+			<component-name>MDXLookupRule</component-name>
+			<action-type>OLAP</action-type>
+			<action-inputs> 
+				<QUERY type="string"/>  
+				<JNDI type="string"/>  
+				<CATALOG type="string"/>  
+				<CUBE type="string"/>
+				<ROLE type="string"/>
+			</action-inputs>
+			<action-resources/> 
+			<action-outputs> 
+				<query-results type="result-set" mapping="query_result"/> 
+			</action-outputs>
+			<component-definition> 
+				<location><![CDATA[mondrian]]></location>  
+				<query>{QUERY}</query>  
+				<jndi>{JNDI}</jndi> 
+				<cube>{CUBE}</cube>
+				<role>{ROLE}</role>
+				<catalog>{CATALOG}</catalog>
+			</component-definition> 
+		</action-definition>
+
+		<action-definition> 
+			<component-name>JavascriptRule</component-name>
+			<action-type>Format MDX Results</action-type>
+			<action-inputs> 
+				<query_result type="result-set"/> 
+				<TITLE type="string"/>
+			</action-inputs>
+			<action-outputs> 
+				<newResults type="result-set"/> 
+				<maxValue type="string"/> 
+				<firstInterval type="string"/> 
+				<secondInterval type="string"/> 
+				<thirdInterval type="string"/> 
+				<lastInterval type="string"/> 
+				<VALUE type="string"/>
+			</action-outputs>
+			<component-definition> 
+				<script><![CDATA[
+
+					// MDX to Relation result set, needed for the 
+
+					var VALUE;
+					var newResults = new JavaScriptResultSet();
+					newResults.setColumnHeaders('Value');
+
+
+					if (query_result != null)
+					{
+					var rsmd = query_result.getMetaData() ;
+					var a = new Array();
+					a[0] = Math.round(query_result.getValueAt(0,0));
+					VALUE = a[0];
+					out.println("VALUE: " + VALUE);
+					
+
+					newResults.addRow(a);
+
+					};
+
+					newResults;
+
+					]]></script> 
+			</component-definition> 
+		</action-definition>
+
+	</actions> 
+</action-sequence>
