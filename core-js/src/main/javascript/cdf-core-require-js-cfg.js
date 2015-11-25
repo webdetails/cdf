@@ -16,61 +16,50 @@
  */
 (function() {
 
-  var requirePaths = requireCfg.paths;
+  requireCfg.map = requireCfg.map || {};
+  requireCfg.map['*'] = requireCfg.map['*'] || {};
 
-  var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
+  var isDebug = typeof document === "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  var prefix;
   if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" &&  ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
-    prefix = requirePaths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
+    requireCfg.paths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
   } else if(typeof KARMA_RUN !== "undefined") { // unit tests
-    prefix = requirePaths['cdf'] = 'target/test-javascript/cdf';
+    requireCfg.paths['cdf'] = 'target/test-javascript/cdf';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production
-
     //if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
-
-    prefix = requirePaths['cdf'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
-  } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
-
+    requireCfg.paths['cdf'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
+  } else if(typeof FULL_QUALIFIED_URL !== "undefined") { // embedded
     //if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
-
-    prefix = requirePaths['cdf'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
+    requireCfg.paths['cdf'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');
   } else { // build
-    prefix = requirePaths['cdf'] = "cdf";
+    requireCfg.paths['cdf'] = "cdf";
   }
 
   /*
-   * Because CCC components are in a subfolder named "ccc", we need to set each component path so the
-   * same path prefix ("cdf/components") can be used. Avoid specific path preprocessing (e.g. CDE renderer).
+   * Because some components are in subfolders, we need to map their module ids so we are able to use the format {plugin}/componentes/{component_name}
    */
-  requirePaths['cdf/components/BaseCccComponent'] = prefix + '/components/ccc/BaseCccComponent';
-  requirePaths['cdf/components/CccAreaChartComponent'] = prefix + '/components/ccc/CccAreaChartComponent';
-  requirePaths['cdf/components/CccBarChartComponent'] = prefix + '/components/ccc/CccBarChartComponent';
-  requirePaths['cdf/components/CccBoxplotChartComponent'] = prefix + '/components/ccc/CccBoxplotChartComponent';
-  requirePaths['cdf/components/CccBulletChartComponent'] = prefix + '/components/ccc/CccBulletChartComponent';
-  requirePaths['cdf/components/CccDotChartComponent'] = prefix + '/components/ccc/CccDotChartComponent';
-  requirePaths['cdf/components/CccHeatGridChartComponent'] = prefix + '/components/ccc/CccHeatGridChartComponent';
-  requirePaths['cdf/components/CccLineChartComponent'] = prefix + '/components/ccc/CccLineChartComponent';
-  requirePaths['cdf/components/CccMetricDotChartComponent'] = prefix + '/components/ccc/CccMetricDotChartComponent';
-  requirePaths['cdf/components/CccMetricLineChartComponent'] = prefix + '/components/ccc/CccMetricLineChartComponent';
-  requirePaths['cdf/components/CccNormalizedBarChartComponent'] = prefix + '/components/ccc/CccNormalizedBarChartComponent';
-  requirePaths['cdf/components/CccParCoordComponent'] = prefix + '/components/ccc/CccParCoordComponent';
-  requirePaths['cdf/components/CccPieChartComponent'] = prefix + '/components/ccc/CccPieChartComponent';
-  requirePaths['cdf/components/CccStackedAreaChartComponent'] = prefix + '/components/ccc/CccStackedAreaChartComponent';
-  requirePaths['cdf/components/CccStackedDotChartComponent'] = prefix + '/components/ccc/CccStackedDotChartComponent';
-  requirePaths['cdf/components/CccStackedLineChartComponent'] = prefix + '/components/ccc/CccStackedLineChartComponent';
-  requirePaths['cdf/components/CccTreemapChartComponent'] = prefix + '/components/ccc/CccTreemapChartComponent';
-  requirePaths['cdf/components/CccWaterfallChartComponent'] = prefix + '/components/ccc/CccWaterfallChartComponent';
-  requirePaths['cdf/components/CccSunburstChartComponent'] = prefix + '/components/ccc/CccSunburstChartComponent';
-
+  requireCfg.map['*']['cdf/components/BaseCccComponent'] = 'cdf/components/ccc/BaseCccComponent';
+  requireCfg.map['*']['cdf/components/CccAreaChartComponent'] = 'cdf/components/ccc/CccAreaChartComponent';
+  requireCfg.map['*']['cdf/components/CccBarChartComponent'] = 'cdf/components/ccc/CccBarChartComponent';
+  requireCfg.map['*']['cdf/components/CccBoxplotChartComponent'] = 'cdf/components/ccc/CccBoxplotChartComponent';
+  requireCfg.map['*']['cdf/components/CccBulletChartComponent'] = 'cdf/components/ccc/CccBulletChartComponent';
+  requireCfg.map['*']['cdf/components/CccDotChartComponent'] = 'cdf/components/ccc/CccDotChartComponent';
+  requireCfg.map['*']['cdf/components/CccHeatGridChartComponent'] = 'cdf/components/ccc/CccHeatGridChartComponent';
+  requireCfg.map['*']['cdf/components/CccLineChartComponent'] = 'cdf/components/ccc/CccLineChartComponent';
+  requireCfg.map['*']['cdf/components/CccMetricDotChartComponent'] = 'cdf/components/ccc/CccMetricDotChartComponent';
+  requireCfg.map['*']['cdf/components/CccMetricLineChartComponent'] = 'cdf/components/ccc/CccMetricLineChartComponent';
+  requireCfg.map['*']['cdf/components/CccNormalizedBarChartComponent'] = 'cdf/components/ccc/CccNormalizedBarChartComponent';
+  requireCfg.map['*']['cdf/components/CccParCoordComponent'] = 'cdf/components/ccc/CccParCoordComponent';
+  requireCfg.map['*']['cdf/components/CccPieChartComponent'] = 'cdf/components/ccc/CccPieChartComponent';
+  requireCfg.map['*']['cdf/components/CccStackedAreaChartComponent'] = 'cdf/components/ccc/CccStackedAreaChartComponent';
+  requireCfg.map['*']['cdf/components/CccStackedDotChartComponent'] = 'cdf/components/ccc/CccStackedDotChartComponent';
+  requireCfg.map['*']['cdf/components/CccStackedLineChartComponent'] = 'cdf/components/ccc/CccStackedLineChartComponent';
+  requireCfg.map['*']['cdf/components/CccTreemapChartComponent'] = 'cdf/components/ccc/CccTreemapChartComponent';
+  requireCfg.map['*']['cdf/components/CccWaterfallChartComponent'] = 'cdf/components/ccc/CccWaterfallChartComponent';
+  requireCfg.map['*']['cdf/components/CccSunburstChartComponent'] = 'cdf/components/ccc/CccSunburstChartComponent';
   /*
    * Filter component is in a subfolder of its own
    */
-
-  requireCfg.map = requireCfg.map || {};
-  requireCfg.map['*'] = requireCfg.map['*'] || {};
   requireCfg.map['*']['cdf/components/FilterComponent'] = 'cdf/components/filter/FilterComponent';
-
-
 
 })();

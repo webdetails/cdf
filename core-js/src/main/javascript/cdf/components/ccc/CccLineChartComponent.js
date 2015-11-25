@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseCccComponent', '../lib/CCC/pvc'],
-  function(BaseCccComponent, pvc) {
+define([
+  './BaseCccComponent',
+  '../../lib/CCC/pvc'
+], function(BaseCccComponent, pvc) {
 
   var CccLineChartComponent = BaseCccComponent.extend({
     cccType: pvc.LineChart
