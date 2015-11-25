@@ -199,9 +199,15 @@
       exclude: [
         // CSSs
         'css!cdf/Dashboard',
+        "css!cdf/OlapUtils",
         'css!cdf/lib/blueprint/screen',
         "css!cdf/lib/impromptu/jquery-impromptu",
         "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
+        "css!cdf/components/TableComponent",
+        "css!cdf/components/MultiButtonComponent",
+        "css!cdf/dashboard/Dashboard.legacy",
+        "css!cdf/dashboard/Dashboard.notifications",
+        "css!cdf/dashboard/Popups",
 
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         'cdf/lib/jquery',
@@ -233,15 +239,7 @@
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
         "cdf/queries/CdaQuery.ext",
-        "cdf/queries/XmlaQuery.ext",
-
-        // Exclude css files
-        "css!cdf/OlapUtils.css",
-        "css!cdf/components/MultiButtonComponent.css",
-        "css!cdf/dashboard/Dashboard.legacy.css",
-        "css!cdf/dashboard/Dashboard.notifications.css",
-        "css!cdf/dashboard/Popups.css",
-        "css!cdf/components/TableComponent.css"
+        "cdf/queries/XmlaQuery.ext"
       ]
     },
     {
@@ -287,10 +285,16 @@
       exclude: [
         // CSSs
         "css!cdf/Dashboard",
+        "css!cdf/OlapUtils",
         "css!cdf/lib/Bootstrap/css/bootstrap",
         "css!cdf/lib/font-awesome/css/font-awesome",
         "css!cdf/lib/impromptu/jquery-impromptu",
         "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
+        "css!cdf/components/MultiButtonComponent",
+        "css!cdf/components/TableComponent",
+        "css!cdf/dashboard/Dashboard.legacy",
+        "css!cdf/dashboard/Dashboard.notifications",
+        "css!cdf/dashboard/Popups",
 
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         "cdf/lib/jquery",
@@ -327,15 +331,7 @@
         "cdf/dashboard/Dashboard.storage.ext",
         "cdf/dashboard/Dashboard.views.ext",
         "cdf/queries/CdaQuery.ext",
-        "cdf/queries/XmlaQuery.ext",
-
-        // Exclude css files
-        "css!cdf/OlapUtils.css",
-        "css!cdf/components/MultiButtonComponent.css",
-        "css!cdf/dashboard/Dashboard.legacy.css",
-        "css!cdf/dashboard/Dashboard.notifications.css",
-        "css!cdf/dashboard/Popups.css",
-        "css!cdf/components/TableComponent.css"
+        "cdf/queries/XmlaQuery.ext"
       ]
     },
     {
@@ -386,7 +382,13 @@
       exclude: [
         // CSSs
         'css!cdf/Dashboard',
+        "css!cdf/OlapUtils",
         "css!cdf/lib/impromptu/jquery-impromptu",
+        "css!cdf/components/MultiButtonComponent",
+        "css!cdf/components/TableComponent",
+        "css!cdf/dashboard/Dashboard.legacy",
+        "css!cdf/dashboard/Dashboard.notifications",
+        "css!cdf/dashboard/Popups",
 
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         'cdf/lib/jquery',
@@ -421,12 +423,7 @@
         "cdf/queries/XmlaQuery.ext",
 
         // Exclude css files
-        "css!cdf/OlapUtils.css",
-        "css!cdf/components/MultiButtonComponent.css",
-        "css!cdf/dashboard/Dashboard.legacy.css",
-        "css!cdf/dashboard/Dashboard.notifications.css",
-        "css!cdf/dashboard/Popups.css",
-        "css!cdf/components/TableComponent.css"
+
       ]
     }
   ]
