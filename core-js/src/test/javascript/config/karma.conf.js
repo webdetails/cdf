@@ -36,9 +36,10 @@ module.exports = function(config) {
       'src/test/javascript/config/require-config.js',
       {pattern: 'src/test/javascript/cdf/**/*.ext.js', included: true},
       // fix 404 messages
-      {pattern: 'target/test-javascript/cdf/**/*.png', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/cdf/**/*.gif', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/cdf/**/*.svg', watched: false, included: false, served: true}
+      {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: true, served: true},
+      {pattern: 'target/test-javascript/**/*.png', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/**/*.gif', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true}
     ],
 
     preprocessors: {'src/test/javascript/cdf/**/*.js': 'coverage'},
