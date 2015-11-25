@@ -53,10 +53,9 @@ module.exports = function(config) {
       {pattern: 'src/test/javascript/cdf-legacy/**/*.js', included: false}
     ],
 
-    // list of files to exclude
-    exclude: [],
-
-    preprocessors: {'src/main/javascript/cdf-legacy/**/*.js': 'coverage'},
+    preprocessors: {
+      "target/test-javascript/cdf-legacy/*.js" : 'coverage'
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'

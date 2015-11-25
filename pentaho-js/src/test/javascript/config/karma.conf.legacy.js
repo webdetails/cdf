@@ -52,11 +52,6 @@ module.exports = function(config) {
       {pattern: 'src/test/javascript/cdf-legacy/**/*.js', included: false}
     ],
 
-    // list of files to exclude
-    exclude: [],
-
-    preprocessors: {'src/main/javascript/cdf-legacy/**/*.js': 'coverage'},
-
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',

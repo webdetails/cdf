@@ -38,8 +38,6 @@ module.exports = function(config) {
       {pattern: 'target/test-javascript/cdf/**/*.svg', watched: false, included: false, served: true}
     ],
 
-    preprocessors: {'src/test/javascript/cdf/**/*.js': 'coverage'},
-
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
     reporters: ['progress', 'junit', 'html', 'coverage'],
@@ -47,18 +45,18 @@ module.exports = function(config) {
     //reporter: coverage
     coverageReporter: {
       type: 'cobertura',
-      dir: 'bin/test-reports/coverage/reports/'
+      dir: 'target/coverage-reports/cdf-javascript'
     },
 
     //reporter: junit
     junitReporter: {
-      outputFile: 'bin/test-reports/test-results.xml',
+      outputFile: 'target/js-reports/cdf-results.xml',
       suite: 'unit'
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'bin/test-reports/karma_html',
+      outputDir: 'target/coverage-reports/cdf-javascript',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
