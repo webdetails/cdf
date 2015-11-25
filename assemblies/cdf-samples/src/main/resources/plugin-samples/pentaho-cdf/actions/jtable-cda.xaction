@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+  <title>JTable with CDA data source</title>
+  <version>1</version>
+  <logging-level>ERROR</logging-level>
+  <documentation> 
+    <author/>  
+    <description>JTable with CDA data source</description>  
+    <help/>  
+    <result-type/>  
+    <icon/> 
+  </documentation>
+
+  <inputs>  
+	<QUERY_TYPE type="string">
+		<sources>
+			<request>queryType</request>
+		</sources>
+		<default-value>cda</default-value>
+	</QUERY_TYPE> 
+	
+	<CDAFILE type="string">
+		<sources>
+			<request>cdaFile</request>
+		</sources>
+		<default-value/>
+	</CDAFILE>
+	<DATAACCESSID type="string">
+		<sources>
+			<request>dataAccessId</request>
+		</sources>
+		<default-value/>
+	</DATAACCESSID>
+	<CDAPARAMETERSTRING type ="string">
+		<sources>
+			<request>cdaParameterString</request>
+		</sources>
+		<default-value></default-value>
+	</CDAPARAMETERSTRING>
+  </inputs>
+
+  <outputs> 
+	<results type="string"> 
+      <destinations>
+        <response>content</response>
+      </destinations>
+    </results>
+    
+  </outputs>
+  
+  <actions>
+  
+	
+	<actions> 
+		<condition><![CDATA[QUERY_TYPE == "cda"]]></condition>
+		<action-definition> 
+		  <component-name>CdaQueryComponent</component-name>
+		  <action-type>CDA Query</action-type>
+		  <action-inputs> 
+			  <CDAFILE type ="string"/>
+			  <DATAACCESSID type="string"/>  
+			  <CDAPARAMETERSTRING type="string" />
+		  </action-inputs>
+		  <action-outputs>
+			  <resultSet type="result-set" mapping="query_result"/> 
+			  </action-outputs>
+		  <component-definition> 
+			  <file>{CDAFILE}</file>  
+			  <dataAccessId>{DATAACCESSID}</dataAccessId>
+		  </component-definition> 
+		</action-definition>
+	</actions> 
+	
+	<action-definition> 
+      <component-name>JavascriptRule</component-name>
+      <action-type>JavaScript</action-type>
+      <action-inputs> 
+        <query_result type="result-set"/> 
+		<QUERY_TYPE type="string"/>
+      </action-inputs>
+      <action-outputs> 
+        <results type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <script><![CDATA[// MDX to Relation result set, needed for the 
+
+		var obj = new Packages.org.json.JSONStringer();	
+		var metadata = new Packages.org.json.JSONArray();
+		var values = new Packages.org.json.JSONArray();
+		
+		if (query_result != null)
+		{
+		
+			var rsmd = query_result.getMetaData() ;
+			var colHeaders = rsmd.getColumnHeaders() ;
+			var rowHeaders = rsmd.getRowHeaders() ;
+			
+			var colCount = rsmd.getColumnCount() ;
+			var rowCount = query_result.getRowCount() ;
+			
+			for(j = 0; j < colCount; j++){
+				metadata.put(colHeaders[0][j].toString() + '');
+			}
+			
+			if(rowCount> 0)
+			{		
+				for (i=0; i<rowCount; i++)
+				{
+					var value = new Packages.org.json.JSONArray();
+					if(QUERY_TYPE == "mdx")
+						//old 
+						// value.put(rowHeaders[i][0]);
+						//ingo: adding all rowheaders to result set
+						var rowHeadersCount = rowHeaders[0].length;
+			
+						for (k=0; k<rowHeadersCount; k++)
+						{
+							value.put(rowHeaders[i][k]);
+						}
+						
+					
+					for(j=0; j< colCount; j++)
+					{
+					    var v = query_result.getValueAt(i,j)+"";
+						value.put(v.replace(/Infinity/g,'0'));
+					}
+					
+					values.put(value);
+				}
+				
+			}
+		}
+		
+		
+		
+		obj.object();
+		obj.key("metadata").value(metadata);
+		obj.key("values").value(values);
+		obj.endObject();
+		
+		var results = new java.lang.String(obj.toString().getBytes("utf8"));
+		results;
+		]]></script> 
+      </component-definition> 
+    </action-definition>
+  
+   
+ 
+  </actions> 
+</action-sequence>
