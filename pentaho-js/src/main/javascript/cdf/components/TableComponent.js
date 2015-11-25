@@ -19,7 +19,8 @@ define([
     '../dashboard/Sprintf',
     '../lib/jquery',
     'amd!../lib/datatables',
-    '../addIns/colTypes'
+    '../addIns/colTypes',
+    'css!./TableComponent.css '
 ], function(Logger, Utils, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
