@@ -12,11 +12,11 @@
  */
 
 define([
-  './ChartComponent',
-  '../lib/CCC/pvc',
-  '../lib/modernizr',
-  '../lib/jquery',
-  '../lib/CCC/protovis-compat!'
+  '../ChartComponent',
+  '../../lib/CCC/pvc',
+  '../../lib/modernizr',
+  '../../lib/jquery',
+  '../../lib/CCC/protovis-compat!'
 ], function(ChartComponent, pvc, Modernizr, $, pv) {
 
   pvc.defaultCompatVersion(2);
