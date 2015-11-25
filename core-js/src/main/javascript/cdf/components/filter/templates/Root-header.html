@@ -9,7 +9,7 @@
          title="{{#header}}{{{header}}}{{/header}}{{^header}}{{#selectedItems}}{{{.}}}{{/selectedItems}}{{/header}}"
        {{/showTooltip}}>
     {{#isDisabled}}
-      {{{strings.isDisabled}}}
+      {{strings.isDisabled}}
     {{/isDisabled}}
     {{^isDisabled}}
       {{#showSelectedItems}}
@@ -23,16 +23,16 @@
             </span>
           {{/noItemsSelected}}
           {{#noItemsSelected}}
-            <span class="filter-root-info-selected-item">{{{strings.noItems}}}</span>
+            <span class="filter-root-info-selected-item">{{strings.noItems}}</span>
           {{/noItemsSelected}}
         </span>
       {{/showSelectedItems}}
       {{#showNumberOfSelectedItems}}
         {{#allItemsSelected}}
-          <span class="filter-root-info-selected-items">{{{strings.allItems}}}</span>
+          <span class="filter-root-info-selected-items">{{strings.allItems}}</span>
         {{/allItemsSelected}}
         {{#noItemsSelected}}
-          <span class="filter-root-info-selected-items">{{{strings.noItems}}}</span>
+          <span class="filter-root-info-selected-items">{{strings.noItems}}</span>
         {{/noItemsSelected}}
         {{^allItemsSelected}}
           {{^noItemsSelected}}
