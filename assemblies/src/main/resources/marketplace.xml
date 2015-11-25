@@ -1,6 +1,6 @@
 <version>
   <branch>${project.stage}</branch>
-  <version>${project.revision}</version>
+  <version>${project.version}</version>
   <name>${marketplace.metadata.name}</name>
   <package_url>
     ${marketplace.metadata.package_url}
