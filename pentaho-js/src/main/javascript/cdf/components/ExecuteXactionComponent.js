@@ -18,7 +18,7 @@ define([
   'amd!../lib/jquery.fancybox'
 ], function(XactionComponentExt, $, BaseComponent) {
 
-  var ExecuteXactionComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     visible: false,
     update: function() {
       // 2 modes of working; if it's a div, create a button inside it
@@ -71,7 +71,5 @@ define([
       });
     }
   });
-
-  return ExecuteXactionComponent;
 
 });

@@ -223,7 +223,7 @@ define([
    * @class UnmanagedComponent
    * @extends BaseComponent
    */
-  var UnmanagedComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     isManaged: false,
     isRunning: false,
 
@@ -816,5 +816,4 @@ define([
     }
   });
 
-  return UnmanagedComponent;
 });

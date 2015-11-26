@@ -16,7 +16,7 @@ define([
   'amd!../lib/underscore'
 ], function(UnmanagedComponent, _) {
 
-  var FreeformComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
   
     update: function() {
       var render = _.bind(this.render, this);
@@ -32,7 +32,5 @@ define([
       this.customfunction(parameters);
     }
   });
-  
-  return FreeformComponent;
 
 });

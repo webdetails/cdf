@@ -12,7 +12,7 @@
  */
 
 define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent, $) {
-  var SelectMultiComponent = SelectBaseComponent.extend({
+  return SelectBaseComponent.extend({
 
     /**
      * Gets the values selected of the select tag.
@@ -116,7 +116,5 @@ define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent,
       return this.valueAt(this.topIndex());
     }
   });
-
-  return SelectMultiComponent;
 
 });

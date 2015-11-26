@@ -11,10 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder',  '../Logger'],
-  function(DashboardExt, Encoder, Logger) {
+define([
+  '../dashboard/Dashboard.ext',
+  'common-ui/util/URLEncoder', 
+  '../Logger'
+], function(DashboardExt, Encoder, Logger) {
 
-  var JFreeChartComponentExt = {
+  return {
 
     getOpenFlashChart: function(result) {
       return result;
@@ -97,8 +100,6 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder',  '../Logger']
         }
       };
     }
-
   };
 
-  return JFreeChartComponentExt;
 });

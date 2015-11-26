@@ -13,7 +13,7 @@
 
 define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent) {
 
-  var ToggleButtonBaseComponent = InputBaseComponent.extend({
+  return InputBaseComponent.extend({
     draw: function(myArray) {
       var myself = this;
       //default
@@ -108,7 +108,5 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
       }, 1);
     }
   });
-
-  return ToggleButtonBaseComponent;
 
 });

@@ -13,12 +13,10 @@
 
 define(['./BaseComponent'], function(BaseComponent) {
 
-  var ManagedFreeformComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       this.customfunction(this.parameters || []);
     }
   });
-  
-  return ManagedFreeformComponent;
 
 });

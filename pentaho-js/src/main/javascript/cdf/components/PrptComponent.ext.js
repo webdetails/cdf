@@ -14,7 +14,7 @@
 define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
   function(DashboardExt, Encoder) {
 
-  var PrptComponentExt = {
+  return {
 
     getReport: function(path, callvar, parameters) {
       /* callvar = report || viewer */
@@ -35,5 +35,4 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
 
   };
 
-  return PrptComponentExt;
 });

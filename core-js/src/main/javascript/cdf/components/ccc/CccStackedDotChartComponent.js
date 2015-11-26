@@ -11,13 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseCccComponent', '../lib/CCC/pvc'],
-  function(BaseCccComponent, pvc) {
+define([
+  './BaseCccComponent',
+  '../../lib/CCC/pvc'
+], function(BaseCccComponent, pvc) {
 
-  var CccStackedDotChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.StackedDotChart
   });
-
-  return CccStackedDotChartComponent;
 
 });

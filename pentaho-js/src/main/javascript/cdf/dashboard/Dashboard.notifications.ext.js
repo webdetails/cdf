@@ -13,11 +13,10 @@
 
 define(['./Dashboard.ext'], function(DashboardExt) {
 
-  var DashboardNotificationsExt = {
+  return {
     getPing: function() {
       return DashboardExt.getCdfBase() + "/ping";
     }
   };
 
-  return DashboardNotificationsExt;
 });

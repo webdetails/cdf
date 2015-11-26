@@ -16,8 +16,6 @@
  * @module Dashboard
  */
 
-
-
 /**
  * Represents a clean (no css engine) dashboard. It's a specialization of the base abstract Dashboard class.
  * Require as cdf/Dashboard.Clean
@@ -54,9 +52,8 @@
  * @extends Dashboard
  */
 
-define(['./Dashboard'],
-    function(Dashboard) {
+define(['./Dashboard'], function(Dashboard) {
 
-      return Dashboard;
+  return Dashboard;
 
 });

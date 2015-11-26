@@ -11,10 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
-  function(DashboardExt, Encoder) {
+define([
+  '../dashboard/Dashboard.ext',
+  'common-ui/util/URLEncoder'
+], function(DashboardExt, Encoder) {
 
-  var AnalyzerComponentExt = {
+  return {
 
     getAnalyzer: function(path, callvar, parameters) {
       return Encoder.encode(
@@ -26,5 +28,4 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
 
   };
 
-  return AnalyzerComponentExt;
 });

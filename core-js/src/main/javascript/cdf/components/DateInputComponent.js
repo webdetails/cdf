@@ -17,7 +17,7 @@ define([
   'css!./DateInputComponent'
 ], function($, BaseComponent) {
 
-  var DateInputComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var myself = this;
       var format = (myself.dateFormat == undefined || myself.dateFormat == null)
@@ -99,7 +99,5 @@ define([
       }
     }
   });
-
-  return DateInputComponent;
   
 });

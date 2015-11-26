@@ -17,7 +17,7 @@ define([
   'pentaho/visual/Wrapper'
 ], function(_, UnmanagedComponent, VisualWrapper) {
 
-  var VisualizationAPIComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
 
     update: function() {
       this.beginQuery(this.queryDefinition, this.render);
@@ -45,5 +45,4 @@ define([
     }
   });
 
-  return VisualizationAPIComponent;
 });

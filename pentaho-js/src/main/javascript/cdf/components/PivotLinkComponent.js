@@ -19,7 +19,7 @@ define([
   'amd!../lib/jquery.fancybox'
 ], function(Utils, PivotLinkComponentExt, BaseComponent, $) {
 
-  var PivotLinkComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var title = this.tooltip == undefined ? "View details in a Pivot table" : this.tooltip;
       // WPG: this assumes name is global name, can I pass in the object directly instead?
@@ -66,7 +66,5 @@ define([
       });
     }
   });
-
-  return PivotLinkComponent;
 
 });

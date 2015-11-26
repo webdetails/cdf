@@ -13,13 +13,11 @@
 
 define(['./BaseComponent', '../OlapUtils'], function(BaseComponent, OlapUtils) {
 
-  var MdxQueryGroupComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     visible: false,
     update: function() {
       OlapUtils.updateMdxQueryGroup(this);
     }
   });
-
-  return MdxQueryGroupComponent;
 
 });

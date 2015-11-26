@@ -17,7 +17,7 @@ define([
   '../dashboard/Utils'
 ], function(UnmanagedComponent, _, Utils) {
 
-  var InputBaseComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
     update: function() {
       var qd = this.queryDefinition;
       if(this.valuesArray && this.valuesArray.length > 0) {
@@ -71,5 +71,4 @@ define([
     }
   });
 
-  return InputBaseComponent;
 });

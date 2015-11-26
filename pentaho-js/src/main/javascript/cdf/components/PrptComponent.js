@@ -19,7 +19,7 @@ define([
   './BaseComponent'
 ], function(PrptComponentExt, Logger, $, _, BaseComponent) {
 
-  var PrptComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     getIframeName: function() {
       return this.htmlObject + '_' + 'prptFrame';
     },
@@ -340,7 +340,5 @@ define([
       return form;
     }
   });
-
-  return PrptComponent;
 
 });

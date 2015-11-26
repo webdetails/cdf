@@ -80,7 +80,7 @@ define([
       var info = {target: tgt, status: st, options: opt};
       this.attachEvents($(tgt), opt.events, info);
       if(typeof opt.postProcess === "function") {
-        this.postProcess.call(this, info);
+        opt.postProcess.call(this, info);
       }
     },
 

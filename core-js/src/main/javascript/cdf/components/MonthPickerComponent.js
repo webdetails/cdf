@@ -13,7 +13,7 @@
 
 define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
-  var MonthPickerComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var myself = this;
       var selectHTML = myself.getMonthPicker(myself.name, myself.size, myself.initialDate, myself.minDate, myself.maxDate, myself.months);
@@ -168,7 +168,5 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       return n.substring(n.length - size, n.length);
     }
   });
-
-  return MonthPickerComponent;
   
 });

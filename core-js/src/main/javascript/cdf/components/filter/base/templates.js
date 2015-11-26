@@ -12,7 +12,7 @@
  */
 
 define([
-  'cdf/lib/mustache',
+  '../../../lib/mustache',
   'text!../templates/Group-skeleton.html',
   'text!../templates/Group-template.html',
   'text!../templates/Item-template.html',

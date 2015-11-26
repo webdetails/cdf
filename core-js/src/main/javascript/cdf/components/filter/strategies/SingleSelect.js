@@ -1,13 +1,26 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 /**
  * @module BaseFilter
  * @submodule SelectionStrategies
  */
 define([
-  'amd!cdf/lib/underscore',
+  'amd!../../../lib/underscore',
   './AbstractSelect',
   '../models/SelectionTree'
 ], function (_, AbstractSelect, SelectionTree) {
-  var SelectionStates = SelectionTree.SelectionStates;
+
   /**
    * Single Selection
    *  - only one item can be selected at any time
@@ -15,20 +28,20 @@ define([
    * @extends AbstractSelect
    * @constructor
    */
-  var SingleSelect = AbstractSelect.extend({
+  return AbstractSelect.extend({
     ID: 'BaseFilter.SelectionStrategies.SingleSelect',
     setSelection: function (newState, model) {
       if (model.children()) {
         return;
       }
       if (this.isLogicGlobal === true) {
-        model.root().setSelection(SelectionStates.NONE);
-      } else if (model.getSelection() !== SelectionStates.ALL) {
+        model.root().setSelection(SelectionTree.SelectionStates.NONE);
+      } else if (model.getSelection() !== SelectionTree.SelectionStates.ALL) {
         if (model.parent()) {
-          model.parent().setSelection(SelectionStates.NONE);
+          model.parent().setSelection(SelectionTree.SelectionStates.NONE);
         }
       }
-      model.setAndUpdateSelection(SelectionStates.ALL);
+      model.setAndUpdateSelection(SelectionTree.SelectionStates.ALL);
       return newState;
     },
     changeSelection: function (model) {
@@ -55,5 +68,5 @@ define([
 
     }
   });
-  return SingleSelect;
+
 });

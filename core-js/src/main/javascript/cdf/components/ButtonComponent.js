@@ -18,7 +18,7 @@ define([
   'css!./ButtonComponent'
 ], function(_, $, ActionComponent) {
 
-  var ButtonComponent = ActionComponent.extend({
+  return ActionComponent.extend({
     _docstring: function() {
       return "Button Component that triggers a server action when clicked";
     },
@@ -147,7 +147,5 @@ define([
       return _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller";
     }
   });
-
-  return ButtonComponent;
 
 });
