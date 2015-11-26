@@ -42,6 +42,8 @@
     <requirejs.build.file></requirejs.build.file>
     <global.require.file></global.require.file>
     <requirejs.config.files.pattern></requirejs.config.files.pattern>
+    <do.documentation.javascript>false</do.documentation.javascript>
+    <documentation.javascript.root></documentation.javascript.root>
   </properties>
 
   <dependencyManagement>
@@ -155,7 +157,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
 
   <profiles>
     <profile>
@@ -321,7 +322,6 @@
 
       <properties>
         <karma.file.config>karma.ci.conf.js</karma.file.config>
-        <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
       </properties>
 
       <build>
@@ -367,10 +367,9 @@
             <groupId>com.github.eirslett</groupId>
             <artifactId>frontend-maven-plugin</artifactId>
             <version>${dependency.frontend-maven-plugin.revision}</version>
-
             <executions>
               <execution>
-                <id>install node and npm</id>
+                <id>install-node-npm</id>
                 <goals>
                   <goal>install-node-and-npm</goal>
                 </goals>
@@ -381,28 +380,19 @@
               </execution>
 
               <execution>
-                <id>npm install</id>
+                <id>npm-install</id>
                 <goals>
                   <goal>npm</goal>
                 </goals>
               </execution>
 
               <execution>
-                <id>javascript tests</id>
+                <id>javascript-tests</id>
                 <goals>
                   <goal>karma</goal>
                 </goals>
                 <configuration>
                   <karmaConfPath>${basedir}/src/test/javascript/config/${karma.file.config}</karmaConfPath>
-                </configuration>
-              </execution>
-              <execution>
-                <id>javascript legacy tests</id>
-                <goals>
-                  <goal>karma</goal>
-                </goals>
-                <configuration>
-                  <karmaConfPath>${basedir}/src/test/javascript/config/${karma.legacy.file.config}</karmaConfPath>
                 </configuration>
               </execution>
             </executions>
