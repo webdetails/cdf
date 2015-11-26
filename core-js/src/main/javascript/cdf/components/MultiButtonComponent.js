@@ -41,6 +41,7 @@ define([
     } else if (index == count - 1) {
       return (verticalOrientation ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
     }
+    return "";
   };
 
   function getToggleButtonClass() {
