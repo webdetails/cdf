@@ -174,6 +174,19 @@ define([
     },
 
     /**
+     * Tests if a query definition is valid or not
+     *
+     * @method isValidQueryDefinition
+     * @param queryDefinition Query Definition
+     * @return {boolean} _true_ if the query definition is valid
+     *
+     * @for Dashboard
+     */
+    isValidQueryDefinition: function(queryDefinition) {
+      return this.detectQueryType(queryDefinition) !== undefined;
+    },
+
+    /**
      * Lists the registered query types in this dashboard
      *
      * @method listQueries
