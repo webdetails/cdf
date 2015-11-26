@@ -14,6 +14,7 @@
 
   <properties>
     <js.project.list>cdf-core-js,ccc</js.project.list>
+    <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
   </properties>
 
   <dependencies>
@@ -54,5 +55,36 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>javascript-test</id>
+      <activation>
+        <file>
+          <exists>${basedir}/src/test/javascript</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>${dependency.frontend-maven-plugin.revision}</version>
+            <executions>
+              <execution>
+                <id>javascript-legacy-tests</id>
+                <goals>
+                  <goal>karma</goal>
+                </goals>
+                <configuration>
+                  <karmaConfPath>${basedir}/src/test/javascript/config/${karma.legacy.file.config}</karmaConfPath>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
