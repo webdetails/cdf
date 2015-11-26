@@ -23,6 +23,7 @@
   </modules>
 
   <properties>
+    <project.stage>master</project.stage>
     <dependency.cpf.revision>${project.version}</dependency.cpf.revision>
     <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
     <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
