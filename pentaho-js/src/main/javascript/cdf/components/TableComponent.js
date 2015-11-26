@@ -12,15 +12,15 @@
  */
 
 define([
-    '../Logger',
-    '../dashboard/Utils',
-    'amd!../lib/underscore',
-    './UnmanagedComponent',
-    '../dashboard/Sprintf',
-    '../lib/jquery',
-    'amd!../lib/datatables',
-    '../addIns/colTypes',
-    'css!./TableComponent.css '
+  '../Logger',
+  '../dashboard/Utils',
+  'amd!../lib/underscore',
+  './UnmanagedComponent',
+  '../dashboard/Sprintf',
+  '../lib/jquery',
+  'amd!../lib/datatables',
+  '../addIns/colTypes',
+  'css!./TableComponent'
 ], function(Logger, Utils, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going

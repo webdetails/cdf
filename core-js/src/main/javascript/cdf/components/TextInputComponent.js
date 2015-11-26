@@ -17,7 +17,7 @@ define([
   "../Logger"
 ], function($, BaseComponent, Logger) {
 
-  var TextInputComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var myself = this;
       var name = myself.name;
@@ -55,5 +55,4 @@ define([
     }
   });
 
-  return TextInputComponent;
 });

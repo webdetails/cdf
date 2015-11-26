@@ -20,7 +20,7 @@ define([
   'css!./TrafficComponent'
 ], function(Utils, Logger, _, UnmanagedComponent, $) {
 
-  var TrafficComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
     trafficLight: function(result, xaction) {
       var cd = this.trafficDefinition;
       var value; 
@@ -118,5 +118,4 @@ define([
     }
   });
 
-  return TrafficComponent;
 });

@@ -20,7 +20,7 @@ define([
   'css!./SchedulePrptComponent'
 ], function(SchedulePrptComponentExt, PrptComponent, $, _) {
 
-  var SchedulePrptComponent = PrptComponent.extend({
+  return PrptComponent.extend({
     visible: false,
     update: function() {
       // 2 modes of working; if it's a div, create a button inside it
@@ -708,7 +708,5 @@ define([
       });
     }
   });
-
-  return SchedulePrptComponent;
 
 });

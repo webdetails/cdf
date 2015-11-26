@@ -18,7 +18,7 @@ define([
   'amd!../lib/jquery.fancybox'
 ], function(AnalyzerComponentExt, $, AnalyzerComponent) {
 
-  var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
+  return AnalyzerComponent.extend({
     
     update: function() {
       // 2 modes of working; if it's a div, create a button inside it
@@ -71,7 +71,5 @@ define([
       });
     }
   });
-
-  return ExecuteAnalyzerComponent;
 
 });

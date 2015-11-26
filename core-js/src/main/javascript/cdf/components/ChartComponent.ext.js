@@ -13,7 +13,7 @@
 
 define(['../dashboard/Dashboard.ext'], function(DashboardExt) {
 
-  var ChartComponentExt = {
+  return {
 
     getCccScriptPath: function(scriptName) {
       // Dasboards.context path example:
@@ -25,7 +25,5 @@ define(['../dashboard/Dashboard.ext'], function(DashboardExt) {
       return DashboardExt.getFilePathFromUrl().replace(/[^\/]+$/, "") + scriptName + ".js";
     }
   };
-
-  return ChartComponentExt;
 
 });

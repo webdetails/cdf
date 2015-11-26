@@ -18,7 +18,7 @@ define([
   'amd!../lib/jquery.jdMenu'
 ], function(DashboardExt, NavigatorBaseComponent, $) {
 
-  var NavigatorComponent = NavigatorBaseComponent.extend({
+  return NavigatorBaseComponent.extend({
     update: function() {
       var myself = this;
       if(NavigatorBaseComponent.navigatorResponse == -1) {
@@ -135,7 +135,5 @@ define([
       return s;
     }
   });
-
-  return NavigatorComponent;
 
 });

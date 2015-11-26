@@ -13,7 +13,7 @@
 
 define(['./MapBaseComponent'], function(MapBaseComponent) {
 
-  var MapComponent = MapBaseComponent.extend({
+  return MapBaseComponent.extend({
     initMap: true, // should this be static?
     update: function() {
       //2010-06-29 enable MapDiv parameter
@@ -124,7 +124,5 @@ define(['./MapBaseComponent'], function(MapBaseComponent) {
       }
     }
   });
-  
-  return MapComponent;
     
 });

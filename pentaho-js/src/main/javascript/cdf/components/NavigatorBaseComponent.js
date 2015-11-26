@@ -17,7 +17,7 @@ define([
   './BaseComponent'
 ], function(Utils, Logger, BaseComponent) {
 
-  var NavigatorBaseComponent = BaseComponent.extend({}, {
+  return BaseComponent.extend({}, {
     path: Utils.getQueryParameter("path"),
 
     solution: Utils.getQueryParameter("solution"),
@@ -27,20 +27,16 @@ define([
     navigatorResponse: -1,
 
     getSolutionJSON: function(solution) {
-      var json = NavigatorBaseComponent.navigatorResponse;
-      var files = json.solution.folders;
+      var files = this.navigatorResponse.solution.folders;
       var locationArray;
 
-      var found = 0;
       for(var i = 0; i < files.length; i++) {
-        var file = files[i];
-        if(NavigatorBaseComponent.solution == ""
-          || file.solution == NavigatorBaseComponent.solution) {
+        if(this.solution == "" || files[i].solution == this.solution) {
 
           var solutionFiles = [];
 
           // Process subFolders;
-          var subFolders = file.folders;
+          var subFolders = files[i].folders;
           if(subFolders != undefined && subFolders.length == undefined) {
             // only one folder inside
             solutionFiles.push(subFolders);
@@ -50,7 +46,7 @@ define([
           }
 
           // Process subFiles;
-          var subFiles = file.files;
+          var subFiles = files[i].files;
           if(subFiles != undefined && subFiles.length == undefined) {
             // only one file inside
             solutionFiles.push(subFiles);
@@ -63,10 +59,7 @@ define([
         }
 
       }
-      if(found == 0) {
-        Logger.error("Fatal: Solution " + solution + " not found in navigation object");
-        return;
-      }
+      Logger.error("Fatal: Solution " + solution + " not found in navigation object");
     },
 
     browseContent: function(files, currentPath) {
@@ -88,25 +81,25 @@ define([
 
       }
       Logger.error("Fatal: path "
-        + (NavigatorBaseComponent.path
-          || Utils.getPathParameter(NavigatorBaseComponent.path))
+        + (this.path
+          || Utils.getPathParameter(this.path))
         + " not found in navigation object");
       return;
     },
 
     getParentSolution: function() {
-      if((NavigatorBaseComponent.path
-        || Utils.getPathParameter(NavigatorBaseComponent.path)).length > 0) {
+      if((this.path
+        || Utils.getPathParameter(this.path)).length > 0) {
 
-        return NavigatorBaseComponent.solution;
+        return this.solution;
       } else {
         return "";
       }
     },
 
     getParentPath: function() {
-      var path = NavigatorBaseComponent.path
-        || Utils.getPathParameter(NavigatorBaseComponent.path);
+      var path = this.path
+        || Utils.getPathParameter(this.path);
       var index = path.lastIndexOf("/");
       if(index == -1) {
         return "";
@@ -116,14 +109,12 @@ define([
     },
 
     isAncestor: function(solution, path) {
-      if(solution != NavigatorBaseComponent.solution) {
+      if(solution != this.solution) {
         return false;
       } else {
         return true;
       }
     }
   });
-
-  return NavigatorBaseComponent;
 
 });

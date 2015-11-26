@@ -12,7 +12,7 @@
  */
 
 define(['common-ui/util/URLEncoder'], function(Encoder) {
-  var DashboardExt = {
+  return {
     pluginName: "pentaho-cdf",
     samplesBasePath: "/public/plugin-samples/",
 
@@ -200,5 +200,4 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
     }
   };
 
-  return DashboardExt;
 });

@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccHeatGridChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.HeatGridChart
   });
-
-  return CccHeatGridChartComponent;
 
 });

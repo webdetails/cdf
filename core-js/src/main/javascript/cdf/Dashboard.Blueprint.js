@@ -16,7 +16,6 @@
  * @module Dashboard
  */
 
-
 /**
  * Represents a blueprint dashboard. It's a specialization of the base abstract Dashboard class.
  * Require as cdf/Dashboard.Blueprint
@@ -52,8 +51,10 @@
  * @extends Dashboard
  */
 
-define(['./Dashboard', 'css!./lib/blueprint/screen'],
-  function(Dashboard) {
+define([
+  './Dashboard',
+  'css!./lib/blueprint/screen'
+], function(Dashboard) {
   
   return Dashboard;
 

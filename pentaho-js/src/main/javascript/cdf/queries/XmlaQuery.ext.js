@@ -13,9 +13,8 @@
 
 define([], function() {
 
-  var XmlaQueryExt = {
+  return {
     getXmla: function() { return CONTEXT_PATH + "Xmla"; }
   };
-  
-  return XmlaQueryExt;
+
 });

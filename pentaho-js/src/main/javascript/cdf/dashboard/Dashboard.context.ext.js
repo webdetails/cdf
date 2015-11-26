@@ -13,11 +13,10 @@
 
 define(['./Dashboard.ext'], function(DashboardExt) {
 
-  var DashboardContextExt = {
+  return {
     getContext: function() {
       return DashboardExt.getCdfBase() + "/context/get";
     }
   };
 
-  return DashboardContextExt;
 });

@@ -80,7 +80,7 @@ define(["../lib/jquery"], function($) {
    * UTF-8 data encode / decode
    * http://www.webtoolkit.info/
    */
-  var Utf8Encoder = {
+  return {
     /**
      * Prepares an UTF8 string to be used in Opera or Internet Explorer
      *
@@ -130,5 +130,4 @@ define(["../lib/jquery"], function($) {
     }
   };
 
-  return Utf8Encoder;
 });

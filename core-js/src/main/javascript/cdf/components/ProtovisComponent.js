@@ -17,7 +17,7 @@ define([
   '../lib/CCC/protovis-compat!'
 ], function(ChartComponent, $, pv) {
 
-  var ProtovisComponent =  ChartComponent.extend({
+  return ChartComponent.extend({
 
     update: function() {
       if(this.parameters == undefined) {
@@ -30,20 +30,17 @@ define([
     render: function(values) {
       $("#" + this.htmlObject).html('<div id="' + this.htmlObject + 'protovis"></div>');
 
-      var vis = new pv.Panel()
+      this.vis = new pv.Panel()
         .canvas(this.htmlObject + "protovis")
         .width(this.width)
         .height(this.height);
-      this.vis = vis;
-      this.customfunction(vis, values);
-      vis.root.render();
+      this.customfunction(this.vis, values);
+      this.vis.root.render();
     },
 
     processdata: function(values) {
       this.render(values);
     }
   });
-
-  return ProtovisComponent;
 
 });

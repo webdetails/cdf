@@ -18,7 +18,7 @@ define([
   '../lib/OpenStreetMap'
 ], function(BaseComponent, $, OpenLayers) {
 
-  var MapBaseComponent = BaseComponent.extend({
+  return BaseComponent.extend({
 
     //
     // From open_maps.js <-------
@@ -480,7 +480,5 @@ define([
     }
 
   });
-
-  return MapBaseComponent;
 
 });

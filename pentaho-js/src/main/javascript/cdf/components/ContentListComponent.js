@@ -19,7 +19,7 @@ define([
   'amd!../lib/jquery.fancybox'
 ], function(DashboardExt, Utils, NavigatorBaseComponent, $) {
 
-  var ContentListComponent = NavigatorBaseComponent.extend({
+  return NavigatorBaseComponent.extend({
     update: function() {
       var myself = this;
       var path = this.mode != 4
@@ -148,7 +148,5 @@ define([
       });
     }
   });
-
-  return ContentListComponent;
 
 });

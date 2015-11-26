@@ -13,7 +13,7 @@
 
 define(['./MapBaseComponent'], function(MapBaseComponent) {
 
-  var MapBubbleComponent  = MapBaseComponent.extend({
+  return MapBaseComponent.extend({
 
     update: function() {
       this.selectedPointDetails = null;
@@ -36,7 +36,5 @@ define(['./MapBaseComponent'], function(MapBaseComponent) {
       this.updateInfoWindow(this.dashboard.pentahoAction(this.solution, this.path, this.action, this.selectedPointDetails, null));
     }
   });
-
-  return MapBubbleComponent;
     
 });

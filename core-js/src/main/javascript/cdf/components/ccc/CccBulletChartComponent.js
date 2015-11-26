@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccBulletChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.BulletChart
   });
-
-  return CccBulletChartComponent;
 
 });

@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccParCoordComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.ParallelCoordinates
   });
-
-  return CccParCoordComponent;
 
 });

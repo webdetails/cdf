@@ -16,7 +16,7 @@ define([
   '../lib/jquery'
 ], function(DashboardExt, $) {
 
-  var CdaQueryExt = {
+  return {
     getDoQuery: function() {
       return DashboardExt.getPluginBase('cda') + "/doQuery?";
     },
@@ -25,7 +25,5 @@ define([
       return DashboardExt.getPluginBase('cda') + "/unwrapQuery?" + $.param(parameters);
     }
   };
-  
-  return CdaQueryExt;
 
 });

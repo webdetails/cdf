@@ -17,7 +17,7 @@ define([
   './BaseComponent'
 ], function(XactionComponentExt, $, BaseComponent) {
 
-  var XactionComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var myself = this;
       try {
@@ -83,7 +83,5 @@ define([
       }
     }
   });
-
-  return XactionComponent;
 
 });

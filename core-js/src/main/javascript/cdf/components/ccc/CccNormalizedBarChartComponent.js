@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccNormalizedBarChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.NormalizedBarChart
   });
-
-  return CccNormalizedBarChartComponent;
 
 });

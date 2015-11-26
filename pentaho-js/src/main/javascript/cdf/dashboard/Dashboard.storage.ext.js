@@ -13,11 +13,10 @@
 
 define(['./Dashboard.ext'], function(DashboardExt) {
 
-  var DashboardStorageExt = {
+  return {
     getStorage: function(action) {
       return DashboardExt.getCdfBase() + "/storage/" + action;
     }
   };
 
-  return DashboardStorageExt;
 });

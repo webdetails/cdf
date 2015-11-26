@@ -18,7 +18,7 @@ define([
   'amd!../lib/jquery.fancybox'
 ], function(PrptComponentExt, $, PrptComponent) {
 
-  var ExecutePrptComponent = PrptComponent.extend({
+  return PrptComponent.extend({
     visible: false,
     update: function() {
       // 2 modes of working; if it's a div, create a button inside it
@@ -73,7 +73,5 @@ define([
       });
     }
   });
-
-  return ExecutePrptComponent;
 
 });

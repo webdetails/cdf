@@ -17,7 +17,7 @@ define([
   './BaseComponent'
 ], function(AnalyzerComponentExt, $, BaseComponent) {
 
-  var AnalyzerComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       this.clear();
       var options = this.getOptions();
@@ -80,7 +80,5 @@ define([
     }
 
   });
-
-  return AnalyzerComponent;
 
 });

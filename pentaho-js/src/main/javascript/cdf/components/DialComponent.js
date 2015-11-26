@@ -16,7 +16,7 @@ define([
   './JFreeChartComponent'
 ], function(Logger, JFreeChartComponent) {
 
-  var DialComponent = JFreeChartComponent.extend({
+  return JFreeChartComponent.extend({
 
     update: function() {
 
@@ -39,7 +39,5 @@ define([
       this.callPentahoAction(this.dashboard.detectQueryType(cd) == 'cda' ? "jfreechartdial-cda.xaction" : "jfreechartdial.xaction");
     }
   });
-
-  return DialComponent;
 
 });

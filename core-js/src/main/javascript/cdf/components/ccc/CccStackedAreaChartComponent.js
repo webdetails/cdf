@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccStackedAreaChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.StackedAreaChart
   });
-
-  return CccStackedAreaChartComponent;
 
 });

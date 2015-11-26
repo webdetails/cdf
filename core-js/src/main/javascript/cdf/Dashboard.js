@@ -33,8 +33,8 @@ define([
   './queries/LegacyQuery',
   './components/BaseComponent',
   './components/UnmanagedComponent',
-  'css!./Dashboard'],
-  function(Dashboard) {
+  'css!./Dashboard'
+], function(Dashboard) {
 
   return Dashboard;
 
