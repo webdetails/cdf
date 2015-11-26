@@ -13,7 +13,7 @@
 
 define([], function() {
 
-  var SchedulePrptComponentExt = {
+  return {
 
     getEmailConfig: function() {
       return CONTEXT_PATH + "api/emailconfig";
@@ -25,5 +25,4 @@ define([], function() {
 
   };
 
-  return SchedulePrptComponentExt;
 });

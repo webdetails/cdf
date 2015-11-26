@@ -22,7 +22,7 @@ define([
   'css!./TemplateComponent'
 ], function(UnmanagedComponent, Utils, Logger, $, _, Mustache) {
 
-  var TemplateComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
 
     defaults: {
       templateType: 'mustache',
@@ -204,5 +204,4 @@ define([
 
   });
 
-  return TemplateComponent;
 });

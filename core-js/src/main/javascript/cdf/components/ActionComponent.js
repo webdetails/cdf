@@ -17,7 +17,7 @@ define([
   '../dashboard/Utils'
 ], function(_, UnmanagedComponent, Utils) {
 
-  var ActionComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
     _docstring: function() {
       return "Abstract class for components calling a query/endpoint";
     },
@@ -74,7 +74,5 @@ define([
       }
     }
   });
-
-  return ActionComponent;
 
 });

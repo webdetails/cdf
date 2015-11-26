@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccTreemapChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.TreemapChart
   });
-
-  return CccTreemapChartComponent;
 
 });

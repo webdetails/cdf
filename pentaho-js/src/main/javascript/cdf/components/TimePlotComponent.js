@@ -19,7 +19,7 @@ define([
   '../dashboard/Utils'
 ], function(XactionComponentExt, Logger, $, BaseComponent, Utils) {
 
-  var TimePlotComponent = BaseComponent.extend({
+  return BaseComponent.extend({
 
     reset: function() {
       this.timeplot = undefined;
@@ -270,7 +270,5 @@ define([
       }
     }
   });
-
-  return TimePlotComponent;
 
 });

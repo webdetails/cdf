@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccDotChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.DotChart
   });
-
-  return CccDotChartComponent;
 
 });

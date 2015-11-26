@@ -11,10 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', 'amd!../lib/jquery.fancybox'],
-  function(XactionComponentExt, $, BaseComponent) {
+define([
+  './XactionComponent.ext',
+  '../lib/jquery',
+  './BaseComponent',
+  'amd!../lib/jquery.fancybox'
+], function(XactionComponentExt, $, BaseComponent) {
 
-  var JpivotComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       //to be backwards compatible set default value for iframeScolling
       // also added 20px
@@ -37,7 +41,5 @@ define(['./XactionComponent.ext', '../lib/jquery', './BaseComponent', 'amd!../li
       $("#" + this.htmlObject).html(jpivotHTML);
     }
   });
-
-  return JpivotComponent;
 
 });

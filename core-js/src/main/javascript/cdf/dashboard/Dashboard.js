@@ -25,10 +25,10 @@ define([
   '../lib/jquery',
   'module',
   'amd!../lib/jquery.impromptu',
-  '../lib/shims'],
-  function(Base, Logger, RefreshEngine, _, Backbone, $, module) {
+  '../lib/shims'
+], function(Base, Logger, RefreshEngine, _, Backbone, $, module) {
 
-  var Dashboard = Base.extend({
+  return Base.extend({
 
     /**
      * A class representing a Dashboard. This class is abstract, so it should not be required or instantiated directly.
@@ -267,5 +267,4 @@ define([
     }
   });
 
-  return Dashboard;
 });

@@ -18,7 +18,7 @@ define([
   'css!./DateRangeInputComponent'
 ], function($, BaseComponent) {
 
-  var DateRangeInputComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var myself = this;
       var dr;
@@ -201,7 +201,5 @@ define([
       }
     }
   });
-
-  return DateRangeInputComponent;
 
 });

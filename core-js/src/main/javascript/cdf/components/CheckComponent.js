@@ -16,7 +16,7 @@ define([
   "./ToggleButtonBaseComponent"
 ], function($, ToggleButtonBaseComponent) {
 
-  var CheckComponent = ToggleButtonBaseComponent.extend({
+  return ToggleButtonBaseComponent.extend({
     getValue: function() {
       if(this.currentVal != 'undefined' && this.currentVal != null) {
         return this.currentVal;
@@ -29,7 +29,5 @@ define([
       }
     }
   });
-
-  return CheckComponent;
 
 });

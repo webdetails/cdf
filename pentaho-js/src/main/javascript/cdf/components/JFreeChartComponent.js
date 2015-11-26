@@ -22,7 +22,7 @@ define([
   'css!./JFreeChartComponent'
 ], function(JFreeChartComponentExt, DashboardExt, Utils, Logger, $, BaseComponent) {
 
-  var JFreeChartComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var xactionFile = (this.dashboard.detectQueryType(this.chartDefinition) == 'cda') ? "jfreechart-cda.xaction" : "jfreechart.xaction";
       this.callPentahoAction(xactionFile);
@@ -180,7 +180,7 @@ define([
       }, cd.caption));
 
       //Add events after captify has finished.
-      bDetails.one('capityFinished',function(e,wrapper) {
+      bDetails.one('capityFinished',function(e, wrapper) {
         var chartOffset = chart.offset();
         var bDetailsOffset = bDetails.offset();
 
@@ -200,11 +200,7 @@ define([
           }
         }
       });
-
     }
-
   });
-
-  return JFreeChartComponent;
 
 });

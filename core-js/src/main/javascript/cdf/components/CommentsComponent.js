@@ -22,7 +22,7 @@ define([
   'css!./CommentsComponent'
 ], function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
-  var CommentsComponent = BaseComponent.extend({
+  return BaseComponent.extend({
   
     processing: function() {
   
@@ -488,5 +488,4 @@ define([
     }
   });
 
-  return CommentsComponent;
 });

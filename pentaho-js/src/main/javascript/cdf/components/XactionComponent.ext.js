@@ -18,7 +18,7 @@ define([
   '../lib/jquery'
 ], function(Utils, DashboardExt, Encoder, $) {
 
-  var XactionComponentExt = {
+  return {
 
     getCdfXaction: function(path, action, solution, params) {
       if(params) {
@@ -42,6 +42,5 @@ define([
 
   };
 
-  return XactionComponentExt;
 });
 

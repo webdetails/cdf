@@ -1,16 +1,29 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 /**
  * @module BaseFilter
  * @submodule Views
  */
 
 define([
-  'amd!cdf/lib/underscore',
-  'cdf/lib/mustache',
+  'amd!../../../lib/underscore',
+  '../../../lib/mustache',
   '../baseevents/baseeventsView',
-  '../base/Logger',
+  '../../../Logger',
   '../models/SelectionTree',
-  'cdf/lib/jquery',
-  'amd!cdf/lib/jquery.mCustomScrollbar'
+  '../../../lib/jquery',
+  'amd!../../../lib/jquery.mCustomScrollbar'
 ], function (_, Mustache, BaseView, Logger, SelectionTree, $) {
 
   /**
@@ -20,8 +33,7 @@ define([
    * @extends BaseView
    * @uses BaseFilter.Logger
    */
-  var SelectionStates = SelectionTree.SelectionStates;
-  var AbstractView = BaseView.extend(Logger).extend({
+  return BaseView.extend(Logger).extend({
     initialize: function (options) {
       this.configuration = options.configuration;
       this.config = this.configuration[this.type];
@@ -84,7 +96,7 @@ define([
       return $.extend(true, this.model.toJSON(), viewOptions, {
         strings: _.result(this.config, 'strings'),
         selectionStrategy: _.omit(this.configuration.selectionStrategy, 'strategy'),
-        isPartiallySelected: this.model.getSelection() === SelectionStates.SOME,
+        isPartiallySelected: this.model.getSelection() === SelectionTree.SelectionStates.SOME,
         numberOfChildren: this.model.children() ? this.model.children().length : 0
       });
     },
@@ -278,5 +290,4 @@ define([
     }
   });
 
-  return AbstractView;
 });

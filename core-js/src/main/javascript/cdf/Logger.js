@@ -20,7 +20,7 @@
 
 define(function() {
 
-  var logger = {
+  return {
 
     /**
      *  Property enumerating the various log levels
@@ -118,7 +118,5 @@ define(function() {
       return this.log(m, "exception");
     }                       
   };
-
-  return logger;
 
 });

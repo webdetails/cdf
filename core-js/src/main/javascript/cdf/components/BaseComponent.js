@@ -25,7 +25,7 @@ define([
    *
    * @module Components
    */
-  var BaseComponent = Base.extend(Backbone.Events).extend({
+  return Base.extend(Backbone.Events).extend({
   
     //type : "unknown",
     visible: true,
@@ -550,5 +550,4 @@ define([
     }
   });
 
-  return BaseComponent;
 });

@@ -21,7 +21,7 @@ define([
 
   pvc.defaultCompatVersion(2);
 
-  var BaseCccComponent = ChartComponent.extend({
+  return ChartComponent.extend({
 
     query: null,
     chart: null,
@@ -114,7 +114,5 @@ define([
       this.chart.render();
     }
   });
-
-  return BaseCccComponent;
 
 });

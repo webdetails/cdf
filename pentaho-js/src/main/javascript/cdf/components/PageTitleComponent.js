@@ -18,7 +18,7 @@ define([
   './NavigatorBaseComponent'
 ], function(DashboardExt, Utils, $, NavigatorBaseComponent) {
 
-  var PageTitleComponent = NavigatorBaseComponent.extend({
+  return NavigatorBaseComponent.extend({
     update: function() {
       var myself = this;
       if(NavigatorBaseComponent.navigatorResponse == -1) {
@@ -53,7 +53,5 @@ define([
       }
     }
   });
-
-  return PageTitleComponent;
 
 });

@@ -11,10 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
-  function(DashboardExt, Encoder) {
+define([
+  '../dashboard/Dashboard.ext',
+  'common-ui/util/URLEncoder'
+], function(DashboardExt, Encoder) {
 
-  var PivotLinkComponentExt = {
+  return {
 
     getPivot: function(solution, path, action) { 
       var fullPath = path.indexOf(DashboardExt.pluginName) == 0 ? (DashboardExt.samplesBasePath + path) : path;
@@ -27,5 +29,4 @@ define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
 
   };
 
-  return PivotLinkComponentExt;
 });

@@ -18,42 +18,40 @@ define([
   'css!./MultiButtonComponent.css'
 ], function($, ToggleButtonBaseComponent, Utils) {
 
-  getCssWrapperClass = function(verticalOrientation) {
+  function getCssWrapperClass(verticalOrientation) {
     return "pentaho-toggle-button pentaho-toggle-button-up " +
-        (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
+      (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
   };
 
-  getSelectedCss = function(verticalOrientation) {
+  function getSelectedCss(verticalOrientation) {
     return "pentaho-toggle-button pentaho-toggle-button-down " + (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
   };
 
-  getUnselectedCss = function(verticalOrientation) {
+  function getUnselectedCss(verticalOrientation) {
     return "pentaho-toggle-button pentaho-toggle-button-up " + (verticalOrientation ? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
   };
 
-  getExtraCss = function(index, count, verticalOrientation) {
-    var css = "";
+  function getExtraCss(index, count, verticalOrientation) {
     if(index == 0 && count == 1) {
       // both first & last
       return " pentaho-toggle-button-single";
     }
     if(index == 0) {
-      css += " " + (verticalOrientation ? " pentaho-toggle-button-vertical-first" : " pentaho-toggle-button-horizontal-first");
+      return (verticalOrientation ? " pentaho-toggle-button-vertical-first" : " pentaho-toggle-button-horizontal-first");
     } else if (index == count - 1) {
-      css += " " + (verticalOrientation ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
+      return (verticalOrientation ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
     }
-    return css;
   };
 
-  getToggleButtonClass = function() {
+  function getToggleButtonClass() {
     return "pentaho-toggle-button";
   };
 
-  getToggleButtonHoveringClass = function() {
+  function getToggleButtonHoveringClass() {
     return "pentaho-toggle-button-up-hovering";
   };
 
-  var MultiButtonComponent = ToggleButtonBaseComponent.extend({
+  return ToggleButtonBaseComponent.extend({
     indexes: [],//used as static
     draw: function(myArray) {
       this.cachedArray = myArray;
@@ -258,7 +256,5 @@ define([
       return this.indexes[name];
     }
   });
-
-  return MultiButtonComponent;
 
 });

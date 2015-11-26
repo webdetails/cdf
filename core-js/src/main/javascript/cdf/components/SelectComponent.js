@@ -13,7 +13,7 @@
 
 define(['./SelectBaseComponent'], function(SelectBaseComponent) {
 
-  var SelectComponent = SelectBaseComponent.extend({
+  return SelectBaseComponent.extend({
 
     defaultIfEmpty: true,
 
@@ -27,7 +27,5 @@ define(['./SelectBaseComponent'], function(SelectBaseComponent) {
       return this.placeholder("select").val();
     }
   });
-
-  return SelectComponent;
 
 });

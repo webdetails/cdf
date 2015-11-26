@@ -12,15 +12,15 @@
  */
 
 define([
-    '../dashboard/Utils',
-    './UnmanagedComponent',
-    './ChartComponent.ext',
-    './CggComponent.ext',
-    '../lib/jquery',
-    'amd!../lib/underscore'],
-  function(Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $, _) {
+  '../dashboard/Utils',
+  './UnmanagedComponent',
+  './ChartComponent.ext',
+  './CggComponent.ext',
+  '../lib/jquery',
+  'amd!../lib/underscore'
+], function(Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $, _) {
 
-  var ChartComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {
       var me = this;
 
@@ -102,7 +102,5 @@ define([
       }
     }
   });
-
-  return ChartComponent;
 
 });

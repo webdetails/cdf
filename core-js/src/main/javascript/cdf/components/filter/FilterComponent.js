@@ -22,11 +22,11 @@
  */
 
 define([
-  'cdf/lib/jquery',
-  'amd!cdf/lib/underscore',
-  'amd!cdf/lib/backbone',
-  'cdf/components/UnmanagedComponent',
-  'cdf/Logger',
+  '../../lib/jquery',
+  'amd!../../lib/underscore',
+  'amd!../../lib/backbone',
+  '../UnmanagedComponent',
+  '../../Logger',
   './BaseFilter',
   './addIns/addIns',
   'css!./styles/filter'
@@ -382,7 +382,7 @@ define([
     }
   };
 
-  var FilterComponent = UnmanagedComponent.extend(IFilter).extend(IConfiguration).extend({
+  return UnmanagedComponent.extend(IFilter).extend(IConfiguration).extend({
     /**
      * Object responsible for storing the MVC model, which contains both the data and the state of the component.
      *
@@ -563,5 +563,4 @@ define([
     }
   });
 
-  return FilterComponent;
 });

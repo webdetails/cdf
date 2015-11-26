@@ -1,15 +1,26 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 /**
  * @module BaseFilter
  * @submodule SelectionStrategies
  */
 define([
-  'amd!cdf/lib/underscore',
+  'amd!../../../lib/underscore',
   '../models/SelectionTree',
   './MultiSelect'
 ], function (_, SelectionTree, MultiSelect) {
 
-
-  var SelectionStates = SelectionTree.SelectionStates;
   /**
    * Limited (Multiple) Selection
    *  - any number of items can be selected, up to a limit
@@ -19,7 +30,7 @@ define([
    * @constructor
    * @param {Object} options
    */
-  var LimitedSelect = MultiSelect.extend({
+  return MultiSelect.extend({
     ID: 'BaseFilter.SelectionStrategies.LimitedSelect',
     constructor: function (options) {
       return this.selectionLimit = options.limit || Infinity;
@@ -29,7 +40,7 @@ define([
       var allow = true;
       var oldState = model.getSelection();
       newState = this.getNewState(oldState);
-      if (newState !== SelectionStates.NONE) {
+      if (newState !== SelectionTree.SelectionStates.NONE) {
         selectedItems = model.root().get('numberOfSelectedItems');
         if (!_.isFinite(selectedItems)) {
           model.update();
@@ -40,11 +51,11 @@ define([
           allow = false;
         } else {
           if (model.children()) {
-            if (newState === SelectionStates.ALL) {
+            if (newState === SelectionTree.SelectionStates.ALL) {
               numberOfUnselectedItems = model.flatten().filter(function (m) {
                 return m.children() == null;
               }).filter(function (m) {
-                return m.getSelection() === SelectionStates.NONE;
+                return m.getSelection() === SelectionTree.SelectionStates.NONE;
               }).value().length;
               if (selectedItems + numberOfUnselectedItems >= this.selectionLimit) {
                 this.warn("Cannot allow the selection of \"" + (model.get('label')) + "\". Selection limit of " + this.selectionLimit + " would be reached.");
@@ -66,5 +77,4 @@ define([
     }
   });
 
-  return LimitedSelect;
 });

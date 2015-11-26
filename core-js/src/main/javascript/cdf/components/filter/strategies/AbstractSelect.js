@@ -1,12 +1,25 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 /**
  * @module BaseFilter
  * @submodule SelectionStrategies
  */
 define([
-  'cdf/lib/jquery',
-  'amd!cdf/lib/underscore',
-  'cdf/lib/Base',
-  '../base/Logger',
+  '../../../lib/jquery',
+  'amd!../../../lib/underscore',
+  '../../../lib/Base',
+  '../../../Logger',
   '../models/SelectionTree'
 ], function ($, _, Base, Logger, SelectionTree) {
 
@@ -20,9 +33,7 @@ define([
    * @constructor
    */
 
-  var SelectionStates = SelectionTree.SelectionStates;
-
-  var AbstractSelect = Base.extend(Logger).extend({
+  return Base.extend(Logger).extend({
     ID: 'BaseFilter.SelectionStrategies.AbstractSelect',
     constructor: function (options) {
       return this.isLogicGlobal = true;
@@ -37,12 +48,12 @@ define([
      */
     getNewState: function (oldState) {
       switch (oldState) {
-        case SelectionStates.NONE:
-          return SelectionStates.ALL;
-        case SelectionStates.ALL:
-          return SelectionStates.NONE;
-        case SelectionStates.SOME:
-          return SelectionStates.NONE;
+        case SelectionTree.SelectionStates.NONE:
+          return SelectionTree.SelectionStates.ALL;
+        case SelectionTree.SelectionStates.ALL:
+          return SelectionTree.SelectionStates.NONE;
+        case SelectionTree.SelectionStates.SOME:
+          return SelectionTree.SelectionStates.NONE;
       }
     },
 
@@ -125,5 +136,4 @@ define([
     }
   });
 
-  return AbstractSelect;
 });

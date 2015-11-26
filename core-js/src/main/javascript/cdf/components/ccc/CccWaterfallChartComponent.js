@@ -16,10 +16,8 @@ define([
   '../../lib/CCC/pvc'
 ], function(BaseCccComponent, pvc) {
 
-  var CccWaterfallChartComponent = BaseCccComponent.extend({
+  return BaseCccComponent.extend({
     cccType: pvc.WaterfallChart
   });
-
-  return CccWaterfallChartComponent;
 
 });

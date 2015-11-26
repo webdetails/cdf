@@ -13,7 +13,7 @@
 
 define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
-  var TextareaInputComponent = BaseComponent.extend({
+  return BaseComponent.extend({
     update: function() {
       var myself = this;
       var name = myself.name;
@@ -39,5 +39,4 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
     }
   });
 
-  return TextareaInputComponent;
 });

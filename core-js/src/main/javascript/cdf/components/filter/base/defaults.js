@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['cdf/lib/jquery'], function( $ ) {
+define(['../../../lib/jquery'], function( $ ) {
 
   /**
    * Default settings
@@ -78,7 +78,7 @@ define(['cdf/lib/jquery'], function( $ ) {
     }
   };
 
-  var defaults = $.extend( true, {}, privateDefaults, {
+  return $.extend( true, {}, privateDefaults, {
 
     /**
      * @property pagination
@@ -183,5 +183,4 @@ define(['cdf/lib/jquery'], function( $ ) {
     }
   });
 
-  return defaults;
 });

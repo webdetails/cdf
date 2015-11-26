@@ -13,7 +13,7 @@
 
 define(['./Dashboard.ext'], function(DashboardExt) {
 
-  var DashboardViewsExt = {
+  return {
     getView: function(view) {
       return DashboardExt.getCdfBase() + "/views/" + view;
     },
@@ -31,5 +31,4 @@ define(['./Dashboard.ext'], function(DashboardExt) {
     }
   };
 
-  return DashboardViewsExt;
 });

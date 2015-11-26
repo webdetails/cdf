@@ -20,8 +20,8 @@
 define([
   './Dashboard',
   './Container',
-  './Utils'],
-  function(Dashboard, Container, Utils) {
+  './Utils'
+], function(Dashboard, Container, Utils) {
 
   var globalAddIns = new Container();
   

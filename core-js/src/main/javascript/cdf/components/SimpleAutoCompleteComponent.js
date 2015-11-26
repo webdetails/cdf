@@ -13,7 +13,7 @@
 
 define(['./BaseComponent', '../lib/jquery'], function(BaseComponent, $) {
 
-  var SimpleAutoCompleteComponent = BaseComponent.extend({
+  return BaseComponent.extend({
 
     ph: undefined,
     completionCallback: undefined,
@@ -76,7 +76,5 @@ define(['./BaseComponent', '../lib/jquery'], function(BaseComponent, $) {
     }
 
   });
-
-  return SimpleAutoCompleteComponent;
 
 });

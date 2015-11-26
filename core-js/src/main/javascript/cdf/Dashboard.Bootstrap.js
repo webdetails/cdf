@@ -16,8 +16,6 @@
  * @module Dashboard
  */
 
-
-
 /**
  * Represents a bootstrap dashboard. It's a specialization of the base abstract Dashboard class.
  * Require as cdf/Dashboard.Bootstrap
@@ -59,8 +57,8 @@ define([
   'amd!./lib/bootstrap',
   'css!cdf/lib/font-awesome/css/font-awesome.css',
   './lib/html5shiv',
-  './lib/respond'],
-  function(Dashboard) {
+  './lib/respond'
+ ], function(Dashboard) {
 
   return Dashboard;
 

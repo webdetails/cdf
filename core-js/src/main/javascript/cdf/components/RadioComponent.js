@@ -16,7 +16,7 @@ define([
   '../lib/jquery'
 ], function(ToggleButtonBaseComponent, $) {
 
-  var RadioComponent = ToggleButtonBaseComponent.extend({
+  return ToggleButtonBaseComponent.extend({
     getValue: function() {
       if(this.currentVal != 'undefined' && this.currentVal != null) {
         return this.currentVal;
@@ -25,7 +25,5 @@ define([
       }
     }
   });
-
-  return RadioComponent;
 
 });

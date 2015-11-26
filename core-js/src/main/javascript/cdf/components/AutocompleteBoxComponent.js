@@ -19,7 +19,7 @@ define([
   'css!./AutocompleteBoxComponent'
 ], function(Logger, UnmanagedComponent, _, $) {
 
-  var AutocompleteBoxComponent = UnmanagedComponent.extend({
+  return UnmanagedComponent.extend({
 
     constructor: function() {
       this.base.apply(this, arguments);
@@ -374,7 +374,5 @@ define([
       this.textbox.autocomplete("change");
     }
   });
-
-  return AutocompleteBoxComponent;
 
 });

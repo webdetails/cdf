@@ -22,7 +22,7 @@ define([
   'amd!../lib/jquery.select2'
 ], function(InputBaseComponent, Logger, $, _, Utils) {
 
-  var SelectBaseComponent = InputBaseComponent.extend({
+  return InputBaseComponent.extend({
     visible: false,
 
     //defaultIfEmpty: [false]
@@ -385,7 +385,5 @@ define([
       return (/android/i).test(navigator.userAgent) ? 'change' : 'focusout';
     }
   });
-
-  return SelectBaseComponent;
 
 });
