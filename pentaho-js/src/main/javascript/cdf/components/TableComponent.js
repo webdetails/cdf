@@ -20,7 +20,7 @@ define([
     '../lib/jquery',
     'amd!../lib/datatables',
     '../addIns/colTypes',
-    'css!./TableComponent.css '
+    'css!./TableComponent.css'
 ], function(Logger, Utils, _, UnmanagedComponent, sprintf, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
