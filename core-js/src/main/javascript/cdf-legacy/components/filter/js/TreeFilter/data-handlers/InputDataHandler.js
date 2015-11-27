@@ -5,10 +5,16 @@
    * @module TreeFilter
    * @submodule DataHandlers
    */
-  var getPageData, groupGenerator, itemGenerator;
-  getPageData = function(queryInfo, pageSize) {
-    var pageData;
-    pageData = {};
+
+  var sanitizeInput = function(input) {
+    return _.isString(input) ?
+              input.replace("<script>", "&lt;script&gt;")
+                   .replace("</script>", "&lt;/script&gt;") :
+              input;
+  };
+
+  var getPageData = function(queryInfo, pageSize) {
+    var pageData = {};
     if ((queryInfo != null ? queryInfo.pageStart : void 0) != null) {
       pageData = {
         page: Math.floor(parseInt(queryInfo.pageStart) / pageSize)
@@ -16,20 +22,19 @@
     }
     return pageData;
   };
-  itemGenerator = function(idx, pageData) {
-    var createItems;
+
+  var itemGenerator = function(idx, pageData) {
     if (!_.isObject(pageData)) {
       pageData = {};
     }
-    createItems = function(rows) {
+    var createItems = function(rows) {
       return _.map(rows, function(row) {
-        var itemData;
-        itemData = {
+        var itemData = {
           id: row[idx.id],
-          label: row[idx.label]
+          label: sanitizeInput(row[idx.label])
         };
         if (_.isFinite(idx.value) && idx.value >= 0) {
-          itemData.value = row[idx.value];
+          itemData.value = sanitizeInput(row[idx.value]);
         }
         itemData = $.extend(true, itemData, pageData);
         return itemData;
@@ -37,11 +42,10 @@
     };
     return createItems;
   };
-  groupGenerator = function(idx, pageData) {
-    var createGroup;
-    createGroup = function(rows, group) {
-      var groupData;
-      groupData = {
+
+  var groupGenerator = function(idx, pageData) {
+    var createGroup = function(rows, group) {
+      var groupData = {
         id: group != null ? rows[0][idx.parentId] : void 0,
         label: rows[0][idx.parentLabel],
         nodes: itemGenerator(idx, pageData)(rows)

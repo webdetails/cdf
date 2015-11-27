@@ -23,9 +23,14 @@ define([
   '../../../Logger'
 ], function($, _, BaseModel, Logger) {
 
+  var sanitizeInput = function(input) {
+    return _.isString(input) ?
+              input.replace(/<script>/g, "&lt;script&gt;")
+                   .replace(/<\/script>/g, "&lt;/script&gt;") :
+              input;
+  };
   var getPageData = function(queryInfo, pageSize) {
-    var pageData;
-    pageData = {};
+    var pageData = {};
     if ((queryInfo != null ? queryInfo.pageStart : void 0) != null) {
       pageData = {
         page: Math.floor(parseInt(queryInfo.pageStart) / pageSize)
@@ -34,19 +39,17 @@ define([
     return pageData;
   };
   var itemGenerator = function(idx, pageData) {
-    var createItems;
     if (!_.isObject(pageData)) {
       pageData = {};
     }
-    createItems = function(rows) {
+    var createItems = function(rows) {
       return _.map(rows, function(row) {
-        var itemData;
-        itemData = {
+        var itemData = {
           id: row[idx.id],
-          label: row[idx.label]
+          label: sanitizeInput(row[idx.label])
         };
         if (_.isFinite(idx.value) && idx.value >= 0) {
-          itemData.value = row[idx.value];
+          itemData.value = sanitizeInput(row[idx.value]);
         }
         itemData = $.extend(true, itemData, pageData);
         return itemData;
@@ -55,10 +58,8 @@ define([
     return createItems;
   };
   var groupGenerator = function(idx, pageData) {
-    var createGroup;
-    createGroup = function(rows, group) {
-      var groupData;
-      groupData = {
+    var createGroup = function(rows, group) {
+      var groupData = {
         id: group != null ? rows[0][idx.parentId] : void 0,
         label: rows[0][idx.parentLabel],
         nodes: itemGenerator(idx, pageData)(rows)
