@@ -34,8 +34,9 @@ module.exports = function(config) {
       'target/test-javascript/cdf-core-require-js-cfg.js',
       'target/test-javascript/cdf-core-lib-require-js-cfg.js',
       'target/test-javascript/cdf-pentaho-require-js-cfg.js',
-      'src/test/javascript/config/require-config.js',
+      'src/test/javascript/config/karma.main.config.js',
       // fix 404 messages
+      {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: true, served: true},
       {pattern: 'target/test-javascript/cdf/**/*.png', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/cdf/**/*.gif', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/cdf/**/*.svg', watched: false, included: false, served: true}
@@ -79,7 +80,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_WARN,
+    logLevel: config.LOG_ERROR,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,

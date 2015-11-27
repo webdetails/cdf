@@ -33,7 +33,7 @@ module.exports = function(config) {
       {pattern: 'src/test/javascript/cdf/**/*-spec.js', included: false},
       'target/test-javascript/cdf-core-require-js-cfg.js',
       'target/test-javascript/cdf-core-lib-require-js-cfg.js',
-      'src/test/javascript/config/require-config.js',
+      'src/test/javascript/config/karma.main.config.js',
       {pattern: 'src/test/javascript/cdf/**/*.ext.js', included: true},
       // fix 404 messages
       {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: true, served: true},
