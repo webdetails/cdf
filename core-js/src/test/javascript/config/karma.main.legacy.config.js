@@ -1,6 +1,6 @@
 // @see http://karma-runner.github.io/0.10/plus/requirejs.html
 
-(function() {
+(function () {
   var karma = window.__karma__;
   var baseUrl = '/base';
 
@@ -15,14 +15,14 @@
   requirejs.config({
     // Karma serves files from '/base'
     baseUrl: baseUrl,
-    paths: {
-      //            'ccc':    'bin/stage/ccc/amd',
-      //            'jquery': 'package-res/cdf/jquery'
-    },
-    shim: {
-      //            'jquery': {exports: 'jQuery'}
-    }
+    paths: {},
+    shim: {}
   });
+
+  console.log = function () {};
+  console.info = function () {};
+  console.debug = function () {};
+  console.warn = function () {};
 
   // Ask Require.js to load all test files and start test run
   require(tests, karma.start);

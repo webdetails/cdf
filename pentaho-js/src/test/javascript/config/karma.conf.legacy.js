@@ -48,7 +48,7 @@ module.exports = function(config) {
       'target/test-javascript/cdf-legacy/components/input.js',
       'target/test-javascript/cdf-legacy/queries/coreQueries.js',
       'src/test/javascript/cdf-legacy/lib/test-components.js',
-      'src/test/javascript/cdf-legacy/main.js',
+      'src/test/javascript/config/karma.main.legacy.config.js',
       {pattern: 'src/test/javascript/cdf-legacy/**/*.js', included: false}
     ],
 
