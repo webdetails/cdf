@@ -49,7 +49,7 @@ define('cdf/dashboard/Dashboard.ext', [], function() {
     },
 
     getStaticResource: function(resource) {
-      return "";
+      return "/base/src/test/javascript/cdf/dashboard/";
     },
 
     getCaptifyZoom: function() {

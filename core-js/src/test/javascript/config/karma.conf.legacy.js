@@ -51,7 +51,7 @@ module.exports = function(config) {
       'target/test-javascript/cdf-legacy/components/simpleautocomplete.js',
       'src/test/javascript/cdf-legacy/lib/test-components.js',
       {pattern: 'src/test/javascript/cdf-legacy/**/*-spec*.js', included: true},
-      'src/test/javascript/cdf-legacy/main.js'
+      'src/test/javascript/config/karma.main.legacy.config.js'
     ],
 
     // test results reporter to use
