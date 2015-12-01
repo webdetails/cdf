@@ -341,11 +341,13 @@ Comments Component
 }
 
 
-.commentComponent .paginate div.disabled {
+.commentComponent .paginate div.disabled,
+.commentComponent .commentsButtons div.disabled {
    color: #aaa ;
 }
 
-.commentComponent .paginate div:hover.disabled {
+.commentComponent .paginate div:hover.disabled,
+.commentComponent .commentsButtons div:hover.disabled {
     border: 1px solid #ccc;
     background-color: #eee;
     cursor: default;

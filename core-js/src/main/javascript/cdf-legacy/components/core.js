@@ -393,7 +393,7 @@ var CommentsComponent = BaseComponent.extend({
                           ' <div class="addCommentWrapper">'+
                           '   <textarea class=addCommentText></textarea>'+
                           '   <div class="commentsButtons">'+
-                          '   <div class="saveComment">Save</div>'+
+                          '   <div class="saveComment disabled">Save</div>'+
                           '   <div class="cancelComment">Cancel</div>'+
                           '   </div>'+
                           ' </div>'+
@@ -576,10 +576,10 @@ var CommentsComponent = BaseComponent.extend({
 
       events: {
         "click .addComment": "addComment",
-        "click .saveComment": "saveComment",
+        "click .saveComment.enabled": "saveComment",
         "click .cancelComment": "cancelComment",
-        "click .navigatePrevious": "navigatePrevious",
-        "click .navigateNext": "navigateNext",
+        "click .navigatePrevious.enabled": "navigatePrevious",
+        "click .navigateNext.enabled": "navigateNext",
         "click .navigateRefresh": "navigateRefresh"
       },
 
@@ -619,10 +619,24 @@ var CommentsComponent = BaseComponent.extend({
           $commentsElem.append(this.renderSingeComment(comment));
         }, this);
         var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
+        this.bindSaveToTextArea($add);
         var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
         this.$el.empty().append($commentsElem, $add, $paginate);
         $renderElem.html(this.$el);
         this.updateNavigateButtons();
+      },
+
+      bindSaveToTextArea: function($elem) {
+        var $area = $elem.find(".addCommentText");
+        var $save = $elem.find(".saveComment");
+        var myself = this;
+        $area.keyup(function(event) {
+          if($area.val().length != 0) {
+            myself.toggleElement($save, true);
+          } else {
+            myself.toggleElement($save, false);
+          }
+        });
       },
 
       renderSingeComment: function(comment) {
@@ -677,20 +691,25 @@ var CommentsComponent = BaseComponent.extend({
         var paginate = myself.options.paginate;
         myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-        $('div.navigateRefreshPopup:first').remove();
-        $('div.navigateRefresh:first').stop();
+        this.$el.find('div.navigateRefreshPopup:first').remove();
+        this.$el.find('div.navigateRefresh:first').stop();
       },
 
       updateNavigateButtons: function() {
         var paginate = myself.options.paginate;
-        $('.navigatePrevious').addClass("disabled");
-        $('.navigateNext').addClass("disabled");
+        this.toggleElement(this.$el.find('.navigatePrevious'), false);
+        this.toggleElement(this.$el.find('.navigateNext'), false);
         if(paginate.activePageNumber > 0) {
-          $('.navigatePrevious').removeClass("disabled");
+          this.toggleElement(this.$el.find('.navigatePrevious'), true);
         }
         if((paginate.activePageNumber + 1) < Math.ceil(myself.options.queryResult.length / paginate.pageCommentsSize)) {
-          $('.navigateNext').removeClass("disabled");
+          this.toggleElement(this.$el.find('.navigateNext'), true);
         }
+      },
+
+      toggleElement: function($elem, val) {
+        $elem.toggleClass("disabled", !val);
+        $elem.toggleClass("enabled", !!val);
       },
 
       commentsUpdateNotification: function() {
@@ -700,8 +719,8 @@ var CommentsComponent = BaseComponent.extend({
             if(data.result.length > 0) {
               if(!!(data.result[0].createdOn == lastCommentDate)) {
               } else {
-                var refreshBtn = $('div.navigateRefresh:first');
-                if(!($('div.navigateRefreshPopup:first').length)) {
+                var refreshBtn = this.$el.find('div.navigateRefresh:first');
+                if(!(this.$el.find('div.navigateRefreshPopup:first').length)) {
                   var popup = $("<div>")
                     .attr('class', 'navigateRefreshPopup')
                     .css('position', 'absolute')
@@ -734,12 +753,14 @@ var CommentsComponent = BaseComponent.extend({
         this.$el.find('.addCommentWrapper').show();
         this.$el.find('.paginate').hide();
         this.$el.find('.addCommentText').val('');
+        this.toggleElement(this.$el.find('.saveComment'), false);
       },
 
       hideAddComment: function() {
         this.$el.find('.addCommentWrapper').hide();
         this.$el.find('.paginate').show();
         this.$el.find('.addCommentText').val('');
+        this.toggleElement(this.$el.find('.saveComment'), false);
       }
 
     });
