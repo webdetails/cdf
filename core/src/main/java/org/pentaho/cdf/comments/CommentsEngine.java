@@ -80,9 +80,13 @@ public class CommentsEngine {
   public JSONObject add( String page, String comment, String user ) throws JSONException, InvalidCdfOperationException,
     PluginHibernateException {
 
-    if ( StringUtils.isEmpty( page ) || StringUtils.isEmpty( comment ) ) {
-      logger.error( "Parameters 'page' and 'comment' are not optional" );
+    if ( StringUtils.isEmpty( page )  ) {
+      logger.error( "Parameter 'page' is not optional" );
       throw new InvalidCdfOperationException( "Page cannot be null" );
+    }
+    if ( StringUtils.isEmpty( comment ) ) {
+      logger.error( "Parameter 'comment' is not optional" );
+      throw new InvalidCdfOperationException( "Comment cannot be null" );
     }
 
     logger.debug( "Adding comment" );

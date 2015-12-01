@@ -23,11 +23,11 @@ define([
 ], function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
   return BaseComponent.extend({
-  
+
     processing: function() {
-  
+
       var myself = {};
-  
+
       myself.defaults = {
         dataTemplates: {
 
@@ -58,7 +58,7 @@ define([
             ' <div class="addCommentWrapper">' +
             '   <textarea class=addCommentText></textarea>' +
             '   <div class="commentsButtons">' +
-            '   <div class="saveComment">Save</div>' +
+            '   <div class="saveComment disabled">Save</div>' +
             '   <div class="cancelComment">Cancel</div>' +
             '   </div>' +
             ' </div>' +
@@ -75,41 +75,41 @@ define([
             '</div>'
         }
       };
-  
+
       // Process operations
       myself.operations = {
-  
+
         processOperation: function(operation, comment, collection, callback, defaults) {
           var options = {};
           switch(operation) {
             case 'LIST_ALL' :
               options = {data: {action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false}};
               break;
-  
+
             case 'LIST_ACTIVE':
               options = {data: {action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults}};
               break;
-  
+
             case 'GET_LAST':
               options = {data: {action: 'list', page: defaults.page, firstResult: 0, maxResults: 1}};
               break;
-  
+
             case 'DELETE_COMMENT':
               options = {data: {action: 'delete', page: defaults.page, commentId: comment}};
               break;
-  
+
             case 'ARCHIVE_COMMENT':
               options = {data: {action: 'archive', page: defaults.page, commentId: comment}};
               break;
-  
+
             case 'ADD_COMMENT':
               options = {data: {action: 'add', page: defaults.page, comment: comment}};
               break;
           }
-  
+
           this.requestProcessing(options, operation, collection, callback);
         },
-  
+
         requestProcessing: function(options, operation, collection, callback) {
           var myself = this;
           options = options || {};
@@ -124,21 +124,21 @@ define([
           ajaxOpts = _.extend( {}, ajaxOpts, options);
           $.ajax(ajaxOpts);
         },
-  
+
         resetCollection: function(result) {
           var paginate = myself.options.paginate;
           var start = paginate.activePageNumber * paginate.pageCommentsSize;
           var end = ((start + paginate.pageCommentsSize) < result.length)
             ? (start + paginate.pageCommentsSize) : result.length;
           var commentsArray = [];
-  
+
           for(var idx = start; idx < end; idx++) {
             var singleComment = new myself.CommentModel(result[idx]);
             commentsArray.push(singleComment)
           }
           return commentsArray;
         },
-  
+
         requestResponse: function (json, operation, collection, callback) {
           if((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
             var paginate = myself.options.paginate;
@@ -151,7 +151,7 @@ define([
             collection.reset(this.resetCollection(json.result));
 
             if(paginate.activePageNumber == 0
-              && ((json) 
+              && ((json)
               && (typeof json.result != 'undefined'))
               && (json.result.length == 0)) {
 
@@ -181,7 +181,7 @@ define([
           }
         }
       };
-  
+
       myself.CommentModel = Backbone.Model.extend({
         defaults: {
           id: 0,
@@ -195,64 +195,64 @@ define([
           user: 'comments',
           permissions: {}
         },
-  
+
         initialize: function() {
           this.set('permissions', myself.options.permissions);
         }
       });
-  
+
       myself.CommentView = Backbone.View.extend({
         tagName: 'div',
         className: 'commentView',
-  
+
         events: {
           "click .delete": "deleteComment",
           "click .archive": "archiveComment"
         },
-  
+
         initialize: function(model) {
           _.bindAll(this, 'render', 'deleteComment', 'archiveComment');
           this.model = model;
         },
-  
+
         render: function() {
           this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));
           return this.$el;
         },
-  
+
         deleteComment: function() {
           var callback = function(data, collection) {
             myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
           };
           myself.operations.processOperation('DELETE_COMMENT', this.model.get('id'), this.model.collection, callback, myself.options);
         },
-  
+
         archiveComment: function() {
           var callback = function(data, collection) {
             myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
           };
           myself.operations.processOperation('ARCHIVE_COMMENT', this.model.get('id'), this.model.collection, callback, myself.options);
         }
-  
+
       });
-  
+
       myself.CommentsCollection = Backbone.Collection.extend({
         model: myself.CommentModel
       });
-  
+
       myself.CommentsView = Backbone.View.extend({
         tagName: 'div',
         className: 'commentComponent',
-  
+
         events: {
           "click .addComment": "addComment",
-          "click .saveComment": "saveComment",
+          "click .saveComment.enabled": "saveComment",
           "click .cancelComment": "cancelComment",
-          "click .navigatePrevious": "navigatePrevious",
-          "click .navigateNext": "navigateNext",
+          "click .navigatePrevious.enabled": "navigatePrevious",
+          "click .navigateNext.enabled": "navigateNext",
           "click .navigateRefresh": "navigateRefresh"
         },
-  
+
         initialize: function(collection) {
           _.bindAll(
             this,
@@ -271,10 +271,10 @@ define([
           );
 
           this.collection = collection;
-  
+
           this.collection.on('reset', this.renderComments);
           this.collection.on('commentsUpdateNotification', this.commentsUpdateNotification);
-  
+
           this.render();
         },
 
@@ -285,10 +285,24 @@ define([
             $commentsElem.append(this.renderSingeComment(comment));
           }, this);
           var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));
+          this.bindSaveToTextArea($add);
           var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));
           this.$el.empty().append($commentsElem, $add, $paginate);
           $renderElem.html(this.$el);
           this.updateNavigateButtons();
+        },
+
+        bindSaveToTextArea: function($elem) {
+          var $area = $elem.find(".addCommentText");
+          var $save = $elem.find(".saveComment");
+          var myself = this;
+          $area.keyup(function(event) {
+            if($area.val().length != 0) {
+              myself.toggleElement($save, true);
+            } else {
+              myself.toggleElement($save, false);
+            }
+          });
         },
 
         renderComments: function() {
@@ -298,16 +312,16 @@ define([
             $commentsElem.append(this.renderSingeComment(comment));
           }, this);
         },
-  
+
         renderSingeComment: function(comment) {
           var singleCommentView = new myself.CommentView(comment);
           return singleCommentView.render();
         },
-  
+
         addComment: function() {
           this.showAddComment();
         },
-  
+
         saveComment: function() {
           var self = this;
           var text = this.$el.find('.addCommentText').val();
@@ -318,13 +332,13 @@ define([
             myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
           };
           myself.operations.processOperation('ADD_COMMENT', text, this.collection, callback, myself.options);
-  
+
         },
-  
+
         cancelComment: function() {
           this.hideAddComment();
         },
-  
+
         navigateNext: function() {
           var paginate = myself.options.paginate;
           var start = paginate.activePageNumber * paginate.pageCommentsSize;
@@ -335,7 +349,7 @@ define([
           this.commentsUpdateNotification();
           this.updateNavigateButtons();
         },
-  
+
         navigatePrevious: function() {
           var paginate = myself.options.paginate;
           var start = paginate.activePageNumber;
@@ -346,27 +360,32 @@ define([
           this.commentsUpdateNotification();
           this.updateNavigateButtons();
         },
-  
+
         navigateRefresh: function() {
           var paginate = myself.options.paginate;
           myself.options.paginate.activePageNumber = 0;
           myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-          $('div.navigateRefreshPopup:first').remove();
-          $('div.navigateRefresh:first').stop();
+          this.$el.find('div.navigateRefreshPopup:first').remove();
+          this.$el.find('div.navigateRefresh:first').stop();
         },
-  
+
         updateNavigateButtons: function() {
           var paginate = myself.options.paginate;
-          $('.navigatePrevious').addClass("disabled");
-          $('.navigateNext').addClass("disabled");
+          this.toggleElement(this.$el.find('.navigatePrevious'), false);
+          this.toggleElement(this.$el.find('.navigateNext'), false);
           if(paginate.activePageNumber > 0) {
-            $('.navigatePrevious').removeClass("disabled");
+            this.toggleElement(this.$el.find('.navigatePrevious'), true);
           }
           if((paginate.activePageNumber + 1) < Math.ceil(myself.options.queryResult.length / paginate.pageCommentsSize)) {
-            $('.navigateNext').removeClass("disabled");
+            this.toggleElement(this.$el.find('.navigateNext'), true);
           }
         },
-  
+
+        toggleElement: function($elem, val) {
+          $elem.toggleClass("disabled", !val);
+          $elem.toggleClass("enabled", !!val);
+        },
+
         commentsUpdateNotification: function() {
           if(myself.options.queryResult.length > 0) {
             var lastCommentDate = myself.options.queryResult[0].createdOn;
@@ -374,8 +393,8 @@ define([
               if(data.result.length > 0) {
                 if(!!(data.result[0].createdOn == lastCommentDate)) {
                 } else {
-                  var refreshBtn = $('div.navigateRefresh:first');
-                  if(!($('div.navigateRefreshPopup:first').length)) {
+                  var refreshBtn = this.$el.find('div.navigateRefresh:first');
+                  if(!(this.$el.find('div.navigateRefreshPopup:first').length)) {
                     var popup = $("<div>")
                       .attr('class', 'navigateRefreshPopup')
                       .css('position', 'absolute')
@@ -403,29 +422,31 @@ define([
             myself.operations.processOperation('GET_LAST', null, null, callback, myself.options);
           }
         },
-  
+
         showAddComment: function() {
           this.$el.find('.addCommentWrapper').show();
           this.$el.find('.paginate').hide();
           this.$el.find('.addCommentText').val('');
+          this.toggleElement(this.$el.find('.saveComment'), false);
         },
-  
+
         hideAddComment: function() {
           this.$el.find('.addCommentWrapper').hide();
           this.$el.find('.paginate').show();
           this.$el.find('.addCommentText').val('');
+          this.toggleElement(this.$el.find('.saveComment'), false);
         }
-  
+
       });
-  
+
       myself.start = function(options) {
         myself.options = options;
         myself.defaults = _.extend({}, myself.defaults, options.defaults);
-  
+
         myself.commentsCollection = new myself.CommentsCollection();
         myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
         myself.commentsView = new myself.CommentsView(myself.commentsCollection);
-  
+
         if(myself.options.intervalActive) {
           var refresh = function() {
             myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
@@ -434,17 +455,17 @@ define([
             myself.commentsCollection.trigger('commentsUpdateNotification');
           }, myself.options.interval);
         }
-  
+
       };
-  
+
       return myself;
-  
+
     },
-  
+
     /*
      * Process component
      */
-  
+
     update: function() {
       // Set page start and length for pagination
       this.paginateActive = (typeof this.paginate == 'undefined') ? true : this.paginate;
@@ -453,13 +474,13 @@ define([
       this.maxResults  = (typeof this.maxResults  == 'undefined') ? 100 : this.maxResults;
       this.interval  = (typeof this.interval  == 'undefined') ? 60000 : this.interval;
       this.intervalActive  = (typeof this.intervalActive  == 'undefined') ? true : this.intervalActive;
-  
+
       this.addPermission = (typeof this.addPermission == 'undefined') ? true : this.addPermission;
       this.deletePermission = (typeof this.deletePermission == 'undefined') ? false : this.deletePermission;
       this.archivePermission = (typeof this.archivePermission == 'undefined') ? true : this.archivePermission;
-  
+
       this.options = (typeof this.options == 'undefined') ? {} : this.options;
-  
+
       // set the page name for the comments
       if(this.page == undefined) {
         Logger.error("Fatal - no page definition passed");
