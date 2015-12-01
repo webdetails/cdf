@@ -25,7 +25,7 @@ define([
    * @module Dashboard.i18n
    */
   Dashboard.implement({
-  
+
     /**
      * Method used by the Dashboard constructor for i18n initialization
      * Reference to current language code . Used in every place where jquery
@@ -44,7 +44,7 @@ define([
         Logger.warn("i18n support wasn't properly initiated. Is the file messages_supported_languages.properties present?");
         return text;
       }}; // Reference to i18n objects
-      
+
       var normalizeLocale = function(sessionLocale) {
         if(!sessionLocale) {
           return;
@@ -64,6 +64,7 @@ define([
         language: normalizedLocale,
         callback: function() {
           $.i18n.properties({
+            path: myself.getMessagesPath(),
             name: 'messages',
             mode: 'map',
             type: 'GET',
@@ -79,7 +80,7 @@ define([
       cdo.format.language(formProvider);
       moment.locale(normalizedLocale);
     },
-  
+
     /**
      * Sets the current locale and i18n options.
      *
@@ -91,6 +92,16 @@ define([
     setI18nSupport: function(lc, i18nRef) {
       this.i18nCurrentLanguageCode = lc;
       $.extend(this.i18nSupport, i18nRef);
+    },
+
+    /**
+     * Gets the path from which to load messages.properties
+     *
+     * @method getMessagesPath
+     * @return {string}
+     */
+    getMessagesPath: function() {
+      // meant to be overriden, or return undefined
     }
 
   });
