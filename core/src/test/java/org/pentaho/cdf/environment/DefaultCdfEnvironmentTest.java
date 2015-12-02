@@ -24,36 +24,36 @@ public class DefaultCdfEnvironmentTest extends TestCase {
 
   @Before
   public void setUp() {
-      environment = mock( DefaultCdfEnvironment.class );
+    environment = mock( DefaultCdfEnvironment.class );
   }
 
   @Test
   public void testGetPluginRepositoryDir() throws Exception {
-    when(environment.getPluginRepositoryDir()).thenCallRealMethod();
+    when( environment.getPluginRepositoryDir()).thenCallRealMethod();
     assertEquals( "cdf", environment.getPluginRepositoryDir() );
   }
 
   @Test
   public void testGetPluginId() throws Exception {
-    when(environment.getPluginId()).thenCallRealMethod();
+    when( environment.getPluginId()).thenCallRealMethod();
     assertEquals( "pentaho-cdf", environment.getPluginId() );
   }
 
   @Test
   public void testGetSystemDir() throws Exception {
-    when(environment.getSystemDir()).thenCallRealMethod();
+    when( environment.getSystemDir()).thenCallRealMethod();
     assertEquals( "system", environment.getSystemDir() );
   }
 
   @Test
   public void testGetApplicationBaseContentUrl() throws Exception {
-    when(environment.getApplicationBaseContentUrl()).thenCallRealMethod();
+    when( environment.getApplicationBaseContentUrl()).thenCallRealMethod();
     assertEquals( "/content/", environment.getApplicationBaseContentUrl() );
   }
 
   @Test
   public void testGetRepositoryBaseContentUrl() throws Exception {
-    when(environment.getRepositoryBaseContentUrl()).thenCallRealMethod();
+    when( environment.getRepositoryBaseContentUrl()).thenCallRealMethod();
     assertEquals( "/content/res/", environment.getRepositoryBaseContentUrl() );
   }
 }

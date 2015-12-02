@@ -17,7 +17,6 @@ import com.orientechnologies.orient.core.exception.OCommandExecutionException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
 import junit.framework.Assert;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.pentaho.cdf.utils.JsonUtil;

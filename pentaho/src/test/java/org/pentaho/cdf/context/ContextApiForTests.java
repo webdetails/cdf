@@ -19,13 +19,17 @@ import javax.ws.rs.core.Response;
 
 public class ContextApiForTests extends ContextApi {
   @Override
-  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {}
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected Response buildContext( String path, String user, HttpServletRequest servletRequest ) { return null; }
+  protected Response buildContext( String path, String user, HttpServletRequest servletRequest ) {
+    return null;
+  }
+
   @Override
   protected void writeConfig(
     String path,
     String user,
     HttpServletRequest servletRequest,
-    HttpServletResponse servletResponse ) {}
+    HttpServletResponse servletResponse ) { }
 }

@@ -40,7 +40,7 @@ public class CommentsApiTest {
   @Before
   public void setUp() throws Exception {
     commentsApi = spy( new CommentsApiForTests() );
-    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/comments", (Map)new HashMap<String, String[]>() );
+    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/comments", (Map) new HashMap<String, String[]>() );
     servletResponse = new MockHttpServletResponse( new ObjectOutputStream( new ByteArrayOutputStream() ) );
     servletResponse.setContentType( null );
     servletResponse.setCharacterEncoding( null );
@@ -62,7 +62,7 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times(1)).addComment( PAGE, COMMENT, servletResponse );
+    verify( commentsApi, times( 1 ) ).addComment( PAGE, COMMENT, servletResponse );
   }
 
   @Test
@@ -74,7 +74,7 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times(1)).listComments( PAGE, 0, 100, false/*deleted*/, false/*archived*/, servletResponse );
+    verify( commentsApi, times( 1 ) ).listComments( PAGE, 0, 100, false/*deleted*/, false/*archived*/, servletResponse );
   }
 
   @Test
@@ -86,7 +86,7 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times(1)).archiveComment( 1, false/*value*/, servletResponse );
+    verify( commentsApi, times( 1 ) ).archiveComment( 1, false/*value*/, servletResponse );
   }
 
   @Test
@@ -98,6 +98,6 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times(1)).deleteComment( 1, false/*value*/, servletResponse );
+    verify( commentsApi, times( 1 ) ).deleteComment( 1, false/*value*/, servletResponse );
   }
 }

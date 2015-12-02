@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
+
 public class CdfHeadersProviderForTests extends CdfHeadersProvider {
 
   private IContentAccessFactory mockFactory;
