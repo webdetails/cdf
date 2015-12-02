@@ -62,8 +62,8 @@ public class JsonUtilTest extends TestCase {
     assertEquals( 2, json.length() );
     assertNotNull( json.get( "status" ) );
     assertNotNull( json.get( "result" ) );
-    assertEquals( "success", json.get("status") );
-    assertEquals( jsonString, json.get("result").toString() );
+    assertEquals( "success", json.get( "status" ) );
+    assertEquals( jsonString, json.get( "result" ).toString() );
   }
 
   @Test

@@ -40,7 +40,7 @@ public class StorageApiTest {
   @Before
   public void setUp() throws Exception {
     storageApi = spy( new StorageApiForTests() );
-    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/storage", (Map)new HashMap<String, String[]>() );
+    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/storage", (Map) new HashMap<String, String[]>() );
     servletResponse = new MockHttpServletResponse( new ObjectOutputStream( new ByteArrayOutputStream() ) );
     servletResponse.setContentType( null );
     servletResponse.setCharacterEncoding( null );
@@ -62,7 +62,7 @@ public class StorageApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( storageApi, times(1)).store( STORAGE_VALUE, USER );
+    verify( storageApi, times( 1 ) ).store( STORAGE_VALUE, USER );
   }
 
   @Test
@@ -74,7 +74,7 @@ public class StorageApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( storageApi, times(1) ).read( USER );
+    verify( storageApi, times( 1 ) ).read( USER );
   }
 
   @Test
@@ -86,6 +86,6 @@ public class StorageApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( storageApi, times(1) ).delete( USER );
+    verify( storageApi, times( 1 ) ).delete( USER );
   }
 }

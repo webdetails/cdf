@@ -16,7 +16,6 @@ package org.pentaho.cdf.storage;
 import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
-import org.pentaho.cdf.Messages;
 
 import java.util.Date;
 

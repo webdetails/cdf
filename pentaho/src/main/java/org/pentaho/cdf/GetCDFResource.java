@@ -33,10 +33,6 @@ import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.utils.MimeTypes;
 import pt.webdetails.cpf.utils.PluginIOUtils;
 
-/**
- * 
- * @author pedro
- */
 public class GetCDFResource extends ServletBase {
 
   private static final long serialVersionUID = 8251622066287622726L;
@@ -131,5 +127,5 @@ public class GetCDFResource extends ServletBase {
    */
   public String getServletInfo() {
     return "Short description";
-  }// </editor-fold>
+  } // </editor-fold>
 }
