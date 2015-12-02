@@ -18,6 +18,7 @@
 (function() {
   if(!requireCfg.map) requireCfg.map = {};
   if(!requireCfg.map['*']) requireCfg.map['*'] = {};
+  if(!requireCfg.map['cdf']) requireCfg.map['cdf'] = {};
 
   //RequireJS css! loader plugin 0.1.2
   requireCfg.map['*']['css'] = 'cdf/lib/require-css/css';
@@ -79,19 +80,13 @@
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
 
-  //jquery migration tool 1.2.1 (this is helpful while the migration to jquery 1.9.1 isn't completely stable)
-  requirePaths['cdf/lib/jquery'] = prefix + "/jquery-migrate-1.2.1";
-  requireShims['cdf/lib/jquery'] = {
-    deps: ['cdf/lib/jQuery/jquery'],
-    exports: "$",
-    init: function() {
-      return $.noConflict(true);
-    }
-  };
-
+  //jquery 1.9.1, without globally scoped variables
+  amdShim['cdf/lib/jQuery/jquery'] = {
+    postscript: "return window.jQuery.noConflict(true);"
+  }
   //mapping all jquery requests from inside cdf to 'cdf/lib/jquery'
-  requireCfg.map['cdf'] = requireCfg.map['cdf'] || {};
-  requireCfg.map['cdf']['jquery'] = 'cdf/lib/jquery';
+  requireCfg.map['*']['cdf/lib/jquery'] = "amd!cdf/lib/jQuery/jquery";
+  requireCfg.map['cdf']['jquery'] = "amd!cdf/lib/jQuery/jquery";
 
   //jquery.ui 1.10.4
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jQuery/jquery.ui";
