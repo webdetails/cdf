@@ -23,7 +23,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'target/test-javascript/lib/shims.js',
-      'target/test-javascript/lib//pen-shim.js',
+      'target/test-javascript/lib/pen-shim.js',
       'src/test/javascript/cdf-legacy/testUtils.js',
       'target/test-javascript/cdf-legacy/wd.js',
       'target/test-javascript/lib/json.js',
