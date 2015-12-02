@@ -19,11 +19,20 @@ import javax.ws.rs.core.Response;
 
 public class StorageApiForTests extends StorageApi {
   @Override
-  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {}
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected Response store( String storageValue, String user ) { return null; }
+  protected Response store( String storageValue, String user ) {
+    return null;
+  }
+
   @Override
-  protected String read( String user ) { return null; }
+  protected String read( String user ) {
+    return null;
+  }
+
   @Override
-  protected Response delete( String user ) { return null; }
+  protected Response delete( String user ) {
+    return null;
+  }
 }

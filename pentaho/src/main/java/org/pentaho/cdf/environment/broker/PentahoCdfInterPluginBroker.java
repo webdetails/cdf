@@ -1,3 +1,16 @@
+/*!
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf.environment.broker;
 
 import java.io.StringReader;
@@ -17,7 +30,6 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONObject;
 import org.json.JSONException;
-import org.pentaho.cdf.context.autoinclude.AutoInclude;
 
 import pt.webdetails.cpf.InterPluginCall;
 
@@ -25,14 +37,14 @@ public class PentahoCdfInterPluginBroker implements ICdfInterPluginBroker {
 
   private static final Log logger = LogFactory.getLog( PentahoCdfInterPluginBroker.class );
   private static PentahoCdfInterPluginBroker instance;
-  
+
   public static PentahoCdfInterPluginBroker getInstance() {
     if ( instance == null ) {
       instance = new PentahoCdfInterPluginBroker();
     }
     return instance;
   }
-  
+
   @Override
   public void addCdaQueries( JSONObject queries, String cdaPath ) {
     List<String> dataAccessIds = listCdaQueries( cdaPath );
@@ -50,7 +62,7 @@ public class PentahoCdfInterPluginBroker implements ICdfInterPluginBroker {
       }
     }
   }
-  
+
   @Override
   public String executeCdaQuery( String path, String id ) {
     Map<String, Object> params = new HashMap<String, Object>();

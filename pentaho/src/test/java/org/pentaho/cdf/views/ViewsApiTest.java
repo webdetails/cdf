@@ -39,7 +39,7 @@ public class ViewsApiTest {
   @Before
   public void setUp() throws Exception {
     viewsApi = spy( new ViewsApiForTests() );
-    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/views", (Map)new HashMap<String, String[]>() );
+    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/views", (Map) new HashMap<String, String[]>() );
     servletResponse = new MockHttpServletResponse( new ObjectOutputStream( new ByteArrayOutputStream() ) );
     servletResponse.setContentType( null );
     servletResponse.setCharacterEncoding( null );
@@ -61,7 +61,7 @@ public class ViewsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( viewsApi, times(1)).listViews( servletResponse );
+    verify( viewsApi, times( 1 ) ).listViews( servletResponse );
   }
 
   @Test
@@ -73,7 +73,7 @@ public class ViewsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( viewsApi, times(1)).saveView( NAME, VIEW, servletResponse );
+    verify( viewsApi, times( 1 ) ).saveView( NAME, VIEW, servletResponse );
   }
 
   @Test
@@ -85,7 +85,7 @@ public class ViewsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( viewsApi, times(1)).deleteView( NAME, servletResponse );
+    verify( viewsApi, times( 1 ) ).deleteView( NAME, servletResponse );
   }
 
   @Test
@@ -97,6 +97,6 @@ public class ViewsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( viewsApi, times(1)).getView( NAME, servletResponse );
+    verify( viewsApi, times( 1 ) ).getView( NAME, servletResponse );
   }
 }

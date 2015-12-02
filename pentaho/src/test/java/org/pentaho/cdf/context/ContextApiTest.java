@@ -40,7 +40,7 @@ public class ContextApiTest {
   @Before
   public void setUp() throws Exception {
     contextApi = spy( new ContextApiForTests() );
-    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/context", (Map)new HashMap<String, String[]>() );
+    servletRequest = new MockHttpServletRequest( "/pentaho-cdf/api/context", (Map) new HashMap<String, String[]>() );
     servletResponse = new MockHttpServletResponse( new ObjectOutputStream( new ByteArrayOutputStream() ) );
     servletResponse.setContentType( null );
     servletResponse.setCharacterEncoding( null );
@@ -62,7 +62,7 @@ public class ContextApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( contextApi, times(1)).buildContext( PATH, USER, servletRequest );
+    verify( contextApi, times( 1 ) ).buildContext( PATH, USER, servletRequest );
   }
 
   @Test
@@ -74,6 +74,6 @@ public class ContextApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( contextApi, times(1) ).writeConfig( PATH, VIEW, servletRequest, servletResponse );
+    verify( contextApi, times( 1 ) ).writeConfig( PATH, VIEW, servletRequest, servletResponse );
   }
 }

@@ -18,22 +18,32 @@ import javax.servlet.http.HttpServletResponse;
 
 public class CommentsApiForTests extends CommentsApi {
   @Override
-  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {}
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected boolean isAdministrator() { return true; }
+  protected boolean isAdministrator() {
+    return true;
+  }
+
   @Override
-  protected boolean isAuthenticated() { return true; }
+  protected boolean isAuthenticated() {
+    return true;
+  }
+
   @Override
-  protected void addComment( String page, String comment, HttpServletResponse servletResponse ) {}
+  protected void addComment( String page, String comment, HttpServletResponse servletResponse ) { }
+
   @Override
   protected void listComments( String page,
                                int firstResult,
                                int maxResults,
                                boolean deleted,
                                boolean archived,
-                               HttpServletResponse servletResponse ) {}
+                               HttpServletResponse servletResponse ) { }
+
   @Override
-  protected void archiveComment( int commentId, boolean value, HttpServletResponse servletResponse ) {}
+  protected void archiveComment( int commentId, boolean value, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected void deleteComment( int commentId, boolean value, HttpServletResponse servletResponse ) {}
+  protected void deleteComment( int commentId, boolean value, HttpServletResponse servletResponse ) { }
 }

@@ -18,13 +18,17 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ViewsApiForTests extends ViewsApi {
   @Override
-  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {}
+  protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected void listViews( HttpServletResponse servletResponse ) {}
+  protected void listViews( HttpServletResponse servletResponse ) { }
+
   @Override
-  protected void saveView( String name, String view, HttpServletResponse servletResponse ) {}
+  protected void saveView( String name, String view, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected void deleteView( String name, HttpServletResponse servletResponse ) {}
+  protected void deleteView( String name, HttpServletResponse servletResponse ) { }
+
   @Override
-  protected void getView( String name, HttpServletResponse servletResponse ) {}
+  protected void getView( String name, HttpServletResponse servletResponse ) { }
 }
