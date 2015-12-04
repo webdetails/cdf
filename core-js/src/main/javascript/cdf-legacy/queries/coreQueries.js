@@ -39,14 +39,15 @@
     deepProperties: ['defaults', 'interfaces'],
     defaults: {
       successCallback: function() {
-        Dashboards.log('Query callback not defined. Override.');
+        Dashboards.log('Query success callback not defined. Override.');
       },
-      errorCallback: function() {
-        if(Dashboards != undefined && Dashboards.handleServerError != undefined) {
-          Dashboards.handleServerError();
+      errorCallback: function(jqXHR, textStatus, errorThrown) {
+        if(Dashboards && typeof Dashboards.handleServerError === 'function') {
+          Dashboards.handleServerError(jqXHR, textStatus, errorThrown);
+          return;
         }
+        Dashboards.log('Query error callback not defined. Override.')
       },
-      errorCallback: Dashboards.handleServerError,
       lastResultSet: null,
       lastProcessedResultSet: null,
       page: 0,

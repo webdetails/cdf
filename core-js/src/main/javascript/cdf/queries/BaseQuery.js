@@ -32,12 +32,14 @@ define([
     dashboard: undefined,
     defaults: {
       successCallback: function() {
-        Logger.log('Query callback not defined. Override.');
+        Logger.log('Query success callback not defined. Override.');
       },
-      errorCallback: function() {
-        if(dashboard != undefined && dashboard.handleServerError != undefined) {
-          dashboard.handleServerError();
+      errorCallback: function(jqXHR, textStatus, errorThrown) {
+        if(this.dashboard && typeof this.dashboard.handleServerError === "function") {
+          this.dashboard.handleServerError(jqXHR, textStatus, errorThrown);
+          return;
         }
+        Logger.log('Query error callback not defined. Override.');
       },
       lastResultSet: null,
       lastProcessedResultSet: null,
@@ -182,7 +184,7 @@ define([
         data: this.buildQueryDefinition(),
         url: this.getOption('url'),
         success: this.getSuccessHandler(successCallback ? successCallback : this.getOption('successCallback')),
-        error: this.getErrorHandler(errorCallback ? errorCallback : this.getOption('errorCallback'))
+        error: this.getErrorHandler(errorCallback ? errorCallback : _.bind(this.getOption('errorCallback'), this))
       });
 
       var async = settings.async == null ? $.ajaxSettings.async : settings.async;
@@ -537,7 +539,7 @@ define([
     }
   });
 
-  // Sets the query class that can extended to create new ones.
+  // Sets the query class that can be extended to create new ones.
   // The registered Base needs to have an extend method.
   DashboardQuery.setBaseQuery(BaseQuery);
 
