@@ -95,15 +95,53 @@ describe("CDF legacy core queries #", function() {
     });
 
     /**
-     * ## Base query # custom callbacks
+     * ## Base query # callbacks
      */
-    describe("Base query # custom callbacks", function() {
+    describe("Base query # callbacks", function() {
+      beforeEach(function() {
+        baseQuery.buildQueryDefinition = function() {};
+      });
+
+      /**
+       * ## Base query # has a default success callback
+       */
+      it("has a default success callback", function() {
+        spyOn(Dashboards, "log").and.callThrough();
+        spyOn(baseQuery.defaults, "successCallback").and.callThrough();
+        spyOn($, "ajax").and.callFake(function(params) {
+          params.success({result: true});
+        });
+        baseQuery.doQuery();
+        expect(baseQuery.defaults.successCallback).toHaveBeenCalledWith({result: true});
+        expect(Dashboards.log.calls.count()).toEqual(1);
+        expect(Dashboards.log).toHaveBeenCalledWith("Query success callback not defined. Override.");
+      });
+
+      /**
+       * ## Base query # has a default error callback
+       */
+      it("has a default error callback", function() {
+        spyOn(baseQuery.defaults, "errorCallback").and.callThrough();
+        spyOn(Dashboards, "handleServerError").and.callThrough();
+        spyOn($, "ajax").and.callFake(function(params) {
+          params.error({result: false}, "ajax error", "test error");
+        });
+        baseQuery.doQuery();
+        expect(baseQuery.defaults.errorCallback).toHaveBeenCalledWith({result: false}, "ajax error", "test error");
+        expect(Dashboards.handleServerError).toHaveBeenCalledWith({result: false}, "ajax error", "test error");
+
+        Dashboards.handleServerError = undefined;
+        spyOn(Dashboards, "log").and.callThrough();
+        baseQuery.doQuery();
+        expect(baseQuery.defaults.errorCallback).toHaveBeenCalledWith({result: false}, "ajax error", "test error");
+        expect(Dashboards.log.calls.count()).toEqual(1);
+        expect(Dashboards.log).toHaveBeenCalledWith("Query error callback not defined. Override.");
+      });
 
       /**
        * ## Base query # supports a custom success callback
        */
       it("supports a custom success callback", function(done) {
-        baseQuery.buildQueryDefinition = function() {};
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({result: true});
         });
@@ -119,7 +157,6 @@ describe("CDF legacy core queries #", function() {
        * ## Base query # supports a custom error callback
        */
       it("supports a custom error callback", function(done) {
-        baseQuery.buildQueryDefinition = function() {};
         spyOn($, "ajax").and.callFake(function(params) {
           params.error({result: false}, "ajax error", "test error");
         });
