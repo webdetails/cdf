@@ -36,7 +36,7 @@ module.exports = function(config) {
       'target/test-javascript/lib/mustache/mustache.js',
       'target/test-javascript/lib/moment/moment.js',
       'target/test-javascript/lib/base/Base.js',
-      '../pentaho/src/main/javascript/cdf-legacy/cdf-base.js',
+      'src/test/javascript/cdf-legacy/cdf-base.js',
       'target/test-javascript/cdf-legacy/Dashboards.Main.js',
       'target/test-javascript/cdf-legacy/Dashboards.Query.js',
       'target/test-javascript/cdf-legacy/Dashboards.Bookmarks.js',
@@ -112,7 +112,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: true,
+    singleRun: false,
 
     plugins: [
       'karma-jasmine',
