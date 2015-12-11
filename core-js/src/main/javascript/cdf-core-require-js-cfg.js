@@ -62,4 +62,7 @@
    */
   requireCfg.map['*']['cdf/components/FilterComponent'] = 'cdf/components/filter/FilterComponent';
 
+  requireCfg.map['*']['cdf/components/DateSelectorComponent'] = 'cdf/components/date/DateSelector/DateSelectorComponent';
+  requireCfg.map['*']['cdf/components/DateRangeSelectorComponent'] = 'cdf/components/date/DateRangeSelector/DateRangeSelectorComponent';
+
 })();

@@ -1,0 +1,672 @@
+/* ==========================================================================
+   FONTS
+   ========================================================================== */
+
+/* Open Sans Regular */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans Regular'), local('OpenSans-Regular'), url(../fonts/OpenSans-Regular.ttf) format('truetype');
+}
+
+/* Open Sans Light */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Open Sans Light'), local('OpenSans-Light'), url(../fonts/OpenSans-Light.ttf) format('truetype');
+}
+
+/* Open Sans Semibold */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(../fonts/OpenSans-Semibold.ttf) format('truetype');
+}
+
+/* Open Sans Bold */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(../fonts/OpenSans-Bold.ttf) format('truetype');
+}
+
+
+/* ==========================================================================
+   GENERAL STYLES
+   ========================================================================== */
+html {
+  height:100%;
+}
+
+body {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 15px;
+  height:100%;
+}
+
+.container > .row > [class^="col"]{
+  margin-bottom: 50px;
+}
+
+/* ==========================================================================
+   DATE RANGE SELECTOR STYLES
+   ========================================================================== */
+
+/* PLACEHOLDER */
+.date-range-selector-block {
+  position: relative;
+}
+
+/* RANGE DISPLAY */
+.date-range-selector-block .range-display {
+  border: 1px solid #C7C7C7;
+  background: #FFFFFF;
+  color: #616161;
+  position: relative;
+  line-height: 20px;
+  padding: 15px 15px 15px 60px;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.date-range-selector-block .range-display:hover {
+  border-color: #0072B7;
+  z-index: 110;
+}
+
+.date-range-selector-block .range-display:before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 30px;
+  height: 30px;
+  background: url(../img/calendar-icon.svg) no-repeat left center;
+  background-size: 60px 30px;
+}
+.no-svg .date-range-selector-block .range-display:before {
+  background: url(../img/calendar-icon.png) no-repeat left center;
+  background-size: 60px 30px;
+}
+.date-range-selector-block .range-display:hover:before {
+  background: url(../img/calendar-icon.svg) no-repeat right center;
+  background-size: 60px 30px;
+}
+.no-svg .date-range-selector-block .range-display:hover:before {
+  background: url(../img/calendar-icon.png) no-repeat right center;
+  background-size: 60px 30px;
+}
+
+/* DROPDOWN */
+.date-range-selector-block .date-range-selector-dropdown {
+  position: absolute;
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid #C7C7C7;
+  margin-top: -1px;
+  z-index: 100;
+}
+
+.date-range-selector-block .buttons-container {
+  padding: 15px;
+  background: #F2F2F2;
+  border-bottom: 1px solid #C7C7C7;
+  font-size: 0;
+}
+
+.date-range-selector-block .buttons-container.buttons-container-bottom {
+  border-top: 1px solid #C7C7C7;
+  border-bottom: 0 none;
+}
+
+.date-range-selector-block .buttons-container .button-container {
+  float: left;
+}
+
+.date-range-selector-block .buttons-container .button-container.cancel-button-container {
+  width: 40%;
+  padding-right: 15px;
+}
+
+.date-range-selector-block .buttons-container .button-container.apply-button-container {
+  width: 60%;
+}
+
+.date-range-selector-block .buttons-container button {
+  width: 100%;
+  background: #616161;
+  border: 1px solid #616161;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 20px;
+  padding: 6px 10px;
+  margin: 0;
+}
+
+.date-range-selector-block .buttons-container button:hover {
+  background: #7E7E7E;
+  border: 1px solid #7E7E7E;
+}
+
+.date-range-selector-block .buttons-container button.disabled,
+.date-range-selector-block .buttons-container button.disabled:link,
+.date-range-selector-block .buttons-container button.disabled:visited,
+.date-range-selector-block .buttons-container button.disabled:hover,
+.date-range-selector-block .buttons-container button.disabled:active,
+.date-range-selector-block .buttons-container button.disabled:focus {
+  background: #EDEDED;
+  border-color: #E0E0E0;
+  color: #B5B5B5;
+  cursor: default;
+}
+
+.date-range-selector-block .selectors-container {
+  padding: 15px 0;
+  background: #FFFFFF;
+}
+
+.header-label {
+  font-size: 10px;
+  color: #4D4D4D;
+  font-weight: 300;
+  margin-bottom: 5px;
+  padding: 0 15px;
+}
+
+.selectors-body > .selector .range-label,
+.custom-range-precision {
+  padding: 6px 15px 6px 44px;
+  line-height: 20px;
+  font-size: 13px;
+  font-weight: 300;
+  position: relative;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.selectors-body > .selector .range-label:before,
+.custom-range-precision:before {
+  position: absolute;
+  content: '';
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #C6C6C6;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+
+.selectors-body > .selector .range-label:after,
+.custom-range-precision:after {
+  position: absolute;
+  content: '';
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #005CA7;
+  opacity: 0;
+}
+
+.selectors-body > .selector.selected .range-label:after,
+.custom-range-precision.selected:after {
+  opacity: 1;
+}
+
+.selectors-body > .selector:not(.selected):hover .range-label,
+.custom-range-precision:not(.selected):hover {
+  background: #E6E6E6;
+}
+
+.selectors-body > .selector:not(.selected):hover .range-label:before,
+.custom-range-precision:not(.selected):hover:before {
+  border-color: #005CA7;
+}
+
+.selectors-body > .selector.selected .range-label,
+.custom-range-precision.selected {
+  background: #F2F2F2;
+  cursor: default;
+}
+
+/* CUSTOM RANGE COMPONENT */
+.custom-range-dropdown {
+  padding-top: 30px;
+}
+
+.calendars-container {
+  padding: 15px;
+}
+
+.calendars-container .header-label {
+  margin-top: 15px;
+  padding: 0;
+}
+
+.custom-date-block {
+  position: relative;
+}
+
+.custom-date-block .date-display {
+  font-size: 13px;
+  font-weight: 400;
+  color: #616161;
+  line-height: 20px;
+  padding: 6px 40px;
+  text-align: center;
+  border: 1px solid #C7C7C7;
+  cursor: pointer;
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #FFF;
+  position: relative;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.custom-date-block .date-display:before {
+  position: absolute;
+  content: '';
+  width: 10px;
+  height: 10px;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  background: url(../img/arrows-v-sprite.svg) no-repeat left top;
+}
+
+.custom-date-block .date-display:hover {
+  border-color: #005CA7;
+  z-index: 210;
+}
+
+.no-svg .custom-date-block .date-display:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat left top;
+}
+
+.custom-date-block .date-display:hover:before {
+  background: url(../img/arrows-v-sprite.svg) no-repeat left bottom;
+}
+
+.no-svg .custom-date-block .date-display:hover:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat left bottom;
+}
+
+.custom-date-block.open .date-display:before {
+  background: url(../img/arrows-v-sprite.svg) no-repeat right top;
+}
+
+.no-svg .custom-date-block.open .date-display:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat right top;
+}
+
+.custom-date-block.open .date-display:hover:before {
+  background: url(../img/arrows-v-sprite.svg) no-repeat right bottom;
+}
+
+.no-svg .custom-date-block.open .date-display:hover:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat right bottom;
+}
+
+/* fold left */
+.custom-date-block.fold-left .date-display:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat left top;
+}
+
+.no-svg .custom-date-block.fold-left .date-display:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat left top;
+}
+
+.custom-date-block.fold-left .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat left bottom;
+}
+
+.no-svg .custom-date-block.fold-left .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat left bottom;
+}
+
+.custom-date-block.fold-left.open .date-display:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat right top;
+}
+
+.no-svg .custom-date-block.fold-left.open .date-display:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat right top;
+}
+
+.custom-date-block.fold-left.open .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat right bottom;
+}
+
+.no-svg .custom-date-block.fold-left.open .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat right bottom;
+}
+
+/* fold right */
+.custom-date-block.fold-right .date-display {
+  padding: 6px 40px 6px 15px;
+}
+
+.custom-date-block.fold-right .date-display:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat right top;
+  left: auto;
+  right: 15px;
+}
+
+.no-svg .custom-date-block.fold-right .date-display:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat right top;
+}
+
+.custom-date-block.fold-right .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat right bottom;
+}
+
+.no-svg .custom-date-block.fold-right .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat right bottom;
+}
+
+.custom-date-block.fold-right.open .date-display:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat left top;
+}
+
+.no-svg .custom-date-block.fold-right.open .date-display:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat left top;
+}
+
+.custom-date-block.fold-right.open .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.svg) no-repeat left bottom;
+}
+
+.no-svg .custom-date-block.fold-right.open .date-display:hover:before {
+  background: url(../img/arrows-h-sprite.png) no-repeat left bottom;
+}
+
+.calendar-dialog {
+  position: absolute;
+  z-index: 200;
+  background-color: #FFF;
+  border: 1px solid #C6C6C6;
+  padding: 15px;
+  width: 100%;
+  margin-top: -1px;
+}
+
+.fold-left .calendar-dialog {
+  left: -100%;
+  margin-top: -52px;
+  margin-left: -15px;
+}
+
+.fold-right .calendar-dialog {
+  left: 100%;
+  margin-top: -52px;
+  margin-left: 15px;
+}
+
+.fold-down .calendar-dialog {
+  left: 0;
+}
+
+
+/* CALENDARS */
+
+.precision-button .precision-button-label {
+  width: 100%;
+  border: 1px solid #C7C7C7;
+  padding: 6px;
+  text-align: center;
+  line-height: 20px;
+  color: #616161;
+  font-size: 13px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #FFFFFF;
+}
+.precision-button .precision-button-label:hover {
+  border-color: #0072B7;
+}
+
+.precision-button {
+  width: 50%;
+  float: left;
+  margin-bottom: 15px;
+}
+
+.precision-button:first-child {
+  padding-right: 8px;
+}
+
+.precision-button:last-child {
+  padding-left: 8px;
+}
+
+.precision-button:only-child {
+  padding: 0;
+  width: 100%;
+}
+
+.calendar-block table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.calendar-block table > tbody > tr > td > div {
+  border: 1px solid #C7C7C7;
+  line-height: 24px;
+  margin: 1px;
+  text-align: center;
+  background: #FFFFFF;
+  width: 100%;
+  width: calc(100% - 2px);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.calendar-block table > tbody > tr > td:first-child > div {
+  margin-left: 0;
+  width: 100%;
+  width: calc(100% - 1px);
+}
+
+.calendar-block table > tbody > tr > td:last-child > div {
+  margin-right: 0px;
+  width: 100%;
+}
+
+.calendar-block table > tbody > tr > td > div.outside-period {
+  color: #D2D8DB;
+}
+
+.calendar-block table > tbody > tr > td > div.current-period:hover,
+.calendar-block table > tbody > tr > td > div.outside-period:hover {
+  border-color: #E6E6E6;
+  background: #E6E6E6;
+  cursor: pointer;
+}
+
+.calendar-block table > tbody > tr > td > div.selected,
+.calendar-block table > tbody > tr > td > div.selected:hover {
+  border-color: #005CA7;
+  background: #005CA7;
+  color: #FFF;
+  cursor: default;
+}
+
+.calendar-block table > tbody > tr > td > div.disabled,
+.calendar-block table > tbody > tr > td > div.disabled:hover {
+  border-color: #D2D8DB;
+  background: #FFF;
+  color: #D2D8DB;
+  cursor: default;
+}
+
+
+/* GRANULARITY SELECTOR */
+.granularities-container {
+  margin-top: 65px;
+}
+
+.granularities-body {
+  margin: 0 15px;
+  position: relative;
+}
+
+.granularities-display {
+  font-size: 13px;
+  font-weight: 400;
+  color: #616161;
+  line-height: 20px;
+  padding: 6px 40px;
+  text-align: center;
+  border: 1px solid #C7C7C7;
+  cursor: pointer;
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #FFF;
+  position: relative;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.granularities-display:before {
+  position: absolute;
+  content: '';
+  width: 10px;
+  height: 10px;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  background: url(../img/arrows-v-sprite.svg) no-repeat left top;
+}
+
+.granularities-display:hover {
+  border-color: #005CA7;
+  z-index: 210;
+}
+
+.no-svg .granularities-display:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat left top;
+}
+
+.granularities-display:hover:before {
+  background: url(../img/arrows-v-sprite.svg) no-repeat left bottom;
+}
+
+.no-svg .granularities-display:hover:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat left bottom;
+}
+
+.granularities-container.open .granularities-display:before {
+  background: url(../img/arrows-v-sprite.svg) no-repeat right top;
+}
+
+.no-svg .granularities-container.open .granularities-display:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat right top;
+}
+
+.granularities-container.open .granularities-display:hover:before {
+  background: url(../img/arrows-v-sprite.svg) no-repeat right bottom;
+}
+
+.no-svg .granularities-container.open .granularities-display:hover:before {
+  background: url(../img/arrows-v-sprite.png) no-repeat right bottom;
+}
+
+.granularities-dropdown {
+  position: absolute;
+  z-index: 200;
+  background-color: #FFF;
+  border: 1px solid #C6C6C6;
+  padding: 15px;
+  width: 100%;
+  margin-top: -1px;
+}
+
+.fold-left .granularities-dropdown {
+  left: -100%;
+  margin-top: -52px;
+  margin-left: -15px;
+}
+
+.fold-right .granularities-dropdown {
+  left: 100%;
+  margin-top: -52px;
+  margin-left: 15px;
+}
+
+.fold-down .granularities-dropdown {
+  left: 0;
+}
+
+.custom-range-granularity {
+  padding: 3px 15px;
+  line-height: 24px;
+  font-size: 11px;
+  font-weight: 400;
+  border: 1px solid #C7C7C7;
+  margin-bottom: 3px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.custom-range-granularity:last-child {
+  margin-bottom: 0;
+}
+
+.custom-range-granularity:hover {
+  border-color: #E6E6E6;
+  background: #E6E6E6;
+  cursor: pointer;
+}
+
+.custom-range-granularity.selected,
+.custom-range-granularity.selected:hover {
+  background: #005CA7;
+  color: #FFF;
+  border-color: #005CA7;
+  cursor: default;
+}
