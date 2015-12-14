@@ -44,24 +44,12 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress', 'junit', 'html', 'coverage'],
-
-    //reporter: coverage
-    coverageReporter: {
-      type: 'cobertura',
-      dir: 'target/coverage-reports/cdf-javascript'
-    },
+    reporters: ['progress', 'junit'],
 
     //reporter: junit
     junitReporter: {
       outputFile: 'target/js-reports/cdf-results.xml',
       suite: 'unit'
-    },
-
-    // the default configuration
-    htmlReporter: {
-      outputDir: 'target/coverage-reports/cdf-javascript',
-      templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
     //hostname
@@ -106,8 +94,6 @@ module.exports = function(config) {
       'karma-jasmine',
       'karma-requirejs',
       'karma-junit-reporter',
-      'karma-html-reporter',
-      'karma-coverage',
       'karma-phantomjs-launcher',
       'karma-chrome-launcher',
       'karma-firefox-launcher'
