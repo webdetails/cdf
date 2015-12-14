@@ -44,8 +44,8 @@ define([
     return ( longStart == longEnd ) ? longStart : shortStart + particle + longEnd;
   }
 
-  function defaultFormatter ( start , end , grain ){
-    return rangeFormatter( start , end , getDefaultFormat(grain) || getDefaultFormat('day') );
+  function defaultFormatter ( start , end , grain, particle ){
+    return rangeFormatter( start , end , getDefaultFormat(grain) || getDefaultFormat('day'), particle );
   }
 
 
@@ -58,7 +58,7 @@ define([
         particle = opts['_separator'] || getDefaultFormat('_separator');
       return _.isFunction( ft ) ? ft( start , end , granularity ) :
         _.isString( ft )   ? rangeFormatter( start , end , ft , particle ) :
-          defaultFormatter( start , end , granularity );
+          defaultFormatter( start , end , granularity, particle );
     }
 
     return ( _.isFunction( opts ) ? opts : formatter )( start , end , granularity );
