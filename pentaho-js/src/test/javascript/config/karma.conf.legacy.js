@@ -22,10 +22,10 @@ module.exports = function(config) {
 
     files: [
       'target/test-javascript/lib/shims.js',
-      'target/test-javascript/lib/pen-shim.js',
+      'target/test-javascript/cdf-legacy/lib/pen-shim.js',
       'src/main/javascript/cdf-legacy/testUtils.js',
       'target/test-javascript/cdf-legacy/wd.js',
-      'target/test-javascript/lib/json.js',
+      'target/test-javascript/cdf-legacy/lib/json.js',
       'target/test-javascript/lib/jQuery/jquery.js',
       'target/test-javascript/lib/jQuery/jquery.ui.js',
       'target/test-javascript/lib/blockUI/jquery.blockUI.js',
