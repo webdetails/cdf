@@ -99,7 +99,7 @@ define([
     var newInput = formatInput.call( this , range );
 
     if ( _.isFunction( this.preChange ) ){
-      newInput = this.preChange.apply( this , range ) || range;
+      newInput = this.preChange.call( this , range ) || range;
     }
 
     if ( !this.oneWayBinding ) {
@@ -113,7 +113,7 @@ define([
     }, this ) );
 
     if (_.isFunction( this.postChange ) ){
-      this.postChange.apply( this , newInput );
+      this.postChange.call( this , newInput );
     }
   }
 

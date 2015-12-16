@@ -106,7 +106,7 @@ window.wd.dateRangeSelectorModules.DateRangeSelectorComponent = ( function ( _ ,
     var newRange = formatRange.call( this , range );
 
     if ( _.isFunction( this.preChange ) ){
-      newRange = this.preChange.apply( this , range ) || range;
+      newRange = this.preChange.call( this , range ) || range;
     }
 
     if ( !this.oneWayBinding ) {
@@ -120,7 +120,7 @@ window.wd.dateRangeSelectorModules.DateRangeSelectorComponent = ( function ( _ ,
     }, this ) );
 
     if (_.isFunction( this.postChange ) ){
-      this.postChange.apply( this , newRange );
+      this.postChange.call( this , newRange );
     }
   }
 
