@@ -47,17 +47,6 @@ window.wd.dateRangeSelectorModules  = window.wd.dateRangeSelectorModules || {};
       return registry[accessor].apply( registry , arguments );
     }
 
-    function copy( collection ){
-      var out;
-      if ( !_.isObject( collection ) ){
-        out = collection;
-      } else {
-        var emptyCollection = _.isArray( collection ) ? [] : {};
-        out = $.extend( true , emptyCollection , collection );
-      }
-      return out;
-    }
-
     function negate( predicate ){
       function negatedPredicate (){
         return !predicate.apply( this, arguments );
