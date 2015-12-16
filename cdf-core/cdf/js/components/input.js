@@ -1461,7 +1461,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         var scroll = myself.scrollHeight || 0;
 
         if(scroll > 0) {
-          this.ph.find('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
+          myself.ph.find('.autocomplete-container .ui-autocomplete').css({'max-height': scroll + 'px', 'overflow-y': 'auto'});
         }
 
         myself.filterData();

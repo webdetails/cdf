@@ -184,9 +184,7 @@ require([
     query: function() {
       return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
         + " NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"
-        + " (Left([Customers].CurrentMember.Name, Len(\""
-        + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) +"\")) = \""
-        + dashboard.getParameterValue(dashboard.getComponentByName("autocompleteBox").parameter) + "\")), 100.0, [Measures].[Sales]) ON ROWS"
+        + " (Left([Customers].CurrentMember.Name, Len(\"\")) = \"\")), 100.0, [Measures].[Sales]) ON ROWS"
         + " FROM [SteelWheelsSales]";
     }
   });

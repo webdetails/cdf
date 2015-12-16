@@ -17,7 +17,7 @@ define([
   '../../../Dashboard',
   '../../../lib/jquery'
 ], function(AddIn, cccBulletChartBase, Dashboard, $) {
-  
+
   var cccBulletChart = new AddIn($.extend(true, {}, cccBulletChartBase, {
     defaults: {
       chartOptions: {
@@ -32,8 +32,8 @@ define([
       }
     }
   }));
-  
+
   Dashboard.registerGlobalAddIn("Template", "templateType", cccBulletChart);
-  
+
   return cccBulletChart;
 });

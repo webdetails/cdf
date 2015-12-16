@@ -16,9 +16,8 @@ define([
     },
 
     init: function() { },
-    
+
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       var $tgt = $(tgt),
           link,
           label;
@@ -35,7 +34,7 @@ define([
       if(opt.prependHttpIfNeeded && !/^https?:\/\//.test(link)) {
         link = "http://" + link;
       }
-      // is this text an hyperlink? 
+      // is this text an hyperlink?
       if(opt.regexp == null || (new RegExp(opt.regexp).test(st.value))) {
         var $a = $(opt.layout).attr("href", link).text(label);
         if(opt.openInNewTab) {

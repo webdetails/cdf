@@ -15,7 +15,7 @@ define([
   '../../lib/jquery',
   'amd!../../lib/jquery.sparkline'
 ], function($) {
-  
+
   return {
 
     name: "sparkline",
@@ -27,9 +27,8 @@ define([
     },
 
     init: function() { },
-    
+
     implementation: function(tgt, st, opt) {
-      opt = $.extend(true, this.defaults, opt);
       $(tgt).sparkline(this.getData(st, opt), opt)
             .removeClass("sparkline")
             .addClass(opt.cssClass);
