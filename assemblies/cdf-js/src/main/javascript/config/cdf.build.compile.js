@@ -126,8 +126,6 @@
   //'excludeShallow', 'include' and 'insertRequire' are all allowed as siblings
   //to name. The name of the optimized file is specified by 'out'.
   exclude: [
-    'cdf/js/cdf-require-js-cfg',
-    'cdf/js/lib/cdf-lib-require-js-cfg',
     //According to https://github.com/guybedford/require-css#basic-usage
     'cdf/lib/require-css/normalize'
   ],
