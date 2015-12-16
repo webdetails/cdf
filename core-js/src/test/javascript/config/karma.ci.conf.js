@@ -39,12 +39,13 @@ module.exports = function(config) {
       {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: true, served: true},
       {pattern: 'target/test-javascript/**/*.png', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/**/*.gif', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true}
+      {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/**/*.ttf', watched: false, included: false, served: true}
     ],
 
     preprocessors: {
       'target/test-javascript/cdf/**/*.js': 'coverage',
-      'target/test-javascript/lib/**/*.js': 'coverage',
+      'target/test-javascript/lib/**/*.js': 'coverage'
     },
 
     // test results reporter to use

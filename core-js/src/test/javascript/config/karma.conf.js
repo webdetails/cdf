@@ -39,7 +39,8 @@ module.exports = function(config) {
       {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: true, served: true},
       {pattern: 'target/test-javascript/**/*.png', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/**/*.gif', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true}
+      {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/**/*.ttf', watched: false, included: false, served: true}
     ],
 
     // test results reporter to use
