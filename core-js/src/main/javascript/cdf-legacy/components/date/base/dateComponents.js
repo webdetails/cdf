@@ -1627,9 +1627,16 @@ window.wd.dateRangeSelectorModules.CustomDateController = ( function ( _ , Block
 
 })( _ , window.wd.dateRangeSelectorModules.BlockController , window.wd.dateRangeSelectorModules.DateFormatter , window.wd.dateRangeSelectorModules.CustomDateDefaults );
 
-window.wd.dateRangeSelectorModules.CustomDateBlock = ( function ( BaseBlock , CustomDateView , CustomDateController ) {
+window.wd.dateRangeSelectorModules.CustomDateBlock = ( function ( BaseBlock , CustomDateView , CustomDateController , CustomDateDefaults ) {
   //'use strict';
 
+  // Static
+  function getDefaults ( ){
+    return CustomDateDefaults.get.apply( CustomDateDefaults , arguments );
+  }
+  function setDefaults ( ){
+    return CustomDateDefaults.set.apply( CustomDateDefaults , arguments );
+  }
 
   // Constructor
   function CustomDateBlock ( opts ){
@@ -1643,9 +1650,12 @@ window.wd.dateRangeSelectorModules.CustomDateBlock = ( function ( BaseBlock , Cu
   // Exports
   return BaseBlock.extend( {
     constructor: CustomDateBlock
+  },{
+    setDefaults: setDefaults,
+    getDefaults: getDefaults
   } );
 
-} )( window.wd.dateRangeSelectorModules.BaseBlock, window.wd.dateRangeSelectorModules.CustomDateView , window.wd.dateRangeSelectorModules.CustomDateController );
+} )( window.wd.dateRangeSelectorModules.BaseBlock, window.wd.dateRangeSelectorModules.CustomDateView , window.wd.dateRangeSelectorModules.CustomDateController , window.wd.dateRangeSelectorModules.CustomDateDefaults );
 
 
 

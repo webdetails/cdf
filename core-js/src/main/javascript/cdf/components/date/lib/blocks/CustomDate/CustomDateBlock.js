@@ -1,10 +1,18 @@
 define([
   '../../base/BaseBlock',
   './CustomDateView',
-  './CustomDateController'
-], function ( BaseBlock , CustomDateView , CustomDateController ) {
+  './CustomDateController',
+  './CustomDateDefaults'
+], function ( BaseBlock , CustomDateView , CustomDateController , CustomDateDefaults ) {
   'use strict';
 
+  // Static
+  function getDefaults ( ){
+    return CustomDateDefaults.get.apply( CustomDateDefaults , arguments );
+  }
+  function setDefaults ( ){
+    return CustomDateDefaults.set.apply( CustomDateDefaults , arguments );
+  }
 
   // Constructor
   function CustomDateBlock ( opts ){
@@ -18,6 +26,9 @@ define([
   // Exports
   return BaseBlock.extend( {
     constructor: CustomDateBlock
+  },{
+    setDefaults: setDefaults,
+    getDefaults: getDefaults
   } );
 
 } );
