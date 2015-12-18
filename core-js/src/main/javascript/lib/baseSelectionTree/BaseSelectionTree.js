@@ -14,6 +14,14 @@ define([
   './Tree'
 ], function( _, Tree) {
 
+  /**
+   * The selection state representation.
+   *
+   * @typedef {?boolean} SelectionStates
+   * @property {null}  SOME - Some items selected.
+   * @property {false} NONE - No items selected.
+   * @property {true}  ALL  - All items selected.
+   */
   var SelectionStates = {
     SOME: null,
     NONE: false,
@@ -23,9 +31,17 @@ define([
   var BaseSelectionTree = Tree.extend({
 
     /**
-     * @property {Object} [defaults]
-     * @private
-     * Default values for each node in the selection tree
+     * Default values for each node in the selection tree.
+     *
+     * @type     {Object}
+     * @property {string}  id                    - The default id.
+     * @property {string}  label                 - The default label.
+     * @property {boolean} isSelected            - The default selection state.
+     * @property {boolean} isVisible             - The default visibility state.
+     * @property {boolean} isCollapsed           - The default collapsed state.
+     * @property {number}  numberOfSelectedItems - The default number of selected items.
+     * @property {number}  numberOfItems         - The default number of items.
+     * @property {number}  page                  - The default page.
      */
     defaults: {
       id: void 0,
@@ -57,9 +73,11 @@ define([
     },
 
     /**
-     * sets the selection state of the model
+     * Sets the selection state of the model.
+     * 
      * @method setSelection
      * @public
+     * @param {SelectionStates} newState The new selection state to be set.
      */
     setSelection: function(newState) {
       if (this.getSelection() === newState) {
@@ -80,7 +98,8 @@ define([
     },
 
     /**
-     * gets the selection state of the model
+     * Gets the selection state of the model.
+     * 
      * @method getSelection
      * @public
      * @return {Boolean}
@@ -130,11 +149,13 @@ define([
     },
 
     /**
-     * Mark listed items as selected
-     * NOTE: currently acts directly on the model and bypasses any business logic
-     * TODO: change implementation to be recursive rather than acting on a flat tree
+     * Mark listed items as selected.
+     *
      * @method setSelectedItems
+     * @param {Array} idList A list of ids.
      */
+    // NOTE: currently acts directly on the model and bypasses any business logic
+    // TODO: change implementation to be recursive rather than acting on a flat tree
     setSelectedItems: function(idList) {
       var flatTree = this.flatten();
       flatTree.filter(function(m) {
