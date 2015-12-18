@@ -43,8 +43,8 @@ define([
      * Calculates the new state of an item, after the user clicked on it
      * @method getNewState
      * @public
-     * @param {Enum} oldState
-     * @return {Enum} Returns the next state
+     * @param  {SelectionStates} oldState The previouse selection state.
+     * @return {SelectionStates} Returns the next selection state.
      */
     getNewState: function (oldState) {
       switch (oldState) {
@@ -61,8 +61,8 @@ define([
      * Infers the state of a node, based on the current state of its children
      * @method inferSelectionFromChildren
      * @private
-     * @param {Array of Enum} childrenStates
-     * @return {Enum} Returns the inferred state
+     * @param {SelectionStates[]} childrenStates an array containing the state of each child
+     * @return {SelectionStates} Returns the inferred state
      */
     inferSelectionFromChildren: function (childrenStates) {
       var all = _.every(childrenStates, function (el) {
@@ -84,7 +84,7 @@ define([
      * Sets a node in the selection tree to a particular state
      * @method setSelection
      * @protected
-     * @param {Enum} newState
+     * @param {SelectionStates} newState
      * @param {Object} model
      * @chainable
      */

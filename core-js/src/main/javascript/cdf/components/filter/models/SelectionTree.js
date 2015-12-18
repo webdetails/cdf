@@ -29,9 +29,17 @@ define([
   return BaseSelectionTree.extend({
 
     /**
-     * @property {Object} [defaults]
-     * @private
-     * Default values for each node in the selection tree
+     * Default values for each node in the selection tree.
+     *
+     * @type     {Object}
+     * @property {string}  id                    - The default id.
+     * @property {string}  label                 - The default label.
+     * @property {boolean} isSelected            - The default selection state.
+     * @property {boolean} isVisible             - The default visibility state.
+     * @property {boolean} isCollapsed           - The default collapsed state.
+     * @property {number}  numberOfSelectedItems - The default number of selected items.
+     * @property {number}  numberOfItems         - The default number of items.
+     * @property {number}  page                  - The default page.
      */
     defaults: {
       id: undefined,
