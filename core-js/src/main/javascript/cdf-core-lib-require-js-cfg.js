@@ -81,12 +81,15 @@
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
 
   //jquery 1.9.1, without globally scoped variables
-  amdShim['cdf/lib/jQuery/jquery'] = {
-    postscript: "return window.jQuery.noConflict(true);"
+  requirePaths['cdf/lib/jquery'] = prefix + '/jQuery/jquery';
+  requireShims['cdf/lib/jquery'] = {
+    exports: '$',
+    init: function() {
+      return $.noConflict(true);
+    }
   }
   //mapping all jquery requests from inside cdf to 'cdf/lib/jquery'
-  requireCfg.map['*']['cdf/lib/jquery'] = "amd!cdf/lib/jQuery/jquery";
-  requireCfg.map['cdf']['jquery'] = "amd!cdf/lib/jQuery/jquery";
+  requireCfg.map['cdf']['jquery'] = 'cdf/lib/jquery';
 
   //jquery.ui 1.10.4
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jQuery/jquery.ui";
