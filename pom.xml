@@ -406,7 +406,7 @@
       <id>javascript-doc</id>
       <activation>
         <file>
-          <exists>${basedir}/src/main/javascript</exists>
+          <exists>${basedir}/src/main/javascript/${javascript.doc.dir}</exists>
         </file>
       </activation>
 
@@ -419,7 +419,7 @@
             <configuration>
               <recursive>true</recursive>
               <directoryRoots>
-                <directoryRoot>${javascript.doc.dir}</directoryRoot>
+                <directoryRoot>${basedir}/src/main/javascript/${javascript.doc.dir}</directoryRoot>
               </directoryRoots>
             </configuration>
           </plugin>
