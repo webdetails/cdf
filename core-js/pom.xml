@@ -15,7 +15,7 @@
   <properties>
     <js.project.list>ccc</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
-    <javascript.doc.dir>${basedir}/src/main/javascript/cdf</javascript.doc.dir>
+    <javascript.doc.dir>/cdf</javascript.doc.dir>
   </properties>
 
   <dependencies>
