@@ -44,7 +44,7 @@
     <requirejs.config.files.pattern></requirejs.config.files.pattern>
     <do.documentation.javascript>false</do.documentation.javascript>
     <documentation.javascript.root></documentation.javascript.root>
-    <javascript.doc.dir></javascript.doc.dir>
+    <docjs.config.file></docjs.config.file>
   </properties>
 
   <dependencyManagement>
@@ -406,7 +406,7 @@
       <id>javascript-doc</id>
       <activation>
         <file>
-          <exists>${basedir}/src/main/javascript/${javascript.doc.dir}</exists>
+          <exists>${basedir}/src/doc/javascript/config/${docjs.config.file}</exists>
         </file>
       </activation>
 
@@ -417,10 +417,10 @@
             <artifactId>jsdoc3-maven-plugin</artifactId>
             <version>1.2.0</version>
             <configuration>
-              <recursive>true</recursive>
-              <directoryRoots>
-                <directoryRoot>${basedir}/src/main/javascript/${javascript.doc.dir}</directoryRoot>
-              </directoryRoots>
+              <configFile>${basedir}/src/doc/javascript/config/${docjs.config.file}</configFile>
+              <sourceFiles>
+                <sourceFile>${basedir}/src/doc/javascript/config/${docjs.config.file}</sourceFile>
+              </sourceFiles>
             </configuration>
           </plugin>
         </plugins>

@@ -1,0 +1,32 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": ["src/main/javascript/cdf"],
+    "exclude": ["src/main/javascript/cdf-legacy", "src/main/javascript/lib"],
+    "includePattern": ".+\\.js(doc)?$"
+  },
+  "plugins": ["plugins/markdown"],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": true,
+      "includeDate": true,
+      "layoutFile": "src/doc/javascript/template/layout.tmpl",
+      "staticFiles": {
+        "include": [
+          "src/doc/javascript/template/static"
+        ]
+      }
+    }
+  },
+  "opts": {
+    "template": "templates/default",
+    "encoding": "utf8",
+    "recurse": true,
+    "private": true,
+    "verbose": true
+  }
+}
