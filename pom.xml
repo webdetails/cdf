@@ -410,6 +410,33 @@
         </file>
       </activation>
 
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-assembly-resources</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <overwrite>true</overwrite>
+                  <outputDirectory>${basedir}/target/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}/src/doc/javascript/config/</directory>
+                      <filtering>true</filtering>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+
       <reporting>
         <plugins>
           <plugin>
@@ -417,9 +444,9 @@
             <artifactId>jsdoc3-maven-plugin</artifactId>
             <version>1.2.0</version>
             <configuration>
-              <configFile>${basedir}/src/doc/javascript/config/${docjs.config.file}</configFile>
+              <configFile>${basedir}/target/${docjs.config.file}</configFile>
               <sourceFiles>
-                <sourceFile>${basedir}/src/doc/javascript/config/${docjs.config.file}</sourceFile>
+                <sourceFile>${basedir}/target/${docjs.config.file}</sourceFile>
               </sourceFiles>
             </configuration>
           </plugin>
