@@ -195,7 +195,7 @@ Timeline.loadJSON = function(url, f) {
         alert("Failed to load json data from " + url + "\n" + statusText);
     };
     var fDone = function(xmlhttp) {
-        f(eval('(' + xmlhttp.responseText + ')'), url);
+        f(JSON.parse(xmlhttp.responseText), url);
     };
     SimileAjax.XmlHttp.get(url, fError, fDone);
 };
@@ -308,7 +308,7 @@ Timeline._Impl.prototype.loadJSON = function(url, f) {
     };
     var fDone = function(xmlhttp) {
         try {
-            f(eval('(' + xmlhttp.responseText + ')'), url);
+            f(JSON.parse(xmlhttp.responseText), url);
         } finally {
             tl.hideLoadingMessage();
         }
