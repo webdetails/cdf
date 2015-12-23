@@ -3,8 +3,8 @@
     "allowUnknownTags": true
   },
   "source": {
-    "include": ["src/main/javascript/cdf"],
-    "exclude": ["src/main/javascript/cdf-legacy", "src/main/javascript/lib"],
+    "include": ["${basedir}/src/main/javascript/cdf"],
+    "exclude": ["${basedir}/src/main/javascript/cdf-legacy", "${basedir}/src/main/javascript/lib"],
     "includePattern": ".+\\.js(doc)?$"
   },
   "plugins": ["plugins/markdown"],
@@ -14,10 +14,10 @@
     "default": {
       "outputSourceFiles": true,
       "includeDate": true,
-      "layoutFile": "src/doc/javascript/template/layout.tmpl",
+      "layoutFile": "${basedir}/src/doc/javascript/template/layout.tmpl",
       "staticFiles": {
         "include": [
-          "src/doc/javascript/template/static"
+          "${basedir}/src/doc/javascript/template/static"
         ]
       }
     }
