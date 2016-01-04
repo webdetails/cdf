@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
     <relativePath></relativePath>
   </parent>
 
@@ -14,6 +14,7 @@
   <artifactId>cdf-plugin</artifactId>
   <packaging>pom</packaging>
   <version>6.1-SNAPSHOT</version>
+  
   <modules>
     <module>core</module>
     <module>core-js</module>
@@ -21,6 +22,20 @@
     <module>pentaho-js</module>
     <module>assemblies</module>
   </modules>
+  
+  <scm>
+    <connection>scm:git:git@github.com:webdetails/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:webdetails/${project.artifactId}.git</developerConnection>
+    <url>scm:git:git@github.com:webdetails/${project.artifactId}.git</url>
+  </scm>
+  
+  <distributionManagement>
+    <site>
+      <id>pentaho.public.snapshot.repo</id>
+      <name>${project.artifactId}-${project.version}</name>
+      <url>dav:${site.publish.url}/${project.groupId}/cdf-plugin-${project.version}</url>
+    </site>
+  </distributionManagement>
 
   <properties>
     <project.stage>master</project.stage>
@@ -453,5 +468,71 @@
         </plugins>
       </reporting>
     </profile>
+    
+    <profile>
+      <id>aggregate-reporting</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jxr-plugin</artifactId>
+            <configuration>
+              <linkJavadoc>true</linkJavadoc>
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-jxr</id>
+                <inherited>false</inherited>
+                <reports>
+                  <report>aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <failOnError>false</failOnError>
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-javadoc</id>
+                <inherited>false</inherited>
+                <reports>
+                  <report>aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <configuration>
+              <configLocation>${checkstyle-config-url}</configLocation>
+              <propertiesLocation>${checkstyle-properties-url}</propertiesLocation>
+              <linkXRef>true</linkXRef>
+              <cacheFile />
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-checkstyle</id>
+                <inherited>false</inherited>
+                <reports>
+                  <report>checkstyle-aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+    
   </profiles>
 </project>
