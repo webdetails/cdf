@@ -464,6 +464,8 @@ define([
        * Initialize our little MVC world
        */
       this.model = new BaseFilter.Models.SelectionTree(configuration.input.defaultModel);
+      this.model.set('matcher', configuration.component.search.matcher);
+
       this.manager = new BaseFilter.Controllers.Manager({
         model: this.model,
         configuration: configuration.component
