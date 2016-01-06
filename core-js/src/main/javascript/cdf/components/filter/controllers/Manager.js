@@ -43,8 +43,12 @@ define([
       controller: null,
       configuration: null
     },
-    constructor: function (options) {
+    constructor: function(node) {
       this.base.apply(this, arguments);
+      var loglevel = this.get('configuration').loglevel;
+      if (!_.isUndefined(loglevel)) {
+        this.loglevel = loglevel;
+      }
       this.updateChildren();
       return this;
     },
