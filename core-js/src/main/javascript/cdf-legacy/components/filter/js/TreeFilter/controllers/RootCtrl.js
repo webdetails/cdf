@@ -20,6 +20,7 @@
       if (this.view) {
         this.bindToView(this.view);
       }
+      this.loglevel = this.configuration.loglevel;
       return this;
     },
     bindToView: function(view) {
