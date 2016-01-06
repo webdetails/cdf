@@ -448,6 +448,8 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
        * Initialize our little MVC world
        */
       this.model = new TreeFilter.Models.SelectionTree(configuration.input.defaultModel);
+      this.model.set('matcher', configuration.component.search.matcher);
+
       this.manager = new TreeFilter.Controllers.Manager({
         model: this.model,
         configuration: configuration.component

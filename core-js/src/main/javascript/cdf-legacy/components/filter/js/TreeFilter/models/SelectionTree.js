@@ -44,15 +44,21 @@
     },
     initialize: function() {
       this.base.apply(this, arguments);
+      if (this.parent()) {
+        this._inheritSelectionFromParent();
+      }
+      var filterText = this.root().get('searchPattern');
+      this._filterBy(filterText);
+
       return this.on('add remove', this.update);
     },
-    sync: function(action, model, options) {
-      this.log("Please " + action + " item " + (model.get('label')));
-      return _.each(model.where({
-        isSelected: true
-      }), function(m) {
-        return this.log("Processing " + action + " on item " + (m.get('label')));
-      });
+    _inheritSelectionFromParent: function() {
+      var parentSelectionState = this.parent().getSelection();
+      if (parentSelectionState === SelectionStates.ALL) {
+        this.setSelection(SelectionStates.ALL);
+      } else if (parentSelectionState === SelectionStates.NONE) {
+        this.setSelection(SelectionStates.NONE);
+      }
     },
 
     /**
@@ -341,6 +347,49 @@
         hasChanged = false;
       }
       return hasChanged;
+    },
+    filterBy: function(text){
+      this.root().set('searchPattern', text);
+      this._filterBy(text);
+      return this;
+    },
+    _filterBy: function(text){
+      this._filter(text, "", this.get("matcher"));
+      this.root().setVisibility(true);
+    },
+    _filter: function(text, prefix, customMatcher) {
+
+      /*
+       * decide on item visibility based on a match to a filter string
+       * The children are processed first in order to ensure the visibility is reset correctly
+       * if the user decides to delete/clear the search box
+       */
+      var isMatch, that = this;
+      var fullString = _.chain(['label']).map(function(property) {
+        return that.get(property);
+      }).compact().value().join(' ');
+      if (prefix) {
+        fullString = prefix + fullString;
+      }
+      if (this.children()) {
+        isMatch = _.any(this.children().map(function(m) {
+          var childIsMatch;
+          childIsMatch = m._filter(text, fullString, customMatcher);
+          m.setVisibility(childIsMatch);
+          return childIsMatch;
+        }));
+      } else if (_.isEmpty(text)) {
+        isMatch = true;
+      } else {
+        if (_.isFunction(customMatcher)) {
+          isMatch = customMatcher(fullString, text);
+        } else {
+          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1;
+        }
+        this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
+      }
+      this.setVisibility(isMatch);
+      return isMatch;
     },
     setBusy: function(isBusy) {
       this.root().set('isBusy', isBusy);

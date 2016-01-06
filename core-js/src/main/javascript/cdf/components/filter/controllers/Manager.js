@@ -22,7 +22,7 @@ define([
   '../../../Logger',
   '../views/Views',
   './RootCtrl'
-], function (_, Tree, Logger, Views, RootCtrl) {
+], function(_, Tree, Logger, Views, RootCtrl) {
 
   /**
    * Controller responsible for managing the hierarchy of views and controllers.
@@ -35,7 +35,7 @@ define([
    * @extends Tree
    */
 
-  return Tree.extend(Logger).extend({
+  return Tree.extend({
     ID: 'BaseFilter.Controllers.Manager',
     defaults: {
       model: null,
@@ -52,14 +52,14 @@ define([
       this.updateChildren();
       return this;
     },
-    initialize: function (options) {
+    initialize: function(options) {
       if (this.get('view') == null) {
         this.addViewAndController(this.get('model'));
       }
       this.applyBindings();
       return this;
     },
-    close: function () {
+    close: function() {
       this.get('view').close();
       this.get('controller').stopListening().off();
       this.stopListening();
@@ -67,19 +67,17 @@ define([
       this.clear();
       return this;
     },
-    applyBindings: function () {
+    applyBindings: function() {
       var that = this;
-      var throttleScroll = function (f) {
+      var throttleScroll = function(f) {
         var throttleTimeMilliseconds = that.get('configuration').pagination.throttleTimeMilliseconds;
         return _.throttle(f, throttleTimeMilliseconds || 0, {
           trailing: false
         });
       };
-      var throttleFilter = function (f) {
+      var throttleFilter = function(f) {
         var throttleTimeMilliseconds = that.get('view').config.view.throttleTimeMilliseconds;
-        return _.throttle(f, throttleTimeMilliseconds || 0, {
-          leading: false
-        });
+        return _.debounce(f, throttleTimeMilliseconds);
       };
 
       /*
@@ -101,16 +99,18 @@ define([
       /*
        * Create listeners
        */
-      _.each(bindings, function (bindingList, object) {
-        return _.each(bindingList, function (method, event) {
+      _.each(bindings, function(bindingList, object) {
+        return _.each(bindingList, function(method, event) {
           return that.listenTo(that.attributes[object], event, _.bind(method, that));
         });
       });
-      this.on('post:child:selection request:child:sort', this.renderSortedChildren);
-      this.on('post:child:add', this.onUpdateChildren);
+
+
+      this.on('post:child:selection request:child:sort', throttleFilter(this.renderSortedChildren));
+      this.on('post:child:add', throttleFilter(this.onUpdateChildren));
       return this;
     },
-    addViewAndController: function (newModel) {
+    addViewAndController: function(newModel) {
 
       /*
        * Decide which view to use
@@ -174,7 +174,7 @@ define([
       this.debug("addViewAndController is done for " + (newModel.get('id')) + " : " + (newModel.get('label')));
       return this;
     },
-    onNewData: function (item, collection, obj) {
+    onNewData: function(item, collection, obj) {
       var itemParent;
       this.debug("New data (" + (item.get('label')) + ") caught by " + (this.get('model').get('label')));
       itemParent = this.where({
@@ -184,13 +184,13 @@ define([
         return itemParent[0].trigger("post:child:add");
       }
     },
-    onUpdateChildren: function () {
+    onUpdateChildren: function() {
       this.debug("New data added to " + (this.get('model').get('label')) + " : updating children");
       this.updateChildren();
       this.restoreScroll();
       return this.trigger('post:update:children', this);
     },
-    restoreScroll: function () {
+    restoreScroll: function() {
       if (this.get('view')._scrollBar != null) {
         this.debug("This group has a scrollbar");
         if (this.previousPosition != null) {
@@ -204,62 +204,58 @@ define([
     /*
      * Pagination
      */
-    getNextPage: function (model, event) {
+    getNextPage: function(model, event) {
       var ref;
       this.previousPosition = (ref = _.last(this.sortChildren(this.children()), 2)[0]) != null ? ref.get('view').$el : void 0;
       return this.getPage('next', model, event);
     },
-    getPreviousPage: function (model, event) {
+    getPreviousPage: function(model, event) {
       var ref;
       this.previousPosition = (ref = _.first(this.sortChildren(this.children()), 2)[1]) != null ? ref.get('view').$el : void 0;
       return this.getPage('previous', model, event);
     },
-    getPage: function (page, model, event) {
-      var deferred;
+    getPage: function(page, model, event) {
       this.debug("Item " + (model.get('label')) + " requested page " + page);
-      deferred = this.requestPage(page, model.root().get('searchPattern'));
-      return deferred;
+      var searchPattern = "";
+      if (this.get('configuration').search.serverSide === true) {
+        searchPattern = model.root().get('searchPattern')
+      }
+      return this.requestPage(page,searchPattern);
     },
-    requestPage: function (page, searchPattern) {
-      var deferred, getPage, that;
-      getPage = this.get('configuration').pagination.getPage;
+    requestPage: function(page, searchPattern) {
+      var getPage = this.get('configuration').pagination.getPage;
       if (!_.isFunction(getPage)) {
         return this;
       }
-      that = this;
-      deferred = getPage(page, searchPattern).then(function (json) {
+      var that = this;
+      return getPage(page, searchPattern).then(function(json) {
         if (json.resultset != null) {
-          return that.debug("getPage: got " + json.resultset.length + " more items");
+          that.debug("getPage: got " + json.resultset.length + " more items");
         } else {
-          return that.debug("getPage: no more items");
+          that.debug("getPage: no more items");
         }
       });
-      return deferred;
     },
 
     /*
      * Child management
      */
-    updateChildren: function () {
-      var models;
-      models = this.get('model').children();
+    updateChildren: function() {
+      var models = this.get('model').children();
       if (models != null) {
-        models.each((function (_this) {
-          return function (m) {
-            var hasModel;
-            if (_this.children()) {
-              hasModel = _.any(_this.children().map(function (child) {
-                return child.get('model') === m;
-              }));
-            } else {
-              hasModel = false;
-            }
-            if (!hasModel) {
-              _this.debug("adding child model " + (m.get('label')));
-              return _this.addChild(m);
-            }
-          };
-        })(this));
+        var that = this;
+        models.each(function(m) {
+          var hasModel = false;
+          if (that.children()) {
+            hasModel = _.any(that.children().map(function(child) {
+              return child.get('model') === m;
+            }));
+          }
+          if (!hasModel) {
+            that.debug("adding child model " + (m.get('label')));
+            return that.addChild(m);
+          }
+        });
         this.renderSortedChildren();
         this.get('view').updateScrollBar();
       }
@@ -272,19 +268,18 @@ define([
      * @method addChild
      * @chainable
      */
-    addChild: function (newModel) {
-      var newManager;
-      newManager = {
+    addChild: function(newModel) {
+      var newManager = {
         model: newModel,
         configuration: this.get('configuration')
       };
       this.add(newManager);
       return this;
     },
-    removeChild: function (model) {
+    removeChild: function(model) {
       throw new Error("NotImplemented");
     },
-    sortSiblings: function (model) {
+    sortSiblings: function(model) {
       this.debug("sortSiblings: " + (this.get('model').get('label')) + " was triggered from " + (model.get('label')) + ":" + (model.getSelection()));
       if (this.get('model') !== model) {
         return this;
@@ -300,7 +295,7 @@ define([
      * @method getSorters
      * @return {Array} an array with the available sorter functions
      */
-    getSorters: function () {
+    getSorters: function() {
       var type = this.children().first().get('view').type;
       var customSorters = this.get('configuration')[type].sorter;
 
@@ -324,7 +319,7 @@ define([
      * @param {Array} children the array to be sorted
      * @return {Array} the sorted array
      */
-    sortChildren: function (children) {
+    sortChildren: function(children) {
       var customSorters = this.getSorters();
       if (_.isEmpty(customSorters)) {
         return children;
@@ -336,7 +331,7 @@ define([
 
       // apply sorters in reverse order, from least to most important sorter
       while (sorterIdx--) {
-        orderedChildren = orderedChildren.sortBy(function (child, idx) {
+        orderedChildren = orderedChildren.sortBy(function(child, idx) {
           return customSorters[sorterIdx](null, child.item.get('model'), configuration);
         });
       }
@@ -348,7 +343,7 @@ define([
      * @method renderSortedChildren
      * @chainable
      */
-    renderSortedChildren: function () {
+    renderSortedChildren: function() {
       var $nursery;
       if (!this.children()) {
         return this;
@@ -361,10 +356,10 @@ define([
 
       return this;
     },
-    _detachChildren: function () {
+    _detachChildren: function() {
       var children;
       if (this.children()) {
-        children = this.children().map(function (child) {
+        children = this.children().map(function(child) {
           var result;
           result = {
             item: child,
@@ -377,10 +372,10 @@ define([
       }
       return children;
     },
-    _appendChildren: function (children) {
+    _appendChildren: function(children) {
       if (children != null) {
-        _.each(children, (function (_this) {
-          return function (child) {
+        _.each(children, (function(_this) {
+          return function(child) {
             return _this.get('view').appendChildNode(child.target);
           };
         })(this));
@@ -395,63 +390,17 @@ define([
      * @param {String} text the new search pattern
      * @for Manager
      */
-    onFilterChange: function (text) {
-      if(this.get('model').root().get('searchPattern') === text) {
-        return;
-      }
-      this.get('model').root().set('searchPattern', text);
-      var filter = _.bind(function () {
-        this.filter(text, "", this.get('configuration').search.matcher);
-        return this.get('model').setVisibility(true);
-      }, this);
+    onFilterChange: function(text) {
       if (this.get('configuration').search.serverSide === true) {
-        this.requestPage(0, text).then(function () {
-          filter();
-        });
+        this.requestPage(0, text)
       }
-      filter();
-    },
-    filter: function (text, prefix, customMatcher) {
-
-      /*
-       * decide on item visibility based on a match to a filter string
-       * The children are processed first in order to ensure the visibility is reset correctly
-       * if the user decides to delete/clear the search box
-       */
-      var fullString, isMatch;
-      fullString = _.chain(['label']).map((function (_this) {
-        return function (property) {
-          return _this.get('model').get(property);
-        };
-      })(this)).compact().value().join(' ');
-      if (prefix) {
-        fullString = prefix + fullString;
-      }
-      if (this.children()) {
-        isMatch = _.any(this.children().map(function (manager) {
-          var childIsMatch;
-          childIsMatch = manager.filter(text, fullString, customMatcher);
-          manager.get('model').setVisibility(childIsMatch);
-          return childIsMatch;
-        }));
-      } else if (_.isEmpty(text)) {
-        isMatch = true;
-      } else {
-        if (_.isFunction(customMatcher)) {
-          isMatch = customMatcher(fullString, text);
-        } else {
-          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1;
-        }
-        this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
-      }
-      this.get('model').setVisibility(isMatch);
-      return isMatch;
+      this.get('model').filterBy(text);
     },
 
     /*
      * Management of selected items
      */
-    onApply: function (model) {
+    onApply: function(model) {
       return this.onFilterChange('');
     }
 
