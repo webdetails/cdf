@@ -27,6 +27,10 @@
     },
     constructor: function(options) {
       this.base.apply(this, arguments);
+      var loglevel = this.get('configuration').loglevel;
+      if (!_.isUndefined(loglevel)) {
+        this.loglevel = loglevel;
+      }
       this.updateChildren();
       return this;
     },
@@ -46,27 +50,22 @@
       return this;
     },
     applyBindings: function() {
-      var bindings, that, throttleFilter, throttleScroll;
-      that = this;
-      throttleScroll = function(f) {
-        var throttleTimeMilliseconds;
-        throttleTimeMilliseconds = that.get('configuration').pagination.throttleTimeMilliseconds;
+      var that = this;
+      var throttleScroll = function(f) {
+        var throttleTimeMilliseconds = that.get('configuration').pagination.throttleTimeMilliseconds;
         return _.throttle(f, throttleTimeMilliseconds || 0, {
           trailing: false
         });
       };
-      throttleFilter = function(f) {
-        var throttleTimeMilliseconds;
-        throttleTimeMilliseconds = that.get('view').config.view.throttleTimeMilliseconds;
-        return _.throttle(f, throttleTimeMilliseconds || 0, {
-          leading: false
-        });
+      var throttleFilter = function(f) {
+        var throttleTimeMilliseconds = that.get('view').config.view.throttleTimeMilliseconds;
+        return _.debounce(f, throttleTimeMilliseconds);
       };
 
       /**
        * Declare bindings to model and view
        */
-      bindings = {
+      var bindings = {
         model: {
           'add': this.onNewData,
           'change:selectedItems': this.onApply,
@@ -82,14 +81,13 @@
       /**
        * Create listeners
        */
-      that = this;
       _.each(bindings, function(bindingList, object) {
         return _.each(bindingList, function(method, event) {
           return that.listenTo(that.attributes[object], event, _.bind(method, that));
         });
       });
-      this.on('post:child:selection request:child:sort', this.renderSortedChildren);
-      this.on('post:child:add', this.onUpdateChildren);
+      this.on('post:child:selection request:child:sort', throttleFilter(this.renderSortedChildren));
+      this.on('post:child:add', throttleFilter(this.onUpdateChildren));
       return this;
     },
     addViewAndController: function(newModel) {
@@ -197,51 +195,47 @@
       return this.getPage('previous', model, event);
     },
     getPage: function(page, model, event) {
-      var deferred;
       this.debug("Item " + (model.get('label')) + " requested page " + page);
-      deferred = this.requestPage(page, model.root().get('searchPattern'));
-      return deferred;
+      var searchPattern = "";
+      if (this.get('configuration').search.serverSide === true) {
+        searchPattern = model.root().get('searchPattern')
+      }
+      return this.requestPage(page,searchPattern);
     },
     requestPage: function(page, searchPattern) {
-      var deferred, getPage, that;
-      getPage = this.get('configuration').pagination.getPage;
+      var getPage = this.get('configuration').pagination.getPage;
       if (!_.isFunction(getPage)) {
         return this;
       }
-      that = this;
-      deferred = getPage(page, searchPattern).then(function(json) {
+      var that = this;
+      return getPage(page, searchPattern).then(function(json) {
         if (json.resultset != null) {
-          return that.debug("getPage: got " + json.resultset.length + " more items");
+          that.debug("getPage: got " + json.resultset.length + " more items");
         } else {
-          return that.debug("getPage: no more items");
+          that.debug("getPage: no more items");
         }
       });
-      return deferred;
     },
 
     /**
      * Child management
      */
     updateChildren: function() {
-      var models;
-      models = this.get('model').children();
+      var models = this.get('model').children();
       if (models != null) {
-        models.each((function(_this) {
-          return function(m) {
-            var hasModel;
-            if (_this.children()) {
-              hasModel = _.any(_this.children().map(function(child) {
-                return child.get('model') === m;
-              }));
-            } else {
-              hasModel = false;
-            }
-            if (!hasModel) {
-              _this.debug("adding child model " + (m.get('label')));
-              return _this.addChild(m);
-            }
-          };
-        })(this));
+        var that = this;
+        models.each(function(m) {
+          var hasModel = false;
+          if (that.children()) {
+            hasModel = _.any(that.children().map(function(child) {
+              return child.get('model') === m;
+            }));
+          }
+          if (!hasModel) {
+            that.debug("adding child model " + (m.get('label')));
+            return that.addChild(m);
+          }
+        });
         this.renderSortedChildren();
         this.get('view').updateScrollBar();
       }
@@ -254,8 +248,7 @@
      * @chainable
      */
     addChild: function(newModel) {
-      var newManager;
-      newManager = {
+      var newManager = {
         model: newModel,
         configuration: this.get('configuration')
       };
@@ -376,56 +369,10 @@
      * @for Manager
      */
     onFilterChange: function(text) {
-      if(this.get('model').root().get('searchPattern') === text) {
-        return;
-      }
-      this.get('model').root().set('searchPattern', text);
-      var filter = _.bind(function () {
-        this.filter(text, "", this.get('configuration').search.matcher);
-        return this.get('model').setVisibility(true);
-      }, this);
       if (this.get('configuration').search.serverSide === true) {
-        this.requestPage(0, text).then(function () {
-          filter();
-        });
+        this.requestPage(0, text)
       }
-      filter();
-    },
-    filter: function(text, prefix, customMatcher) {
-
-      /**
-       * decide on item visibility based on a match to a filter string
-       * The children are processed first in order to ensure the visibility is reset correctly
-       * if the user decides to delete/clear the search box
-       */
-      var fullString, isMatch;
-      fullString = _.chain(['label']).map((function(_this) {
-        return function(property) {
-          return _this.get('model').get(property);
-        };
-      })(this)).compact().value().join(' ');
-      if (prefix) {
-        fullString = prefix + fullString;
-      }
-      if (this.children()) {
-        isMatch = _.any(this.children().map(function(manager) {
-          var childIsMatch;
-          childIsMatch = manager.filter(text, fullString, customMatcher);
-          manager.get('model').setVisibility(childIsMatch);
-          return childIsMatch;
-        }));
-      } else if (_.isEmpty(text)) {
-        isMatch = true;
-      } else {
-        if (_.isFunction(customMatcher)) {
-          isMatch = customMatcher(fullString, text);
-        } else {
-          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1 ;
-        }
-        this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
-      }
-      this.get('model').setVisibility(isMatch);
-      return isMatch;
+      this.get('model').filterBy(text);
     },
 
     /**

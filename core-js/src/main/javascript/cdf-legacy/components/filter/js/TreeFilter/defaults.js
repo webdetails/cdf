@@ -10,7 +10,7 @@
      */
     var defaults, privateDefaults;
     privateDefaults = {
-      logLevel: 1,
+      logLevel: "log",
       pagination: {
         throttleTimeMilliseconds: 500
       },

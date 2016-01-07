@@ -16,6 +16,7 @@ define([
 
   var Tree = BaseEvents.extendWithEvents(Backbone.TreeModel).extend(Logger).extend({
     url: '',
+    loglevel: 'log',
     children: function () {
       return this.nodes.apply(this, arguments);
     },
