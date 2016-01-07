@@ -16,6 +16,7 @@
   Views.AbstractView = BaseView.extend(LoggerMixin).extend({
     initialize: function(options) {
       this.configuration = options.configuration;
+      this.loglevel = this.configuration.loglevel;
       this.config = this.configuration[this.type];
 
       /**
@@ -171,7 +172,7 @@
       needsScrollBar = _.isFinite(this.configuration.pagination.pageSize) && this.configuration.pagination.pageSize > 0;
       needsScrollBar = needsScrollBar || this.type !== 'Item' && this.model.flatten().size().value() > nItems;
       if (needsScrollBar) {
-        this.log("There are more than " + nItems + " items, adding scroll bar");
+        this.debug("There are more than " + nItems + " items, adding scroll bar");
         return this.addScrollBar();
       }
     },
