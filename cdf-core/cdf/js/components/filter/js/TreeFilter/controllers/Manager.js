@@ -27,6 +27,10 @@
     },
     constructor: function(options) {
       this.base.apply(this, arguments);
+      var loglevel = this.get('configuration').loglevel;
+      if (!_.isUndefined(loglevel)) {
+        this.loglevel = loglevel;
+      }
       this.updateChildren();
       return this;
     },
