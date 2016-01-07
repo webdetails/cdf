@@ -34,12 +34,14 @@ define([
       listeners: [],
       parameter: "singleSelectionParam_simple",
       parameters: [],
-      options: function() { return {}; },
+      options: function() {
+        return {};
+      },
       queryDefinition: {},
       componentInput: {
         valueAsId: false,
-        valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],
-                      [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"]]
+        valuesArray: [[1.1, "One", "Ones"], [1.2, "Two", "Ones"], [1.3, "Three", "Ones"], [1.4, "Four", "Ones"],
+          [2.1, "One", "Twos"], [2.2, "Two", "Twos"], [2.3, "Three", "Twos"], [2.4, "Four", "Twos"]]
       },
       componentOutput: {
         outputFormat: "lowestID"
@@ -75,7 +77,7 @@ define([
     var getNewDashboard = function() {
       var dashboard = new Dashboard();
       dashboard.init();
-      dashboard.addParameter("singleSelectionParam_simple",_.bind(function() {
+      dashboard.addParameter("singleSelectionParam_simple", _.bind(function() {
         return [];
       }, {"dashboard": dashboard}));
       return dashboard;
@@ -146,14 +148,14 @@ define([
         path: "/test.cda"
       });
       var modelData = [["One", "Label", "Value"],
-                       ["Two", "<script>Label</script>", "<script>Value</script>"],
-                       ["Three", "<b>Label</b>", "<b>Value</b>"],
-                       ["Three", "<b><script>Label</script></b>", "<b><script>Value</script></b>"]];
+        ["Two", "<script>Label</script>", "<script>Value</script>"],
+        ["Three", "<b>Label</b>", "<b>Value</b>"],
+        ["Three", "<b><script>Label</script></b>", "<b><script>Value</script></b>"]];
       spyOn($, 'ajax').and.callFake(function(params) {
         params.success(getCdaJson(modelData,
           [{colIndex: 0, colType: "String", colName: "id"},
-           {colIndex: 1, colType: "String", colName: "name"},
-           {colIndex: 2, colType: "String", colName: "value"}]));
+            {colIndex: 1, colType: "String", colName: "name"},
+            {colIndex: 2, colType: "String", colName: "value"}]));
       });
 
       var filterComponent = getNewFilterComponent({
@@ -179,7 +181,7 @@ define([
       dashboard.addComponent(filterComponent);
 
       var evaluateExpectations = function(models, override) {
-        for(var i = 0; i < models.length; i++) {
+        for (var i = 0; i < models.length; i++) {
           var data = override[i] || modelData[i];
           expect(models[i].get("label")).toEqual(data[1]);
           expect(models[i].get("value")).toEqual(data[2]);
@@ -210,6 +212,15 @@ define([
           componentInput: {valuesArray: []},
           options: function() {
             return {
+              input: {
+                indexes: {
+                  id: 0,
+                  label:1,
+                  parentId: null,
+                  parentLabel: null,
+                  value: 4
+                }
+              },
               component: {
                 search: {serverSide: true},
                 Root: {view: {scrollbar: {engine: "fake_engine"}}}
@@ -226,11 +237,11 @@ define([
         spyOn($, 'ajax').and.callFake(function(params) {
           params.success(getCdaJson(
             [["One", "label1", null, null, 60],
-             ["Two", "label2", null, null, 7],
-             ["Three", "label1", null, null, 7]],
+              ["Two", "label2", null, null, 7],
+              ["Three", "label1", null, null, 7]],
             [{colIndex: 0, colType: "String", colName: "id"},
-             {colIndex: 1, colType: "String", colName: "name"},
-             {colIndex: 4, colType: "Numeric", colName: "value"}]));
+              {colIndex: 1, colType: "String", colName: "name"},
+              {colIndex: 4, colType: "Numeric", colName: "value"}]));
         });
 
         filterComponent.once("getData:success", function() {
@@ -251,7 +262,6 @@ define([
             expect(orderedChildren[2].item.get('model').get('label')).toEqual("label1");
             done();
           });
-          filterComponent.manager.renderSortedChildren();
         });
 
         dashboard.update(filterComponent);
@@ -301,7 +311,7 @@ define([
           var rootModel = filterComponent.model;
           var childrenModels = rootModel.children().models;
           expect(rootModel.get('numberOfSelectedItems')).toEqual(0);
-          for(var i = 0; i < selectionLimit; i++) {
+          for (var i = 0; i < selectionLimit; i++) {
             controller.onSelection(childrenModels[i]);
           }
           expect(rootModel.get('numberOfSelectedItems')).toEqual(selectionLimit);
@@ -337,7 +347,7 @@ define([
       });
 
       var count = 0;
-      var runGetPageMechanismTest = function(serverSide, pageSize, done) {
+      function runGetPageMechanismTest(serverSide, pageSize, done) {
         var dashboard = getNewDashboard();
         dashboard.addDataSource("testFilterComponentDataSource", {
           dataAccessId: "testId",
@@ -351,7 +361,7 @@ define([
         dashboard.addComponent(testFilterComponent);
 
         testFilterComponent.once("getData:success", function() {
-          if(serverSide) {
+          if (serverSide) {
             addEvaluateExpectationsAfterGetPage(testFilterComponent, serverSide, pageSize, done);
           } else {
             addEvaluateExpectationsInsteadOfFilter(testFilterComponent, serverSide, pageSize, done);
@@ -360,9 +370,9 @@ define([
         });
 
         dashboard.update(testFilterComponent);
-      };
+      }
 
-      var getTestFilterComponent = function(serverSide, pageSize) {
+      function getTestFilterComponent(serverSide, pageSize) {
         return getNewFilterComponent({
           queryDefinition: {
             dataSource: "testFilterComponentDataSource",
@@ -389,47 +399,47 @@ define([
             };
           }
         });
-      };
+      }
 
-      var makeAjaxSpy = function() {
+      function makeAjaxSpy() {
         var firstCallToServer = true;
         spyOn($, 'ajax').and.callFake(function(params) {
-          if(firstCallToServer) {
+          if (firstCallToServer) {
             params.success(defaultCdaJson);
             firstCallToServer = false;
           } else {
             params.success(onFilterChangeCdaJson);
           }
         });
-      };
+      }
 
-      addEvaluateExpectationsAfterGetPage = function(component, serverSide, pageSize, done) {
+      function addEvaluateExpectationsAfterGetPage(component, serverSide, pageSize, done) {
         component.manager.get('configuration').pagination.getPage =
           (function(originalGetPage) {
             return function() {
               return originalGetPage.apply(component, arguments).then(function(json) {
-                evaluateExpectations(serverSide, pageSize, component.manager.get("model").children().models,
+                evaluateExpectations(serverSide, pageSize, component.model.children().models,
                   component.manager.get('configuration'));
                 done();
                 return json;
               });
             };
           })(component.manager.get('configuration').pagination.getPage);
-      };
+      }
 
-      addEvaluateExpectationsInsteadOfFilter = function(component, serverSide, pageSize, done) {
-        component.manager.filter = function() {
-          evaluateExpectations(serverSide, pageSize, component.manager.get("model").children().models,
+      function addEvaluateExpectationsInsteadOfFilter(component, serverSide, pageSize, done) {
+        component.model._filter = function() {
+          evaluateExpectations(serverSide, pageSize, component.model.children().models,
             component.manager.get('configuration'));
           done();
         };
-      };
+      }
 
-      var evaluateExpectations = function(serverSide, pageSize, models, configuration) {
+      function evaluateExpectations(serverSide, pageSize, models, configuration) {
         expect(models[0].get("label")).toEqual("Default1");
         expect(models[1].get("label")).toEqual("Default2");
         expect(configuration.search.serverSide).toEqual(serverSide);
-        expect(configuration.pagination.pageSize).toEqual((pageSize > 0) ? pageSize : Infinity );
+        expect(configuration.pagination.pageSize).toEqual((pageSize > 0) ? pageSize : Infinity);
         if (serverSide) {
           expect(models.length).toEqual(4);
           expect(models[2].get("label")).toEqual("ServerSide");
@@ -437,7 +447,7 @@ define([
         } else {
           expect(models.length).toEqual(2);
         }
-      };
+      }
     });
 
     describe("Search Mechanism #", function() {
@@ -458,9 +468,8 @@ define([
       var getTestSearchFilterComponent = function(matcher) {
         return getNewFilterComponent({
           componentInput: {
-            valuesArray:
-            [[0, "Twenty-One", "Twenties"], [1, "Twenty-Two", "Twenties"], [2, "Twenty-Three", "Twenties"], [3, "Twenty-Four", "Twenties"],
-             [4, "Fourty-Seven", "Fourties"], [5, "Fourty-Nine", "Fourties"], [6, "Fourty-Five", "Fourties"], [7, "Fourty-One", "Fourties"]]
+            valuesArray: [[0, "Twenty-One", "Twenties"], [1, "Twenty-Two", "Twenties"], [2, "Twenty-Three", "Twenties"], [3, "Twenty-Four", "Twenties"],
+              [4, "Fourty-Seven", "Fourties"], [5, "Fourty-Nine", "Fourties"], [6, "Fourty-Five", "Fourties"], [7, "Fourty-One", "Fourties"]]
           },
           options: function() {
             return {
@@ -489,7 +498,7 @@ define([
         var searchCount = [2, 4, 5, 1];
         filterComponent.once('getData:success', function() {
           // need to make sure the manager is already fully initialized
-          for(var i = 0; i < searchTerms.length; i++) {
+          for (var i = 0; i < searchTerms.length; i++) {
             testSearch(filterComponent, searchTerms[i], searchCount[i]);
           }
           done();
@@ -506,7 +515,7 @@ define([
         dashboard.addComponent(filterComponent);
         var searchCount = [6, 4, 3, 7];
         filterComponent.once('getData:success', function() {
-          for(var i = 0; i < searchTerms.length; i++) {
+          for (var i = 0; i < searchTerms.length; i++) {
             testSearch(filterComponent, searchTerms[i], searchCount[i]);
           }
           done();
@@ -569,12 +578,12 @@ define([
 
       var getSelectedModels = function(models) {
         return _.filter(models, function(model) {
-            return model.getSelection();
-          });
+          return model.getSelection();
+        });
       };
 
       var expectSelections = function(controller, models, single) {
-        for(var i = 0; i < models.length; i++) {
+        for (var i = 0; i < models.length; i++) {
           controller.onSelection(models[i]);
           expect(getSelectedModels(models).length).toEqual(single ? 1 : (i + 1));
         }
@@ -587,7 +596,7 @@ define([
         filterComponent.model.updateSelectedItems();
         expect(dashboard.getParameterValue(filterComponent.parameter).length).toEqual(
           (options.root || options.single) ? 1 : childrenModels.length);
-        if(options.root) {
+        if (options.root) {
           expect(dashboard.getParameterValue(filterComponent.parameter)).toEqual([rootId]);
         }
       };
