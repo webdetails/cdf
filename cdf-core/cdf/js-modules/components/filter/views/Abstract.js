@@ -24,6 +24,7 @@ define([
   var AbstractView = BaseView.extend(Logger).extend({
     initialize: function (options) {
       this.configuration = options.configuration;
+      this.loglevel = this.configuration.loglevel;
       this.config = this.configuration[this.type];
 
       /*

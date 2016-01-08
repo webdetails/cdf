@@ -12,6 +12,7 @@
    */
   return Models.Tree = BaseEvents.extendWithEvents(TreeModel).extend(Logger).extend({
     url: '',
+    loglevel: 'log',
     children: function() {
       return this.nodes.apply(this, arguments);
     },

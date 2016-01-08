@@ -1,4 +1,3 @@
-
 /**
  * Represents the state of the filter as tree structure.
  #
@@ -12,8 +11,16 @@
 define([
   'amd!cdf/lib/underscore',
   './Tree'
-], function( _, Tree) {
+], function(_, Tree) {
 
+  /**
+   * The selection state representation.
+   *
+   * @typedef {?boolean} SelectionStates
+   * @property {null}  SOME - Some items selected.
+   * @property {false} NONE - No items selected.
+   * @property {true}  ALL  - All items selected.
+   */
   var SelectionStates = {
     SOME: null,
     NONE: false,
@@ -23,9 +30,17 @@ define([
   var BaseSelectionTree = Tree.extend({
 
     /**
-     * @property {Object} [defaults]
-     * @private
-     * Default values for each node in the selection tree
+     * Default values for each node in the selection tree.
+     *
+     * @type     {Object}
+     * @property {string}  id                    - The default id.
+     * @property {string}  label                 - The default label.
+     * @property {boolean} isSelected            - The default selection state.
+     * @property {boolean} isVisible             - The default visibility state.
+     * @property {boolean} isCollapsed           - The default collapsed state.
+     * @property {number}  numberOfSelectedItems - The default number of selected items.
+     * @property {number}  numberOfItems         - The default number of items.
+     * @property {number}  page                  - The default page.
      */
     defaults: {
       id: void 0,
@@ -41,25 +56,35 @@ define([
           attributes.id = attributes.label;
         }
       }
-      return this.base(attributes, options);
+      this.base(attributes, options);
+
+      return this;
     },
     initialize: function() {
       this.base.apply(this, arguments);
+      if (this.parent()) {
+        this._inheritSelectionFromParent();
+      }
+      var filterText = this.root().get('searchPattern');
+      this._filterBy(filterText);
+
       return this.on('add remove', this.update);
     },
-    sync: function(action, model, options) {
-      this.log("Please " + action + " item " + (model.get('label')));
-      return _.each(model.where({
-        isSelected: true
-      }), function(m) {
-        return this.log("Processing " + action + " on item " + (m.get('label')));
-      });
+    _inheritSelectionFromParent: function() {
+      var parentSelectionState = this.parent().getSelection();
+      if (parentSelectionState === SelectionStates.ALL) {
+        this.setSelection(SelectionStates.ALL);
+      } else if (parentSelectionState === SelectionStates.NONE) {
+        this.setSelection(SelectionStates.NONE);
+      }
     },
 
     /**
-     * sets the selection state of the model
+     * Sets the selection state of the model.
+     *
      * @method setSelection
      * @public
+     * @param {SelectionStates} newState The new selection state to be set.
      */
     setSelection: function(newState) {
       if (this.getSelection() === newState) {
@@ -80,7 +105,8 @@ define([
     },
 
     /**
-     * gets the selection state of the model
+     * Gets the selection state of the model.
+     *
      * @method getSelection
      * @public
      * @return {Boolean}
@@ -130,11 +156,13 @@ define([
     },
 
     /**
-     * Mark listed items as selected
-     * NOTE: currently acts directly on the model and bypasses any business logic
-     * TODO: change implementation to be recursive rather than acting on a flat tree
+     * Mark listed items as selected.
+     *
      * @method setSelectedItems
+     * @param {Array} idList A list of ids.
      */
+    // NOTE: currently acts directly on the model and bypasses any business logic
+    // TODO: change implementation to be recursive rather than acting on a flat tree
     setSelectedItems: function(idList) {
       var flatTree = this.flatten();
       flatTree.filter(function(m) {
@@ -325,8 +353,54 @@ define([
         }));
       }
       return hasChanged;
+    },
+
+    filterBy: function(text){
+      this.root().set('searchPattern', text);
+      this._filterBy(text);
+      return this;
+    },
+    _filterBy: function(text){
+      this._filter(text, "", this.get("matcher"));
+      this.root().setVisibility(true);
+    },
+    _filter: function(text, prefix, customMatcher) {
+
+      /*
+       * decide on item visibility based on a match to a filter string
+       * The children are processed first in order to ensure the visibility is reset correctly
+       * if the user decides to delete/clear the search box
+       */
+      var isMatch, that = this;
+      var fullString = _.chain(['label']).map(function(property) {
+        return that.get(property);
+      }).compact().value().join(' ');
+      if (prefix) {
+        fullString = prefix + fullString;
+      }
+      if (this.children()) {
+        isMatch = _.any(this.children().map(function(m) {
+          var childIsMatch;
+          childIsMatch = m._filter(text, fullString, customMatcher);
+          m.setVisibility(childIsMatch);
+          return childIsMatch;
+        }));
+      } else if (_.isEmpty(text)) {
+        isMatch = true;
+      } else {
+        if (_.isFunction(customMatcher)) {
+          isMatch = customMatcher(fullString, text);
+        } else {
+          isMatch = fullString.toLowerCase().indexOf(text.toLowerCase()) > -1;
+        }
+        this.debug("fullstring  " + fullString + " match to " + text + ": " + isMatch);
+      }
+      this.setVisibility(isMatch);
+      return isMatch;
     }
-  },{
+
+
+  }, {
     SelectionStates: SelectionStates
   });
 

@@ -20,7 +20,7 @@ define(['cdf/lib/jquery'], function( $ ) {
    * @main
    */
   var privateDefaults = {
-    logLevel: 1,
+    loglevel: "log",
     pagination: {
       throttleTimeMilliseconds: 500
     },
