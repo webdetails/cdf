@@ -68,7 +68,7 @@ define([
     };
     var getNewFilterComponent = function(options) {
       return new FilterComponent($.extend(true, {}, testFilterDefaults, options));
-    }
+    };
 
     filterComponent = getNewFilterComponent();
 
@@ -201,6 +201,92 @@ define([
       dashboard.update(filterComponent);
     });
 
+    describe("InputDataHandler #", function() {
+      it("sets the root as the group of a simple list in valuesArray", function(done) {
+        dashboard.addComponent(filterComponent);
+        filterComponent.once("cdf:postExecution", function() {
+          expect(filterComponent.model.find(1.1).parent()).toBe(filterComponent.model);
+          done();
+        });
+        dashboard.update(filterComponent);
+      });
+
+      describe("when using an augmented valuesArray", function() {
+        it("sets the correct group parent", function(done) {
+          var filterComponent = getNewFilterComponent({
+            componentInput: {
+              valuesArray: [
+                ['[0]', 'Zero', '[<10]', 'Below 10'],
+                ['[1]', 'One', '[<10]', 'Below 10'],
+                ['[11]', 'Eleven', '[>10]', 'Above 10']
+              ]
+            },
+            options: function() {
+              return {
+                component: {
+                  Root: {view: {scrollbar: {engine: "fake_engine"}}}
+                },
+                input: {
+                  indexes: {
+                    id: 0,
+                    label: 1,
+                    parentId: 2,
+                    parentLabel: 3,
+                    value: 4
+                  }
+                }
+              };
+            }
+          });
+          dashboard.addComponent(filterComponent);
+          filterComponent.once("cdf:postExecution", function() {
+            expect(filterComponent.model.find('[0]').parent().get('id')).toBe('[<10]');
+            expect(filterComponent.model.find('[1]').parent().get('id')).toBe('[<10]');
+            expect(filterComponent.model.find('[11]').parent().get('id')).toBe('[>10]');
+            expect(filterComponent.model.find('[<10]').parent().isRoot()).toBe(true);
+            expect(filterComponent.model.find('[>10]').parent().isRoot()).toBe(true);
+            done();
+          });
+          dashboard.update(filterComponent);
+        });
+        it("processes the 'value'", function(done) {
+          var filterComponent = getNewFilterComponent({
+            componentInput: {
+              valuesArray: [
+                ['[0]', 'Zero', '[<10]', 'Below 10', 0],
+                ['[1]', 'One', '[<10]', 'Below 10', 1],
+                ['[11]', 'Eleven', '[>10]', 'Above 10', 11]
+              ]
+            },
+            options: function() {
+              return {
+                component: {
+                  Root: {view: {scrollbar: {engine: "fake_engine"}}}
+                },
+                input: {
+                  indexes: {
+                    id: 0,
+                    label: 1,
+                    parentId: 2,
+                    parentLabel: 3,
+                    value: 4
+                  }
+                }
+              };
+            }
+          });
+          dashboard.addComponent(filterComponent);
+          filterComponent.once("cdf:postExecution", function() {
+            expect(filterComponent.model.find('[0]').get('value')).toBe(0);
+            expect(filterComponent.model.find('[1]').get('value')).toBe(1);
+            expect(filterComponent.model.find('[11]').get('value')).toBe(11);
+            done();
+          });
+          dashboard.update(filterComponent);
+        });
+      });
+    });
+
     describe("Manager controller #", function() {
       it("sorts children according to an array of custom sorting functions", function(done) {
         dashboard.addDataSource("selectionDataSource", {
@@ -215,7 +301,7 @@ define([
               input: {
                 indexes: {
                   id: 0,
-                  label:1,
+                  label: 1,
                   parentId: null,
                   parentLabel: null,
                   value: 4
@@ -347,6 +433,7 @@ define([
       });
 
       var count = 0;
+
       function runGetPageMechanismTest(serverSide, pageSize, done) {
         var dashboard = getNewDashboard();
         dashboard.addDataSource("testFilterComponentDataSource", {
@@ -669,5 +756,6 @@ define([
         dashboard.update(filterComponent);
       });
     });
+
   });
 });
