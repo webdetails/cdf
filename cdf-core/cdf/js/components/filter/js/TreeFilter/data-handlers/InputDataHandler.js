@@ -78,7 +78,7 @@
       } else if (this.isCdaJson(whatever)) {
         this._updateModelFromCdaJson(whatever);
       } else {
-        this._updateModelJson(whatever);
+        this._updateModelFromJson(whatever);
       }
       var model = this.get('model');
       model.set('isBusy', false);
@@ -98,15 +98,7 @@
     _updateModelFromCdaJson: function(json) {
       var options = $.extend(true, {}, this.get('options'));
       var pageData = getPageData(json.queryInfo, options.query.getOption('pageSize'));
-      var data;
-      if (_.chain(options.indexes).map(_.identity).max().value() < json.metadata.length) {
-        data = _.chain(json.resultset).groupBy(function(row) {
-          return row[options.indexes.parentId];
-        }).map(groupGenerator(options.indexes, pageData)).value();
-      } else {
-        data = itemGenerator(options.indexes, pageData)(json.resultset);
-      }
-      this.get('model').add(data);
+      this._addDataToModel(json.resultset, pageData);
       var numberOfItems;
       if (json.queryInfo && json.queryInfo.pageStart) {
         numberOfItems = parseInt(json.queryInfo.totalRows);
@@ -121,30 +113,36 @@
       return this;
     },
     _updateModelFromBidimensionalArray: function(rows) {
-      var data, idx;
-      /* if (rows.length > 0) {
+      this._addDataToModel(rows, undefined);
+      return this;
+    },
+    _addDataToModel: function(rows, pageData) {
+      if (rows.length === 0) {
         return this;
-      } */
-      idx = {
-        id: 0,
-        label: 1,
-        value: void 0
-      };
-      data = itemGenerator(idx)(rows);
+      }
+      var options = $.extend(true, {}, this.get('options'));
+      var parentIndexes = _.chain(options.indexes)
+        .pick('parentId', 'parentLabel')
+        .filter(_.isFinite)
+        .max()
+        .value();
+      var hasGroups = _.isFinite(parentIndexes) && parentIndexes < rows[0].length;
+      var data;
+      if (hasGroups) {
+        data = _.chain(rows)
+          .groupBy(function(row) {
+            return row[options.indexes.parentId];
+          })
+          .map(groupGenerator(options.indexes, pageData))
+          .value();
+      } else {
+        data = itemGenerator(options.indexes, pageData)(rows);
+      }
       this.get('model').add(data);
       return this;
     },
     isCdaJson: function(obj) {
-      var result;
-      result = false;
-      if (_.isObject(obj)) {
-        if (_.isArray(obj.resultset)) {
-          if (_.isArray(obj.metadata)) {
-            result = true;
-          }
-        }
-      }
-      return result;
+      return _.isObject(obj) && _.isArray(obj.resultset) && _.isArray(obj.metadata);
     },
 
     /**
@@ -158,28 +156,6 @@
       this.get('model').setSelectedItems(selectedItems);
       this.trigger('setValue', selectedItems);
       return this;
-    },
-    injectFakeData: function(label, level) {
-      var generateData;
-      generateData = function(label, level) {
-        return [
-          {
-            label: label,
-            id: level + ".all",
-            value: Math.pow(10, level - 1) + _.random(Math.pow(10, level)),
-            nodes: _.map(_.range(Math.pow(10, level)), function(v) {
-              var node;
-              node = {
-                label: "Item " + level + "." + v,
-                value: _.random(100),
-                id: level + "." + v
-              };
-              return node;
-            })
-          }
-        ];
-      };
-      return this.get('model').add(generateData(label, level));
     }
   });
 })(_, BaseModel, TreeFilter.Logger, TreeFilter.DataHandlers);
