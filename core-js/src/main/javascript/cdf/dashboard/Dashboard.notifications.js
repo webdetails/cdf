@@ -55,6 +55,27 @@ define([
     },
 
     /**
+     * Sets additional block ui options based on the defaults already set
+     *
+     * @method _setBlockUiOptions
+     *
+     * @param {Object} options - The options to configure the block ui
+     * @param {string} options.message - The message or html to display on block ui
+     * @param {Object} options.css - A json that accepts valid css key/value pairs
+     * @param {Object} options.overlayCSS - A json that accepts valid css key/value pairs for the block ui overlay
+     * @param {boolean} options.showOverlay - Allows you to show or hide the overlay on block ui
+     */
+    _setBlockUiOptions: function(options) {
+       if(typeof $.blockUI == 'function') {
+        this.blockUiOptions = $.extend({}, $.blockUI.defaults); // Clone block ui defaults
+
+        for (var key in options) {
+          this.blockUiOptions[key] = options[key];
+        }
+      }
+    },
+
+    /**
      * Renders a blocking div that can be dragged.
      */
     blockUIwithDrag: function() {
@@ -64,7 +85,7 @@ define([
         $.blockUI.defaults.message = '<div class="img blockUIDefaultImg" style="padding: 0px;"></div>';
       }
 
-      $.blockUI();
+      $.blockUI(this.blockUiOptions);
       var handle = $('<div id="blockUIDragHandle"></div>');
       $("div.blockUI.blockMsg").prepend(handle);
       $("div.blockUI.blockMsg").draggable({
