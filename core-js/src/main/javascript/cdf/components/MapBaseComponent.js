@@ -11,6 +11,20 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+/**
+ * The OpenLayers library. A high-performance, feature-packed library for all your mapping needs.
+ * @external OpenLayers
+ * @see {@link http://openlayers.org/}
+ * @ignore
+ */
+
+/**
+ * The OpenLayers library. A high-performance, feature-packed library for all your mapping needs.
+ * @external OpenLayers.LonLat
+ * @see {@link http://dev.openlayers.org/docs/files/OpenLayers/BaseTypes/LonLat-js.html}
+ * @ignore
+ */
+
 define([
   './BaseComponent',
   '../lib/jquery',
@@ -18,7 +32,14 @@ define([
   '../lib/OpenStreetMap'
 ], function(BaseComponent, $, OpenLayers) {
 
-  return BaseComponent.extend({
+  /**
+   * @class cdf.components.MapBaseComponent
+   * @amd cdf/components/MapBaseComponent
+   * @extends cdf.components.BaseComponent
+   * @classdesc A base class for the map components.
+   * @ignore
+   */
+  return BaseComponent.extend(/** @lends cdf.components.MapBaseComponent# */{
 
     //
     // From open_maps.js <-------
@@ -40,11 +61,10 @@ define([
     use_mercator: false,
 
     /** 
-     * Converts a LonLat Object using the Mercator formula.
+     * Converts an {@link external:OpenLayers.LonLat|OpenLayers.LonLat} object using the Mercator formula.
      *
-     * @method lonLatToMercator
-     * @param {OpenLayers.LonLat} ll the coordinate object.
-     * @return {OpenLayers.LonLat} the transformed coordinates
+     * @param {external:OpenLayers.LonLat} ll The coordinate object.
+     * @return {external:OpenLayers.LonLat} The transformed coordinates.
      */
     lonLatToMercator: function(ll) {
       var lon = ll.lon * 20037508.34 / 180;
@@ -56,15 +76,14 @@ define([
     /** 
      * Constructs and sets some initial values and calls show_map.
      *
-     * @method init_map
-     * @param {String} div the id of the div that contains the map
-     * @param {Float} lon The longitude coordinate.
-     * @param {Float} lat The latitude coordinate.
-     * @param {Integer} zoom  Zoom level for initial display.
-     * @param {String} b_layer_control <tt>true</tt> to show Layer selector
-     * @param {String} b_use_mercator <tt>true</tt> to show custom map
-     * @param {String} b_custom_map <tt>true</tt> to show custom map
-     * @param {String} str_custom_map Custom map definition
+     * @param {string} div             The id of the div that contains the map
+     * @param {number} lon             The longitude coordinate.
+     * @param {number} lat             The latitude coordinate.
+     * @param {number} zoom            Zoom level for initial display.
+     * @param {string} b_layer_control _true_ to show Layer selector.
+     * @param {string} b_use_mercator  _true_ to show custom map.
+     * @param {string} b_custom_map    _true_ to show custom map.
+     * @param {string} str_custom_map  Custom map definition.
      */
     init_map: function(div, lon, lat, zoom, b_use_mercator, b_layer_control, b_custom_map, str_custom_map) {
 
@@ -103,8 +122,6 @@ define([
 
     /** 
      * Sets the inital layer and displays the map.
-     *
-     * @method show_map
      */
     show_map: function() {
       var map = this.map;
@@ -147,31 +164,35 @@ define([
     },
 
     /**
-     * Adds a new marker - Not implemented.
+     * Adds a new marker.
      *
-     * @method add_marker
+     * @param {object} point
+     * @param {object} icon
+     * @abstract
      */
     add_marker: function(point, icon) {},
 
     /**
-     * Deletes a marker - Not implemented.
+     * Deletes a marker.
      *
-     * @method delete_marker
+     * @param {object} old_marker
+     * @abstract
      */
     delete_marker: function(old_marker) {},
 
     /**
-     * Change the marker Icon - Not implemented.
+     * Change the marker Icon.
      *
-     * @method change_marker
+     * @param {object} old_marker
+     * @param {object} new_icon
+     * @abstract
      */
     change_marker: function(old_marker, new_icon) {},
 
     /**
-     * Shows a popup bubble with the html content provided
+     * Shows a popup bubble with the html content provided.
      *
-     * @method show_bubble
-     * @param {String} html the popup html content
+     * @param {string} html The popup HTML content.
      */
     show_bubble: function(html) {
       var popup = this.popup;
@@ -194,18 +215,14 @@ define([
     },
 
     /**
-     * Shows the mouse pointer coordinates when hovering over the map
-     *
-     * @method show_positon
+     * Shows the mouse pointer coordinates when hovering over the map.
      */
     show_positon: function() {
       this.map.addControl(new OpenLayers.Control.MousePosition());
     },
 
     /**
-     * Add the layer control to the map
-     *
-     * @method show_layers
+     * Add the layer control to the map.
      */
     show_layers: function() {
       this.map.addControl(new OpenLayers.Control.LayerSwitcher());

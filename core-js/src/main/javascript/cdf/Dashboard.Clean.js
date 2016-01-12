@@ -12,15 +12,12 @@
  */
 
 /**
- * Module aggregating all the classes in the Dashboard hierarchy
- * @module Dashboard
- */
-
-/**
- * Represents a clean (no css engine) dashboard. It's a specialization of the base abstract Dashboard class.
- * Require as cdf/Dashboard.Clean
- *
- * Usage example:
+ * @class cdf.Clean
+ * @amd cdf/Dashboard.Clean
+ * @classdesc Represents a clean (no css engine) dashboard aggregating all
+ *            the classes in the Dashboard hierarchy. It's a specialization of
+ *            the base abstract {@link cdf.dashboard.Dashboard|Dashboard} class.
+ * @example
  *
  *      require(['cdf/Dashboard.Clean', 'cdf/components/ButtonComponent'],
  *        function(Dashboard, ButtonComponent) {
@@ -46,12 +43,7 @@
  *          }));
  *          dashboard.init();
  *      });
- *
- *
- * @class Dashboard.Clean
- * @extends Dashboard
  */
-
 define(['./Dashboard'], function(Dashboard) {
 
   return Dashboard;

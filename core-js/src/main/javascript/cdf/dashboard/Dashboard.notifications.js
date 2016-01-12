@@ -23,17 +23,17 @@ define([
 ], function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
 
   /**
-   * A module representing an extension to the Dashboard module for notifications.
-   * @module Dashboard.notifications
+   * @class cdf.dashboard.Dashboard.notifications
+   * @amd cdf/dashboard/Dashboard.notifications
+   * @classdesc A class representing an extension to the Dashboard class for notifications.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Inits the notification module
+     * Inits the notification.
      *
-     * @method _initNotifications
      * @private
-     * @for Dashboard
      */
     _initNotifications: function() {
 
@@ -41,9 +41,8 @@ define([
        * Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
        * are registered and assigned to a specific error message.
        *
-       * @property ERROR_CODES
-       * @type Object
-       * @for Dashboard
+       * @type {Object}
+       * @instance
        */
       this.ERROR_CODES = {
         'QUERY_TIMEOUT': {
@@ -57,9 +56,6 @@ define([
 
     /**
      * Renders a blocking div that can be dragged.
-     *
-     * @method blockUIwithDrag
-     * @for Dashboard
      */
     blockUIwithDrag: function() {
       if(typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
@@ -78,9 +74,6 @@ define([
 
     /**
      * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner.
-     *
-     * @method showProgressIndicator
-     * @for Dashboard
      */
     showProgressIndicator: function() {
       $.blockUI && this.blockUIwithDrag();
@@ -89,9 +82,7 @@ define([
     /**
      * Hides the progress indicator. Optionally, resets the running calls counter.
      *
-     * @method hideProgressIndicator
-     * @param {Boolean} force _true_ if the running calls counter should be reset, _false_ otherwise
-     * @for Dashboard
+     * @param {boolean} force _true_ if the running calls counter should be reset, _false_ otherwise
      */
     hideProgressIndicator: function(force) {
       if(force) {
@@ -103,12 +94,10 @@ define([
 
     /**
      * Given an error code, returns the registered error object associated with that code.
-     * 
-     * @method getErrorObj
-     * @param errorCode errorCode to translate
-     * @return {*|{}} error object or the empty object if the code is not registered
      *
-     * @for Dashboard
+     * @param {string} errorCode The error code.
+     * @return {*|{}} error An object with a _msg_ property containing the error code message or
+     *                      an empty object if the code is not registered.
      */
     getErrorObj: function(errorCode) {
       return this.ERROR_CODES[errorCode] || {};
@@ -117,15 +106,13 @@ define([
     /**
      * Parses a server error response and creates an error object.
      *
-     * @method	parseServerError
-     * @param resp Server response
-     * @param txtStatus Response status
-     * @param error Error object to encapsulate
-     * @return {Object} an error object containing detailed error message
-     *
-     * @for Dashboard
-     * @deprecated
      * @private
+     * @param {string} resp      Server response.
+     * @param {string} txtStatus Response status.
+     * @param {string} error     Error object to encapsulate.
+     * @return {Object} An error object containing detailed error message.
+     *
+     * @deprecated
      */
     parseServerError: function(resp, txtStatus, error) {
       // NOTE: this method's signature matches the error callback of $.ajax({error: . }).
@@ -153,9 +140,6 @@ define([
 
     /**
      * Handles a server error.
-     *
-     * @method handleServerError
-     * @for Dashboard
      */
     handleServerError: function() {
       this.errorNotification(this.parseServerError.apply(this, arguments));
@@ -166,11 +150,8 @@ define([
     /**
      * Displays an error notification.
      *
-     * @method errorNotification
-     * @param err Error message to display
-     * @param ph Optional html element where to attach the error notification
-     *
-     * @for Dashboard
+     * @param {Object} err An object containing a _msg_ property with the error message to display.
+     * @param {*} [ph] A reference to the HTML element where to attach the error message.
      */
     errorNotification: function(err, ph) {
       if(ph) {
@@ -186,10 +167,7 @@ define([
     /**
      * Default implementation for the login alert that pops up when we detect the user is no longer logged in.
      *
-     * @method loginAlert
-     * @param newOpts Options for the login popup
-     *
-     * @for Dashboard
+     * @param {Object} newOpts Options for the login popup.
      */
     loginAlert: function(newOpts) {
       var opts = {
@@ -209,10 +187,7 @@ define([
     /**
      * Check if we're able to connect to the server correctly, using post to avoid cache.
      *
-     * @method checkServer
-     * @return {Boolean} _true_ if able to connect, _false_ otherwise
-     *
-     * @for Dashboard
+     * @return {boolean} _true_ if able to connect, _false_ otherwise.
      */
     checkServer: function() {
       $.ajax({

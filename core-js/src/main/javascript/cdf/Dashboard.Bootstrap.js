@@ -12,15 +12,13 @@
  */
 
 /**
- * Module aggregating all the classes in the Dashboard hierarchy
- * @module Dashboard
- */
-
-/**
- * Represents a bootstrap dashboard. It's a specialization of the base abstract Dashboard class.
- * Require as cdf/Dashboard.Bootstrap
- *
- * Usage example:
+ * @class cdf.Bootstrap
+ * @amd cdf/Dashboard.Bootstrap
+ * @classdesc Represents a {@link http://getbootstrap.com|bootstrap} dashboard
+ *            aggregating all the classes in the Dashboard hierarchy.
+ *            It's a specialization of the base abstract
+ *            {@link cdf.dashboard.Dashboard|Dashboard} class.
+ * @example
  *
  *      require(['cdf/Dashboard.Bootstrap', 'cdf/components/ButtonComponent'],
  *        function(Dashboard, ButtonComponent) {
@@ -46,12 +44,7 @@
  *          }));
  *          dashboard.init();
  *      });
- *
- *
- * @class Dashboard.Bootstrap
- * @extends Dashboard
  */
-
 define([
   './Dashboard',
   'amd!./lib/bootstrap',

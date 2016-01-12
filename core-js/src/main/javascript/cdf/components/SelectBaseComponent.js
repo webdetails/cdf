@@ -22,7 +22,19 @@ define([
   'amd!../lib/jquery.select2'
 ], function(InputBaseComponent, Logger, $, _, Utils) {
 
-  return InputBaseComponent.extend({
+  /**
+   * @class cdf.components.SelectBaseComponent
+   * @amd cdf/components/SelectBaseComponent
+   * @extends cdf.components.InputBaseComponent
+   * @classdesc Base component used by select components.
+   * @ignore
+   */
+  return InputBaseComponent.extend(/** @lends cdf.components.SelectBaseComponent# */{
+    /**
+     * Visibility.
+     *
+     * @type {boolean}
+     */
     visible: false,
 
     //defaultIfEmpty: [false]
@@ -180,9 +192,8 @@ define([
      * Indicates if the user can select multiple values.
      * The default implementation returns <tt>false</tt>.
      *
-     * @method _allowMultipleValues
-     * @return {boolean}
-     * @protected
+     * @return {boolean} _true_ if multiple values are allowed, _false_ otherwise.
+     * @private
      */
     _allowMultipleValues: function() {
       return false;
@@ -191,8 +202,8 @@ define([
     /**
      * Returns the placeholder label for empty values, or false if it is an non-empty String.
      *
-     * @method _getPlaceholderText
-     * @protected
+     * @return {string} The placeholder text.
+     * @private
      */
     _getPlaceholderText: function() {
       var txt = this.placeholderText;
@@ -200,15 +211,12 @@ define([
     },
 
     /**
-     * The number of elements that the list should show
-     * without scrolling.
-     * The default implementation
-     * returns the value of the {@link #size} property.
+     * The number of elements that the list should show without scrolling.
+     * The default implementation returns the value of the _size_ property.
      *
-     * @method _getListSize
      * @param {Array.<Array.<*>>} values the values array.
      * @return {?number}
-     * @protected
+     * @private
      */
     _getListSize: function(values) {
       return this.size;
@@ -217,10 +225,10 @@ define([
     /**
      * Currently, reads extra options for the "chosen" and "select2" plugins,
      * by transforming the array of key/value pair arrays
-     * in {@link #extraOptions} into a JS object.
+     * in _extraOptions_ into a JS object.
      *
-     * @method _readExtraOptions
-     * @return {!Object.<string,*>} an options object.
+     * @return {undefined|!Object.<string, *>} an options object.
+     * @private
      */
     _readExtraOptions: function() {
       if(this.externalPlugin && this.extraOptions) {
@@ -235,8 +243,8 @@ define([
      *    and dashboard-processes each change.
      * </p>
      *
-     * @method _listenElement
      * @param {!HTMLElement} elem the element.
+     * @private
      */
     _listenElement: function(elem) {
       var me = this;
@@ -307,12 +315,13 @@ define([
      * The default implementation normalizes, validates and defaults
      * the change mode value.
      * </p>
-     *
-     * @method _getChangeMode
      * @return {!string} one of values:
      * <tt>'immediate'</tt>,
      * <tt>'focus'</tt> or
      * <tt>'timeout-focus'</tt>.
+     *
+     * @return {string} The change mode.
+     * @private
      */
     _getChangeMode: function() {
       var changeMode = this.changeMode;
@@ -335,11 +344,10 @@ define([
     },
 
     /**
-     * Obtains an appropriate jQuery event name
-     * for when testing for changes is done.
+     * Obtains an appropriate jQuery event name for when testing for changes is done.
      *
-     * @method _changeTrigger
-     * @return {!string} the name of the event.
+     * @return {string} The name of the event.
+     * @private
      */
     _changeTrigger: function() {
       /*

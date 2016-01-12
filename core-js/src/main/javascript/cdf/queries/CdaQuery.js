@@ -11,18 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Module that holds query related objects.
- *
- * @module Query
- */
-
-/**
- * Class that represents a CDA query.
- *
- * @class CdaQuery
- * @extends BaseQuery
- */
 define([
   './CdaQuery.ext',
   './BaseQuery',
@@ -33,7 +21,12 @@ define([
   '../lib/jquery'
 ], function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
-  var cdaQueryOpts = {
+  /**
+   * @class cdf.queries.CdaQuery
+   * @amd cdf/queries/CdaQuery
+   * @classdesc Class that represents a CDA query.
+   */
+  var cdaQueryOpts = /** @lends cdf.queries.CdaQuery# */{
     name: 'cda',
     label: 'CDA Query',
     defaults: {
@@ -52,11 +45,16 @@ define([
     },
 
     /**
-     * Init method for the Cda query.
+     * Initializes a CDA query.
      *
-     * @method init
-     * @param opts Options is an object with the following properties: path, dataAccessId, sortBy, pageSize, outputIndexId
-     * @throws InvalidQuery error if the opts object does not contain path and data access id
+     * @param {object} opts               The query definition object.
+     * @param {string} opts.path          The path to the CDA file.
+     * @param {string} opts.dataAccessId  The Data access identifier.
+     * @param {string} opts.sortBy        The sorting order.
+     * @param {number} opts.pageSize      The page size.
+     * @param {number} opts.outputIndexId The output index identifier.
+     * @throws {InvalidQuery} If the _opts_ parameter doesn't contain a path
+     *                        and a data access identifier.
      */
     init: function(opts) {
       if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
@@ -80,11 +78,9 @@ define([
     /**
      * Builds the query definition object.
      *
-     * @method buildQueryDefinition
-     * @param overrides Overrides to the existing options
-     * @return {{}} Query definition object
-     *
      * @private
+     * @param {object} overrides New query definitions to override any existing query definitions.
+     * @return {object} Query definition object.
      */
     buildQueryDefinition: function(overrides) {
       var myself = this;
@@ -135,10 +131,15 @@ define([
     /**
      * Exports the data, according to a specific output type.
      *
-     * @method exportData
-     * @param outputType Output type (csv, xls, xml, html)
-     * @param overrides Overrides for the query definition object
-     * @param options Export options {separator, filename, template, columnHeaders, dtFilter, dtSearchableColumn
+     * @param {string} outputType Output type (CSV, XLS, XML, HTML).
+     * @param {object} overrides Overrides for the query definition object.
+     * @param {object} options Export options.
+     * @param {string} options.separator Separator.
+     * @param {string} options.filename File name.
+     * @param {string} options.template Template name.
+     * @param {object} options.columnHeaders The column headers' values.
+     * @param {object} options.dtFilter Data table filter.
+     * @param {object} options.dtSearchableColumns Data table searchable columns.
      */
     exportData: function(outputType, overrides, options) {
       if(!options) {
@@ -187,8 +188,7 @@ define([
     },
 
     /**
-     * Sets the sort by columns.
-     *
+     * Sets the sort by columns.<p>
      * CDA expects an array of terms consisting of a number and a letter
      * that's either 'A' or 'D'. Each term denotes, in order, a column
      * number and sort direction: 0A would then be sorting the first column
@@ -199,10 +199,10 @@ define([
      * first by the first column (ascending), and then by the second
      * column (descending).
      *
-     * @method setSortBy
-     * @param sortBy  Sort By columns
-     * @return {Boolean} _true_ if the sort by condition has changed, _false_ if it remained the same
-     * @throws   InvalidSortExpression if the sort by columns are not correctly defined
+     * @param {string} sortBy Sorting columns order.
+     * @return {boolean} _true_ if the sort by condition has changed,
+     *                   _false_ if it remained the same.
+     * @throws {InvalidSortExpression} If the sort by columns are not correctly defined.
      */
     setSortBy: function(sortBy) {
       var newSort,
@@ -260,12 +260,12 @@ define([
 
     /**
      * Sorts the result set. See the notes on sort columns on the
-     * {{#crossLink "CdaQuery/setSortBy:method"}}setSortBy{{/crossLink}} method.
+     * {@link cdf.queries.CdaQuery#setSortBy|setSortBy} method.
      *
-     * @method sortBy
-     * @param sortBy Sort By Columns
-     * @param outsideCallback  Callback to call after the sorting has been processed
-     * @return _false_ if the sort by conditions have not changed, the result of calling doQuery otherwise
+     * @param {string}   sortBy          Sorting columns order.
+     * @param {function} outsideCallback Callback to call after the sorting has been processed.
+     * @return {boolean|*} _false_ if the sort by conditions have not changed,
+     *                     the result of calling _doQuery_ otherwise.
      */
     sortBy: function(sortBy, outsideCallback) {
       /* If the parameter is not the same, and we have a valid state,

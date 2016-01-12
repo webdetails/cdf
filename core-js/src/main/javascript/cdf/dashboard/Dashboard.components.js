@@ -18,18 +18,18 @@ define([
   '../Logger',
   '../lib/jquery'
 ], function(Dashboard, Backbone, Mustache, Logger, $) {
+
   /**
-   * A module representing an extension to the Dashboard module for components.
-   *
-   * @module Dashboard.components
+   * @class cdf.dashboard.Dashboard.components
+   * @amd cdf/dashboard/Dashboard.components
+   * @classdesc A class representing an extension to the Dashboard class for handling components.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
      * Method used by the Dashboard constructor for components initialization.
      *
-     * @method _initComponents
-     * @for Dashboard
      * @private
      */
     _initComponents: function() {
@@ -38,11 +38,9 @@ define([
 
     /**
      * Gets the component given a string representing the component's name.
-     * If a falsy value is specified, <tt>undefined</tt> is returned.
+     * If a falsy value is specified, _undefined_ is returned.
      *
-     * @method getComponent
-     * @for Dashboard
-     * @param {string} name a string representing the component's name
+     * @param {string} name The component's name.
      * @return {BaseComponent|undefined} the component or <tt>undefined</tt>
      */
     getComponent: function(name) {
@@ -58,11 +56,9 @@ define([
     },
 
     /**
-     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}.
+     * Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
      *
-     * @method getComp
-     * @for Dashboard
-     * @param {string} name a string representing the component's name
+     * @param {string} name The component's name.
      * @return {BaseComponent|undefined} the component or <tt>undefined</tt>
      */
     getComp: function(name) {
@@ -70,10 +66,8 @@ define([
     },
 
     /**
-     * Alias for {{#crossLink "Dashboard/getComponent:method"}}getComponent{{/crossLink}}.
+     * Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
      *
-     * @method getComponentByName
-     * @for Dashboard
      * @param {string} name a string representing the component's name
      * @return {BaseComponent|undefined} the component or <tt>undefined</tt>
      */
@@ -82,12 +76,11 @@ define([
     },
 
     /**
-     * Adds one or more components to the dashboard, if a component was already added it will not be replaced.
+     * Adds one or more components to the dashboard, if a component was already added
+     * it will not be replaced.
      * If an array of components is specified, it iterates through the array and calls
-     * {{#crossLink "Dashboard/addComponent:method"}}addComponent{{/crossLink}} for each component.
+     * {@link cdf.dashboard.Dashboard#addComponent|addComponent} for each component.
      *
-     * @method addComponents
-     * @for Dashboard
      * @param {array} components the array of components to be added
      */
     addComponents: function(components) {
@@ -109,13 +102,11 @@ define([
      * If `options.index` is truthy the new component is appended to the array at
      * position `options.index`.
      *
-     * @method addComponent
-     * @for Dashboard
-     * @param {BaseComponent} component the new component to be added
-     * @param {object} [options] an option object
-     * @param {number} [options.index] the index at which to add the component
-     * @return {Dashboard} the dashboard object
-     * @throws {Error} throw error if the component is invalid or was already added
+     * @param {BaseComponent} component The new component to be added.
+     * @param {object} [options] An option object.
+     * @param {number} [options.index] The index at which to add the component.
+     * @return {Dashboard} The dashboard object.
+     * @throws {Error} Throws an error if the component is invalid or was already added.
      */
     addComponent: function(component, options) {
       // validate new component's name
@@ -155,10 +146,8 @@ define([
      * If `compOrNameOrIndex` is a <tt>number</tt> return it.
      * If `compOrNameOrIndex` is a component return the index where it is in `components`.
      *
-     * @method getComponentIndex
-     * @for Dashboard
-     * @param {BaseComponent|string|number} compOrNameOrIndex the name, index or the component to search
-     * @return {number} the index where the component is at or <tt>-1</tt> if not found
+     * @param {BaseComponent|string|number} compOrNameOrIndex The name, index or the component to search.
+     * @return {number} The index where the component is at or <tt>-1</tt> if not found.
      */
     getComponentIndex: function(compOrNameOrIndex) {
       if(compOrNameOrIndex != null) {
@@ -186,10 +175,9 @@ define([
      * If `compOrNameOrIndex` is a number, the component in such position in the `components` array is removed.
      * If `compOrNameOrIndex` is an object that exists in the `components` array, it will be removed.
      *
-     * @method removeComponent
-     * @for Dashboard
-     * @param {BaseComponent|string|number} compOrNameOrIndex the component object, the name of the component or the index of the component to be removed
-     * @return {BaseComponent|undefined} the removed component or <tt>undefined</tt>
+     * @param {Object|string|number} compOrNameOrIndex the component object,
+     *   the name of the component or the index of the component to be removed.
+     * @return {BaseComponent|undefined} The removed component or <tt>undefined</tt>.
      */
     removeComponent: function(compOrNameOrIndex) {
       var index = this.getComponentIndex(compOrNameOrIndex);
@@ -211,11 +199,12 @@ define([
     },
   
     /**
+     * Bind the control of a given component to the current dashboard instance
+     * if none was previously bound.
      *
-     * @method _bindControl
-     * @param control
      * @private
-     * @return {*}
+     * @param {Object} control The target component.
+     * @return {*} The target component.
      */
     _bindControl: function(control) {
 
@@ -228,12 +217,13 @@ define([
     },
   
     /**
+     * Bind the control of a given component to the current dashboard instance
+     * if none was previously bound. Sets the priority of the component if none exists.
      *
-     * @method _bindExistingControl
-     * @param control
-     * @param Class
      * @private
-     * @return {*}
+     * @param {Object} control The target component.
+     * @param {Object} Class
+     * @return {Object} The target component.
      *
      * @deprecated
      */
@@ -264,11 +254,11 @@ define([
     },
 
     /**
+     * Casts a component to a new component class type.
      *
-     * @method _castControlToClass
-     * @param control
-     * @param Class
      * @private
+     * @param {Object} control The target component.
+     * @param {Object} Class   The new class to cast the component to.
      */
     _castControlToClass: function(control, Class) {
       if(!(control instanceof Class)) {
@@ -280,11 +270,11 @@ define([
     },
 
     /**
+     * Gets the class name of a given component.
      *
-     * @method _getControlClass
-     * @param control
-     * @return {*}
      * @private
+     * @param {Object} control The target component.
+     * @return {*}
      */
     _getControlClass: function(control) {
       // see if there is a class defined for this control
@@ -308,11 +298,12 @@ define([
     },
 
     /**
+     * Creates a new component of a given class type. Allows to set
+     * default properties for the component instance.
      *
-     * @method _makeInstance
-     * @param Class
-     * @param args
-     * @return {Class}
+     * @param {Object} Class The component class object.
+     * @param {Object} args The component properties.
+     * @return {Class} The new component instance.
      * @private
      */
     _makeInstance: function(Class, args) {
@@ -322,16 +313,14 @@ define([
     },
 
     /**
+     * Extend control with BaseComponent methods, if it's not an instance of it.
+     * Also, avoid extending if _Class_ was already applied and it is a subclass of BaseComponent.
      *
-     * @method _castControlToComponent
-     * @param control
-     * @param Class
      * @private
+     * @param {Object} control The target component.
+     * @param {Object} Class The target component class object.
      */
     _castControlToComponent: function(control, Class) {
-      // Extend control with BaseComponent methods, if it's not an instance of it.
-      // Also, avoid extending if _Class_ was already applied
-      // and it is a subclass of BaseComponent.
       if(!(control instanceof BaseComponent)
         && (!Class || !(Class.prototype instanceof BaseComponent))) {
   
@@ -357,10 +346,10 @@ define([
     },
 
     /**
+     * Allows logging lifecycle events of a given component to the console.
      *
-     * @method _addLogLifecycleToControl
-     * @param control
      * @private
+     * @param {Object} control The target component.
      */
     _addLogLifecycleToControl: function(control) {
       // TODO: Could the _typeof console !== "undefined"_ test be made beforehand,

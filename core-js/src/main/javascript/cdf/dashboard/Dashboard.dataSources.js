@@ -18,16 +18,17 @@ define([
 ], function(Dashboard, Logger, _) {
 
   /**
-   * A module representing an extension to Dashboard module for data sources.
-   * The methods here handle getting and saving data sources from the dashboard.
-   * @module Dashboard.dataSources
+   * @class cdf.dashboard.Dashboard.dataSources
+   * @amd cdf/dashboard/Dashboard.dataSources
+   * @classdesc A class representing an extension to the Dashboard class for handling data sources.
+   *            The methods here handle getting and saving data sources from the dashboard.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Method used by the Dashboard constructor for data sources initialization
+     * Method used by the Dashboard constructor for data sources initialization.
      *
-     * @method _initDataSources
      * @private
      */
     _initDataSources: function() {
@@ -37,11 +38,9 @@ define([
     /**
      * Gets the data source name.
      *
-     * @method _getDataSourceName
-     * @param {Object} obj a string, a data source object with a name property or a query definition object with a dataSource property
-     * @return {string|undefined} the data source name or undefined if none is found
-     *
      * @private
+     * @param {Object} obj A string, a data source object with a name property or a query definition object with a dataSource property.
+     * @return {string|undefined} The data source name or undefined if none is found.
      */
     _getDataSourceName: function(obj) {
       var name;
@@ -63,12 +62,10 @@ define([
      * Adds a data source. If no string name parameter is provided, a name property
      * will be extracted from the data source object.
      *
-     * @method addDataSource
-     * @for Dashboard
-     * @param {string|Object} name the name of the data source
-     * @param {Object|boolean} obj the data source to be added
-     * @param {boolean|undefined} force a flag indicating if any previous data sources with the
-     *  same name are to be overridden
+     * @param {string|Object}     name  The name of the data source.
+     * @param {Object|boolean}    obj   The data source to be added.
+     * @param {boolean|undefined} force A flag indicating if any previous data sources with the
+     *                                  same name are to be overridden.
      */
     addDataSource: function(name, obj, force) {
       // if no name is provided, try to extract it from the data source object
@@ -113,10 +110,8 @@ define([
     /**
      * Gets a data source according to the provided name or object with a dataSource property.
      *
-     * @method getDataSource
-     * @for Dashboard
-     * @param {string|Object} obj the name of the data source or an object from which to extract the name from
-     * @return {Object|undefined} the data source or undefined if none is found
+     * @param {string|Object} obj The name of the data source or an object from which to extract the name from.
+     * @return {Object|undefined} The data source or undefined if none is found.
      */
     getDataSource: function(obj) {
       var name = this._getDataSourceName(obj);
@@ -128,10 +123,8 @@ define([
     /**
      * Returns a query object built using the data source with the provided name.
      *
-     * @method getDataSourceQuery
-     * @for Dashboard
-     * @param {string|Object} obj the name of the data source or an object from which to extract the name from
-     * return {Object|undefined} the query built using the target data source or undefined if no data source was found
+     * @param {string|Object} obj The name of the data source or an object from which to extract the name from.
+     * @return {Object|undefined} The query built using the target data source or undefined if no data source was found.
      */
     getDataSourceQuery: function(obj) {
       var dataSource = this.getDataSource(obj);
@@ -146,10 +139,8 @@ define([
     /**
      * Adds a data source. If a data source already exists with the same name, it is replaced with the new one.
      *
-     * @method setDataSource
-     * @for Dashboard
-     * @param {string|Object} name the name of the data source
-     * @param {Object|undefined} obj the data source to be added
+     * @param {string|Object}    name The name of the data source.
+     * @param {Object|undefined} obj  The data source to be added.
      */
     setDataSource: function(name, obj) {
       // if no name is provided, try to extract it from the provided object
@@ -164,9 +155,7 @@ define([
     /**
      * Removes a data source according to the provided name or object with a dataSource property.
      *
-     * @method removeDataSource
-     * @for Dashboard
-     * @param {string|Object} obj the name of the data source or an object from which to extract the name
+     * @param {string|Object} obj The name of the data source or an object from which to extract the name.
      */
     removeDataSource: function(obj) {
       var name;

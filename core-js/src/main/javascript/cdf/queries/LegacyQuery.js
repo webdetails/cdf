@@ -11,19 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Module that holds query related objects.
- *
- * @module Query
- */
-
-/**
- * Class that represents a legacy query (calling xactions). This functionality is deprecated.
- *
- * @class LegacyQuery
- * @extends BaseQuery
- * @deprecated
- */
 define([
   '../Logger',
   '../components/XactionComponent.ext',
@@ -34,11 +21,29 @@ define([
   '../dashboard/Utils'
 ], function(Logger, XactionComponentExt, BaseQuery, Dashboard, _, $, Utils) {
 
+  /**
+   * Creates a new metadata object with properties colIndex, colType and colName.
+   *
+   * @alias makeMetadataElement
+   * @memberof cdf.queries.LegacyQuery
+   * @param {number} idx  The index of the element.
+   * @param {string} name The name of the element.
+   * @param {string} type The type of the element.
+   * @return {{colIndex: number, colType: string, colName: string}} The metadata object.
+   */
   function makeMetadataElement(idx, name, type) {
     return {"colIndex": idx || 0, "colType": type || "String", "colName": name || "Name"};
   }
 
-  var legacyOpts = {
+  /**
+   * @class cdf.queries.LegacyQuery
+   * @amd cdf/queries/LegacyQuery
+   * @classdesc Class that represents a legacy query (calling xactions).
+   *            This functionality is deprecated.
+   *
+   * @deprecated
+   */
+  var legacyOpts = /** @lends cdf.queries.LegacyQuery# */{
     name: "legacy",
     label: "Legacy Query",
     defaults: {
@@ -62,21 +67,19 @@ define([
     },
 
     /**
-     * Init method for the Legacy query.
+     * Initializes a legacy query.
      *
-     * @method init
-     * @param opts Options object
+     * @param {object} opts The query definition object.
      */
     init: function(opts) {
       this.setOption('queryDef', opts);
     },
 
     /**
-     * Gets the success handler for the query, given a fallback to call.
+     * Gets the success callback handler for the provided success callback function.
      *
-     * @method getSuccessHandler
-     * @param callback Callback to call after the query is successful
-     * @return {Function} success handler
+     * @param {function} callback Callback to execute after the query is successful.
+     * @return {function} Success callback handler.
      */
     getSuccessHandler: function(callback) {
       var myself = this;
@@ -105,11 +108,9 @@ define([
     /**
      * Builds the query definition object.
      *
-     * @method buildQueryDefinition
-     * @param overrides Overrides to the existing options
-     * @return {{}} Query definition object
-     *
      * @private
+     * @param {object} overrides Options that override the existing ones.
+     * @return {object} Query definition object.
      */
     buildQueryDefinition: function(overrides) {
       return _.extend({}, this.getOption('queryDef'), overrides);

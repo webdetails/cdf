@@ -17,7 +17,14 @@ define([
   '../dashboard/Utils'
 ], function(UnmanagedComponent, _, Utils) {
 
-  return UnmanagedComponent.extend({
+  /**
+   * @class cdf.components.InputBaseComponent
+   * @amd cdf/components/filter/views/Group
+   * @classdesc Base class for input components.
+   * @extends cdf.components.UnmanagedComponent
+   * @ignore
+   */
+  return UnmanagedComponent.extend(/** @lends cdf.components.InputBaseComponent# */{
     update: function() {
       var qd = this.queryDefinition;
       if(this.valuesArray && this.valuesArray.length > 0) {
@@ -55,15 +62,10 @@ define([
   
     /**
      * Obtains the value of this component's parameter.
-     * <p>
      * If the parameter value is a function, the result of evaluating it is returned instead.
-     * </p>
-     * <p>
      * Normalizes return values by using {@link Utils.normalizeValue}.
-     * </p>
      *
-     * @method _getParameterValue
-     * @return {*} the parameter value.
+     * @return {*} The parameter value.
      */
     _getParameterValue: function() {
       return Utils.normalizeValue(

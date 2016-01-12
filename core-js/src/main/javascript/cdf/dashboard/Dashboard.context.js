@@ -17,18 +17,17 @@ define([
   './Dashboard.ext',
   './Dashboard.context.ext'
 ], function($, Dashboard, DashboardExt, DashboardContextExt) {
-  
+
   /**
-   * A module representing an extension to the Dashboard module for context.
-   *
-   * @module Dashboard.Context
+   * @class cdf.dashboard.Dashboard.context
+   * @amd cdf/dashboard/Dashboard.context
+   * @classdesc A class representing an extension to the Dashboard class
+   *            for handling the context object.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * Method used by the Dashboard constructor for context initialization.
-     *
-     * @method _initContext
-     * @for Dashboard
+     * Method used by the constructor for context initialization.
      *
      * @private
      */

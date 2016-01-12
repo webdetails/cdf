@@ -17,11 +17,6 @@
  * Contact: agrohe21@gmail.com
  */
 
-/**
- * Module that holds query related objects.
- *
- * @module Query
- */
 define([
   'amd!../lib/xmla',
   './XmlaQuery.ext',
@@ -33,12 +28,11 @@ define([
 ], function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
   /**
-   * Class that will be used by both XML/A and XML/A Discover classes.
-   *
    * @class SharedXmla
-   * @extends Base
+   * @classdesc Class that will be used by both XML/A and XML/A Discover classes.
+   * @ignore
    */
-  var SharedXmla = Base.extend({
+  var SharedXmla = Base.extend(/** @lends cdf.queries.SharedXmla# */{
     xmla: null,
     //cache the datasource as there should be only one xmla server
     datasource: null,
@@ -46,8 +40,6 @@ define([
 
     /**
      * Fetches the available datasources from the server.
-     *
-     * @method getDataSources
      */
     getDataSources: function() {
       var datasourceCache = [],
@@ -72,8 +64,6 @@ define([
 
     /**
      * Fetches the available catalogs from the server.
-     *
-     * @method getCatalogs
      */
     getCatalogs: function() {
       var properties = {}, catalog = {};
@@ -101,8 +91,10 @@ define([
     /**
      * Executes a XML/A Discover query.
      *
-     * @method discover
-     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     * @param {object}   queryDefinition           An object containing the query definitions.
+     * @param {string}   queryDefinition.queryType The type of query.
+     * @param {string}   queryDefinition.catalog   The target catalog.
+     * @param {function} queryDefinition.query     The query to execute.
      */
     discover: function(queryDefinition) {
       var properties = {},
@@ -120,9 +112,11 @@ define([
     /**
      * Executes a XML/A query.
      *
-     * @method execute
-     * @param queryDefinition Object with the following properties: queryType, catalog, query
-     * @throws Error if the catalog is not found in the catalogs array previously retrieved from the server.
+     * @param {object}   queryDefinition           An object containing the query definitions.
+     * @param {string}   queryDefinition.queryType The type of query.
+     * @param {string}   queryDefinition.catalog   The target catalog.
+     * @param {function} queryDefinition.query     The query to execute.
+     * @throws {Error} If the catalog is not found in the catalogs array previously retrieved from the server.
      */
     execute: function(queryDefinition) {
       //find the requested catalog in internal array of valid catalogs
@@ -147,12 +141,11 @@ define([
   var _sharedXmla = new SharedXmla();
 
   /**
-   * Class that represents a XML/A query.
-   *
-   * @class XmlaQuery
-   * @extends BaseQuery
+   * @class cdf.queries.XmlaQuery
+   * @amd cdf/queries/XmlaQuery
+   * @classdesc Class that represents a XML/A query.
    */
-  var xmlaOpts = {
+  var xmlaOpts = /** @lends cdf.queries.XmlaQuery# */{
     name: "xmla",
     label: "XML/A Query",
     queryDefinition: {},
@@ -162,10 +155,12 @@ define([
     },
 
     /**
-     * Init method for the XML/A query.
+     * Initializes a XML/A query.
      *
-     * @method init
-     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     * @param {object}   queryDefinition           An object containing the query definitions.
+     * @param {string}   queryDefinition.queryType The type of query.
+     * @param {string}   queryDefinition.catalog   The target catalog.
+     * @param {function} queryDefinition.query     The query to execute.
      */
     init: function(queryDefinition) {
       // store query definition
@@ -188,7 +183,6 @@ define([
     /**
      * Formats the XML/A query result as an object with metadata and resultset properties.
      *
-     * @method transformXMLAResults
      * @param {object} results The XML/A query result.
      * @return {object} The XML/A query metadata and resultset as properties.
      */
@@ -231,12 +225,11 @@ define([
     },
 
     /**
-     * Executes {{#crossLink "XmlaQuery/_executeQuery:method"}}_executeQuery{{/crossLink}} and
-     * {{#crossLink "XmlaQuery/transformXMLAResults:method"}}transformXMLAResults{{/crossLink}}
+     * Executes {@link cdf.queries.XmlaQuery#_executeQuery|_executeQuery} and
+     * {@link cdf.queries.XmlaQuery#transformXMLAResults|transformXMLAResults}
      * before finally persisting the original and the processed results of the XML/A query.
      *
-     * @method doQuery
-     * @param outsideCallback Function to be called with the XML/A query result.
+     * @param {function} outsideCallback Function to be called with the XML/A query result.
      */
     doQuery: function(outsideCallback) {
       var url = this.getOption('url'),
@@ -261,7 +254,6 @@ define([
     /**
      * Executes a XML/A query.
      *
-     * @method _executeQuery
      * @return {object} The XML/A query execution result.
      * @private
      */
@@ -275,12 +267,11 @@ define([
 
 
   /**
-   * Class that represents a XML/A Discover query.
-   *
-   * @class XmlaDiscoverQuery
-   * @extends BaseQuery
+   * @class cdf.queries.XmlaDiscoverQuery
+   * @amd cdf/queries/XmlaDiscoverQuery
+   * @classdesc Class that represents a XML/A Discover query.
    */
-  var xmlaDiscoverOpts = {
+  var xmlaDiscoverOpts = /** @lends cdf.queries.XmlaDiscoverQuery# */{
     name: "xmlaDiscover",
     label: "XML/A Discover Query",
     queryDefinition: {},
@@ -290,10 +281,12 @@ define([
     },
 
     /**
-     * Init method for the XML/A Discover query.
+     * Initializes a XML/A Discover query.
      *
-     * @method init
-     * @param queryDefinition Object with the following properties: queryType, catalog, query
+     * @param {object}   queryDefinition           An object containing the query definitions.
+     * @param {string}   queryDefinition.queryType The type of query.
+     * @param {string}   queryDefinition.catalog   The target catalog.
+     * @param {function} queryDefinition.query     The query to execute.
      */
     init: function(queryDefinition) {
       // store query definition
@@ -314,8 +307,7 @@ define([
     /**
      * Formats the XML/A Discover query result as an object with metadata and resultset properties.
      *
-     * @method transformXMLADiscoverResults
-     * @param results Object with the XML/A Discover query result.
+     * @param {object} results Object with the XML/A Discover query result.
      * @return {object} The XML/A Discover query metadata and resultset as properties.
      */
     transformXMLADiscoverResults: function(results) {
@@ -347,12 +339,11 @@ define([
     },
 
     /**
-     * Executes {{#crossLink "XmlaDiscoverQuery/_executeDiscoverQuery:method"}}_executeDiscoverQuery{{/crossLink}} and
-     * {{#crossLink "XmlaDiscoverQuery/transformXMLADiscoverResults:method"}}transformXMLADiscoverResults{{/crossLink}}
+     * Executes {@link cdf.queries.XmlaDiscoverQuery#_executeDiscoverQuery|_executeDiscoverQuery} and
+     * {@link cdf.queries.XmlaDiscoverQuery#transformXMLADiscoverResults|transformXMLADiscoverResults}
      * before finally persisting the original and the processed results of the XML/A query.
      *
-     * @method doQuery
-     * @param outsideCallback Function to be called with the XML/A query result.
+     * @param {function} outsideCallback Function to be called with the XML/A query result.
      */
     doQuery: function(outsideCallback) {
       var url = this.getOption('url'),
@@ -377,7 +368,6 @@ define([
     /**
      * Executes a XML/A discover query.
      *
-     * @method _executeDiscoverQuery
      * @return {object} The XML/A discover query execution result.
      * @private
      */

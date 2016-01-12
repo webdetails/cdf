@@ -19,16 +19,16 @@ define([
 ], function(Dashboard, Logger, Utils, $) {
 
   /**
-   * A module representing an extension to the Dashboard module for bookmarkable parameters.
-   *
-   * @module Dashboard.bookmarkable
+   * @class cdf.dashboard.Dashboard.bookmarkable
+   * @amd cdf/dashboard/Dashboard.bookmarkable
+   * @classdesc A class representing an extension to the Dashboard class for bookmarkable parameters.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
   
     /**
      * Method used by the Dashboard constructor for bookmarkable parameters initialization.
      *
-     * @method _initBookmarkables
      * @private
      */
     _initBookmarkables: function() {
@@ -36,12 +36,11 @@ define([
     },
 
     /**
+     * Gets the value associated to a given key if it exists.
      *
-     * @method getHashValue
-     * @for Dashboard
-     * @param key
-     * @return {*}
      * @private
+     * @param {string} key The key corresponding to the value being obtained.
+     * @return {*} The key value or an empty object.
      */
     getHashValue: function(key) {
       var hash = window.location.hash;
@@ -59,12 +58,11 @@ define([
     },
 
     /**
+     * Sets the hash value of _window.location_.
      *
-     * @method setHashValue
-     * @for Dashboard
-     * @param key
-     * @param value
      * @private
+     * @param {string} key   The key value.
+     * @param {}       value The value associated with the key.
      */
     setHashValue: function(key, value) {
       var obj = this.getHashValue(),json;
@@ -85,11 +83,11 @@ define([
     },
 
     /**
+     * If no key is provided it clears _window.location.hash_, otherwise
+     * it sets the new hash value with the provided key removed.
      *
-     * @method deleteHashValue
-     * @for Dashboard
-     * @param key
      * @private
+     * @param {string} key The value of the key.
      */
     deleteHashValue: function(key) {
       var obj = this.getHashValue();
@@ -104,10 +102,8 @@ define([
     /**
      * Sets a pair parameter/value as bookmarkable.
      *
-     * @method setBookmarkable
-     * @for Dashboard
-     * @param parameter the name of the parameter to be stored
-     * @param value of the parameter
+     * @param {string} parameter The name of the parameter to be stored.
+     * @param {}       value     The value for the parameter.
      */
     setBookmarkable: function(parameter, value) {
       if(arguments.length === 1) { value = true; }
@@ -117,10 +113,8 @@ define([
     /**
      * Checks if a parameter is bookmarkable.
      *
-     * @method isBookmarkable
-     * @for Dashboard
-     * @param parameter
-     * @return {boolean} describing if a parameter is bookmarkable
+     * @param {string} parameter The parameter name.
+     * @return {boolean} describing if a parameter is bookmarkable.
      */
     isBookmarkable: function(parameter) {
       return Boolean(this.bookmarkables[parameter]);
@@ -129,9 +123,7 @@ define([
     /**
      * Generates a bookmark state using values stored.
      *
-     * @method generateBookmarkState
-     * @for Dashboard
-     * @return an object with the state of the parameters previously marked as bookmarkable
+     * @return {Object} An object with the state of the parameters previously marked as bookmarkable.
      */
     generateBookmarkState: function() {
       var params = {},
@@ -147,10 +139,7 @@ define([
     /**
      * Persists a bookmark state.
      *
-     *
-     * @method persistBookmarkables
-     * @for Dashboard
-     * @param param
+     * @param {string} param The name of the parameter.
      */
     persistBookmarkables: function(param) {
       var bookmarkables = this.bookmarkables,
@@ -175,9 +164,7 @@ define([
     /**
      * Overrides a bookmark state with a given state.
      *
-     * @method setBookmarkState
-     * @for Dashboard
-     * @param state to override the existing state
+     * @param {} state The new state to override the existing state.
      */
     setBookmarkState: function(state) {
       if(window.history && window.history.replaceState) {
@@ -201,9 +188,7 @@ define([
     /**
      * Gets the bookmark state url decoded.
      *
-     * @method getBookmarkState
-     * @for Dashboard
-     * @return an object with the current bookmark state
+     * @return {Object} An object with the current bookmark state.
      */
     getBookmarkState: function() {
       /*
@@ -218,7 +203,7 @@ define([
         } catch(e) {
           /*
            * We'll land here if the hash isn't a valid json object,
-           * so we'll go on and try getting the state from the params
+           * so we'll go on and try getting the state from the params.
            */
         }
       }
@@ -237,9 +222,6 @@ define([
 
     /**
      * Restores the bookmark state.
-     *
-     * @method restoreBookmarkables
-     * @for Dashboard
      */
     restoreBookmarkables: function() {
       var state;

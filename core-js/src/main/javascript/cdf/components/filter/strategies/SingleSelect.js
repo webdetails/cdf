@@ -11,10 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule SelectionStrategies
- */
 define([
   'amd!../../../lib/underscore',
   './AbstractSelect',
@@ -22,14 +18,27 @@ define([
 ], function (_, AbstractSelect, SelectionTree) {
 
   /**
-   * Single Selection
-   *  - only one item can be selected at any time
-   * @class SingleSelect
-   * @extends AbstractSelect
-   * @constructor
+   * @class cdf.components.filter.strategies.SingleSelect
+   * @amd cdf/components/filter/strategies/SingleSelect
+   * @extends cdf.components.filter.strategies.AbstractSelect
+   * @classdesc Single Selection. Only one item can be selected at any time.
+   * @ignore
    */
-  return AbstractSelect.extend({
+  return AbstractSelect.extend(/** @lends cdf.components.filter.strategies.SingleSelect# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.SelectionStrategies.SingleSelect',
+    /**
+     * Sets a new selection state.
+     *
+     * @param {string} newState The new selection state.
+     * @param {object} model    The target model.
+     * @return {string} The new selection state.
+     */
     setSelection: function (newState, model) {
       if (model.children()) {
         return;
@@ -44,10 +53,22 @@ define([
       model.setAndUpdateSelection(SelectionTree.SelectionStates.ALL);
       return newState;
     },
+    /**
+     * Changes the selection state.
+     *
+     * @param {object} model The target model.
+     * @return {*} The value returned by {@link cdf.components.filter.strategies.AbstractSelect#applySelection|applySelection}.
+     */
     changeSelection: function (model) {
       this.base(model);
       return this.applySelection(model);
     },
+    /**
+     * Gets the selected models.
+     * @param {object} model The target model.
+     * @param {string} field The selection state field.
+     * @return {object[]} The list of selected items.
+     */
     getSelectedItems: function (model, field) {
 
       /* a single select item with 1 item: when this one becomes selected, then the selection

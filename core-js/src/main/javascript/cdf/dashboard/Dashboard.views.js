@@ -17,20 +17,25 @@ define([
   './Dashboard.views.ext',
   '../lib/jquery'
 ], function(Dashboard, Base64, DashboardViewsExt, $) {
+
   /**
-   * A module representing an extension to the Dashboard module for views.
-   * Map containing the list of parameters of a dashboard,
-   * describing its state with viewFlags.
-   *
-   * @module Dashboard.views
+   * @class cdf.dashboard.Dashboard.views
+   * @amd cdf/dashboard/Dashboard.views
+   * @classdesc A class representing an extension to the Dashboard class for views.
+   *            Map containing the list of parameters of a dashboard,
+   *            describing its state with viewFlags.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Property used to define if a parameter is defined by a view.
+     * Object used to store the available view flag values (read only).
      *
-     * @property viewFlags
-     * @for Dashboard
+     * @type {Object}
+     * @instance
+     * @property {string} UNUSED=unused   Flag value for unused parameters.
+     * @property {string} UNBOUND=unbound Flag value for unbound parameters.
+     * @property {string} VIEW=view       Flag value for view parameters.
      */
     viewFlags: {
       UNUSED: "unused",
@@ -41,8 +46,6 @@ define([
     /**
      * Method used by the Dashboard constructor for view initialization.
      *
-     * @method _initViews
-     * @for Dashboard
      * @private
      */
     _initViews: function() {
@@ -58,9 +61,6 @@ define([
      * Because we're storing the parameters in OrientDB, and as OrientDB has some serious issues when storing nested
      * objects, we need to marshall the parameters into a JSON object and converting that JSON into a Base64 blob
      * before the storage operation.
-     *
-     * @method restoreView
-     * @for Dashboard
      */
     restoreView: function() {
       var p, params;
@@ -84,10 +84,8 @@ define([
     /**
      * Defines the view flag of a given parameter.
      *
-     * @method setParameterViewMode
-     * @for Dashboard
-     * @param parameter defines the name of the parameter
-     * @param value defines the value of the parameter. Its default value is viewFlags.VIEW
+     * @param {string} parameter  The name of the parameter
+     * @param {string} value=view The value of the view flag for the parameter.
      */
     setParameterViewMode: function(parameter, value) {
       if(arguments.length === 1) {
@@ -99,21 +97,19 @@ define([
     /**
      * Returns the view flag for a given parameter.
      *
-     * @method isViewParameter
-     * @for Dashboard
-     * @param parameter defines the name of the parameter
-     * @return the parameter viewFlags
+     * @param {string} parameter The name of the parameter.
+     * @return {string} The parameter view flag value.
      */
     isViewParameter: function(parameter) {
       return this.viewParameters[parameter];
     },
 
     /**
-     * Obtains an object with the values for all dashboard parameters flagged as being View parameters.
+     * Obtains a list with the values for all dashboard parameters
+     * flagged as being {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}
+     * or {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND} parameters.
      *
-     * @method getViewParameters
-     * @for Dashboard
-     * @return object with parameter values
+     * @return {Object[]} List of parameter values.
      */
     getViewParameters: function() {
       var params = this.viewParameters,
@@ -129,11 +125,10 @@ define([
     },
 
     /**
-     * Obtains a list of viewFlags.UNBOUND parameters.
+     * Obtains a list of parameters with the view flag set to
+     * {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
      *
-     * @method getUnboundParameters
-     * @for Dashboard
-     * @return {Array} of parameters
+     * @return {string[]} List of the unbound parameters' names.
      */
     getUnboundParameters: function() {
       var params = this.viewParameters,

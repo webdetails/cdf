@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule Controllers
- */
-
 define([
   'amd!../../../lib/underscore',
   '../../../lib/Tree',
@@ -24,25 +19,35 @@ define([
   './RootCtrl'
 ], function(_, Tree, Logger, Views, RootCtrl) {
 
-  /**
-   * Controller responsible for managing the hierarchy of views and controllers.
-   *
-   * When data is added to the model, the Manager reacts by creating
-   * the appropriate views and respective controllers
-   *
-   * @class Manager
-   * @constructor
-   * @extends Tree
-   */
-
-  return Tree.extend({
+  return Tree.extend(/** @lends cdf.components.filter.controllers.Manager# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.Controllers.Manager',
+    /**
+     * Default values.
+     *
+     * @type {{model: object, view: object, controller: object, configuration: object}}
+     */
     defaults: {
       model: null,
       view: null,
       controller: null,
       configuration: null
     },
+    /**
+     * @constructs
+     * @amd cdf/components/filter/controllers/Manager
+     * @extends cdf.lib.baseSelectionTree.Tree
+     * @classdesc Controller responsible for managing the hierarchy of views and
+     *   controllers. When data is added to the model, the Manager reacts by
+     *   creating the appropriate views and respective controllers.
+     * @param {object} node
+     * @ignore
+     */
     constructor: function(node) {
       this.base.apply(this, arguments);
       var loglevel = this.get('configuration').loglevel;
@@ -81,7 +86,7 @@ define([
       };
 
       /*
-       * Declare bindings to model and view
+       * Declare bindings to model and view.
        */
       var bindings = {
         model: {
@@ -264,9 +269,6 @@ define([
 
     /**
      * Create a new manager for this MVC tuple.
-     *
-     * @method addChild
-     * @chainable
      */
     addChild: function(newModel) {
       var newManager = {
@@ -292,8 +294,7 @@ define([
      * Gets an array containing the sorter functions. The most significant
      * sorter function should be placed at the beginning of the array.
      *
-     * @method getSorters
-     * @return {Array} an array with the available sorter functions
+     * @return {object[]} An array with the available sorter functions.
      */
     getSorters: function() {
       var type = this.children().first().get('view').type;
@@ -315,9 +316,8 @@ define([
      * The most significant should be placed at the beginning of the custom sorter
      * functions array.
      *
-     * @method sortChildren
-     * @param {Array} children the array to be sorted
-     * @return {Array} the sorted array
+     * @param {object[]} children The array to be sorted.
+     * @return {object[]} The sorted array.
      */
     sortChildren: function(children) {
       var customSorters = this.getSorters();
@@ -340,8 +340,7 @@ define([
     /**
      * Renders an array of sorted children.
      *
-     * @method renderSortedChildren
-     * @chainable
+     * return {object} The current manager instance.
      */
     renderSortedChildren: function() {
       var $nursery;
@@ -386,9 +385,7 @@ define([
     /**
      * React to the user typing in the search box.
      *
-     * @method onFilterChange
-     * @param {String} text the new search pattern
-     * @for Manager
+     * @param {String} text The new search pattern.
      */
     onFilterChange: function(text) {
       if (this.get('configuration').search.serverSide === true) {
@@ -397,8 +394,13 @@ define([
       this.get('model').filterBy(text);
     },
 
-    /*
-     * Management of selected items
+    /**
+     * Resets the search pattern by executing
+     * {@link cdf.components.filter.controllers.Manager#onFilterChange|onFilterChange}
+     * using an empty string parameter.
+     *
+     * @param {object} model The model object.
+     * @return {*} The return value of {@link cdf.components.filter.controllers.Manager#onFilterChange|onFilterChange}.
      */
     onApply: function(model) {
       return this.onFilterChange('');

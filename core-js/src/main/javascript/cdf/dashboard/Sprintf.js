@@ -11,31 +11,31 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Sprintf implementation for javascript. Request as 'cdf/dashboard/Sprintf'.
- * The module returns a function that can be called to format a string according to the Sprintf specs.
- *
- * @module Sprintf
+/*
+ * Javascript sprintf
+ * http://www.webtoolkit.info/
  */
 
 define(['./Utils'], function(utils) {
 
-  /*
-   *
-   * Javascript sprintf
-   * http://www.webtoolkit.info/
-   *
-   *
+  /**
+   * @class cdf.dashboard.Sprintf
+   * @amd cdf/dashboard/Sprintf
+   * @classdesc Sprintf implementation for javascript.
+   *            The class returns a function that can be called to format
+   *            a string according to the Sprintf specs.
    */
-  var sprintfWrapper = {
+  var sprintfWrapper = /** @lends cdf.dashboard.Sprintf# */ {
 
     /**
+     * Formats a string according to the Sprintf specs.
      *
-     * @method init
-     * @return {*}
+     * @param {...string} string The string containing the regular expression followed
+     *                    by string representations of the values to be processed.
+     * @return {?string} The new string or null.
      */
     init: function () {
-  
+
       if(typeof arguments == 'undefined') {
         return null;
       }
@@ -48,7 +48,7 @@ define(['./Utils'], function(utils) {
       if(typeof RegExp == 'undefined') {
         return null;
       }
-  
+
       var string = arguments[0];
       var exp = new RegExp(/(%([%]|(\-)?(\+|\x20)?(0)?(\d+)?(\.(\d)?)?([bcdfosxX])))/g);
       var matches = new Array();
@@ -59,23 +59,23 @@ define(['./Utils'], function(utils) {
       var matchPosEnd = 0;
       var newString = '';
       var match = null;
-  
+
       while((match = exp.exec(string))) {
         if(match[9]) {
           convCount += 1;
         }
-  
+
         stringPosStart = matchPosEnd;
         stringPosEnd = exp.lastIndex - match[0].length;
         strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
-  
+
         matchPosEnd = exp.lastIndex;
-  
+
         var negative = parseInt(arguments[convCount]) < 0;
         if(!negative) {
           negative = parseFloat(arguments[convCount]) < 0;
         }
-  
+
         matches[matches.length] = {
           match: match[0],
           left: match[3] ? true : false,
@@ -89,17 +89,17 @@ define(['./Utils'], function(utils) {
         };
       }
       strings[strings.length] = string.substring(matchPosEnd);
-  
+
       if(matches.length == 0) {
         return string;
       }
       if((arguments.length - 1) < convCount) {
         return null;
       }
-  
+
       match = null;
       var i = null;
-  
+
       for(i = 0; i < matches.length; i++) {
         var m = matches[i];
         var substitution;
@@ -132,16 +132,16 @@ define(['./Utils'], function(utils) {
         } else {
           substitution = m.match;
         }
-  
+
         newString += strings[i];
         newString += substitution;
       }
-  
+
       newString += strings[i];
-  
+
       return newString;
     },
-  
+
     convert: function(match, nosign) {
       if(nosign) {
         match.sign = '';
