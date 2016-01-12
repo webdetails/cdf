@@ -144,8 +144,12 @@ define([
             eventHandler = _.last(elem),
             event = _.first(handler).trim(),
             selector = _.last(handler).trim();
-        if(_.isFunction(eventHandler)) {
-          $placeholder.find(selector).on(event, info, eventHandler);
+        if (_.isFunction(eventHandler)) {
+          if (event === selector) {
+              $placeholder.off(event).on(event, info, eventHandler);
+          } else {
+              $placeholder.find(selector).off(event).on(event, info, eventHandler);
+          }
         }
       });
     }
