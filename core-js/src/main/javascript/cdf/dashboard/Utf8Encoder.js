@@ -11,20 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Auxiliary UTF8 encoder. Request as 'cdf/dashboard/Utf8Encoder'.
- *
- * @module Utf8Encoder
- * @class Utf8Encoder
+/*
+ * UTF-8 data encode / decode
+ * http://www.webtoolkit.info/
  */
+
 define(["../lib/jquery"], function($) {
 
-  /*
-   *
-   * UTF-8 data encode / decode
-   * http://www.webtoolkit.info/
-   *
-   */
   var Utf8 = {
 
     // public method for url encoding
@@ -76,19 +69,18 @@ define(["../lib/jquery"], function($) {
     }
   };
 
-  /*
-   * UTF-8 data encode / decode
-   * http://www.webtoolkit.info/
+  /**
+   * @class cdf.dashboard.Utf8Encoder
+   * @amd cdf/dashboard/Utf8Encoder
+   * @classdesc Auxiliary UTF-8 encoder.
+   * @static
    */
-  return {
+  return /** @lends cdf.dashboard.Utf8Encoder */ {
     /**
      * Prepares an UTF8 string to be used in Opera or Internet Explorer
      *
-     * @method encode_prepare
-     * @param s String to be prepared
-     * @return {*} Encoded/Prepared String
-     *
-     * @static
+     * @param {string} s String to be encoded.
+     * @return {?string} Encoded/prepared string.
      */
     encode_prepare: function(s) {
       if(s != null) {
@@ -105,13 +97,10 @@ define(["../lib/jquery"], function($) {
     },
 
     /**
-     * Prepares an array containing UTF8 strings to be used in Opera or Internet Explorer
+     * Prepares an array containing UTF-8 strings to be used in Opera or Internet Explorer.
      *
-     * @method encode_prepare_arr
-     * @param value Array to be encoded
-     * @return {Array} Array with encoded/prepared elements
-     *
-     * @static
+     * @param {*} value Value to be encoded.
+     * @return {Array} Array with encoded/prepared elements.
      */
     encode_prepare_arr: function(value) {
       var myself = this;

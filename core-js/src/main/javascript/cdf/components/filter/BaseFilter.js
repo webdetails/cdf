@@ -39,25 +39,26 @@ define([
   defaults
 ) {
 
-  /**
-   * MVC-based tree-like filter that supports
-   * - multiple nested groups
-   * - server-side pagination and searching
-   *
-   * @module BaseFilter
-   * @main
-   */
-
   /*
    * Schmiede, mein Hammer, ein hartes Schwert!
    */
-  return {
+
+  /**
+   * @class  cdf.components.filter.BaseFilter
+   * @amd cdf/components/filter/BaseFilter
+   * @classdesc MVC-based tree-like filter that supports
+   * <ul>
+   *   <li>multiple nested groups</li>
+   *   <li>server-side pagination and searching</li>
+   * </ul>
+   * @static
+   * @ignore
+   */
+  return /** @lends cdf.components.filter.BaseFilter */ {
 
     Logger: Logger,
     /**
      * MVC Models used internally to represent and manipulate information
-     * @submodule Models
-     * @main
      */
     Models: {
       SelectionTree: SelectionTree
@@ -65,15 +66,11 @@ define([
 
     /**
      * MVC views that listen to changes in a model and trigger events that will eventually be handled by a Controller
-     * @submodule Views
-     * @main
      */
     Views: Views,
 
     /**
      * Set of Controllers responsible for handling the interaction between views and models
-     * @submodule Controllers
-     * @main
      */
     Controllers: {
       RootCtrl: RootCtrl,
@@ -85,8 +82,6 @@ define([
      * and isolate that "business" logic from lower-level view interaction logic.
      *
      * These classes are singletons passed as part of the configuration objects.
-     * @submodule SelectionStrategies
-     * @main
      */
     SelectionStrategies: {
       AbstractSelect: AbstractSelect,
@@ -98,10 +93,10 @@ define([
     /**
      * The MVC component consumes data in a specific format.
      * As such, it requires classes that:
-     * - Import data to the filter
-     * - Export the selection model
-     * @submodule DataHandlers
-     * @main
+     * <ul>
+     *   <li> Import data to the filter</li>
+     *   <li> Export the selection model</li>
+     * </ul>
      */
     DataHandlers: {
       Input: Input,
@@ -110,8 +105,6 @@ define([
 
     /**
      * Extension points: Sorters and Renderers
-     * @submodule Extensions
-     * @main
      */
     Extensions: {
       Sorters: sorters,
@@ -121,19 +114,8 @@ define([
     templates: templates,
     /**
      * Enumerations
-     * @module BaseFilter
-     * @submodule Enum
-     * @main
      */
     Enum: {
-
-      /**
-       * @module BaseFilter
-       * @submodule Enum
-       * Selection states
-       * @class select
-       * @static
-       */
       select: SelectionTree.SelectionStates,
       selectionStrategy: {
         'LimitedSelect': {

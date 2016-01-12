@@ -11,16 +11,25 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([
-  './Root',
-  './Group',
-  './Item'
-], function (Root, Group, Item) {
+/**
+ * @event preExecution
+ * @memberof cdf
+ * @return {boolean} `false` if the component execution should stop, `true` otherwise.
+ */
 
-  return {
-    Root: Root,
-    Group: Group,
-    Item: Item
-  };
+/**
+ * @event postFetch
+ * @memberof cdf
+ * @param {object} data The data returned from the {@link external:jQuery.ajax|jQuery.ajax} call.
+ * @return {object} The transformed data.
+ */
 
-});
+/**
+ * @event render
+ * @memberof cdf
+ */
+
+/**
+ * @event postExecution
+ * @memberof cdf
+ */

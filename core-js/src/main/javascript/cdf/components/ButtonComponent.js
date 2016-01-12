@@ -18,11 +18,21 @@ define([
   'css!./ButtonComponent'
 ], function(_, $, ActionComponent) {
 
-  return ActionComponent.extend({
+  /**
+   * @class cdf.components.ButtonComponent
+   * @amd cdf/components/ButtonComponent
+   * @classdesc Button component class.
+   * @extends cdf.components.ActionComponent
+   * @ignore
+   */
+  return ActionComponent.extend(/** @lends cdf.components.ButtonComponent# */{
     _docstring: function() {
       return "Button Component that triggers a server action when clicked";
     },
 
+    /**
+     * Renders the button component UI.
+     */
     render: function() {
       var myself = this;
 
@@ -102,8 +112,6 @@ define([
 
     /**
      * Disables the button (grays it out and prevents click events).
-     *
-     * @method disable
      */
     disable: function() {
       this.placeholder('button').attr('disabled', 'disabled');
@@ -112,8 +120,6 @@ define([
 
     /**
      * Enables the button.
-     *
-     * @method enable
      */
     enable: function() {
       this.placeholder('button').removeAttr('disabled');
@@ -123,7 +129,7 @@ define([
     /**
      * Changes the label shown on the button.
      *
-     * @method setLabel
+     * @param {string|function} label The label to show in the component's HTML element.
      */
     setLabel: function(label) {
       var validatedLabel = typeof label === 'function' ? label.call(this) : (label || "");
@@ -138,9 +144,8 @@ define([
     },
 
     /**
-     * Returns whether or not the button is a jQueryUi button.
+     * Returns whether or not the button is a {@link external:jQueryUI|jQueryUI} button.
      *
-     * @method _isJQueryUiButton
      * @private
      */
     _isJQueryUiButton: function() {

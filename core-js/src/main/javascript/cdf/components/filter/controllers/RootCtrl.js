@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule Controllers
- */
-
 define([
   '../../../lib/jquery',
   'amd!../../../lib/underscore',
@@ -24,15 +19,15 @@ define([
   '../models/SelectionTree'
 ], function($, _, BaseEvents,  Logger, SelectionTree) {
 
-  /**
-   * General-purpose controller.
-   *
-   * @class RootCtrl
-   * @constructor
-   * @uses BaseFilter.Logger
-   * @extends Backbone.View
-   */
-  return BaseEvents.extend( Logger ).extend({
+  return BaseEvents.extend(Logger).extend(/** @lends cdf.components.filter.controllers.RootCtl# */{
+    /**
+     * @constructs
+     * @amd cdf/components/filter/controllers/RootCtl
+     * @extends cdf.lib.baseEvents.BaseEvents
+     * @classdesc General-purpose controller.
+     * @param {object} args Some aditional default options.
+     * @ignore
+     */
     constructor: function(args) {
       $.extend(this, _.pick(args, ['model', 'view', 'configuration']));
       if (this.view) {
@@ -66,8 +61,8 @@ define([
      * Acts upon the model whenever the user selected something.
      * Delegates work to the current selection strategy.
      *
-     * @method onSelection
-     * @chainable
+     * @param {object} model The target model.
+     * @return {this}
      */
     onSelection: function(model) {
       this.configuration.selectionStrategy.strategy.changeSelection(model);
@@ -78,8 +73,8 @@ define([
      * Informs the model that the user chose to commit the current selection.
      * Delegates work to the current selection strategy.
      *
-     * @method onApply
-     * @chainable
+     * @param {object} model The target model.
+     * @return {this}
      */
     onApply: function(model) {
       this.configuration.selectionStrategy.strategy.applySelection(model);
@@ -90,14 +85,23 @@ define([
      * Informs the model that the user chose to revert to the last saved selection.
      * Delegates work to the current selection strategy.
      *
-     * @method onCancel
-     * @chainable
+     * @param {object} model The target model.
+     * @return {this}
      */
     onCancel: function(model) {
       model.restoreSelectedItems();
       model.root().set('isCollapsed', true);
       return this;
     },
+
+    /**
+     * Toggles the component collapsed state and updates the models visibility.
+     * When collapsing the component, if no model was visible,
+     * the filter (search pattern) is reset.
+     *
+     * @param {object} model The target model.
+     * @return {this}
+     */
     onToggleCollapse: function(model) {
       var newState, oldState;
       this.debug("Setting isCollapsed");
@@ -116,10 +120,24 @@ define([
       model.set('isCollapsed', newState);
       return this;
     },
+
+    /**
+     * Collapses the component when a mouse click happens outside the component.
+     *
+     * @param {object} model The target model.
+     * @return {this}
+     */
     onClickOutside: function(model) {
       model.set('isCollapsed', true);
       return this;
     },
+
+    /**
+     * UPdates the models selection state when the _only-this_ button is pressed.
+     *
+     * @param {object} model The target model.
+     * @return {this}
+     */
     onOnlyThis: function(model) {
       this.debug("Setting Only This");
       this.model.root().setAndUpdateSelection(SelectionTree.SelectionStates.NONE);

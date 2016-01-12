@@ -13,15 +13,26 @@
 
 define(['./SelectBaseComponent'], function(SelectBaseComponent) {
 
-  return SelectBaseComponent.extend({
-
+  /**
+   * @class cdf.components.SelectComponent
+   * @amd cdf/components/SelectComponent
+   * @extends cdf.components.SelectBaseComponent
+   * @classdesc The select component.
+   * @ignore
+   */
+  return SelectBaseComponent.extend(/** @lends cdf.components.SelectComponent# */{
+    /**
+     * Flag indicating if the default should show when the value is empty.
+     *
+     * @type {boolean}
+     * @default
+     */
     defaultIfEmpty: true,
 
     /**
-     * Gets the value of the select tag.
+     * Gets the value of the _select_ placeholder.
      *
-     * @method getValue
-     * @return {*} the value of the selector
+     * @return {string} The value of the corresponding HTML element.
      */
     getValue: function() {
       return this.placeholder("select").val();

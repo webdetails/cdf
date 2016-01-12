@@ -11,16 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * An intuitive Filter Component with many out-of-the-box features:
- * - pluggable selection logic: single-, multi-, and limited-select
- * - automatic handling of groups of options
- * - searchable
- * - extensible via addIns
- * @class FilterComponent
- * @constructor
- */
-
 define([
   '../../lib/jquery',
   'amd!../../lib/underscore',
@@ -32,16 +22,6 @@ define([
   'css!./styles/filter'
 ], function ($, _, Backbone, UnmanagedComponent, Logger, BaseFilter) {
 
-  /**
-   * An intuitive Filter Component with many out-of-the-box features:
-   * - pluggable selection logic: single-, multi-, and limited-select
-   * - automatic handling of groups of options
-   * - searchable
-   * - extensible via addIns
-   * @class FilterComponent
-   * @constructor
-   */
-
   /*
    * Über-filter: one filter to rule them all
    */
@@ -49,16 +29,13 @@ define([
   /*
    * Interface Mixin for a filter
    */
-  var IFilter = {
+  var IFilter = /** @lends cdf.components.filter.FilterComponent# */ {
 
     /**
      * Gets the current selection state.
      *
-     * @method getValue
-     * @public
-     * @for FilterComponent
      * @return {Array} List of strings containing the IDs of the selected items,
-     * in the same format as they would be written to the parameter
+     *                 in the same format as they would be written to the parameter.
      */
     getValue: function () {
       return this._value;
@@ -67,12 +44,9 @@ define([
     /**
      * Updates the selection state of the filter.
      *
-     * @method setValue
-     * @public
-     * @for FilterComponent
      * @param {Array} value List of strings containing the IDs of the selected items,
-     * which will be written to the parameter
-     * @chainable
+     *                      which will be written to the parameter.
+     * @return {this}
      */
     setValue: function (value) {
       this.inputDataHandler.setValue(value);
@@ -81,13 +55,11 @@ define([
 
     /**
      * Implement's CDF logic for updating the state of the parameter, by
-     * invoking the dashboard's {{#crossLink "Dashboard/processChange:method"}}processChange{{/crossLink}} function.
+     * invoking the dashboard's {@link cdf.dashboard.Dashboard#processChange|processChange} function.
      *
-     * @method processChange
-     * @public
-     * @for FilterComponent
      * @param {Array} value List of strings containing the IDs of the selected items,
-     * in the same format as they would be written to the parameter
+     *                      in the same format as they would be written to the parameter.
+     * @return {this}
      */
     processChange: function (value) {
       this._value = value;
@@ -99,7 +71,7 @@ define([
   /*
    * Interface mixin for the configuration
    */
-  var IConfiguration = {
+  var IConfiguration = /** @lends cdf.components.filter.FilterComponent# */ {
 
     /**
      * Default settings of the component
@@ -124,9 +96,7 @@ define([
      * </code>
      * </pre>
      *
-     * @property defaults
-     * @for FilterComponent
-     * @type {Object}
+     * @type {object}
      */
     defaults: {
       component: {},
@@ -148,14 +118,13 @@ define([
 
     /**
      * Collate and conciliate settings from the following origins:
-     * - component's {{#crossLink "FilterComponent/defaults:property"}}{{/crossLink}}
-     * - properties set by the user at design time, via the CDE interface
-     * - options programmatically defined at run time
+     * <ul>
+     *   <li>component's {@link cdf.components.FilterComponent#defaults|defaults}</li>
+     *   <li>properties set by the user at design time, via the CDE interface</li>
+     *   <li>options programmatically defined at run time</li>
+     * </ul>
      *
-     * @method getConfiguration
-     * @for FilterComponent
-     * @public
-     * @return {Object} Returns a configuration object
+     * @return {object} Returns a configuration object.
      */
     getConfiguration: function () {
       var cd = this.componentDefinition;
@@ -293,26 +262,32 @@ define([
      * <pre>
      * <code>
      * {
-         *   postUpdate:  [], // e.g. 'accordion'
-         *   renderRootHeader: [],
-         *   renderRootSelection: [], // e.g. ['sumSelected', 'notificationSelectionLimit']
-         *   renderRootFooter: [],
-         *   renderGroupHeader: [],
-         *   renderGroupSelection:[],
-         *   renderGroupFooter: [],
-         *   renderItemSelection: [],
-         *   sortGroup: [],
-         *   sortItem: []
-         * }
+     *   postUpdate:  [], // e.g. 'accordion'
+     *   renderRootHeader: [],
+     *   renderRootSelection: [], // e.g. ['sumSelected', 'notificationSelectionLimit']
+     *   renderRootFooter: [],
+     *   renderGroupHeader: [],
+     *   renderGroupSelection:[],
+     *   renderGroupFooter: [],
+     *   renderItemSelection: [],
+     *   sortGroup: [],
+     *   sortItem: []
+     * }
      * </pre>
      * </code>
      *
-     * @property addIns
-     * @type Object
-     * @public
+     * @property {object} addIns
+     * @ignore
+     */
+
+    /**
+     * Maps the add-ins to the component configuration.
+     *
+     * @return {*|Array} The result of executing the add-in,
+     *                   or the array of slot-addIns pair values.
+     * @private
      */
     _mapAddInsToConfiguration: function () {
-
       /*
        * Traverse the list of declared addIns,
        * Get the addIns, the user-defined options, wrap this into a function
@@ -382,40 +357,45 @@ define([
     }
   };
 
-  return UnmanagedComponent.extend(IFilter).extend(IConfiguration).extend({
+  /**
+   * @class cdf.components.filter.FilterComponent
+   * @extends cdf.components.UnmanagedComponent
+   * @amd cdf/components/FilterComponent
+   * @classdesc An intuitive Filter Component with many out-of-the-box features:
+   *   <ul>
+   *     <li>pluggable selection logic: single-, multi-, and limited-select</li>
+   *     <li>automatic handling of groups of options</li>
+   *     <li>searchable</li>
+   *     <li>extensible via addIns</li>
+   *   </ul>
+   * @ignore
+   */
+  return UnmanagedComponent.extend(IFilter).extend(IConfiguration).extend(/** @lends cdf.components.filter.FilterComponent# */{
     /**
      * Object responsible for storing the MVC model, which contains both the data and the state of the component.
      *
-     * @property model
-     * @public
-     * @type SelectionTree
+     * @type {SelectionTree}
      */
     model: void 0,
 
     /**
      * Object responsible for managing the MVC hierarchy of views and controllers associated with the model.
      *
-     * @property manager
-     * @public
-     * @type Manager
+     * @type {Manager}
      */
     manager: void 0,
 
     /**
      * Object that handles writing to the MVC model.
      *
-     * @property inputDataHandler
-     * @public
-     * @type Input
+     * @type {Input}
      */
     inputDataHandler: void 0,
 
     /**
      * Object that handles reading from the MVC model.
      *
-     * @property outputDataHandler
-     * @public
-     * @type Output
+     * @type {Output}
      */
     outputDataHandler: void 0,
     update: function () {
@@ -444,13 +424,14 @@ define([
 
     /**
      * Initialize the component by creating new instances of the main objects:
-     * - model
-     * - MVC manager
-     * - input data handler
-     * - output data handler
+     * <ul>
+     *   <li>model</li>
+     *   <li>MVC manager</li>
+     *   <li>input data handler</li>
+     *   <li>output data handler</li>
+     * </ul>
      *
-     * @method initialize
-     * @return {Promise} Returns a $.Deferred().promise() object
+     * @return {Promise} Returns a $.Deferred().promise() object.
      */
     initialize: function () {
 
@@ -491,8 +472,7 @@ define([
      * Abstract the origin of the data used to populate the component.
      * Precedence order for importing data: query -> parameter -> valuesArray
      *
-     * @method getData
-     * @return {Promise} Returns promise that is fulfilled when the data is available
+     * @return {Promise} Returns promise that is fulfilled when the data is available.
      */
     getData: function () {
       var deferred = new $.Deferred();
@@ -530,11 +510,6 @@ define([
      * Launch an event equivalent to postExecution
      */
 
-    /**
-     * @method onDataReady
-     * @public
-     * @chainable
-     */
     onDataReady: function (data) {
       this.inputDataHandler.updateModel(data);
       if (this.parameter) {
@@ -542,18 +517,10 @@ define([
         this.setValue(currentSelection);
       }
 
-      /**
-       * @event getData:success
-       */
       this.trigger('getData:success');
       return this;
     },
 
-    /**
-     * @method onDataFail
-     * @public
-     * @chainable
-     */
     onDataFail: function (reason) {
       Logger.log('Component failed to retrieve data: ' + reason, 'debug');
       this.trigger('getData:failed');

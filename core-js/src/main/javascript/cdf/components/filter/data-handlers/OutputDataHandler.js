@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule DataHandlers
- */
-
 define([
   'amd!../../../lib/underscore',
   '../baseevents/baseeventsModel',
@@ -23,18 +18,23 @@ define([
 ], function(_, BaseModel, Logger) {
 
   /**
-   * The Output DataHandler:
-   * - watches the model for specific changes
-   * - synchronizes CDF with the model
-   * If you squint, you can see that it behaves like a View,
-   * except that it writes to a CDF parameter
-   * @class Output
-   * @extends BaseModel
-   * @uses Logger
-   * @constructor
-   * @param {Object} options
+   * @class cdf.components.filter.data-handlers.OutputDataHandler
+   * @amd cdf/components/filter/data-handlers/OutputDataHandler
+   * @extends cdf.components.filter.baseevents.baseeventsModel
+   * @classdesc The Output DataHandler:
+   *   <ul><li>watches the model for specific changes</li>
+   *       <li>synchronizes CDF with the model</li></ul>
+   *   If you squint, you can see that it behaves like a View,
+   *   except that it writes to a CDF parameter.
+   * @ignore
    */
-  return BaseModel.extend( Logger ).extend({
+  return BaseModel.extend(Logger).extend(/** @lends cdf.components.filter.data-handlers.OutputDataHandler# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.DataHandlers.Output',
     initialize: function() {
       if (true || this.attributes.options.trigger === 'apply') {
@@ -73,12 +73,10 @@ define([
     /**
      * Process the list of selected items and attempt to produce a compact array,
      * in which a single id is user to represent all the members of a fully
-     * selected group
-     * @method getHighestId
-     * @for Output
-     * @private
-     * @param {Object} selectionState
-     * @return {Array} Returns a list of ids
+     * selected group.
+     *
+     * @param {string} selectionState The selection state.
+     * @return {object[]} Returns a list of model identifiers.
      */
     getHighestId: function(selectionState) {
 
@@ -100,12 +98,10 @@ define([
 
     /**
      * Process the list of selected items and produce a list of the ids of
-     * the selected items (leafs only)
-     * @method getLowestId
-     * @for Output
-     * @private
-     * @param {Object} selectionState
-     * @return {Array} Returns a list of ids
+     * the selected items (leafs only).
+     *
+     * @param {string} selectionState The selection state.
+     * @return {object[]} Returns a list of model identifiers.
      */
     getLowestId: function(selectionState) {
 
@@ -137,10 +133,9 @@ define([
 
     /**
      * Reads the selection state from the model and transforms this information
-     * into the format the CDF filter is expecting to consume
-     * @method getValue
-     * @public
-     * @return {Array|Object} Returns the currently committed selection state
+     * into the format the CDF filter is expecting to consume.
+     *
+     * @return {object[]} Returns the currently committed selection state.
      */
     getValue: function() {
       var model, selection, treatedSelection;

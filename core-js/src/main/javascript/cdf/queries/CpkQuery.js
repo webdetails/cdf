@@ -11,18 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Module that holds query related objects.
- *
- * @module Query
- */
-
-/**
- * Class that represents a CPK query.
- *
- * @class CpkQuery
- * @extends BaseQuery
- */
 define([
   '../dashboard/Dashboard.ext',
   './BaseQuery',
@@ -33,7 +21,12 @@ define([
   '../lib/jquery'
 ], function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
 
-  var CpkEndpointsOpts = {
+  /**
+   * @class cdf.queries.CpkQuery
+   * @amd cdf/queries/CpkQuery
+   * @classdesc Class that represents a CPK query.
+   */
+  var CpkEndpointsOpts = /** @lends cdf.queries.CpkQuery# */{
     name: "cpk",
     label: "CPK Query",
     defaults: {
@@ -52,10 +45,15 @@ define([
     },
 
     /**
-     * Init method for the CPK query.
+     * Initializes a CPK query.
      *
-     * @method init
-     * @param opts Options is an object with the following properties: pluginId, endpoint, kettleOutput, stepName, systemParams, ajaxOptions
+     * @param {object} opts              An object containing query definitions.
+     * @param {string} opts.pluginId     The plugin identifier.
+     * @param {string} opts.endpoint     The target endpoint.
+     * @param {string} opts.kettleOutput Output type.
+     * @param {string} opts.stepName     The target step name.
+     * @param {object} opts.systemParams System parameters.
+     * @param {object} opts.ajaxOptions  {@link external:jQuery|jQuery.ajax} options.
      */
     init: function(opts) {
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
@@ -77,9 +75,8 @@ define([
     /**
      * Builds the query definition object.
      *
-     * @method buildQueryDefinition
-     * @param overrides Overrides to the existing options
-     * @return {{}} Query definition object
+     * @param {object} overrides Options that override the existing ones.
+     * @return {*} Query definition object.
      *
      * @private
      */
@@ -133,11 +130,10 @@ define([
     },
 
     /**
-     * Gets the success handler for the query, given a fallback to call.
+     * Gets the success handler that executes the provided callback when the query executes sucessfuly.
      *
-     * @method getSuccessHandler
-     * @param callback Callback to call after the query is successful
-     * @return Success handler
+     * @param {function} callback Callback to call after the query is successful.
+     * @return {function} Success callback handler.
      */
     getSuccessHandler: function(callback) {
       // copy-pasted from BaseQuery + added errorCallback

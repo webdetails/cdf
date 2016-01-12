@@ -20,23 +20,37 @@ define([
   './Utils'
 ], function(Logger, Base, Dashboard, Container, _, Utils) {
 
-  var _BaseQuery = Base;
-  
-  var globalQueryFactories = new Container();
-     
   /**
-   * A module representing a extension to Dashboard module for i18n.
-   * @module Dashboard.query
+   * The base query object, from where other query types can be extended.
+   * 
+   * @type {Object}
+   * @alias cdf.dashboard.Dashboard~_BaseQuery
+   * @ignore
    */
-  Dashboard.implement({
+  var _BaseQuery = Base;
+
+  /**
+   * Object used for generating new query objects.
+   *
+   * @type {Object}
+   * @alias cdf.dashboard.Dashboard~globalQueryFactories
+   * @ignore
+   */
+  var globalQueryFactories = new Container();
+
+  /**
+   * @class cdf.dashboard.Dashboard.query
+   * @amd cdf/dashboard/Dashboard.query
+   * @classdesc A class representing an extension to the Dashboard class for managing queries.
+   *            It's methods allow registering and setting queries.
+   * @ignore
+   */
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Method used by the Dashboard constructor for query initialization
-     * Reference to current language code . 
+     * Method used by the dashboard's constructor for query initialization.
+     * Reference to current language code. 
      *
-     * @method _initQuery
-     *
-     * @for Dashboard
      * @private
      */
     _initQuery: function() {
@@ -44,25 +58,19 @@ define([
     },
 
     /**
-     * Gets the base query object, from where other query types can be extended
+     * Gets the base query object, from where other query types can be extended.
      *
-     * @method getBaseQuery
-     * @return {*} the base query object
-     *
-     * @for Dashboard
+     * @return {Object} the base query object
      */
     getBaseQuery: function() {
       return _BaseQuery;
     },
 
     /**
-     * Registers a new query for the dashboard
+     * Registers a new query for the dashboard.
      *
-     * @method registerQuery
-     * @param type Query type
-     * @param query Query object
-     *
-     * @for Dashboard
+     * @param {string} type  The query type.
+     * @param {Object} query The query object.
      */
     registerQuery: function(type, query) {
       var BaseQuery = this.getBaseQuery();
@@ -86,26 +94,20 @@ define([
     },
 
     /**
-     * Determines if a given query type is registered in the current dashboard
+     * Determines if a given query type is registered in the current dashboard.
      *
-     * @method hasQuery
-     * @param type query type
-     * @return {boolean} _true_ if the query type has been registered for this dashboard
-     *
-     * @for Dashboard
+     * @param {string} type The query type.
+     * @return {boolean} _true_ if the query type has been registered for this dashboard.
      */
     hasQuery: function(type) {
       return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
     },
 
     /**
-     * Given a query definition object, returns its query type
+     * Given a query definition object, returns its query type.
      *
-     * @method detectQueryType
-     * @param qd - Query definition object
-     * @return {queryType} Query type associated with the query definition object
-     *
-     * @for Dashboard
+     * @param {Object} qd The query definition object.
+     * @return {string} The query type associated with the query definition object provided.
      */
     detectQueryType: function(qd) {
       if(qd) {
@@ -136,12 +138,9 @@ define([
      * Given a type and options, returns the query object for running that particular query.
      * If a data source name is provided as an option, also include all options from it.
      *
-     * @method getQuery
-     * @param type Query type
-     * @param opts Options object
-     * @return {*} the query object
-     *
-     * @for Dashboard
+     * @param {string|Object} type   The query type or an object containing the query definitions.
+     * @param {Object}        [opts] An object containing the query options.
+     * @return {Object} The query object.
      */
     getQuery: function(type, opts) {
       if(_.isUndefined(type)) {
@@ -174,46 +173,31 @@ define([
     },
 
     /**
-     * Tests if a query definition is valid or not
+     * Tests if a query definition is valid or not.
      *
-     * @method isValidQueryDefinition
-     * @param queryDefinition Query Definition
-     * @return {boolean} _true_ if the query definition is valid
-     *
-     * @for Dashboard
+     * @param {Object} queryDefinition The query definition object.
+     * @return {boolean} _true_ if the query definition is valid.
      */
     isValidQueryDefinition: function(queryDefinition) {
       return this.detectQueryType(queryDefinition) !== undefined;
     },
 
     /**
-     * Lists the registered query types in this dashboard
+     * Lists the registered query types in this dashboard.
      *
-     * @method listQueries
-     * @return {Array} Array of registered query types
-     *
-     * @for Dashboard
+     * @return {string[]} An array containing the registered query types.
      */
     listQueries: function() {
       return _.keys(this.queryFactories.listType('Query'));
     }
   });
 
-  /**
-   * Helper object for registering and setting queries.
-   * @class DashboardQuery
-   *
-   */
-  return {
+  return /** @lends cdf.dashboard.Dashboard.query */ {
 
     /**
-     * Sets the base query object
+     * Sets the base query object.
      *
-     * @method setBaseQuery
-     * @param QueryClass Base query object
-     *
-     * @for DashboardQuery
-     * @static
+     * @param {Object} QueryClass The base query object.
      */
     setBaseQuery: function(QueryClass) {
       if(_.isFunction(QueryClass) && QueryClass.extend) {
@@ -224,12 +208,8 @@ define([
     /**
      * Register a globally available query.
      *
-     *
-     * @method registerGlobalQuery
-     * @param type Query type
-     * @param query Query object that represents that query type
-     *
-     * @static
+     * @param {string} type  The query type.
+     * @param {Object} query The query object.
      */
     registerGlobalQuery: function(type, query) {
       var BaseQuery = _BaseQuery;

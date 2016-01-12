@@ -11,29 +11,63 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Class that manages the periodic refresh of components. Require as 'cdf/dashboard/RefreshEngine'.
- *
- * @module RefreshEngine
- * @class RefreshEngine
- */
-
 define([], function() {
 
   /**
-   * Builds a new RefreshEngine for a particular dashboard.
+   * Builds a new refresh engine for the provided dashboard.
    *
-   * @constructor
-   *
-   * @param dashboard Dashboard managed by this RefreshEngine
+   * @class cdf.dashboard.RefreshEngine
+   * @amd cdf/dashboard/RefreshEngine
+   * @classdesc Class that manages the periodic refresh of components.
+   * @param {cdf.dashboard.Dashboard} dashboard The dashboard instance to be managed by the refresh engine.
    */
-  return function(dashboard) {// Manages periodic refresh of components
-
-    var NO_REFRESH = 0;//currently no distinction between explicitly disabled or not set
-    var refreshQueue = new Array();//component refresh queue
-    var activeTimer = null;//timer for individual component refresh
+  return /** @lends cdf.dashboard.RefreshEngine# */ function(dashboard) {
+    /**
+     * Default value for the refresh period.
+     * Currently no distinction between explicitly disabled or not set.
+     *
+     * @type {number}
+     * @const
+     * @inner
+     * @default 0
+     * @ignore
+     */
+    var NO_REFRESH = 0;
+    /**
+     * Component refresh queue.
+     *
+     * @type {Array}
+     * @inner
+     * @default []
+     * @ignore
+     */
+    var refreshQueue = new Array();
+    /**
+     * Timer for individual component refresh.
+     *
+     * @type {string}
+     * @inner
+     * @default null
+     * @ignore
+     */
+    var activeTimer = null;
   
+    /**
+     * The global refresh period.
+     *
+     * @type {number}
+     * @inner
+     * @default 0
+     * @ignore
+     */
     var globalRefreshPeriod = NO_REFRESH;
+    /**
+     * The global timer.
+     *
+     * @type {number}
+     * @default null
+     * 
+     */
     var globalTimer = null;
   
     var QueueItem = function() {
@@ -43,7 +77,13 @@ define([], function() {
       };
     };
 
-    //set global refresh and (re)start interval
+    /**
+     * Set _globalTimer_ and (re)start interval.
+     *
+     * @param {number} refreshPeriod The refresh interval.
+     * @inner
+     * @ignore
+     */
     var startGlobalRefresh = function(refreshPeriod) {
       if(globalTimer != null) {
         clearInterval(globalTimer);
@@ -131,16 +171,17 @@ define([], function() {
         sortedInsert(refreshQueue, info);
       }
     };
-    return {
+
+    return /** @lends cdf.dashboard.RefreshEngine# */ {
 
       /**
-       * Set a component's refresh period and clears it from the queue if there;
-       * processComponent must be called to activate the refresh timer for the component.
+       * Set a component's refresh period and clears it from the queue.
+       * {@link cdf.dashboard.RefreshEngine#processComponent|processComponent}
+       * must be called to activate the refresh timer for the component.
        *
-       * @method registerComponent
-       * @param component Component to register
-       * @param refreshPeriod Associated refresh period
-       * @return {boolean} _true_ if registration succeeds, _false_ otherwise
+       * @param {Object} component     The component to register.
+       * @param {number} refreshPeriod The ssociated refresh period.
+       * @return {boolean} _true_ if registration succeeds, _false_ otherwise.
        */
       registerComponent: function(component, refreshPeriod) {
         if(!component) { return false; }
@@ -156,9 +197,8 @@ define([], function() {
       /**
        * Gets the refresh period for a component.
        *
-       * @method getRefreshPeriod
-       * @param component Component from which we want the refresh period
-       * @return {*} Associated refresh period or the value NO_REFRESH (0)
+       * @param {Object} component Component from which we want the refresh period.
+       * @return {number} Associated refresh period or the value of _NO_REFRESH_.
        */
       getRefreshPeriod: function(component) {
         if(component && component.refreshPeriod > 0) {
@@ -169,10 +209,10 @@ define([], function() {
       },
 
       /**
-       * Sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed.
+       * Sets next refresh for given component and inserts it in refreshQueue,
+       * restarts timer if needed.
        *
-       * @method processComponent
-       * @param component Component to process
+       * @param {Object} component Component to process.
        * @return {boolean} _true_ if the component was correctly processed.
        */
       processComponent: function(component) {
@@ -187,7 +227,6 @@ define([], function() {
       /**
        * Clears queue, sets next refresh for all components, restarts timer.
        *
-       * @method processComponents
        * @return {boolean} _true_ if components were correctly processed
        */
       processComponents: function() {
@@ -201,8 +240,6 @@ define([], function() {
 
       /**
        * Pop due items from queue, refresh components and set next timeout.
-       *
-       * @method fireRefresh
        */
       fireRefresh: function() {
         activeTimer = null;
@@ -219,9 +256,8 @@ define([], function() {
       },
 
       /**
-       * Called when a valid globalRefreshPeriod exists, it updates all components without their own refresh period.
-       *
-       * @method fireGlobalRefresh
+       * Called when a valid globalRefreshPeriod exists,
+       * it updates all components without their own refresh period.
        */
       fireGlobalRefresh: function() {
         for(var i = 0; i < dashboard.components.length; i++) {
@@ -237,8 +273,7 @@ define([], function() {
       /**
        * Sets the global refresh period.
        *
-       * @method setGlobalRefresh
-       * @param refreshPeriod Refresh period to set
+       * @param {number} refreshPeriod Refresh period to set.
        */
       setGlobalRefresh: function(refreshPeriod) {
         startGlobalRefresh(refreshPeriod);
@@ -247,8 +282,7 @@ define([], function() {
       /**
        * Gets the current queue of components to be processed.
        *
-       * @method getQueue
-       * @return {Array} array with components that need to be refreshed
+       * @return {Object[]} An array with components that need to be refreshed.
        * @private
        */
       getQueue: function() {

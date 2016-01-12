@@ -17,15 +17,20 @@ define([
   '../dashboard/Utils'
 ], function(_, UnmanagedComponent, Utils) {
 
-  return UnmanagedComponent.extend({
+  /**
+   * @class cdf.components.ActionComponent
+   * @amd cdf/components/ActionComponent
+   * @classdesc Action component class.
+   * @extends cdf.components.UnmanagedComponent
+   * @ignore
+   */
+  return UnmanagedComponent.extend(/** @lends cdf.components.ActionComponent# */{
     _docstring: function() {
       return "Abstract class for components calling a query/endpoint";
     },
 
     /**
      * Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
-     *
-     * @method update
      */
     update: function() {
       var render = _.bind(this.render, this);
@@ -38,9 +43,9 @@ define([
 
     /**
      * Calls the endpoint, passing any parameters.
-     * This method is typically bound to the "click" event of the component.
+     * This method is typically bound to the _click_ event of the component.
      *
-     * @method triggerAction
+     * @return {*} The result of executing {@link cdf.dashboard.Dashboard#getQuery|getQuery}.
      */
     triggerAction: function() {
       var params = Utils.propertiesArrayToObject(this.actionParameters);
@@ -59,9 +64,9 @@ define([
     },
 
     /**
-     * Detect if the endpoint associated with the Action is defined.
+     * Detects if the action definition contains a valid query type.
      *
-     * @method hasAction
+     * @return {boolean} _true_ if the query type is valid, _false_ otherwise.
      */
     hasAction: function() {
       if(!this.actionDefinition) {

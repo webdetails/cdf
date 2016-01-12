@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule Views
- */
-
 define([
   '../../../lib/jquery',
   'amd!../../../lib/underscore',
@@ -25,15 +20,33 @@ define([
 ], function ($, _, Mustache, AbstractView, templates) {
 
   /**
-   * Root View: the part of the filter that
-   * remains visible when the filter is collapsed
-   * @class Root
-   * @extends AbstractView
-   * @constructor
+   * @class cdf.components.filter.views.Root
+   * @amd cdf/components/filter/views/Root
+   * @extends cdf.components.filter.views.Abstract
+   * @classdesc Root View. The part of the filter that remains visible
+   *   when the filter is collapsed.
+   * @ignore
    */
-  return AbstractView.extend({
+  return AbstractView.extend(/** @lends cdf.components.filter.views.Root# */{
+    /**
+     * View type.
+     *
+     * @const
+     * @type {string}
+     */
     type: 'Root',
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.Views.Root',
+    /**
+     * Default templates.
+     *
+     * @type {object}
+     */
     template: {
       skeleton: templates['Root-skeleton'],
       overlay: templates['Root-overlay'],
@@ -41,6 +54,11 @@ define([
       selection: templates['Root-template'],
       footer: templates['Root-footer']
     },
+    /**
+     * Default event mappings.
+     *
+     * @type {object}
+     */
     events: {
       'click     .filter-root-header:eq(0)': 'onToggleCollapse',
       'click     .filter-root-selection:eq(0)': 'onSelection',

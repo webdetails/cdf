@@ -13,13 +13,16 @@
 
 define(['../../../lib/jquery'], function( $ ) {
 
-  /**
+  /*
    * Default settings
-   * @module TreeSelect
-   * @submodule defaults
-   * @main
    */
-  var privateDefaults = {
+  var privateDefaults = /** @lends cdf.components.filter.base.defaults */ {
+    /**
+     * Configuration of the log level.
+     *
+     * @type {string}
+     * @default
+     */
     loglevel: "log",
     pagination: {
       throttleTimeMilliseconds: 500
@@ -78,30 +81,46 @@ define(['../../../lib/jquery'], function( $ ) {
     }
   };
 
-  return $.extend( true, {}, privateDefaults, {
+  /**
+   * @class cdf.components.filter.base.defaults
+   * @amd cdf/components/filter/base/defaults
+   * @classdesc Filter component default values.
+   * @static
+   * @ignore
+   */
+  return $.extend(true, {}, privateDefaults, /** @lends cdf.components.filter.base.defaults */ {
 
     /**
-     * @property pagination
-     * @type Object
-     * @for defaults
+     * Configuration of the pagination.
+     *
+     * @type {object}
      */
     pagination: {
       pageSize: Infinity
     },
+    /**
+     * Configuration of the search.
+     *
+     * @type {object}
+     */
     search: {
       serverSide: false,
       matcher: undefined // function(entry, fragment)
     },
+    /**
+     * Configuration of the selection strategy.
+     *
+     * @type {object}
+     */
     selectionStrategy: {
       type: 'LimitedSelect',
       limit: 500
     },
 
     /**
-     * Configuration of the Root
-     * @property Root
-     * @type Object
-     * @for defaults
+     * Configuration of the Root.
+     *
+     * @type {object}
      */
     Root: {
       options: {
@@ -141,9 +160,9 @@ define(['../../../lib/jquery'], function( $ ) {
     },
 
     /**
-     * Configuration of the Group
-     * @property Group
-     * @type Object
+     * Configuration of the Group.
+     *
+     * @type {object}
      */
     Group: {
       options: {
@@ -167,9 +186,9 @@ define(['../../../lib/jquery'], function( $ ) {
     },
 
     /**
-     * Configuration of the Item
-     * @property Item
-     * @type Object
+     * Configuration of the Item.
+     *
+     * @type {object}
      */
     Item: {
       options: {

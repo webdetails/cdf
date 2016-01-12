@@ -12,39 +12,36 @@
  */
 
 /**
- * Logger module. Require as 'cdf/Logger'.
- *
- * @class Logger
- * @module Logger
+ * @class cdf.Logger
+ * @amd cdf/Logger
+ * @classdesc This is a static class used for logging messages in the console.
+ * @static
  */
-
 define(function() {
 
-  return {
-
+  return /** @lends cdf.Logger */ {
     /**
-     *  Property enumerating the various log levels
-     *  @property logLevels
-     *  @type Array
+     * The different log levels supported.
+     *
+     * @type {string[]}
+     * @default
      */
     loglevels: ['debug', 'log', 'info', 'warn', 'error', 'exception'],
-
-
     /**
-     *  Current log level. Assign a new value to this property to change the log level
-     *  @property logLevel
-     *  @type string
+     * Current log level. Assign a new value to this property to change the log level.
+     *
+     * @type {string}
+     * @default
      */
     loglevel: 'debug',
 
     /**
+     * Logs a message at the specified log level.
      *
-     * Logs a message at the specified log level
-     *
-     * @method log
-     * @param m Message to log
-     * @param type Log level. One of debug, info, warn, error or exception
-     * @param css CSS styling rules for the message to log
+     * @param {string|object} m           Message to log or an object containing information about an exception to log.
+     * @param {string}        [m.stack]   Stack trace of the exception to log.
+     * @param {string}        [type=info] Log level. One of debug, info, warn, error or exception.
+     * @param {string}        [css]       CSS styling rules for the message to log.
      */
     log: function(m, type, css) {    
       type = type || "info";
@@ -74,45 +71,47 @@ define(function() {
     },
 
     /**
-     * Logs a message at debug level
-     * @method debug
-     * @param m Message to log
+     * Logs a message at debug level.
+     * It calls the {@link cdf.Logger#log|log} method with the {@link cdf.Logger#loglevel|log level} debug.
+     *
+     * @param {string} m Message to log.
      */
     debug: function(m) {
       return this.log(m, "debug");
     },
-    /**
-     * Logs a message at info level
-     * @method info
-     * @param m Message to log
-     */
 
+    /**
+     * Logs a message at info level.
+     *
+     * @param {string} m Message to log.
+     */
     info: function(m) {
       return this.log(m, "info");
     },
 
     /**
-     * Logs a message at warn level
-     * @method warn
-     * @param m Message to log
+     * Logs a message at warn level.
+     *
+     * @param {string} m Message to log.
      */
     warn: function(m) {
       return this.log(m, "warn");
     },
 
     /**
-     * Logs a message at error level
-     * @method error
-     * @param m Message to log
+     * Logs a message at error level.
+     *
+     * @param {string} m Message to log.
      */
     error: function(m) {
       return this.log(m, "error");
     },
 
     /**
-     * Logs a message at exception level
-     * @method exception
-     * @param m Message to log
+     * Logs a message at exception level.
+     *
+     * @param {string|object} m         Message to log or an object containing information about the exception to log.
+     * @param {string} [m.stack] Stack trace of the exception to log.
      */
     exception: function(m) {
       return this.log(m, "exception");
