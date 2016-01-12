@@ -62,6 +62,7 @@
  *      });
  *
  * @module dash
+ * @ignore
  */
 define(["module"], function(module) {
   // dash plugin config
@@ -70,16 +71,17 @@ define(["module"], function(module) {
   return {
     version: '0.0.1',
 
-    /*
+    /**
      * Called when a CDE dashboard module needs to be loaded.
      *
-     * @param {string} dashPath the URL of the CDE dashboard to load
-     * @param {function} parentRequire a local "require" function providing some
-     *   utils and a way to load other modules
-     * @param {function} onLoad the function to call with the optional value
-     *   for the dashboard module, tells the loader that the plugin is done loading
-     * @param {Object} config the "global" configuration object, provides a way
-     *   for the optimizer/web app to pass configuration information to the plugin 
+     * @param {string} dashPath The URL of the CDE dashboard to load.
+     * @param {function} parentRequire A local "require" function providing some
+     *    utils and a way to load other modules.
+     * @param {function} onLoad The function to call with the optional value
+     *    for the dashboard module, tells the loader that the plugin is done loading.
+     * @param {object} config The "global" configuration object, provides a way
+     *    for the optimizer/web app to pass configuration information to the plugin.
+     * @ignore
      */
     load: function(dashPath, parentRequire, onLoad, config) {
       config = config || {};

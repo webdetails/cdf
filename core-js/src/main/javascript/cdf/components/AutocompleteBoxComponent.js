@@ -11,6 +11,20 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+/**
+ * The jQuery UI autocomplete plugin.
+ * @external jQueryUI
+ * @see {@link http://www.jquery.com/}
+ * @ignore
+ */
+
+/**
+ * The jQuery UI autocomplete plugin.
+ * @external jQueryUI.autocomplete
+ * @see {@link http://plugins.jquery.com/ui.autocomplete/}
+ * @ignore
+ */
+
 define([
   '../Logger',
   './UnmanagedComponent',
@@ -19,8 +33,16 @@ define([
   'css!./AutocompleteBoxComponent'
 ], function(Logger, UnmanagedComponent, _, $) {
 
-  return UnmanagedComponent.extend({
+  return UnmanagedComponent.extend(/** @lends cdf.components.AutocompleteBoxComponent# */{
 
+    /**
+     * Builds new autocompletebox instances.
+     *
+     * @constructs
+     * @amd cdf/components/AutocompleteBoxComponent
+     * @classdesc The AutocompleteBox component class.
+     * @ignore
+     */
     constructor: function() {
       this.base.apply(this, arguments);
       this.selectedValues = [];
@@ -29,9 +51,11 @@ define([
     result: [],
 
     /**
+     * Executes a query using a provided search text and if successful
+     * executes the provided callback function.
      *
-     * @method _queryServer
-     * @param searchString
+     * @param {string} searchString      A text to search for.
+     * @param {function} successCallback A success callback function.
      * @private
      */
     _queryServer: function(searchString, successCallback) {
@@ -62,9 +86,9 @@ define([
     },
 
     /**
+     * Gets the text box value.
      *
-     * @method _getTextBoxValue
-     * @return {*}
+     * @return {string} The text box value.
      * @private
      */
     _getTextBoxValue: function() {
@@ -72,9 +96,9 @@ define([
     },
 
     /**
+     * Gets the inner parameter name.
      *
-     * @method _getInnerParameterName
-     * @return {string}
+     * @return {string} The inner parameter name.
      * @private
      */
     _getInnerParameterName: function() {
@@ -82,8 +106,9 @@ define([
     },
 
     /**
+     * Executes {@link cdf.components.AutocompleteBoxComponent#_selectValue|_selectValue}
+     * for each value to be initially set as selected.
      *
-     * @method _setInitialValue
      * @private
      */
     _setInitialValue: function() {
@@ -102,8 +127,7 @@ define([
     },
 
     /**
-     *
-     * @method update
+     * Updates the component.
      */
     update: function() {
       // Allow the component to be silent
@@ -206,18 +230,19 @@ define([
     },
 
     /**
+     * Gets the component _value_ property value.
      *
-     * @method getValue
-     * @return {*}
+     * @return {*} The value of _value_.
      */
     getValue: function() {
       return this.value;
     },
 
     /**
-     *
-     * @method _getOptions
-     * @return {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|*|number), source: Function, focus: Function, open: Function, close: Function}}
+     * Gets the values of the component options.
+     * 
+     * @return {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|0), source: function, focus: function, open: function, close: function}}
+     *   The component options.
      * @private
      */
     _getOptions: function() {
@@ -253,9 +278,9 @@ define([
     },
 
     /**
+     * Marks a value in the list as selected according to a providade HTML element identifier.
      *
-     * @method _selectValue
-     * @param label
+     * @param {string} label The HTML element identifier.
      * @private
      */
     _selectValue: function(label) {
@@ -284,9 +309,12 @@ define([
     },
 
     /**
+     * Removes a value from the list according to a providade HTML element identifier.
+     * Executes {@link cdf.component.AutocompleteBoxComponent#processChange|processChange}
+     * if the _change_ parameter has a truthy value.
      *
-     * @method _removeValue
-     * @param id
+     * @param {string} label The HTML element identifier.
+     * @param {boolean|*} change Flag indicating if {@link cdf.component.AutocompleteBoxComponent#processChange|processChange should execute.
      * @private
      */
     _removeValue: function(id, change) {
@@ -297,6 +325,9 @@ define([
       }
     },
 
+    /**
+     * Updates the element list of the component and hides the list if no element is found.
+     */
     _filterData: function() {
       var menu = this.ph.find('.autocomplete-container .ui-autocomplete');
       var data = this.selectedValues || [];
@@ -322,10 +353,11 @@ define([
     },
 
     /**
-     *
-     * @method _search
-     * @param search
-     * @param callback
+     * Executes a query according to the provided _search_ parameter.
+     * If the query is successfull the _callback_ parameter is also executed.
+     * 
+     * @param {string}   search   The search text to be used in the query.
+     * @param {function} callback The success callback.
      * @private
      */
     _search: function(search, callback) {
@@ -345,14 +377,14 @@ define([
             list.push(value);
           }
         }
-        callback(list);
+        callback.ok(list);
       });
 
     },
 
     /**
+     * Closes the component UI and resets the input value.
      *
-     * @method _endSearch
      * @private
      */
     _endSearch: function() {
@@ -366,8 +398,8 @@ define([
     },
 
     /**
+     * Triggers a _change_ event using the {@link external:jQueryUI.autocomplete|jQuery.autocomplete} plugin.
      *
-     * @method _processAutoBoxChange
      * @private
      */
     _processAutoBoxChange: function() {

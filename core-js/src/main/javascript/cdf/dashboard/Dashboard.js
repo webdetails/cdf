@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * Module aggregating all the classes in the Dashboard hierarchy
- * @module Dashboard
- */
-
 define([
   '../lib/Base',
   '../Logger',
@@ -28,17 +23,18 @@ define([
   '../lib/shims'
 ], function(Base, Logger, RefreshEngine, _, Backbone, $, module) {
 
-  return Base.extend({
-
+  return Base.extend(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * A class representing a Dashboard. This class is abstract, so it should not be required or instantiated directly.
-     * Instead use one of its extending subclasses, {{#crossLink "Dashboard.Blueprint"}}Dashboard.Blueprint{{/crossLink}},
-     * {{#crossLink "Dashboard.Bootstrap"}}Dashboard.Bootstrap{{/crossLink}} or
-     * {{#crossLink "Dashboard.Clean"}}Dashboard.Clean{{/crossLink}}.
-     *
-     *
-     * @class Dashboard
-     * @constructor
+     * This class is abstract, so it should not be required or instantiated directly.
+     * Instead use one of its extending subclasses:
+     * {@link cdf.Blueprint|Blueprint},
+     * {@link cdf.Bootstrap|Bootstrap} or
+     * {@link cdf.Clean|Clean}.
+     * 
+     * @constructs
+     * @extends external:Base
+     * @extends external:Backbone.Events
+     * @classdesc Base abstract dashboard class.
      * @param {Object} options Object that can contain the context, storage and view.
      */
     constructor: function(options) {
@@ -91,10 +87,12 @@ define([
       this.refreshEngine = new RefreshEngine(this);
 
       /**
-       * Calls a function if it is available in the prototype
+       * Calls a function if it is available in the prototype.
        *
-       * @method _callIfAvailable
-       * @private
+       * @param {Function} func The function to execute.
+       * @param {String} module The name of the module that will be loaded.
+       * @inner
+       * @ignore
        */
       function _callIfAvailable(func, module) {
         if(typeof func == "function") {
@@ -106,10 +104,10 @@ define([
       }
 
       /**
-       * Initializes the cdf plugins
+       * Initializes the cdf plugins.
        *
-       * @method _configurePlugins
-       * @private
+       * @inner
+       * @ignore
        */
       function _configurePlugins() {
         var myself = this;
@@ -164,38 +162,97 @@ define([
       }
     },
 
-    /* globalContext determines if components and params are retrieved
-     * from the current window's object or from the Dashboards singleton
+    /**
+     * Determines if components and params are retrieved
+     * from the _window_ object or from the dashboard instance
+     *
+     * @type {boolean}
+     * @default
+     * 
+     * @deprecated
+     * @ignore
      */
     globalContext: false,
 
     // Holds the dashboard parameters if globalContext = false
 
-    //trying to retrieve context from the module configuration
+    /**
+     * Initial dashboard context value. It will either be an empty object
+     * or will be set according to the context property of the 
+     * dashboard AMD module configuration.
+     *
+     * @type {object}
+     * @ignore
+     */
     contextObj: module.config().context || {},
 
-    //trying to retrieve storage from the module configuration
+    /**
+     * Initial dashboard storage value. It will either be an empty object
+     * or will be set according to the storage property of the 
+     * dashboard AMD module configuration.
+     *
+     * @type {object}
+     * @ignore
+     */
     storageObj: module.config().storage || {},
 
-    //trying to retrieve view from the module configuration
+    /**
+     * Initial dashboard view value. It will either be an empty object
+     * or will be set according to the view property of the 
+     * dashboard AMD module configuration.
+     *
+     * @type {object}
+     * @ignore
+     */
     viewObj: module.config().view,
 
-    /*
+    /**
      * Legacy dashboards don't have priority, so we'll assign a very low priority
      * to them.
-     * */
-
+     *
+     * @type {number}
+     * @default
+     * @ignore
+     */
     legacyPriority: -1000,
 
-    /* Log lifecycle events? */
+    /**
+     * Flag indicating if the lifecycle events should be logged.
+     *
+     * @type {boolean}
+     * @default
+     * @ignore
+     */
     logLifecycle: true,
 
+    /**
+     * Array of arguments.
+     *
+     * @type {string[]}
+     * @deprecated
+     * @ignore
+     */
     args: [],
 
     //TODO: Review the monthNames usage in month selector component, impossible to localize!!!!
+    /**
+     * Array of month names.
+     *
+     * @type {string[]}
+     * @deprecated
+     * @ignore
+     */
     monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'],
 
+    /**
+     * Registers a callback function in the dashboard's events property.
+     * Creates the dashboard's events property if it's undefined.
+     *
+     * @param {string}   ev       The name of the event.
+     * @param {function} callback The callback function.
+     * @ignore
+     */
     registerEvent: function(ev, callback) {
       if(typeof this.events == 'undefined') {
         this.events = {};
@@ -203,8 +260,25 @@ define([
       this.events[ev] = callback;
     },
 
+    /**
+     * The dashboard's debug level.
+     *
+     * @type {numeric}
+     * @default
+     */
     debug: 1,
 
+    /**
+     * Sets the {@link cdf.dashboard.Dashboard#debug|debug} level.
+     * If the URL parameter _debug_ has value _true_ and the value of the URL parameter
+     * _debugLevel_ is a valid numric value it will set the debug level according to the latter.
+     * If an error occurs while reading the URL parameters, or _debug_ is not set to _true_, the debug level is set to 1.
+     * 
+     *
+     * @return {number} The new {@link cdf.dashboard.Dashboard#debug|debug} level value according to the _debugLevel_ URL parameter,
+     *                  1 if an error occurs while parsing the URL, if _debugLevel_ has an invalid numeric value
+     *                  or if the _debug_ parameter is not set to _true_.
+     */
     syncDebugLevel: function() {
       var level = 1; // log errors
       try {
@@ -221,31 +295,30 @@ define([
     },
 
     /**
-     * Sets the globalContext value
+     * Sets the globalContext value.
      *
-     * @method setGlobalContext
-     * @param globalContext boolean
+     * @param {boolean} globalContext Flag indicating if global context is to be activated.
+     * @deprecated
+     * @ignore
      */
     setGlobalContext: function(globalContext) {
       this.globalContext = globalContext;
     },
 
     /**
-     * Gets the current webapp path
+     * Gets the current webapp path.
      *
-     * @method getWebAppPath
-     * @return the current webapp path (/pentaho for instance)
+     * @return {string} The current webapp path (e.g. "/pentaho").
      */
     getWebAppPath: function() {
       return this.webAppPath;
     },
 
     /**
-     * Gets the dashboard's wcdfSettings
-     * This method is meant to be overriden
+     * Gets the dashboard's wcdfSettings.
+     * This method is meant to be overriden.
      *
-     * @method getWcdfSettings
-     * @return the dashboard's wcdfSettings
+     * @return {Object} The dashboard's wcdf settings object.
      */
     getWcdfSettings: function() {
       Logger.info("getWcdfSettings was not overriden, returning empty object");
@@ -253,14 +326,13 @@ define([
     },
 
     /**
-     * Normalizes an htmlObject id
+     * Normalizes an HTML element identifier.
      *
-     * This method is meant to be used when we need to directly manipulate an htmlObject.
-     * It will be overriden returning the proper id in embedded scenarios.
+     * This method is meant to be used when we need to directly manipulate an HTML element.
+     * It will be overriden returning the proper identifier in embedded scenarios.
      *
-     * @method normalizeId
-     * @param {String} id the htmlObject id to normalize
-     * @return {String} the normalized id
+     * @param {string} id The HTML element identifier to normalize.
+     * @return {string} The normalized identifier.
      */
     normalizeId: function(id) {
       return id;

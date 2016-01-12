@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule Extensions
- */
-
 define([
   '../../../lib/jquery',
   '../../../lib/mustache',

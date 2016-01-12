@@ -11,25 +11,34 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule SelectionStrategies
- */
 define([
   'amd!../../../lib/underscore',
   './AbstractSelect'
 ], function (_, AbstractSelect) {
 
   /**
-   * Multiple Selection
-   *  - any number of items can be selected
-   #
-   * @class MultiSelect
-   * @extends AbstractSelect
-   * @constructor
+   * @class cdf.components.filter.strategies.MultiSelect
+   * @amd cdf/components/filter/strategies/MultiSelect
+   * @extends cdf.components.filter.strategies.AbstractSelect
+   * @classdesc Multiple selection. Any number of items can be selected.
+   * @ignore
    */
-  return AbstractSelect.extend({
+  return AbstractSelect.extend(/** @lends cdf.components.filter.strategies.MultiSelect# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.SelectionStrategies.MultiSelect',
+
+    /**
+     * Sets a new selection state.
+     *
+     * @param {string} newState The new selection state.
+     * @param {object} model    The target model.
+     * @return {string} The new selection state.
+     */
     setSelection: function (newState, model) {
       model.setAndUpdateSelection(newState);
       return newState;

@@ -80,6 +80,7 @@
  *      });
  *
  * @module amd
+ * @ignore
  */
 define(["module", "text"], function(module, text) {
   
@@ -114,7 +115,7 @@ define(["module", "text"], function(module, text) {
    
   // == COMPILER ==
   
-  /*
+  /**
    * Compiles a non-amd module given its non-amd code and its compilation configuration options.
    * @param {string} jsText The non-amd JavaScript code.
    * @param {object} moduleConfig The non-amd configuration of the module being compiled.
@@ -132,6 +133,7 @@ define(["module", "text"], function(module, text) {
    * @param {Object.<string, string>} [moduleConfig.deps] A map of dependencies of the module, 
    *    having as keys the module's define function argument names and as values the correposding module ids.
    * @param {boolean} [isBuild=false] Whether running in build mode, under r.js.
+   * @ignore
    */
   function compileNonAmd(jsText, moduleConfig, isBuild) {
     var moduleUrl = moduleConfig.url, // required

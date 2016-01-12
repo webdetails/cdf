@@ -19,20 +19,21 @@ define([
   '../lib/CCC/cdo',
   '../lib/cdf.jquery.i18n'
 ], function(Logger, Dashboard, DashboardExt, moment, cdo, $) {
+
   /**
-   * A module representing an extension to the Dashboard module for i18n.
-   *
-   * @module Dashboard.i18n
+   * @class cdf.dashboard.Dashboard.i18n
+   * @amd cdf/dashboard/Dashboard.i18n
+   * @classdesc A class representing an extension to the Dashboard class for handling
+   *            internationalization and localization.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
      * Method used by the Dashboard constructor for i18n initialization
      * Reference to current language code . Used in every place where jquery
      * plugins used in CDF has native internationalization support (ex: Datepicker).
      *
-     * @method _initI18n
-     * @for Dashboard
      * @private
      */
     _initI18n: function() {
@@ -84,10 +85,8 @@ define([
     /**
      * Sets the current locale and i18n options.
      *
-     * @method setI18nSupport
-     * @for Dashboard
-     * @param lc Locale Code
-     * @param i18nRef Additional i18 options
+     * @param {string} lc Locale code.
+     * @param {Object} i18nRef Additional i18 options.
      */
     setI18nSupport: function(lc, i18nRef) {
       this.i18nCurrentLanguageCode = lc;
@@ -95,10 +94,10 @@ define([
     },
 
     /**
-     * Gets the path from which to load messages.properties
+     * Gets the path from which to load the locale-specific properties files.
      *
-     * @method getMessagesPath
-     * @return {string}
+     * @return {string} The path to the dashboard's locale-specific text files.
+     * @abstract
      */
     getMessagesPath: function() {
       // meant to be overriden, or return undefined

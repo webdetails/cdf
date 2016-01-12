@@ -11,16 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * OlapUtils is a collection of functions allowing client side CDF to issue MDX queries.
- * This functionality is completely deprecated now and only used by the MdxQueryGroupComponent,
- * which is deprecated as well.
- *
- * @class OlapUtils
- * @module OlapUtils
- * @deprecated
- */
-
 define([
     './Dashboard',
     './dashboard/Utf8Encoder',
@@ -28,6 +18,15 @@ define([
     'css!./OlapUtils.css'
 ], function(Dashboard, Utf8Encoder, Utils) {
 
+    /**
+     * @class cdf.OlapUtils
+     * @amd cdf/OlapUtils
+     * @classdesc OlapUtils is a collection of functions allowing client side CDF to
+     *            issue MDX queries. This functionality is completely deprecated now and
+     *            only used by the MdxQueryGroupComponent, which is deprecated as well.
+     *
+     * @deprecated
+     */
     var OlapUtils = {
 	    mdxGroups: {},
     	evolutionType: "Week"
@@ -75,15 +74,16 @@ define([
 
 
     OlapUtils.fireMdxGroupAction = function(mdxQueryGroup,idx,param1, param2, param3){
-        /*         http://jira.pentaho.com/browse/BISERVER-3542	   *
-         *								   *
-         * Prior to Pentaho 3.5, this function received only 3 parameters: *
-         *(query,idx,PARAM). 						   *
-         * In Pentaho 3.5, the behavior	of the x/y and TimeSeries Charts   *
-         *changed, and this function passed to receive 5 parameters:
-         *(query,idx,chartDefinition,PARAM,SERIES).			   *
-         * When chartType == AreaChart, the value used to drill through is *
-         *SERIES, otherwise it's PARAM.					   */
+        /* http://jira.pentaho.com/browse/BISERVER-3542
+         *
+         * Prior to Pentaho 3.5, this function received only 3 parameters:
+         *  (query, idx, PARAM). 						   *
+         * In Pentaho 3.5, the behavior	of the x/y and TimeSeries Charts
+         * changed, and this function passed to receive 5 parameters:
+         *  (query, idx, chartDefinition, PARAM,SERIES).
+         * When chartType == AreaChart, the value used to drill through is
+         * SERIES, otherwise it's PARAM.
+         */
 
         if(param2 != undefined && param3 != undefined){
           cType = Utils.ev(param1.chartType);

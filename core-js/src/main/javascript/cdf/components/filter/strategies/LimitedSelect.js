@@ -11,30 +11,39 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule SelectionStrategies
- */
 define([
   'amd!../../../lib/underscore',
   '../models/SelectionTree',
   './MultiSelect'
 ], function (_, SelectionTree, MultiSelect) {
 
-  /**
-   * Limited (Multiple) Selection
-   *  - any number of items can be selected, up to a limit
-   #
-   * @class LimitedSelect
-   * @extends AbstractSelect
-   * @constructor
-   * @param {Object} options
-   */
-  return MultiSelect.extend({
+  return MultiSelect.extend(/** @lends cdf.components.filter.strategies.LimitedSelect# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.SelectionStrategies.LimitedSelect',
+    /**
+     * @constructs
+     * @amd cdf/components/filter/strategies/LimitedSelect
+     * @extends cdf.components.filter.strategies.MultiSelect
+     * @classdesc Limited (Multiple) Selection allows selecting s limited number of items.
+     * @param {object} options Selection options.
+     * @param {object} options.limit=Infinity The selection limit option.
+     * @ignore
+     */
     constructor: function (options) {
       return this.selectionLimit = options.limit || Infinity;
     },
+    /**
+     * Sets the new selection state to the provided model.
+     *
+     * @param {string} newState The new state to set.
+     * @param {object} model The target model.
+     * @return {string} The new selection state.
+     */
     setSelection: function (newState, model) {
       var numberOfUnselectedItems, selectedItems;
       var allow = true;

@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
- define([
+define([
   './Dashboard',
   '../Logger',
   '../lib/jquery',
@@ -19,17 +19,16 @@
 ], function(Dashboard, Logger, $, DashboardStorageExt) {
 
   /**
-   * A module representing an extension to the Dashboard module for storage.
-   *
-   * @module Dashboard.storage
+   * @class cdf.dashboard.Dashboard.storage
+   * @amd cdf/dashboard/Dashboard.storage
+   * @classdesc A class representing an extension to the Dashboard class for storage.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
      * Method used by the Dashboard constructor for storage initialization.
      *
-     * @method _initStorage
-     * @for Dashboard
      * @private
      */
     _initStorage: function() {
@@ -42,9 +41,6 @@
 
     /**
      * Requests the storage object and stores it in storage object.
-     *
-     * @method loadStorage
-     * @for Dashboard
      */
     loadStorage: function() {
       var myself = this;
@@ -76,9 +72,6 @@
 
     /**
      * Saves the storage in the server, based on the storage object.
-     *
-     * @method saveStorage
-     * @for Dashboard
      */
     saveStorage: function() {
       // Don't do anything for anonymousUser
@@ -111,9 +104,6 @@
 
     /**
      * Cleans the storage object in the client and places a request to clean it in the server.
-     *
-     * @method cleanStorage
-     * @for Dashboard
      */
     cleanStorage: function() {
       this.storage = {};

@@ -11,10 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule SelectionStrategies
- */
 define([
   '../../../lib/jquery',
   'amd!../../../lib/underscore',
@@ -23,26 +19,34 @@ define([
   '../models/SelectionTree'
 ], function ($, _, Base, Logger, SelectionTree) {
 
-  /**
-   * Base class for handling the selection logic
-   *  - what happens when I click on a particular item
-   *  - what rules should be followed
-   * @class AbstractSelect
-   * @extends Base
-   * @uses BaseFilter.Logger
-   * @constructor
-   */
-
-  return Base.extend(Logger).extend({
+  return  Base.extend(Logger).extend(/** @lends cdf.components.filter.strategies.AbstractSelect# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.SelectionStrategies.AbstractSelect',
+
+    /**
+     * @constructs
+     * @extends external:Base
+     * @extends cdf.Logger
+     * @amd cdf/components/filter/strategies/AbstractSelect
+     * @classdesc Base class for handling the selection logic, for instance:
+     *   <ul>
+     *     <li> what happens when I click on a particular item </li>
+     *     <li> what rules should be followed </li>
+     *   </ul>
+     * @ignore
+     */
     constructor: function (options) {
       return this.isLogicGlobal = true;
     },
 
     /**
-     * Calculates the new state of an item, after the user clicked on it
-     * @method getNewState
-     * @public
+     * Calculates the new state of an item, after the user clicked on it.
+     *
      * @param  {SelectionStates} oldState The previouse selection state.
      * @return {SelectionStates} Returns the next selection state.
      */
@@ -58,9 +62,8 @@ define([
     },
 
     /**
-     * Infers the state of a node, based on the current state of its children
-     * @method inferSelectionFromChildren
-     * @private
+     * Infers the state of a node, based on the current state of its children.
+     *
      * @param {SelectionStates[]} childrenStates an array containing the state of each child
      * @return {SelectionStates} Returns the inferred state
      */
@@ -81,23 +84,20 @@ define([
     },
 
     /**
-     * Sets a node in the selection tree to a particular state
-     * @method setSelection
-     * @protected
+     * Sets a node in the selection tree to a particular state.
+     *
      * @param {SelectionStates} newState
-     * @param {Object} model
-     * @chainable
+     * @param {object} model
      */
     setSelection: function (newState, model) {
       throw new Error("NotImplemented");
     },
 
     /**
-     * Perform operations on the model, associated with the user clicking on an item
-     * @method changeSelection
-     * @public
-     * @param {Object} model
-     * @chainable
+     * Perform operations on the model, associated with the user clicking on an item.
+     *
+     * @param {object} model
+     * @return {this}
      */
     changeSelection: function (model) {
       var d = $.now();
@@ -111,11 +111,10 @@ define([
     },
 
     /**
-     * Perform operations on the model, associated with commiting the current selection
-     * @method applySelection
-     * @public
-     * @param {Object} model
-     * @chainable
+     * Perform operations on the model, associated with commiting the current selection.
+     *
+     * @param {object} model
+     * @return {this}
      */
     applySelection: function (model) {
       model.updateSelectedItems();
@@ -124,12 +123,11 @@ define([
     },
 
     /**
-     * Default getSelectedItems behaviour is do defer to the model's one
-     * @method getSelectedItems
-     * @public
-     * @param {Object} model
-     * @param {Object} field
-     * @chainable
+     * Gets the selected items. Default behaviour is do defer to the model's one.
+     *
+     * @param {object} model The target model.
+     * @param {object} field
+     * @return {*} The return value of executing the model object _getSelectedItems_ function.
      */
     getSelectedItems: function (model, field) {
       return model.getSelectedItems(field);

@@ -11,6 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+// Module aggregating all the classes in the dashboard hierarchy.
+
 define([
   './dashboard/Dashboard',
   './dashboard/Dashboard.context',

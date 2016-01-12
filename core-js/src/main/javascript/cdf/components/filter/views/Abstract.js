@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule Views
- */
-
 define([
   'amd!../../../lib/underscore',
   '../../../lib/mustache',
@@ -27,13 +22,14 @@ define([
 ], function (_, Mustache, BaseView, Logger, SelectionTree, $) {
 
   /**
-   * Abstract base class for all Views
-   * @class Abstract
-   * @constructor
+   * @class cdf.components.filter.views.Abstract
+   * @amd cdf/components/filter/views/Abstract
+   * @classdesc Abstract base class for all Views
    * @extends BaseView
-   * @uses BaseFilter.Logger
+   * @extends BaseFilter.Logger
+   * @ignore
    */
-  return BaseView.extend(Logger).extend({
+  return BaseView.extend(Logger).extend(/** @lends cdf.components.filter.views.Abstract# */{
     initialize: function (options) {
       this.configuration = options.configuration;
       this.loglevel = this.configuration.loglevel;
@@ -121,9 +117,6 @@ define([
 
     /**
      * Fully renders the view.
-     *
-     * @method render
-     * @chainable
      */
     render: function () {
       var viewModel = this.getViewModel();

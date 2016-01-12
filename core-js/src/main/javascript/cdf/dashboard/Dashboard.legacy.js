@@ -11,13 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * A module representing an extension to the Dashboard module for handling legacy calls.
- * The methods here handle calling xactions and other legacy related actions.
- * All the methods in this module are deprecated.
- *
- * @module Dashboard.legacy
- */
 define([
   '../queries/CdaQuery.ext',
   '../components/XactionComponent.ext',
@@ -28,21 +21,28 @@ define([
   'css!./Dashboard.legacy.css'
 ], function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
-  Dashboard.implement({
+  /**
+   * @class cdf.dashboard.Dashboard.legacy
+   * @amd cdf/dashboard/Dashboard.legacy
+   * @classdesc A class representing an extension to the Dashboard class for handling legacy calls.
+   *            The methods here handle calling xactions and other legacy related actions.
+   *            All the methods in this class are deprecated.
+   * @deprecated
+   * @ignore
+   */
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
      * Calls a xaction.
      *
-     * @method callPentahoAction
-     * @param obj Dom object where the response from the xaction should be written
-     * @param solution Solution folder
-     * @param path Path to the xaction - can be the full path, in which case you don't need the solution and action
-     * @param action xaction name
-     * @param parameters Parameter object to send to the xaction
-     * @param callback Callback function to call when the xaction responds
-     * @return {*} The xaction result
+     * @param {Object} obj        DOM object where the response from the xaction should be written.
+     * @param {string} solution   The solution folder.
+     * @param {string} path       Path to the xaction. Can be the full path, in which case you don't need the solution and action.
+     * @param {string} action     The xaction name.
+     * @param {Object} parameters Parameter object to send to the xaction.
+     * @param {function} callback Callback function to call when the xaction responds.
+     * @return {*} The xaction result.
      *
-     * @for Dashboard
      * @deprecated
      */
     callPentahoAction: function(obj, solution, path, action, parameters, callback) {
@@ -62,13 +62,11 @@ define([
     /**
      * Calls an arbitrary URL expecting the result content type to be xml.
      *
-     * @method urlAction
-     * @param url Url to call
-     * @param params Parameters object
-     * @param func Callback function
-     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null
+     * @param {string} url    The URL to call.
+     * @param {Object} params The parameters object.
+     * @param {function} func Callback function.
+     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
      *
-     * @for Dashboard
      * @deprecated
      */
     urlAction: function(url, params, func) {
@@ -78,14 +76,12 @@ define([
     /**
      * Executes an AJAX request
      *
-     * @method executeAjax
-     * @param returnType expected return type
-     * @param url Url to call
-     * @param params Parameters object
-     * @param func Callback function
-     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null
+     * @param {string}   returnType The expected return type.
+     * @param {string}   url        The URL to call.
+     * @param {Object}   params     The parameters object.
+     * @param {function} func       Callback function.
+     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
      *
-     * @for Dashboard
      * @deprecated
      */
     executeAjax: function(returnType, url, params, func) {
@@ -141,15 +137,13 @@ define([
     /**
      * Another way to call an xaction.
      *
-     * @method pentahoAction
-     * @param solution Solution folder
-     * @param path Path to the xaction - can be the full path, in which case you don't need the solution and action
-     * @param action xaction name
-     * @param params Parameter object to send to the xaction
-     * @param func Callback function to call when the xaction responds
-     * @return {*} The xaction result
+     * @param {string}   solution Solution folder.
+     * @param {string}   path     Path to the xaction. Can be the full path, in which case you don't need the solution and action.
+     * @param {string}   action   The xaction name.
+     * @param {Object}   params   Parameter object to send to the xaction.
+     * @param {function} func     Callback function to call when the xaction responds.
+     * @return {*} The xaction result.
      *
-     * @for Dashboard
      * @deprecated
      */
     pentahoAction: function(solution, path, action, params, func) {
@@ -159,17 +153,15 @@ define([
     /**
      * Calls an xaction.
      *
-     * @method pentahoServiceAction
-     * @param serviceMethod Dom object where the response from the xaction should be written
-     * @param returntype Expected return type of the response
-     * @param solution Solution folder
-     * @param path Path to the xaction - can be the full path, in which case you don't need the solution and action
-     * @param action xaction name
-     * @param params Parameter object to send to the xaction
-     * @param func Callback function to call when the xaction responds
-     * @return {*} The xaction result
+     * @param {string}   serviceMethod Dom object where the response from the xaction should be written.
+     * @param {string}   returntype    Expected return type of the response.
+     * @param {string}   solution      Solution folder.
+     * @param {string}   path          Path to the xaction. Can be the full path, in which case you don't need the solution and action
+     * @param {string}   action        The xaction name.
+     * @param {Object}   params        Parameter object to send to the xaction.
+     * @param {function} func          Callback function to call when the xaction responds.
+     * @return {*} The xaction result.
      *
-     * @for Dashboard
      * @deprecated
      */
     pentahoServiceAction: function(serviceMethod, returntype, solution, path, action, params, func) {
@@ -184,16 +176,35 @@ define([
       });
       return this.executeAjax(returntype, url, arr, func);
     },
-    
+
+    /**
+     * Legacy identifier of the HTML div element used for showing errors.
+     *
+     * @type {string}
+     * @default
+     *
+     * @deprecated
+     */
     CDF_ERROR_DIV: 'cdfErrorDiv',
-    
+
+    /**
+     * Creates an empty HTML div element, with identifier
+     * {@link cdf.dashboard.Dashboard#CDF_ERROR_DIV|CDF_ERROR_DIV} for showing error messages.
+     *
+     * @deprecated
+     */
     createAndCleanErrorDiv: function() {
       if($("#" + this.CDF_ERROR_DIV).length == 0) {
         $("body").append("<div id='" + this.CDF_ERROR_DIV + "'></div>");
       }
       $("#" + this.CDF_ERROR_DIV).empty();
     },
-    
+
+    /**
+     * Creates an empty HTML div element for showing error messages.
+     *
+     * @deprecated
+     */
     showErrorTooltip: function() {
       $(function() {
         if($.tooltip) {
@@ -210,13 +221,11 @@ define([
     /**
      * Parses the xaction result.
      *
-     * @method parseXActionResult
-     * @param obj DOM object where the response will be written to
-     * @param html HTML string containing the xaction result
-     *
-     * @for Dashboard
-     * @deprecated
      * @private
+     * @param {Object} obj  DOM object where the response will be written to.
+     * @param {string} html HTML string containing the xaction result.
+     *
+     * @deprecated
      */
     parseXActionResult: function(obj, html) {
     
@@ -241,7 +250,7 @@ define([
       //<img src='"+ ERROR_IMAGE + "'>
       // TODO errorDetails in title: is this right?
       var out = "<table class='errorMessageTable' border='0'><tr><td class='errorIcon'></td><td><span class='cdf_error' title=\""
-        + errorDetails.join('<br/>').replace(/"/g,"'") + "\" >" + errorMessage + " </span></td></tr></table/>";
+        + errorDetails.join('<br/>').replace(/"/g,"'") + "\" >" + errorMessage + " </span></td></tr></table>";
     
       // if this is a hidden component, we'll place this in the error div
       if(obj.visible == false) {
@@ -256,11 +265,9 @@ define([
     /**
      * Sets a setting in the server.
      *
-     * @method setSettingsValue
-     * @param name Name of the setting
-     * @param object Value for the setting
+     * @param {string} name   Name of the setting.
+     * @param {Object} object Value for the setting.
      *
-     * @for Dashboard
      * @deprecated
      */
     setSettingsValue: function(name, object) {
@@ -276,11 +283,9 @@ define([
     /**
      * Gets a setting value from the server.
      *
-     * @method getSettingsValue
-     * @param key Key to the setting
-     * @param value Callback
+     * @param {string}   key   Key to the setting.
+     * @param {function} value Callback function.
      *
-     * @for Dashboard
      * @deprecated
      */
     getSettingsValue: function(key, value) {
@@ -300,15 +305,13 @@ define([
     },
 
     /**
-     * Fetches data from the server according to a ChartDefinition object.
-     * This method is deprecated. {{#crossLink "Query"}}Query{{/crossLink}} object should be used instead.
+     * Fetches data from the server according to a Chart Definition object.
+     * This method is deprecated, a {@link cdf.dashboard.Query|Query} instance should be used instead.
      *
-     * @method fetchData
-     * @param cd Chart Definition object
-     * @param params Parameter object
-     * @param callback Callback to be called with results
+     * @param {Object}   cd       Chart definition object.
+     * @param {Object}   params   Parameter object.
+     * @param {function} callback Callback to be called with results.
      *
-     * @for Dashboard
      * @deprecated
      */
     fetchData: function(cd, params, callback) {

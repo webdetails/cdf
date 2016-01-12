@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @module BaseFilter
- * @submodule DataHandlers
- */
-
 define([
   '../../../lib/jquery',
   'amd!../../../lib/underscore',
@@ -70,25 +65,29 @@ define([
   };
 
   /**
-   * Import data from multiple sources, populate the model
-   * @class Input
-   * @uses BaseFilter.Logger
-   * @extends BaseModel
-   * @constructor
-   * @param {Object} options
+   * @class cdf.components.filter.data-handlers.InputDataHandler
+   * @amd cdf/components/filter/data-handlers/InputDataHandler
+   * @extends cdf.components.filter.baseevents.baseeventsModel
+   * @classdesc Import data from multiple sources, populate the model.
+   * @ignore
    */
-  return BaseModel.extend(Logger).extend({
+  return BaseModel.extend(Logger).extend(/** @lends cdf.components.filter.data-handlers.InputDataHandler# */{
+    /**
+     * Class identifier.
+     *
+     * @const
+     * @type {string}
+     */
     ID: 'BaseFilter.DataHandlers.Input',
     getModel: function() {
       return this.get('model');
     },
 
     /**
-     * Import data into the MVC model, eventually inferring the data format
-     * @method updateModel
-     * @param {CDAJson | Array} whatever
-     * @chainable
-     * @public
+     * Import data into the MVC model, eventually inferring the data format.
+     *
+     * @param {CDAJson|Array} whatever
+     * @return {this}
      */
     updateModel: function(whatever) {
       if (_.isArray(whatever)) {
@@ -164,11 +163,10 @@ define([
     },
 
     /**
-     * Matches the items against a list and marks the matches as selected
-     * @method setValue
-     * @param {Array} selectedItems Arrays containing the ids of the selected items
-     * @chainable
-     * @public
+     * Matches the items against a list and marks the matches as selected.
+     *
+     * @param {Array} selectedItems Array containing the ids of the selected items.
+     * @return {this}
      */
     setValue: function(selectedItems) {
       this.get('model').setSelectedItems(selectedItems);

@@ -11,16 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([
-  './Root',
-  './Group',
-  './Item'
-], function (Root, Group, Item) {
-
-  return {
-    Root: Root,
-    Group: Group,
-    Item: Item
-  };
-
-});
+/**
+ * The cdf.dashboard namespace.
+ *
+ * @namespace cdf.dashboard
+ */

@@ -12,12 +12,18 @@
  */
 
 define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent, $) {
-  return SelectBaseComponent.extend({
 
+  /**
+   * @class cdf.components.SelectMultiComponent
+   * @amd cdf/components/SelectMultiComponent
+   * @extends cdf.components.SelectBaseComponent
+   * @classdesc Multi select component. Allows selecting multiple items.
+   * @ignore
+   */
+  return SelectBaseComponent.extend(/** @lends cdf.components.SelectMultiComponent# */{
     /**
      * Gets the values selected of the select tag.
      *
-     * @method getValue
      * @return {array|*} an empty array or the values selected
      */
     getValue : function() {
@@ -30,23 +36,19 @@ define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent,
      * Obtains the normalized and defaulted value of
      * the {@link #isMultiple} option.
      *
-     * @method _allowMultipleValues
-     * @override
+     * @return {boolean} _true_ if multiple values are allowed, _false_ otherwise.
      * @private
-     * @return {boolean}
      */
     _allowMultipleValues: function() {
       return this.isMultiple == null || !!this.isMultiple;
     },
 
     /**
-     * When the size option is unspecified,
-     * and multiple values are allowed,
-     * returns the number of items in the
-     * provided possible values list.
+     * When the size option is unspecified, and multiple values are allowed,
+     * returns the number of items in the provided possible values list.
      *
-     * @method _getListSize
-     * @override
+     * @param {object[]} values The values list.
+     * @return {number} The values list size.
      * @private
      */
     _getListSize: function(values) {

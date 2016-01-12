@@ -12,15 +12,13 @@
  */
 
 /**
- * Module aggregating all the classes in the Dashboard hierarchy
- * @module Dashboard
- */
-
-/**
- * Represents a blueprint dashboard. It's a specialization of the base abstract Dashboard class.
- * Require as cdf/Dashboard.Blueprint
- *
- * Usage example:
+ * @class cdf.Blueprint
+ * @amd cdf/Dashboard.Blueprint
+ * @classdesc Represents a {@link http://http://blueprintcss.org|blueprint}
+ *            dashboard aggregating all the classes in the Dashboard
+ *            hierarchy. It's a specialization of the base abstract
+ *            {@link cdf.dashboard.Dashboard|Dashboard} class.
+ * @example
  *
  *      require(['cdf/Dashboard.Blueprint', 'cdf/components/ButtonComponent'],
  *        function(Dashboard, ButtonComponent) {
@@ -46,11 +44,7 @@
  *          }));
  *          dashboard.init();
  *      });
- *
- * @class Dashboard.Blueprint
- * @extends Dashboard
  */
-
 define([
   './Dashboard',
   'css!./lib/blueprint/screen'

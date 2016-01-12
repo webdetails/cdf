@@ -20,18 +20,17 @@ define([
 ], function(Dashboard, Logger, _, UnmanagedComponent, $) {
 
   /**
-   * A module representing an extension to the Dashboard module for lifecycle.
-   *
-   * @module Dashboard.lifecycle
+   * @class cdf.dashboard.Dashboard.lifecycle
+   * @amd cdf/dashboard/Dashboard.lifecycle
+   * @classdesc A class representing an extension to the Dashboard class for lifecycle.
+   * @ignore
    */
-  Dashboard.implement({
+  Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Inits the lifecycle module.
+     * Inits the lifecycle.
      *
-     * @method _initLifecycle
      * @private
-     * @for Dashboard
      */
     _initLifecycle: function() {
       // Init Counter, for subdashboards
@@ -48,9 +47,6 @@ define([
 
     /**
      * Resets the running calls counter and hides the progress indicator.
-     *
-     * @method resetRunningCalls
-     * @for Dashboard
      */
     resetRunningCalls: function() {
       this.runningCalls = 0;
@@ -63,9 +59,6 @@ define([
      * Returns the number of running calls.
      *
      * @return {number} Number of actual running calls to the server
-     *
-     * @method getRunningCalls
-     * @for Dashboard
      */
     getRunningCalls: function() {
       return this.runningCalls;
@@ -73,9 +66,6 @@ define([
 
     /**
      * Increments the running calls counter.
-     *
-     * @method incrementRunningCalls
-     * @for Dashboard
      */
     incrementRunningCalls: function() {
       this.runningCalls++;
@@ -85,9 +75,6 @@ define([
 
     /**
      * Decrements the running calls counter. If the counter reaches 0, hides the progress indicator.
-     *
-     * @method decrementRunningCalls
-     * @for Dashboard
      */
     decrementRunningCalls: function() {
       this.runningCalls--;
@@ -103,9 +90,7 @@ define([
     /**
      * Init function for the dashboard. Calling this method will trigger the dashboard execution and render.
      *
-     * @method init
-     * @param components - Components to be added to the dashboard
-     * @for Dashboard
+     * @param {Object[]} components List of components to be added to the dashboard.
      */
     init: function(components) {
       var myself = this;
@@ -153,10 +138,9 @@ define([
     /**
      * Part of the initialization procedure. This supports some deprecated functionality.
      *
-     * @method _initEngine
-     * @for Dashboard
-     * @param initInstance
      * @private
+     * @param {string} initInstance A string identifying the instance.
+     *
      * @deprecated
      */
     _initEngine: function(initInstance) {
@@ -249,10 +233,8 @@ define([
     /**
      * Handles the postInit section of the dashboard initialization.
      *
-     * @method _handlePostInit
-     * @param initInstance
      * @private
-     * @for Dashboard
+     * @param {string} initInstance A string identifying the instance.
      */
     _handlePostInit: function(initInstance) {
       var myself = this;
@@ -337,11 +319,8 @@ define([
     /**
      * Update algorithm for a managed component. Calls preExecution, update and postExecution.
      *
-     * @method updateLifecycle
-     * @param object Component to update
-     *
-     * @for Dashboard
      * @private
+     * @param {Object} object The component to update.
      */
     updateLifecycle: function(object) {
       var silent = object.lifecycle ? !!object.lifecycle.silent : false;
@@ -416,34 +395,31 @@ define([
     /**
      * Update components by priority. Expects as parameter an object where the keys
      * are the priorities, and the values are arrays of components that should be
-     * updated at that priority level:
+     * updated at that priority level:<p>
      *
-     *  {
-     *    0: [c1,c2],
-     *    2: [c3],
-     *    10: [c4]
-     *  }
+     *  {<p>
+     *    0: [c1,c2],<p>
+     *    2: [c3],<p>
+     *    10: [c4]<p>
+     *  }<p>
      *
      * Alternatively, you can pass an array of components, `[c1, c2, c3]`, in which
      * case the priority-keyed object will be created internally from the priority
-     * values the components declare for themselves.
+     * values the components declare for themselves.<p>
      *
      * Note that even though `updateAll` expects `components` to have numerical
      * keys, and that it does work if you pass it an array, `components` should be
      * an object, rather than an array, so as to allow negative keys (and so that
      * we can use it as a sparse array of sorts).
      *
-     * @method updateAll
-     * @param components Components to update
-     *
-     * @for Dashboard
      * @private
+     * @param {Object[]} components The list of components to update
      */
     updateAll: function(components) {
       /*
-       * Add all components in priority list 'source' into priority list 'target'
+       * Add all components in priority list 'source' into priority list 'target'.
        */
-      var _mergePriorityLists = function(target,source) {
+      var _mergePriorityLists = function(target, source) {
         if(!source) {
           return;
         }
@@ -542,13 +518,10 @@ define([
     /**
      * Adds a component to the "to be updated" queue and starts a timer.
      * If the timer finishes before this method is called again, the
-     * {{#crossLink "Dashboard/updateAll:method"}}updateAll{{/crossLink}} method is called
+     * {@link cdf.dashboard.Dashboard#updateAll|updateAll} method is called
      * updating all the components in the queue.
      *
-     * @method update
-     * @param component Component to update
-     *
-     * @for Dashboard
+     * @param {Object} component The component to update.
      */
     update: function(component) {
       /*
@@ -579,10 +552,7 @@ define([
     /**
      * Updates a specific component.
      *
-     * @method updateComponent
-     * @param object component to update
-     *
-     * @for Dashboard
+     * @param {Object} object The component to update.
      */
     updateComponent: function(object) {
       if((Date.now ? Date.now() : new Date().getTime()) - this.lastServerResponse > this.serverCheckResponseTimeout) {
@@ -607,11 +577,9 @@ define([
      * Given a list of component priority tiers, returns the highest priority
      * non-empty tier of components awaiting update, or null if no such tier exists.
      *
-     * @method getFirstTier
-     * @param tiers
-     * @return {*}
-     * @for Dashboard
      * @private
+     * @param {Object} tiers The list of component priority tiers.
+     * @return {?number} The priority value or null.
      */
     getFirstTier: function(tiers) {
       var keys = _.keys(tiers).sort(function(a, b) {
@@ -630,9 +598,6 @@ define([
 
     /**
      * Resets the dashboard.
-     *
-     * @method resetAll
-     * @for Dashboard
      */
     resetAll: function() {
       this.createAndCleanErrorDiv(); //Dashboard.legacy
@@ -651,10 +616,7 @@ define([
     /**
      * Forces a process change on a component's parameter.
      *
-     * @method processChange
-     * @param object_name Component name on which the fireChange should be triggered
-     *
-     * @for Dashboard
+     * @param {string} object_name Component name on which the fireChange should be triggered.
      */
     processChange: function(object_name) {
       //Logger.log("Processing change on " + object_name);
@@ -681,7 +643,7 @@ define([
     },
 
     /**
-     * fireChange must accomplish two things:
+     * _fireChange_ must accomplish two things:
      * first, we must change the parameters
      * second, we execute the components that listen for
      * changes on that parameter.
@@ -692,11 +654,8 @@ define([
      * in a function wrapped in a setTimeout, so the running
      * script has the opportunity to finish.
      *
-     * @method fireChange
-     * @param parameter parameter on which to fire change
-     * @param value Value for the parameter
-     *
-     * @for Dashboard
+     * @param {string} parameter The name of the parameter on which to fire change.
+     * @param {*} value Value for the parameter.
      */
     fireChange: function(parameter, value) {
       var myself = this;
@@ -720,14 +679,14 @@ define([
       myself.updateAll(toUpdate);
     },
 
-    /*
+    /**
      * Checks if there are any other components of equal or higher 
      * priority than the one that is currently being executed.
      *
-     * @method othersAwaitExecution
-     * @for Dashboard
-     *
      * @private
+     * @param {Object} tiers The list of component priority tiers.
+     * @param {Object} current The current component.
+     * @return {boolean} _true_ if the first tier has components with equal or higher priority than the current component, _false_ otherwise.
      */
     othersAwaitExecution: function(tiers, current) {
 
@@ -752,7 +711,7 @@ define([
         return false;
       } 
 
-      // compToUpdate has components with equal or higher priority than the component 
+      // componentsToUpdate has components with equal or higher priority than the component 
       // that is currently being executed, that await execution themselves
       return true;
     }

@@ -17,9 +17,25 @@ define([
   'amd!../lib/underscore'
 ], function(UnmanagedComponent, Logger, _) {
 
-  var QueryComponent = UnmanagedComponent.extend({
+  /**
+   * @class cdf.components.QueryComponent
+   * @amd cdf/components/QueryComponent
+   * @extends cdf.components.UnmanagedComponent
+   * @classdesc The query component class.
+   * @ignore
+   */
+  return UnmanagedComponent.extend(/** @lends cdf.components.QueryComponent# */{
+    /**
+     * Visibility.
+     *
+     * @type {boolean}
+     * @default
+     */
     visible: false,
 
+    /**
+     * Updates the component.
+     */
     update: function() {
       var myself = this;
       if(myself.warnOnce) {
@@ -61,28 +77,36 @@ define([
       }
     },
 
+    /**
+     * Sets the query result as the value of the dashboard parameter
+     * with a name equal to the value of _resultvar_.
+     *
+     * @param {object} data The query result object.
+     * @param {object} data.resultset The query result set.
+     */
     render: function(data) {
       if(this.resultvar != null) {
         this.dashboard.setParameter(this.resultvar, data.resultset);
       }
     },
 
+    /**
+     * Logs a warning message and removes the _warnOnce_ flag.
+     */
     warnOnce: function() {
       Logger.log("Warning: QueryComponent behaviour is due to change. See "
         + "http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent"
         + " for more information");
       delete(this.warnOnce);
     }
-  }, {
+  },/** @lends cdf.components.QueryComponent */{
 
     /**
      * Generates a query object given a definition object and a success callback function.
      *
-     * @method makeQuery
-     * @static
+     * @param {object}   object          The query definition.
+     * @param {function} successCallback The success callback function.
      * @deprecated
-     * @param object the object containing the query definition
-     * @param successCallback the success callback function
      */
     makeQuery: function(object, successCallback) {
 
@@ -129,7 +153,5 @@ define([
       query.fetchData(object.parameters, successCallback);
     }
   });
-
-  return QueryComponent;
 
 });
