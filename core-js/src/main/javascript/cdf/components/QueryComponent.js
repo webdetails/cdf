@@ -24,7 +24,7 @@ define([
    * @classdesc The query component class.
    * @ignore
    */
-  return UnmanagedComponent.extend(/** @lends cdf.components.QueryComponent# */{
+  var QueryComponent = UnmanagedComponent.extend(/** @lends cdf.components.QueryComponent# */{
     /**
      * Visibility.
      *
@@ -153,5 +153,5 @@ define([
       query.fetchData(object.parameters, successCallback);
     }
   });
-
+  return QueryComponent;
 });
