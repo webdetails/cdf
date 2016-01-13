@@ -377,7 +377,7 @@ define([
             list.push(value);
           }
         }
-        callback.ok(list);
+        callback(list);
       });
 
     },
