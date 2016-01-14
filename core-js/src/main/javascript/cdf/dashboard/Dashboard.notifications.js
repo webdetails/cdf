@@ -39,10 +39,10 @@ define([
 
       /**
        * Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
-       * are registered and assigned to a specific error message.
+       * are registered and assigned a specific error message.
        *
        * @type {Object}
-       * @instance
+       * @name cdf.dashboard.Dashboard#ERROR_CODES
        */
       this.ERROR_CODES = {
         'QUERY_TIMEOUT': {
@@ -55,15 +55,13 @@ define([
     },
 
     /**
-     * Sets additional block ui options based on the defaults already set
+     * Sets additional {@link external:jQuery.blockUI|jQuery.blockUI} options based on the defaults already set.
      *
-     * @method _setBlockUiOptions
-     *
-     * @param {Object} options - The options to configure the block ui
-     * @param {string} options.message - The message or html to display on block ui
-     * @param {Object} options.css - A json that accepts valid css key/value pairs
-     * @param {Object} options.overlayCSS - A json that accepts valid css key/value pairs for the block ui overlay
-     * @param {boolean} options.showOverlay - Allows you to show or hide the overlay on block ui
+     * @param {Object}  options             The options to configure.
+     * @param {string}  options.message     The message or HTML to display in the UI overlay.
+     * @param {Object}  options.css         A json that accepts valid css key/value pairs.
+     * @param {Object}  options.overlayCSS  A json that accepts valid css key/value pairs for the UI overlay.
+     * @param {boolean} options.showOverlay Allows you to show or hide the UI overlay.
      */
     _setBlockUiOptions: function(options) {
        if(typeof $.blockUI == 'function') {
@@ -117,8 +115,8 @@ define([
      * Given an error code, returns the registered error object associated with that code.
      *
      * @param {string} errorCode The error code.
-     * @return {*|{}} error An object with a _msg_ property containing the error code message or
-     *                      an empty object if the code is not registered.
+     * @return {{msg: string}} error An object with a _msg_ property containing the error code message or
+     *                               an empty object if the code is not registered.
      */
     getErrorObj: function(errorCode) {
       return this.ERROR_CODES[errorCode] || {};
@@ -131,7 +129,7 @@ define([
      * @param {string} resp      Server response.
      * @param {string} txtStatus Response status.
      * @param {string} error     Error object to encapsulate.
-     * @return {Object} An error object containing detailed error message.
+     * @return {{msg: string, error: string, errorStatus: string}} An error object containing detailed error messages.
      *
      * @deprecated
      */

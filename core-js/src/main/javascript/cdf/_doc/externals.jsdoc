@@ -18,6 +18,12 @@
  */
 
 /**
+ * jQuery plugin that prevents user activity with the page (or part of the page) until it is deactivated.
+ * @method external:jQuery.blockUI
+ * @see {@link http://malsup.com/jquery/block/}
+ */
+
+/**
  * Perform an asynchronous HTTP (Ajax) request.
  * @method external:jQuery.ajax
  * @see {@link http://api.jquery.com/jquery.ajax/}
@@ -42,9 +48,9 @@
  */
 
 /**
- * The {@link external:Backbone|Backbone} eventing engine.
- * @external "Backbone.Events"
- * @memberof external:Backbone
+ * The Backbone eventing engine.
+ * @name external:Backbone.Events
+ * @type {object}
  * @see http://backbonejs.org/#Events
  */
 

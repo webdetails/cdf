@@ -32,10 +32,10 @@ define([
      * Object used to store the available view flag values (read only).
      *
      * @type {Object}
-     * @instance
-     * @property {string} UNUSED=unused   Flag value for unused parameters.
-     * @property {string} UNBOUND=unbound Flag value for unbound parameters.
-     * @property {string} VIEW=view       Flag value for view parameters.
+     * @const
+     * @property {string} UNUSED="unused"   Flag value for unused parameters.
+     * @property {string} UNBOUND="unbound" Flag value for unbound parameters.
+     * @property {string} VIEW="view"       Flag value for view parameters.
      */
     viewFlags: {
       UNUSED: "unused",
@@ -82,10 +82,12 @@ define([
     },
 
     /**
-     * Defines the view flag of a given parameter.
+     * Defines the view flag of a given parameter. If no _value_ is provided the
+     * parameter value is set to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
      *
-     * @param {string} parameter  The name of the parameter
-     * @param {string} value=view The value of the view flag for the parameter.
+     * @param {string} parameter    The name of the parameter
+     * @param {string} value="view" The value of the view flag for the parameter. If none is provided
+     *                              it defaults to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
      */
     setParameterViewMode: function(parameter, value) {
       if(arguments.length === 1) {

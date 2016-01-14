@@ -62,7 +62,7 @@ define([
      * @private
      * @param {Object}          o    The context of the assignment.
      * @param {string|string[]} path The path to the parameter.
-     * @return the value of the property
+     * @return {*} The value of the property or _undefined_ if the context object _o_ is a falsy value.
      */
     _getValueFromContext: function(o, path) {
       if(!o) {
@@ -105,8 +105,8 @@ define([
      * @private
      * @param {Object}          o    The context of the assignment.
      * @param {string|string[]} path The path to the parameter.
-     * @param {}                v    The value of the parameter.
-     * @return {} The value of the parameter assigned.
+     * @param {*}               v    The value of the parameter.
+     * @return {*} The value of the parameter assigned or _undefined_ if the context object _o_ is a falsy value.
      */
     _setValueInContext: function(o, path, v) {
       if(!o || path == null || v === undefined) {
@@ -142,7 +142,7 @@ define([
      *
      * @private
      * @param {string} parameterName The name of the parameter.
-     * @return {Object} An object with the store location and the new name of the parameter (without the store prefix).
+     * @return {{store: object, name: string}} An object with the store location and the new name of the parameter (without the store prefix).
      */
     _getParameterStore: function(parameterName) {
       var parameterStore;
@@ -171,8 +171,8 @@ define([
      * the value returned by {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue} is used.
      *
      * @param {string} parameterName  The name of the parameter.
-     * @param {}       parameterValue The initial value of the parameter.
-     * @return {} The value assigned to the parameter.
+     * @param {*}      parameterValue The initial value of the parameter.
+     * @return {*} The value assigned to the parameter or _undefined_ if the parameter name is invalid.
      */
     addParameter: function(parameterName, parameterValue) {
       if(parameterName == undefined || parameterName == "undefined") {
@@ -192,7 +192,7 @@ define([
      * Gets a parameter value.
      *
      * @param {string} parameterName The parameter name.
-     * @return {} The value of the parameter.
+     * @return {*} The value of the parameter or _undefined_ if the parameter name is invalid.
      */
     getParameterValue: function(parameterName) {
       if(parameterName == undefined || parameterName == "undefined") {
@@ -208,7 +208,7 @@ define([
      * Alias for {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue}.
      *
      * @param {string} parameterName The parameter name.
-     * @return {} The parameter value.
+     * @return {*} The parameter value or _undefined_ if the parameter name is invalid.
      */
     getParam: function(parameterName) {
       return this.getParameterValue(parameterName);
@@ -218,7 +218,7 @@ define([
      * Stores a parameter with a certain value.
      *
      * @param {string}  parameterName  The parameter name.
-     * @param {}        parameterValue The value of the parameter.
+     * @param {*}       parameterValue The value of the parameter.
      * @param {boolean} isNotified     A flag indicating if a _fireChange_ event is to
      *                                 be triggered when the parameter value changes.
      */
@@ -245,7 +245,7 @@ define([
      * Alias for {@link cdf.dashboard.Dashboard#setParameter|setParameter}.
      *
      * @param {string}  parameterName  The parameter name.
-     * @param {}        parameterValue The value of the parameter.
+     * @param {*}       parameterValue The value of the parameter.
      * @param {boolean} isNotified     A flag indicating if a _fireChange_ event is to
      *                                 be triggered when the parameter value changes.
      */
@@ -258,8 +258,8 @@ define([
      * takes precedence over the slave parameter's when initializing the dashboard.
      *
      * @private
-     * @param {} master The master parameter.
-     * @param {} slave  The slave parameter.
+     * @param {string} master The name of the master parameter.
+     * @param {string} slave  The name of the slave parameter.
      */
     syncParameters: function(master, slave) {
       this.setParameter(slave, this.getParameterValue(master));
@@ -275,8 +275,8 @@ define([
      * Register parameter pairs that will be synced on dashboard init.
      *
      * @private
-     * @param {} master The master parameter.
-     * @param {} slave  The slave parameter.
+     * @param {string} master The name of the master parameter.
+     * @param {string} slave  The name of the slave parameter.
      */
     syncParametersOnInit: function(master, slave) {
       /* We'll store the dependency pairings in Dashboards.syncedParameters, as an object mapping master parameters to an

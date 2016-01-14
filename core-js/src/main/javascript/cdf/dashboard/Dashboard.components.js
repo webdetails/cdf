@@ -41,7 +41,7 @@ define([
      * If a falsy value is specified, _undefined_ is returned.
      *
      * @param {string} name The component's name.
-     * @return {BaseComponent|undefined} the component or <tt>undefined</tt>
+     * @return {BaseComponent|undefined} The component or _undefined_.
      */
     getComponent: function(name) {
       if(!name || typeof name !== "string") {
@@ -59,7 +59,7 @@ define([
      * Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
      *
      * @param {string} name The component's name.
-     * @return {BaseComponent|undefined} the component or <tt>undefined</tt>
+     * @return {BaseComponent|undefined} The component or _undefined_.
      */
     getComp: function(name) {
       return this.getComponent(name);
@@ -68,8 +68,8 @@ define([
     /**
      * Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
      *
-     * @param {string} name a string representing the component's name
-     * @return {BaseComponent|undefined} the component or <tt>undefined</tt>
+     * @param {string} name A string representing the component's name.
+     * @return {BaseComponent|undefined} The component or _undefined_.
      */
     getComponentByName: function(name) {
       return this.getComponent(name);
@@ -81,7 +81,7 @@ define([
      * If an array of components is specified, it iterates through the array and calls
      * {@link cdf.dashboard.Dashboard#addComponent|addComponent} for each component.
      *
-     * @param {array} components the array of components to be added
+     * @param {array} components The array of components to be added.
      */
     addComponents: function(components) {
       if(!$.isArray(components)) { 
@@ -142,12 +142,12 @@ define([
   
     /**
      * Get the index of the array `components` that contains the component.
-     * If `compOrNameOrIndex` is a <tt>string</tt> search the component that first matches such name.
-     * If `compOrNameOrIndex` is a <tt>number</tt> return it.
+     * If `compOrNameOrIndex` is a _string_ search the component that first matches such name.
+     * If `compOrNameOrIndex` is a _number_ return it.
      * If `compOrNameOrIndex` is a component return the index where it is in `components`.
      *
      * @param {BaseComponent|string|number} compOrNameOrIndex The name, index or the component to search.
-     * @return {number} The index where the component is at or <tt>-1</tt> if not found.
+     * @return {number} The index where the component is at or _-1_ if not found.
      */
     getComponentIndex: function(compOrNameOrIndex) {
       if(compOrNameOrIndex != null) {
@@ -175,9 +175,9 @@ define([
      * If `compOrNameOrIndex` is a number, the component in such position in the `components` array is removed.
      * If `compOrNameOrIndex` is an object that exists in the `components` array, it will be removed.
      *
-     * @param {Object|string|number} compOrNameOrIndex the component object,
+     * @param {Object|string|number} compOrNameOrIndex The component object,
      *   the name of the component or the index of the component to be removed.
-     * @return {BaseComponent|undefined} The removed component or <tt>undefined</tt>.
+     * @return {BaseComponent|undefined} The removed component or _undefined_.
      */
     removeComponent: function(compOrNameOrIndex) {
       var index = this.getComponentIndex(compOrNameOrIndex);
@@ -222,12 +222,11 @@ define([
      *
      * @private
      * @param {Object} control The target component.
-     * @param {Object} Class
      * @return {Object} The target component.
      *
      * @deprecated
      */
-    _bindExistingControl: function(control, Class) {
+    _bindExistingControl: function(control /*, Class*/) {
       if(!control.dashboard) {
         control.dashboard = this;
         delete control.initInstance;

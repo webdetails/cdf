@@ -73,7 +73,6 @@ define(["../lib/jquery"], function($) {
    * @class cdf.dashboard.Utf8Encoder
    * @amd cdf/dashboard/Utf8Encoder
    * @classdesc Auxiliary UTF-8 encoder.
-   * @static
    */
   return /** @lends cdf.dashboard.Utf8Encoder */ {
     /**

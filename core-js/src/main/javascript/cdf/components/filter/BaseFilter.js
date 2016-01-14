@@ -51,7 +51,6 @@ define([
    *   <li>multiple nested groups</li>
    *   <li>server-side pagination and searching</li>
    * </ul>
-   * @static
    * @ignore
    */
   return /** @lends cdf.components.filter.BaseFilter */ {

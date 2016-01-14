@@ -167,7 +167,7 @@ define([
      * from the _window_ object or from the dashboard instance
      *
      * @type {boolean}
-     * @default
+     * @default false
      * 
      * @deprecated
      * @ignore
@@ -211,7 +211,7 @@ define([
      * to them.
      *
      * @type {number}
-     * @default
+     * @default -1000
      * @ignore
      */
     legacyPriority: -1000,
@@ -220,7 +220,7 @@ define([
      * Flag indicating if the lifecycle events should be logged.
      *
      * @type {boolean}
-     * @default
+     * @default true
      * @ignore
      */
     logLifecycle: true,
@@ -264,7 +264,7 @@ define([
      * The dashboard's debug level.
      *
      * @type {numeric}
-     * @default
+     * @default 1
      */
     debug: 1,
 

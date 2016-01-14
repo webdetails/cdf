@@ -294,7 +294,7 @@ define([
      * Gets an array containing the sorter functions. The most significant
      * sorter function should be placed at the beginning of the array.
      *
-     * @return {object[]} An array with the available sorter functions.
+     * @return {function[]} An array with the available sorter functions.
      */
     getSorters: function() {
       var type = this.children().first().get('view').type;

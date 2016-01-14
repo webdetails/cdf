@@ -31,9 +31,10 @@ define([
    */
   return InputBaseComponent.extend(/** @lends cdf.components.SelectBaseComponent# */{
     /**
-     * Visibility.
+     * Visibility flag.
      *
      * @type {boolean}
+     * @default false
      */
     visible: false,
 
@@ -190,7 +191,7 @@ define([
 
     /**
      * Indicates if the user can select multiple values.
-     * The default implementation returns <tt>false</tt>.
+     * The default implementation returns _false_.
      *
      * @return {boolean} _true_ if multiple values are allowed, _false_ otherwise.
      * @private
@@ -316,9 +317,9 @@ define([
      * the change mode value.
      * </p>
      * @return {!string} one of values:
-     * <tt>'immediate'</tt>,
-     * <tt>'focus'</tt> or
-     * <tt>'timeout-focus'</tt>.
+     * _'immediate'_,
+     * _'focus'_ or
+     * _'timeout-focus'_.
      *
      * @return {string} The change mode.
      * @private

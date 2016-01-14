@@ -29,7 +29,7 @@ define([
      * @constructs
      * @amd cdf/components/filter/strategies/LimitedSelect
      * @extends cdf.components.filter.strategies.MultiSelect
-     * @classdesc Limited (Multiple) Selection allows selecting s limited number of items.
+     * @classdesc Limited (Multiple) Selection allows selecting a limited number of items.
      * @param {object} options Selection options.
      * @param {object} options.limit=Infinity The selection limit option.
      * @ignore

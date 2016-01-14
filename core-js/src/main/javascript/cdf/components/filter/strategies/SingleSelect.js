@@ -65,6 +65,7 @@ define([
     },
     /**
      * Gets the selected models.
+     *
      * @param {object} model The target model.
      * @param {string} field The selection state field.
      * @return {object[]} The list of selected items.
