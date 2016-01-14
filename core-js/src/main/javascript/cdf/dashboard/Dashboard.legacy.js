@@ -74,13 +74,17 @@ define([
     },
 
     /**
-     * Executes an AJAX request
+     * Executes an Ajax request. If no `func` callback is provided it executes asynchronously
+     * and returns a jQuery XMLHttpRequest ({@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR})
+     * object. Otherwise, it executes {@link external:jQuery.ajax|jQuery.ajax} synchronously and
+     * returns the result of the HTTP request.
      *
      * @param {string}   returnType The expected return type.
      * @param {string}   url        The URL to call.
      * @param {Object}   params     The parameters object.
      * @param {function} func       Callback function.
-     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
+     * @return {*} If no `func` callback is provided it returns a jqXHR object.
+     *             Otherwise, it returns the result of the HTTP request.
      *
      * @deprecated
      */

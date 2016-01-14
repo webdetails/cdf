@@ -39,7 +39,7 @@ define([
      * Gets the data source name.
      *
      * @private
-     * @param {Object} obj A string, a data source object with a name property or a query definition object with a dataSource property.
+     * @param {Object} obj A string, a data source object with a name property or a query definition object with a _dataSource_ property.
      * @return {string|undefined} The data source name or undefined if none is found.
      */
     _getDataSourceName: function(obj) {
@@ -59,13 +59,16 @@ define([
     },
 
     /**
-     * Adds a data source. If no string name parameter is provided, a name property
-     * will be extracted from the data source object.
+     * Adds a data source given a name, the data source object to be added and an optional _boolean_
+     * indicating if any data source with the same name should be deleted.
+     * If the _name_ parameter is an _object_ its _name_ property
+     * will be used as the data source name and the _obj_ parameter will be used as the
+     * flag that when evaluates as a truthy overwrites any previous data source with the same name.
      *
-     * @param {string|Object}     name  The name of the data source.
-     * @param {Object|boolean}    obj   The data source to be added.
-     * @param {boolean|undefined} force A flag indicating if any previous data sources with the
-     *                                  same name are to be overridden.
+     * @param {string|Object}     name        The name of the data source.
+     * @param {Object|boolean}    obj         The data source to be added.
+     * @param {boolean|undefined} force=false A flag indicating if any previous data sources with the
+     *                                        same name are to be replaced.
      */
     addDataSource: function(name, obj, force) {
       // if no name is provided, try to extract it from the data source object
@@ -108,7 +111,7 @@ define([
     },
 
     /**
-     * Gets a data source according to the provided name or object with a dataSource property.
+     * Gets a data source according to the provided name or query definition object with a _dataSource_ property.
      *
      * @param {string|Object} obj The name of the data source or an object from which to extract the name from.
      * @return {Object|undefined} The data source or undefined if none is found.
@@ -153,7 +156,7 @@ define([
     },
 
     /**
-     * Removes a data source according to the provided name or object with a dataSource property.
+     * Removes a data source according to the provided name or query definition object with a _dataSource_ property.
      *
      * @param {string|Object} obj The name of the data source or an object from which to extract the name.
      */

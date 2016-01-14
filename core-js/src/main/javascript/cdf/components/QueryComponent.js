@@ -26,10 +26,10 @@ define([
    */
   var QueryComponent = UnmanagedComponent.extend(/** @lends cdf.components.QueryComponent# */{
     /**
-     * Visibility.
+     * Visibility flag.
      *
      * @type {boolean}
-     * @default
+     * @default false
      */
     visible: false,
 

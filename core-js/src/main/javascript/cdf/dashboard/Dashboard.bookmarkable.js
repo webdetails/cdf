@@ -36,7 +36,8 @@ define([
     },
 
     /**
-     * Gets the value associated to a given key if it exists.
+     * Gets an object representation of _window.location.hash_. If a _key_ value is provided
+     * the value for the URL parameter with name equal to the value of _key_ is returned.
      *
      * @private
      * @param {string} key The key corresponding to the value being obtained.
@@ -58,11 +59,14 @@ define([
     },
 
     /**
-     * Sets the hash value of _window.location_.
+     * Sets the hash value of _window.location_. If _value_ is provided, the parameter with name
+     * equal to the value of _key_ has it's value set to _value_ before the _window.location.hash_
+     * is set. If the object representation of _window.location.hash_ is an empty object,
+     * the value of _window.location.hash_ is set to an empty string.
      *
      * @private
-     * @param {string} key   The key value.
-     * @param {}       value The value associated with the key.
+     * @param {object|string} key     The object representation of _window.location.hash_ or a parameter name.
+     * @param {*}             [value] The value for the parameter named _key_.
      */
     setHashValue: function(key, value) {
       var obj = this.getHashValue(),json;
@@ -83,8 +87,8 @@ define([
     },
 
     /**
-     * If no key is provided it clears _window.location.hash_, otherwise
-     * it sets the new hash value with the provided key removed.
+     * If no _key_ is provided it clears _window.location.hash_, otherwise
+     * it sets the new hash value with the parameter named _key_ removed.
      *
      * @private
      * @param {string} key The value of the key.
@@ -103,7 +107,7 @@ define([
      * Sets a pair parameter/value as bookmarkable.
      *
      * @param {string} parameter The name of the parameter to be stored.
-     * @param {}       value     The value for the parameter.
+     * @param {*}      value     The value for the parameter.
      */
     setBookmarkable: function(parameter, value) {
       if(arguments.length === 1) { value = true; }
@@ -164,7 +168,7 @@ define([
     /**
      * Overrides a bookmark state with a given state.
      *
-     * @param {} state The new state to override the existing state.
+     * @param {*} state The new state to override the existing state.
      */
     setBookmarkState: function(state) {
       if(window.history && window.history.replaceState) {
