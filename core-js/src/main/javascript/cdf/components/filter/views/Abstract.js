@@ -25,8 +25,8 @@ define([
    * @class cdf.components.filter.views.Abstract
    * @amd cdf/components/filter/views/Abstract
    * @classdesc Abstract base class for all Views
-   * @extends BaseView
-   * @extends BaseFilter.Logger
+   * @extends cdf.components.filter.baseevents.baseeventsView
+   * @extends cdf.Logger
    * @ignore
    */
   return BaseView.extend(Logger).extend(/** @lends cdf.components.filter.views.Abstract# */{

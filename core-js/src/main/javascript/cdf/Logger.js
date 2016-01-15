@@ -11,14 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/**
- * @class cdf.Logger
- * @amd cdf/Logger
- * @classdesc This is a static class used for logging messages in the console.
- * @static
- */
 define(function() {
 
+  /**
+   * @class cdf.Logger
+   * @amd cdf/Logger
+   * @classdesc This is a static class used for logging messages in the console.
+   */
   return /** @lends cdf.Logger */ {
     /**
      * The different log levels supported.
@@ -31,17 +30,16 @@ define(function() {
      * Current log level. Assign a new value to this property to change the log level.
      *
      * @type {string}
-     * @default
+     * @default "debug"
      */
     loglevel: 'debug',
 
     /**
      * Logs a message at the specified log level.
      *
-     * @param {string|object} m           Message to log or an object containing information about an exception to log.
-     * @param {string}        [m.stack]   Stack trace of the exception to log.
-     * @param {string}        [type=info] Log level. One of debug, info, warn, error or exception.
-     * @param {string}        [css]       CSS styling rules for the message to log.
+     * @param {string|{stack: string}} m             Message to log or an object containing information about an exception to log.
+     * @param {string}                 [type="info"] Log level. One of debug, info, warn, error or exception.
+     * @param {string}                 [css]         CSS styling rules for the message to log.
      */
     log: function(m, type, css) {    
       type = type || "info";
@@ -71,8 +69,7 @@ define(function() {
     },
 
     /**
-     * Logs a message at debug level.
-     * It calls the {@link cdf.Logger#log|log} method with the {@link cdf.Logger#loglevel|log level} debug.
+     * Logs a message at _{@link cdf.Logger.loglevels|debug}_ level.
      *
      * @param {string} m Message to log.
      */
@@ -81,7 +78,7 @@ define(function() {
     },
 
     /**
-     * Logs a message at info level.
+     * Logs a message at _{@link cdf.Logger.loglevels|info}_ level.
      *
      * @param {string} m Message to log.
      */
@@ -90,7 +87,7 @@ define(function() {
     },
 
     /**
-     * Logs a message at warn level.
+     * Logs a message at _{@link cdf.Logger.loglevels|warn}_ level.
      *
      * @param {string} m Message to log.
      */
@@ -99,7 +96,7 @@ define(function() {
     },
 
     /**
-     * Logs a message at error level.
+     * Logs a message at _{@link cdf.Logger.loglevels|error}_ level.
      *
      * @param {string} m Message to log.
      */
@@ -108,10 +105,9 @@ define(function() {
     },
 
     /**
-     * Logs a message at exception level.
+     * Logs a message at _{@link cdf.Logger.loglevels|exception}_ level.
      *
-     * @param {string|object} m         Message to log or an object containing information about the exception to log.
-     * @param {string} [m.stack] Stack trace of the exception to log.
+     * @param {string|{stack: string}} m  Message to log or an object containing information about the exception to log.
      */
     exception: function(m) {
       return this.log(m, "exception");

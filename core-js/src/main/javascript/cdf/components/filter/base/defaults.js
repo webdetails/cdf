@@ -21,7 +21,7 @@ define(['../../../lib/jquery'], function( $ ) {
      * Configuration of the log level.
      *
      * @type {string}
-     * @default
+     * @default "log"
      */
     loglevel: "log",
     pagination: {
@@ -85,7 +85,6 @@ define(['../../../lib/jquery'], function( $ ) {
    * @class cdf.components.filter.base.defaults
    * @amd cdf/components/filter/base/defaults
    * @classdesc Filter component default values.
-   * @static
    * @ignore
    */
   return $.extend(true, {}, privateDefaults, /** @lends cdf.components.filter.base.defaults */ {

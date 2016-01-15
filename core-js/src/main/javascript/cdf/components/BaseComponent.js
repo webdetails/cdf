@@ -21,19 +21,62 @@ define([
 ], function(Base, $, _, Backbone, Logger, Utils) {
 
   return Base.extend(Backbone.Events).extend(/** @lends cdf.components.BaseComponent# */{
-
+    /**
+     * Visibility flag.
+     *
+     * @type {boolean}
+     * @default true
+     */
     visible: true,
+
+    /**
+     * Managed flag.
+     *
+     * @type {boolean}
+     * @default true
+     */
     isManaged: true,
 
     // Properties for handling timer function
-    // start date for the timer start
+
+    /**
+     * Start date for the timer start.
+     *
+     * @type {number}
+     * @default 0
+     */
     timerStart: 0,
-    // start date for the timer split
+
+    /**
+     * Start date for the timer split.
+     *
+     * @type {number}
+     * @default 0
+     */
     timerSplit: 0,
-    // number of milliseconds since timer start
+
+    /**
+     * Number of milliseconds since timer split.
+     *
+     * @type {number}
+     * @default -1
+     */
     elapsedSinceSplit: -1,
-    // number of milliseconds since timer split
+
+    /**
+     * Number of milliseconds since timer start.
+     *
+     * @type {number}
+     * @default -1
+     */
     elapsedSinceStart: -1,
+
+    /**
+     * Color to use while logging messages.
+     *
+     * @type {string}
+     * @default undefined
+     */
     logColor: undefined,
 
     /**
@@ -95,7 +138,7 @@ define([
      * adds the target object as listener for all events in the list.
      *
      * @param {cdf.components.BaseComponent} target The target BaseComponent object.
-     * @param {Backbone.Events[]}            events Event list to copy.
+     * @param {external:Backbone.Events[]}   events Event list to copy.
      */
     copyEvents: function(target, events) {
       _.each(events, function(evt, evtName) {
@@ -120,7 +163,7 @@ define([
       /*
        * `dashboard` points back to this component, so we need to remove it from
        * the original component before cloning, lest we enter an infinite loop.
-       * `_events` contains the event bindings for the Backbone.Events mixin
+       * `_events` contains the event bindings for the `Backbone.Events` mixin
        * and may also point back to the dashboard. We want to clone that as well,
        * but have to be careful about it.
        */

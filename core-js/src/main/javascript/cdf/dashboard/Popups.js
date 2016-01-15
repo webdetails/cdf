@@ -24,7 +24,6 @@ define([
    * @amd cdf/dashboard/Popups
    * @classdesc A static class containing pre-built error and success popups.
    *            Each exposed popup is an object with a _render_ method that can be called to show the popup.
-   * @static
    */
   return /** @lends cdf.dashboard.Popups */ {
 
