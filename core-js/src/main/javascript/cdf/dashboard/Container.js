@@ -11,11 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/*
- * Generic container class for registering and fetching objects according to a key, using a factory pattern.
- * Used for add-ins and queries, this is mostly an internal use only module.
- * Should not appear by now in yui-documentation
- */
 define(function() {
 
   // Shared/Static stuff
@@ -70,7 +65,16 @@ define(function() {
     return true;
   }
 
-  return function() {
+  /**
+   * @class  cdf.dashboard.Container
+   * @amd  cdf/dashboard/Container
+   * @classdesc Generic container class for registering and fetching objects
+   *            according to a key, using a factory pattern.
+   *            Used for add-ins and queries, this is mostly an internal use
+   *            only module and should not appear by now in the documentation.
+   * @ignore
+   */
+  return /** @lends cdf.dashboard.Container */ function() {
 
     // PUBLIC
 

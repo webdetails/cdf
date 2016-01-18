@@ -69,13 +69,14 @@ define([
      * @param {*}             [value] The value for the parameter named _key_.
      */
     setHashValue: function(key, value) {
-      var obj = this.getHashValue(),json;
+      var obj;
       if(arguments.length == 1) {
         obj = key;
       } else {
+        obj = this.getHashValue();
         obj[key] = value;
       }
-      json = JSON.stringify(obj);
+      var json = JSON.stringify(obj);
       /* We don't want to store empty objects */
       if(json != "{}") {
         window.location.hash = json;
@@ -94,10 +95,10 @@ define([
      * @param {string} key The value of the key.
      */
     deleteHashValue: function(key) {
-      var obj = this.getHashValue();
       if(arguments.length === 0) {
         window.location.hash = "";
       } else {
+        var obj = this.getHashValue();
         delete obj[key];
         this.setHashValue(obj);
       }
@@ -110,8 +111,11 @@ define([
      * @param {*}      value     The value for the parameter.
      */
     setBookmarkable: function(parameter, value) {
-      if(arguments.length === 1) { value = true; }
-      this.bookmarkables[parameter] = value;
+      if(arguments.length === 1) {
+        this.bookmarkables[parameter] = true;
+      } else {
+        this.bookmarkables[parameter] = value;
+      }
     },
 
     /**
@@ -146,8 +150,6 @@ define([
      * @param {string} param The name of the parameter.
      */
     persistBookmarkables: function(param) {
-      var bookmarkables = this.bookmarkables,
-          params = {};
       /*
        * We don't want to update the hash if we were passed a
        * non-bookmarkable parameter (why bother?), nor is there
@@ -155,14 +157,13 @@ define([
        * initializing the dashboard. That's just the code for
        * restoreBookmarkables doing the reverse of this!
        */
-      if(!bookmarkables[param]) {
+      if(!this.bookmarkables[param]) {
         return;
       }
       if(!this.finishedInit) {
         return;
       }
-      params = this.generateBookmarkState();
-      this.setBookmarkState({impl: 'client', params: params});
+      this.setBookmarkState({impl: 'client', params: this.generateBookmarkState()});
     },
 
     /**
