@@ -91,9 +91,10 @@ define([
      */
     setParameterViewMode: function(parameter, value) {
       if(arguments.length === 1) {
-        value = this.viewFlags.VIEW;
+        this.viewParameters[parameter] = this.viewFlags.VIEW;
+      } else {
+        this.viewParameters[parameter] = value;
       }
-      this.viewParameters[parameter] = value;
     },
 
     /**
