@@ -130,7 +130,7 @@ define([
     },
 
     /**
-     * Gets the success handler that executes the provided callback when the query executes sucessfuly.
+     * Gets the success handler that executes the provided callback when the query executes successfully.
      *
      * @param {function} callback Callback to call after the query is successful.
      * @return {function} Success callback handler.

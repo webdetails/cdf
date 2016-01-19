@@ -18,7 +18,7 @@ define([
 ], function(Utils, Logger, $) {
 
   /**
-   * The contructor of an add-in.
+   * The constructor of an add-in.
    *
    * @class cdf.AddIn
    * @amd cdf/AddIn

@@ -54,7 +54,7 @@ define([
      * Executes a query using a provided search text and if successful
      * executes the provided callback function.
      *
-     * @param {string} searchString      A text to search for.
+     * @param {string}   searchString    A text to search for.
      * @param {function} successCallback A success callback function.
      * @private
      */
@@ -313,8 +313,8 @@ define([
      * Executes {@link cdf.component.AutocompleteBoxComponent#processChange|processChange}
      * if the _change_ parameter has a truthy value.
      *
-     * @param {string} label The HTML element identifier.
-     * @param {boolean|*} change Flag indicating if {@link cdf.component.AutocompleteBoxComponent#processChange|processChange should execute.
+     * @param {string}  id             The HTML element identifier.
+     * @param {boolean} [change=false] Flag indicating if {@link cdf.component.AutocompleteBoxComponent#processChange|processChange should execute.
      * @private
      */
     _removeValue: function(id, change) {
