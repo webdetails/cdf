@@ -263,7 +263,7 @@ define([
     /**
      * The dashboard's debug level.
      *
-     * @type {numeric}
+     * @type {number}
      * @default 1
      */
     debug: 1,
