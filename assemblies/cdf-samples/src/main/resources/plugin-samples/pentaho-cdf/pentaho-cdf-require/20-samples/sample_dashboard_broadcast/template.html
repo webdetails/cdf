@@ -1,6 +1,10 @@
-<p style="font-family: Arial;" id="title">Select a region: <span id='text_object'></span></p>
+
+<p style="font-family: Arial;" id="title">Select a region:
+  <span id="text_object"></span></p>
 <form name="myForm">
-  <table style="width: 100%; text-align: left; margin-left: auto; margin-right: auto;" border="0" cellpadding="2" cellspacing="2">
+  <table
+    style="width: 100%; text-align: left; margin-left: auto; margin-right: auto;"
+    border="0" cellpadding="2" cellspacing="2">
     <tbody>
       <tr>
         <td style="width: 50%; text-align: center; vertical-align: middle;">
@@ -8,7 +12,7 @@
         </td>
       </tr>
       <tr>
-        <td style="width: 50%; text-align: center; vertical-align: middle;">
+        <td  style="width: 50%; text-align: center; vertical-align: middle;">
           Single Select: <div id="object_select"></div> 
           <br/>
           Multi Select: <div id="object_multi"></div> 
@@ -31,135 +35,129 @@
   </table>
 </form>
 
+<style>
+    
+ul{
+       list-style-type:none;
+    }
+</style>
 <script language="javascript" type="text/javascript">
 
-var dashboard;
+var dashboard = _.extend({}, Dashboards);
 
-require([
-  'cdf/Dashboard.Blueprint',
-  'cdf/components/SelectComponent',
-  'cdf/components/SelectMultiComponent',
-  'cdf/components/CheckComponent',
-  'cdf/components/RadioComponent',
-  'cdf/components/TextInputComponent',
-  'cdf/components/DateInputComponent',
-  'cdf/components/XactionComponent',
-  'cdf/components/TextComponent'
-], function(
-  Dashboard,
-  SelectComponent,
-  SelectMultiComponent,
-  CheckComponent,
-  RadioComponent,
-  TextInputComponent,
-  DateInputComponent,
-  XactionComponent,
-  TextComponent
-) {
+dashboard.addParameter('region', 'test');
+dashboard.addParameter('dateStart', '2007-01-01');
 
-  dashboard = new Dashboard();
+regionSelector = {
+  name: "regionSelector",
+  type: "select",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  parameters: [],
+  parameter: "region",
+  valueAsId: true,
+  htmlObject: "object_select",
+  executeAtStart: true,
+  preExecution: function() {},
+  postExecution: function() {
+    Dashboards.processChange(this.name);
+  }
+}
 
-  dashboard.addParameter("region", "test");
-  dashboard.addParameter("dateStart", "2007-01-01");
+regionSelectorMulti = {
+  name: "regionSelectorMulti",
+  type: "selectMulti",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  valueAsId: true,
+  parameters: [],
+  parameter: "region",
+  htmlObject: "object_multi",
+  size: "4",
+  executeAtStart: true,
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new SelectComponent({
-    name: "regionSelector",
-    type: "select",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
-    parameters: [],
-    parameter: "region",
-    valueAsId: true,
-    htmlObject: "object_select",
-    executeAtStart: true,
-    preExecution: function() {},
-    postExecution:function() { this.dashboard.processChange(this.name); }
-  }));
+regionCheck = {
+  name: "regionCheck",
+  type: "check",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  parameters: [],
+  parameter: "region",
+  htmlObject: "object_check",
+  executeAtStart: true,
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new SelectMultiComponent({
-    name: "regionSelectorMulti",
-    type: "selectMulti",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
-    valueAsId: true,
-    parameters: [],
-    parameter: "region",
-    htmlObject: "object_multi",
-    size: "4",
-    executeAtStart: true,
-    preExecution: function() {},
-    postExecution: function() {}
-  }));
+regionRadio = {
+  name: "regionRadio",
+  type: "radio",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  parameters: [],
+  parameter: "region",
+  htmlObject: "object_radio",
+  executeAtStart: true,
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new CheckComponent({
-    name: "regionCheck",
-    type: "check",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
-    parameters: [],
-    parameter: "region",
-    htmlObject: "object_check",
-    executeAtStart: true,
-    preExecution: function() {},
-    postExecution: function() {}
-  }));
+regionText = {
+  name: "regionText",
+  type: "textInput",
+  parameter: "region",
+  htmlObject: "object_textInput",
+  executeAtStart: true,
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new RadioComponent({
-    name: "regionRadio",
-    type: "radio",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/regions.xaction",
-    parameters: [],
-    parameter: "region",
-    htmlObject: "object_radio",
-    executeAtStart: true,
-    preExecution:function() {},
-    postExecution:function() {}
-  }));
+dateInput = {
+  name: "dateInput",
+  type: "dateInput",
+  parameter: "dateStart",
+  htmlObject: "object_dateInput",
+  executeAtStart: true,
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new TextInputComponent({
-    name: "regionText",
-    type: "textInput",
-    parameter: "region",
-    htmlObject: "object_textInput",
-    executeAtStart: true,
-    preExecution:function() {},
-    postExecution:function() {}
-  }));
+regionVarianceBarChart = {
+  name: "regionVarianceBarChart",
+  type: "xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/RegionVarianceBarChart.xaction",
+  listeners: ["region"],
+  parameters: [["REGION","region"]],
+  htmlObject: "object_2",
+  executeAtStart: false,
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new DateInputComponent({
-    name: "dateInput",
-    type: "dateInput",
-    parameter: "dateStart",
-    htmlObject: "object_dateInput",
-    executeAtStart: true,
-    preExecution: function() {},
-    postExecution: function() {}
-  }));
+titleString = {
+  //name: "regionVarianceBarChart",
+  name: "titleString",
+  type: "text",
+  listeners: ["region", "dateStart"],
+  htmlObject: "text_object",
+  executeAtStart: true,
+  expression: function() {
+    //return 'Chosen region: ' + region + '; Start date: ' + dateStart;
+    return "Chosen region: " + dashboard.getParameterValue('region') + "; Start date: " + dashboard.getParameterValue('dateStart');
+  },
+  preExecution: function() {},
+  postExecution: function() {}
+}
 
-  dashboard.addComponent(new XactionComponent({
-    name: "regionVarianceBarChart",
-    type: "xaction",
-    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/20-samples/sample_dashboard_broadcast/RegionVarianceBarChart.xaction",
-    listeners: ["region"],
-    parameters: [["REGION","region"]],
-    htmlObject: "object_2",
-    executeAtStart: false,
-    preExecution: function() {},
-    postExecution: function() {}
-  }));
+dashboard.addComponents([
+  regionSelector,
+  regionSelectorMulti,
+  regionCheck,
+  regionRadio,
+  regionText,
+  dateInput,
+  regionVarianceBarChart,
+  titleString]);
 
-  dashboard.addComponent(new TextComponent({
-    name: "titleString",
-    type: "text",
-    listeners: ["region","dateStart"],
-    htmlObject: "text_object",
-    executeAtStart: true,
-    expression: function() {
-      return 'Chosen region: ' + this.dashboard.getParameterValue("region") +
-        '; Start date: ' + this.dashboard.getParameterValue("dateStart");
-    },
-    preExecution:function() {},
-    postExecution:function() {}
-  }));
-
-  dashboard.init();
-});
+dashboard.init();
 
 </script>

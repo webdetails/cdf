@@ -22,13 +22,13 @@ var MetaLayerHome2 = {
   pieChartClicked: function(measure, value) {
 
     if(measure == "productLine" && MetaLayerHome2.territory == null) {
-      MetaLayerHome2.productLine = value;
+      MetaLayerHome2.productLine = value.replace(/[^a-z0-9]/gi, ' ');
       MetaLayerHome2.filterMeasure =  " where ([Product].[All Products].[" + MetaLayerHome2.productLine + "])";
       MetaLayerHome2.title = "Top Ten for " + MetaLayerHome2.productLine;
     }
 
     if(measure == "productLine" && MetaLayerHome2.territory != null) {
-      MetaLayerHome2.productLine = value;
+      MetaLayerHome2.productLine = value.replace(/[^a-z0-9]/gi, ' ');;
       MetaLayerHome2.filterMeasure =  " where ([Product].[All Products].[" + MetaLayerHome2.productLine + "],[Markets].[All Markets].[" + MetaLayerHome2.territory + "])";
       MetaLayerHome2.title = "Top Ten for " + MetaLayerHome2.territory + "," + MetaLayerHome2.productLine;
     }

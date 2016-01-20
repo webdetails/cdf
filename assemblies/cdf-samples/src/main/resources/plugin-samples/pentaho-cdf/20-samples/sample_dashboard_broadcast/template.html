@@ -1,6 +1,10 @@
-<p style="font-family: Arial;" id="title">Select a region:  <span id="text_object"></span></p>
+
+<p style="font-family: Arial;" id="title">Select a region:
+  <span id="text_object"></span></p>
 <form name="myForm">
-  <table style="width: 100%; text-align: left; margin-left: auto; margin-right: auto;" border="0" cellpadding="2" cellspacing="2">
+  <table
+    style="width: 100%; text-align: left; margin-left: auto; margin-right: auto;"
+    border="0" cellpadding="2" cellspacing="2">
     <tbody>
       <tr>
         <td style="width: 50%; text-align: center; vertical-align: middle;">
@@ -8,7 +12,7 @@
         </td>
       </tr>
       <tr>
-        <td style="width: 50%; text-align: center; vertical-align: middle;">
+        <td  style="width: 50%; text-align: center; vertical-align: middle;">
           Single Select: <div id="object_select"></div> 
           <br/>
           Multi Select: <div id="object_multi"></div> 
@@ -31,6 +35,12 @@
   </table>
 </form>
 
+<style>
+    
+ul{
+       list-style-type:none;
+    }
+</style>
 <script language="javascript" type="text/javascript">
 
 var dashboard = _.extend({}, Dashboards);
@@ -112,7 +122,7 @@ dateInput = {
 }
 
 regionVarianceBarChart = {
-  name: "regionVarianceBarChartXaction",
+  name: "regionVarianceBarChart",
   type: "xaction",
   path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/RegionVarianceBarChart.xaction",
   listeners: ["region"],
@@ -124,12 +134,14 @@ regionVarianceBarChart = {
 }
 
 titleString = {
+  //name: "regionVarianceBarChart",
   name: "titleString",
   type: "text",
   listeners: ["region", "dateStart"],
   htmlObject: "text_object",
   executeAtStart: true,
   expression: function() {
+    //return 'Chosen region: ' + region + '; Start date: ' + dateStart;
     return "Chosen region: " + dashboard.getParameterValue('region') + "; Start date: " + dashboard.getParameterValue('dateStart');
   },
   preExecution: function() {},
