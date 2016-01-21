@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -85,22 +85,28 @@ define([
       dashboard.update(tableComponent);
     });
 
-    it("properly escapes column headers", function(done) {
-      var scriptText = '<script>alert("Gotcha!")</script>';
-      tableComponent.chartDefinition.colHeaders[0] = scriptText;
+    var testHeaders = function(value, done) {
+      tableComponent.chartDefinition.colHeaders[0] = value;
+      var text = value || "";
       spyOn($, 'ajax').and.callFake(function(params) {
         params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
       });
-
       tableComponent.once("cdf:postExecution", function() {
         //find the first column header, and make sure it is html escaped
         var $firstHeader = $($("#" + tableComponentDefaults.htmlObject).find("thead tr th")[0]);
-        expect($firstHeader.html()).toEqual($("<div>").text(scriptText).html());
-        expect($firstHeader.text()).toEqual(scriptText);
+        expect($firstHeader.html()).toEqual($("<div>").text(text).html());
+        expect($firstHeader.text()).toEqual(text);
         done();
       });
-
       dashboard.update(tableComponent);
+    };
+
+    it("properly escapes column headers", function(done) {
+      testHeaders('<script>alert("Gotcha!")</script>', done);
+    });
+
+    it("ignores null column headers", function(done) {
+      testHeaders(null, done);
     });
   });
 });

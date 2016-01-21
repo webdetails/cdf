@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -67,6 +67,10 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       expectDateParse('Wednesday, February 18, 2015 12:00 AM', 'LLLL', 'Wed Feb 18 2015');
     });
 
+    var expectEscapeHtml = function(value, expected) {
+      expect(Utils.escapeHtml(value)).toEqual(expected);
+    };
+
     /**
      * ## The Utils class # properly escapes html
      */
@@ -77,9 +81,9 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       var fullyEscapedHtml = "&lt;p&gt;Hello &#34;person&#34; &amp;&amp; &#39;being&#39;&lt;/p&gt;";
       var halfEscapedHtml = fullyEscapedHtml + script;
 
-      expect(Utils.escapeHtml(unescapedHtml)).toEqual(fullyEscapedHtml);
-      expect(Utils.escapeHtml(halfEscapedHtml)).toEqual(fullyEscapedHtml + escapedScript);
-      expect(Utils.escapeHtml(fullyEscapedHtml)).toEqual(fullyEscapedHtml);
+      expectEscapeHtml(Utils.escapeHtml(unescapedHtml), fullyEscapedHtml);
+      expectEscapeHtml(Utils.escapeHtml(halfEscapedHtml), fullyEscapedHtml + escapedScript);
+      expectEscapeHtml(Utils.escapeHtml(fullyEscapedHtml), fullyEscapedHtml);
     });
 
     /**
@@ -90,10 +94,16 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       var numericText = "&#09;&#55203;";
       var hexText = "&#x09;#D7A3;";
 
-      expect(Utils.escapeHtml(alphabeticText)).toEqual(alphabeticText);
-      expect(Utils.escapeHtml(numericText)).toEqual(numericText);
-      expect(Utils.escapeHtml(hexText)).toEqual(hexText);
+      expectEscapeHtml(alphabeticText, alphabeticText);
+      expectEscapeHtml(numericText, numericText);
+      expectEscapeHtml(hexText, hexText);
     });
 
+    it("returns an empty string if it receives anything other than a string", function() {
+      var nonStringArray = [{question: "answer"}, 42, 42.7, null, undefined, function(){}, false];
+      for(var i = 0; i < nonStringArray.length; i++) {
+        expectEscapeHtml(nonStringArray[i], "");
+      }
+    });
   });
 });

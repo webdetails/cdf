@@ -1,6 +1,6 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
- * 
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
@@ -31,24 +31,27 @@ define([
   var urlParams = undefined;
 
   /**
-   * Escapes a string into an HTML safe string.
+   * Escapes a string as an HTML safe string.
    * It assumes that, if there is an escaped char in the
    * input then the input is fully escaped.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} input The string to be escaped.
-   * @return {string} The escaped string.
+   * @return {!string} The escaped string or an empty string if it receives anything other than a string.
    */
   Utils.escapeHtml = function(input) {
+    if(typeof input !== "string") {
+      Logger.warn("escapeHtml expects string values, returning an empty string");
+      return "";
+    }
     // using Negative Lookahead when replacing '&' to make sure we don't
     // double escape
-    var escaped = input
+    return input
     .replace(/&(?!#([0-9][0-9]?[0-9]?[0-9]?[0-9]?);)(?!([a-zA-Z]{2,8});)(?!#x[A-F0-9][A-F0-9][A-F0-9]?[A-F0-9]?;)/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/'/g, "&#39;")
     .replace(/"/g, "&#34;");
-    return escaped;
   };
 
   /**
