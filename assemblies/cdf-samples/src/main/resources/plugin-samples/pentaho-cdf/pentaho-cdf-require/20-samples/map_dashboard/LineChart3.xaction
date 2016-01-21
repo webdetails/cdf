@@ -85,7 +85,7 @@
 					INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE
 					{condition}
 					GROUP BY
-					CONCAT( MONTH(ORDERS.ORDERDATE), YEAR(ORDERS.ORDERDATE));
+					CONCAT(CONCAT( YEAR(ORDERS.ORDERDATE),'-' ),MONTH(ORDERS.ORDERDATE));
 					]]></query>  
 				<live><![CDATA[true]]></live> 
 			</component-definition> 
