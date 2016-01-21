@@ -1,0 +1,40 @@
+<div class="container">
+    <div class="span-24"><h1>Custom Dashboard Sample</h1></div>
+    <div class="span-24"><p>
+        You can create custom dashboard types. This sample serves as an example on how to create your own custom dashboard type.
+    </p></div>
+    <div class="span-24"><p>
+        The file <a href="./myDashboard.js">myDashboard.js</a> defines an anonymous AMD module that returns a function that allows to create dashboards of a custom type based on the Blueprint dashboard type. Alternatively the Clean or Bootstrap types could have been used.
+        In this case the dashboard was extended with a customize function.
+    </p></div>
+    <div class="span-24"><h4>The content of the myDashboard.js file is the following:</h4></div>
+    <div class="span-24"><code>
+        define(['cdf/Dashboard.Blueprint', 'cdf/lib/jquery'], function(Dashboard, $) {<br>
+        &nbsp;&nbsp;return Dashboard.extend({<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;customize: function() {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$("#sampleObj").html("the dashboard customize function generated this message");<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+        &nbsp;&nbsp;});<br>
+        });
+    </code></div>
+    <div class="span-24"><h2>Require</h2></div>
+    <div class="span-24"><h4>To create custom dashboards using the new myDashboard type you can do the following:</h4></div>
+    <div class="span-24"><code>
+        require(['./myDashboard'], function(Dashboard) {<br>
+          &nbsp;&nbsp;var dashboard = new Dashboard();<br>
+          &nbsp;&nbsp;dashboard.init();<br>
+          &nbsp;&nbsp;dashboard.customize();<br>
+        });
+    </code></div>
+    <div class="span-24"><br></div>
+    <div class="span-24"><h4>The following message is generated after executing the dashboard's customize function:</h4></div>
+    <div class="span-24"><div id="sampleObj"></div></div>
+</div>
+
+<script language="javascript" type="text/javascript">
+require(['./myDashboard'], function(Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.init();
+    dashboard.customize();
+});
+</script>

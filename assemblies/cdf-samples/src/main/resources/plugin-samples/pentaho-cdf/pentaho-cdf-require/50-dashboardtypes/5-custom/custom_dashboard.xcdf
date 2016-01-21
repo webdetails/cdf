@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-  <title>CleanDashboard</title>
+  <title>CustomDashboard</title>
   <author>Webdetails</author>
-  <description>CDF Clean Dashboard</description>
+  <description>CDF Custom dashboard</description>
   <icon></icon>
   <template>template.html</template>
   <style>mantle</style>
