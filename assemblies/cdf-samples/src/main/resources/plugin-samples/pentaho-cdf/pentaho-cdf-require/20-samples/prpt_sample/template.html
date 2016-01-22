@@ -9,7 +9,7 @@
 	</tr>
   <tr height="100%">
 		<td>
-				<div id="orderStatusPrptObject" style="height:100%; width:100%;"></div>
+				<div id="ProductNamePrptObject" style="height:100%; width:100%;"></div>
 		</td>
 	</tr>
 </table>
@@ -26,25 +26,22 @@ require([
   function(Dashboard, TextComponent, SelectComponent, PrptComponent) {
 
   dashboard = new Dashboard();
-  dashboard.addParameter("oStatus", "Shipped");
-
-  //var oStatus = "Shipped";
-
+  dashboard.addParameter("PROD_CODE");
   dashboard.addComponent(new TextComponent({
     name: "titleString",
     type: "text",
-    title: "Order Status",
-    listeners: ["oStatus"],
+    title: "Product Code",
+    listeners: ["PROD_CODE"],
     htmlObject: "titleObject",
     executeAtStart: true,
     expression: function() { return this.title; },
     preExecution:function() {
-      var oStatus = this.dashboard.getParameterValue("oStatus");
+      var PROD_CODE = this.dashboard.getParameterValue("PROD_CODE");
 
-    	if(oStatus != "null") {
-  		  this.title = "Shipping Status (" + oStatus + ")";
+    	if(PROD_CODE != "null") {
+  		  this.title = "Selected Product (" + PROD_CODE + ")";
   	  } else {
-  		  this.title = "Shipping Status";
+  		  this.title = "Selected Product";
   	  }
     },
     postExecution:function() {}
@@ -54,9 +51,9 @@ require([
   dashboard.addComponent(new SelectComponent({
     name: "statusSelector",
     type: "select",
-    parameter: "oStatus",
+    parameter: "PROD_CODE",
     parameters: [],
-    valuesArray: [ ["Shipped", "Shipped"], ["In Process", "In Process"]],
+    valuesArray: [["S18_3136", "S18_3136"],["S24_2011", "S24_2011"]],
     htmlObject: "selectStatusObject",
     executeAtStart: true,
     preExecution: function() {},
@@ -66,10 +63,10 @@ require([
   dashboard.addComponent(new PrptComponent({
     name: "orderStatus",
     type: "prpt",
-    path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
-    listeners: ["oStatus"],
-    parameters: [["oStatus", "oStatus", "Shipped"]],
-    htmlObject: "orderStatusPrptObject",
+    path: "/public/Steel Wheels/Widget Library/Reports/Product Sales.prpt",
+    listeners: ["PROD_CODE"],
+    parameters: [["PROD_CODE","PROD_CODE"]],
+    htmlObject: "ProductNamePrptObject",
     executeAtStart: true,
     postExecution: function() {}
   }));
