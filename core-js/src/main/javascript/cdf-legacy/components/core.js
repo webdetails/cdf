@@ -1006,6 +1006,9 @@ var UnmanagedComponent = BaseComponent.extend({
     if(userQueryOptions.pageSize){
       query.setPageSize(userQueryOptions.pageSize);
     }
+    if(userQueryOptions.searchPattern){
+      query.setSearchPattern(userQueryOptions.searchPattern);
+    }
     query.fetchData(this.parameters, handler, errorHandler);
   },
 

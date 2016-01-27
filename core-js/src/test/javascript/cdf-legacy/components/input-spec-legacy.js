@@ -66,14 +66,14 @@ describe("The Autocomplete Component #", function() {
       "Auto Canal+ Petit"
     ];
 
-    spyOn(autocompleteComponent, 'queryServer').and.callFake(function(){
-      this.result = [
+    spyOn(autocompleteComponent, 'queryServer').and.callFake(function(searchString, successCallback) {
+      successCallback([
         ["AV Stores, Co."],
         ["Anna's Decorations"],
         ["Auto Canal+ Petit"],
         ["Euro+ Shopping Channel"],
         ["La Rochelle Gifts"]
-      ]
+      ]);
     });
 
     var returnedList = [];
