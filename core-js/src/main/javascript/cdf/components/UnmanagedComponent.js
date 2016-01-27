@@ -574,8 +574,14 @@ define([
       query.setAjaxOptions(ajaxOptions);
 
       // Other Query Options
-      if(queryOptions && queryOptions.pageSize)
-        query.setPageSize(queryOptions.pageSize);
+      if(queryOptions) {
+        if(queryOptions.pageSize) {
+          query.setPageSize(queryOptions.pageSize);
+        }
+        if(queryOptions.searchPattern) {
+          query.setSearchPattern(queryOptions.searchPattern);
+        }
+      }
 
       return query;
     },

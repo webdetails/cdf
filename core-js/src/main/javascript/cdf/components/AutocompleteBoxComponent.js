@@ -62,15 +62,14 @@ define([
       if(!this.parameters) {
         this.parameters = [];
       }
+      var queryOpts = {};
 
-      if(_.isString(searchString)) {
-        this.searchParam =  searchString;
-      }
+      var searchParam = this.searchParam || "searchBox";
 
-      if(this.searchParam) {
-        this.parameters = [[this.searchParam, this._getInnerParameterName()]];
-      } else if(this.parameters.length > 0) {
-        this.parameters[0][1] = this._getInnerParameterName();
+      if(searchParam == "searchBox") {
+        queryOpts.searchPattern = searchString;
+      } else {
+        this.parameters.push([this.searchParam, searchString]);
       }
 
       if(this.maxResults) {
@@ -79,7 +78,7 @@ define([
       this.dashboard.setParameter(this._getInnerParameterName(), this._getTextBoxValue());
 
       if(this.queryDefinition) {
-        this.triggerQuery(this.queryDefinition, successCallback);
+        this.triggerQuery(this.queryDefinition, successCallback, queryOpts);
       } else {
         Logger.error("No query definition found");
       }
@@ -149,16 +148,14 @@ define([
         return false;
       }
 
-      this.processChange = this.processChange == null
-          ? function() {
-              myself.value = myself.selectedValues;
-              myself.dashboard.processChange(myself.name);
-            }
-          : function() {
-              myself.processChange();
-            };
-
       var myself = this;
+
+      if(!_.isFunction(this.processChange)) {
+        this.processChange = function() {
+          myself.value = myself.selectedValues;
+          myself.dashboard.processChange(myself.name);
+        }
+      }
 
       var isMultiple = this.selectMulti || false;
 
@@ -187,7 +184,7 @@ define([
       this.textbox.autocomplete(this._getOptions());
 
       this.ph.find('.autocomplete-container .ui-autocomplete').off('menuselect');
-      this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui){
+      this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui) {
           var checkbox = ui ? ui.item.find('input') : $(event.target).find('input');
           if(checkbox.length > 0) {
             checkbox.prop('checked', !checkbox.is(':checked'))
@@ -240,7 +237,7 @@ define([
 
     /**
      * Gets the values of the component options.
-     * 
+     *
      * @return {{appendTo: string, minLength: (AutocompleteBoxComponent.minTextLength|0), source: function, focus: function, open: function, close: function}}
      *   The component options.
      * @private

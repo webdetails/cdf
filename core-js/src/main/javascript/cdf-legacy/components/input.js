@@ -1305,7 +1305,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   }
 });
 
-var AutocompleteBoxComponent = BaseComponent.extend({
+var AutocompleteBoxComponent = UnmanagedComponent.extend({
 
   constructor: function(){
       this.base.apply(this, arguments)
@@ -1315,19 +1315,19 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   result: [],
 
 
-  queryServer: function(searchString) {
+  queryServer: function(searchString, successCallback) {
     if(!this.parameters) {
       this.parameters = [];
     }
 
-    if(_.isString(searchString)) {
-      this.searchParam =  searchString;
-    }
+    var queryOpts = {ajax: {async: false}}; //keeping the request synchronous
 
-    if(this.searchParam) {
-      this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
-    } else if (this.parameters.length > 0) {
-      this.parameters[0][1] = this.getInnerParameterName();
+    var searchParam = this.searchParam || "searchBox";
+
+    if(searchParam == "searchBox") {
+      queryOpts.searchPattern = searchString;
+    } else {
+      this.parameters.push([this.searchParam, searchString]);
     }
 
     if(this.maxResults) {
@@ -1335,7 +1335,11 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     }
 
     Dashboards.setParameter(this.getInnerParameterName(), this.getTextBoxValue());
-    QueryComponent.makeQuery(this);
+    if(this.queryDefinition) {
+      this.triggerQuery(this.queryDefinition, successCallback, queryOpts);
+    } else {
+      Dashboards.error("No query definition found");
+    }
   },
 
   getTextBoxValue: function() {
@@ -1362,22 +1366,34 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   },
 
   update: function() {
+    // Allow the component to be silent
+    if(this.lifecycle) { this.lifecycle.silent = this.silent === true; }
+    else { this.lifecycle = {silent: this.silent === true}; }
+
+    if(!this.preExec()) {
+      return;
+    }
+
+    if(!this.isSilent()) {
+      this.block();
+    }
+
     this.ph = this.placeholder().empty();
 
     if(this.ph.length === 0) {
       Dashboards.log("Placeholder not in DOM - Will not draw", "warn");
       return false;
     }
-    this.processChange = this.processChange == null ?
-        function() {
-          myself.value = myself.selectedValues;
-          Dashboards.processChange(myself.name);
-        } :
-        function() {
-          myself.processChange();
-        };
 
     var myself = this;
+
+    if(!_.isFunction(this.processChange)) {
+      this.processChange = function() {
+        myself.value = myself.selectedValues;
+        Dashboards.processChange(myself.name);
+      }
+    }
+
     var isMultiple = this.selectMulti || false;
 
 
@@ -1441,6 +1457,11 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     });
 
     this.setInitialValue();
+
+    this.postExec();
+    if(!this.isSilent()) {
+      this.unblock();
+    }
   },
 
   getOptions: function() {
@@ -1535,21 +1556,21 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   search: function(search, callback) {
     var matchType = this.matchType || 'fromStart';
     var val = search.term.toLowerCase();
-    this.queryServer(val);
+    this.queryServer(val, function(data) {
+      var result = data.resultset ? data.resultset : data;
+      var list = [];
 
-    var result = this.result;
-    var list = [];
-
-    for(var p in result) if(result.hasOwnProperty(p)) {
-      var value = result[p][0];
-      if(value != null &&
-          (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0) ||
-          (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
-        list.push(value);
+      for(var p in result) if(result.hasOwnProperty(p)) {
+        var value = result[p][0];
+        if(value != null &&
+            (matchType === 'fromStart' && value.toLowerCase().indexOf(val) == 0) ||
+            (matchType === 'all' && value.toLowerCase().indexOf(val) > -1)) {
+          list.push(value);
+        }
       }
-    }
 
-    callback(list);
+      callback(list);
+    });
   },
 
   endSearch: function() {
