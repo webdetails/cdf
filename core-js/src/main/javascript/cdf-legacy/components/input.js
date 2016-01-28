@@ -1325,9 +1325,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     }
 
     if(this.searchParam) {
-      this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
-    } else if (this.parameters.length > 0) {
-      this.parameters[0][1] = this.getInnerParameterName();
+      this.parameters.push([this.searchParam, this.getInnerParameterName()]);
     }
 
     if(this.maxResults) {
@@ -1368,16 +1366,17 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       Dashboards.log("Placeholder not in DOM - Will not draw", "warn");
       return false;
     }
-    this.processChange = this.processChange == null ?
-        function() {
-          myself.value = myself.selectedValues;
-          Dashboards.processChange(myself.name);
-        } :
-        function() {
-          myself.processChange();
-        };
 
+    this.defaultParameters = _.isArray(this.parameters) ? this.parameters.slice() : [];
     var myself = this;
+
+    if(!_.isFunction(this.processChange)) {
+      this.processChange = function() {
+        myself.value = myself.selectedValues;
+        myself.dashboard.processChange(myself.name);
+      }
+    }
+
     var isMultiple = this.selectMulti || false;
 
 
@@ -1539,6 +1538,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
     var result = this.result;
     var list = [];
+    this.parameters = this.defaultParameters.slice();
 
     for(var p in result) if(result.hasOwnProperty(p)) {
       var value = result[p][0];
