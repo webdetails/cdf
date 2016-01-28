@@ -42,31 +42,40 @@ define([
       }
     });
 
-    var autocompleteBox = new AutocompleteBoxComponent({
-      name: "autocompleteBox",
-      type: "autocompleteBox",
-      matchType: "fromStart",
-      queryDefinition: {dataSource: "clientQuery"},
-      selectMulti: true,
-      showApplyButton: true,
-      minTextLength: 0,
-      scrollHeight: 250,
-      parameter: "autocompleteBoxParameter",
-      htmlObject: "sampleObjectAutocompleteBox",
-      reloadOnUpdate: true,
-      autoUpdateTimeout: 3000,
-      executeAtStart: true,
-      autoUpdateFunction: function() {
-        if(!this.dashboard.getParameterValue(this.parameter)) {
-          this.dashboard.setParameter(this.parameter, "");
-        }
-        var inputValue = this._getTextBoxValue();
-        if(this.dashboard.getParameterValue(this.parameter) != inputValue) {
-          this.dashboard.setParameter(this.parameter, inputValue);
-          this.dashboard.update(this);
-        }
-      }
+    dashboard.addDataSource("cdaTestQuery", {
+      dataAccessId: "dummy",
+      path: "dummy/path"
     });
+
+    var getNewAutocompleteBoxComponent = function(options) {
+      return new AutocompleteBoxComponent($.extend(true, {
+        name: "autocompleteBox",
+        type: "autocompleteBox",
+        matchType: "fromStart",
+        queryDefinition: {dataSource: "clientQuery"},
+        selectMulti: true,
+        showApplyButton: true,
+        minTextLength: 0,
+        scrollHeight: 250,
+        parameter: "autocompleteBoxParameter",
+        htmlObject: "sampleObjectAutocompleteBox",
+        reloadOnUpdate: true,
+        autoUpdateTimeout: 3000,
+        executeAtStart: true,
+        autoUpdateFunction: function() {
+          if(!this.dashboard.getParameterValue(this.parameter)) {
+            this.dashboard.setParameter(this.parameter, "");
+          }
+          var inputValue = this._getTextBoxValue();
+          if(this.dashboard.getParameterValue(this.parameter) != inputValue) {
+            this.dashboard.setParameter(this.parameter, inputValue);
+            this.dashboard.update(this);
+          }
+        }
+      }, options));
+    }
+
+    var autocompleteBox = getNewAutocompleteBoxComponent();
     var $htmlObject = $('<div />').attr('id', autocompleteBox.htmlObject);
 
     dashboard.addComponent(autocompleteBox);
@@ -157,5 +166,35 @@ define([
       expect(typeof options.close).toEqual('function');
     });
 
+    /**
+     * ## The Autocomplete Component # Sends parameters to the query
+     */
+    it("Sends parameters to the query", function(done) {
+      var params = [["param1", "value1"], ["param2", "value2"]];
+      var auto = getNewAutocompleteBoxComponent({
+        name: "auto",
+        htmlObject: "autocompleteBoxComponentCdaQuery",
+        parameters: params,
+        queryDefinition: {
+          dataSource: "cdaTestQuery"
+        }
+      });
+
+      var $htmlObject = $('<div />').attr('id', auto.htmlObject);
+      $("body").append($htmlObject);
+      dashboard.addComponent(auto);
+
+      spyOn($, "ajax").and.callFake(function(queryParameters) {
+        expect(queryParameters.data["param" + params[0][0]]).toEqual(params[0][1]);
+        expect(queryParameters.data["param" + params[1][0]]).toEqual(params[1][1]);
+        $htmlObject.remove();
+        done();
+      });
+
+      auto.once("cdf:postExecution", function() {
+        auto._search({term:'searchTerm'}, function(list) {});
+      });
+      dashboard.updateAll([auto]);
+    });
   });
 });
