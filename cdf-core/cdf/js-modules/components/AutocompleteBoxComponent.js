@@ -40,15 +40,11 @@ define([
       }
 
       if(_.isString(searchString)) {
-        this.searchParam =  searchString;
+        this.searchParam = searchString;
       }
-
       if(this.searchParam) {
-        this.parameters = [[this.searchParam, this._getInnerParameterName()]];
-      } else if(this.parameters.length > 0) {
-        this.parameters[0][1] = this._getInnerParameterName();
+        this.parameters.push([this.searchParam, this._getInnerParameterName()]);
       }
-
       if(this.maxResults) {
         this.queryDefinition.pageSize = this.maxResults;
       }
@@ -124,17 +120,15 @@ define([
         Logger.warn("Placeholder not in DOM - Will not draw");
         return false;
       }
-
-      this.processChange = this.processChange == null
-          ? function() {
-              myself.value = myself.selectedValues;
-              myself.dashboard.processChange(myself.name);
-            }
-          : function() {
-              myself.processChange();
-            };
-
+      this.defaultParameters = _.isArray(this.parameters) ? this.parameters.slice() : [];
       var myself = this;
+
+      if(!_.isFunction(this.processChange)) {
+        this.processChange = function() {
+          myself.value = myself.selectedValues;
+          myself.dashboard.processChange(myself.name);
+        }
+      }
 
       var isMultiple = this.selectMulti || false;
 
@@ -163,7 +157,7 @@ define([
       this.textbox.autocomplete(this._getOptions());
 
       this.ph.find('.autocomplete-container .ui-autocomplete').off('menuselect');
-      this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui){
+      this.ph.find('.autocomplete-container .ui-autocomplete').on('menuselect', function(event, ui) {
           var checkbox = ui ? ui.item.find('input') : $(event.target).find('input');
           if(checkbox.length > 0) {
             checkbox.prop('checked', !checkbox.is(':checked'))
@@ -331,9 +325,11 @@ define([
     _search: function(search, callback) {
       var matchType = this.matchType || 'fromStart';
       var val = search.term.toLowerCase();
+      var myself = this;
 
       this._queryServer(val, function(data) {
 
+        myself.parameters = myself.defaultParameters.slice();
         var result = data.resultset ? data.resultset : data;
         var list = [];
 

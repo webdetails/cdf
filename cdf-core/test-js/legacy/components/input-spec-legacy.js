@@ -6,12 +6,14 @@ describe("The Autocomplete Component #", function() {
   var myDashboard = _.extend({}, Dashboards);
   myDashboard.addParameter('autocompleteTestParameter', 1);
 
+  var autocompleteParameters =[["param1", "value1"], ["param2", "value2"]];
   var autocompleteComponent = window.AutocompleteBoxComponent = new AutocompleteBoxComponent();
   $.extend(autocompleteComponent, {
     name: "autocompleteComponent",
     type: "AutoCompleteBoxComponent",
     htmlObject: 'autocompleteComponent',
     parameter: "autocompleteTestParameter",
+    parameters: autocompleteParameters,
     matchType: "fromStart",
     selectMulti: true,
     showApplyButton: true,
@@ -20,6 +22,10 @@ describe("The Autocomplete Component #", function() {
     reloadOnUpdate:true,
     autoUpdateTimeout:3000,
     executeAtStart: true,
+    queryDefinition: {
+      dataAccessId: "dummy",
+      path: "dummy/path"
+    },
     autoUpdateFunction: function(){
       if(!autocompleteTestParameter){
         autocompleteTestParameter="";
@@ -119,6 +125,18 @@ describe("The Autocomplete Component #", function() {
     expect(typeof options.focus).toEqual('function');
     expect(typeof options.open).toEqual('function');
     expect(typeof options.close).toEqual('function');
+  });
+
+  /**
+   * ## The Autocomplete Component # Sends parameters to the query
+   */
+  it("Sends parameters to the query", function(done) {
+    spyOn($, "ajax").and.callFake(function(queryParameters) {
+      expect(queryParameters.data["param" + autocompleteParameters[0][0]]).toEqual(autocompleteParameters[0][1]);
+      expect(queryParameters.data["param" + autocompleteParameters[1][0]]).toEqual(autocompleteParameters[1][1]);
+      done();
+    });
+    autocompleteComponent.search({term:'searchTerm'}, function(){});
   });
 });
 
