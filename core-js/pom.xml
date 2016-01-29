@@ -5,7 +5,7 @@
   <parent>
     <artifactId>cdf-plugin</artifactId>
     <groupId>pentaho</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.0-16.01.22</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -23,6 +23,7 @@
       <groupId>pentaho</groupId>
       <artifactId>ccc</artifactId>
       <type>zip</type>
+      <version>16.01.22</version>
     </dependency>
   </dependencies>
 

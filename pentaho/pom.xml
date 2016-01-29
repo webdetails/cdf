@@ -5,7 +5,7 @@
   <parent>
     <artifactId>cdf-plugin</artifactId>
     <groupId>pentaho</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.0-16.01.22</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +13,7 @@
 
   <properties>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
-    <dependency.pentaho-platform.revision>${project.version}</dependency.pentaho-platform.revision>
+    <dependency.pentaho-platform.revision>6.0.0.0-353</dependency.pentaho-platform.revision>
     <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
