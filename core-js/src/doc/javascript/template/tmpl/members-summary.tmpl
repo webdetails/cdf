@@ -1,0 +1,33 @@
+<?js
+var members = obj;
+var self = this;
+?>
+
+<table class="api-ref-table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?js
+        var self = this;
+        members.forEach(function(member) {
+            if(!member) { return; }
+            ?>
+            <tr class="<?js= member.access != null ? member.access : 'public' ?> <?js= member.deprecated ? 'deprecated' : '' ?> <?js= member.inherited ? 'inherited' : '' ?>">
+                <td> 
+                    <a href="#<?js= member.name + '_anchor' ?>"> <?js= member.name ?> </a>
+                    :
+                    <?js= self.partial('type.tmpl', member.type.names) ?> 
+                    <?js= self.partial('modifiers.tmpl', member) ?>  
+                </td>
+                <td> <?js= member.summary ?> </td>
+            </tr>
+
+            <?js }); ?>
+        </tbody>
+</table>
+
