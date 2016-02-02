@@ -1,0 +1,39 @@
+<?js
+var methods = obj;
+?>
+
+<table class="api-ref-table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?js
+        var self = this;
+        if(methods) {
+          methods.forEach(function(method) {
+            if(!method) { return; }
+            ?>
+            <tr class="<?js= method.access != null ? method.access : 'public' ?> <?js= method.deprecated ? 'deprecated' : '' ?> <?js= method.inherited ? 'inherited' : '' ?>">
+              <td> 
+                <a href="#<?js= method.name+'_anchor' ?>"> <?js= method.name + (method.signature || '') ?> 
+                </a>
+                <?js if (method.returns && method.returns.length) { ?>
+                :
+                    <?js method.returns.forEach(function(r, i) { ?>
+                      <?js= self.partial('type.tmpl', r.type.names) ?>
+                      <?js if (i < method.returns.length-1) { ?>|<?js } ?>
+                    <?js });
+                  } ?>
+                <?js= self.partial('modifiers.tmpl', method) ?>  
+              </td>
+              <td> <?js= method.summary ?> </td>          
+            </tr>
+        <?js }); 
+        }?>           
+    </tbody>
+</table>
+

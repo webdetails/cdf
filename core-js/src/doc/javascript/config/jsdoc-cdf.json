@@ -7,23 +7,16 @@
     "exclude": ["${basedir}/src/main/javascript/cdf-legacy", "${basedir}/src/main/javascript/lib"],
     "includePattern": ".+\\.js(doc)?$"
   },
-  "plugins": ["plugins/markdown"],
+  "plugins": [
+    "plugins/markdown",
+    "${basedir}/src/doc/javascript/config/customPlugins/defineTags"
+  ],
   "templates": {
     "cleverLinks": true,
-    "monospaceLinks": false,
-    "default": {
-      "outputSourceFiles": true,
-      "includeDate": true,
-      "layoutFile": "${basedir}/src/doc/javascript/template/layout.tmpl",
-      "staticFiles": {
-        "include": [
-          "${basedir}/src/doc/javascript/template/static"
-        ]
-      }
-    }
+    "monospaceLinks": false
   },
   "opts": {
-    "template": "templates/default",
+    "template": "${basedir}/src/doc/javascript/template",
     "encoding": "utf8",
     "recurse": true,
     "private": true,

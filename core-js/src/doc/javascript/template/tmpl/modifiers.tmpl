@@ -1,0 +1,29 @@
+<?js
+var data = obj;
+
+function isPrivate(){ return data.access == "private"; }
+function isDeprecated(){ return data.deprecated; }
+function isConstant(){ return data.kind == "constant"; }
+function isAbstract(){ return data.virtual; }
+function isStatic(){ return data.scope == "static"; }
+function needsModifiers(){ return isPrivate() || isDeprecated() || isConstant() || isAbstract() || isStatic(); }
+?>
+
+<?js if( needsModifiers() ) { ?>
+  <br>
+  <?js if( isPrivate() ){ ?>
+  	<?js= this.partial('modifier.tmpl', "Private") ?>
+  <?js } ?> 
+  <?js if( isDeprecated() ){ ?>
+    <?js= this.partial('modifier.tmpl', "Deprecated") ?>
+  <?js } ?>      
+  <?js if( isConstant() ){ ?>
+    <?js= this.partial('modifier.tmpl', "Constant") ?>
+  <?js } ?>   
+  <?js if( isAbstract() ){ ?>
+    <?js= this.partial('modifier.tmpl', "Abstract") ?>
+  <?js } ?> 
+  <?js if( isStatic() ){ ?>
+    <?js= this.partial('modifier.tmpl', "Static") ?>
+  <?js } ?> 
+<?js } ?>
