@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -32,8 +32,8 @@ define([
      * {@link cdf.Clean|Clean}.
      * 
      * @constructs
-     * @extends external:Base
-     * @extends external:Backbone.Events
+     * @extends {@link http://dean.edwards.name/weblog/2006/03/base/|Base}
+     * @extends {@link http://backbonejs.org/#Events|Backbone.Events}
      * @classdesc Base abstract dashboard class.
      * @param {Object} options Object that can contain the context, storage and view.
      */
