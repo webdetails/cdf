@@ -1,0 +1,48 @@
+<?js
+var data = obj;
+var self = this;
+?>
+
+<p>
+    <a id="<?js= id+'_anchor' ?>" name="<?js= id+'_anchor' ?>"></a>
+</p>
+
+<table class="<?js= data.access != null ? data.access : 'public' ?> <?js= data.deprecated ? 'deprecated' : '' ?> <?js= data.inherited ? 'inherited' : '' ?>">
+    <thead>
+        <tr>
+            <th>
+                <?js= id ?>: <code> <?js= self.partial('type.tmpl', data.type.names) ?> </code>
+                <?js= self.partial('modifiers.tmpl', data) ?>  
+            </th>
+        </tr>    
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>
+                <?js if(!data.description){ ?>
+                    <?js= data.summary ?> 
+                <?js } else { ?>
+                    <?js= data.description ?>
+                <?js } ?>
+                </p>
+
+                <?js if (data.meta) {?>
+                    <p>
+                        <strong>Source: </strong> <?js= self.linkto(meta.shortpath) ?>, <?js= self.linkto(meta.shortpath, 'line ' + meta.lineno, null, 'line' + meta.lineno) ?>
+                    </p>
+                <?js } ?>                
+                <?js if (data.inherited && data.inherits && !data.overrides) { ?>
+                    <p>
+                        <strong>Inherited from: </strong><?js= this.linkto(data.inherits, this.htmlsafe(data.inherits)) ?>
+                    </p>
+                <?js } ?>
+                <?js if (data.defaultvalue) {?>
+                    <p>
+                        <strong>Default Value: </strong> <?js= data.defaultvalue ?>
+                    </p>
+                <?js } ?>
+            </td>
+        </tr>
+    </tbody>
+</table>

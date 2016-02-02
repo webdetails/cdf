@@ -1,0 +1,12 @@
+<?js
+var data = obj;
+var self = this;
+?>
+<?js if(data.amd != null) { ?>
+	<p>
+		<strong>AMD Module</strong>
+	</p>
+	<pre class="prettyprint">
+		<code>require("<?js= data.amd.value ?>", function(<?js= data.name ?>){ /* code goes here */ });</code>
+	</pre>
+<?js } ?>
