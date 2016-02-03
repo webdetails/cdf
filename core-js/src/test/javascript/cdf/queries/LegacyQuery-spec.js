@@ -14,10 +14,10 @@
 define(["cdf/Dashboard.Clean"], function(Dashboard) {
 
   // legacy queries executes eval on data strings
-  var unprocessedDataString = '{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}',
-      unprocessedData = {metadata: [{colIndex : 0, colType : 'String', colName : 'Name'},
-                                    {colIndex : 1, colType : 'String', colName : 'Sales'}],
-                         resultset: [['Euro+ Shopping Channel', '914.11'], ['Mini Gifts Ltd.', '6558.02']]},
+  var unprocessedDataString = "{\"metadata\":[\"Sales\"],\"values\":[[\"Euro+ Shopping's Channel\",\"914.11\"],[\"Mini Gifts Ltd.\",\"6558.02\"]]}",
+      unprocessedData = {metadata: [{colIndex : 0, colType : "String", colName : "Name"},
+                                    {colIndex : 1, colType : "String", colName : "Sales"}],
+                         resultset: [["Euro+ Shopping's Channel", "914.11"], ["Mini Gifts Ltd.", "6558.02"]]},
       processedData = {data: [1, 2, 3]},
       dashboard,
       legacyQuery;
@@ -47,6 +47,30 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
 
         expect(legacyQuery.getOption("lastResultSet")).toEqual(unprocessedData);
         expect(legacyQuery.getOption("lastProcessedResultSet")).toEqual(processedData);
+      });
+    });
+
+    describe("Legacy query # lastResultSet.reader", function() {
+
+      describe("when passing well-formed json object's string representation", function() {
+
+        it("should parse it successfully", function() {
+          var actual = legacyQuery.interfaces.lastResultSet.reader(unprocessedDataString);
+          expect(actual).toEqual(unprocessedData);
+        });
+      });
+
+      describe("when passing malicious code", function() {
+
+        it("it should not be executed; instead SyntaxError should be thrown", function() {
+          var f = { inject: function() {/* dummy*/} };
+          spyOn(f, "inject");
+          var malicious = "f.inject()";
+
+          var call = function() { legacyQuery.interfaces.lastResultSet.reader(malicious); };
+          expect(call).toThrowError(SyntaxError);
+          expect(f.inject).not.toHaveBeenCalled();
+        });
       });
     });
 
