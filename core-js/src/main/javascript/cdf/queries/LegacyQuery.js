@@ -53,7 +53,8 @@ define([
     interfaces: {
       lastResultSet: {
         reader: function(json) {
-          json = eval("(" + json + ")");
+          json = JSON.parse(json);
+
           var result = {
             metadata: [makeMetadataElement(0)],
             resultset: json.values || []

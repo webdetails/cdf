@@ -37,6 +37,10 @@
             array. It will return false if there is an error.
 */
 
+/*
+ * This file was changed to replace unsafe eval() calls with more appropriate JSON.parse()
+ */
+
 SimileAjax.JSON = new Object();
 
 (function () {
@@ -129,12 +133,16 @@ SimileAjax.JSON = new Object();
             return o.toString();
         }
     };
+
+    var parseFunc = (typeof JSON !== 'undefined' && typeof JSON.parse === 'function')
+      ? JSON.parse
+      : function(val) { return eval('('+ val +')'); }
     
     SimileAjax.JSON.parseJSON = function () {
         try {
             return !(/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(
                     this.replace(/"(\\.|[^"\\])*"/g, ''))) &&
-                eval('(' + this + ')');
+                parseFunc(this);
         } catch (e) {
             return false;
         }
