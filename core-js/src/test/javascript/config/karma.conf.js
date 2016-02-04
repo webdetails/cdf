@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -36,7 +36,7 @@ module.exports = function(config) {
       'src/test/javascript/config/karma.main.config.js',
       {pattern: 'src/test/javascript/cdf/**/*.ext.js', included: true},
       // fix 404 messages
-      {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: true, served: true},
+      {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/**/*.png', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/**/*.gif', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true}
