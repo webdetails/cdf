@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -30,7 +30,7 @@ define([
 
     /**
      * @constructs
-     * @extends external:Base
+     * @extends {@link http://dean.edwards.name/weblog/2006/03/base/|Base}
      * @extends cdf.Logger
      * @amd cdf/components/filter/strategies/AbstractSelect
      * @classdesc Base class for handling the selection logic, for instance:

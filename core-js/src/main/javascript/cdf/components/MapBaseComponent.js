@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -9,20 +9,6 @@
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
  * the license for the specific language governing your rights and limitations.
- */
-
-/**
- * The OpenLayers library. A high-performance, feature-packed library for all your mapping needs.
- * @external OpenLayers
- * @see {@link http://openlayers.org/}
- * @ignore
- */
-
-/**
- * The OpenLayers library. A high-performance, feature-packed library for all your mapping needs.
- * @external OpenLayers.LonLat
- * @see {@link http://dev.openlayers.org/docs/files/OpenLayers/BaseTypes/LonLat-js.html}
- * @ignore
  */
 
 define([
@@ -61,10 +47,14 @@ define([
     use_mercator: false,
 
     /** 
-     * Converts an {@link external:OpenLayers.LonLat|OpenLayers.LonLat} object using the Mercator formula.
+     * Converts an
+     * {@link http://dev.openlayers.org/docs/files/OpenLayers/BaseTypes/LonLat-js.html|OpenLayers.LonLat}
+     * object using the Mercator formula.
      *
-     * @param {external:OpenLayers.LonLat} ll The coordinate object.
-     * @return {external:OpenLayers.LonLat} The transformed coordinates.
+     * @param {@link http://dev.openlayers.org/docs/files/OpenLayers/BaseTypes/LonLat-js.html|OpenLayers.LonLat} ll
+     * The coordinate object.
+     * @return {@link http://dev.openlayers.org/docs/files/OpenLayers/BaseTypes/LonLat-js.html|OpenLayers.LonLat}
+     * The transformed coordinates.
      */
     lonLatToMercator: function(ll) {
       var lon = ll.lon * 20037508.34 / 180;

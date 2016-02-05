@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -33,7 +33,7 @@ define([
      * @type {Object}
      * @property {string}   template    Ok popup template.
      * @property {Object}   defaults    Ok popup default values.
-     * @property {Object}   $el         A {@link external:jQuery|jQuery} object referencing a DOM element.
+     * @property {Object}   $el         A {@link http://api.jquery.com/|jQuery} object referencing a DOM element.
      * @property {function} show        Function that shows the ok popup.
      * @property {function} hide        Function that hides the ok popup.
      * @property {function} render      Function that renders the ok popup.

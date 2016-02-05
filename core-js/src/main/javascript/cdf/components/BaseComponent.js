@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -120,7 +120,7 @@ define([
      * @description Getter for the component's html object. Returns the jquery element that represents it
      *
      * @param {string} selector Optional selector to use inside the html object.
-     * @return {jQuery|string} A {@link external:jQuery|jQuery} object that references the matched
+     * @return {jQuery|string} A {@link http://api.jquery.com/|jQuery} object that references the matched
      *                  DOM elements or a new object if no match is found.
      */
     placeholder: function(selector) {
@@ -167,7 +167,7 @@ define([
      * adds the target object as listener for all events in the list.
      *
      * @param {cdf.components.BaseComponent} target The target BaseComponent object.
-     * @param {external:Backbone.Events[]}   events Event list to copy.
+     * @param {Backbone.Events[]} events {@link http://backbonejs.org/#Events|Backbone.Events} list to copy.
      */
     copyEvents: function(target, events) {
       _.each(events, function(evt, evtName) {

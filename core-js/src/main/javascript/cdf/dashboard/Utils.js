@@ -365,7 +365,7 @@ define([
 
   /**
    * Deep clones an object. This method is deprecated, use
-   * {@link external:jQuery.extend|jQuery.extend(true, {}, obj)}.
+   * {@link http://api.jquery.com/jquery.extend/|jQuery.extend}.
    *
    * @memberof cdf.dashboard.Utils
    * @param {object} obj The object to clone.

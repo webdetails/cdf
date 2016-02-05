@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -330,10 +330,10 @@ define([
 
     /**
      * Fails execution of the component, given an error object or the arguments of a
-     * {@link external:jQuery.ajax|jQuery.ajax} error callback.<br>
+     * {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.<br>
      * This method handles parsing, signaling and logging of the error and unblocking the UI, if necessary.
      *
-     * @param {object|*} arg An error object or the arguments of a {@link external:jQuery.ajax|jQuery.ajax} error callback.
+     * @param {object|*} arg An error object or the arguments of a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
      */
     failExec: function(arg) {
       // NOTE: #error() already unblocks
@@ -492,7 +492,7 @@ define([
      *   <li>{@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}({url: url, data: params, ...}, callback);</li>
      *   <li>{@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}({url: url, data: params, ...}, callback, ajaxParameters);</li>
      * </ul>
-     * In the second case, you can add any other {@link external:jQuery.ajax|jQuery.ajax} parameters you desire to the
+     * In the second case, you can add any other {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} parameters you desire to the
      * object, but <code>callback</code> will take control over the success and error callbacks.
      * If passed, the supplied _ajaxParameters_ will be passed to the default ajax call.
      *
@@ -529,7 +529,7 @@ define([
      * Ending the execution, is the responsibility of the specified callback, by calling
      * {@link cdf.components.UnmanagedComponent#endExec|endExec}, resulting in: <code>{@link cdf.components.UnmanagedComponent#postExec|postExec} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional) or {@link cdf.components.UnmanagedComponent#failExec|failExec} </code>.
      *
-     * @param {object}  ajaxParameters Parameters for {@link external:jQuery.ajax|jQuery.ajax},
+     * @param {object}  ajaxParameters Parameters for {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax},
      *   including, at a minimum, the `url` option. {@link cdf.components.UnmanagedComponent#beginAjax|beginAjax} will
      *   take control over the `success` and `error` callbacks, and default `async` to `true`.
      * @param {string} ajaxParameters.url URL to call.
@@ -556,8 +556,8 @@ define([
      *
      * @param {object} queryDef The query definition object.
      * @param {object} [queryOptions] Query options object.
-     * @param {object} [queryOptions.ajax] Options passed to {@link external:jQuery.ajax|jQuery.ajax}.
-     *   The {@link external:jQuery.ajax|jQuery.ajax} options _data_, _url_, _error_ and _success_ are reserved.
+     * @param {object} [queryOptions.ajax] Options passed to {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax}.
+     *   The {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options _data_, _url_, _error_ and _success_ are reserved.
      * @param {number} [queryOptions.pageSize] The page size of paginated results.
      * @return {BaseQuery} The query object.
      *
@@ -643,7 +643,7 @@ define([
     },
 
     /**
-     * Gets an error handler suitable for use as a {@link external:jQuery.ajax|jQuery.ajax} error callback or a
+     * Gets an error handler suitable for use as a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback or a
      * try/catch handler.<br>
      * This method returns a `this` free version of the {@link cdf.components.UnmanagedComponent#failExec|failExec}
      * method.

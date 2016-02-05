@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -53,7 +53,7 @@ define([
      * @param {string} opts.kettleOutput Output type.
      * @param {string} opts.stepName     The target step name.
      * @param {object} opts.systemParams System parameters.
-     * @param {object} opts.ajaxOptions  {@link external:jQuery|jQuery.ajax} options.
+     * @param {object} opts.ajaxOptions  {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options.
      */
     init: function(opts) {
       if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {

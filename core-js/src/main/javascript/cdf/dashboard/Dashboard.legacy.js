@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -76,7 +76,7 @@ define([
     /**
      * Executes an Ajax request. If no `func` callback is provided it executes asynchronously
      * and returns a jQuery XMLHttpRequest ({@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR})
-     * object. Otherwise, it executes {@link external:jQuery.ajax|jQuery.ajax} synchronously and
+     * object. Otherwise, it executes {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} synchronously and
      * returns the result of the HTTP request.
      *
      * @param {string}   returnType The expected return type.
