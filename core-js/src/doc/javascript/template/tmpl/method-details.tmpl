@@ -45,7 +45,6 @@ var self = this;
                     </p>
                 <?js } ?>
                 <?js if (data.params && params.length) { ?>
-                    <p><strong>Parameters:</strong></p>
                     <?js= this.partial('params.tmpl', params) ?>
                 <?js } ?>
 
@@ -90,16 +89,19 @@ var self = this;
                 } } ?>
 
                 <?js if (data.returns && returns.length) { ?>
-                    <p><strong>Returns:</strong></p>
-                    <?js if (returns.length > 1) { ?><ul><?js
-                        returns.forEach(function(r) { ?>
-                            <li><?js= self.partial('returns.tmpl', r) ?></li>
-                        <?js });
-                    ?></ul><?js } else {
-                        returns.forEach(function(r) { ?>
-                            <?js= self.partial('returns.tmpl', r) ?>
-                        <?js });
-                } } ?>
+                    <p>
+                        <strong>Returns:</strong>
+                        <?js if (returns.length > 1) { ?><ul><?js
+                            returns.forEach(function(r) { ?>
+                                <li><?js= self.partial('returns.tmpl', r) ?></li>
+                            <?js });
+                        ?></ul><?js } else {
+                            returns.forEach(function(r) { ?>
+                                <?js= self.partial('returns.tmpl', r) ?>
+                            <?js });
+                        } ?> 
+                    </p>
+                <?js } ?>
 
                 <?js if (data.examples && examples.length) { ?>
                     <p><strong>Example<?js= examples.length > 1? 's':'' ?></strong></p>
