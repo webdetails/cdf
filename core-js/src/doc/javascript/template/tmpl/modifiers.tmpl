@@ -10,20 +10,21 @@ function needsModifiers(){ return isPrivate() || isDeprecated() || isConstant() 
 ?>
 
 <?js if( needsModifiers() ) { ?>
-  <br>
-  <?js if( isPrivate() ){ ?>
-  	<?js= this.partial('modifier.tmpl', "Private") ?>
-  <?js } ?> 
-  <?js if( isDeprecated() ){ ?>
-    <?js= this.partial('modifier.tmpl', "Deprecated") ?>
-  <?js } ?>      
-  <?js if( isConstant() ){ ?>
-    <?js= this.partial('modifier.tmpl', "Constant") ?>
-  <?js } ?>   
-  <?js if( isAbstract() ){ ?>
-    <?js= this.partial('modifier.tmpl', "Abstract") ?>
-  <?js } ?> 
-  <?js if( isStatic() ){ ?>
-    <?js= this.partial('modifier.tmpl', "Static") ?>
-  <?js } ?> 
+  <div>
+    <?js if( isPrivate() ){ ?>
+    	<?js= this.partial('modifier.tmpl', "Private") ?>
+    <?js } ?> 
+    <?js if( isDeprecated() ){ ?>
+      <?js= this.partial('modifier.tmpl', "Deprecated") ?>
+    <?js } ?>      
+    <?js if( isConstant() ){ ?>
+      <?js= this.partial('modifier.tmpl', "Constant") ?>
+    <?js } ?>   
+    <?js if( isAbstract() ){ ?>
+      <?js= this.partial('modifier.tmpl', "Abstract") ?>
+    <?js } ?> 
+    <?js if( isStatic() ){ ?>
+      <?js= this.partial('modifier.tmpl', "Static") ?>
+    <?js } ?> 
+  </div>
 <?js } ?>
