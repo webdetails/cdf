@@ -367,18 +367,11 @@ define([
       }
     },
 
-    /**
-     * The executor function. Function is called with this component as the `this` context.
-     *
-     * @callback cdf.components.UnmanagedComponent~executeCb
-     * @param {function} resolve Function to signal that core execution has ended.
-     * @param {function} reject Function called to signal that an error occurred during core execution.
-     */
 
     /**
      * Generic execute method that handles {@link cdf.components.UnmanagedComponent#preExec|preExecution} and
      * {@link cdf.components.UnmanagedComponent#postExec|postExecution} lifecycle tasks.<br>
-     * The specified {@link cdf.components.UnmanagedComponent~executeCb|callback} function handles the component's
+     * The specified _callback_ function handles the component's
      * core execution. If execution is not cancelled by the
      * {@link cdf.components.UnmanagedComponent#preExec|preExecution} handler, it is called synchronously, from within
      * a call to this method.
@@ -394,7 +387,13 @@ define([
      *       }
      *     }
      *
-     * @param {cdf.components.UnmanagedComponent~executeCb} callback The function to execute.
+     * @param {function} callback The function to execute.
+     *   This function receives two arguments:
+     *   1. resolve - call this function to signal that core execution has ended.
+     *   2. reject  - called, optionally with a cause value (an `Error` object),
+     *        to signal that an error occurred during core execution.
+     *
+     * This function is called with this component as the `this` context.
      */
     execute: function(callback) {
       if(this.beginExec()) {
