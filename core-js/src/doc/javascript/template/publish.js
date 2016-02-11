@@ -81,18 +81,7 @@ function getSignatureAttributes(item) {
 }
 
 function updateItemName(item) {
-    var attributes = getSignatureAttributes(item);
     var itemName = item.name || '';
-
-    if (item.variable) {
-        itemName = '&hellip;' + itemName;
-    }
-
-    if (attributes && attributes.length) {
-        itemName = util.format( '%s<span class="signature-attributes">%s</span>', itemName,
-            attributes.join(', ') );
-    }
-
     return itemName;
 }
 
@@ -425,6 +414,21 @@ exports.publish = function(taffyData, opts, tutorials) {
                 };
             });
         }
+        if (doclet.codeExamples) {
+            doclet.codeExamples = doclet.codeExamples.map(function(codeExample) {
+                var caption, code;
+
+                if (codeExample.match(/^\s*<caption>([\s\S]+?)<\/caption>(\s*[\n\r])([\s\S]+)$/i)) {
+                    caption = RegExp.$1;
+                    code = RegExp.$3;
+                }
+
+                return {
+                    caption: caption || '',
+                    code: code || codeExample
+                };
+            });
+        }
         if (doclet.see) {
             doclet.see.forEach(function(seeItem, i) {
                 doclet.see[i] = hashToLink(doclet, seeItem);
@@ -442,6 +446,35 @@ exports.publish = function(taffyData, opts, tutorials) {
             if (sourceFilePaths.indexOf(sourcePath) === -1) {
                 sourceFilePaths.push(sourcePath);
             }
+        }
+    });
+
+    /*
+     * Handle the defaul values for non optional properties correctly. 
+     * 
+     */
+    data().each(function(doclet) {
+        if (doclet.properties) {
+            doclet.properties = doclet.properties.map(function(property) {
+                var separator = " - ",
+                    separatorLength = separator.length;
+                
+                var defaultvalue = property.defaultvalue;
+                var description = property.description;
+
+                if( property.defaultvalue !== 'undefined' && !property.optional && description.indexOf(separator) > 0) {
+                    var index = description.indexOf(separator);
+                    defaultvalue += " " + description.substr(separatorLength, index-separatorLength);
+                    description = "<p>" + description.substr(index + separatorLength, description.length);
+                }
+
+                return {
+                    defaultvalue: defaultvalue,
+                    description: description,
+                    type: property.type,
+                    name: property.name
+                }  
+            });                  
         }
     });
 

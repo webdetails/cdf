@@ -1,0 +1,8 @@
+<?js
+    var data = obj;
+    var self = this;
+?>
+<?js if (data.caption) { ?>
+	<p class="code-caption"><?js= data.caption ?></p>
+<?js } ?>
+<pre class="prettyprint"><code><?js= self.htmlsafe(data.code) ?></code></pre>
