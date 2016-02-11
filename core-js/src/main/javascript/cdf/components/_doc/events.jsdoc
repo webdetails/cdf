@@ -1,0 +1,60 @@
+/*!
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+/*
+ * namepaths with special chars need double quotes
+ * see https://github.com/jsdoc3/jsdoc/issues/950
+ */
+
+/**
+ * Event triggered before a component starts executing.
+ *
+ * @event "cdf:preExecution"
+ * @memberof cdf.components.BaseComponent#
+ * @summary Event triggered before execution.
+ */
+
+/**
+ * Event triggered after a component finishes executing.
+ *
+ * @event "cdf:postExecution"
+ * @memberof cdf.components.BaseComponent#
+ * @summary Event triggered after execution.
+ */
+
+/**
+ * Event triggered when an error occurs.
+ *
+ * @event "cdf:error"
+ * @memberof cdf.components.BaseComponent#
+ * @summary Event triggered on error.
+ */
+
+/**
+ * The [`all`]{@link http://backbonejs.org/#Events-catalog} event is a special 
+ * event that will trigger the bound callbacks when any event occurs.
+ *
+ * @event all
+ * @memberof cdf.components.BaseComponent#
+ * @see Backbone Events {@link http://backbonejs.org/#Events-catalog|catalog}.
+ * @summary Event triggered by any other event.
+ */
+
+/**
+ * Event triggered after an {@link cdf.component.UnmanagedComponent|Unmanaged component} fetches data.
+ *
+ * @event "cdf:postFetch"
+ * @memberof cdf.components.UnmanagedComponent#
+ * @param {object} data The data returned from the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} call.
+ * @summary Event triggered after fetching data.
+ */
