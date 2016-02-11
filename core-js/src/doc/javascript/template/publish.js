@@ -449,6 +449,35 @@ exports.publish = function(taffyData, opts, tutorials) {
         }
     });
 
+    /*
+     * Handle the defaul values for non optional properties correctly. 
+     * 
+     */
+    data().each(function(doclet) {
+        if (doclet.properties) {
+            doclet.properties = doclet.properties.map(function(property) {
+                var separator = " - ",
+                    separatorLength = separator.length;
+                
+                var defaultvalue = property.defaultvalue;
+                var description = property.description;
+
+                if( property.defaultvalue !== 'undefined' && !property.optional && description.indexOf(separator) > 0) {
+                    var index = description.indexOf(separator);
+                    defaultvalue += " " + description.substr(separatorLength, index-separatorLength);
+                    description = "<p>" + description.substr(index + separatorLength, description.length);
+                }
+
+                return {
+                    defaultvalue: defaultvalue,
+                    description: description,
+                    type: property.type,
+                    name: property.name
+                }  
+            });                  
+        }
+    });
+
     // update outdir if necessary, then create outdir
     var packageInfo = ( find({kind: 'package'}) || [] ) [0];
     if (packageInfo && packageInfo.name) {
