@@ -50,8 +50,15 @@
     });
 ?>
 
-<table class="params">
+<table class="inner-table">
     <caption>Parameters:</caption>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Default Value</th>
+            <th>Summary</th>
+        </tr>
+    </thead>
     <tbody>
     <?js
         var self = this;
@@ -66,24 +73,31 @@
                 <?js if (param.type && param.type.names) {?>
                     <?js= self.partial('type.tmpl', param.type.names) ?>
                 <?js } ?>
+                <?js if (params.hasAttributes) {?>
+                    <?js if (param.optional) { ?>
+                        <?js= self.partial('modifier.tmpl', {
+                            class: "gray",
+                            modifier: "Optional"
+                        }) ?>
+                    <?js } ?>
+                    <?js if (param.nullable) { ?>
+                        <?js= self.partial('modifier.tmpl', "Nullable") ?>
+                    <?js } ?>
+                    <?js if (param.variable) { ?>
+                        <?js= self.partial('modifier.tmpl', {
+                            class: "purple",
+                            modifier: "Repeatable"
+                        }) ?>
+                    <?js } ?>                
+      
+                <?js } ?>
             </td>
- 
-            <?js if (params.hasAttributes) {?>
-                <td>
-                <?js if (param.optional) { ?>
-                    <?js= self.partial('modifier.tmpl', "Optional") ?>
+            <td>
+            <?js if (typeof param.defaultvalue !== 'undefined') { ?>
+                    <?js= self.htmlsafe(param.defaultvalue) ?>
                 <?js } ?>
-                <?js if (param.nullable) { ?>
-                    <?js= self.partial('modifier.tmpl', "Nullable") ?>
-                <?js } ?>
-                <?js if (param.variable) { ?>
-                    <?js= self.partial('modifier.tmpl', "Repeatable") ?>
-                <?js } ?>
-                </td>    
-            <?js } ?>
-            
+            </td> 
             <td><?js= param.description ?><?js if (param.subparams) { ?>
-                <p><strong>Properties</strong></p>
                 <?js= self.partial('params.tmpl', param.subparams) ?>
             <?js } ?>
             </td>
