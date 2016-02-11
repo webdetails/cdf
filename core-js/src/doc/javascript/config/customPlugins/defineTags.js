@@ -41,6 +41,16 @@ exports.defineTags = function (dictionary) {
     }
   });
 
+  dictionary.defineTag('code', {
+    keepsWhitespace: true,
+    removesIndent: true,
+    mustHaveValue: true,
+    onTagged: function(doclet, tag) {
+      doclet.codeExamples = doclet.codeExamples || [];
+      doclet.codeExamples.push(tag.value);
+    }
+  });
+
   //TODO: Check what this is doing in the default tag
   /*function parseTypeText(text) {
     var tagType = jsdoc.tag.type.parse(text, false, true);

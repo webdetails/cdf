@@ -20,27 +20,6 @@
     <article id="elm-main-content" class="elm-content-container">
         <section class="mt-content-container">
             <div id="pageText">
-                <p><input id="privateCheckbox" name="private" type="checkbox" value="Private" checked/>Private
-                <script type="text/javascript">
-                    $("#privateCheckbox").click(function(){
-                        $(".private").toggle();
-                    });
-                </script>
-
-                <input id="inheritedCheckbox" name="inherited" type="checkbox" value="Inherited" checked/>Inherited
-                <script type="text/javascript">
-                    $("#inheritedCheckbox").click(function(){
-                        $(".inherited").toggle();
-                    });
-                </script>
-
-                <input id="deprecatedCheckbox" name="deprecated" type="checkbox" value="Deprecated" checked/>Deprecated<p>
-                <script type="text/javascript">
-                    $("#deprecatedCheckbox").click(function(){
-                        $(".deprecated").toggle();
-                    });
-                </script>
-
                 <div class="mt-page-summary">
                     <div class="mt-page-overview"></div>
                 </div>
@@ -58,7 +37,7 @@
                         <p><?js= doc.classdesc ?></p>
                     <?js } ?>
                 <?js } ?>
-                    
+
                 <p>
                     <strong>Source: </strong>WHAT WE WILL DO HERE???????
                 </p>
@@ -66,6 +45,9 @@
                 <?js= self.partial('amd.tmpl', doc) ?>
 
                 <?js if (doc.kind === 'class') { ?>
+                    <?js if(doc.scope != "static") { ?>
+                        <h3>Constructor</h3>
+                    <?js } ?>
                     <?js= self.partial('method-details.tmpl', doc) ?>
                 <?js } else { ?>
                     <?js if (doc.description) { ?>
@@ -78,11 +60,11 @@
                         <h3>Example<?js= doc.examples.length > 1? 's':'' ?></h3>
                         <?js= self.partial('examples.tmpl', doc.examples) ?>
                     <?js } ?>
-                <?js } ?> 
+                <?js } ?>
 
                 <?js if (doc.augments && doc.augments.length) { ?>
                     <p class="h3">Extends </p>
-                    
+
 
                     <?js= self.partial('augments.tmpl', doc) ?>
                 <?js } ?>
@@ -93,9 +75,8 @@
                     <ul><?js doc.requires.forEach(function(r) { ?>
                         <li><?js= self.linkto(r, r) ?></li>
                     <?js }); ?></ul>
-                <?js } ?> 
-
-                <h3>Constructor</h3>
+                <?js } ?>
+                
 
                 <?js var members = self.find({kind: 'member', memberof: isGlobalPage ? {isUndefined: true} : doc.longname});
                 if (isGlobalPage && members && members.length && members.forEach) {
@@ -106,7 +87,7 @@
                 if (members && members.length && members.forEach) { ?>
                     <h3>Members</h3>
                     <?js= self.partial('members-summary.tmpl', members) ?>
-                <?js } ?> 
+                <?js } ?>
 
                 <?js var methods = self.find({kind: 'function', memberof: isGlobalPage ? {isUndefined: true} : doc.longname});
                 if (methods && methods.length && methods.forEach) { ?>
@@ -157,7 +138,7 @@
                         <?js= self.partial('method-details.tmpl', m) ?>
                     <?js }); ?>
                 <?js } ?>
-            
+
                 <?js var typedefs = self.find({kind: 'typedef', memberof: isGlobalPage ? {isUndefined: true} : doc.longname});
                 if (typedefs && typedefs.length && typedefs.forEach) { ?>
                     <h3>Type Definitions</h3>
@@ -178,7 +159,7 @@
                         <?js= self.partial('method-details.tmpl', e) ?>
                     <?js }); ?>
                 <?js } ?>
-            
+
         </section>
     </article>
 <?js } ?>

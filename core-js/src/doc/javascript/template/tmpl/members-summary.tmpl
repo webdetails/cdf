@@ -19,9 +19,12 @@ var self = this;
             ?>
             <tr class="<?js= member.access != null ? member.access : 'public' ?> <?js= member.deprecated ? 'deprecated' : '' ?> <?js= member.inherited ? 'inherited' : '' ?>">
                 <td> 
-                    <a href="#<?js= member.name + '_anchor' ?>"> <?js= member.name ?> </a>
-                    :
-                    <?js= self.partial('type.tmpl', member.type.names) ?> 
+                    <a href="#<?js= member.name + '_anchor' ?>"> 
+                        <?js= member.name ?> 
+                    </a>
+                    <?js if(member.type) { ?>
+                        : <code> <?js= self.partial('type.tmpl', member.type.names) ?> </code>
+                    <?js } ?>    
                     <?js= self.partial('modifiers.tmpl', member) ?>  
                 </td>
                 <td> <?js= member.summary ?> </td>
