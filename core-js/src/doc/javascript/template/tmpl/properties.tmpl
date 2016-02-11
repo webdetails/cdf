@@ -39,24 +39,13 @@
     });
 ?>
 
-<table class="props">
+<table class="inner-table">
+    <caption>Properties:</caption>
     <thead>
     <tr>
-        <?js if (props.hasName) {?>
         <th>Name</th>
-        <?js } ?>
-
-        <th>Type</th>
-
-        <?js if (props.hasAttributes) {?>
-        <th>Attributes</th>
-        <?js } ?>
-
-        <?js if (props.hasDefault) {?>
-        <th>Default</th>
-        <?js } ?>
-
-        <th class="last">Description</th>
+        <th>Default Value</th>
+        <th>Description</th>
     </tr>
     </thead>
 
@@ -68,39 +57,42 @@
     ?>
 
         <tr>
-            <?js if (props.hasName) {?>
-                <td class="name"><code><?js= prop.name ?></code></td>
-            <?js } ?>
-
-            <td class="type">
+            <td>
+            <?js= prop.name ?>
+            : 
             <?js if (prop.type && prop.type.names) {?>
                 <?js= self.partial('type.tmpl', prop.type.names) ?>
             <?js } ?>
+            <?js if (prop.hasAttributes) {?>
+                <?js if (prop.optional) { ?>
+                    <?js= self.partial('modifier.tmpl', {
+                        class: "gray",
+                        modifier: "Optional"
+                    }) ?>
+                <?js } ?>
+                <?js if (prop.nullable) { ?>
+                    <?js= self.partial('modifier.tmpl', "Nullable") ?>
+                <?js } ?>
+                <?js if (prop.variable) { ?>
+                    <?js= self.partial('modifier.tmpl', {
+                        class: "purple",
+                        modifier: "Repeatable"
+                    }) ?>
+                <?js } ?>                
+            <?js } ?>
             </td>
 
-            <?js if (props.hasAttributes) {?>
-                <td class="attributes">
-                <?js if (prop.optional) { ?>
-                    &lt;optional><br>
-                <?js } ?>
-
-                <?js if (prop.nullable) { ?>
-                    &lt;nullable><br>
-                <?js } ?>
-                </td>
+            <td>
+            <?js if (typeof prop.defaultvalue !== 'undefined') { ?>
+                <?js= self.htmlsafe(prop.defaultvalue) ?>
             <?js } ?>
+            </td>
 
-            <?js if (props.hasDefault) {?>
-                <td class="default">
-                <?js if (typeof prop.defaultvalue !== 'undefined') { ?>
-                    <?js= self.htmlsafe(prop.defaultvalue) ?>
-                <?js } ?>
-                </td>
+            <td>
+            <?js= prop.description ?><?js if (prop.subprops) { ?>
+                <?js= self.partial('properties.tmpl', prop) ?>
             <?js } ?>
-
-            <td class="description last"><?js= prop.description ?><?js if (prop.subprops) { ?>
-                <h6>Properties</h6><?js= self.partial('properties.tmpl', prop) ?>
-            <?js } ?></td>
+            </td>
         </tr>
 
     <?js }); ?>
