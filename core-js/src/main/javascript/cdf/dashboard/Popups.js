@@ -29,12 +29,10 @@ define([
   return /** @lends cdf.dashboard.Popups */ {
 
     /**
+     * @class
      * @summary The Ok Popup
      * @classdesc <p>The Ok Popup object containing the default values for a success notification popup.</p>
      *            <p>On Button click, the Popup is closed.</p> 
-     *
-     * @class
-     *
      * @example
      * <div class='cdfPopup'>
      *   <div class='cdfPopupHeader'>Title</div>
@@ -82,9 +80,9 @@ define([
        * @description The Popup default properties, with the properties applied during the template render
        * @type {Object}
        * 
-       * @property {String} header=Title The Header of the popup
-       * @property {String} desc=Description Text The description of the popup
-       * @property {String} button=Button Text The text on the button used to close the popup
+       * @property {String} header=Title The Header of the popup.
+       * @property {String} desc=Description Text - The description of the popup.
+       * @property {String} button=Button Text - The text on the button used to close the popup. 
        * @property {Function} callback Callback function executed when the button is clicked
        */
       defaults: {
@@ -151,11 +149,10 @@ define([
     },
 
     /**
+     * @class
      * @summary The Error Notification Popup
      * @classdesc <p>The Error Notification Popup object containing the default values for a error notification
-     *            popup.</p>
-     *           
-     * @class
+     *            popup.</p>     
      *
      * @example
      * <div class='cdfNotification component small>
@@ -196,8 +193,8 @@ define([
        * @description The Popup default properties, with the properties applied during the template render.
        *
        * @type {Object}
-       * @property {String} title=Component Error Error popup default values.
-       * @property {String} desc=Error processing component.
+       * @property {String} title=Component Error - Title of the Error message
+       * @property {String} desc=Error processing component - The Error message
       */
       defaults: {
         title: "Component Error",
@@ -206,7 +203,8 @@ define([
 
       /**
        * @summary Renders the Popup
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache template.</p>
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache 
+       *              template.</p>
        *              <p>If the component has width smaller than 300, the css class small is added.</p>
        *
        * @param {Element|Selector} ph The Html Element Object or the 
@@ -225,12 +223,10 @@ define([
     },
 
     /**
+     * @class
      * @summary The Error Notification Growl Popup
      * @classdesc <p>The Error Notification Growl Popup object containing the default values for a error
      *            notification growl popup.</p>
-     *           
-     * @class
-     *
      * @example
      * <div class='cdfNotification growl'>
      *   <div class='cdfNotificationBody'>
@@ -278,7 +274,7 @@ define([
        * @type {Object}
        *
        * @property {String} title=Title The Title of the popup
-       * @property {String} desc=Default CDF notification. The description of the popup
+       * @property {String} desc=Default CDF notification - The description of the popup
        * @property {Number} timeout=4000 The timeout for the popup
        * @property {Function} onUnblock Callback function called when onUnblock from 
        *                                {@link http://malsup.com/jquery/block/|jQuery.blockUI} is called
