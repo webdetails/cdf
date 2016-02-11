@@ -1,0 +1,46 @@
+/*!
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+/*
+ * namepaths with special chars need double quotes
+ * see https://github.com/jsdoc3/jsdoc/issues/950
+ */
+
+/**
+ * Event triggered before a dashboard starts initializing.
+ *
+ * @event "cdf:preInit"
+ * @memberof cdf.dashboard.Dashboard#
+ * @summary Event triggered before initialization.
+ */
+
+/**
+ * Event triggered after a dashboard finishes initializing.
+ *
+ * @event "cdf:postInit"
+ * @memberof cdf.dashboard.Dashboard#
+ * @summary Event triggered after initialization.
+ */
+
+/**
+ * Event triggered when a dashboard parameter value changes. The name
+ * of the event is formed using the name of the parameter and the
+ * suffix `:fireChange`.
+ *
+ * @event "<em>parameterName</em>:fireChange"
+ * @memberof cdf.dashboard.Dashboard#
+ * @param {object} obj 			 An object containing the parameter name and the new value.
+ * @param {string} obj.parameter The name of the parameter.
+ * @param {*}      obj.value 	 The new parameter value.
+ * @summary Event triggered when parameter value changes.
+ */

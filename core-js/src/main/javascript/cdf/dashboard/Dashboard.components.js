@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -345,7 +345,13 @@ define([
     },
 
     /**
-     * Allows logging lifecycle events of a given component to the console.
+     * Binds a callback function to the provided `control` component using the special
+     * Backbone [all]{@link http://backbonejs.org/#Events-catalog} event that will be
+     * triggered whenever any event is triggered. The callback will log a message, using
+     * the [Logger]{@link cdf.Logger} class, whenever an event is triggered. The only
+     * exceptions are if the event triggered is the [cdf]{@link cdf.event:cdf} event, if
+     * [logLifeCycle]{@link cdf.dashboard.Dashboard#logLifecycle} is `false` or if the 
+     * component is a _PostInitMarker_.
      *
      * @private
      * @param {Object} control The target component.

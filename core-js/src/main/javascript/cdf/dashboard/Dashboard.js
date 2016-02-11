@@ -221,7 +221,6 @@ define([
      *
      * @type {boolean}
      * @default true
-     * @ignore
      */
     logLifecycle: true,
 

@@ -435,7 +435,7 @@ define([
      * @summary Sets the options for an addIn
      * @description Sets the options for an addIn 
      *
-     * @param {object} slot    The add-n subtype.
+     * @param {object} slot    The add-in subtype.
      * @param {string} addIn   The add-in name.
      * @param {object} options An object with the options to use.
      */

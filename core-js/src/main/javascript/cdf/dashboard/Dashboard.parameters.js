@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -219,8 +219,9 @@ define([
      *
      * @param {string}  parameterName  The parameter name.
      * @param {*}       parameterValue The value of the parameter.
-     * @param {boolean} isNotified     A flag indicating if a _fireChange_ event is to
-     *                                 be triggered when the parameter value changes.
+     * @param {boolean} isNotified     A flag indicating if a
+     *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
+     *   event is to be triggered when the parameter value changes.
      */
     setParameter: function(parameterName, parameterValue, isNotified) {
       if(parameterName == undefined || parameterName == "undefined") {
@@ -246,8 +247,9 @@ define([
      *
      * @param {string}  parameterName  The parameter name.
      * @param {*}       parameterValue The value of the parameter.
-     * @param {boolean} isNotified     A flag indicating if a _fireChange_ event is to
-     *                                 be triggered when the parameter value changes.
+     * @param {boolean} isNotified     A flag indicating if a
+     *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
+     *   event is to be triggered when the parameter value changes.
      */
     setParam: function(parameterName, parameterValue, isNotified) {
       this.setParameter(parameterName, parameterValue, isNotified);
