@@ -81,18 +81,7 @@ function getSignatureAttributes(item) {
 }
 
 function updateItemName(item) {
-    var attributes = getSignatureAttributes(item);
     var itemName = item.name || '';
-
-    if (item.variable) {
-        itemName = '&hellip;' + itemName;
-    }
-
-    if (attributes && attributes.length) {
-        itemName = util.format( '%s<span class="signature-attributes">%s</span>', itemName,
-            attributes.join(', ') );
-    }
-
     return itemName;
 }
 
@@ -422,6 +411,21 @@ exports.publish = function(taffyData, opts, tutorials) {
                 return {
                     caption: caption || '',
                     code: code || example
+                };
+            });
+        }
+        if (doclet.codeExamples) {
+            doclet.codeExamples = doclet.codeExamples.map(function(codeExample) {
+                var caption, code;
+
+                if (codeExample.match(/^\s*<caption>([\s\S]+?)<\/caption>(\s*[\n\r])([\s\S]+)$/i)) {
+                    caption = RegExp.$1;
+                    code = RegExp.$3;
+                }
+
+                return {
+                    caption: caption || '',
+                    code: code || codeExample
                 };
             });
         }

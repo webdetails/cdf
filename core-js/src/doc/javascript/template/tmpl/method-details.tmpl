@@ -11,7 +11,7 @@ var self = this;
     <thead>
         <tr>
             <th>
-                <?js= data.name + (data.signature || '')  ?>
+                <?js= data.name + (data.kind === "class" && data.scope === "static" ? '': data.signature || '' )  ?>
                 <?js if (data.returns && data.returns.length) { ?>
                 :
                     <?js data.returns.forEach(function(r, i) { ?>
@@ -33,20 +33,12 @@ var self = this;
                     <?js= data.description ?>
                 <?js } ?>
                 </p>
-
-                <?js if (data.meta) {?>
-                    <p>
-                        <strong>Source: </strong> <?js= self.linkto(meta.shortpath) ?>, <?js= self.linkto(meta.shortpath, 'line ' + meta.lineno, null, 'line' + meta.lineno) ?>
-                    </p>
-                <?js } ?>  
-                <?js if (data.inherited && data.inherits && !data.overrides) { ?>
-                    <p>
-                        <strong>Inherited from: </strong><?js= this.linkto(data.inherits, this.htmlsafe(data.inherits)) ?>
-                    </p>
-                <?js } ?>
+                
                 <?js if (data.params && params.length) { ?>
                     <?js= this.partial('params.tmpl', params) ?>
                 <?js } ?>
+
+                <?js= this.partial('details.tmpl', data) ?>
 
                 <?js if (data.fires && fires.length) { ?>
                     <p><strong>Fires:</strong>

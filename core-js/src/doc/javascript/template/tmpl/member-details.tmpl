@@ -11,7 +11,10 @@ var self = this;
     <thead>
         <tr>
             <th>
-                <?js= id ?>: <code> <?js= self.partial('type.tmpl', data.type.names) ?> </code>
+                <?js= id ?> 
+                <?js if(data.type) { ?>
+                    : <code> <?js= self.partial('type.tmpl', data.type.names) ?> </code>
+                <?js } ?>    
                 <?js= self.partial('modifiers.tmpl', data) ?>  
             </th>
         </tr>    
@@ -27,33 +30,23 @@ var self = this;
                 <?js } ?>
                 </p>
 
-                <?js if (data.meta) {?>
-                    <p>
-                        <strong>Source: </strong> <?js= self.linkto(meta.shortpath) ?>, <?js= self.linkto(meta.shortpath, 'line ' + meta.lineno, null, 'line' + meta.lineno) ?>
-                    </p>
-                <?js } ?>                
-                <?js if (data.inherited && data.inherits && !data.overrides) { ?>
-                    <p>
-                        <strong>Inherited from: </strong><?js= this.linkto(data.inherits, this.htmlsafe(data.inherits)) ?>
-                    </p>
+                <?js if (data.codeExamples) { ?>
+                    <h5>Code</h5>
+                    <?js= this.partial('examples.tmpl', data.codeExamples) ?>
                 <?js } ?>
-                <?js if (data.defaultvalue) {?>
-                    <p>
-                        <strong>Default Value: </strong> <?js= data.defaultvalue ?>
-                    </p>
-                <?js } ?>
+
                 <?js= this.partial('details.tmpl', data) ?>
 
-                <?js if (data.fires && fires.length) { ?>
+                <?js if (data.fires && data.fires.length) { ?>
                     <h5>Fires:</h5>
                     <ul><?js fires.forEach(function(f) { ?>
                         <li><?js= self.linkto(f) ?></li>
                     <?js }); ?></ul>
                 <?js } ?>
 
-                <?js if (data.examples && examples.length) { ?>
-                    <h5>Example<?js= examples.length > 1? 's':'' ?></h5>
-                    <?js= this.partial('examples.tmpl', examples) ?>
+                <?js if (data.examples && data.examples.length) { ?>
+                    <h5>Example<?js= data.examples.length > 1? 's':'' ?></h5>
+                    <?js= this.partial('examples.tmpl', data.examples) ?>
                 <?js } ?>
             </td>
         </tr>
