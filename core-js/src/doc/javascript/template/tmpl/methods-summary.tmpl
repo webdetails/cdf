@@ -19,7 +19,7 @@ var methods = obj;
             ?>
             <tr class="<?js= method.access != null ? method.access : 'public' ?> <?js= method.deprecated ? 'deprecated' : '' ?> <?js= method.inherited ? 'inherited' : '' ?>">
               <td> 
-                <a href="#<?js= method.name+'_anchor' ?>"> <?js= method.name + (method.signature || '') ?> 
+                <a href="#<?js= method.name ?>"> <?js= method.name + (method.signature || '') ?> 
                 </a>
                 <?js if (method.returns && method.returns.length) { ?>
                 :
