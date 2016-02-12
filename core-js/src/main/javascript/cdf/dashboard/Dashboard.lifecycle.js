@@ -188,17 +188,19 @@ define([
       // Since we can get into racing conditions between last component's
       // preExecution and dashboard.postInit, we'll add a last component with very
       // low priority who's function is only to act as a marker.
-      var postInitComponent = new UnmanagedComponent({
-        name: "PostInitMarker",
-        type: "unmanaged",
-        lifecycle: {
-          silent: true
-        },
-        executeAtStart: true,
-        priority: 999999999
-      });
-      myself.addComponent(postInitComponent);  //TODO: check this!!!!
-      updating.push(postInitComponent);
+      if(!myself.getComponent("PostInitMarker")) {
+        var postInitComponent = new UnmanagedComponent({
+          name: "PostInitMarker",
+          type: "unmanaged",
+          lifecycle: {
+            silent: true
+          },
+          executeAtStart: true,
+          priority: 999999999
+        });
+        myself.addComponent(postInitComponent);  //TODO: check this!!!!
+        updating.push(postInitComponent);
+      }
 
       myself.waitingForInit = updating.slice();
 

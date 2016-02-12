@@ -38,6 +38,7 @@ define([
     var shouldUpdate = new ManagedFreeformComponent({
       name: "shouldUpdate",
       type: "managedFreeform",
+      executeAtStart: true,
       preExecution: function() {},
       customfunction: function() {},
       postExecution: function() {}
@@ -503,6 +504,44 @@ define([
         // although comp3priority10 has been triggered for updating, it *should* be discarded from this execution cycle due to lower priority rate
         // (read: 1rst is comp2priority5, then is comp3priority10)
         expect(dashboard.othersAwaitExecution).toBeTruthy();
+      });
+    });
+
+    /**
+     * ## _initEngine function
+     */
+    describe("_initEngine function", function() {
+
+      it("doesn't add the PostInitMarker component if no components were added to the dashboard", function() {
+        spyOn(dashboard, "addComponent").and.callThrough();
+        expect(dashboard.getComponent("PostInitMarker")).toEqual(undefined);
+
+        dashboard._initEngine();
+
+        expect(dashboard.addComponent).not.toHaveBeenCalled();
+        expect(dashboard.getComponent("PostInitMarker")).toEqual(undefined);
+      });
+
+      it("doesn't add the PostInitMarker component if the components added to the dashboard don't have the executeAtStart flag set to true", function() {
+        spyOn(dashboard, "addComponent").and.callThrough();
+        expect(dashboard.getComponent("PostInitMarker")).toEqual(undefined);
+
+        dashboard.addComponent(shouldNotUpdate);
+        dashboard._initEngine();
+
+        expect(dashboard.addComponent).toHaveBeenCalled();
+        expect(dashboard.getComponent("PostInitMarker")).toEqual(undefined);
+      });
+
+      it("adds the PostInitMarker component if more components were added to the dashboard with the executeAtStart flag set to true", function() {
+        spyOn(dashboard, 'addComponent').and.callThrough();
+        expect(dashboard.getComponent("PostInitMarker")).toEqual(undefined);
+
+        dashboard.addComponent(shouldUpdate);
+        dashboard._initEngine();
+
+        expect(dashboard.addComponent).toHaveBeenCalled();
+        expect(dashboard.getComponent("PostInitMarker")).not.toEqual(undefined);
       });
     });
   });
