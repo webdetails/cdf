@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -140,6 +140,8 @@ define([
      *
      * @private
      * @param {string} initInstance A string identifying the instance.
+     * @fires cdf.event:cdf
+     * @fires cdf.dashboard.Dashboard#event:"cdf:preInit"
      *
      * @deprecated
      */
@@ -237,6 +239,8 @@ define([
      *
      * @private
      * @param {string} initInstance A string identifying the instance.
+     * @fires cdf.event:cdf
+     * @fires cdf.dashboard.Dashboard#event:"cdf:postInit"
      */
     _handlePostInit: function(initInstance) {
       var myself = this;
@@ -323,6 +327,9 @@ define([
      *
      * @private
      * @param {Object} object The component to update.
+     * @fires cdf.event:cdf
+     * @fires cdf.components.BaseComponent#event:"cdf:preExecution"
+     * @fires cdf.components.BaseComponent#event:"cdf:postExecution"
      */
     updateLifecycle: function(object) {
       var silent = object.lifecycle ? !!object.lifecycle.silent : false;
@@ -616,9 +623,13 @@ define([
     },
 
     /**
-     * Forces a process change on a component's parameter.
+     * Gets the component with name equal to the value of `object_name`.
+     * Uses the component `parameter` property and the return value of
+     * executing its `getValue` function to execute the component `preChange`,
+     * the dashboard [fireChange]{@link cdf.dashboard.Dashboard#fireChange}
+     * and the component `postChange` functions.
      *
-     * @param {string} object_name Component name on which the fireChange should be triggered.
+     * @param {string} object_name The component name.
      */
     processChange: function(object_name) {
       //Logger.log("Processing change on " + object_name);
@@ -645,10 +656,9 @@ define([
     },
 
     /**
-     * _fireChange_ must accomplish two things:
-     * first, we must change the parameters
-     * second, we execute the components that listen for
-     * changes on that parameter.
+     * Changes the value of a parameter with the provided name, triggers the
+     * [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
+     * and updates the components that listen for changes on the aforementioned parameter.
      *
      * Because some browsers won't draw the blockUI widgets
      * until the script has finished, we find the list of
@@ -658,6 +668,8 @@ define([
      *
      * @param {string} parameter The name of the parameter on which to fire change.
      * @param {*} value Value for the parameter.
+     * @fires cdf.event:cdf
+     * @fires cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"
      */
     fireChange: function(parameter, value) {
       var myself = this;

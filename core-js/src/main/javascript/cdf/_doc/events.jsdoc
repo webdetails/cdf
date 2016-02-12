@@ -12,24 +12,10 @@
  */
 
 /**
- * @event preExecution
+ * This event is triggered along with any other dashboard or component main event.
+ * Can be used in a more generic way, e.g. to proxy dashboard/component lifecycle events.
+ *
+ * @event cdf
  * @memberof cdf
- * @return {boolean} `false` if the component execution should stop, `true` otherwise.
- */
-
-/**
- * @event postFetch
- * @memberof cdf
- * @param {object} data The data returned from the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} call.
- * @return {object} The transformed data.
- */
-
-/**
- * @event render
- * @memberof cdf
- */
-
-/**
- * @event postExecution
- * @memberof cdf
+ * @summary Event triggered along with lifecycle events.
  */
