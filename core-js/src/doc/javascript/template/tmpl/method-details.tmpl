@@ -3,11 +3,7 @@ var data = obj;
 var self = this;
 ?>
 
-<p>
-    <a id="<?js= id+'_anchor' ?>" name="<?js= id+'_anchor' ?>"></a>
-</p>
-
-<table class="<?js= data.access != null ? data.access : 'public' ?> <?js= data.deprecated ? 'deprecated' : '' ?> <?js= data.inherited ? 'inherited' : '' ?>">
+<table id="<?js= id ?>" class="<?js= data.access != null ? data.access : 'public' ?> <?js= data.deprecated ? 'deprecated' : '' ?> <?js= data.inherited ? 'inherited' : '' ?>">
     <thead>
         <tr>
             <th>
@@ -44,7 +40,7 @@ var self = this;
                     <p><strong>Fires:</strong>
                     <?js fires.forEach(function(f,i) { ?>
                         <?js= self.linkto(f) ?>
-                        <?js if (i < data.length-1) { ?>, <?js } ?>
+                        <?js if (i < fires.length-1) { ?>, <?js } ?>
                     <?js }); ?>
                     </p>
                 <?js } ?>
@@ -53,7 +49,7 @@ var self = this;
                     <p><strong>Listens to Events:</strong>
                     <?js listens.forEach(function(f) { ?>
                         <?js= self.linkto(f) ?>
-                        <?js if (i < data.length-1) { ?>, <?js } ?>
+                        <?js if (i < listens.length-1) { ?>, <?js } ?>
                     <?js }); ?>
                     </p>
                 <?js } ?>
@@ -62,7 +58,7 @@ var self = this;
                     <p><strong>Listeners of This Event:</strong>
                     <?js listeners.forEach(function(f) { ?>
                         <?js= self.linkto(f) ?>
-                        <?js if (i < data.length-1) { ?>, <?js } ?>
+                        <?js if (i < listeners.length-1) { ?>, <?js } ?>
                     <?js }); ?>
                     </p>
                 <?js } ?>
