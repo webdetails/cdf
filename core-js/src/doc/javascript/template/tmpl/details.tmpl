@@ -115,12 +115,15 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
     <?js } ?>
 
     <?js if (data.see && see.length) {?>
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul><?js see.forEach(function(s) { ?>
-            <li><?js= self.linkto(s) ?></li>
-        <?js }); ?></ul>
-    </dd>
+    <p>
+        <strong>See also:&nbsp;</strong>
+        <?js see.forEach(function(s, i) { ?>
+            <?js= self.linkto(s) ?>
+            <?js if(i < see.length-1) { ?>
+                <?js= ", " ?>
+            <?js } ?>
+        <?js }) ?>
+    </p>
     <?js } ?>
 
     <?js if (data.todo && todo.length) {?>
