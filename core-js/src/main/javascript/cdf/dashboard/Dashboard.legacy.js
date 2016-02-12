@@ -66,6 +66,7 @@ define([
      * @param {Object} params The parameters object.
      * @param {function} func Callback function.
      * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
+     * @see cdf.dashboard.Dashboard#executeAjax
      *
      * @deprecated
      */
