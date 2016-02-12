@@ -77,18 +77,20 @@ var self = this;
                 } } ?>
 
                 <?js if (data.returns && returns.length) { ?>
-                    <p>
-                        <strong>Returns:</strong>
-                        <?js if (returns.length > 1) { ?><ul><?js
-                            returns.forEach(function(r) { ?>
-                                <li><?js= self.partial('returns.tmpl', r) ?></li>
-                            <?js });
-                        ?></ul><?js } else {
-                            returns.forEach(function(r) { ?>
+                    <table class="inner-table">
+                        <caption>Returns:</caption>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>    
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?js returns.forEach(function(r) { ?>
                                 <?js= self.partial('returns.tmpl', r) ?>
-                            <?js });
-                        } ?> 
-                    </p>
+                            <?js }); ?>
+                        </tbody>
+                    </table>
                 <?js } ?>
 
                 <?js if (data.examples && examples.length) { ?>
