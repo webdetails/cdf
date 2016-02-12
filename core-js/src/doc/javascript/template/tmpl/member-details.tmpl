@@ -3,11 +3,7 @@ var data = obj;
 var self = this;
 ?>
 
-<p>
-    <a id="<?js= id+'_anchor' ?>" name="<?js= id+'_anchor' ?>"></a>
-</p>
-
-<table class="<?js= data.access != null ? data.access : 'public' ?> <?js= data.deprecated ? 'deprecated' : '' ?> <?js= data.inherited ? 'inherited' : '' ?>">
+<table id="<?js= id ?>" class="<?js= data.access != null ? data.access : 'public' ?> <?js= data.deprecated ? 'deprecated' : '' ?> <?js= data.inherited ? 'inherited' : '' ?>">
     <thead>
         <tr>
             <th>
