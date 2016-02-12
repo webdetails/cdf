@@ -22,7 +22,7 @@ define([
 
   /**
    * The base query object, from where other query types can be extended.
-   * 
+   *
    * @type {Object}
    * @alias cdf.dashboard.Dashboard~_BaseQuery
    * @ignore
@@ -42,14 +42,14 @@ define([
    * @class cdf.dashboard.Dashboard.query
    * @amd cdf/dashboard/Dashboard.query
    * @classdesc A class representing an extension to the Dashboard class for managing queries.
-   *            It's methods allow registering and setting queries.
+   *            Its methods allow registering and setting queries.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
      * Method used by the dashboard's constructor for query initialization.
-     * Reference to current language code. 
+     * Reference to current language code.
      *
      * @private
      */
