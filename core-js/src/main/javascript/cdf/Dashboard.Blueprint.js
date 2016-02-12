@@ -18,6 +18,8 @@
  *            dashboard aggregating all the classes in the Dashboard
  *            hierarchy. It's a specialization of the base abstract
  *            {@link cdf.dashboard.Dashboard|Dashboard} class.
+ * @see cdf.dashboard.Dashboard
+ * @see http://www.blueprintcss.org
  * @example
  *
  *      require(['cdf/Dashboard.Blueprint', 'cdf/components/ButtonComponent'],

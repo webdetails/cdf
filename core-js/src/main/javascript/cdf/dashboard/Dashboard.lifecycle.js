@@ -402,27 +402,29 @@ define([
     },
 
     /**
-     * Update components by priority. Expects as parameter an object where the keys
+     * @summary Update components by priority.
+     * @description <p>Expects as parameter an object where the keys
      * are the priorities, and the values are arrays of components that should be
-     * updated at that priority level:<p>
+     * updated at that priority level:</p>
      *
-     *  {<p>
-     *    0: [c1,c2],<p>
-     *    2: [c3],<p>
-     *    10: [c4]<p>
-     *  }<p>
+     *     {
+     *       0: [c1,c2],
+     *       2: [c3],
+     *       10: [c4]
+     *     }
      *
-     * Alternatively, you can pass an array of components, `[c1, c2, c3]`, in which
+     * <p>Alternatively, you can pass an array of components, `[c1, c2, c3]`, in which
      * case the priority-keyed object will be created internally from the priority
-     * values the components declare for themselves.<p>
+     * values the components declare for themselves.</p>
      *
-     * Note that even though `updateAll` expects `components` to have numerical
+     * <p>Note that even though `updateAll` expects `components` to have numerical
      * keys, and that it does work if you pass it an array, `components` should be
      * an object, rather than an array, so as to allow negative keys (and so that
-     * we can use it as a sparse array of sorts).
+     * we can use it as a sparse array of sorts).</p>
      *
      * @private
      * @param {Object[]} components The list of components to update
+     * @see cdf.dashboard.Dashboard#updateComponent
      */
     updateAll: function(components) {
       /*
