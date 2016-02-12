@@ -63,20 +63,7 @@ var self = this;
                     </p>
                 <?js } ?>
 
-
-                <?js if (data.exceptions && exceptions.length) { ?>
-                    <p><strong>Throws:</strong></p>
-                    <?js if (exceptions.length > 1) { ?><ul><?js
-                        exceptions.forEach(function(r) { ?>
-                        <li><?js= self.partial('exceptions.tmpl', r) ?></li>
-                        <?js }); ?></ul>
-                    <?js } else {
-                        exceptions.forEach(function(r) { ?>
-                            <?js= self.partial('exceptions.tmpl', r) ?>
-                        <?js });
-                } } ?>
-
-                <?js if (data.returns && returns.length) { ?>
+                <?js if (data.returns && data.returns.length) { ?>
                     <table class="inner-table">
                         <caption>Returns:</caption>
                         <thead>
@@ -86,8 +73,25 @@ var self = this;
                             </tr>
                         </thead>
                         <tbody>
-                            <?js returns.forEach(function(r) { ?>
+                            <?js data.returns.forEach(function(r) { ?>
                                 <?js= self.partial('returns.tmpl', r) ?>
+                            <?js }); ?>
+                        </tbody>
+                    </table>
+                <?js } ?>
+
+                <?js if (data.exceptions && data.exceptions.length) { ?>
+                    <table class="inner-table">
+                        <caption>Throws:</caption>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?js data.exceptions.forEach(function(r) { ?>
+                                <?js= self.partial('exceptions.tmpl', r) ?>
                             <?js }); ?>
                         </tbody>
                     </table>
