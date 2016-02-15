@@ -165,7 +165,7 @@ define([
     },
 
     /**
-     * Adds a parameter new parameter to the parameter module.
+     * Adds a parameter to the parameter model.
      * Receives a parameter name and an initial value, that will be used
      * if the parameter is not available in the parameter model. Otherwise,
      * the value returned by {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue} is used.
