@@ -26,14 +26,17 @@ define([
    *            represent static data or behaviour, whereas Scriptable add-ins
    *            represent dynamic, context-dependent behaviour.
    * @param {Object}   options                  The options for the add-in. Needs a label, a name property and must have
-   *                                            either a value (for static add-ins) or implementation member (for
-   *                                            scriptable add-ins). Should the add-in support configuration, then
-   *                                            there should also be an options.defaults property.
-   * @param {string}   options.label            The human-readable label for the add-in.
-   * @param {string}   options.name             The internal identifier for the add-in.
-   * @param {function} [options.implementation] The implementation function for the add-in.
-   * @param {Object}   [options.value]          The value for the add-in.
-   * @param {Object}   [options.defaults]       The default values for the configurable settings.
+   *                                            either a value (for static add-ins) or an implementation member (for
+   *                                            scriptable add-ins). If the add-in supports configuration, it should
+   *                                            be provided via the `options.defaults` property.
+   * @param {string}   options.label            The human-readable label of the add-in.
+   * @param {string}   options.name             The name of the add-in, used as an internal identifier.
+   * @param {function} [options.implementation] The implementation function of the add-in.
+   * @param {Object}   [options.value]          The value of the add-in.
+   * @param {Object}   [options.defaults]       The default values of the configurable settings.
+   * @throws {TypeError} If the `options` parameter is not an `object`.
+   * @throws {TypeError} If `options.name` or `options.label` are not providad. Also, either `options.implementation`
+   *                     or `options.value` needs to be defined.
    */
   return /** @lends cdf.AddIn */ function(options) {
     var myself = options;
@@ -46,51 +49,53 @@ define([
     }
 
     /**
-     * The internal identifier for the add-in (read only).
+     * @description The internal identifier for the add-in.
+     * @summary The internal identifier for the add-in.
      *
      * @type {string}
-     * @inner
-     * @ignore
+     * @private
      */
     var _name = options.name,
       /**
-       * The add-in's human-readable label (read only).
+       * @description The add-in human-readable label.
+       * @summary The add-in human-readable label.
        *
        * @type {string}
-       * @inner
-       * @ignore
+       * @private
        */
       _label = options.label,
       /**
-       * The add-in's type (read only).
+       * @description The add-in type. If {@link cdf.AddIn~_implementation|_implementation}
+       * is defined it will be "scriptable", otherwise it will default to "static".
+       * @summary The add-in type.
        *
        * @type {string}
-       * @inner
-       * @ignore
+       * @default "static"
+       * @private
        */
       _type = options.implementation ? "scriptable" : "static",
       // It's OK if any of these ends up being undefined
       /**
-       * The add-in's implementation function (read only).
+       * @description The add-in implementation function.
+       * @summary The add-in implementation function.
        *
-       * @inner
-       * @ignore
+       * @type {Function}
+       * @private
        */
       _implementation = options.implementation,
       /**
-       * The default values for the configurable settings (read only).
+       * @description The default values for the configurable settings.
+       * @summary The default values for the configurable settings.
        *
        * @type {Object}
-       * @inner
-       * @ignore
+       * @private
        */
       _defaults = options.defaults,
       /**
-       * The default value (read only).
-       *
+       * @description The default value. This is the return value if the add-in is static.
+       * @summary The default value.
        * @type {Object}
-       * @inner
-       * @ignore
+       * @private
        */
       _value = options.options;
       
@@ -100,41 +105,49 @@ define([
     }
 
     /**
-     * Returns the add-in label.
+     * @description Returns the add-in label.
+     * @summary Returns the add-in label.
      *
-     * @return {string} Add-in label.
+     * @return {string} The add-in label.
      */
     this.getLabel = function() {
       return _label;
     };
 
     /**
-     * Returns the add-in name.
+     * @description Returns the add-in name.
+     * @summary Returns the add-in name.
      *
-     * @return {string} Add-in name.
+     * @return {string} The add-in name.
      */
     this.getName = function() {
       return _name;
     };
 
     /**
-     * Call the add-in. If the add-in is static, all parameters are
-     * irrelevant, and this method will simply return the value.
+     * @description <p>Call the add-in. If the add-in is static, all parameters
+     * are irrelevant, and this method will simply return the value
+     * of {@link cdf.AddIn~_value|_value}.</p>
      * 
-     * In a dynamic add-in, the implementation will be passed the
+     * <p>In a dynamic add-in, the implementation will be passed the
      * the target DOM Element (whatever element is relevant,
      * e.g. the element that was clicked on, or the table cell
      * that's being processed), a state object with whatever
      * context is relevant for the add-in to fulfill its purpose,
-     * and optionally any overriding options.
+     * and optionally any overriding options.</p>
      *
-     * Components are allowed to pass undefined as the target if 
-     * no elements make sense in context. 
+     * <p>Components are allowed to pass `undefined` as the target if 
+     * no elements make sense in context.</p>
+     * @summary Executes the add-in {@link cdf.AddIn~_implementation|_implementation} function or
+     *          returns the value of {@link cdf.AddIn~_value|_value}.
      *
      * @param {Element} target  The relevant DOM Element.
-     * @param {Object}  state   A representation of the necessary
-     *                          context for the add-n to operate.
+     * @param {Object}  state   A representation of the necessary context for the add-n to operate.
      * @param {Object}  options Configuration options for the add-in.
+     * @return {Object} The value of {@link cdf.AddIn~_value|_value} if the
+     *                  {@link cdf.AddIn~_implementation|_implementation} function is undefined.
+     * @return {Object} The result of executing the {@link cdf.AddIn~_implementation|_implementation}
+     *                  function when it is available.
      */
     this.call = function(target, state, options) {
       if(!_implementation) {
@@ -151,7 +164,11 @@ define([
     };
 
     /**
-     * Sets the default values of the configurable settings.
+     * @description Sets the default values of the configurable settings.
+     *              If `defaults` is a `function` it will override any previous
+     *              default values. If it is an `object` its properties will be
+     *              used to extend the current default values.
+     * @summary Sets the default values of the configurable settings.
      *
      * @param {Object} defaults The default values for the configurable settings.
      */
