@@ -571,6 +571,7 @@ exports.publish = function(taffyData, opts, tutorials) {
             addSignatureTypes(doclet);
             addAttribs(doclet);
             doclet.kind = 'member';
+            doclet.constant = true;
         }
     });
 
