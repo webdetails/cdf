@@ -236,5 +236,29 @@ describe("CDF legacy core queries #", function() {
         expect(legacyQuery.getOption("lastProcessedResultSet")).toEqual(processedData);
       });
     });
+
+    describe("CDF legacy core queries # Legacy query # lastResultSet.reader", function() {
+
+      describe("when passing well-formed json object's string representation", function() {
+
+        it("should parse it successfully", function() {
+          var actual = legacyQuery.interfaces.lastResultSet.reader(unprocessedDataString);
+          expect(actual).toEqual(unprocessedData);
+        });
+      });
+
+      describe("when passing malicious code", function() {
+
+        it("it should not be executed; instead SyntaxError should be thrown", function() {
+          var f = { inject: function() {/* dummy*/} };
+          spyOn(f, "inject");
+          var malicious = "f.inject()";
+
+          var call = function() { legacyQuery.interfaces.lastResultSet.reader(malicious); };
+          expect(call).toThrowError(SyntaxError);
+          expect(f.inject).not.toHaveBeenCalled();
+        });
+      });
+    });
   });
 });
