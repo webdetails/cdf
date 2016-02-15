@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -18,22 +18,24 @@ define([
 ], function(Dashboard, Container, Utils) {
 
   /**
-   * Serves as a container for holding all globally registered add-ins.
+   * @description Serves as a container for holding all globally registered add-ins.
+   * @summary Serves as a container for holding all globally registered add-ins.
    *
+   * @memberof cdf.dashboard.Dashboard
    * @type {Object}
-   * @alias cdf.dashboard.Dashboard~globalAddIns
-   * @ignore
+   * @private
    */
   var globalAddIns = new Container();
   
   /**
-   * Normalizes an add-in key.
+   * @description Normalizes an add-in key.
+   * @summary Normalizes an add-in key.
    *
-   * @alias cdf.dashboard.Dashboard~normalizeAddInKey
+   * @memberof cdf.dashboard.Dashboard
    * @param {string} key    Add-in key.
    * @param {string} subKey Add-in sub key.
    * @return {string} The normalized add-in key.
-   * @ignore
+   * @private
    */
   function normalizeAddInKey(key, subKey) {
     if(key.indexOf('Component', key.length - 'Component'.length) !== -1) {
@@ -45,12 +47,16 @@ define([
   }
 
   /**
-   * Registers a global add-in, to be used in all instances of dashboards sharing the same context.
+   * @description Registers a global add-in, to be used in all instances of
+   *              dashboards sharing the same context.
+   * @summary Registers a global add-in.
    *
-   * @alias cdf.dashboard.Dashboard.registerGlobalAddIn
-   * @param {string}    type    Type of the add-in, usually the component type where this add-in will be available.
+   * @function cdf.dashboard.Dashboard.registerGlobalAddIn
+   * @param {string}    type    Type of the add-in, usually the component type
+   *                            where this add-in will be available.
    * @param {string}    subType The subtype of the add-in.
    * @param {cdf.AddIn} addIn   The add-in instance to register.
+   * @private
    */
   Dashboard.registerGlobalAddIn = function(type, subType, addIn) {
     var type = normalizeAddInKey(type, subType),
@@ -61,14 +67,25 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.addIns
    * @amd cdf/dashboard/Dashboard.addIns
-   * @classdesc A class representing an extension to the Dashboard class for handling add-ins.
-   *            It's methods allow handling add-in registration and fetching.
+   * @classdesc A class representing an extension to the Dashboard class for handling
+   *            add-ins. Its methods allow handling add-in registration and fetching.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Method used by the Dashboard constructor for add-ins initialization.
+     * @description Serves as a container for holding the registered add-ins of
+     *              the respective dashboard instance.
+     * @summary Serves as a container for holding the registered add-ins.
+     * 
+     * @type {Object}
+     * @protected
+     */
+    addIns: undefined,
+
+    /**
+     * @description Method used by the Dashboard constructor for add-ins initialization.
+     * @summary Method used by the Dashboard constructor for add-ins initialization.
      *
      * @private
      */
@@ -77,21 +94,27 @@ define([
     },
 
     /**
-     * Registers a global add-in, to be used in all instances of dashboards sharing the same context.
-     * Essentially calls the static method with the same name.
+     * @description Registers a global add-in, to be used in all instances of
+     *              dashboards sharing the same context. Essentially calls the
+     *              static method with the same name.
+     * @summary Registers a global add-in.
      *
-     * @param {string}     type    The type of the add-in, usually the component type where this add-in will be available.
+     * @param {string}     type    The type of the add-in, usually the component
+     *                             type where this add-in will be available.
      * @param {string}     subType The subtype of the add-in.
      * @param {cdf.AddIn}  addIn   The add-in instance to register.
+     * @see cdf.dashboard.Dashboard.registerGlobalAddIn
      */
     registerGlobalAddIn: function(type, subType, addIn) {
       Dashboard.registerGlobalAddIn(type, subType, addIn);
     },
 
     /**
-     * Registers an add-in, to be used only by this dashboard instance.
+     * @description Registers an add-in, to be used only by this dashboard instance.
+     * @summary Registers an add-in, to be used only by this dashboard instance.
      *
-     * @param {string}     type    Type of the add-in, usually the component type where this add-in will be available.
+     * @param {string}     type    Type of the add-in, usually the component type
+     *                             where this add-in will be available.
      * @param {string}     subType The subtype of the add-in.
      * @param {cdf.AddIn}  addIn   The add-in instance to register.
      */
@@ -102,13 +125,15 @@ define([
     },
 
     /**
-     * Checks if the add-in with the specified name, sub type and type exists in the add-in registry for this
-     * dashboard.
+     * @description Checks if the add-in with the specified name, sub type and
+     *              type exists in the add-in registry for this dashboard.
+     * @summary Checks if the add-in exists in the add-in registry.
      *
-     * @param {string} type      Type of the add-in, usually the component type where this add-in will be available.
+     * @param {string} type      Type of the add-in, usually the component type
+     *                           where this add-in will be available.
      * @param {string} subType   The subtype of the add-in.
      * @param {string} addInName The add-in name.
-     * @return {boolean} _true_ if the add-in exists.
+     * @return {boolean} `true` if the add-in exists, `false` otherwise.
      */
     hasAddIn: function(type, subType, addInName) {
       var type = normalizeAddInKey(type, subType);
@@ -116,13 +141,15 @@ define([
     },
 
     /**
-     * Gets the add-in with the specified name, sub type and type from the add-in registry for this
-     * dashboard.
+     * @description Gets the add-in with the specified name, sub type and type
+     *              from the add-in registry for this dashboard.
+     * @summary Gets the add-in from the add-in registry.
      *
-     * @param {string} type      Type of the add-in, usually the component type where this add-in will be available
+     * @param {string} type      Type of the add-in, usually the component type
+     *                           where this add-in will be available
      * @param {string} subType   The subtype of the add-in.
      * @param {string} addInName The add-in name.
-     * @return {?cdf.AddIn} The add-in if one is found, null otherwise.
+     * @return {?cdf.AddIn} The add-in if one is found, `null` otherwise.
      */
     getAddIn: function(type, subType, addInName) {
       var type = normalizeAddInKey(type, subType);
@@ -135,12 +162,15 @@ define([
     },
 
     /**
-     * Sets the default options of an add-in.
+     * @description Sets the default options of an add-in.
+     * @summary Sets the default options of an add-in.
      *
-     * @param {string} type      Type of the add-in, usually the component type where this add-in will be available.
+     * @param {string} type      Type of the add-in, usually the component type
+     *                           where this add-in will be available.
      * @param {string} subType   The subtype of the add-in.
      * @param {string} addInName The add-in name.
-     * @param {Object} defaults  The default options. This is a JSON object specifying the default options. The options
+     * @param {Object} defaults  The default options. This is a JSON object
+     *                           specifying the default options. The options
      *                           are dependent on which add-in is being used.
      */
     setAddInDefaults: function(type, subType, addInName, defaults) {
@@ -151,11 +181,14 @@ define([
     },
 
     /**
-     * Lists registered add-ins for a given type and subtype.
+     * @description Lists registered add-ins of a given type and subtype.
+     * @summary Lists registered add-ins of a given type and subtype.
      *
-     * @param {string} type    Type of the add-in, usually the component type where this add-in will be available
+     * @param {string} type    Type of the add-in, usually the component type
+     *                         where this add-in will be available
      * @param {string} subType The subtype of the add-in.
-     * @return {AddIn[]} The list of add-ins for the given type and subtype.
+     * @return {Array<cdf.AddIn>} An `array` containing the add-ins of the given
+     *                            type and subtype.
      */
     listAddIns: function(type, subType) {
       var type = normalizeAddInKey(type, subType);
@@ -165,7 +198,6 @@ define([
       } catch(e) {
         return [];
       }
-    }                              
+    }
   });
-    
 });
