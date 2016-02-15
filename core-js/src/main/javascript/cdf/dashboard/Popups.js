@@ -23,16 +23,16 @@ define([
    * @class cdf.dashboard.Popups
    * @amd cdf/dashboard/Popups
    * @classdesc <p>A static class containing pre-built error and success popups.</p>
-   *            <p>Each exposed popup is an object with a _render_ method that can be called to show the popup with 
+   *            <p>Each exposed popup is an object with a _render_ method that can be called to show the popup with
    *            some default values for each case.</p>
    */
   return /** @lends cdf.dashboard.Popups */ {
 
     /**
      * @class
-     * @summary The Ok Popup
+     * @summary The Ok Popup.
      * @classdesc <p>The Ok Popup object containing the default values for a success notification popup.</p>
-     *            <p>On Button click, the Popup is closed.</p> 
+     *            <p>On Button click, the Popup is closed.</p>
      * @example
      * <div class='cdfPopup'>
      *   <div class='cdfPopupHeader'>Title</div>
@@ -41,25 +41,25 @@ define([
      *     <div class='cdfPopupButton'>Button Text</div>
      *   </div>
      * </div>
-     * 
+     *
      */
     okPopup: /** @lends cdf.dashboard.Popups.okPopup */{
       /**
-       * @summary <code>Boolean</code> for component render state
-       * @description <code>Boolean</code> property used to define if the component was rendered or not 
+       * @summary <code>Boolean</code> for component render state.
+       * @description <code>Boolean</code> property used to define if the component was rendered or not.
        * @type {Boolean}
        * @private
        */
       _firstRender: true,
 
       /**
-       * @summary The template of the Popup
+       * @summary The template of the Popup.
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Ok Popup.</p>
        *              <p>It has an header, description and a button. The default values for each of the template
        *              variables are stored in {@link defaults} object.</p>
        * @type {String}
-       *   
-       * @code 
+       *
+       * @code
        * <div class='cdfPopup'>
        *   <div class='cdfPopupHeader'>{{{header}}}</div>
        *   <div class='cdfPopupBody'>
@@ -76,14 +76,14 @@ define([
                 "  </div>" +
                 "</div>",
       /**
-       * @summary The Popup default properties
-       * @description The Popup default properties, with the properties applied during the template render
+       * @summary The Popup default properties.
+       * @description The Popup default properties, with the properties applied during the template render.
        * @type {Object}
-       * 
+       *
        * @property {String} header=Title The Header of the popup.
        * @property {String} desc=Description Text - The description of the popup.
-       * @property {String} button=Button Text - The text on the button used to close the popup. 
-       * @property {Function} callback Callback function executed when the button is clicked
+       * @property {String} button=Button Text - The text on the button used to close the popup.
+       * @property {Function} callback Callback function executed when the button is clicked.
        */
       defaults: {
         header: "Title",
@@ -95,18 +95,18 @@ define([
       },
 
       /**
-       * @summary The {@link http://api.jquery.com/Types/#jQuery|jQuery} element
-       * @description The {@link http://api.jquery.com/Types/#jQuery|jQuery} element that holds the popup's content
+       * @summary The {@link http://api.jquery.com/Types/#jQuery|jQuery} element.
+       * @description The {@link http://api.jquery.com/Types/#jQuery|jQuery} element that holds the popup's content.
        * @type {jQuery}
        */
       $el: undefined,
 
       /**
-       * @summary Shows the popup
+       * @summary Shows the popup.
        * @description <p>Shows the popup based on the {@link $el} object.</p>
-       *              <p>If the popup is rendering for the first time or if show is called with the opts para then 
+       *              <p>If the popup is rendering for the first time or if show is called with the `opts` parameter then
        *              the render is called.</p>
-       * @param {Object} [opts] Options object used to call the render 
+       * @param {Object} [opts] Options object used to call the render.
        */
       show: function(opts) {
         if(opts || this._firstRender) {
@@ -116,19 +116,19 @@ define([
       },
 
       /**
-       * @summary Hides the popup
-       * @description Hides the popup, based on the {@link #$el} element
+       * @summary Hides the popup.
+       * @description Hides the popup, based on the {@link #$el} element.
        */
       hide: function() {
         this.$el.hide();
       },
 
       /**
-       * @summary Renders the Popup
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache 
+       * @summary Renders the Popup.
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
        *              template.</p>
        *              <p>When the component is rendered, it gets hidden and appended to the body.
-       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values 
+       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
        *                           to the properties that define the content of the component.
        */
       render: function(newOpts) {
@@ -150,9 +150,9 @@ define([
 
     /**
      * @class
-     * @summary The Error Notification Popup
+     * @summary The Error Notification Popup.
      * @classdesc <p>The Error Notification Popup object containing the default values for a error notification
-     *            popup.</p>     
+     *            popup.</p>
      *
      * @example
      * <div class='cdfNotification component small>
@@ -165,14 +165,14 @@ define([
      */
     notificationsComponent: {
       /**
-       * @summary The template of the Popup
+       * @summary The template of the Popup.
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification Popup.
        *              </p>
-       *              <p>It has an title and description. The default values for each of the template variables are 
+       *              <p>It has an title and description. The default values for each of the template variables are
        *              stored in {@link defaults} object.</p>
        * @type {String}
-       *   
-       * @code 
+       *
+       * @code
        * <div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}>
        *   <div class='cdfNotificationBody'>
        *     <div class='cdfNotificationImg'>&nbsp;</div>
@@ -189,7 +189,7 @@ define([
                 "  </div>" +
                 "</div>" ,
       /**
-       * @summary The Popup default properties 
+       * @summary The Popup default properties.
        * @description The Popup default properties, with the properties applied during the template render.
        *
        * @type {Object}
@@ -202,15 +202,15 @@ define([
       },
 
       /**
-       * @summary Renders the Popup
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache 
+       * @summary Renders the Popup.
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
        *              template.</p>
        *              <p>If the component has width smaller than 300, the css class small is added.</p>
        *
-       * @param {Element|Selector} ph The Html Element Object or the 
-       *                              {@link http://api.jquery.com/Types/#Selector|jQuery Selector} for the object. 
-       *                              This is the container that will hold the content of the component
-       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values 
+       * @param {Element|Selector} ph The Html Element Object or the
+       *                              {@link http://api.jquery.com/Types/#Selector|jQuery Selector} for the object.
+       *                              This is the container that will hold the content of the component.
+       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
        *                           to the properties that define the content of the component.
        */
       render: function(ph, newOpts) {
@@ -224,7 +224,7 @@ define([
 
     /**
      * @class
-     * @summary The Error Notification Growl Popup
+     * @summary The Error Notification Growl Popup.
      * @classdesc <p>The Error Notification Growl Popup object containing the default values for a error
      *            notification growl popup.</p>
      * @example
@@ -237,28 +237,30 @@ define([
      */
     notificationsGrowl: {
       /**
-       * @summary <code>Boolean</code> for component render state
-       * @description <code>Boolean</code> property used to define if the component was rendered or not 
+       * @summary <code>Boolean</code> for component render state.
+       * @description <code>Boolean</code> property used to define if the component was rendered or not.
        * @type {Boolean}
        * @private
        */
       _firstRender: true,
 
       /**
-       * @summary The template of the Popup
-       * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification 
+       * @summary The template of the Popup.
+       * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification
        *              Popup.</p>
        *              <p>It has an title and description. The default values for each of the template variables are
        *              stored in {@link defaults} object.</p>
        * @type {String}
-       *   
-       * @code 
+       *
+       * @code
        * <div class='cdfNotification growl'>
        *   <div class='cdfNotificationBody'>
        *     <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>
        *     <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>
        *   </div>
        * </div>
+       *
+       * @see {@link https://mustache.github.io/|Mustache}
        */
       template: "<div class='cdfNotification growl'>" +
                 "  <div class='cdfNotificationBody'>" +
@@ -268,26 +270,26 @@ define([
                 "</div>" ,
 
       /**
-       * @summary The Popup default properties
+       * @summary The Popup default properties.
        * @description <p>The Popup default properties, with the properties applied during the template render.</p>
        *              <p>More info about some of the properties used detailed below.</p>
        * @type {Object}
        *
-       * @property {String} title=Title The Title of the popup
-       * @property {String} desc=Default CDF notification - The description of the popup
-       * @property {Number} timeout=4000 The timeout for the popup
-       * @property {Function} onUnblock Callback function called when onUnblock from 
-       *                                {@link http://malsup.com/jquery/block/|jQuery.blockUI} is called
+       * @property {String} title=Title The Title of the popup.
+       * @property {String} desc=Default CDF notification - The description of the popup.
+       * @property {Number} timeout=4000 The timeout for the popup.
+       * @property {Function} onUnblock Callback function called when onUnblock from
+       *                                {@link http://malsup.com/jquery/block/|jQuery.blockUI} is called.
        * @property {Object} css An object wit the {@link http://malsup.com/jquery/block/|jQuery.blockUI} default
-       *                        options
-       * @property {String} css.position=Absolute The default popup css position value
-       * @property {String} css.width=100% The default popup css width value
-       * @property {String} css.top=10px The default popup css top value
-       * @property {Boolean} showOverlay=false Boolean flag to control wether the overlay is shown or not
-       * @property {Number} fadeIn=700 Time in milliseconds to show the Growl Popup
-       * @property {Number} fadeOut=1000 Time in milliseconds to hide the Growl Popup
-       * @property {Boolean} centerY=false Boolean to force the Growl Popup to now be centered in the Y axis
-       * 
+       *                        options.
+       * @property {String} css.position=Absolute The default popup css position value.
+       * @property {String} css.width=100% The default popup css width value.
+       * @property {String} css.top=10px The default popup css top value.
+       * @property {Boolean} showOverlay=false Boolean flag to control wether the overlay is shown or not.
+       * @property {Number} fadeIn=700 Time in milliseconds to show the Growl Popup.
+       * @property {Number} fadeOut=1000 Time in milliseconds to hide the Growl Popup.
+       * @property {Boolean} centerY=false Boolean to force the Growl Popup to now be centered in the Y axis.
+       *
        * @see {@link http://malsup.com/jquery/block/|jQuery.blockUI}
        */
       defaults: {
@@ -307,16 +309,18 @@ define([
       },
 
       /**
-       * @summary Renders the Popup
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache 
+       * @summary Renders the Popup.
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
        *              template.</p>
-       *              <p>If the render function is called for the first time, then the component is rendered and 
-       *              attached in the body of the page. Otherwise, the component is shown, calling the 
+       *              <p>If the render function is called for the first time, then the component is rendered and
+       *              attached in the body of the page. Otherwise, the component is shown, calling the
        *              {@link http://malsup.com/jquery/block/|jQuery.blockUI}.
-       *              {@link http://malsup.com/jquery/block/#element|block} function with the defaults extended 
-       *              with the newOpts argument, to allow user costumizations</p>
+       *              {@link http://malsup.com/jquery/block/#element|block} function with the defaults extended
+       *              with the newOpts argument, to allow user costumizations.</p>
        *
        * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values to the properties that define the content of the component.
+       *
+       * @see {@link http://malsup.com/jquery/block/|jQuery.blockUI}
        */
       render: function(newOpts) {
         var opts = _.extend({}, this.defaults, newOpts),
@@ -333,7 +337,7 @@ define([
           this._firstRender = false;
         }
         this.$el.show().block(opts);
-      } 
+      }
     }
   };
 });
