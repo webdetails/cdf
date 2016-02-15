@@ -22,13 +22,24 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.components
    * @amd cdf/dashboard/Dashboard.components
-   * @classdesc A class representing an extension to the Dashboard class for handling components.
+   * @classdesc A class representing an extension to the Dashboard class for handling components. 
+   *            It defines the methods used to interact with the components array. These components are instances
+   *            of BaseComponent
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
+    /**
+     * @summary Array that stores all components in the dashboard 
+     * @description Array of instances of {@link cdf.components.BaseComponent|BaseComponents} in the dashboard
+     * 
+     * @type {Array<cdf.components.BaseComponent>}
+     * @protected
+     */
+    components: [],
 
     /**
-     * Method used by the Dashboard constructor for components initialization.
+     * @summary Initializes the components array with an empty array
+     * @description Method used by the Dashboard constructor for components initialization.
      *
      * @private
      */
@@ -37,11 +48,16 @@ define([
     },
 
     /**
-     * Gets the component given a string representing the component's name.
-     * If a falsy value is specified, _undefined_ is returned.
+     * @summary Gets the component instance from a given name
+     * @description <p>Gets the component given a string representing the component's name. </p>
+     *              <p>This method iterates over the components array and searches for the component with the name
+     *              used as argument. If the component with that name is not found, then _undefined_ is returned. </p>
      *
-     * @param {string} name The component's name.
-     * @return {BaseComponent|undefined} The component or _undefined_.
+     * @param {String} name The component's name.
+     * @return {cdf.components.BaseComponent} The instance of {@link cdf.components.BaseComponent|BaseComponent} with the given name
+     * @return {undefined} If an instance of {@link cdf.components.BaseComponent|BaseComponent} with the given name is not found in the components array
+     * @example
+     *   var myComponent = myDashboard.getComponent("myInputComponent");
      */
     getComponent: function(name) {
       if(!name || typeof name !== "string") {
@@ -56,32 +72,34 @@ define([
     },
 
     /**
-     * Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
-     *
-     * @param {string} name The component's name.
-     * @return {BaseComponent|undefined} The component or _undefined_.
+     * @summary Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}
+     * @description Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
      */
     getComp: function(name) {
       return this.getComponent(name);
     },
 
     /**
-     * Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
-     *
-     * @param {string} name A string representing the component's name.
-     * @return {BaseComponent|undefined} The component or _undefined_.
+     * @summary Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}
+     * @description Alias for {@link cdf.dashboard.Dashboard#getComponent|getComponent}.
      */
     getComponentByName: function(name) {
       return this.getComponent(name);
     },
 
     /**
-     * Adds one or more components to the dashboard, if a component was already added
-     * it will not be replaced.
-     * If an array of components is specified, it iterates through the array and calls
-     * {@link cdf.dashboard.Dashboard#addComponent|addComponent} for each component.
+     * @summary Adds an Array of component instances to the dashboard
+     * @description <p>Adds one or more components to the dashboard, if a component was already added
+     *              it will not be replaced.</p>
+     *              <p>It iterates through the array and calls
+     *              {@link cdf.dashboard.Dashboard#addComponent|addComponent} for each component.</p>
+     *              <p>Along with the {@link cdf.dashboard.Dashboard#addComponent|addComponent} 
+     *              behaviour, if a component in the array fails to be added to the dashboard 
+     *              instance, an error is thrown and the execution stops. </p>
      *
-     * @param {array} components The array of components to be added.
+     * @param {Array<cdf.components.BaseComponent>} components The array of components to be added
+     * @throws {Error} Error if a component in the array is invalid or was already added.
+     * @see cdf.dashboard.Dashboard#addComponent
      */
     addComponents: function(components) {
       if(!$.isArray(components)) { 
@@ -94,19 +112,20 @@ define([
     },
 
     /**
-     * Adds a component to the dashboard `components` array if it wasn't already added.
-     *
-     * If `component` doesn't have a valid property `component.name`,
-     * or if the property isn't a valid string, an exception is thrown.
-     * If `options.index` is falsy the new component is appended to the end of the array.
-     * If `options.index` is truthy the new component is appended to the array at
-     * position `options.index`.
-     *
-     * @param {BaseComponent} component The new component to be added.
-     * @param {object} [options] An option object.
-     * @param {number} [options.index] The index at which to add the component.
-     * @return {Dashboard} The dashboard object.
-     * @throws {Error} Throws an error if the component is invalid or was already added.
+     * @summary Adds an instance of component to the dashboard
+     * @description <p>Adds an instance of {@link cdf.components.BaseComponent|BaseComponent} to the dashboard
+     *              components array if it wasn't already added.<p>
+     *              <p>If `component` doesn't have a valid property `component.name`, or if the property isn't 
+     *              a valid string, an exception is thrown.</p>
+     *              <p>The <code>options</code> parameter is optional and on his absence, the component is added 
+     *              to the end of the components array. The same rule is applied if `options.index` is falsy.
+     *              If not, the new component is appended to the array at position `options.index`. </p>
+     * @param {cdf.components.BaseComponent} component The new component to be added
+     * @param {Object} [options] An option object.
+     * @param {Number} [options.index] The index at which to add the component.
+     * @return {cdf.dashboard.Dashboard} The dashboard instance where the component was added.
+     * @throws {Error} The component is invalid.
+     * @throws {Error} The component already exists in the dashboard instance.
      */
     addComponent: function(component, options) {
       // validate new component's name
@@ -141,12 +160,15 @@ define([
     },
   
     /**
-     * Get the index of the array `components` that contains the component.
-     * If `compOrNameOrIndex` is a _string_ search the component that first matches such name.
-     * If `compOrNameOrIndex` is a _number_ return it.
-     * If `compOrNameOrIndex` is a component return the index where it is in `components`.
+     * @summary Get the index of a component
+     * @description <p>Get the index of the array `components` that contains the component.</p>
+     *              <p>If `compOrNameOrIndex` is a _string_, searchs the component that first matches such name. 
+     *              If `compOrNameOrIndex` is a _number_, it returns component index on the components array.
+     *              Lastly, if `compOrNameOrIndex` is a component instance, return the index where it is in 
+     *              `components` array.</p>
      *
-     * @param {BaseComponent|string|number} compOrNameOrIndex The name, index or the component to search.
+     * @param {cdf.components.BaseComponent|string|number} compOrNameOrIndex 
+     *        The name, index or the component to search.
      * @return {number} The index where the component is at or _-1_ if not found.
      */
     getComponentIndex: function(compOrNameOrIndex) {
@@ -170,14 +192,22 @@ define([
     },
 
     /**
-     * Removes a component from the `components` array.
-     * If `compOrNameOrIndex` is a string, the first component with such name is removed from the `components` array.
-     * If `compOrNameOrIndex` is a number, the component in such position in the `components` array is removed.
-     * If `compOrNameOrIndex` is an object that exists in the `components` array, it will be removed.
+     * @summary Removes a component from the `components` array.
+     * @description <p>Removes a component from the `components` array, calling 
+     *              {@link cdf.dashboard.Dashboard#getComponentIndex|getComponentIndex} to retrieve the correct 
+     *              component. Additionally, all the cdf events are removed, returning the component instance 
+     *              removed.</p>
+     *              <p>If argument is a {@link cdf.components.BaseComponent|BaseComponent} instance that 
+     *              exists in the `components` array, it will be removed. If `compOrNameOrIndex` is a string, 
+     *              the first component with such name is removed from the `components` array. The other case is 
+     *              if `compOrNameOrIndex` is a number. In this scenario, the component in such position in 
+     *              the `components` array is removed.</p>
      *
-     * @param {Object|string|number} compOrNameOrIndex The component object,
+     * @param {cdf.components.BaseComponent|string|number} compOrNameOrIndex The component object,
      *   the name of the component or the index of the component to be removed.
-     * @return {BaseComponent|undefined} The removed component or _undefined_.
+     * @return {cdf.components.BaseComponent} The removed component
+     * @return {undefined} The component was not found
+     * @see cdf.dashboard.Dashboard#getComponentIndex
      */
     removeComponent: function(compOrNameOrIndex) {
       var index = this.getComponentIndex(compOrNameOrIndex);
@@ -199,12 +229,14 @@ define([
     },
   
     /**
-     * Bind the control of a given component to the current dashboard instance
+     * @summary Bind the control of a given component to the current dashboard instance
+     * if none was previously bound.
+     * @description Bind the control of a given component to the current dashboard instance
      * if none was previously bound.
      *
      * @private
-     * @param {Object} control The target component.
-     * @return {*} The target component.
+     * @param {cdf.components.BaseComponent} control The target component.
+     * @return {cdf.components.BaseComponent} The target component.
      */
     _bindControl: function(control) {
 
@@ -217,13 +249,13 @@ define([
     },
   
     /**
-     * Bind the control of a given component to the current dashboard instance
-     * if none was previously bound. Sets the priority of the component if none exists.
+     * @summary Bind the control of a given component to the current dashboard instance.
+     * @description Bind the control of a given component to the current dashboard instance 
+     *              if none was previously bound. Sets the priority of the component if none exists.
      *
      * @private
-     * @param {Object} control The target component.
-     * @return {Object} The target component.
-     *
+     * @param {cdf.components.BaseComponent} control The target component.
+     * @return {cdf.components.BaseComponent} The target component.
      * @deprecated
      */
     _bindExistingControl: function(control /*, Class*/) {
@@ -253,11 +285,13 @@ define([
     },
 
     /**
-     * Casts a component to a new component class type.
+     * @summary Casts a component to a new component class type.
+     * @description Casts a component to a new component class type.
      *
      * @private
-     * @param {Object} control The target component.
+     * @param {cdf.components.BaseComponent} control The target component.
      * @param {Object} Class   The new class to cast the component to.
+     * @deprecated
      */
     _castControlToClass: function(control, Class) {
       if(!(control instanceof Class)) {
@@ -269,11 +303,13 @@ define([
     },
 
     /**
-     * Gets the class name of a given component.
+     * @summary Gets the class name of a given component.
+     * @description Gets the class name of a given component.
      *
      * @private
-     * @param {Object} control The target component.
-     * @return {*}
+     * @param {cdf.components.BaseComponent} control The target component.
+     * @return {Object}
+     * @deprecated
      */
     _getControlClass: function(control) {
       // see if there is a class defined for this control
@@ -297,13 +333,15 @@ define([
     },
 
     /**
-     * Creates a new component of a given class type. Allows to set
-     * default properties for the component instance.
+     * @summary Creates a new component of a given class type. 
+     * @description Creates a new component of a given class type. Allows to set default properties 
+     *              for the component instance.
      *
+     * @private
      * @param {Object} Class The component class object.
      * @param {Object} args The component properties.
-     * @return {Class} The new component instance.
-     * @private
+     * @return {cdf.components.BaseComponent} The new component instance.
+     * @deprecated
      */
     _makeInstance: function(Class, args) {
       var o = Object.create(Class.prototype);
@@ -312,12 +350,14 @@ define([
     },
 
     /**
-     * Extend control with BaseComponent methods, if it's not an instance of it.
-     * Also, avoid extending if _Class_ was already applied and it is a subclass of BaseComponent.
+     * @summary Extend control with BaseComponent methods.
+     * @description Extend control with BaseComponent methods, if it's not an instance of it.
+     *              Also, avoid extending if _Class_ was already applied and it is a subclass of BaseComponent.
      *
      * @private
      * @param {Object} control The target component.
-     * @param {Object} Class The target component class object.
+     * @param {cdf.components.BaseComponent} Class The target component class object.
+     * @deprecated
      */
     _castControlToComponent: function(control, Class) {
       if(!(control instanceof BaseComponent)
@@ -345,7 +385,8 @@ define([
     },
 
     /**
-     * Binds a callback function to the provided `control` component using the special
+     * @summary Binds a callback function to the provided `control` component for debugging 
+     * @description Binds a callback function to the provided `control` component using the special
      * Backbone [all]{@link http://backbonejs.org/#Events-catalog} event that will be
      * triggered whenever any event is triggered. The callback will log a message, using
      * the [Logger]{@link cdf.Logger} class, whenever an event is triggered. The only
@@ -354,7 +395,7 @@ define([
      * component is a _PostInitMarker_.
      *
      * @private
-     * @param {Object} control The target component.
+     * @param {cdf.components.BaseComponent} control The target component.
      */
     _addLogLifecycleToControl: function(control) {
       // TODO: Could the _typeof console !== "undefined"_ test be made beforehand,
