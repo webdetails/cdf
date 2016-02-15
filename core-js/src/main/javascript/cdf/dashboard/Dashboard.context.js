@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -21,13 +21,15 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.context
    * @amd cdf/dashboard/Dashboard.context
-   * @classdesc A class representing an extension to the Dashboard class
-   *            for handling the context object.
+   * @classdesc A class representing an extension to the {cdf.dashboard.Dashboard}
+   *            class for handling the context `object`.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * Method used by the constructor for context initialization.
+     * @description Method used by the dashboard constructor
+     *              for initializing the context `object`.
+     * @summary Initializes the context `object`.
      *
      * @private
      */
