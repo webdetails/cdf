@@ -33,7 +33,8 @@ define([
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Calls a xaction.
+     * @summary Calls a xaction.
+     * @description Calls a xaction.
      *
      * @param {Object} obj        DOM object where the response from the xaction should be written.
      * @param {string} solution   The solution folder.
@@ -60,7 +61,8 @@ define([
     },
 
     /**
-     * Calls an arbitrary URL expecting the result content type to be xml.
+     * @summary Calls an arbitrary URL expecting the result content type to be xml.
+     * @description Calls an arbitrary URL expecting the result content type to be xml.
      *
      * @param {string} url    The URL to call.
      * @param {Object} params The parameters object.
@@ -75,10 +77,11 @@ define([
     },
 
     /**
-     * Executes an Ajax request. If no `func` callback is provided it executes asynchronously
-     * and returns a jQuery XMLHttpRequest ({@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR})
-     * object. Otherwise, it executes {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} synchronously and
-     * returns the result of the HTTP request.
+     * @summary Executes an Ajax request.
+     * @description Executes an Ajax request. If no `func` callback is provided it executes asynchronously
+     *              and returns a jQuery XMLHttpRequest ({@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR})
+     *              object. Otherwise, it executes {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} synchronously and
+     *              returns the result of the HTTP request.
      *
      * @param {string}   returnType The expected return type.
      * @param {string}   url        The URL to call.
@@ -140,7 +143,8 @@ define([
     },
 
     /**
-     * Another way to call an xaction.
+     * @summary Another way to call a xaction.
+     * @description Another way to call a xaction.
      *
      * @param {string}   solution Solution folder.
      * @param {string}   path     Path to the xaction. Can be the full path, in which case you don't need the solution and action.
@@ -156,7 +160,8 @@ define([
     },
 
     /**
-     * Calls an xaction.
+     * @summary Calls a xaction.
+     * @description Calls a xaction.
      *
      * @param {string}   serviceMethod Dom object where the response from the xaction should be written.
      * @param {string}   returntype    Expected return type of the response.
@@ -183,7 +188,8 @@ define([
     },
 
     /**
-     * Legacy identifier of the HTML div element used for showing errors.
+     * @summary Legacy identifier of the HTML div element used for showing errors.
+     * @description Legacy identifier of the HTML div element used for showing errors.
      *
      * @type {string}
      * @default
@@ -193,7 +199,8 @@ define([
     CDF_ERROR_DIV: 'cdfErrorDiv',
 
     /**
-     * Creates an empty HTML div element, with identifier
+     * @summary Creates an empty HTML div element for showing errors.
+     * @description Creates an empty HTML div element, with identifier
      * {@link cdf.dashboard.Dashboard#CDF_ERROR_DIV|CDF_ERROR_DIV} for showing error messages.
      *
      * @deprecated
@@ -206,7 +213,8 @@ define([
     },
 
     /**
-     * Creates an empty HTML div element for showing error messages.
+     * @summary Creates a tooltip for showing errors.
+     * @description Creates an empty HTML div element for showing error messages.
      *
      * @deprecated
      */
@@ -224,7 +232,8 @@ define([
     },
 
     /**
-     * Parses the xaction result.
+     * @summary Parses the xaction result.
+     * @description Parses the xaction result.
      *
      * @private
      * @param {Object} obj  DOM object where the response will be written to.
@@ -268,7 +277,8 @@ define([
     },
 
     /**
-     * Sets a setting in the server.
+     * @summary Sets a setting in the server.
+     * @description Sets a setting in the server.
      *
      * @param {string} name   Name of the setting.
      * @param {Object} object Value for the setting.
@@ -286,7 +296,8 @@ define([
     },
 
     /**
-     * Gets a setting value from the server.
+     * @summary Gets a setting value from the server.
+     * @description Gets a setting value from the server.
      *
      * @param {string}   key   Key to the setting.
      * @param {function} value Callback function.
@@ -310,8 +321,10 @@ define([
     },
 
     /**
-     * Fetches data from the server according to a Chart Definition object.
-     * This method is deprecated, a {@link cdf.dashboard.Query|Query} instance should be used instead.
+     * @summary Fetches data from the server according to a Chart Definition `object`.
+     * @description Fetches data from the server according to a Chart Definition `object`.
+     *              This method is deprecated, a {@link cdf.dashboard.Query|Query}
+     *              instance should be used instead.
      *
      * @param {Object}   cd       Chart definition object.
      * @param {Object}   params   Parameter object.
