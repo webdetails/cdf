@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -25,9 +25,10 @@ define([
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
-  
+
     /**
-     * Method used by the Dashboard constructor for bookmarkable parameters initialization.
+     * @summary Method used by the Dashboard constructor for bookmarkable parameters initialization.
+     * @description Method used by the Dashboard constructor for bookmarkable parameters initialization.
      *
      * @private
      */
@@ -36,12 +37,13 @@ define([
     },
 
     /**
-     * Gets an object representation of _window.location.hash_. If a _key_ value is provided
-     * the value for the URL parameter with name equal to the value of _key_ is returned.
+     * @summary Gets an object representation of `window.location.hash`.
+     * @description <p>If a `key` parameter is provided, the value for the URL parameter
+     *              with name equal to the value of `key` is returned.</p>
      *
      * @private
      * @param {string} key The key corresponding to the value being obtained.
-     * @return {*} The key value or an empty object.
+     * @return {Object} The key value or an empty object.
      */
     getHashValue: function(key) {
       var hash = window.location.hash;
@@ -59,14 +61,15 @@ define([
     },
 
     /**
-     * Sets the hash value of _window.location_. If _value_ is provided, the parameter with name
-     * equal to the value of _key_ has it's value set to _value_ before the _window.location.hash_
-     * is set. If the object representation of _window.location.hash_ is an empty object,
-     * the value of _window.location.hash_ is set to an empty string.
+     * @summary Sets the hash value of `window.location`.
+     * @description <p>If `value` is provided, the parameter with name equal to the value of `key`
+     *              has its value set to `value` before the `window.location.hash` is set.</p>
+     *              <p>If the object representation of `window.location.hash` is an empty object,
+     *              the value of `window.location.hash` is set to an empty string.</p>
      *
      * @private
-     * @param {object|string} key     The object representation of _window.location.hash_ or a parameter name.
-     * @param {*}             [value] The value for the parameter named _key_.
+     * @param {object|string} key     The object representation of `window.location.hash` or a parameter name.
+     * @param {Object}             [value] The value for the parameter named `key`.
      */
     setHashValue: function(key, value) {
       var obj;
@@ -88,11 +91,12 @@ define([
     },
 
     /**
-     * If no _key_ is provided it clears _window.location.hash_, otherwise
-     * it sets the new hash value with the parameter named _key_ removed.
+     * @summary Deletes a value from `window.location.hash`.
+     * @description <p>If no `key` is provided it clears `window.location.hash`, otherwise
+     *              it sets the new hash value with the parameter named `key` removed.</p>
      *
      * @private
-     * @param {string} key The value of the key.
+     * @param {string} [key] The value of the key.
      */
     deleteHashValue: function(key) {
       if(arguments.length === 0) {
@@ -105,10 +109,12 @@ define([
     },
 
     /**
-     * Sets a pair parameter/value as bookmarkable.
+     * @summary Sets a pair parameter/value as bookmarkable.
+     * @description <p>It sets `parameter` as bookmarkable, with value = `true` or `value` if
+     *              provided</p>
      *
      * @param {string} parameter The name of the parameter to be stored.
-     * @param {*}      value     The value for the parameter.
+     * @param {Object}      [value]     The value for the parameter.
      */
     setBookmarkable: function(parameter, value) {
       if(arguments.length === 1) {
@@ -119,17 +125,19 @@ define([
     },
 
     /**
-     * Checks if a parameter is bookmarkable.
+     * @summary Checks if a `parameter` is bookmarkable.
+     * @description Checks if a `parameter` is bookmarkable.
      *
      * @param {string} parameter The parameter name.
-     * @return {boolean} describing if a parameter is bookmarkable.
+     * @return {boolean} `true` if `parameter` is bookmarkable, `false` otherwise.
      */
     isBookmarkable: function(parameter) {
       return Boolean(this.bookmarkables[parameter]);
     },
 
     /**
-     * Generates a bookmark state using values stored.
+     * @summary Generates a bookmark state using values stored.
+     * @description Generates a bookmark state using values stored.
      *
      * @return {Object} An object with the state of the parameters previously marked as bookmarkable.
      */
@@ -145,7 +153,11 @@ define([
     },
 
     /**
-     * Persists a bookmark state.
+     * @summary Persists a bookmark state.
+     * @description <p>If `param` is a bookmarkable parameter, this method uses
+     *              {@link cdf.dashboard.Dashboard#generateBookmarkState|generateBookmarkState}
+     *              to generate a bookmark state with the values stored and
+     *              {@link cdf.dashboard.Dashboard#setBookmarkState|setBookmarkState} to persist them.</p>
      *
      * @param {string} param The name of the parameter.
      */
@@ -167,9 +179,10 @@ define([
     },
 
     /**
-     * Overrides a bookmark state with a given state.
+     * @summary Overrides a bookmark state with a given `state`.
+     * @description Overrides a bookmark state with a given `state`.
      *
-     * @param {*} state The new state to override the existing state.
+     * @param {Object} state The new state to override the existing state.
      */
     setBookmarkState: function(state) {
       if(window.history && window.history.replaceState) {
@@ -191,7 +204,8 @@ define([
     },
 
     /**
-     * Gets the bookmark state url decoded.
+     * @summary Gets the bookmark state url decoded.
+     * @description Gets the bookmark state url decoded.
      *
      * @return {Object} An object with the current bookmark state.
      */
@@ -226,7 +240,9 @@ define([
     },
 
     /**
-     * Restores the bookmark state.
+     * @summary Restores the bookmark state.
+     * @description <p>This method uses {@link cdf.dashboard.Dashboard#getBookmarkState|getBookmarkState} to read the bookmark state
+     *              and then {@link cdf.dashboard.Dashboard#setParameter|setParameter} to set each parameter/value read in the dashboard.</p>
      */
     restoreBookmarkables: function() {
       var state;
