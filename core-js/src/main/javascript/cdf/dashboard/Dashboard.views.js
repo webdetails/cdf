@@ -21,15 +21,38 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.views
    * @amd cdf/dashboard/Dashboard.views
-   * @classdesc A class representing an extension to the Dashboard class for views.
-   *            Map containing the list of parameters of a dashboard,
-   *            describing its state with viewFlags.
+   * @classdesc A class representing an extension to the
+   *            {@link cdf.dashboard.Dashboard|Dashboard} class for managing views.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Object used to store the available view flag values (read only).
+     * @summary Map containing the list of parameters of a dashboard and their
+     *          {@link cdf.dashboard.Dashboard#viewFlags|view flag}.
+     * @description Map containing the list of parameters of a dashboard.
+     *              The keys are the parameter names and the values are the
+     *              {@link cdf.dashboard.Dashboard#viewFlags|view flag} value.
+     */
+    viewParameters: undefined,
+
+    /**
+     * @summary A view is a snapshot of the dashboard parameters state, useful
+     *          to restore a dashboard to a previous state.
+     * @description <p>Holds a snapshot of the dashboard parameters state,
+     *              useful to restore a dashboard to a previous state.</p>
+     *              <p>It can be initialized in two different ways. The main way is via
+     *              the dashboard constructor. If not, it will be initialized via the
+     *              {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration.</p>
+     * 
+     * @type {Object}
+     * @protected
+     */
+    view: undefined,
+
+    /**
+     * @description Object used to store the available view flag values (read only).
+     * @summary Object used to store the available view flag values (read only).
      *
      * @type {Object}
      * @const
@@ -44,9 +67,15 @@ define([
     },
 
     /**
-     * Method used by the Dashboard constructor for view initialization.
+     * @description <p>Method used by the {@link cdf.dashboard.Dashboard|Dashboard} constructor
+     *              for initializing the {@link cdf.dashboard.Dashboard#view|view}.</p>
+     *              <p>If the view hasn't been initialized, its value will be read from
+     *              {@link cdf.dashboard.Dashboard#viewObj|viewObj}.</p>
+     * @summary Method used by the {@link cdf.dashboard.Dashboard|Dashboard} constructor
+     *          to initialize the {@link cdf.dashboard.Dashboard#view|view}.
      *
      * @private
+     * @see {@link cdf.dashboard.Dashboard#viewObj|viewObj}
      */
     _initViews: function() {
       this.viewParameters = {};
@@ -57,10 +86,15 @@ define([
     },
 
     /**
-     * Restores the view stored in the object view, changing the parameters values to the values stored in the view.
-     * Because we're storing the parameters in OrientDB, and as OrientDB has some serious issues when storing nested
-     * objects, we need to marshall the parameters into a JSON object and converting that JSON into a Base64 blob
-     * before the storage operation.
+     * @summary Restores the dashboard parameters stored in a {@link cdf.dashboard.Dashboard#view|view}.
+     * @description Restores the dashboard parameters stored in a {@link cdf.dashboard.Dashboard#view|view}.
+     *              Because we're storing the parameters in {@link http://orientdb.com/|OrientDB}, and
+     *              it has some serious issues when storing nested objects, we need to marshall the
+     *              parameters into a JSON object and convert that JSON into a
+     *              {@link http://www.webtoolkit.info/javascript_base64.html|Base64} blob before the
+     *              storage operation. So, to restore the view parameters we need to revert this process.
+     * @see {@link http://orientdb.com/|OrientDB}
+     * @see {@link http://www.webtoolkit.info/javascript_base64.html|Base64}
      */
     restoreView: function() {
       var p, params;
@@ -82,10 +116,11 @@ define([
     },
 
     /**
-     * Defines the view flag of a given parameter. If no _value_ is provided the
-     * parameter value is set to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
+     * @summary Sets the view flag for a given parameter.
+     * @description Sets the view flag for a given parameter. If none is provided
+     *              it defaults to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
      *
-     * @param {string} parameter    The name of the parameter
+     * @param {string} parameter    The name of the parameter.
      * @param {string} value="view" The value of the view flag for the parameter. If none is provided
      *                              it defaults to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
      */
@@ -98,7 +133,8 @@ define([
     },
 
     /**
-     * Returns the view flag for a given parameter.
+     * @summary Returns the view flag value of a given parameter.
+     * @description Returns the view flag value of a given parameter.
      *
      * @param {string} parameter The name of the parameter.
      * @return {string} The parameter view flag value.
@@ -108,11 +144,15 @@ define([
     },
 
     /**
-     * Obtains a list with the values for all dashboard parameters
-     * flagged as being {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}
-     * or {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND} parameters.
+     * @summary Gets a map with the dashboard parameters with the view flag set to
+     *          {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}
+     *          or {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
+     * @description Gets a map, with the pairs parameter name - parameter value,
+     *              with all dashboard parameters with the view flag set to
+     *              {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}
+     *              or {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
      *
-     * @return {Object[]} List of parameter values.
+     * @return {Object} Map containing the viewable and unbound parameters.
      */
     getViewParameters: function() {
       var params = this.viewParameters,
@@ -128,10 +168,12 @@ define([
     },
 
     /**
-     * Obtains a list of parameters with the view flag set to
-     * {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
+     * @summary Gets a list of the names of the dashboard parameters with the view flag set to
+     *          {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
+     * @description Gets a list of the names of the dashboard parameters with the view flag set to
+     *              {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
      *
-     * @return {string[]} List of the unbound parameters' names.
+     * @return {string[]} List containing the names of the unbound parameters.
      */
     getUnboundParameters: function() {
       var params = this.viewParameters,
