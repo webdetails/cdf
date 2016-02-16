@@ -179,10 +179,12 @@ define([
     /**
      * Initial dashboard context value. It will either be an empty object
      * or will be set according to the context property of the 
-     * dashboard AMD module configuration.
+     * {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration.
      *
      * @type {object}
-     * @ignore
+     * @default {}
+     * @private
+     * @see {@link http://requirejs.org/docs/api.html#config|RequireJS Configuration Options}
      */
     contextObj: module.config().context || {},
 
@@ -270,7 +272,7 @@ define([
     /**
      * Sets the {@link cdf.dashboard.Dashboard#debug|debug} level.
      * If the URL parameter _debug_ has value _true_ and the value of the URL parameter
-     * _debugLevel_ is a valid numric value it will set the debug level according to the latter.
+     * _debugLevel_ is a valid numeric value it will set the debug level according to the latter.
      * If an error occurs while reading the URL parameters, or _debug_ is not set to _true_, the debug level is set to 1.
      * 
      *
