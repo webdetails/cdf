@@ -20,14 +20,27 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.dataSources
    * @amd cdf/dashboard/Dashboard.dataSources
-   * @classdesc A class representing an extension to the Dashboard class for handling data sources.
-   *            The methods here handle getting and saving data sources from the dashboard.
+   * @classdesc A class representing an extension to the
+   *            {@link cdf.dashboard.Dashboard|Dashboard} class for handling data sources.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Method used by the Dashboard constructor for data sources initialization.
+     * @summary Map of key value pairs, data source name - data source value.
+     * @description Map of key value pairs where the keys are the data source names and the
+     *              values are the corresponding data source `object`.
+     *
+     * @type {Array<Object>}
+     * @protected
+     */
+    dataSources: undefined,
+
+    /**
+     * @summary Method used by the {@link cdf.dashboard.Dashboard|Dashboard}
+     *          constructor for data sources initialization.
+     * @description Method used by the {@link cdf.dashboard.Dashboard|Dashboard}
+     *              constructor for data sources initialization.
      *
      * @private
      */
@@ -36,11 +49,13 @@ define([
     },
 
     /**
-     * Gets the data source name.
+     * @summary Gets the data source name.
+     * @description Gets the data source name given a data source or a query definition `object`.
      *
      * @private
-     * @param {Object} obj A string, a data source object with a name property or a query definition object with a _dataSource_ property.
-     * @return {string|undefined} The data source name or undefined if none is found.
+     * @param {Object} obj A string, a data source object with a `name` property or
+     *                     a query definition `object` with a `dataSource` property.
+     * @return {string|undefined} The data source name or `undefined` if none is found.
      */
     _getDataSourceName: function(obj) {
       var name;
@@ -59,11 +74,14 @@ define([
     },
 
     /**
-     * Adds a data source given a name, the data source object to be added and an optional _boolean_
-     * indicating if any data source with the same name should be deleted.
-     * If the _name_ parameter is an _object_ its _name_ property
-     * will be used as the data source name and the _obj_ parameter will be used as the
-     * flag that when evaluates as a truthy overwrites any previous data source with the same name.
+     * @summary Adds a new data source.
+     * @description Adds a data source given a name, the data source object to be
+     *              added and an optional `boolean` indicating if any data source
+     *              with the same name should be deleted. If the `name` parameter
+     *              is an `object` its `name` property will be used as the data
+     *              source name and the `obj` parameter will be used as the flag
+     *              that when evaluates as a truthy overwrites any previous data
+     *              source with the same name.
      *
      * @param {string|Object}     name        The name of the data source.
      * @param {Object|boolean}    obj         The data source to be added.
@@ -111,10 +129,13 @@ define([
     },
 
     /**
-     * Gets a data source according to the provided name or query definition object with a _dataSource_ property.
+     * @summary Gets the data source with the provided name.
+     * @description Gets a data source according to the provided name or
+     *              query definition object with a `dataSource` property.
      *
-     * @param {string|Object} obj The name of the data source or an object from which to extract the name from.
-     * @return {Object|undefined} The data source or undefined if none is found.
+     * @param {string|Object} obj The name of the data source or an `object`
+     *                            from which to extract the name from.
+     * @return {Object|undefined} The data source or `undefined` if none is found.
      */
     getDataSource: function(obj) {
       var name = this._getDataSourceName(obj);
@@ -124,10 +145,13 @@ define([
     },
 
     /**
-     * Returns a query object built using the data source with the provided name.
+     * @summary Gets a query from {@link cdf.dashboard.Dashboard#getQuery|getQuery}
+     *          using the data source with the provided name.
+     * @description Gets a query from {@link cdf.dashboard.Dashboard#getQuery|getQuery}
+     *              using the data source with the provided name.
      *
-     * @param {string|Object} obj The name of the data source or an object from which to extract the name from.
-     * @return {Object|undefined} The query built using the target data source or undefined if no data source was found.
+     * @param {string|Object} obj The name of the data source or an `object` from which to extract the name from.
+     * @return {Object|undefined} The query built using the target data source or `undefined` if no data source was found.
      */
     getDataSourceQuery: function(obj) {
       var dataSource = this.getDataSource(obj);
@@ -140,7 +164,8 @@ define([
     },
 
     /**
-     * Adds a data source. If a data source already exists with the same name, it is replaced with the new one.
+     * @summary Adds a data source overriding any existing one with the same name.
+     * @description Adds a data source. If a data source already exists with the same name, it is replaced with the new one.
      *
      * @param {string|Object}    name The name of the data source.
      * @param {Object|undefined} obj  The data source to be added.
@@ -156,7 +181,10 @@ define([
     },
 
     /**
-     * Removes a data source according to the provided name or query definition object with a _dataSource_ property.
+     * @summary Removes the data source with the provided name.
+     * @description Removes the data source with the provided name. If `obj` is a
+     *              query definition `object`, the data source name will be extracted
+     *              from its `dataSource` property.
      *
      * @param {string|Object} obj The name of the data source or an object from which to extract the name.
      */
