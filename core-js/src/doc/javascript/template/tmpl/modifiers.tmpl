@@ -4,7 +4,7 @@ var data = obj;
 function isPrivate(){ return data.access == "private"; }
 function isProtected(){ return data.access == "protected"; }
 function isDeprecated(){ return data.deprecated; }
-function isConstant(){ return data.kind == "constant"; }
+function isConstant(){ return data.constant; }
 function isAbstract(){ return data.virtual; }
 function isStatic(){ return data.scope == "static"; }
 ?>
