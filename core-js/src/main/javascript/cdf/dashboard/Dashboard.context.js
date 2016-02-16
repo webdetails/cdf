@@ -44,7 +44,7 @@ define([
     /**
      * @description Method used by the {@link cdf.dashboard.Dashboard|Dashboard} constructor for
      *              initializing the context `object`. If the context hasn't been initialized,
-     *              its value will be read from the {@link cdf.dashboard.Dashboard#contextObj|contextObj}.
+     *              its value will be read from {@link cdf.dashboard.Dashboard#contextObj|contextObj}.
      * @summary Method used by the {@link cdf.dashboard.Dashboard|Dashboard} constructor to initialize
      *          the context `object`.
      *
