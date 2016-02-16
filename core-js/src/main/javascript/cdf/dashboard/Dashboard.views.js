@@ -33,6 +33,9 @@ define([
      * @description Map containing the list of parameters of a dashboard.
      *              The keys are the parameter names and the values are the
      *              {@link cdf.dashboard.Dashboard#viewFlags|view flag} value.
+     *
+     * @protected 
+     * @type {Object}
      */
     viewParameters: undefined,
 
