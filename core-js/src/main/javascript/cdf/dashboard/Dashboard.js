@@ -35,7 +35,11 @@ define([
      * @extends {@link http://dean.edwards.name/weblog/2006/03/base/|Base}
      * @extends {@link http://backbonejs.org/#Events|Backbone.Events}
      * @classdesc Base abstract dashboard class.
-     * @param {Object} options Object that can contain the context, storage and view.
+     * @param {Object} [options] Object that can contain the context, storage and view.
+     * @param {Object} [options.context] The context of the dashboard retrieved from the server.
+     * @param {Object} [options.storage] The storage of the dashboard retrieved from the server.
+     * @param {Object} [options.view] The views of the dashboard retrieved from the server.
+     * @abstract
      */
     constructor: function(options) {
       var myself = this;
@@ -163,18 +167,34 @@ define([
     },
 
     /**
-     * Determines if components and params are retrieved
-     * from the _window_ object or from the dashboard instance
+     * @summary The current webapp path.
+     * @description The current webapp path.
+     *
+     * @name cdf.dashboard.Dashboard#webAppPath
+     * @protected
+     * @type {String}
+     */
+    //webAppPath: undefined,
+
+    /**
+     * @summary The {@link cdf.dashboard.RefreshEngine|RefreshEngine} that manages the component refresh cycle.
+     * @description The {@link cdf.dashboard.RefreshEngine|RefreshEngine} that manages the component refresh cycle.
+     *
+     * @protected
+     * @type {cdf.dashboard.RefreshEngine}
+     */
+    refreshEngine: undefined,
+
+
+    /**
+     * @summary Determines if components and params are retrieved from the _window_ object or from the dashboard instance
+     * @description Determines if components and params are retrieved from the _window_ object or from the dashboard instance
      *
      * @type {boolean}
      * @default false
-     * 
      * @deprecated
-     * @ignore
      */
     globalContext: false,
-
-    // Holds the dashboard parameters if globalContext = false
 
     /**
      * @summary Initial dashboard {@link cdf.dashboard.Dashboard#context|context} value.
@@ -217,46 +237,50 @@ define([
     viewObj: module.config().view,
 
     /**
-     * Legacy dashboards don't have priority, so we'll assign a very low priority
-     * to them.
+     * @summary Legacy dashboard components don't have priority, so we'll assign a very low priority to them.
+     * @description Legacy dashboard components don't have priority, so we'll assign a very low priority to them.
      *
      * @type {number}
      * @default -1000
-     * @ignore
+     * @deprecated
+     * @protected
      */
     legacyPriority: -1000,
 
     /**
-     * Flag indicating if the lifecycle events should be logged.
+     * @summary Flag indicating if the lifecycle events should be logged.
+     * @description Flag indicating if the lifecycle events should be logged. 
      *
      * @type {boolean}
      * @default true
+     * @protected
      */
     logLifecycle: true,
 
     /**
-     * Array of arguments.
+     * @summary Array of arguments.
+     * @description Array of arguments.
      *
      * @type {string[]}
      * @deprecated
-     * @ignore
      */
     args: [],
 
     //TODO: Review the monthNames usage in month selector component, impossible to localize!!!!
     /**
-     * Array of month names.
+     * @summary Array of month names.
+     * @description Array of month names.
      *
      * @type {string[]}
      * @deprecated
-     * @ignore
      */
     monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'],
 
     /**
-     * Registers a callback function in the dashboard's events property.
-     * Creates the dashboard's events property if it's undefined.
+     * @summary Registers a callback function in the dashboard's events property.
+     * @description Registers a callback function in the dashboard's events property. 
+     *              Creates the dashboard's events property if it's undefined.
      *
      * @param {string}   ev       The name of the event.
      * @param {function} callback The callback function.
@@ -270,19 +294,21 @@ define([
     },
 
     /**
-     * The dashboard's debug level.
+     * @summary The dashboard debug level.
+     * @description The dashboard debug level. 
      *
      * @type {number}
      * @default 1
+     * @protected
      */
     debug: 1,
 
     /**
-     * Sets the {@link cdf.dashboard.Dashboard#debug|debug} level.
-     * If the URL parameter _debug_ has value _true_ and the value of the URL parameter
-     * _debugLevel_ is a valid numeric value it will set the debug level according to the latter.
-     * If an error occurs while reading the URL parameters, or _debug_ is not set to _true_, the debug level is set to 1.
-     * 
+     * @summary Sets the {@link cdf.dashboard.Dashboard#debug|debug} level.
+     * @description Sets the {@link cdf.dashboard.Dashboard#debug|debug} level. If the URL parameter _debug_ 
+     *              has value _true_ and the value of the URL parameter _debugLevel_ is a valid numeric value 
+     *              it will set the debug level according to the latter. If an error occurs while reading 
+     *              the URL parameters, or _debug_ is not set to _true_, the debug level is set to 1. 
      *
      * @return {number} The new {@link cdf.dashboard.Dashboard#debug|debug} level value according to the _debugLevel_ URL parameter,
      *                  1 if an error occurs while parsing the URL, if _debugLevel_ has an invalid numeric value
@@ -304,18 +330,19 @@ define([
     },
 
     /**
-     * Sets the globalContext value.
+     * @summary Sets the {@link cdf.dashboard.Dashboard#globalContext|globalContext} value.
+     * @description Sets the {@link cdf.dashboard.Dashboard#globalContext|globalContext} value.
      *
      * @param {boolean} globalContext Flag indicating if global context is to be activated.
      * @deprecated
-     * @ignore
      */
     setGlobalContext: function(globalContext) {
       this.globalContext = globalContext;
     },
 
     /**
-     * Gets the current webapp path.
+     * @summary Gets the current webapp path.
+     * @description Gets the current webapp path.
      *
      * @return {string} The current webapp path (e.g. "/pentaho").
      */
@@ -324,9 +351,11 @@ define([
     },
 
     /**
-     * Gets the dashboard's wcdfSettings.
-     * This method is meant to be overriden.
-     *
+     * @summary Gets the dashboard's wcdfSettings.
+     * @description Gets the dashboard's wcdfSettings. It will be overriden returning 
+     *              the proper wcdf settings in embedded scenarios.
+     * 
+     * @abstract
      * @return {Object} The dashboard's wcdf settings object.
      */
     getWcdfSettings: function() {
@@ -335,11 +364,12 @@ define([
     },
 
     /**
-     * Normalizes an HTML element identifier.
+     * @summary Normalizes an HTML element identifier.
+     * @description  Normalizes an HTML element identifier. This method is meant to be used when 
+     *               we need to directly manipulate an HTML element. It will be overriden returning 
+     *               the proper identifier in embedded scenarios.
      *
-     * This method is meant to be used when we need to directly manipulate an HTML element.
-     * It will be overriden returning the proper identifier in embedded scenarios.
-     *
+     * @abstract
      * @param {string} id The HTML element identifier to normalize.
      * @return {string} The normalized identifier.
      */
