@@ -194,7 +194,7 @@ define([
      * @summary Initial dashboard {@link cdf.dashboard.Dashboard#storage|storage} value.
      * @description Initial dashboard {@link cdf.dashboard.Dashboard#storage|storage} value.
      *              It will either be an empty `object` or will be set according to the
-     *              `storage` property of the  {@link cdf.dashboard.Dashboard|Dashboard}
+     *              `storage` property of the {@link cdf.dashboard.Dashboard|Dashboard}
      *              AMD module configuration.
      *
      * @type {object}
@@ -205,12 +205,14 @@ define([
     storageObj: module.config().storage || {},
 
     /**
-     * Initial dashboard view value. It will either be an empty object
-     * or will be set according to the view property of the 
-     * dashboard AMD module configuration.
+     * @summary Initial dashboard {@link cdf.dashboard.Dashboard#view|view} value.
+     * @description Initial dashboard {@link cdf.dashboard.Dashboard#view|view} value.
+     *              It will be set according to the `view` property of the
+     *              {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration.
      *
      * @type {object}
-     * @ignore
+     * @private
+     * @see {@link http://requirejs.org/docs/api.html#config|RequireJS Configuration Options}
      */
     viewObj: module.config().view,
 
