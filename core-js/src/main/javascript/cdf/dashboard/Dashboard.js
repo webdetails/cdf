@@ -177,9 +177,11 @@ define([
     // Holds the dashboard parameters if globalContext = false
 
     /**
-     * Initial dashboard context value. It will either be an empty object
-     * or will be set according to the context property of the 
-     * {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration.
+     * @summary Initial dashboard {@link cdf.dashboard.Dashboard#context|context} value.
+     * @description  Initial dashboard {@link cdf.dashboard.Dashboard#context|context} value.
+     *               It will either be an empty `object` or will be set according to the
+     *               `context` property of the {@link cdf.dashboard.Dashboard|Dashboard}
+     *               AMD module configuration.
      *
      * @type {object}
      * @default {}
@@ -189,12 +191,16 @@ define([
     contextObj: module.config().context || {},
 
     /**
-     * Initial dashboard storage value. It will either be an empty object
-     * or will be set according to the storage property of the 
-     * dashboard AMD module configuration.
+     * @summary Initial dashboard {@link cdf.dashboard.Dashboard#storage|storage} value.
+     * @description Initial dashboard {@link cdf.dashboard.Dashboard#storage|storage} value.
+     *              It will either be an empty `object` or will be set according to the
+     *              `storage` property of the  {@link cdf.dashboard.Dashboard|Dashboard}
+     *              AMD module configuration.
      *
      * @type {object}
-     * @ignore
+     * @default {}
+     * @private
+     * @see {@link http://requirejs.org/docs/api.html#config|RequireJS Configuration Options}
      */
     storageObj: module.config().storage || {},
 
