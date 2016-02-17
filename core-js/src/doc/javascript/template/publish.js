@@ -19,8 +19,8 @@ var hasOwnProp = Object.prototype.hasOwnProperty;
 var data;
 var view;
 
-var version = "${project.stage}";
-var github = "${project.github-name}";
+var version = '' + env.opts.githubConfig.branch;
+var github = '' + env.opts.githubConfig.name;
 
 var outdir = path.normalize(env.opts.destination);
 

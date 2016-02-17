@@ -442,7 +442,7 @@
                   <outputDirectory>${basedir}/target/</outputDirectory>
                   <resources>
                     <resource>
-                      <directory>${basedir}/src/</directory>
+                      <directory>${basedir}/src/doc/javascript/config</directory>
                       <filtering>true</filtering>
                     </resource>
                   </resources>
