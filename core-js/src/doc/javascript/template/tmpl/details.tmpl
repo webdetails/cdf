@@ -98,7 +98,7 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
 
     <?js if (data.meta) {?>
     <p>
-        <strong>Source: </strong> <?js= self.linkto(meta.shortpath) ?>, <?js= self.linkto(meta.shortpath, 'line ' + meta.lineno, null, 'line' + meta.lineno) ?>
+        <strong>Source: </strong> <?js= self.linkto(meta.sourceLink) ?>
     </p>
     <?js } ?>
 
