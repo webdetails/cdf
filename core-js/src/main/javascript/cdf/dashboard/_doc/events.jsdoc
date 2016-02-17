@@ -17,30 +17,46 @@
  */
 
 /**
- * Event triggered before a dashboard starts initializing.
+ * @summary Event triggered before dashboard initialization.
+ * @description Event triggered before the dashboard starts initializing.
  *
  * @event "cdf:preInit"
  * @memberof cdf.dashboard.Dashboard#
- * @summary Event triggered before initialization.
  */
 
 /**
- * Event triggered after a dashboard finishes initializing.
+ * @summary Event triggered after dashboard initialization.
+ * @description Event triggered after the dashboard finishes initializing.
  *
  * @event "cdf:postInit"
  * @memberof cdf.dashboard.Dashboard#
- * @summary Event triggered after initialization.
  */
 
 /**
- * Event triggered when a dashboard parameter value changes. The name
- * of the event is formed using the name of the parameter and the
- * suffix `:fireChange`.
+ * @summary Event triggered when the dashboard parameter value changes.
+ * @description Event triggered when the dashboard parameter value changes.
+ *              The name of the event is formed using the name of the
+ *              parameter and the suffix `:fireChange`.
  *
  * @event "<em>parameterName</em>:fireChange"
  * @memberof cdf.dashboard.Dashboard#
- * @param {object} obj 			 An object containing the parameter name and the new value.
+ * @param {object} obj           An object containing the parameter name and the new value.
  * @param {string} obj.parameter The name of the parameter.
- * @param {*}      obj.value 	 The new parameter value.
- * @summary Event triggered when parameter value changes.
+ * @param {*}      obj.value     The new parameter value.
+ */
+
+/**
+ * @summary Event triggered when login fails.
+ * @description Event triggered when login fails.
+ *
+ * @event "cdf:loginError"
+ * @memberof cdf.dashboard.Dashboard#
+ */
+
+/**
+ * @summary Event triggered when a server error occurs.
+ * @description Event triggered when a server error occurs.
+ *
+ * @event "cdf:serverError"
+ * @memberof cdf.dashboard.Dashboard#
  */

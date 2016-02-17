@@ -17,44 +17,45 @@
  */
 
 /**
- * Event triggered before a component starts executing.
+ * @summary Event triggered before execution.
+ * @description Event triggered before a component starts executing.
  *
  * @event "cdf:preExecution"
  * @memberof cdf.components.BaseComponent#
- * @summary Event triggered before execution.
  */
 
 /**
- * Event triggered after a component finishes executing.
+ * @summary Event triggered after execution.
+ * @description Event triggered after a component finishes executing.
  *
  * @event "cdf:postExecution"
  * @memberof cdf.components.BaseComponent#
- * @summary Event triggered after execution.
  */
 
 /**
- * Event triggered when an error occurs.
+ * @summary Event triggered on error.
+ * @description Event triggered when an error occurs.
  *
  * @event "cdf:error"
  * @memberof cdf.components.BaseComponent#
- * @summary Event triggered on error.
  */
 
 /**
- * The [`all`]{@link http://backbonejs.org/#Events-catalog} event is a special 
- * event that will trigger the bound callbacks when any event occurs.
+ * @summary Event triggered by any other event.
+ * @description The [`all`]{@link http://backbonejs.org/#Events-catalog} event is a
+ *              special event that will trigger the bound callbacks when any event occurs.
  *
  * @event all
  * @memberof cdf.components.BaseComponent#
  * @see Backbone Events {@link http://backbonejs.org/#Events-catalog|catalog}.
- * @summary Event triggered by any other event.
  */
 
 /**
- * Event triggered after an {@link cdf.component.UnmanagedComponent|Unmanaged component} fetches data.
+ * @summary Event triggered after fetching data.
+ * @description Event triggered after an {@link cdf.component.UnmanagedComponent|Unmanaged}
+ *              component fetches data.
  *
  * @event "cdf:postFetch"
  * @memberof cdf.components.UnmanagedComponent#
  * @param {object} data The data returned from the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} call.
- * @summary Event triggered after fetching data.
  */
