@@ -327,8 +327,8 @@ function buildNav(members) {
         nav += '<li class="namespaceEntry">';
         nav += '  <button id="toggle_' + index + '" class="mt-toggle-expand mt-toggle"></button>';
         nav += '  <span>' + namespace.title + '</span>';
+        nav += '  <ul id="namespace_' + index + '" style="display:none;">';
         nav += '</li>';
-        nav += '<ul id="namespace_' + index + '">';
         nav += buildMembers(namespace.interfaces, 'Interfaces', linkto);
         nav += buildMembers(namespace.classes, 'Classes', linkto);
         nav += buildMembers(namespace.events, 'Events', linkto);
