@@ -25,16 +25,27 @@ define([
 
   return Base.extend(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * This class is abstract, so it should not be required or instantiated directly.
-     * Instead use one of its extending subclasses:
-     * {@link cdf.Blueprint|Blueprint},
-     * {@link cdf.Bootstrap|Bootstrap} or
-     * {@link cdf.Clean|Clean}.
-     * 
+     * @classdesc <p>Base abstract dashboard class. This class is abstract, so it should not be required
+     *            or instantiated directly.
+     *            <p>Instead use one of its extending subclasses: {@link cdf.Blueprint|Blueprint},
+     *            {@link cdf.Bootstrap|Bootstrap} or {@link cdf.Clean|Clean}.</p>
+     *            <p>Each dashboard instance can be localized by adding, in the same directory,
+     *            the following properties files:</p>
+     *            <ul><li>messages&#95;supported&#95;languages.properties - Defines supported languages,
+     *            if not present, i18n support will not be loaded, eg. <pre>en=English
+     * pt=Portuguese</pre></li>
+     *            <li>messages.properties - Default messages file, eg. <pre>
+     * myDashboard.title=Default title</pre></li>
+     *            <li>messages&#95;[language&#95;code].properties - Language code messages file, eg. <pre>
+     * myDashboard.title=Title # for messages_en.properties
+     * myDashboard.title=Título # for messages_pt.properties</pre></li></ul>
+     *            <p>Usage:</p>
+     *            <pre>dashboard.i18nSupport.prop("myDashboard.title");</pre>
+     *
      * @constructs
+     * @description Abstract constructor for the Dashboard object.
      * @extends {@link http://dean.edwards.name/weblog/2006/03/base/|Base}
      * @extends {@link http://backbonejs.org/#Events|Backbone.Events}
-     * @classdesc Base abstract dashboard class.
      * @param {Object} [options] Object that can contain the context, storage and view.
      * @param {Object} [options.context] The context of the dashboard retrieved from the server.
      * @param {Object} [options.storage] The storage of the dashboard retrieved from the server.
