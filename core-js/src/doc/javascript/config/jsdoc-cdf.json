@@ -16,7 +16,7 @@
     "monospaceLinks": false
   },
   "opts": {
-    "template": "${basedir}/src/doc/javascript/template",
+    "template": "${basedir}/target/doc/javascript/template",
     "encoding": "utf8",
     "recurse": true,
     "private": true,
