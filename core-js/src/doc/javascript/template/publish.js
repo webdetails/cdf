@@ -19,6 +19,9 @@ var hasOwnProp = Object.prototype.hasOwnProperty;
 var data;
 var view;
 
+var version = "${project.stage}";
+var github = "${project.github-name}";
+
 var outdir = path.normalize(env.opts.destination);
 
 function find(spec) {
@@ -193,6 +196,40 @@ function getPathFromDoclet(doclet) {
     return doclet.meta.path && doclet.meta.path !== 'null' ?
         path.join(doclet.meta.path, doclet.meta.filename) :
         doclet.meta.filename;
+}
+
+function getLinkFromDoclet(doclet) {
+    if (!doclet.meta) {
+        return null;
+    }
+    var linkBase = 'https://github.com/webdetails/';
+    var type = 'tree';
+
+    if (doclet.meta.shortpath && doclet.meta.shortpath !== 'null'
+            && doclet.meta.shortpath.indexOf('.js') != -1) {
+        type = 'blob';
+    }
+
+    var cdfPath = doclet.meta.path.replace(/\\/g,"/");
+    cdfPath = cdfPath.substring(cdfPath.indexOf(github) + 4, cdfPath.length);
+
+    linkBase = linkBase + github + '/' + type + '/' + version + '/' + cdfPath;
+
+    var fileName = doclet.meta.shortpath.indexOf('/') != -1 ?
+        doclet.meta.shortpath.substr(
+            doclet.meta.shortpath.lastIndexOf('/') + 1, 
+            doclet.meta.shortpath.length) :
+        doclet.meta.shortpath;
+    var url = linkBase + '/' + fileName;
+
+    var linkText = doclet.meta.shortpath;    
+
+    if (doclet.meta.lineno) {
+        url += '#L' + doclet.meta.lineno;
+        linkText += ', line ' + doclet.meta.lineno;
+    }
+
+    return '<a href="' + url + '" target="_blank">' + linkText + '</a>';
 }
 
 function generate(title, docs, filename, resolveLinks) {
@@ -544,6 +581,12 @@ exports.publish = function(taffyData, opts, tutorials) {
             if (docletPath) {
                 doclet.meta.shortpath = docletPath;
             }
+        }
+
+        var sourceLink;
+        if (doclet.meta) {
+            sourceLink = getLinkFromDoclet(doclet);
+            doclet.meta.sourceLink = sourceLink;
         }
     });
 

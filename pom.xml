@@ -39,8 +39,10 @@
 
   <properties>
     <project.stage>master</project.stage>
+
     <dependency.cpf.revision>6.0-16.01.22</dependency.cpf.revision>
     <dependency.ccc.revision>16.01.22</dependency.ccc.revision>
+    <project.github-name>cdf</project.github-name>
     <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
     <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
     <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
@@ -441,7 +443,7 @@
                   <outputDirectory>${basedir}/target/</outputDirectory>
                   <resources>
                     <resource>
-                      <directory>${basedir}/src/doc/javascript/config/</directory>
+                      <directory>${basedir}/src/</directory>
                       <filtering>true</filtering>
                     </resource>
                   </resources>
