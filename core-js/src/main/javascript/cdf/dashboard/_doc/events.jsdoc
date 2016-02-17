@@ -44,3 +44,19 @@
  * @param {*}      obj.value 	 The new parameter value.
  * @summary Event triggered when parameter value changes.
  */
+
+/**
+ * @summary Event triggered when login fails.
+ * @description Event triggered when login fails.
+ *
+ * @event "cdf:loginError"
+ * @memberof cdf.dashboard.Dashboard#
+ */
+
+/**
+ * @summary Event triggered when a server error occurs.
+ * @description Event triggered when a server error occurs.
+ *
+ * @event "cdf:serverError"
+ * @memberof cdf.dashboard.Dashboard#
+ */
