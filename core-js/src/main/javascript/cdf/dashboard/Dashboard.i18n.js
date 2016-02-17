@@ -29,11 +29,31 @@ define([
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
+
     /**
-     * Method used by the Dashboard constructor for i18n initialization
-     * Reference to current language code . Used in every place where jquery
-     * plugins used in CDF has native internationalization support (ex: Datepicker).
+     * @summary Localization object.
+     * @description Localization object, this will contain the property/value map and
+     *              the method to get a value from a property.
      *
+     * @type {Object}
+     * @protected
+     */
+    i18nSupport: undefined,
+
+    /**
+     * @summary Dashboards current language code.
+     * @description Dashboards current language code, used by other localizable components.
+     *
+     * @type {String}
+     * @protected
+     */
+    i18nCurrentLanguageCode: undefined,
+
+    /**
+     * @summary Method used by the Dashboard constructor for i18n initialization.
+     * @description Method used by the Dashboard constructor for i18n initialization.
+     *
+     * @see {@link https://www.github.com/jquery-i18n-properties/jquery-i18n-properties|jQuery i18n Support}
      * @private
      */
     _initI18n: function() {
@@ -83,7 +103,8 @@ define([
     },
 
     /**
-     * Sets the current locale and i18n options.
+     * @summary Sets the current locale and i18n options.
+     * @description Sets the current locale and i18n options.
      *
      * @param {string} lc Locale code.
      * @param {Object} i18nRef Additional i18 options.
@@ -94,7 +115,10 @@ define([
     },
 
     /**
-     * Gets the path from which to load the locale-specific properties files.
+     * @summary Gets the path from which to load the locale-specific properties files.
+     * @description <p>Gets the path from which to load the locale-specific properties files.</p>
+     *              <p>If this method returns `undefined`, which is the most common case, the path will be the dashboards path.</p>
+     *              <p>It will be overriden returning the appropriate dashboard path in embedded scenarios.</p>
      *
      * @return {string} The path to the dashboard's locale-specific text files.
      * @abstract
