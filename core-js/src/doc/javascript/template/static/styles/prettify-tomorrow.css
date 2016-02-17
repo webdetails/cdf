@@ -4,7 +4,8 @@
 /* SPAN elements with the classes below are added by prettyprint. */
 /* plain text */
 .pln {
-  color: #4d4d4c; }
+  color: #4d4d4c;
+}
 
 @media screen {
   /* string content */
@@ -130,3 +131,15 @@ li.L5,
 li.L7,
 li.L9 {
   /* */ }
+
+nav > ul {
+  padding-left: 0;
+}
+
+.index-nav > ul {
+  display: none;
+}
+
+.index-nav li {
+  list-style-type: none;
+}

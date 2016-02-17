@@ -277,30 +277,6 @@ function attachModuleSymbols(doclets, modules) {
     });
 }
 
-function buildMemberNav(items, itemHeading, itemsSeen, linktoFn) {
-    var nav = '';
-
-    if (items.length) {
-        var itemsNav = '';
-
-        items.forEach(function(item) {
-            if ( !hasOwnProp.call(item, 'longname') ) {
-                itemsNav += '<li>' + linktoFn('', item.name) + '</li>';
-            }
-            else if ( !hasOwnProp.call(itemsSeen, item.longname) ) {
-                itemsNav += '<li>' + linktoFn(item.longname, item.name.replace(/^module:/, '')) + '</li>';
-                itemsSeen[item.longname] = true;
-            }
-        });
-
-        if (itemsNav !== '') {
-            nav += '<h3>' + itemHeading + '</h3><ul>' + itemsNav + '</ul>';
-        }
-    }
-
-    return nav;
-}
-
 function linktoTutorial(longName, name) {
     return tutoriallink(name);
 }
@@ -309,54 +285,84 @@ function linktoExternal(longName, name) {
     return linkto(longName, name.replace(/(^"|"$)/g, ''));
 }
 
-/**
- * Create the navigation sidebar.
- * @param {object} members The members that will be used to create the sidebar.
- * @param {array<object>} members.classes
- * @param {array<object>} members.externals
- * @param {array<object>} members.globals
- * @param {array<object>} members.mixins
- * @param {array<object>} members.modules
- * @param {array<object>} members.namespaces
- * @param {array<object>} members.tutorials
- * @param {array<object>} members.events
- * @param {array<object>} members.interfaces
- * @return {string} The HTML for the navigation sidebar.
- */
-function buildNav(members) {
-    var nav = '<h2><a href="index.html">Home</a></h2>';
-    var seen = {};
-    var seenTutorials = {};
+function findMembers(data, kind, memberOf) {
+    var spec = {kind: kind, memberof: memberOf},
+        search = helper.find(data, spec),
+        members = [];
 
-    nav += buildMemberNav(members.modules, 'Modules', {}, linkto);
-    nav += buildMemberNav(members.externals, 'Externals', seen, linktoExternal);
-    nav += buildMemberNav(members.classes, 'Classes', seen, linkto);
-    nav += buildMemberNav(members.events, 'Events', seen, linkto);
-    nav += buildMemberNav(members.namespaces, 'Namespaces', seen, linkto);
-    nav += buildMemberNav(members.mixins, 'Mixins', seen, linkto);
-    nav += buildMemberNav(members.tutorials, 'Tutorials', seenTutorials, linktoTutorial);
-    nav += buildMemberNav(members.interfaces, 'Interfaces', seen, linkto);
+    search.forEach(function(_member) {
+        members.push(createMemberData(data, _member, kind));
 
-    if (members.globals.length) {
-        var globalNav = '';
+    });
 
-        members.globals.forEach(function(g) {
-            if ( g.kind !== 'typedef' && !hasOwnProp.call(seen, g.longname) ) {
-                globalNav += '<li>' + linkto(g.longname, g.name) + '</li>';
-            }
-            seen[g.longname] = true;
-        });
+    return members;
+}
 
-        if (!globalNav) {
-            // turn the heading into a link so you can actually get to the global page
-            nav += '<h3>' + linkto('global', 'Global') + '</h3>';
-        }
-        else {
-            nav += '<h3>Global</h3><ul>' + globalNav + '</ul>';
-        }
+function createMemberData(data, member, kind) {
+    var memberData = {
+        name: member.name,
+        longname: member.longname
+    };
+
+    if(kind === 'class' || kind === 'namespace') {
+        memberData.interfaces = findMembers(data, 'interface', member.longname);
+        memberData.classes = findMembers(data, 'class', member.longname);
+        memberData.events = findMembers(data, 'event', member.longname);
     }
 
-    return nav;
+    if(kind === 'namespace') {
+        var hasPrefix = member.name !== member.longname;
+        var prefix = hasPrefix ? member.longname.replace(member.name, '') : "";
+        memberData.title = prefix + "<strong>" + member.name + "</strong>";
+    }
+
+    return memberData;
+}
+
+function buildNav(members) {
+    if(members == null || members.length === 0) return "";
+
+    var nav = "";
+    members.forEach(function(namespace, index) {
+        nav += '<li class="namespaceEntry">';
+        nav += '  <button id="toggle_' + index + '" class="mt-toggle-expand mt-toggle"></button>';
+        nav += '  <span>' + namespace.title + '</span>';
+        nav += '</li>';
+        nav += '<ul id="namespace_' + index + '">';
+        nav += buildMembers(namespace.interfaces, 'Interfaces', linkto);
+        nav += buildMembers(namespace.classes, 'Classes', linkto);
+        nav += buildMembers(namespace.events, 'Events', linkto);
+        nav  += '</ul>';
+    });
+
+    return '<ul class="index-nav">' + nav + '</ul>' + buildToggleScript();
+}
+
+function buildMembers(members, title, linktoFn) {
+    if(members == null || members.length === 0 ) return "";
+
+    var memberNav = "";
+    members.forEach(function(member) {
+        var innerNav = "";
+        memberNav += '<li>' + linktoFn(member.longname, member.name) + '</li>';
+        innerNav += buildMembers(member.interfaces, 'Interfaces', linktoFn);
+        innerNav += buildMembers(member.classes, 'Classes', linktoFn);
+        innerNav += buildMembers(member.events, 'Events', linktoFn);
+        memberNav += innerNav !== "" ? "<ul>" + innerNav + "</ul>" : "";
+    });
+
+    return '<li class="title">' + title + '</li>' + memberNav;
+}
+
+function buildToggleScript() {
+    return "<script type=\"text/javascript\">" +
+        "  $(\".index-nav button[id^='toggle_']\").click(function() {" +
+        "    var $this = $(this);" +
+        "    var index = $this.attr('id').replace('toggle_', '');" +
+        "    $this.toggleClass('mt-toggle-expand').toggleClass('mt-toggle-collapse');" +
+        "    $('ul#namespace_' + index).toggleClass('namespace-collapsed').slideToggle();" +
+        "  });" +
+        "</script>";
 }
 
 /**
@@ -591,7 +597,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     view.outputSourceFiles = outputSourceFiles;
 
     // once for all
-    view.nav = buildNav(members);
+    view.nav = buildNav(findMembers(data, 'namespace'));
     attachModuleSymbols( find({ longname: {left: 'module:'} }), members.modules );
 
     // generate the pretty-printed source files first so other pages can link to them
