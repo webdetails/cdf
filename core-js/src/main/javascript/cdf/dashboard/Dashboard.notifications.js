@@ -31,37 +31,53 @@ define([
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Inits the notification.
+     * @summary Dashboard error codes.
+     * @description Contains the default dashboard error codes.
      *
-     * @private
+     * @type {Object}
+     * @property {string} QUERY_TIMEOUT="Query timeout reached" - Query timeout error message.
+     * @property {string} COMPONENT_ERROR="Error processing component" - Error processing component error message.
+     * @constant
+     * @protected
      */
-    _initNotifications: function() {
-
-      /**
-       * Property with the registered error codes. By default, the QUERY_TIMEOUT and COMPONENT_ERROR code
-       * are registered and assigned a specific error message.
-       *
-       * @type {Object}
-       * @name cdf.dashboard.Dashboard#ERROR_CODES
-       */
-      this.ERROR_CODES = {
-        'QUERY_TIMEOUT': {
-          msg: "Query timeout reached"
-        },
-        "COMPONENT_ERROR": {
-          msg: "Error processing component"
-        }
-      };
+    ERROR_CODES: {
+      "QUERY_TIMEOUT": {msg: "Query timeout reached"},
+      "COMPONENT_ERROR": {msg: "Error processing component"}
     },
 
     /**
-     * Sets additional {@link http://malsup.com/jquery/block/|jQuery.blockUI} options based on the defaults already set.
+     * @summary Initializes the dashboard notifications.
+     * @description Initializes the dashboard notifications.
      *
-     * @param {Object}  options             The options to configure.
-     * @param {string}  options.message     The message or HTML to display in the UI overlay.
-     * @param {Object}  options.css         A json that accepts valid css key/value pairs.
-     * @param {Object}  options.overlayCSS  A json that accepts valid css key/value pairs for the UI overlay.
-     * @param {boolean} options.showOverlay Allows you to show or hide the UI overlay.
+     * @private
+     */
+    _initNotifications: function() {},
+
+    /**
+     * @summary Holds the dashboard {@link http://malsup.com/jquery/block/|jQuery.blockUI} options.
+     * @description Holds the dashboard {@link http://malsup.com/jquery/block/|jQuery.blockUI} options.
+     *
+     * @type {Object}
+     * @protected
+     */
+    blockUiOptions: undefined,
+
+    /**
+     * @summary Stores the {@link http://malsup.com/jquery/block/|jQuery.blockUI} options in
+     *          {@link cdf.dashboard.Dashboard#blockUiOptions|blockUiOptions}.
+     * @description Sets the {@link http://malsup.com/jquery/block/|jQuery.blockUI} options.
+     *              It stores the default {@link http://malsup.com/jquery/block/|jQuery.blockUI}
+     *              options in {@link cdf.dashboard.Dashboard#blockUiOptions|blockUiOptions} and
+     *              the options provided through the `options` parameter, the latter have priority
+     *              over the default options.
+     *
+     * @param {Object}  [options]             The options to configure {@link http://malsup.com/jquery/block/|jQuery.blockUI}.
+     * @param {string}  [options.message]     The message or HTML to display in the UI overlay.
+     * @param {Object}  [options.css]         A json that accepts valid css key/value pairs.
+     * @param {Object}  [options.overlayCSS]  A json that accepts valid css key/value pairs for the UI overlay.
+     * @param {boolean} [options.showOverlay] Allows you to show or hide the UI overlay.
+     * @private
+     * @see {@link http://malsup.com/jquery/block/|jQuery.blockUI}
      */
     _setBlockUiOptions: function(options) {
        if(typeof $.blockUI == 'function') {
@@ -74,7 +90,8 @@ define([
     },
 
     /**
-     * Renders a blocking div that can be dragged.
+     * @summary Renders a blocking div that can be dragged.
+     * @description Renders a blocking div that can be dragged.
      */
     blockUIwithDrag: function() {
       if(typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
@@ -92,16 +109,19 @@ define([
     },
 
     /**
-     * Makes visible the progress indicator. By default, this is a draggable blocking div that shows a spinner.
+     * @summary Makes the progress indicator visible. 
+     * @description Makes the progress indicator visible. By default,
+     *              this is a draggable blocking div that shows a spinner.
      */
     showProgressIndicator: function() {
       $.blockUI && this.blockUIwithDrag();
     },
 
     /**
-     * Hides the progress indicator. Optionally, resets the running calls counter.
+     * @summary Hides the progress indicator. 
+     * @description Hides the progress indicator. Optionally, resets the running calls counter.
      *
-     * @param {boolean} force _true_ if the running calls counter should be reset, _false_ otherwise
+     * @param {boolean} force `true` if the running calls counter should be reset, `false` otherwise
      */
     hideProgressIndicator: function(force) {
       if(force) {
@@ -112,10 +132,11 @@ define([
     },
 
     /**
-     * Given an error code, returns the registered error object associated with that code.
+     * @summary Gets an error code message.
+     * @description Given an error code, returns the registered error object associated with that code.
      *
      * @param {string} errorCode The error code.
-     * @return {{msg: string}} error An object with a _msg_ property containing the error code message or
+     * @return {{msg: string}} An object with a `msg` property containing the error code message or
      *                               an empty object if the code is not registered.
      */
     getErrorObj: function(errorCode) {
@@ -123,13 +144,14 @@ define([
     },
 
     /**
-     * Parses a server error response and creates an error object.
+     * @summary Parses a server error response and creates an error object.
+     * @description Parses a server error response and creates an error object.
      *
      * @private
      * @param {string} resp      Server response.
      * @param {string} txtStatus Response status.
      * @param {string} error     Error object to encapsulate.
-     * @return {{msg: string, error: string, errorStatus: string}} An error object containing detailed error messages.
+     * @return {{msg: string, error: string, errorStatus: string}} An error `object` containing detailed error messages.
      *
      * @deprecated
      */
@@ -158,7 +180,11 @@ define([
     },
 
     /**
-     * Handles a server error.
+     * @summary Handles a server error.
+     * @description Handles a server error.
+     *
+     * @fires cdf.event:cdf
+     * @fires cdf.dashboard.Dashboard#event:"cdf:serverError"
      */
     handleServerError: function() {
       this.errorNotification(this.parseServerError.apply(this, arguments));
@@ -167,10 +193,11 @@ define([
     },
 
     /**
-     * Displays an error notification.
+     * @summary Displays an error notification.
+     * @description Displays an error notification.
      *
-     * @param {Object} err An object containing a _msg_ property with the error message to display.
-     * @param {*} [ph] A reference to the HTML element where to attach the error message.
+     * @param {Object} err An object containing a `msg` property with the error message to display.
+     * @param {Object} [ph] A reference to the HTML element where to attach the error message.
      */
     errorNotification: function(err, ph) {
       if(ph) {
@@ -184,9 +211,13 @@ define([
     },
 
     /**
-     * Default implementation for the login alert that pops up when we detect the user is no longer logged in.
+     * @summary Shows a login error notification.
+     * @description Default implementation for the login alert that pops up when we
+     *              detect the user is no longer logged in.
      *
      * @param {Object} newOpts Options for the login popup.
+     * @fires cdf.event:cdf
+     * @fires cdf.dashboard.Dashboard#event:"cdf:loginError"
      */
     loginAlert: function(newOpts) {
       var opts = {
@@ -204,9 +235,12 @@ define([
     },
 
     /**
-     * Check if we're able to connect to the server correctly, using post to avoid cache.
+     * @summary Executes a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax}
+     *          to test the connection to the server.
+     * @description Executes a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax}
+     *              to test the connection to the server. Uses HTTP POST to avoid cache.
      *
-     * @return {boolean} _true_ if able to connect, _false_ otherwise.
+     * @return {boolean} `true` if able to connect, `false` otherwise.
      */
     checkServer: function() {
       $.ajax({
