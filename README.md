@@ -56,7 +56,13 @@ If you don't already have a *settings.xml* file on that location, this is a stoc
   <offline/>
   <pluginGroups/>
   <servers/>
-  <mirrors/>
+  <mirrors>
+    <mirror>
+      <id>pentaho-internal-repository</id>
+      <url>http://nexus.pentaho.org/content/groups/omni</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
   <proxies/>
   <profiles>
     <profile>
