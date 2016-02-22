@@ -124,7 +124,9 @@ regionVarianceBarChart = {
   htmlObject: "object_2",
   executeAtStart: false,
   preExecution: function() {},
-  postExecution: function() {}
+  postExecution: function() {
+    $('#object_2').css( 'pointer-events', 'none' );
+  }
 }
 
 titleString = {

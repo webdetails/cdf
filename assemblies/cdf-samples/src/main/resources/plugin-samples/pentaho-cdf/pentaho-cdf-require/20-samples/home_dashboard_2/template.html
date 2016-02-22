@@ -38,9 +38,8 @@ require([
     'cdf/Dashboard.Blueprint',
     'cdf/components/TextComponent',
     'cdf/components/JFreeChartComponent',
-    'cdf/components/PivotLinkComponent',
     'cdf/components/DialComponent'],
-  function(Dashboard, TextComponent, JFreeChartComponent, PivotLinkComponent, DialComponent) {
+  function(Dashboard, TextComponent, JFreeChartComponent, DialComponent) {
 
   dashboard = new Dashboard();
 
@@ -68,17 +67,10 @@ require([
     htmlObject: "topTenCustomersObject",
     executeAtStart: true,
     preExecution: function() {},
-    postExecution: function() {}
-  }));
-
-  dashboard.addComponent(new PivotLinkComponent({
-    name: "topTenCustomersDetails",
-    type: "pivotLink",
-    htmlObject: "topTenCustomersDetailsObject",
-    content: "Details...",
-    tooltip: "See the details for this component",
-    pivotDefinition: MetaLayerHome2.topTenCustomerDefinition,
-    executeAtStart: true
+    postExecution: function() {
+      event  =  document.getElementById('topTenCustomersObject');
+      event.style.pointerEvents = "none";
+    }
   }));
 
   dashboard.addComponent(new JFreeChartComponent({
