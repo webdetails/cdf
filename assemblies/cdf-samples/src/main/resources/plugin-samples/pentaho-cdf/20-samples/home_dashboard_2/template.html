@@ -56,17 +56,10 @@ topTenCustomers =
   htmlObject: "topTenCustomersObject",
   executeAtStart: true,
   preExecution:function(){},
-  postExecution:function(){}
-}
-
-topTenCustomersDetails   = {
-	name: "topTenCustomersDetails",
-	type: "pivotLink",
-	htmlObject: "topTenCustomersDetailsObject",
-	content: "Details...",
-	tooltip: "See the details for this component",
-	pivotDefinition: MetaLayerHome2.topTenCustomerDefinition,
-	executeAtStart: true
+  postExecution:function(){
+    event  =  document.getElementById('topTenCustomersObject');
+    event.style.pointerEvents = "none";
+  }
 }
 
 territorySales = 
@@ -96,7 +89,7 @@ productLineSales =
 }
 
 var components = [titleString, territorySales, productLineSales, topTenCustomers,
-    topTenCustomersDetails];
+                 ];
 
 </script>
 
