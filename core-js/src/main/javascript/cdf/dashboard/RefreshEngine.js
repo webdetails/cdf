@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -14,75 +14,106 @@
 define([], function() {
 
   /**
-   * Builds a new refresh engine for the provided dashboard.
+   * @description Builds a new refresh engine for the provided dashboard.
    *
    * @class cdf.dashboard.RefreshEngine
    * @amd cdf/dashboard/RefreshEngine
+   * @summary Class that manages the periodic refresh of components.
    * @classdesc Class that manages the periodic refresh of components.
    * @param {cdf.dashboard.Dashboard} dashboard The dashboard instance to be managed by the refresh engine.
    */
-  return /** @lends cdf.dashboard.RefreshEngine# */ function(dashboard) {
+  return function(dashboard) {
     /**
-     * Default value for the refresh period.
-     * Currently no distinction between explicitly disabled or not set.
+     * @summary Default value for the refresh period.
+     * @description Default value for the refresh period.
+     *              Currently no distinction between explicitly disabled or not set.
      *
+     * @memberof cdf.dashboard.RefreshEngine#
      * @type {number}
+     * @readonly
      * @const
-     * @inner
      * @default 0
-     * @ignore
+     * @private
      */
     var NO_REFRESH = 0;
     /**
-     * Component refresh queue.
+     * @summary The component refresh queue.
+     * @description The component refresh queue.
      *
-     * @type {Array}
-     * @inner
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @type {Array<cdf.dashboard.RefreshEngine#QueueItem>}
      * @default []
-     * @ignore
+     * @private
      */
     var refreshQueue = new Array();
     /**
-     * Timer for individual component refresh.
+     * @summary Timer for the individual component refresh.
+     * @description Timer for the individual component refresh.
      *
+     * @memberof cdf.dashboard.RefreshEngine#
      * @type {string}
-     * @inner
      * @default null
-     * @ignore
+     * @private
      */
     var activeTimer = null;
   
     /**
-     * The global refresh period.
+     * @summary The global refresh period.
+     * @description The global refresh period.
      *
+     * @memberof cdf.dashboard.RefreshEngine#
      * @type {number}
-     * @inner
      * @default 0
-     * @ignore
+     * @private
      */
     var globalRefreshPeriod = NO_REFRESH;
+
     /**
-     * The global timer.
+     * @summary The global timer.
+     * @description The global timer.
      *
+     * @memberof cdf.dashboard.RefreshEngine#
      * @type {number}
      * @default null
-     * 
+     * @private
      */
     var globalTimer = null;
-  
+
+    /**
+     * @summary A container for the queue items.
+     * @classdesc A container for the queue items.
+     *
+     * @class
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @description Creates a new queue item.
+     * @private
+     */
     var QueueItem = function() {
-      return {
+      return /** @lends cdf.dashboard.RefreshEngine#QueueItem# */ {
+        /**
+         * @summary The next refresh value.
+         * @description The next refresh value. This value is used to sort the refresh queue.
+         * @type {Number}
+         * @default 0
+         */
         nextRefresh: 0,
+        /**
+         * @summary The component to be refreshed.
+         * @description The component to be refreshed.
+         * @type {cdf.components.BaseComponent}
+         * @default null
+         */
         component: null
       };
     };
 
     /**
-     * Set _globalTimer_ and (re)start interval.
+     * @summary Set {@link cdf.dashboard.RefreshEngine#globalTimer|globalTimer} and (re)start interval.
+     * @description Set {@link cdf.dashboard.RefreshEngine#globalTimer|globalTimer} and (re)start interval.
      *
+     * @memberof cdf.dashboard.RefreshEngine#
      * @param {number} refreshPeriod The refresh interval.
-     * @inner
-     * @ignore
+     * @private
      */
     var startGlobalRefresh = function(refreshPeriod) {
       if(globalTimer != null) {
@@ -95,6 +126,14 @@ define([], function() {
       }
     };
 
+    /**
+     * @summary Removes a component from the refresh queue.
+     * @description Removes a component from the refresh queue.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @param {cdf.components.BaseComponent} component The component to remove from the refresh queue.
+     * @private
+     */
     var clearFromQueue = function(component) {
       for(var i = 0; i < refreshQueue.length; i++) {
         if(refreshQueue[i].component == component) {
@@ -104,13 +143,32 @@ define([], function() {
       }
     };
 
+    /**
+     * @summary Clears the refresh queue.
+     * @description Removes all components from the refresh queue.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @private
+     */
     var clearQueue = function() {
       if(refreshQueue.length > 0) {
         refreshQueue.splice(0, refreshQueue.length);
       }
     };
 
-    //binary search for elem's position in coll (nextRefresh asc order)
+    /**
+     * @summary Gets the index at which the queue item `elem` should be
+     *          added to the `coll` sorted array.
+     * @description Gets the index at which the queue item `elem` should
+     *              be added to the `coll` ascending sorted array. The array is sorted
+     *              using the queue items `nextRefresh` property.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @param {Array<cdf.dashboard.RefreshEngine#QueueItem>} coll An array of queue items sorted in ascending order.
+     * @param {cdf.dashboard.RefreshEngine#QueueItem} elem The queue item to add to the array.
+     * @return {Number} The index position where `elem` should be inserted.
+     * @private
+     */
     var getSortedInsertPosition = function(coll, elem) {
       var high = coll.length - 1;
       var low = 0;
@@ -128,11 +186,29 @@ define([], function() {
       }
       return low;
     };
+
+    /**
+     * @summary Adds the queue item `rtInfo` to the sorted array `rtArray`.
+     * @description Adds the queue item `rtInfo` to the sorted array `rtArray`.
+     *              The array is sorted using the queue items `nextRefresh` property.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @param {Array<cdf.dashboard.RefreshEngine#QueueItem>} rtArray An array of queue items sorted in ascending order.
+     * @param {cdf.dashboard.RefreshEngine#QueueItem} rtInfo The queue item to add to the array.
+     * @private
+     */
     var sortedInsert = function(rtArray, rtInfo) {
       var pos = getSortedInsertPosition(rtArray,rtInfo);
       rtArray.splice(pos, 0, rtInfo);
     };
 
+    /**
+     * @summary Removes the current active timer.
+     * @description Removes the current active timer.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @private
+     */
     var stopTimer = function() {
       if(activeTimer != null) {
         clearTimeout(activeTimer);
@@ -140,23 +216,68 @@ define([], function() {
       }
     };
 
+    /**
+     * @summary Stops the current active timer and starts a refresh cycle.
+     * @description Stops the current active timer and starts a refresh cycle
+     *              by executing {@link cdf.dashboard.RefreshEngine#fireRefresh|fireRefresh}.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @private
+     */
     var restartTimer = function() {
       stopTimer();
       dashboard.refreshEngine.fireRefresh();
     };
 
+    /**
+     * @summary Gets the current time in milliseconds according to universal time.
+     * @description Gets the current time in milliseconds according to universal time.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @return {Number} The current time in milliseconds according to universal time.
+     * @private
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime|Date.prototype.getTime()}
+     */
     var getCurrentTime = function() {
       return (new Date()).getTime();
     };
 
+    /**
+     * @summary Checks if `component` is the first in the refresh queue.
+     * @description Checks if `component` is the first in the refresh queue.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @param {cdf.components.BaseComponent} component The target component.
+     * @return {Boolean} `true` if `component` is the first in the refresh queue, `false` otherwise.
+     * @private
+     */
     var isFirstInQueue = function(component) {
       return refreshQueue.length > 0 && refreshQueue[0].component == component;
     };
 
+    /**
+     * @summary Executes {@link cdf.dashboard.Dashboard#updateComponent|updateComponent} using the provided component.
+     * @description Executes {@link cdf.dashboard.Dashboard#updateComponent|updateComponent} using the provided component.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @param {cdf.components.BaseComponent} component The component to update.
+     * @private
+     * @see {@link cdf.dashboard.Dashboard#updateComponent|updateComponent}
+     */
     var refreshComponent = function(component) {
       dashboard.update(component);
     };
 
+    /**
+     * @summary Inserts the provided component into the sorted refresh queue.
+     * @description Creates a new {@link cdf.dashboard.RefreshEngine#QueueItem|QueueItem} instance
+     *              using the provided component and inserts it into the sorted refresh queue.
+     *
+     * @memberof cdf.dashboard.RefreshEngine#
+     * @param {cdf.components.BaseComponent} component The target component.
+     * @private
+     * @see {@link cdf.dashboard.RefreshEngine#sortedInsert|sortedInsert}
+     */
     var insertInQueue = function(component) {
       var time = getCurrentTime();
       // normalize invalid refresh
@@ -175,13 +296,14 @@ define([], function() {
     return /** @lends cdf.dashboard.RefreshEngine# */ {
 
       /**
-       * Set a component's refresh period and clears it from the queue.
-       * {@link cdf.dashboard.RefreshEngine#processComponent|processComponent}
-       * must be called to activate the refresh timer for the component.
+       * @summary Set a components refresh period and clears it from the queue.
+       * @description Set a components refresh period and clears it from the queue.
+       *              {@link cdf.dashboard.RefreshEngine#processComponent|processComponent}
+       *              must be called to activate the refresh timer for the component.
        *
-       * @param {Object} component     The component to register.
-       * @param {number} refreshPeriod The ssociated refresh period.
-       * @return {boolean} _true_ if registration succeeds, _false_ otherwise.
+       * @param {cdf.components.BaseComponent} component The component to register.
+       * @param {number} refreshPeriod The associated refresh period.
+       * @return {boolean} `true` if registration succeeds, `false` otherwise.
        */
       registerComponent: function(component, refreshPeriod) {
         if(!component) { return false; }
@@ -195,10 +317,11 @@ define([], function() {
       },
 
       /**
-       * Gets the refresh period for a component.
+       * @summary Gets the refresh period for a component.
+       * @description Gets the refresh period for a component.
        *
-       * @param {Object} component Component from which we want the refresh period.
-       * @return {number} Associated refresh period or the value of _NO_REFRESH_.
+       * @param {cdf.components.BaseComponent} component The target component.
+       * @return {number} The components refresh period value or the value of {@link cdf.dashboard.RefreshEngine#NO_REFRESH|NO_REFRESH}.
        */
       getRefreshPeriod: function(component) {
         if(component && component.refreshPeriod > 0) {
@@ -209,11 +332,12 @@ define([], function() {
       },
 
       /**
-       * Sets next refresh for given component and inserts it in refreshQueue,
-       * restarts timer if needed.
+       * @summary Removes and adds the given component into the refresh queue restarting the timer if it is the first in the queue.
+       * @description Removes and adds the given component into the refresh queue. If the component is the first
+       *              in the sorted queue {cdf.dashboard.RefreshEngine.restartTimer|restartTimer} is executed.
        *
-       * @param {Object} component Component to process.
-       * @return {boolean} _true_ if the component was correctly processed.
+       * @param {cdf.components.BaseComponent} component The component to process.
+       * @return {boolean} `true` after the component was correctly processed.
        */
       processComponent: function(component) {
         clearFromQueue(component);
@@ -225,9 +349,10 @@ define([], function() {
       },
 
       /**
-       * Clears queue, sets next refresh for all components, restarts timer.
+       * @summary Clears the queue, adds all the dashboard components into the queue and restarts the timer.
+       * @description Clears the queue, adds all the dashboard components into the queue and restarts the timer.
        *
-       * @return {boolean} _true_ if components were correctly processed
+       * @return {boolean} `true` after the components are processed.
        */
       processComponents: function() {
         clearQueue();
@@ -239,7 +364,8 @@ define([], function() {
       },
 
       /**
-       * Pop due items from queue, refresh components and set next timeout.
+       * @summary Pop due items from the queue, refresh components and set the next timeout.
+       * @description Pop due items from the queue, refresh components and set the next timeout.
        */
       fireRefresh: function() {
         activeTimer = null;
@@ -256,8 +382,9 @@ define([], function() {
       },
 
       /**
-       * Called when a valid globalRefreshPeriod exists,
-       * it updates all components without their own refresh period.
+       * @summary Updates all components that don't have a valid refresh period.
+       * @description Called when a valid {@link cdf.dashboard.RefreshEngine#globalRefreshPeriod|globalRefreshPeriod}
+       *              exists, it updates all components that don't have a valid refresh period.
        */
       fireGlobalRefresh: function() {
         for(var i = 0; i < dashboard.components.length; i++) {
@@ -271,7 +398,8 @@ define([], function() {
       },
 
       /**
-       * Sets the global refresh period.
+       * @summary Sets the global refresh period.
+       * @description Sets the global refresh period.
        *
        * @param {number} refreshPeriod Refresh period to set.
        */
@@ -280,9 +408,10 @@ define([], function() {
       },
 
       /**
-       * Gets the current queue of components to be processed.
+       * @summary Gets the current refresh queue.
+       * @description Gets the current refresh queue.
        *
-       * @return {Object[]} An array with components that need to be refreshed.
+       * @return {Array<cdf.dashboard.RefreshEngine#QueueItem>} An array with the components that need to be refreshed.
        * @private
        */
       getQueue: function() {

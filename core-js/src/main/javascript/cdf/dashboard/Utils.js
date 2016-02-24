@@ -22,18 +22,37 @@ define([
 
   /**
    * @class cdf.dashboard.Utils
+   * @staticClass
    * @amd cdf/dashboard/Utils
+   * @summary A collection of utility functions.
    * @classdesc A collection of utility functions.
    */
   var Utils = {};
 
+  /**
+   * @summary Language format provider.
+   * @description CDO's language format provider.
+   *
+   * @memberof cdf.dashboard.Utils
+   * @type {function}
+   * @private
+   */
   var formProvider = undefined;
+
+  /**
+   * @summary Holds the URL query parameters.
+   * @description Holds the URL query parameters.
+   *
+   * @memberof cdf.dashboard.Utils
+   * @type {object}
+   * @private
+   */
   var urlParams = undefined;
 
   /**
-   * Escapes a string as an HTML safe string.
-   * It assumes that, if there is an escaped char in the
-   * input then the input is fully escaped.
+   * @summary Escapes a string as an HTML safe string.
+   * @description Escapes a string as an HTML safe string. It assumes that, if there
+   *              is an escaped char in the input, then the input is fully escaped.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} input The string to be escaped.
@@ -55,26 +74,29 @@ define([
   };
 
   /**
-   * Given a url containing an encoded Pentaho path (:home:admin:Test.wcdf), returns the encoded path.
+   * @summary Gets the path from the URL.
+   * @description Given a URL containing an encoded Pentaho path, eg `:home:admin:Test.wcdf`,
+   *              returns the encoded path.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} url The URL to encode.
-   * @return {?string} path The encoded URL or null if not available.
+   * @return {string|undefined} path The encoded URL or `undefined` if not available.
    */
   Utils.getPathParameter = function(url) {
-  
+
     url = (url || window.location.pathname);
     url = decodeURIComponent(url);
-  
+
     var pathRegex = url.match("/:(.[^/]+)(.*)/");
-    
-    if(pathRegex && pathRegex.length > 1) { 
-      return (":" + pathRegex[1]).replace(/:/g, "/"); 
+
+    if(pathRegex && pathRegex.length > 1) {
+      return (":" + pathRegex[1]).replace(/:/g, "/");
     }
   };
 
   /**
-   * Returns the query string part of the URL.
+   * @summary Returns the query string part of the URL.
+   * @description Returns the query string part of the URL.
    *
    * @memberof cdf.dashboard.Utils
    * @return {string} The query string.
@@ -84,11 +106,12 @@ define([
   };
 
   /**
-   * Returns the value of a query string parameter.
+   * @summary Returns the value of a query string parameter.
+   * @description Returns the value of a query string parameter.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} parameterName The name of the parameter.
-   * @return {?string} The value of the query parameter or null.
+   * @return {string} The value of the query parameter or an empty string.
    */
   Utils.getQueryParameter = function(parameterName) {
     if(urlParams === undefined) {
@@ -99,9 +122,10 @@ define([
   };
 
   /**
-   * Format a number with the given mask using the Dashboard language
-   * or the one that the user specified if it exists, otherwise
-   * uses the default language 'en-US'.
+   * @summary Formats a number.
+   * @description Formats a number with a given mask using the dashboard language,
+   *              the one that the user specified if it exists, or
+   *              the default language 'en-US'.
    *
    * @memberof cdf.dashboard.Utils
    * @param {number} value    Number value to be formatted.
@@ -125,14 +149,15 @@ define([
   };
 
   /**
-   * Configure a new or existing language by specifying the language code
-   * and a configuration object with the keywords:
-   * - 'number' to configure number's format language
-   * - 'dateLocale' to configure date's format language
+   * @summary Configure a language.
+   * @description Configure a new or existing language by specifying the language code
+   *              and a configuration object.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {string} langCode Language code to be used.
-   * @param {object} config   Object with the language configuration.
+   * @param {string} langCode          Language code to be used.
+   * @param {object} config            Object with the language configuration.
+   * @param {object} config.number     Number format language configuration.
+   * @param {object} config.dateLocale Date format language configuration.
    */
   Utils.configLanguage = function(langCode, config) {
     var dateConfig = config.dateLocale || {};
@@ -145,9 +170,10 @@ define([
   };
 
   /**
-   * Format a date with a given mask using the Dashboard language
-   * or the one that the user specified if it exists, otherwise
-   * uses the default language 'en-US'.
+   * @summary Formats a date.
+   * @description Formats a date with a given mask using the dashboard language,
+   *              the one that the user specified if it exists, or
+   *              the default language 'en-US'.
    *
    * @memberof cdf.dashboard.Utils
    * @param {Date}   date     Date object to be formatted.
@@ -175,7 +201,8 @@ define([
   };
 
   /**
-   * Parse a date with a given mask.
+   * @summary Parses a date with a given mask.
+   * @description Parses a date with a given mask.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} date The date to be parsed.
@@ -185,17 +212,18 @@ define([
   Utils.dateParse = function(date, mask) {
     return moment(date, mask).toDate();
   };
-    
+
   // Conversion functions
 
   /**
-   * Converts an array to an object.
+   * @summary Converts an array to an object.
+   * @description Converts an array to an object.
    *
-   * @memberof cdf.dashboard.Utils~
-   * @param {Array.<Array.<*>>} pArray An array of key-value pairs (array) to be converted.
+   * @memberof cdf.dashboard.Utils
+   * @param {Array<Array<Object>>} pArray An array of key-value pairs (array)
+   *                               to be converted. eg.`[["key","value"]]`.
    * @return {object} An object with the same info as the array.
    * @private
-   * @ignore
    */
   function _pa2obj(pArray) {
     var obj = {};
@@ -206,13 +234,13 @@ define([
   }
 
   /**
-   * Converts an object to an array.
+   * @summary Converts an object to an array.
+   * @description Converts an object to an array.
    *
-   * @memberof cdf.dashboard.Utils~
+   * @memberof cdf.dashboard.Utils
    * @param obj object to convert
-   * @return {Array.<Array.<*>>} An array of key-value pairs (array).
+   * @return {Array<Array<Object>>} An array of key-value pairs (array). eg.`[["key","value"]]`.
    * @private
-   * @ignore
    */
   function _obj2pa(obj) {
     var pArray = [];
@@ -223,11 +251,12 @@ define([
   }
 
   /**
-   * Converts an array to an object.
+   * @summary Converts an array to an object.
+   * @description Converts an array to an object.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {Array.<Array.<*>>} pArray Array to convert.
-   * @return {object|undefined} The object represented by the array or undefined if argument is not an array.
+   * @param {Array<Array<Object>>} pArray An array of key-value pairs (array) to be converted. eg.`[["key","value"]]`.
+   * @return {object|undefined} The object represented by the array or `undefined` if argument is not an array.
    */
   Utils.propertiesArrayToObject = function(pArray) {
     // Mantra 1: "Order matters!"
@@ -236,11 +265,13 @@ define([
   };
 
   /**
-   * Converts an object to an array.
+   * @summary Converts an object to an array.
+   * @description Converts an object to an array.
    *
    * @memberof cdf.dashboard.Utils
    * @param {object} obj The object to be converted into an array.
-   * @return {Array.<Array.<*>>|undefined} An array of key-value pairs (array) or undefined if the argument is not an object.
+   * @return {Array<Array<Object>>|undefined} An array of key-value pairs (array) or `undefined` if the
+   *                                          argument is not an object. eg.`[["key","value"]]`.
    */
   Utils.objectToPropertiesArray = function(obj) {
     // Mantra 1: "Order matters!"
@@ -249,14 +280,15 @@ define([
   };
 
   /**
-   * Gets the url parameters from a URL. CDF url parameters are defined as those that are present in the query
-   * string with names starting with the string _param_. So, for a query string like _?paramfoo=bar_, you'd get
-   * a parameter foo with value bar.
+   * @summary Gets the parameters from a URL.
+   * @description Gets the parameters from a URL. CDF URL parameters are defined as those that are present
+   *              in the query string with names starting with the string `param`. So, for a query string like
+   *              `?paramfoo=bar`, you would get a parameter `foo` with value `bar`.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} sURL URL with the query string to be parsed.
-   * @return {Array.<Array.<string, string>>} Array with the parsed parameters. Each element is an array with two positions,
-   *                                          the first being the parameter name and the second the value.
+   * @return {Array<Array<String>>} Array with the parsed parameters. Each element is an array with two positions, the
+   *                                first being the parameter name and the second the value. eg.`[["key","value"]]`.
    */
   Utils.getURLParameters = function(sURL) {
     if(sURL.indexOf("?") > 0) {
@@ -279,13 +311,14 @@ define([
   };
 
   /**
-   * Formats a string according to some arcane and unreadable algorithm. Just ignore and don't use it.
+   * @summary Formats a string.
+   * @description Formats a string according to some arcane and unreadable algorithm. Just ignore and don't use it.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} value Value to be formatted.
    * @return {string} Some piece of formatted string.
    * @private
-   * 
+   *
    * @deprecated
    */
   Utils.toFormatedString = function(value) {
@@ -301,13 +334,14 @@ define([
   };
 
   /**
-   * Quote csv values in a way compatible with CSVTokenizer.
+   * @summary Quote CSV values in a way compatible with CSVTokenizer.
+   * @description Quote CSV values in a way compatible with CSVTokenizer.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string}  value        Value quote.
    * @param {string}  separator    Separator to use when quoting.
    * @param {boolean} alwaysEscape Flag that indicates if the value should always be escaped or just when needed.
-   * @return {?string} The escaped value or null.
+   * @return {?string} The escaped value or `null`.
    */
   Utils.doCsvQuoting = function(value, separator, alwaysEscape) {
     var QUOTE_CHAR = '"';
@@ -329,34 +363,37 @@ define([
   };
 
   /**
-   * Evaluates the argument. If it is a function, calls the function, otherwise returns the argument.
+   * @summary Evaluates the argument.
+   * @description Evaluates the argument. If it is a function, calls the function,
+   *              otherwise returns the argument.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {*} o The object to try and evaluate as a function.
-   * @return {*} The value of _o_ if it isn't a function. Otherwise, the result of invoking _o_.
+   * @param {object} o The object to try and evaluate as a function.
+   * @return {object} The value of `o` if it isn't a function. Otherwise, the result of invoking `o`.
    */
   Utils.ev = function(o) {
     return typeof o === 'function' ? o() : o;
   };
 
   /**
-   * Performs a post to the server.
+   * @summary Performs a post to the server.
+   * @description Performs a post to the server.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} url The URL where to post.
    * @param {object} obj Parameter object.
    */
   Utils.post = function(url, obj) {
-  
+
     var form = '<form action="' + url + '" method="post">';
     for(var o in obj) {
-  
+
       var v = Utils.ev(obj[o]);
-  
+
       if(typeof v == 'string') {
         v = v.replace(/"/g, "\'");
       }
-  
+
       form += '"<input type="hidden" name="' + o + '" value="' + v + '"/>';
     }
     form += '</form>';
@@ -364,26 +401,27 @@ define([
   };
 
   /**
-   * Deep clones an object. This method is deprecated, use
-   * {@link http://api.jquery.com/jquery.extend/|jQuery.extend}.
+   * @summary Deep clones an object.
+   * @description Deep clones an object. This method is deprecated, use
+   *              {@link http://api.jquery.com/jquery.extend/|jQuery.extend}.
    *
    * @memberof cdf.dashboard.Utils
    * @param {object} obj The object to clone.
    * @return {object} The cloned object.
-   * 
+   *
    * @deprecated
    */
   Utils.clone = function(obj) {
-  
+
     var c = obj instanceof Array ? [] : {};
-  
+
     for(var i in obj) {
       var prop = obj[i];
-  
+
       if(typeof prop == 'object') {
         if(prop instanceof Array) {
           c[i] = [];
-  
+
           for(var j = 0; j < prop.length; j++) {
             if(typeof prop[j] != 'object') {
               c[i].push(prop[j]);
@@ -398,16 +436,17 @@ define([
         c[i] = prop;
       }
     }
-  
+
     return c;
   };
 
   /**
-   * Adds the URL parameters to a local object.
+   * @summary Adds the URL parameters to a local object.
+   * @description Adds the URL parameters to a local `args` object.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} url The URL from which to extract the parameters.
-   * 
+   *
    * @deprecated
    */
   Utils.addArgs = function(url) {
@@ -417,13 +456,17 @@ define([
   };
 
   /**
-   * Gets an argument value that was previously set by calling addArgs. This is deprecated, use
-   * {@link cdf.dashboard.Utils.getQueryParameter|getQueryParameter} or `dashboard.context.params`.
+   * @summary Gets an argument value that was previously set by calling
+   *          {@link cdf.dashboard.Utils.addArgs|addArgs}.
+   * @description Gets an argument value that was previously set by calling
+   *              {@link cdf.dashboard.Utils.addArgs|addArgs}. This is deprecated, use
+   *              {@link cdf.dashboard.Utils.getQueryParameter|getQueryParameter} or
+   *              `dashboard.context.params`.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} key The argument name.
-   * @return {*|undefined} The argument value or undefined.
-   * 
+   * @return {object|undefined} The argument value or `undefined`.
+   *
    * @deprecated
    */
   Utils.getArgValue = function(key) {
@@ -432,26 +475,27 @@ define([
         return this.args[i][1];
       }
     }
-  
+
     return undefined;
   };
 
   /**
-   * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
+   * @summary Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
+   * @description Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {Array.<Array.<*>>} values The values array - an array of arrays.
+   * @param {Array<Array<string>>} values The values array - an array of arrays.
    *   <p>
    *   Each second-level array is a <i>value specification</i> and contains
    *   a value and, optionally, a label and an id.
    *   It may have the following forms:
    *   </p>
    *   <ul>
-   *     <li>_[valueAndLabel]_ - when having <i>length</i> one</li>
-   *     <li>_[value, label,...]_ - when having <i>length</i> two or more and
+   *     <li>`[valueAndLabel]` - when having <i>length</i> one</li>
+   *     <li>`[value, label,...]` - when having <i>length</i> two or more and
    *         `opts.valueAsId` is falsy
    *     </li>
-   *     <li>_[id, valueAndLabel,..]_ - when having <i>length</i> two or more and
+   *     <li>`[id, valueAndLabel,..]` - when having <i>length</i> two or more and
    *         `opts.valueAsId` is truthy
    *     </li>
    *   </ul>
@@ -461,15 +505,15 @@ define([
    *
    * @param {function(string, string, string, number)} f the traversal function
    * that is to be called with each value-label-id triple and
-   * with the JS content `x`. The function is called with arguments:
+   * with the JS context `x`. The function is called with arguments:
    * `value`, `label`, `id` and `index`.
    * <p>
-   * When the function returns the value _false_, traversal is stopped,
-   * and _false_ is returned.
+   * When the function returns the value `false`, traversal is stopped,
+   * and `false` is returned.
    * </p>
    * @param {object} x The JS context object on which `f` is to be called.
-   * @return {boolean} indicates if the traversal was complete, _true_,
-   *   or if explicitly stopped by the traversal function, _false_.
+   * @return {boolean} `true` if the traversal was complete, `false` if
+   *                   explicitly stopped by the traversal function.
    */
   Utils.eachValuesArray = function(values, opts, f, x) {
     if(typeof opts === 'function') {
@@ -484,7 +528,7 @@ define([
       if(valSpec && valSpec.length) {
         var v0 = valSpec[0];
         var value, label, id = undefined; // must reset on each iteration
-  
+
         if(valSpec.length > 1) {
           if(valueAsId) { id = v0; }
           label = "" + valSpec[1];
@@ -497,28 +541,25 @@ define([
         j++;
       }
     }
-  
+
     return true;
   };
 
   /**
-   * Given a parameter value obtains an equivalent values array.
-   *
-   *
-   * <p>The parameter value may encode multiple values in a string format.</p>
-   * <p>A nully (i.e. null or undefined) input value or an empty string result in _null_,
-   *    and so the result of this method is normalized.
-   * </p>
-   * <p>
-   * A string value may contain multiple values separated by the character _|_.
-   * </p>
-   * <p>An array or array-like object is returned without modification.</p>
-   * <p>Any other value type returns _null_.</p>
+   * @summary Given a parameter value obtains an equivalent values array.
+   * @description Given a parameter value obtains an equivalent values array.
+   *              <p>The parameter value may encode multiple values in a string format.</p>
+   *              <p>A nully (i.e. `null` or `undefined`) input value or an empty string result
+   *              in `null`, and so the result of this method is normalized.</p>
+   *              <p>A string value may contain multiple values separated by the character `|`.
+   *              </p><p>An array or array-like object is returned without modification.</p>
+   *              <p>Any other value type returns `null`.</p>
    *
    * @memberof cdf.dashboard.Utils
-   * @param {*} value A parameter value, as returned by {@link Dashboards.getParameterValue}.
+   * @param {object} value A parameter value, as returned by
+   *                 {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue}.
    *
-   * @return {null|!Array.<*>|!{join}} _null_ or an array or array-like object.
+   * @return {?array|?object} an array, array-like object or `null`.
    */
   Utils.parseMultipleValues = function(value) {
     if(value != null && value !== '') {
@@ -526,18 +567,19 @@ define([
       if(this.isArray(value)) { return value; }
       if(typeof value === "string") { return value.split("|"); }
     }
-  
+
     // null or of invalid type
     return null;
   };
 
   /**
-   * Normalizes a value so that _undefined_, empty string
-   * and empty array, are all translated to _null_.
+   * @summary Normalizes a value.
+   * @description Normalizes a value so that `undefined`, empty string
+   *              and empty array, are all translated to `null`.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {*} value The value to normalize.
-   * @return {*} The normalized value.
+   * @param {object} value The value to normalize.
+   * @return {?object} The normalized value or `null`.
    */
   Utils.normalizeValue = function(value) {
     if(value === '' || value == null) { return null; }
@@ -546,11 +588,14 @@ define([
   };
 
   /**
-   * Determines if a value is considered an array.
+   * @summary Determines if a value is considered an array.
+   * @description <p>Determines if a value is considered an array.</p>
+   *              <p>Returns `true` if value is an array, or an array-like object (
+   *              object containing the methods `join` and `length`).</p>
    *
    * @memberof cdf.dashboard.Utils
-   * @param {*} value the value.
-   * @return {boolean} _true_ if it's an array, _false_ otherwise.
+   * @param {object} value the value.
+   * @return {boolean} `true` if it's an array or array-like object, `false` otherwise.
    */
   Utils.isArray = function(value) {
     // An array or array like?
@@ -559,12 +604,13 @@ define([
   };
 
   /**
-   * Determines if two values are considered equal.
+   * @summary Determines if two values are considered equal.
+   * @description Determines if two values are considered equal.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {*} a The first value.
-   * @param {*} b The second value.
-   * @return {boolean} _true_ if equal, _false_ otherwise.
+   * @param {object} a The first value.
+   * @param {object} b The second value.
+   * @return {boolean} `true` if equal, `false` otherwise.
    */
   Utils.equalValues = function(a, b) {
     // Identical or both null/undefined?
@@ -585,8 +631,9 @@ define([
   };
 
   /**
-   * Converts an HSV to an RGB color value.
-   * Based on the algorithm described at {@link http://en.wikipedia.org/wiki/HSL_and_HSV}.
+   * @summary Converts an HSV to an RGB color value.
+   * @description Converts an HSV to an RGB color value.
+   *              Based on the algorithm described at {@link http://en.wikipedia.org/wiki/HSL_and_HSV}.
    *
    * @memberof cdf.dashboard.Utils
    * @param {number} h Hue as a value between 0 - 360 (degrees).
@@ -597,7 +644,7 @@ define([
   Utils.hsvToRgb = function(h, s, v) {
     v = v / 100; // 0 - 1
     s = s / 100; // idem
-    
+
     var h6 = (h % 360) / 60;
     var chroma = v * s;
     var m = v - chroma;

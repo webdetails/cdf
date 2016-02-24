@@ -25,8 +25,9 @@ define([
 
   return Base.extend(/** @lends cdf.dashboard.Dashboard# */{
     /**
+     * @summary Base abstract dashboard class. It should not be required or instantiated directly.
      * @classdesc <p>Base abstract dashboard class. This class is abstract, so it should not be required
-     *            or instantiated directly.
+     *            or instantiated directly.</p>
      *            <p>Instead use one of its extending subclasses: {@link cdf.Blueprint|Blueprint},
      *            {@link cdf.Bootstrap|Bootstrap} or {@link cdf.Clean|Clean}.</p>
      *            <p>Each dashboard instance can be localized by adding, in the same directory,

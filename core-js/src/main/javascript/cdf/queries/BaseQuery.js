@@ -21,10 +21,69 @@ define([
 ], function($, Base, _, Logger, OptionsManager, DashboardQuery) {
  
   var BaseQuery = Base.extend(/** @lends cdf.queries.BaseQuery# */{
+    /**
+     * @summary The class name.
+     * @description The class name.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "baseQuery"
+     */
     name: "baseQuery",
+
+    /**
+     * @summary The class label.
+     * @description The class label.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "Base Query"
+     */
     label: "Base Query",
-    deepProperties: ['defaults' , 'interfaces'],
+
+    /**
+     * @summary A list of properties to be extended to the registered queries.
+     * @description A list of properties to be extended to the registered queries that don't
+     *              provide their own constructor function.
+     *
+     * @see {@link cdf.dashboard.Dashboard#registerQuery|registerQuery}
+     * @type {Array<string>}
+     * @const
+     * @readonly
+     * @protected
+     * @default
+     */
+    deepProperties: ['defaults', 'interfaces'],
+
+    /**
+     * @summary A reference to the dashboard instance.
+     * @description A reference to the dashboard instance.
+     *
+     * @type {cdf.dashboard.Dashboard}
+     * @protected
+     */
     dashboard: undefined,
+
+    /**
+     * @summary The default properties.
+     * @description The default properties.
+     *
+     * @type {Object}
+     * @property {function} successCallback Default success callback.
+     * @property {function} errorCallback Default error callback.
+     * @property {Object} lastResultSet=null The last resultset returned by the query.
+     * @property {Object} lastProcessedResultSet=null The last resultset returned by the query and processed.
+     * @property {number} page=0 The page number.
+     * @property {number} pageSize=0 The page size.
+     * @property {Object} params={} The query parameters.
+     * @property {Object} ajaxOptions={async:false,type:"POST"} The {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options for the query.
+     * @property {string} url="" The target URL.
+     * @protected
+     */
     defaults: {
       successCallback: function() {
         Logger.log('Query success callback not defined. Override.');
@@ -43,40 +102,58 @@ define([
       params: {},
       ajaxOptions: {
         async: false,
-        type: 'POST'
+        type: "POST"
       },
-      url: ''
+      url: ""
     },
+
+    /**
+     * @summary The default interfaces.
+     * @description The default interfaces.
+     *
+     * @type {Object}
+     * @property {Object} params Parameter interfaces.
+     * @property {string} params.reader="propertiesObject" Parameter reader.
+     * @property {string} params.validator="isObjectOrPropertiesArray" Parameter validator.
+     * @property {Object} successCallback Success callback interfaces.
+     * @property {string} successCallback.validator="isFunction" Success callback validator.
+     * @property {Object} errorCallback Error callback interfaces.
+     * @property {string} errorCallback.validator="isFunction" Error callback validator.
+     * @property {Object} pageSize Page size interfaces.
+     * @property {string} pageSize.validator="isPositive" Page size validator.
+     * @readonly
+     * @protected
+     */
     interfaces: {
       params: {
-        reader: 'propertiesObject',
-        validator: 'isObjectOrPropertiesArray'
+        reader: "propertiesObject",
+        validator: "isObjectOrPropertiesArray"
       },
       successCallback: {
-        validator: 'isFunction'
+        validator: "isFunction"
       },
       errorCallback: {
-        validator: 'isFunction'
+        validator: "isFunction"
       },
       pageSize: {
-        validator: 'isPositive'
+        validator: "isPositive"
       }
     },
 
     /**
      * @constructs
-     * @classdesc Defines the base query type used by default by any dashboard
-     *             {@link cdf.dashboard.Dashboard~_BaseQuery.query|Dashboard.query}.
-     *            Additional query types can be registered at any time using the
-     *             {@link cdf.dashboard."Dashboard.query"#registerQuery|registerQuery} method:
-     *            The second argument, the query definition, can be one of two things:
-     *            An object, which will be used to extend the BaseQuery class, and the resulting class used to create new query instances.
-     *            A class constructor function, which will be used directly to create new query instances without depending on BaseQuery.
-     *            Additionally, the BaseQuery class can be set to something other than the default by using
-     *             {@link cdf.dashboard."Dashboard.query".setBaseQuery|setBaseQuery} method:
-     *            DashboardQuery.setBaseQuery(constructor)
-     *            but this is a risky operation with considerable implications. Use at your own risk!
-     * @param {object} config The query configuration object.
+     * @description Please use the dashboard function
+     *              {@link cdf.dashboard.Dashboard#getQuery|getQuery}
+     *              to create new queries.
+     * @classdesc <p>Defines the base query type used by default by any dashboard.</p>
+     *            <p>While loading this class' module, the static function
+     *            {@link cdf.dashboard.Dashboard.setBaseQuery|setBaseQuery}
+     *            is executed in order to make this the default base query class for any dashboard.</p>
+     *            <p>Additional query types might extend from this class, if no
+     *            valid constructor is provided during the new query type registration.</p>
+     * @param {Object} config The query configuration `object`.
+     * @staticClass
+     * @abstract
      */
     constructor: function(config) {
       this._optionsManager = new OptionsManager(this);
@@ -85,20 +162,22 @@ define([
     },
 
     /**
-     * Gets an option (fallback for when the OptionManager is not available).
+     * @summary Gets an option (fallback for when the OptionManager is not available).
+     * @description Gets an option (fallback for when the OptionManager is not available).
      *
      * @param {string} prop The property from where to get the options from.
-     * @return {*} Value for the option.
+     * @return {Object} Value for the option.
      */
     getOption: function(prop) {
       return this.defaults[prop];
     },
 
     /**
-     * Sets an option (fallback for when the OptionManager is not available).
+     * @summary Sets an option (fallback for when the OptionManager is not available).
+     * @description Sets an option (fallback for when the OptionManager is not available).
      *
      * @param {string} prop  The property for which the value will be set.
-     * @param {*}      value Value for the property.
+     * @param {Object} value Value for the property.
      */
     setOption: function(prop, value) {
       // Fallback for when OptionManager is not available
@@ -106,9 +185,10 @@ define([
     },
 
     /**
-     * Initialization function.
+     * @summary Initialization function.
+     * @description Initialization function.
      *
-     * @param {object} opts The query definition options.
+     * @param {Object} opts The query definition options.
      * @abstract
      */
     init: function(opts) {
@@ -116,8 +196,20 @@ define([
     },
 
     /**
-     * Gets the success callback handler that executes the provided callback
-     * when the query executes successfully.
+     * @summary Builds the query definition `object`.
+     * @description Builds the query definition `object`.
+     *
+     * @param {object} overrides Options that override the existing ones.
+     * @abstract
+     */
+    buildQueryDefinition: function(overrides) {
+      // Override
+    },
+
+    /**
+     * @summary Gets the success callback handler.
+     * @description Gets the success callback handler, that executes the provided callback
+     *              when the query executes successfully.
      *
      * @param {function} callback Callback to call after the query is successful.
      * @return {function} Success callback handler.
@@ -139,10 +231,11 @@ define([
     },
 
     /**
-     * Gets the error callback handler that executes the provided callback
-     * when the query fails to execute.
+     * @summary Gets the error callback handler.
+     * @description Gets the error callback handler that executes the provided callback
+     *              when the query fails to execute.
      *
-     * @param {function} callback Callback to call if the query fails
+     * @param {function} callback Callback to call if the query fails.
      * @return {function} Error callback handler.
      */
     getErrorHandler: function(callback) {
@@ -154,7 +247,8 @@ define([
     },
 
     /**
-     * Executes a server-side query.
+     * @summary Executes a server-side query.
+     * @description Executes a server-side query.
      *
      * @param {function} successCallback Success callback.
      * @param {function} errorCallback   Error callback.
@@ -181,7 +275,8 @@ define([
     },
 
     /**
-     * Exports the data represented by the query.
+     * @summary Exports the data represented by the query.
+     * @description Exports the data represented by the query.
      *
      * @abstract
      */
@@ -190,16 +285,18 @@ define([
     },
 
     /**
-     * Sets the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options for the query.
+     * @summary Sets the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options for the query.
+     * @description Sets the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options for the query.
      *
-     * @param {object} newOptions Ajax options to be added.
+     * @param {Object} newOptions Ajax options to be added.
      */
      setAjaxOptions: function(newOptions) {
       this.setOption('ajaxOptions', _.extend({}, this.getOption('ajaxOptions'), newOptions));
     },
 
     /**
-     * Sets the sorting options.
+     * @summary Sets the sorting options.
+     * @description Sets the sorting options.
      *
      * @param {string} sortBy Sorting options.
      * @abstract
@@ -209,7 +306,8 @@ define([
     },
 
     /**
-     * Sorts the data, specifying a callback that'll be called after the sorting takes place.
+     * @summary Sorts the data and executes a callback.
+     * @description Sorts the data, specifying a callback that'll be called after the sorting takes place.
      *
      * @param {string}   sortBy          Sorting options.
      * @param {function} outsideCallback Post-sort callback.
@@ -220,12 +318,13 @@ define([
     },
 
     /**
-     * Fetches the data.
+     * @summary Fetches the data.
+     * @description Fetches the data.
      *
-     * @param {object}   params          Parameters for the query.
+     * @param {Object}   params          Parameters for the query.
      * @param {function} successCallback Success callback.
      * @param {function} errorCallback   Error callback.
-     * @return {*} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery} with the specified arguments.
+     * @return {Object} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery} with the specified arguments.
      * @throws {InvalidInput} If the arguments are not correct.
      */
     fetchData: function(params, successCallback, errorCallback) {
@@ -272,9 +371,10 @@ define([
     },
 
     /**
-     * Gets the last retrieved result.
+     * @summary Gets the last retrieved result.
+     * @description Gets the last retrieved result.
      *
-     * @return {object} A deep copy of the last result set obtained from the server.
+     * @return {Object} A deep copy of the last result set obtained from the server.
      * @throws {NoCachedResults} If there haven't been previous calls to the server.
      */
     lastResults: function() {
@@ -286,9 +386,10 @@ define([
     },
 
     /**
-     * Gets the last retrieved result after being processed by postFetch.
+     * @summary Gets the last retrieved result after being processed by postFetch.
+     * @description Gets the last retrieved result after being processed by postFetch.
      *
-     * @return {object} A deep copy of the the last result set obtained from the server
+     * @return {Object} A deep copy of the the last result set obtained from the server
      *                  after being processed by postFetch.
      * @throws {NoCachedResults} If there haven't been previous calls to the server.
      */
@@ -301,11 +402,13 @@ define([
     },
 
     /**
-     * Reruns the success callback on the last retrieved result set from the server.
+     * @summary Reruns the success callback on the last retrieved result set from the server.
+     * @description Reruns the success callback on the last retrieved result set from the server.
      *
      * @param {function} outerCallback Success callback.
-     * @return {object} The result of calling the specified callback.
+     * @return {Object} The result of calling the specified callback.
      * @throws {NoCachedResults} If there haven't been previous calls to the server.
+     * @see {@link cdf.queries.BaseQuery#reprocessResults|reprocessResults}
      */
     reprocessLastResults: function(outerCallback) {
       if(this.getOption('lastResultSet') !== null) {
@@ -324,27 +427,31 @@ define([
     },
 
     /**
-     * Alias for {@link cdf.queries.BaseQuery#reprocessLastResults|reprocessLastResults}.
+     * @summary Alias for {@link cdf.queries.BaseQuery#reprocessLastResults|reprocessLastResults}.
+     * @description Alias for {@link cdf.queries.BaseQuery#reprocessLastResults|reprocessLastResults}.
      *
      * @param {function} outsideCallback Success callback.
-     * @return {object} The result of calling the specified callback.
+     * @return {Object} The result of calling the specified callback.
      * @throws {NoCachedResults} If there haven't been previous calls to the server.
+     * @see {@link cdf.queries.BaseQuery#reprocessLastResults|reprocessLastResults}
      */
     reprocessResults: function(outsideCallback) {
       return this.reprocessLastResults(outsideCallback);
     },
 
     /**
-     * Sets query parameters.
+     * @summary Sets query parameters.
+     * @description Sets query parameters.
      *
-     * @param {object} params The query parameters.
+     * @param {Object} params The query parameters.
      */
     setParameters: function(params) {
       this.setOption('params', params);
     },
 
     /**
-     * Sets the success callback for the query.
+     * @summary Sets the success callback for the query.
+     * @description Sets the success callback for the query.
      *
      * @param {function} callback The success callback function.
      */
@@ -353,7 +460,8 @@ define([
     },
 
     /**
-     * Sets the error callback for the query.
+     * @summary Sets the error callback for the query.
+     * @description Sets the error callback for the query.
      *
      * @param {function} callback The error callback function.
      */
@@ -362,7 +470,8 @@ define([
     },
 
     /**
-     * Sets the search pattern for the query.
+     * @summary Sets the search pattern for the query.
+     * @description Sets the search pattern for the query.
      *
      * @param {string} pattern The search pattern.
      */
@@ -378,11 +487,12 @@ define([
      */
 
     /**
-     * Gets the next page of results, as controlled by the _pageSize_ option.
+     * @summary Gets the next page of results, as controlled by the `pageSize` option.
+     * @description Gets the next page of results, as controlled by the `pageSize` option.
      *
      * @param {function} outsideCallback Success callback to execute when the
      *                                   next page of results is retrieved.
-     * @return {*} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
+     * @return {Object} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
      * @throws {InvalidPageSize} If the page size option is not a positive number.
      */
     nextPage: function(outsideCallback) {
@@ -398,11 +508,12 @@ define([
     },
 
     /**
-     * Gets the previous page of results, as controlled by the _pageSize_ option.
+     * @summary Gets the previous page of results, as controlled by the `pageSize` option.
+     * @description Gets the previous page of results, as controlled by the `pageSize` option.
      *
      * @param {function} outsideCallback Success callback to execute when the
      *                                   previous page of results is retrieved.
-     * @return {*} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
+     * @return {Object} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
      * @throws {AtBeginning} If current page is the first one.
      */
     previousPage: function(outsideCallback) {
@@ -421,13 +532,14 @@ define([
     },
 
     /**
-     * Gets the set of results for the page at index _targetPage_ (0-indexed).
+     * @summary Gets the set of results for the page at index `targetPage` (0-indexed).
+     * @description Gets the set of results for the page at index `targetPage` (0-indexed).
      *
      * @param {number}   targetPage      Index of the page to get, starting at index 0.
      * @param {function} outsideCallback Success callback to execute when the page is retrieved.
-     * @return {boolean|*} _false_ if the page is already the current one,
+     * @return {boolean|Object} `false` if the page is already the current one,
      *                   otherwise returns the result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
-     * @throws {InvalidPage} If targetPage is not a positive number.
+     * @throws {InvalidPage} If `targetPage` is not a positive number.
      */
     getPage: function(targetPage, outsideCallback) {
       var page = this.getOption('page'),
@@ -443,11 +555,12 @@ define([
     },
 
     /**
-     * Sets the starting page for later executions of the query.
+     * @summary Sets the starting page for later executions of the query.
+     * @description Sets the starting page for later executions of the query.
      *
      * @param {number} targetPage Index of the page to get.
-     * @return {boolean} _true_ if the page is correctly set,
-     *                   _false_ if the target page is already the selected one.
+     * @return {boolean} `true` if the page is correctly set,
+     *                   `false` if the target page is already the selected one.
      * @throws {InvalidPage} If the page number is not a positive number.
      */
     setPageStartingAt: function(targetPage) {
@@ -461,14 +574,15 @@ define([
     },
 
     /**
-     * Runs the query, setting a starting page before doing so.
-     * If the starting page matches the already selected one,
-     * the query run is cancelled and _false_ is returned.
+     * @summary Runs the query, setting a starting page before doing so.
+     * @description Runs the query, setting a starting page before doing so.
+     *              If the starting page matches the already selected one,
+     *              the query run is cancelled and `false` is returned.
      *
      * @param {number}   page            Starting page index.
      * @param {function} outsideCallback Success callback to execute after the
      *                                   server side query is processed.
-     * @return {boolean|*} _false_ if the query run is cancelled,
+     * @return {boolean|Object} `false` if the query run is cancelled,
      *                   otherwise the result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
      */
     pageStartingAt: function(page, outsideCallback) {
@@ -480,7 +594,8 @@ define([
     },
 
     /**
-     * Sets the page size.
+     * @summary Sets the page size.
+     * @description Sets the page size.
      *
      * @param {number} pageSize Page size to set.
      */
@@ -489,13 +604,14 @@ define([
     },
 
     /**
-     * Sets the page size and gets the first page of results.
+     * @summary Sets the page size and gets the first page of results.
+     * @description Sets the page size and gets the first page of results.
      *
      * @param {number}   pageSize        Page Size.
      * @param {function} outsideCallback Success callback to execute after query is retrieved.
-     * @return {boolean|*} _false_ if pageSize is invalid,
-     *                   otherwise the result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
-     * @throws InvalidPageSize If the page size is not a positive number.
+     * @return {boolean|Object} `false` if pageSize is invalid, otherwise the result
+     *                          of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
+     * @throws {InvalidPageSize} If the page size is not a positive number.
      */
     initPage: function(pageSize, outsideCallback) {
       if(pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {

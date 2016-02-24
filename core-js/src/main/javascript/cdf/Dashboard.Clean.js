@@ -12,12 +12,14 @@
  */
 
 /**
- * @class cdf.Clean
+ * @class cdf."Dashboard.Clean"
  * @amd cdf/Dashboard.Clean
+ * @summary Represents a clean (no css engine) dashboard.
  * @classdesc Represents a clean (no css engine) dashboard aggregating all
  *            the classes in the Dashboard hierarchy. It's a specialization of
  *            the base abstract {@link cdf.dashboard.Dashboard|Dashboard} class.
  * @see cdf.dashboard.Dashboard
+ * @extends cdf.dashboard.Dashboard
  * @example
  *
  *      require(['cdf/Dashboard.Clean', 'cdf/components/ButtonComponent'],

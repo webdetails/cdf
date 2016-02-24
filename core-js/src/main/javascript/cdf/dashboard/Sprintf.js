@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -21,18 +21,31 @@ define(['./Utils'], function(utils) {
   /**
    * @class cdf.dashboard.Sprintf
    * @amd cdf/dashboard/Sprintf
+   * @staticClass
+   * @summary Sprintf implementation for javascript.
    * @classdesc Sprintf implementation for javascript.
    *            The class returns a function that can be called to format
    *            a string according to the Sprintf specs.
+   *
+   *
+   *     require(["cdf/dashboard/Sprintf"], function(Sprintf) {
+   *       var firstName = "John";
+   *       var info = Sprintf("%s %s is %d years old!", firstName, "Doe", 42);
+   *       //info == "John Doe is 42 years old!"
+   *     });
+   *
+   * @see http://www.webtoolkit.info/javascript_sprintf.html
    */
   var sprintfWrapper = /** @lends cdf.dashboard.Sprintf# */ {
 
     /**
-     * Formats a string according to the Sprintf specs.
+     * @summary Formats a string according to the Sprintf specs.
+     * @description Formats a string according to the Sprintf specs.
      *
      * @param {...string} string The string containing the regular expression followed
      *                    by string representations of the values to be processed.
-     * @return {?string} The new string or null.
+     * @return {?string} The new string or `null`.
+     * @ignore
      */
     init: function () {
 

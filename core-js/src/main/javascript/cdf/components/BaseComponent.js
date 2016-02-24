@@ -22,89 +22,135 @@ define([
 
   return Base.extend(Backbone.Events).extend(/** @lends cdf.components.BaseComponent# */{
     /**
-     * @summary Name of the component
-     * @description The name of the component. Its name needs to be unique in the dashboard that they belong
+     * @summary Name of the component.
+     * @description The name of the component. Its name needs to be unique in the dashboard that they belong.
      * @type {string}
+     * @protected
      */
     name: undefined,
-    
+
     /**
-     * @summary Type of the component
-     * @description The Type of the component. Usually is the class name of the component
+     * @summary Type of the component.
+     * @description The type of the component. Usually is the class name of the component.
      * @type {string}
+     * @protected
      */
     type: undefined,
 
     /**
-     * @summary Html id where the component is rendered
-     * @description The Html object id, unique in the html page, where the component is rendered
+     * @summary HTML element identifier where the component is rendered.
+     * @description The HTML element identifier, unique in the HTML page, where the component is rendered.
      * @type {string}
+     * @protected
      */
     htmlObject: undefined,
 
     /**
-     * @summary Visibility flag
+     * @summary Visibility flag.
+     * @description Visibility flag.
      *
      * @type {boolean}
      * @default true
+     * @protected
      */
     visible: true,
 
     /**
-     * @summary Managed flag
+     * @summary Managed flag.
+     * @description Managed flag.
      *
      * @type {boolean}
      * @default true
+     * @protected
      */
     isManaged: true,
 
     // Properties for handling timer function
 
     /**
-     * @summary Start date for the timer start
+     * @summary Start date for the timer start.
+     * @description Start date for the timer start.
      *
      * @type {number}
      * @default 0
+     * @protected
      */
     timerStart: 0,
 
     /**
-     * @summary Start date for the timer split
+     * @summary Start date for the timer split.
+     * @description Start date for the timer split.
      *
      * @type {number}
      * @default 0
+     * @protected
      */
     timerSplit: 0,
 
     /**
-     * @summary Number of milliseconds since timer split
+     * @summary Number of milliseconds since timer split.
+     * @description Number of milliseconds since timer split.
      *
      * @type {number}
      * @default -1
+     * @protected
      */
     elapsedSinceSplit: -1,
 
     /**
-     * @summary Number of milliseconds since timer start
+     * @summary Number of milliseconds since timer start.
+     * @description Number of milliseconds since timer start.
      *
      * @type {number}
      * @default -1
+     * @protected
      */
     elapsedSinceStart: -1,
 
     /**
-     * @summary Color to use while logging messages
+     * @summary Color to use while logging messages.
+     * @description Color to use while logging messages.
      *
      * @type {string}
      * @default undefined
+     * @protected
      */
     logColor: undefined,
 
     /**
-     * @summary The contructor of a BaseComponent
-     * @description Constructs a BaseComponent
+     * @summary The Dashboard instance the component belongs to.
+     * @description The Dashboard instance the component belongs to.
+     *
+     * @name cdf.components.BaseComponent#initInstance
+     * @type {Number}
+     * @protected
+     * @deprecated
+     */
+    //initInstance: undefined,
+
+    /**
+     * @summary Function to be executed before the components parameter value changes.
+     * @description Function to be executed before the components parameter value changes.
+     *
+     * @name cdf.components.BaseComponent#preChange
+     * @type {Function}
+     */
+    //preChange: undefined,
+
+    /**
+     * @summary Function to be executed after the components parameter value changes.
+     * @description Function to be executed after the components parameter value changes.
+     *
+     * @name cdf.components.BaseComponent#postChange
+     * @type {Function}
+     */
+    //postChange: undefined,
+
+    /**
+     * @description Constructs a BaseComponent.
      *
      * @constructs
+     * @summary Holds the core functionalities present in all components.
      * @classdesc The BaseComponent. Module that holds everything related to components.
      * @extends {@link http://dean.edwards.name/weblog/2006/03/base/|Base}
      * @extends {@link http://backbonejs.org/#Events|Backbone.Events}
@@ -116,10 +162,10 @@ define([
     },
 
     /**
-     * @summary Getter for the component's html object 
-     * @description Getter for the component's html object. Returns the jquery element that represents it
+     * @summary Getter for the component's HTML object.
+     * @description Getter for the component's HTML object. Returns the jquery element that represents it.
      *
-     * @param {string} selector Optional selector to use inside the html object.
+     * @param {string} selector Optional selector to use inside the HTML object.
      * @return {jQuery|string} A {@link http://api.jquery.com/|jQuery} object that references the matched
      *                  DOM elements or a new object if no match is found.
      */
@@ -129,8 +175,8 @@ define([
     },
 
     /**
-     * @summary Focus the first placeholder html element on the component
-     * @description Focus the first placeholder html element on the component 
+     * @summary Focus the first placeholder HTML element on the component.
+     * @description Focus the first placeholder HTML element on the component.
      */
     focus: function() {
       try {
@@ -139,12 +185,11 @@ define([
     },
 
     /**
-     * @summary Autofocus on the component
-     * @description  Autofocus on the component
+     * @summary Autofocus on the component.
+     * @description  Autofocus on the component.
      *
      * @private
      * @deprecated
-     * @static
      */
     _doAutoFocus: function() {
       if(this.autoFocus) {
@@ -154,19 +199,19 @@ define([
     },
 
     /**
-     * @summary Clears the component html element
-     * @description Clears the component html element
+     * @summary Clears the component HTML element.
+     * @description Clears the component HTML element.
      */
     clear: function() {
       this.placeholder().empty();
     },
 
     /**
-     * @summary General copy events methods
-     * @description General copy events methods. Given a target object and an event list,
-     * adds the target object as listener for all events in the list.
+     * @summary General copy events methods.
+     * @description General copy events methods. Given a target component and an event list,
+     *              adds the component as listener for all events in the list.
      *
-     * @param {cdf.components.BaseComponent} target The target BaseComponent object.
+     * @param {cdf.components.BaseComponent} target The target component object.
      * @param {Backbone.Events[]} events {@link http://backbonejs.org/#Events|Backbone.Events} list to copy.
      */
     copyEvents: function(target, events) {
@@ -180,12 +225,12 @@ define([
     },
 
     /**
-     * @summary Clones a component
-     * @description Clones a component
+     * @summary Clones a component.
+     * @description Clones a component.
      *
-     * @param {cdf.dashboard.parameter[]}      parameterRemap Map containing parameter remapping.
-     * @param {cdf.components.BaseComponent[]} componentRemap Map containing component remapping.
-     * @param {HTMLElement[]}                  htmlRemap      Map containing HTML object remapping.
+     * @param {Object} parameterRemap Map containing parameter remapping.
+     * @param {Object} componentRemap Map containing component remapping.
+     * @param {Object} htmlRemap      Map containing HTML object remapping.
      * @return {cdf.components.BaseComponent} The cloned component.
      */
     clone: function(parameterRemap, componentRemap, htmlRemap) {
@@ -241,10 +286,10 @@ define([
     },
 
     /**
-     * @summary Gets an addIn for this component
-     * @description Gets an addIn for this component
+     * @summary Gets an add-in for this component.
+     * @description Gets an add-in for this component.
      *
-     * @param {object} slot  Add-in sub type.
+     * @param {string} slot  Add-in sub type.
      * @param {string} addIn Add-in name.
      * @return {cdf.AddIn} Add-in registered with the specified name and sub type.
      */
@@ -258,12 +303,12 @@ define([
     },
 
     /**
-     * @summary Returns true is an addIn with given sub type and name exists
-     * @description Returns true is an addIn with given sub type and name exists
+     * @summary Returns `true` if the add-in with the provided sub type and name exists.
+     * @description Returns `true` if the add-in with the provided sub type and name exists.
      *
-     * @param {object} slot  Add-in sub type.
+     * @param {string} slot  Add-in sub type.
      * @param {string} addIn Add-in name.
-     * @return {boolean} _true_ if the addIn exists, _false_ otherwise.
+     * @return {boolean} `true` if the add-in exists, `false` otherwise.
      */
     hasAddIn: function(slot, addIn) {
       if(!this.dashboard) {
@@ -275,9 +320,9 @@ define([
     },
 
     /**
-     * @summary Gets the values array property
+     * @summary Gets the values array property.
      * @description Gets the values array property, if one is defined.
-     * Otherwise, issues a call to the server to get data.
+     *              Otherwise, issues a call to the server to get data.
      *
      * @return {object[]} An array with values from the values array property or the data retrieved from the server.
      * @deprecated
@@ -348,9 +393,9 @@ define([
     },
 
     /**
-     * @summary Builds an array given data received from the server in another format
-     * @description Builds an array given data received from the server in another format.
-     * 
+     * @summary Builds an array with the data received from the server in another format.
+     * @description Builds an array with the data received from the server in another format.
+     *
      * @param {object} jData          Data object (Xaction or CDA) resulting from a call to the server.
      * @param {boolean} includeHeader A boolean indicating whether the resulting array should include the headers.
      * @return {object[]} The parsed data array.
@@ -391,12 +436,12 @@ define([
     },
 
     /**
-     * @summary Builds an array given data received
-     * @description Builds an array given data received from the server in CDA format. 
+     * @summary Builds an array with the data received.
+     * @description Builds an array with the data received from the server in CDA format.
      *
      * @param {object}  jData         Data object (CDA format) resulting from a call to the server.
      * @param {boolean} includeHeader A boolean indicating whether the resulting array should include the headers.
-     * @return {object[]} data array
+     * @return {object[]} The built data array in the CDA format.
      * @deprecated
      */
     parseArrayCda: function(jData, includeHeader) {
@@ -432,10 +477,10 @@ define([
     },
 
     /**
-     * @summary Sets the options for an addIn
-     * @description Sets the options for an addIn 
+     * @summary Sets the options for an add-in.
+     * @description Sets the options for an add-in.
      *
-     * @param {object} slot    The add-in subtype.
+     * @param {string} slot    The add-in subtype.
      * @param {string} addIn   The add-in name.
      * @param {object} options An object with the options to use.
      */
@@ -451,10 +496,10 @@ define([
     },
 
     /**
-     * @summary Gets an addIn options
-     * @description Gets an addIn options
-     * 
-     * @param {object} slot  The add-in subtype.
+     * @summary Gets an add-in options.
+     * @description Gets an add-in options.
+     *
+     * @param {string} slot  The add-in subtype.
      * @param {string} addIn The add-in name.
      * @return {object} The options associated with the specified add-in.
      */
@@ -470,8 +515,8 @@ define([
     },
 
     /**
-     * @summary Starts a timer
-     * @description  Starts a timer
+     * @summary Starts a timer.
+     * @description  Starts a timer.
      *
      * @private
      */
@@ -483,10 +528,10 @@ define([
     },
 
     /**
-     * @summary Marks a split time in the timer
-     * @description Marks a split time in the timer 
+     * @summary Marks a split time in the timer.
+     * @description Marks a split time in the timer.
      *
-     * @return {TimerInfo} The timer info.
+     * @return {cdf.components.BaseComponent.TimerInfo} The timer info.
      * @private
      */
     splitTimer: function() {
@@ -506,8 +551,8 @@ define([
     },
 
     /**
-     * @summary Formats time display
-     * @description Formats time display given a number of milliseconds 
+     * @summary Formats the time display.
+     * @description Formats the time display given a number of milliseconds.
      *
      * @param {number} t Number of milliseconds.
      * @return {string} The formatted string.
@@ -530,10 +575,10 @@ define([
      */
 
     /**
-     * @summary Gets timer info
-     * @description Gets timer info
+     * @summary Gets the timer info.
+     * @description Gets the timer info.
      *
-     * @return {TimerInfo} The timer info.
+     * @return {cdf.components.BaseComponent.TimerInfo|TimerInfo} The timer info.
      * @private
      */
     getTimerInfo: function() {
@@ -549,11 +594,11 @@ define([
     },
 
     /**
-     * @summary Gets the color for messages
+     * @summary Gets the color for messages.
      * @description This method assigns and returns a unique and somewhat randomish color for
-     * this log. The goal is to be able to track cdf lifecycle more easily in
-     * the console logs. We're returning a Hue value between 0 and 360, a range between 0
-     * and 75 for saturation and between 45 and 80 for value.
+     *              this log. The goal is to be able to track cdf lifecycle more easily in
+     *              the console logs. We're returning a Hue value between 0 and 360, a range between 0
+     *              and 75 for saturation and between 45 and 80 for value.
      *
      * @return {string} The color used for logging messages.
      * @private
