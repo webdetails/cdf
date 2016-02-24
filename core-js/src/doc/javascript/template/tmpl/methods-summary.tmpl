@@ -16,10 +16,11 @@ var methods = obj;
         if(methods) {
           methods.forEach(function(method) {
             if(!method) { return; }
+                var name = encodeURIComponent(method.name);
             ?>
-            <tr class="<?js= method.access != null ? method.access : 'public' ?> <?js= method.deprecated ? 'deprecated' : '' ?> <?js= method.inherited ? 'inherited' : '' ?>">
+            <tr>
               <td> 
-                <a href="#<?js= method.name ?>"> <?js= method.name + (method.signature || '') ?> 
+                <a href="#<?js= name ?>"> <?js= (method.kind == "class" ? "new " : "") + method.parsedName + (method.signature || '') ?>
                 </a>
                 <?js if (method.returns && method.returns.length) { ?>
                 :

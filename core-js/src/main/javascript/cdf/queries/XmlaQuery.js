@@ -29,7 +29,8 @@ define([
 
   /**
    * @class cdf.queries.SharedXmla
-   * @classdesc Class that will be used by both XML/A and XML/A Discover query classes.
+   * @summary Helper class used by both XML/A and XML/A Discover query classes.
+   * @classdesc Helper class used by both XML/A and XML/A Discover query classes.
    * @private
    */
   var SharedXmla = Base.extend(/** @lends cdf.queries.SharedXmla# */{
@@ -185,6 +186,7 @@ define([
 
   /**
    * @class cdf.queries.XmlaQuery
+   * @summary Class that represents an XML/A query.
    * @classdesc <p>Class that represents an XML/A query. This class will be registered
    *            globally using the static dashboard function
    *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
@@ -197,8 +199,7 @@ define([
    * @extends cdf.queries.BaseQuery
    * @example
    * dashboard.addDataSource("myXmlaQuery", {queryType: "xmla", ...});
-   * dashboard.getQuery({dataSource: "myXmlaQuery"})
-   *          .doQuery(successCallback, errorCallback);
+   * dashboard.getQuery({dataSource: "myXmlaQuery"}).doQuery(successCallback, errorCallback);
    */
   var xmlaOpts = /** @lends cdf.queries.XmlaQuery# */{
     /**
@@ -366,6 +367,7 @@ define([
 
   /**
    * @class cdf.queries.XmlaDiscoverQuery
+   * @summary Class that represents an XML/A Discover query.
    * @classdesc <p>Class that represents an XML/A Discover query. This class will be registered
    *            globally using the static dashboard function
    *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
@@ -378,8 +380,7 @@ define([
    * @extends cdf.queries.BaseQuery
    * @example
    * dashboard.addDataSource("myXmlaDiscQuery", {queryType: "xmlaDiscover", ...});
-   * dashboard.getQuery({dataSource: "myXmlaDiscQuery"})
-   *          .doQuery(successCallback, errorCallback);
+   * dashboard.getQuery({dataSource: "myXmlaDiscQuery"}).doQuery(successCallback, errorCallback);
    */
   var xmlaDiscoverOpts = /** @lends cdf.queries.XmlaDiscoverQuery# */{
     /**

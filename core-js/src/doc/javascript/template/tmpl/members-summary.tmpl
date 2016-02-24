@@ -19,8 +19,8 @@ var self = this;
             ?>
             <tr class="<?js= member.access != null ? member.access : 'public' ?> <?js= member.deprecated ? 'deprecated' : '' ?> <?js= member.inherited ? 'inherited' : '' ?>">
                 <td> 
-                    <a href="#<?js= member.name ?>"> 
-                        <?js= member.name ?> 
+                    <a href="#<?js= member.parsedName ?>"> 
+                        <?js= member.parsedName ?> 
                     </a>
                     <?js if(member.type) { ?>
                         : <code> <?js= self.partial('type.tmpl', member.type.names) ?> </code>
