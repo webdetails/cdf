@@ -1,25 +1,24 @@
 <?js
     var data = obj;
     var self = this;
-    var basicJavascriptTypes = ["string", "number", "boolean", "array", "object", "date", "function"];
+    var basicJavascriptTypes = ["string", "number", "boolean", "array", "object", "date", "function", "null"];
     var basicJavascriptTypesLink = "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/";
 
     var capitalize = function(s){
     	return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase(); } );
     };
     if(data){
-
       data.forEach(function(name, i) {
       	var regex = /array.<(.*)>/; ?>
-        <span class="param-type"><code>    
+        <code>    
         <?js if(basicJavascriptTypes.indexOf(name.toLowerCase()) >= 0){ ?>
             <?js= self.linkto(basicJavascriptTypesLink + name, capitalize(name)) ?>
         <?js} else if(m = regex.exec(name.toLowerCase())) { ?>
-    		<?js= self.linkto(basicJavascriptTypesLink + "Array", "Array") ?><?js= "<" + self.linkto(basicJavascriptTypesLink + m[1], capitalize(m[1])) + ">" ?>    	
+    		<?js= self.linkto(basicJavascriptTypesLink + "Array", "Array") ?><?js= "&lt;" + self.linkto(basicJavascriptTypesLink + m[1], capitalize(m[1])) + "&gt;" ?>    	
         <?js} else {?>
           <?js= self.linkto(name, self.htmlsafe(name)) ?>
         <?js}?>
-        </code></span>
+        </code>
         <?js if (i < data.length-1) { ?>|<?js } ?>
 		  <?js });
     } ?>

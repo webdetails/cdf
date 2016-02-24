@@ -130,7 +130,7 @@ define([
        * @summary Renders the Popup.
        * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
        *              template.</p>
-       *              <p>When the component is rendered, it gets hidden and appended to the body.
+       *              <p>When the component is rendered, it gets hidden and appended to the body.</p>
        * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
        *                           to the properties that define the content of the component.
        */

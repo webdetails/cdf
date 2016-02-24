@@ -18,7 +18,7 @@
  * @classdesc Represents a clean (no css engine) dashboard aggregating all
  *            the classes in the Dashboard hierarchy. It's a specialization of
  *            the base abstract {@link cdf.dashboard.Dashboard|Dashboard} class.
- * @see cdf.dashboard.Dashboard
+ * @see {@link cdf.dashboard.Dashboard|Dashboard}
  * @extends cdf.dashboard.Dashboard
  * @example
  *

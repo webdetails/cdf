@@ -10,6 +10,12 @@ var taffy = require('taffydb').taffy;
 var template = require('jsdoc/template');
 var util = require('util');
 
+//override htmlsafe function
+helper.htmlsafeOrig = helper.htmlsafe;
+helper.htmlsafe = function(str){
+    return helper.htmlsafeOrig(str).replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+};
+
 var htmlsafe = helper.htmlsafe;
 var linkto = helper.linkto;
 var resolveAuthorLinks = helper.resolveAuthorLinks;
@@ -23,6 +29,12 @@ var version = '' + env.opts.githubConfig.branch;
 var github = '' + env.opts.githubConfig.name;
 
 var outdir = path.normalize(env.opts.destination);
+
+function trimDoubleQuotes(s) {
+    var pattern = /^\"(.+)\"$/;
+    var m = pattern.exec(s);
+    return m != null ? m[1] : s;
+}
 
 function find(spec) {
     return helper.find(data, spec);
@@ -337,9 +349,13 @@ function findMembers(data, kind, memberOf) {
 
 function createMemberData(data, member, kind) {
     var memberData = {
-        name: member.name,
-        longname: member.longname
+        name: trimDoubleQuotes(member.name),
+        longname: member.longname,
+        kind: kind
     };
+
+    var hasPrefix = member.name !== member.longname;
+    var prefix = hasPrefix ? member.longname.replace(member.name, '') : "";
 
     if(kind === 'class' || kind === 'namespace') {
         memberData.interfaces = findMembers(data, 'interface', member.longname);
@@ -348,9 +364,11 @@ function createMemberData(data, member, kind) {
     }
 
     if(kind === 'namespace') {
-        var hasPrefix = member.name !== member.longname;
-        var prefix = hasPrefix ? member.longname.replace(member.name, '') : "";
-        memberData.title = prefix + "<strong>" + member.name + "</strong>";
+        memberData.title = prefix + "<strong>" + linkto(member.longname, member.name) + "</strong>";
+    }
+
+    if(kind === 'event') {
+        memberData.title = prefix.replace("#event:", ".html#event:").replace(/\"/g, "_") + encodeURIComponent(member.name);
     }
 
     return memberData;
@@ -365,11 +383,11 @@ function buildNav(members) {
         nav += '  <button id="toggle_' + index + '" class="mt-toggle-expand mt-toggle"></button>';
         nav += '  <span>' + namespace.title + '</span>';
         nav += '  <ul id="namespace_' + index + '" style="display:none;">';
-        nav += '</li>';
         nav += buildMembers(namespace.interfaces, 'Interfaces', linkto);
         nav += buildMembers(namespace.classes, 'Classes', linkto);
         nav += buildMembers(namespace.events, 'Events', linkto);
-        nav  += '</ul>';
+        nav += '  </ul>';
+        nav += '</li>';
     });
 
     return '<ul class="index-nav">' + nav + '</ul>' + buildToggleScript();
@@ -380,8 +398,10 @@ function buildMembers(members, title, linktoFn) {
 
     var memberNav = "";
     members.forEach(function(member) {
+        var link = member.kind === "event" ? '<a href="' + member.title + '">' + member.name + '</a>' : linktoFn(member.longname, member.name);
+
         var innerNav = "";
-        memberNav += '<li>' + linktoFn(member.longname, member.name) + '</li>';
+        memberNav += '<li>' + link + '</li>';
         innerNav += buildMembers(member.interfaces, 'Interfaces', linktoFn);
         innerNav += buildMembers(member.classes, 'Classes', linktoFn);
         innerNav += buildMembers(member.events, 'Events', linktoFn);
@@ -412,7 +432,6 @@ exports.publish = function(taffyData, opts, tutorials) {
 
     var conf = env.conf.templates || {};
     conf.default = conf.default || {};
-
     var templatePath = path.normalize(opts.template);
     view = new template.Template( path.join(templatePath, 'tmpl') );
 
@@ -425,10 +444,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     helper.registerLink('global', globalUrl);
 
     // set up templating
-    view.layout = conf.default.layoutFile ?
-        path.getResourcePath(path.dirname(conf.default.layoutFile),
-            path.basename(conf.default.layoutFile) ) :
-        'layout.tmpl';
+    view.layout = opts.layoutFile;
 
     // set up tutorials for helper
     helper.setTutorials(tutorials);
@@ -624,29 +640,97 @@ exports.publish = function(taffyData, opts, tutorials) {
         }
     });
 
+    data().each(function(doclet) {
+        if(!doclet.ignore) {
+            var parent = find({longname: doclet.memberof})[0];
+            if( !parent ) {
+                doclet.scopeEf = doclet.scope;
+            } else {
+                if(doclet.scope === 'static' && parent.kind !== 'class') {
+                    doclet.scopeEf = 'instance';
+                } else if(doclet.scope === 'static' && parent.static && parent.kind === 'class') {
+                    doclet.scopeEf = 'instance';
+                } else {
+                    doclet.scopeEf = doclet.scope;
+                }
+            }
+        }
+    });
+
+    // handle summary, description and class description default values properly
+    data().each(function(doclet) {
+        if(!doclet.ignore) {
+            if(!doclet.summary && (desc = (doclet.description || doclet.classdesc))) {
+                doclet.summary = desc.split(".")[0] + ".";
+            }
+
+            var checkP = function(prop) {
+                if(!prop) return;
+
+                prop = prop.replace(/<p><p>/g, "<p>");
+
+                if(prop.indexOf("<p>") == -1) {
+                    return "<p>" + prop + "</p>";
+                } 
+
+                return prop;
+            }
+            var replaceCode = function(string) {
+                if(!string) return;
+                var flip = true;
+                var idx = string.indexOf("`");
+                while(idx > -1) {
+                  string = string.substr(0, idx) + (flip ? "<code>" : "</code>") + string.substr(idx + 1);
+                  flip = !flip;
+                  idx = string.indexOf("`");
+                }
+                return string;
+            };
+
+            doclet.summary = replaceCode(checkP(doclet.summary));
+            doclet.description = replaceCode(checkP(doclet.description));
+            doclet.classdesc = replaceCode(checkP(doclet.classdesc));
+        }
+    });
+
+    //handle splits and joins on names
+    data().each(function(doclet) {
+        if(!doclet.ignore) {
+            var split = function(str, sep) {
+                if(str) {
+                    return str.split(sep).join('');
+                } 
+            }
+
+            //dont split for code
+            if(doclet.description && doclet.description.indexOf("syntax.javascript") == -1) {
+                doclet.description = split(doclet.description, '<br>');
+            }
+            if(doclet.classdesc && doclet.classdesc.indexOf("syntax.javascript") == -1) {
+                doclet.classdesc = split(doclet.classdesc, '<br>');
+            }
+            if(doclet.summary && doclet.summary.indexOf("syntax.javascript") == -1) { 
+                doclet.summary = split(doclet.summary, '<br>');
+            }
+            
+            doclet.parsedName = split(doclet.name, '"')
+            doclet.parsedLongname = split(doclet.longname, '"')
+        }
+    });
+
     var members = helper.getMembers(data);
     members.tutorials = tutorials.children;
-
-    // output pretty-printed source files by default
-    var outputSourceFiles = conf.default && conf.default.outputSourceFiles !== false ? true :
-        false;
-
+    
     // add template helpers
     view.find = find;
     view.linkto = linkto;
     view.resolveAuthorLinks = resolveAuthorLinks;
     view.tutoriallink = tutoriallink;
     view.htmlsafe = htmlsafe;
-    view.outputSourceFiles = outputSourceFiles;
-
+    
     // once for all
     view.nav = buildNav(findMembers(data, 'namespace'));
     attachModuleSymbols( find({ longname: {left: 'module:'} }), members.modules );
-
-    // generate the pretty-printed source files first so other pages can link to them
-    if (outputSourceFiles) {
-        generateSourceFiles(sourceFiles, opts.encoding);
-    }
 
     if (members.globals.length) { generate('Global', [{kind: 'globalobj'}], globalUrl); }
 

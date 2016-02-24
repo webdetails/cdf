@@ -36,7 +36,7 @@ define([
    * @param {Object}   [options.value]          The value of the add-in.
    * @param {Object}   [options.defaults]       The default values of the configurable settings.
    * @throws {TypeError} If the `options` parameter is not an `object`.
-   * @throws {TypeError} If `options.name` or `options.label` are not providad. Also, either `options.implementation`
+   * @throws {TypeError} If `options.name` or `options.label` are not provided. Also, either `options.implementation`
    *                     or `options.value` needs to be defined.
    */
   return /** @lends cdf.AddIn */ function(options) {
