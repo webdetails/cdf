@@ -25,7 +25,10 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.notifications
    * @amd cdf/dashboard/Dashboard.notifications
-   * @classdesc A class representing an extension to the Dashboard class for notifications.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for notifications.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for notifications.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{

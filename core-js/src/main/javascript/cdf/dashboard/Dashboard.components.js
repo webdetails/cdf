@@ -22,9 +22,12 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.components
    * @amd cdf/dashboard/Dashboard.components
-   * @classdesc A class representing an extension to the Dashboard class for handling components.
-   *            It defines the methods used to interact with the components array. These components are instances
-   *            of BaseComponent
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for handling components.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for handling components. It defines the methods used to interact
+   *            with the components array. These components are instances of
+   *            {@link cdf.components.BaseComponent|BaseComponent}.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
