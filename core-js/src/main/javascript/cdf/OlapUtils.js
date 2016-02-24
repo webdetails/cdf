@@ -20,6 +20,7 @@ define([
 
     /**
      * @class cdf.OlapUtils
+     * @staticClass
      * @amd cdf/OlapUtils
      * @classdesc OlapUtils is a collection of functions allowing client side CDF to
      *            issue MDX queries. This functionality is completely deprecated now and

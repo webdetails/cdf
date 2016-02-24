@@ -21,7 +21,10 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.bookmarkable
    * @amd cdf/dashboard/Dashboard.bookmarkable
-   * @classdesc A class representing an extension to the Dashboard class for bookmarkable parameters.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for bookmarkable parameters.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for bookmarkable parameters.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{

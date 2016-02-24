@@ -22,13 +22,62 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.lifecycle
    * @amd cdf/dashboard/Dashboard.lifecycle
-   * @classdesc A class representing an extension to the Dashboard class for lifecycle.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for lifecycle.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for lifecycle.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * Inits the lifecycle.
+     * @summary Init counter.
+     * @description Init counter.
+     *
+     * @type {Number}
+     * @protected
+     * @deprecated
+     */
+    initCounter: undefined,
+
+    /**
+     * @summary Running calls counter.
+     * @description Running calls counter, used to control the progress indicator in asynchronous calls.
+     *
+     * @type {Number}
+     * @protected
+     */
+    runningCalls: undefined,
+
+    /**
+     * @summary Last server response timestamp.
+     * @description Last server response timestamp, in milliseconds, used to know if the session expired.
+     *
+     * @type {Number}
+     * @protected
+     */
+    lastServerResponse: undefined,
+
+    /**
+     * @summary Timeout value in milliseconds.
+     * @description Timeout value in milliseconds, if `serverCheckResponseTimeout` passes between ajax
+     *              communications, when the next {@link cdf.dashboard.Dashboard#updateComponent|updateComponent}
+     *              is called, the dashboard will first {@link cdf.dashboard.Dashboard#checkServer|checkServer},
+     *              showing a {@link cdf.dashboard.Dashboard#loginAlert|loginAlert} if it's unable to connect
+     *              to the server.
+     *
+     * @type {Number}
+     * @protected
+     */
+    serverCheckResponseTimeout: undefined,
+
+    /**
+     * @summary Initializes the lifecycle.
+     * @description Initializes the lifecycle, setting the default values for
+     *              {@link cdf.dashboard.Dashboard#initCounter|initCounter},
+     *              {@link cdf.dashboard.Dashboard#runningCalls|runningCalls},
+     *              {@link cdf.dashboard.Dashboard#lastServerResponse|lastServerResponse} and
+     *              {@link cdf.dashboard.Dashboard#serverCheckResponseTimeout|serverCheckResponseTimeout}.
      *
      * @private
      */
@@ -46,7 +95,8 @@ define([
     },
 
     /**
-     * Resets the running calls counter and hides the progress indicator.
+     * @summary Resets the running calls counter and hides the progress indicator.
+     * @description Resets the running calls counter and hides the progress indicator.
      */
     resetRunningCalls: function() {
       this.runningCalls = 0;
@@ -56,7 +106,8 @@ define([
     },
 
     /**
-     * Returns the number of running calls.
+     * @summary Returns the number of running calls.
+     * @description Returns the number of running calls.
      *
      * @return {number} Number of actual running calls to the server
      */
@@ -65,7 +116,8 @@ define([
     },
 
     /**
-     * Increments the running calls counter.
+     * @summary Increments the running calls counter.
+     * @description Increments the running calls counter.
      */
     incrementRunningCalls: function() {
       this.runningCalls++;
@@ -74,7 +126,8 @@ define([
     },
 
     /**
-     * Decrements the running calls counter. If the counter reaches 0, hides the progress indicator.
+     * @summary Decrements the running calls counter.
+     * @description Decrements the running calls counter and if it reaches 0, hides the progress indicator.
      */
     decrementRunningCalls: function() {
       this.runningCalls--;
@@ -88,9 +141,10 @@ define([
     },
 
     /**
-     * Init function for the dashboard. Calling this method will trigger the dashboard execution and render.
+     * @summary Dashboards initialization function.
+     * @description Dashboards initialization function. Calling this method will trigger the dashboard execution and render.
      *
-     * @param {Object[]} components List of components to be added to the dashboard.
+     * @param {Array<cdf.components.BaseComponent>} [components] List of components to be added to the dashboard.
      */
     init: function(components) {
       var myself = this;
@@ -136,10 +190,11 @@ define([
     },
 
     /**
-     * Part of the initialization procedure. This supports some deprecated functionality.
+     * @summary Part of the initialization procedure.
+     * @description Part of the initialization procedure. This supports some deprecated functionality.
      *
      * @private
-     * @param {string} initInstance A string identifying the instance.
+     * @param {Number} initInstance A number identifying the instance.
      * @fires cdf.event:cdf
      * @fires cdf.dashboard.Dashboard#event:"cdf:preInit"
      *
@@ -235,10 +290,11 @@ define([
     },
 
     /**
-     * Handles the postInit section of the dashboard initialization.
+     * @summary Handles the postInit section of the dashboard initialization.
+     * @description Handles the postInit section of the dashboard initialization.
      *
      * @private
-     * @param {string} initInstance A string identifying the instance.
+     * @param {Number} initInstance A number identifying the instance.
      * @fires cdf.event:cdf
      * @fires cdf.dashboard.Dashboard#event:"cdf:postInit"
      */
@@ -323,10 +379,11 @@ define([
     },
 
     /**
-     * Update algorithm for a managed component. Calls preExecution, update and postExecution.
+     * @summary Update algorithm for a managed component.
+     * @description Update algorithm for a managed component. Calls `preExecution`, `update` and `postExecution`.
      *
      * @private
-     * @param {Object} object The component to update.
+     * @param {cdf.components.BaseComponent} object The component to update.
      * @fires cdf.event:cdf
      * @fires cdf.components.BaseComponent#event:"cdf:preExecution"
      * @fires cdf.components.BaseComponent#event:"cdf:postExecution"
@@ -404,8 +461,8 @@ define([
     /**
      * @summary Update components by priority.
      * @description <p>Expects as parameter an object where the keys
-     * are the priorities, and the values are arrays of components that should be
-     * updated at that priority level:</p>
+     *              are the priorities, and the values are arrays of components that should be
+     *              updated at that priority level:</p>
      *
      *     {
      *       0: [c1,c2],
@@ -423,8 +480,8 @@ define([
      * we can use it as a sparse array of sorts).</p>
      *
      * @private
-     * @param {Object[]} components The list of components to update
-     * @see cdf.dashboard.Dashboard#updateComponent
+     * @param {Array<cdf.components.BaseComponent>} components The list of components to update
+     * @see {@link cdf.dashboard.Dashboard#updateComponent|updateComponent}
      */
     updateAll: function(components) {
       /*
@@ -475,7 +532,7 @@ define([
         if(othersAwaitExecution) {
           var tiers = this.updating.tiers;
           tiers[updating.priority] = _.difference(tiers[updating.priority], updating.components);
-          toUpdate.components = _.union(tiers[updating.priority], this.getFirstTier(tiers).components); 
+          toUpdate.components = _.union(tiers[updating.priority], this.getFirstTier(tiers).components);
         }
 
         this.updating.current = toUpdate;
@@ -527,12 +584,13 @@ define([
     },
 
     /**
-     * Adds a component to the "to be updated" queue and starts a timer.
-     * If the timer finishes before this method is called again, the
-     * {@link cdf.dashboard.Dashboard#updateAll|updateAll} method is called
-     * updating all the components in the queue.
+     * @summary Adds a component to the "to be updated" queue.
+     * @description Adds a component to the "to be updated" queue and starts a timer.
+     *              If the timer finishes before this method is called again, the
+     *              {@link cdf.dashboard.Dashboard#updateAll|updateAll} method is called
+     *              updating all the components in the queue.
      *
-     * @param {Object} component The component to update.
+     * @param {cdf.components.BaseComponent} component The component to update.
      */
     update: function(component) {
       /*
@@ -561,9 +619,10 @@ define([
     },
 
     /**
-     * Updates a specific component.
+     * @summary Updates a specific component.
+     * @description Updates a specific component.
      *
-     * @param {Object} object The component to update.
+     * @param {cdf.components.BaseComponent} object The component to update.
      */
     updateComponent: function(object) {
       if((Date.now ? Date.now() : new Date().getTime()) - this.lastServerResponse > this.serverCheckResponseTimeout) {
@@ -585,12 +644,21 @@ define([
     },
 
     /**
-     * Given a list of component priority tiers, returns the highest priority
-     * non-empty tier of components awaiting update, or null if no such tier exists.
+     * @summary Gets the first tier from a list of component priority tiers.
+     * @description Given a `tiers` object like:
+     *
+     *     {
+     *       0: [c1,c2],
+     *       2: [c3],
+     *       10: [c4]
+     *     }
+     *
+     * Where `key: value` are `priority: components-array`, returns the highest priority non-empty
+     * tier of components awaiting update, or null if no such tier exists.
      *
      * @private
-     * @param {Object} tiers The list of component priority tiers.
-     * @return {?number} The priority value or null.
+     * @param {Object} tiers The component priority tiers map.
+     * @return {?Array<cdf.components.BaseComponent>} The highest priority components or null.
      */
     getFirstTier: function(tiers) {
       var keys = _.keys(tiers).sort(function(a, b) {
@@ -608,7 +676,8 @@ define([
     },
 
     /**
-     * Resets the dashboard.
+     * @summary Resets the dashboard.
+     * @description Resets the dashboard, clearing all the components, and re-updating them.
      */
     resetAll: function() {
       this.createAndCleanErrorDiv(); //Dashboard.legacy
@@ -625,11 +694,13 @@ define([
     },
 
     /**
-     * Gets the component with name equal to the value of `object_name`.
-     * Uses the component `parameter` property and the return value of
-     * executing its `getValue` function to execute the component `preChange`,
-     * the dashboard [fireChange]{@link cdf.dashboard.Dashboard#fireChange}
-     * and the component `postChange` functions.
+     * @summary Processes a change in a component.
+     * @description <p>Given the component with name `object_name`, a change is processed as follows:</p>
+     *              <p>We get the `parameter` and the `value` from the component (`getValue()`). Then
+     *              we do the actual processing:</p>
+     *              <ol><li>component.{@link cdf.components.BaseComponent#preChange|`preChange(value)`}</li>
+     *              <li>dashboard.{@link cdf.dashboard.Dashboard#fireChange|fireChange(`parameter`,`value`)}</li>
+     *              <li>component.{@link cdf.components.BaseComponent#postChange|`postChange(value)`}</li></ol>
      *
      * @param {string} object_name The component name.
      */
@@ -658,18 +729,17 @@ define([
     },
 
     /**
-     * Changes the value of a parameter with the provided name, triggers the
-     * [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
-     * and updates the components that listen for changes on the aforementioned parameter.
-     *
-     * Because some browsers won't draw the blockUI widgets
-     * until the script has finished, we find the list of
-     * components to update, then execute the actual update
-     * in a function wrapped in a setTimeout, so the running
-     * script has the opportunity to finish.
+     * @summary Changes the value of a parameter, triggering a
+     *          {@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"|`parameter`:fireChange} event.
+     * @description <p>Changes the value of a parameter with the provided name, triggers the
+     *              {@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"|`parameter`:fireChange}
+     *              event and updates the components that listen for changes on the aforementioned parameter.</p>
+     *              <p>Because some browsers won't draw the blockUI widgets until the script has finished, we
+     *              find the list of components to update, then execute the actual update in a function wrapped
+     *              in a setTimeout, so the running script has the opportunity to finish.</p>
      *
      * @param {string} parameter The name of the parameter on which to fire change.
-     * @param {*} value Value for the parameter.
+     * @param {Object} value Value for the parameter.
      * @fires cdf.event:cdf
      * @fires cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"
      */
@@ -696,13 +766,15 @@ define([
     },
 
     /**
-     * Checks if there are any other components of equal or higher 
-     * priority than the one that is currently being executed.
+     * @summary Checks if there are other components awaiting execution.
+     * @description Checks if there are any other components of equal or higher
+     *              priority than the one that is currently being executed awaiting execution.
      *
      * @private
      * @param {Object} tiers The list of component priority tiers.
      * @param {Object} current The current component.
-     * @return {boolean} _true_ if the first tier has components with equal or higher priority than the current component, _false_ otherwise.
+     * @return {boolean} `true` if the first tier has components with equal or higher priority
+     *                   than the current component, `false` otherwise.
      */
     othersAwaitExecution: function(tiers, current) {
 
@@ -710,13 +782,13 @@ define([
         return false;
       }
 
-      // first thing is to discard 'current.components' from the calculations, as we are only 
+      // first thing is to discard 'current.components' from the calculations, as we are only
       // interested in checking if there are *other components* that await execution
       tiers[current.priority] = _.difference(tiers[current.priority], current.components);
 
       var componentsToUpdate = this.getFirstTier(tiers);
-      
-      if(!componentsToUpdate || !componentsToUpdate.components || componentsToUpdate.components.length == 0) { 
+
+      if(!componentsToUpdate || !componentsToUpdate.components || componentsToUpdate.components.length == 0) {
 
         return false; // no other components await execution
 
@@ -725,9 +797,9 @@ define([
         // recall: 1 - utmost priority , 999999 - lowest priority
         // those who await execution are lower in priority that the current component
         return false;
-      } 
+      }
 
-      // componentsToUpdate has components with equal or higher priority than the component 
+      // componentsToUpdate has components with equal or higher priority than the component
       // that is currently being executed, that await execution themselves
       return true;
     }

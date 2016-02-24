@@ -21,6 +21,8 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.storage
    * @amd cdf/dashboard/Dashboard.storage
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for handling the storage `object`.
    * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *            class for handling the storage `object`.
    * @ignore

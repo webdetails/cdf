@@ -24,9 +24,12 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.legacy
    * @amd cdf/dashboard/Dashboard.legacy
-   * @classdesc A class representing an extension to the Dashboard class for handling legacy calls.
-   *            The methods here handle calling xactions and other legacy related actions.
-   *            All the methods in this class are deprecated.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for handling legacy calls.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for handling legacy calls. The methods here handle calling
+   *            xactions and other legacy related actions. All the methods in
+   *            this class are deprecated.
    * @deprecated
    * @ignore
    */

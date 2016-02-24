@@ -23,8 +23,10 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.i18n
    * @amd cdf/dashboard/Dashboard.i18n
-   * @classdesc A class representing an extension to the Dashboard class for handling
-   *            internationalization and localization.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for handling internationalization and localization.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for handling internationalization and localization.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{

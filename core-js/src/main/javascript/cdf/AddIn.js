@@ -18,10 +18,11 @@ define([
 ], function(Utils, Logger, $) {
 
   /**
-   * The constructor of an add-in.
+   * @description The constructor of an add-in.
    *
    * @class cdf.AddIn
    * @amd cdf/AddIn
+   * @summary Class that allows creating Static or Scriptable add-ins.
    * @classdesc Creates a new add-in. Add-ins come in two varieties: Static add-ins
    *            represent static data or behaviour, whereas Scriptable add-ins
    *            represent dynamic, context-dependent behaviour.
