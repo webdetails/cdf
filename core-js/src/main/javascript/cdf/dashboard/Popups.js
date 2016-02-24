@@ -21,7 +21,9 @@ define([
 
   /**
    * @class cdf.dashboard.Popups
+   * @staticClass
    * @amd cdf/dashboard/Popups
+   * @summary A static class containing pre-built error and success popups.
    * @classdesc <p>A static class containing pre-built error and success popups.</p>
    *            <p>Each exposed popup is an object with a _render_ method that can be called to show the popup with
    *            some default values for each case.</p>
@@ -30,6 +32,7 @@ define([
 
     /**
      * @class
+     * @staticClass
      * @summary The Ok Popup.
      * @classdesc <p>The Ok Popup object containing the default values for a success notification popup.</p>
      *            <p>On Button click, the Popup is closed.</p>
@@ -150,6 +153,7 @@ define([
 
     /**
      * @class
+     * @staticClass
      * @summary The Error Notification Popup.
      * @classdesc <p>The Error Notification Popup object containing the default values for a error notification
      *            popup.</p>
@@ -224,6 +228,7 @@ define([
 
     /**
      * @class
+     * @staticClass
      * @summary The Error Notification Growl Popup.
      * @classdesc <p>The Error Notification Growl Popup object containing the default values for a error
      *            notification growl popup.</p>

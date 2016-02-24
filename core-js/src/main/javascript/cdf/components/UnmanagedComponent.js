@@ -19,11 +19,13 @@ define([
 ], function(BaseComponent, _, $, Logger) {
 
   /**
-   * The constructor of an unmanaged component.
+   * @description The constructor of an unmanaged component.
    *
    * @class cdf.components.UnmanagedComponent
    * @extends cdf.components.BaseComponent
    * @amd cdf/components/UnmanagedComponent
+   * @summary Advanced version of the {@link cdf.components.BaseComponent|BaseComponent}
+   *          that allows control over the core CDF lifecycle.
    * @classdesc <p>The <code>UnmanagedComponent</code> is an advanced version of the
    * {@link cdf.components.BaseComponent|BaseComponent} that allows control over the core CDF lifecycle for
    * implementing components.</p>
@@ -125,20 +127,18 @@ define([
    * <code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code> lifecycle method to emulate
    * {@link cdf.components.BaseComponent|BaseComponent}'s behaviour:</p>
    *
-   * <pre><code>
-   *   update: function() {
-   *     this.synchronous(this.redraw);
-   *   }
+   * <pre><code>update: function() {
+   *   this.synchronous(this.redraw);
+   * }
    * </code></pre>
    *
    * <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
    * <code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code>:</p>
    *
-   * <pre><code>
-   *   update: function() {
-   *     // Will call this.redraw(1, 2, 3)
-   *     this.synchronous(this.redraw, [1, 2, 3]);
-   *   }
+   * <pre><code>update: function() {
+   *   // Will call this.redraw(1, 2, 3)
+   *   this.synchronous(this.redraw, [1, 2, 3]);
+   * }
    * </code></pre>
    *
    * <h3>Use <code>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}</code> When You Want Your
@@ -150,21 +150,19 @@ define([
    * minimum a query definition and a <code>redraw</code> callback to process the query results. The query definition
    * is an object of the form:</p>
    *
-   * <pre><code>
-   *   {
-   *     dataAccessId: 'myQuery',
-   *     file: '/path/to/my/datasourceDefinition.cda'
-   *   }
+   * <pre><code>{
+   *   dataAccessId: 'myQuery',
+   *   file: '/path/to/my/datasourceDefinition.cda'
+   * }
    * </code></pre>
    *
    * <p>Typically, if you're using CDE, these properties will be added to one of either
    * <code>this.queryDefinition</code> or <code>this.chartDefinition</code> so you can just use this pattern:</p>
    *
-   * <pre><code>
-   *   update: function() {
-   *     var redraw = _.bind(this.redraw, this);
-   *     this.triggerQuery(this.queryDefinition, redraw);
-   *   }
+   * <pre><code>update: function() {
+   *   var redraw = _.bind(this.redraw, this);
+   *   this.triggerQuery(this.queryDefinition, redraw);
+   * }
    * </code></pre>
    *
    * <h3>Alternating Between Static And Query-Based Data</h3>
@@ -175,15 +173,14 @@ define([
    * <code>valuesArray</code> is provided, or a query if it is not. Using <code>UnmanagedComponent</code>, this
    * convention would look like this:</p>
    *
-   * <pre><code>
-   *   update: function() {
-   *     var redraw = _.bind(this.redraw, this);
-   *     if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
-   *       this.synchronous(redraw, this.valuesArray);
-   *     } else {
-   *       this.triggerQuery(this.queryDefinition, redraw);
-   *     }
+   * <pre><code>update: function() {
+   *   var redraw = _.bind(this.redraw, this);
+   *   if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
+   *     this.synchronous(redraw, this.valuesArray);
+   *   } else {
+   *     this.triggerQuery(this.queryDefinition, redraw);
    *   }
+   * }
    * </code></pre>
    *
    *
@@ -543,8 +540,8 @@ define([
     /**
      * @summary The beginAjax lifecycle handler implements the begin phase of a lifecycle based on generic AJAX calls.
      * @description <p>The beginAjax lifecycle handler implements the begin phase of a lifecycle based on generic AJAX calls.
-     *              It implements the lifecycle:
-     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.components.UnmanagedComponent#block|block} -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; {@link cdf.components.UnmanagedComponent~beginAjaxCb|callback}</code></pre></p>
+     *              It implements the lifecycle:</p>
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.components.UnmanagedComponent#block|block} -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; {@link cdf.components.UnmanagedComponent~beginAjaxCb|callback}</code></pre>
      *              Ending the execution, is the responsibility of the specified callback, by calling
      *              {@link cdf.components.UnmanagedComponent#endExec|endExec}, resulting in: <code>{@link cdf.components.UnmanagedComponent#postExec|postExec} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional) or {@link cdf.components.UnmanagedComponent#failExec|failExec} </code>.
      *
@@ -616,11 +613,13 @@ define([
      * @description <p>Build a generic response handler that runs the success callback when being called in response to the most recent
      *              AJAX request that was triggered for this component (as determined by comparing counter and this.runCounter),
      *              and always calls the always callback. If the counter is not provided, it'll be generated automatically.</p>
-     *              Accepts the following calling conventions:
-     *              - {@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(counter, success, always)
-     *              - {@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(counter, success)
-     *              - {@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(success, always)
-     *              - {@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(success)
+     *              <p>Accepts the following calling conventions:</p>
+     *              <ul>
+     *                <li>{@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(counter, success, always)</li>
+     *                <li>{@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(counter, success)</li>
+     *                <li>{@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(success, always)</li>
+     *                <li>{@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(success)</li>
+     *              </ul>
      *
      * @param {number}   [counter={@link cdf.components.UnmanagedComponent#callCounter|callCounter}] Identifier for the
      *   ajax call being made.

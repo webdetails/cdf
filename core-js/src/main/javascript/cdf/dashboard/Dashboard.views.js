@@ -21,6 +21,8 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.views
    * @amd cdf/dashboard/Dashboard.views
+   * @summary A class representing an extension to the
+   *            {@link cdf.dashboard.Dashboard|Dashboard} class for managing views.
    * @classdesc A class representing an extension to the
    *            {@link cdf.dashboard.Dashboard|Dashboard} class for managing views.
    * @ignore

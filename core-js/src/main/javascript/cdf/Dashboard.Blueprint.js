@@ -12,14 +12,16 @@
  */
 
 /**
- * @class cdf.Blueprint
+ * @class cdf."Dashboard.Blueprint"
  * @amd cdf/Dashboard.Blueprint
+ * @summary Represents a {@link http://http://blueprintcss.org|blueprint} dashboard.
  * @classdesc Represents a {@link http://http://blueprintcss.org|blueprint}
  *            dashboard aggregating all the classes in the Dashboard
  *            hierarchy. It's a specialization of the base abstract
  *            {@link cdf.dashboard.Dashboard|Dashboard} class.
  * @see cdf.dashboard.Dashboard
  * @see http://www.blueprintcss.org
+ * @extends cdf.dashboard.Dashboard
  * @example
  *
  *      require(['cdf/Dashboard.Blueprint', 'cdf/components/ButtonComponent'],

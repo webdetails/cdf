@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -23,38 +23,89 @@ define([
 
   /**
    * @class cdf.queries.CdaQuery
-   * @amd cdf/queries/CdaQuery
-   * @classdesc Class that represents a CDA query.
+   * @classdesc <p>Class that represents a CDA query. This class will be registered
+   *            globally using the static dashboard function
+   *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
+   *            <p>The constructor of this class is created dynamically and registered
+   *            in the dashboard query container
+   *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
+   *            <p>To create a new CDA query use the dashboard function
+   *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
+   * @staticClass
+   * @extends cdf.queries.BaseQuery
+   * @example
+   * dashboard.addDataSource("myCdaQuery", {
+   *   queryType: "cda", dataAccessId: "cdaQuery", path: "/public/myQ.cda"
+   * });
+   * dashboard.getQuery({dataSource: "myCdaQuery"})
+   *          .doQuery(successCallback, errorCallback);
    */
   var cdaQueryOpts = /** @lends cdf.queries.CdaQuery# */{
-    name: 'cda',
-    label: 'CDA Query',
+    /**
+     * @summary The class name.
+     * @description The class name.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "cda"
+     */
+    name: "cda",
+
+    /**
+     * @summary The class label.
+     * @description The class label.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "CDA Query"
+     */
+    label: "CDA Query",
+
+    /**
+     * @summary The default properties.
+     * @description The default properties.
+     *
+     * @type {Object}
+     * @property {string} url The target endpoint URL.
+     * @property {string} file="" The target file name.
+     * @property {string} id="" The target identifier.
+     * @property {string} outputIdx="1" The default output index.
+     * @property {string} sortBy="" The default sorting order.
+     * @property {Object} ajaxOptions={async:true,xhrFields:{withCredentials:true}} The {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options for the query.
+     * @property {string} searchPattern="" The default search pattern.
+     * @protected
+     */
     defaults: {
       url: CdaQueryExt.getDoQuery(),
-      file: '',
-      id: '',
-      outputIdx: '1',
-      sortBy: '',
+      file: "",
+      id: "",
+      outputIdx: "1",
+      sortBy: "",
       ajaxOptions: {
         async: true,
         xhrFields: {
           withCredentials: true
         }
       },
-      searchPattern: ''
+      searchPattern: ""
     },
 
     /**
-     * Initializes a CDA query.
+     * @summary Initializes a CDA query.
+     * @description Initializes a CDA query.
      *
-     * @param {object} opts               The query definition object.
-     * @param {string} opts.path          The path to the CDA file.
-     * @param {string} opts.dataAccessId  The Data access identifier.
-     * @param {string} opts.sortBy        The sorting order.
-     * @param {number} opts.pageSize      The page size.
-     * @param {number} opts.outputIndexId The output index identifier.
-     * @throws {InvalidQuery} If the _opts_ parameter doesn't contain a path
-     *                        and a data access identifier.
+     * @param {object} opts                 The query definition object.
+     * @param {string} opts.path            The path to the CDA file.
+     * @param {string} opts.dataAccessId    The Data access identifier.
+     * @param {string} [opts.sortBy]        The sorting order.
+     * @param {number} [opts.pageSize]      The page size.
+     * @param {number} [opts.outputIndexId] The output index identifier.
+     * @throws {InvalidQuery} If the `opts` parameter doesn't contain a path
+     *                        nor a data access identifier.
      */
     init: function(opts) {
       if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
@@ -76,9 +127,9 @@ define([
     },
 
     /**
-     * Builds the query definition object.
+     * @summary Builds the query definition object.
+     * @description Builds the query definition object.
      *
-     * @private
      * @param {object} overrides New query definitions to override any existing query definitions.
      * @return {object} Query definition object.
      */
@@ -129,7 +180,8 @@ define([
     },
 
     /**
-     * Exports the data, according to a specific output type.
+     * @summary Exports the data, according to a specific output type.
+     * @description Exports the data, according to a specific output type.
      *
      * @param {string} outputType Output type (CSV, XLS, XML, HTML).
      * @param {object} overrides Overrides for the query definition object.
@@ -188,20 +240,21 @@ define([
     },
 
     /**
-     * Sets the sort by columns.<p>
-     * CDA expects an array of terms consisting of a number and a letter
-     * that's either 'A' or 'D'. Each term denotes, in order, a column
-     * number and sort direction: 0A would then be sorting the first column
-     * ascending, and 1D would sort the second column in descending order.
-     * This function accepts either an array with the search terms, or
-     * a comma-separated string with the terms:  "0A,1D" would then mean
-     * the same as the array ["0A","1D"], which would sort the results
-     * first by the first column (ascending), and then by the second
-     * column (descending).
+     * @summary Sets the sort by columns.
+     * @description <p>Sets the sort by columns.</p>
+     *              <p>CDA expects an array of terms consisting of a number and a letter
+     *              that's either "A" or "D". Each term denotes, in order, a column
+     *              number and sort direction: 0A would then be sorting the first column
+     *              ascending, and 1D would sort the second column in descending order.
+     *              This function accepts either an array with the search terms, or
+     *              a comma-separated string with the terms:  "0A,1D" would then mean
+     *              the same as the array ["0A","1D"], which would sort the results
+     *              first by the first column (ascending), and then by the second
+     *              column (descending).</p>
      *
-     * @param {string} sortBy Sorting columns order.
-     * @return {boolean} _true_ if the sort by condition has changed,
-     *                   _false_ if it remained the same.
+     * @param {string|Array<string>} sortBy Sorting columns order.
+     * @return {boolean} `true` if the sort by condition has changed,
+     *                   `false` if it remained the same.
      * @throws {InvalidSortExpression} If the sort by columns are not correctly defined.
      */
     setSortBy: function(sortBy) {
@@ -217,12 +270,12 @@ define([
        */
       else if(typeof sortBy == "string") {
         /* Valid sortBy Strings are column numbers, optionally
-         * succeeded by A or D (ascending or descending), and separated by commas
+         * succeeded by A or D (ascending or descending), and separated by commas.
          */
         if(!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
           throw "InvalidSortExpression";
         }
-        /* Break the string into its constituent terms, filter out empty terms, if any */
+        /* Break the string into its constituent terms, filter out empty terms, if any. */
         newSort = sortBy.toUpperCase().split(',').filter(function(e) {
           return e !== "";
         });
@@ -230,7 +283,7 @@ define([
         newSort = sortBy.map(function(d) {
           return d.toUpperCase();
         });
-        /* We also need to validate that each individual term is valid */
+        /* We also need to validate that each individual term is valid. */
         var invalidEntries = newSort.filter(function(e) {
           return !e.match("^[0-9]+[adAD]?,?$");
         });
@@ -240,7 +293,7 @@ define([
       }
 
       /* We check whether the parameter is the same as before,
-       * and notify the caller on whether it changed
+       * and notify the caller on whether it changed.
        */
       var same;
       if(newSort instanceof Array) {
@@ -259,13 +312,14 @@ define([
     },
 
     /**
-     * Sorts the result set. See the notes on sort columns on the
-     * {@link cdf.queries.CdaQuery#setSortBy|setSortBy} method.
+     * @summary Sorts the result set.
+     * @description Sorts the result set. See the notes on sort columns on the
+     *              {@link cdf.queries.CdaQuery#setSortBy|setSortBy} method.
      *
      * @param {string}   sortBy          Sorting columns order.
      * @param {function} outsideCallback Callback to call after the sorting has been processed.
-     * @return {boolean|*} _false_ if the sort by conditions have not changed,
-     *                     the result of calling _doQuery_ otherwise.
+     * @return {boolean|Object} `false` if the sort by conditions have not changed,
+     *                          the result of calling `doQuery` otherwise.
      */
     sortBy: function(sortBy, outsideCallback) {
       /* If the parameter is not the same, and we have a valid state,

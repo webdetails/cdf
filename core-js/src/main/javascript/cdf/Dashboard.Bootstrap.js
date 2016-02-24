@@ -12,14 +12,16 @@
  */
 
 /**
- * @class cdf.Bootstrap
+ * @class cdf."Dashboard.Bootstrap"
  * @amd cdf/Dashboard.Bootstrap
+ * @summary Represents a {@link http://getbootstrap.com|bootstrap} dashboard.
  * @classdesc Represents a {@link http://getbootstrap.com|bootstrap} dashboard
  *            aggregating all the classes in the Dashboard hierarchy.
  *            It's a specialization of the base abstract
  *            {@link cdf.dashboard.Dashboard|Dashboard} class.
  * @see cdf.dashboard.Dashboard
  * @see http://www.getbootstrap.com
+ * @extends cdf.dashboard.Dashboard
  * @example
  *
  *      require(['cdf/Dashboard.Bootstrap', 'cdf/components/ButtonComponent'],

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,18 +16,27 @@ define(function() {
   /**
    * @class cdf.Logger
    * @amd cdf/Logger
+   * @summary Allows logging messages in the console.
    * @classdesc This is a static class used for logging messages in the console.
+   * @staticClass
    */
   return /** @lends cdf.Logger */ {
     /**
-     * The different log levels supported.
+     * @summary The different log levels supported.
+     * @description The different log levels supported.
+     *              This array is ordered from the most verbose level to the less verbose.
      *
      * @type {string[]}
+     * @const
+     * @readonly
+     * @private
      * @default
      */
     loglevels: ['debug', 'log', 'info', 'warn', 'error', 'exception'],
+
     /**
-     * Current log level. Assign a new value to this property to change the log level.
+     * @summary The current log level.
+     * @description The current log level.
      *
      * @type {string}
      * @default "debug"
@@ -35,11 +44,12 @@ define(function() {
     loglevel: 'debug',
 
     /**
-     * Logs a message at the specified log level.
+     * @summary Logs a message to the console.
+     * @description Logs a message to the console using the specified `type` log level if it is allowed by the current log level.
      *
-     * @param {string|{stack: string}} m             Message to log or an object containing information about an exception to log.
-     * @param {string}                 [type="info"] Log level. One of debug, info, warn, error or exception.
-     * @param {string}                 [css]         CSS styling rules for the message to log.
+     * @param {string|{stack: string}} m             Message to log or an `object` containing information about an exception.
+     * @param {string}                 [type="info"] The log level, one of the registered log {@link cdf.Logger.loglevels|levels}.
+     * @param {string}                 [css]         CSS styling rules for the message.
      */
     log: function(m, type, css) {    
       type = type || "info";
@@ -69,7 +79,8 @@ define(function() {
     },
 
     /**
-     * Logs a message at _{@link cdf.Logger.loglevels|debug}_ level.
+     * @summary Logs a message at {@link cdf.Logger.loglevels|debug} level.
+     * @description Logs a message at {@link cdf.Logger.loglevels|debug} level.
      *
      * @param {string} m Message to log.
      */
@@ -78,7 +89,8 @@ define(function() {
     },
 
     /**
-     * Logs a message at _{@link cdf.Logger.loglevels|info}_ level.
+     * @summary Logs a message at {@link cdf.Logger.loglevels|info} level.
+     * @description Logs a message at {@link cdf.Logger.loglevels|info} level.
      *
      * @param {string} m Message to log.
      */
@@ -87,7 +99,8 @@ define(function() {
     },
 
     /**
-     * Logs a message at _{@link cdf.Logger.loglevels|warn}_ level.
+     * @summary Logs a message at {@link cdf.Logger.loglevels|warn} level.
+     * @description Logs a message at {@link cdf.Logger.loglevels|warn} level.
      *
      * @param {string} m Message to log.
      */
@@ -96,7 +109,8 @@ define(function() {
     },
 
     /**
-     * Logs a message at _{@link cdf.Logger.loglevels|error}_ level.
+     * @summary Logs a message at {@link cdf.Logger.loglevels|error} level.
+     * @description Logs a message at {@link cdf.Logger.loglevels|error} level.
      *
      * @param {string} m Message to log.
      */
@@ -105,9 +119,10 @@ define(function() {
     },
 
     /**
-     * Logs a message at _{@link cdf.Logger.loglevels|exception}_ level.
+     * @summary Logs a message at {@link cdf.Logger.loglevels|exception} level.
+     * @description Logs a message at {@link cdf.Logger.loglevels|exception} level.
      *
-     * @param {string|{stack: string}} m  Message to log or an object containing information about the exception to log.
+     * @param {string|{stack: string}} m  Message to log or an `object` containing information about the exception to log.
      */
     exception: function(m) {
       return this.log(m, "exception");
