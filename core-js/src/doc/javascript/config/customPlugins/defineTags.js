@@ -41,6 +41,9 @@ exports.defineTags = function (dictionary) {
     }
   });
 
+  /**
+   * New code for examples in order to have different header
+   */
   dictionary.defineTag('code', {
     keepsWhitespace: true,
     removesIndent: true,
@@ -51,6 +54,14 @@ exports.defineTags = function (dictionary) {
     }
   });
 
+  /**
+   * New tag to manually mark classes as static
+   */
+  dictionary.defineTag('staticClass', {
+    onTagged: function (doclet, tag) {
+      doclet.static = true;
+    }
+  });
   //TODO: Check what this is doing in the default tag
   /*function parseTypeText(text) {
     var tagType = jsdoc.tag.type.parse(text, false, true);

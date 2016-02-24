@@ -14,16 +14,18 @@
   "templates": {
     "cleverLinks": true,
     "monospaceLinks": false
+    
   },
   "opts": {
     "template": "${basedir}/src/doc/javascript/template",
     "encoding": "utf8",
+    "outputSourceFiles": false,
     "githubConfig": {
       "branch": "${project.stage}",
       "name": "${project.github-name}" 
     },
     "recurse": true,
-    "private": true,
-    "verbose": true    
+    "private": false,
+    "layoutFile": "${template.file}"
   }
 }

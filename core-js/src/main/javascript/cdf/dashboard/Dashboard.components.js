@@ -102,7 +102,7 @@ define([
      *
      * @param {Array<cdf.components.BaseComponent>} components The array of components to be added.
      * @throws {Error} Error if a component in the array is invalid or was already added.
-     * @see cdf.dashboard.Dashboard#addComponent
+     * @see {@link cdf.dashboard.Dashboard#addComponent|addComponent}
      */
     addComponents: function(components) {
       if(!$.isArray(components)) {
@@ -210,7 +210,7 @@ define([
      *   the name of the component or the index of the component to be removed.
      * @return {cdf.components.BaseComponent} The removed component.
      * @return {undefined} The component was not found.
-     * @see cdf.dashboard.Dashboard#getComponentIndex
+     * @see {@link cdf.dashboard.Dashboard#getComponentIndex|getComponentIndex}
      */
     removeComponent: function(compOrNameOrIndex) {
       var index = this.getComponentIndex(compOrNameOrIndex);
