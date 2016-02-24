@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -28,18 +28,48 @@ define([
 ], function(Xmla, XmlaQueryExt, Base, BaseQuery, Dashboard, Logger, $) {
 
   /**
-   * @class SharedXmla
-   * @classdesc Class that will be used by both XML/A and XML/A Discover classes.
-   * @ignore
+   * @class cdf.queries.SharedXmla
+   * @classdesc Class that will be used by both XML/A and XML/A Discover query classes.
+   * @private
    */
   var SharedXmla = Base.extend(/** @lends cdf.queries.SharedXmla# */{
+    /**
+     * @summary The XML/A `object`.
+     * @description The XML/A `object`.
+     *
+     * @type {object}
+     * @protected
+     * @default null
+     */
     xmla: null,
-    //cache the datasource as there should be only one xmla server
+
+    /**
+     * @summary The target data source.
+     * @description The target data source. Serves as cache,
+     *              as there should be only one XML/A server.
+     *
+     * @type {object}
+     * @protected
+     * @default null
+     */
     datasource: null,
+
+    /**
+     * @summary The array of available catalogs.
+     * @description The array of available catalogs.
+     *
+     * @type {Array<object>}
+     * @protected
+     * @default null
+     */
     catalogs: null,
 
     /**
-     * Fetches the available datasources from the server.
+     * @summary Fetches the available data sources from the server.
+     * @description Fetches the available data sources from the server.
+     *              Stores the first retrieved data source at
+     *              {@link cdf.queries.SharedXmla#datasource|datasource}
+     *              as there should be only one XML/A server.
      */
     getDataSources: function() {
       var datasourceCache = [],
@@ -63,7 +93,9 @@ define([
     },
 
     /**
-     * Fetches the available catalogs from the server.
+     * @summary Fetches the available catalogs from the server.
+     * @description Fetches the available catalogs from the server and stores
+     *              them at {@link cdf.queries.SharedXmla#catalogs|catalogs}.
      */
     getCatalogs: function() {
       var properties = {}, catalog = {};
@@ -89,12 +121,14 @@ define([
     },
 
     /**
-     * Executes a XML/A Discover query.
+     * @summary Executes an XML/A Discover query.
+     * @description Executes an XML/A Discover query.
      *
      * @param {object}   queryDefinition           An object containing the query definitions.
      * @param {string}   queryDefinition.queryType The type of query.
      * @param {string}   queryDefinition.catalog   The target catalog.
      * @param {function} queryDefinition.query     The query to execute.
+     * @return {Object} The XML/A Discover query result.
      */
     discover: function(queryDefinition) {
       var properties = {},
@@ -110,12 +144,14 @@ define([
     },
 
     /**
-     * Executes a XML/A query.
+     * @summary Executes an XML/A query.
+     * @description Executes an XML/A query.
      *
      * @param {object}   queryDefinition           An object containing the query definitions.
      * @param {string}   queryDefinition.queryType The type of query.
      * @param {string}   queryDefinition.catalog   The target catalog.
      * @param {function} queryDefinition.query     The query to execute.
+     * @return {Object} The XML/A query result.
      * @throws {Error} If the catalog is not found in the catalogs array previously retrieved from the server.
      */
     execute: function(queryDefinition) {
@@ -138,24 +174,83 @@ define([
     }
   });
 
+  /**
+   * @summary The {@link cdf.queries.SharedXmla|SharedXmla} instance.
+   * @description The {@link cdf.queries.SharedXmla|SharedXmla} instance.
+   *
+   * @type {cdf.queries.SharedXmla}
+   * @private
+   */
   var _sharedXmla = new SharedXmla();
 
   /**
    * @class cdf.queries.XmlaQuery
-   * @amd cdf/queries/XmlaQuery
-   * @classdesc Class that represents a XML/A query.
+   * @classdesc <p>Class that represents an XML/A query. This class will be registered
+   *            globally using the static dashboard function
+   *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
+   *            <p>The constructor of this class is created dynamically and registered
+   *            in the dashboard query container
+   *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
+   *            <p>To create a new XML/A query use the dashboard function
+   *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
+   * @staticClass
+   * @extends cdf.queries.BaseQuery
+   * @example
+   * dashboard.addDataSource("myXmlaQuery", {queryType: "xmla", ...});
+   * dashboard.getQuery({dataSource: "myXmlaQuery"})
+   *          .doQuery(successCallback, errorCallback);
    */
   var xmlaOpts = /** @lends cdf.queries.XmlaQuery# */{
+    /**
+     * @summary The class name.
+     * @description The class name.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "xmla"
+     */
     name: "xmla",
+
+    /**
+     * @summary The class label.
+     * @description The class label.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "XML/A Query"
+     */
     label: "XML/A Query",
+
+    /**
+     * @summary The query definition `object`.
+     * @description The query definition `object`.
+     *
+     * @type {Object}
+     * @default {}
+     * @protected
+     */
     queryDefinition: {},
+
+    /**
+     * @summary The default properties.
+     * @description The default properties.
+     *
+     * @type {Object}
+     * @property {string} url The target URL.
+     * @protected
+     */
     defaults: {
       //defaults to Pentaho's Mondrian servlet. can be overridden in options
       url: XmlaQueryExt.getXmla()
     },
 
     /**
-     * Initializes a XML/A query.
+     * @summary Initializes an XML/A query.
+     * @description Initializes an XML/A query.
      *
      * @param {object}   queryDefinition           An object containing the query definitions.
      * @param {string}   queryDefinition.queryType The type of query.
@@ -181,7 +276,8 @@ define([
     },
 
     /**
-     * Formats the XML/A query result as an object with metadata and resultset properties.
+     * @summary Formats the XML/A query result as an object with metadata and resultset properties.
+     * @description Formats the XML/A query result as an object with metadata and resultset properties.
      *
      * @param {object} results The XML/A query result.
      * @return {object} The XML/A query metadata and resultset as properties.
@@ -225,9 +321,11 @@ define([
     },
 
     /**
-     * Executes {@link cdf.queries.XmlaQuery#_executeQuery|_executeQuery} and
-     * {@link cdf.queries.XmlaQuery#transformXMLAResults|transformXMLAResults}
-     * before finally persisting the original and the processed results of the XML/A query.
+     * @summary Executes the query and processes the result.
+     * @description Executes {@link cdf.queries.XmlaQuery#_executeQuery|_executeQuery} and
+     *              {@link cdf.queries.XmlaQuery#transformXMLAResults|transformXMLAResults}
+     *              before finally persisting the original and the processed results of the
+     *              XML/A query.
      *
      * @param {function} outsideCallback Function to be called with the XML/A query result.
      */
@@ -252,7 +350,8 @@ define([
     },
 
     /**
-     * Executes a XML/A query.
+     * @summary Executes an XML/A query.
+     * @description Executes an XML/A query.
      *
      * @return {object} The XML/A query execution result.
      * @private
@@ -265,23 +364,74 @@ define([
   // that will allow to generate new XML/A queries.
   Dashboard.registerGlobalQuery("xmla", xmlaOpts);
 
-
   /**
    * @class cdf.queries.XmlaDiscoverQuery
-   * @amd cdf/queries/XmlaDiscoverQuery
-   * @classdesc Class that represents a XML/A Discover query.
+   * @classdesc <p>Class that represents an XML/A Discover query. This class will be registered
+   *            globally using the static dashboard function
+   *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
+   *            <p>The constructor of this class is created dynamically and registered
+   *            in the dashboard query container
+   *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
+   *            <p>To create a new XML/A Discover query use the dashboard function
+   *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
+   * @staticClass
+   * @extends cdf.queries.BaseQuery
+   * @example
+   * dashboard.addDataSource("myXmlaDiscQuery", {queryType: "xmlaDiscover", ...});
+   * dashboard.getQuery({dataSource: "myXmlaDiscQuery"})
+   *          .doQuery(successCallback, errorCallback);
    */
   var xmlaDiscoverOpts = /** @lends cdf.queries.XmlaDiscoverQuery# */{
+    /**
+     * @summary The class name.
+     * @description The class name.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "xmlaDiscover"
+     */
     name: "xmlaDiscover",
+
+    /**
+     * @summary The class label.
+     * @description The class label.
+     *
+     * @type {string}
+     * @const
+     * @readonly
+     * @protected
+     * @default "XML/A Discover Query"
+     */
     label: "XML/A Discover Query",
+
+    /**
+     * @summary The query definition `object`.
+     * @description The query definition `object`.
+     *
+     * @type {Object}
+     * @default {}
+     * @protected
+     */
     queryDefinition: {},
+
+    /**
+     * @summary The default properties.
+     * @description The default properties.
+     *
+     * @type {Object}
+     * @property {string} url The target URL.
+     * @protected
+     */
     defaults: {
       //defaults to Pentaho's Mondrian servlet. can be overridden in options
       url: XmlaQueryExt.getXmla()
     },
 
     /**
-     * Initializes a XML/A Discover query.
+     * @summary Initializes an XML/A Discover query.
+     * @description Initializes an XML/A Discover query.
      *
      * @param {object}   queryDefinition           An object containing the query definitions.
      * @param {string}   queryDefinition.queryType The type of query.
@@ -305,7 +455,8 @@ define([
     },
 
     /**
-     * Formats the XML/A Discover query result as an object with metadata and resultset properties.
+     * @summary Formats the XML/A Discover query result.
+     * @description Formats the XML/A Discover query result as an object with metadata and resultset properties.
      *
      * @param {object} results Object with the XML/A Discover query result.
      * @return {object} The XML/A Discover query metadata and resultset as properties.
@@ -339,9 +490,10 @@ define([
     },
 
     /**
-     * Executes {@link cdf.queries.XmlaDiscoverQuery#_executeDiscoverQuery|_executeDiscoverQuery} and
-     * {@link cdf.queries.XmlaDiscoverQuery#transformXMLADiscoverResults|transformXMLADiscoverResults}
-     * before finally persisting the original and the processed results of the XML/A query.
+     * @summary Executes the query and processes the result.
+     * @description Executes {@link cdf.queries.XmlaDiscoverQuery#_executeDiscoverQuery|_executeDiscoverQuery} and
+     *              {@link cdf.queries.XmlaDiscoverQuery#transformXMLADiscoverResults|transformXMLADiscoverResults}
+     *              before finally persisting the original and the processed results of the XML/A query.
      *
      * @param {function} outsideCallback Function to be called with the XML/A query result.
      */
@@ -366,7 +518,8 @@ define([
     },
 
     /**
-     * Executes a XML/A discover query.
+     * @summary Executes an XML/A discover query.
+     * @description Executes an XML/A discover query.
      *
      * @return {object} The XML/A discover query execution result.
      * @private

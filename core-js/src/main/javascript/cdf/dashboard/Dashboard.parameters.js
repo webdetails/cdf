@@ -21,8 +21,11 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.parameters
    * @amd cdf/dashboard/Dashboard.parameters
-   * @classdesc A class representing an extension to the Dashboard class for parameters.
-   *            It's methods allow getting and saving parameters from the dashboard context.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for parameters.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for parameters. Its methods allow getting and saving
+   *            parameters from the dashboard context.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{

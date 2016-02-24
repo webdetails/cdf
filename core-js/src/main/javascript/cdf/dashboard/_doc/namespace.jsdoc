@@ -12,7 +12,8 @@
  */
 
 /**
- * The cdf.dashboard namespace.
+ * @summary The cdf.dashboard namespace.
+ * @description The cdf.dashboard namespace.
  *
  * @namespace cdf.dashboard
  */

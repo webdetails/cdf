@@ -1,6 +1,6 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
- * 
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
@@ -14,17 +14,22 @@
 define(['amd!../lib/underscore', '../lib/jquery'], function(_, $) {
 
   /**
-   * Builds a new Query object by calling {@link cdf.dashboard.Dashboard#getQuery|getQuery}.
-   *
    * @class cdf.dashboard.Query
    * @amd cdf/dashboard/Query
+   * @summary The Query class allows generating query instances.
    * @classdesc The Query class allows generating query instances. Here mainly for legacy reasons.
+   *
+   * @summary Builds a new Query object by calling {@link cdf.dashboard.Dashboard#getQuery|getQuery}.
+   * @description <p>Builds a new Query instance by calling {@link cdf.dashboard.Dashboard#getQuery|getQuery}.
+   *              It creates a new query type based on the query type, determined within the constructor, and
+   *              the query definition. </p>
+   * @deprecated
    * @param {string|object} cd             Path to the server-side query or a chart definition object.
-   * @param {string}        [dataAccessId] The data access identifier.
+   * @param {string}        dataAccessId The data access identifier.
    * @param {object}        dashboard      The dashboard from which the query will be generated.
    * @throws {InvalidQuery} If an invalid query type is detected.
    */
-  
+
   // NOTE: The query type detection code should be kept in sync with CGG's UnmanagedComponent#detectQueryType.
   return function(cd, dataAccessId, dashboard) {
 
@@ -40,7 +45,7 @@ define(['amd!../lib/underscore', '../lib/jquery'], function(_, $) {
         path: cd,
         dataAccessId: dataAccessId
       };
-    } 
+    }
 
     if(!queryType) { throw 'InvalidQuery'; }
 

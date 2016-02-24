@@ -20,8 +20,10 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.dataSources
    * @amd cdf/dashboard/Dashboard.dataSources
-   * @classdesc A class representing an extension to the
-   *            {@link cdf.dashboard.Dashboard|Dashboard} class for handling data sources.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for handling data sources.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for handling data sources.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{

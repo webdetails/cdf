@@ -67,8 +67,10 @@ define([
   /**
    * @class cdf.dashboard.Dashboard.addIns
    * @amd cdf/dashboard/Dashboard.addIns
-   * @classdesc A class representing an extension to the Dashboard class for handling
-   *            add-ins. Its methods allow handling add-in registration and fetching.
+   * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *          class for handling add-ins.
+   * @classdesc A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
+   *            class for handling add-ins. Its methods allow handling add-in registration and fetching.
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
