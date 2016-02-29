@@ -29,13 +29,13 @@ define([
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * @summary The dashboard context `object`, used for holding user and server session data.
+     * @summary The dashboard context `object` used for holding user and server session data.
      * @description <p>The dashboard context is used for holding user and server session
      *              information, such as the current locale and session timeout settings.</p>
      *              <p>It can be initialized in two different ways. The main way is via
      *              the dashboard constructor. If not, it will be initialized via the
      *              {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration. If no context
-     *              configuration is available it will be initialized as an empty `object`.</p>
+     *              configuration is available, it will be initialized as an empty `object`.</p>
      * 
      * @type {Object}
      * @protected

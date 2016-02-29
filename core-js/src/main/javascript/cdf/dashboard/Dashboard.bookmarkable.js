@@ -113,8 +113,8 @@ define([
 
     /**
      * @summary Sets a pair parameter/value as bookmarkable.
-     * @description <p>It sets `parameter` as bookmarkable, with value = `true` or `value` if
-     *              provided</p>
+     * @description <p>It sets `parameter` as bookmarkable, with value=`true` or `value` if
+     *              provided.</p>
      *
      * @param {string} parameter The name of the parameter to be stored.
      * @param {Object}      [value]     The value for the parameter.
@@ -139,8 +139,8 @@ define([
     },
 
     /**
-     * @summary Generates a bookmark state using values stored.
-     * @description Generates a bookmark state using values stored.
+     * @summary Generates a bookmark state using stored values.
+     * @description Generates a bookmark state using stored values.
      *
      * @return {Object} An object with the state of the parameters previously marked as bookmarkable.
      */
@@ -207,8 +207,8 @@ define([
     },
 
     /**
-     * @summary Gets the bookmark state url decoded.
-     * @description Gets the bookmark state url decoded.
+     * @summary Gets the bookmark state URL decoded.
+     * @description Gets the bookmark state URL decoded.
      *
      * @return {Object} An object with the current bookmark state.
      */

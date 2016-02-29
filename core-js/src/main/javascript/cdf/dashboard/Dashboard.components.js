@@ -32,7 +32,7 @@ define([
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * @summary Array that stores all components in the dashboard.
+     * @summary Array which stores all components in the dashboard.
      * @description Array of instances of {@link cdf.components.BaseComponent|BaseComponents} in the dashboard.
      *
      * @type {Array<cdf.components.BaseComponent>}
@@ -54,7 +54,7 @@ define([
      * @summary Gets the component instance from a given name.
      * @description <p>Gets the component given a string representing the component's name. </p>
      *              <p>This method iterates over the components array and searches for the component with the name
-     *              used as argument. If the component with that name is not found, then _undefined_ is returned. </p>
+     *              used as the argument. If the component with that name is not found, then _undefined_ is returned. </p>
      *
      * @param {String} name The component's name.
      * @return {cdf.components.BaseComponent} The instance of {@link cdf.components.BaseComponent|BaseComponent} with the given name.
@@ -91,8 +91,8 @@ define([
     },
 
     /**
-     * @summary Adds an Array of component instances to the dashboard.
-     * @description <p>Adds one or more components to the dashboard, if a component was already added
+     * @summary Adds an array of component instances to the dashboard.
+     * @description <p>Adds one or more components to the dashboard. If a component was already added,
      *              it will not be replaced.</p>
      *              <p>It iterates through the array and calls
      *              {@link cdf.dashboard.Dashboard#addComponent|addComponent} for each component.</p>
@@ -115,13 +115,13 @@ define([
     },
 
     /**
-     * @summary Adds an instance of component to the dashboard.
+     * @summary Adds an instance of a component to the dashboard.
      * @description <p>Adds an instance of {@link cdf.components.BaseComponent|BaseComponent} to the dashboard
-     *              components array if it wasn't already added.<p>
-     *              <p>If `component` doesn't have a valid property `component.name`, or if the property isn't
+     *              components array if it was not already added.<p>
+     *              <p>If the `component` does not have a valid property `component.name`, or if the property is not
      *              a valid string, an exception is thrown.</p>
-     *              <p>The <code>options</code> parameter is optional and on his absence, the component is added
-     *              to the end of the components array. The same rule is applied if `options.index` is falsy.
+     *              <p>The <code>options</code> parameter is optional and when it is absent, the component is added
+     *              to the end of the components array. The same rule is applied if `options.index` is false.
      *              If not, the new component is appended to the array at position `options.index`. </p>
      * @param {cdf.components.BaseComponent} component The new component to be added.
      * @param {Object} [options] An option object.
@@ -163,15 +163,15 @@ define([
     },
 
     /**
-     * @summary Get the index of a component.
+     * @summary Gets the index of a component.
      * @description <p>Get the index of the array `components` that contains the component.</p>
-     *              <p>If `compOrNameOrIndex` is a _string_, searchs the component that first matches such name.
+     *              <p>If `compOrNameOrIndex` is a _string_, it searches the component that first matches such name.
      *              If `compOrNameOrIndex` is a _number_, it returns component index on the components array.
-     *              Lastly, if `compOrNameOrIndex` is a component instance, return the index where it is in
+     *              Lastly, if `compOrNameOrIndex` is a component instance, it returns the index where it is in
      *              `components` array.</p>
      *
      * @param {cdf.components.BaseComponent|string|number} compOrNameOrIndex
-     *        The name, index or the component to search.
+     *        The name, index, or the component to search.
      * @return {number} The index where the component is at or _-1_ if not found.
      */
     getComponentIndex: function(compOrNameOrIndex) {
@@ -203,11 +203,11 @@ define([
      *              <p>If argument is a {@link cdf.components.BaseComponent|BaseComponent} instance that
      *              exists in the `components` array, it will be removed. If `compOrNameOrIndex` is a string,
      *              the first component with such name is removed from the `components` array. The other case is
-     *              if `compOrNameOrIndex` is a number. In this scenario, the component in such position in
+     *              if `compOrNameOrIndex` is a number. In this scenario, the component in such a position in
      *              the `components` array is removed.</p>
      *
      * @param {cdf.components.BaseComponent|string|number} compOrNameOrIndex The component object,
-     *   the name of the component or the index of the component to be removed.
+     *   the name of the component, or the index of the component to be removed.
      * @return {cdf.components.BaseComponent} The removed component.
      * @return {undefined} The component was not found.
      * @see {@link cdf.dashboard.Dashboard#getComponentIndex|getComponentIndex}

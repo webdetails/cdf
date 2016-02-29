@@ -30,33 +30,33 @@ define([
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
     /**
-     * @summary Store of key value pairs, parameter name - parameter value
-     * @description Object that stores key value pairs with parameter name - parameter value
+     * @summary Store of key value pairs: parameter name - parameter value.
+     * @description Object which stores key value pairs with parameter name - parameter value.
      * @type {Array}
      * @protected
      */
     parameters: undefined,
 
     /**
-     * @summary Backbone model connected with the parameters
-     * @description <p>Backbone model connected with the parameters to provide an eventing system
-     *              over the cdf parameters.</p>
+     * @summary Backbone model connected with the parameters.
+     * @description <p>Backbone model connected with the parameters to provide an events system
+     *              over the CDF parameters.</p>
      * @type {BackboneModel}
      * @protected
      */
     parameterModel: undefined,
 
     /**
-     * @summary Store of pairs, parameter master name - parameter slave name
-     * @description Store of pairs, parameter master name - parameter slave name
+     * @summary Store of pairs: parameter master name - parameter slave name
+     * @description Store of pairs: parameter master name - parameter slave name
      * @type {Array<Object>}
      * @private
      */
     chains: undefined,
 
     /**
-     * @summary Store of synced key value pairs, parameter name - parameter value.
-     * @description <p>Store of key value pairs, parameter name - parameter value.</p>
+     * @summary Store of synced key value pairs: parameter name - parameter value.
+     * @description <p>Store of key value pairs: parameter name - parameter value.</p>
      * @type {Object}
      * @private
      */
@@ -84,7 +84,7 @@ define([
     flatParameters: false,
 
     /**
-     * @summary Legacy storage parameter prefix
+     * @summary Legacy storage parameter prefix.
      * @description <p>Legacy storage parameter prefix.</p>
      *              <p>This allows users to store parameters between dashboard renders.</p>
      * @type {String}
@@ -94,7 +94,7 @@ define([
      */
     LEGACY_STORAGE: "Dashboards.storage.",
     /**
-     * @summary Storage parameters prefix
+     * @summary Storage parameters prefix.
      * @description <p>Storage parameters prefix.</p>
      *              <p>This allows users to store parameters between dashboard renders.</p>
      * @type {String}
@@ -250,9 +250,9 @@ define([
     },
 
     /**
-     * @summary Adds a parameter new parameter to the parameter module
-     * @description <p>Adds a parameter new parameter to the parameter module.</p>
-     *              <p>Receives a parameter name and an initial value, that will be used
+     * @summary Adds a new parameter to the parameter module.
+     * @description <p>Adds a new parameter to the parameter module.</p>
+     *              <p>Receives a parameter name and an initial value, which will be used
      *              if the parameter is not available in the parameter model. Otherwise,
      *              the value returned by 
      *              {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue} is used.</p>
@@ -276,9 +276,9 @@ define([
     },
 
     /**
-     * @summary Gets a parameter value
+     * @summary Gets a parameter value.
      * @description <p>Gets the parameter value from a given parameter name. </p>
-     *              <p>If the argument is invalid, _undefined_ is returned</p>
+     *              <p>If the argument is invalid, _undefined_ is returned.</p>
      *
      * @param {String} parameterName The parameter name.
      * @return {Object} The value of the parameter or _undefined_ if the parameter name is invalid.
@@ -307,19 +307,19 @@ define([
     /**
      * @summary Stores a parameter with a certain value.
      * @description <p>Stores a parameter value with a certain parameter name. 
-     *              If parameter name is not valid an undefined is returned.</p>
-     *              <p>Since parameters are stored using the Backbone event model, an extra param - _isNotified_ - 
+     *              If parameter name is not valid, undefined is returned.</p>
+     *              <p>Since parameters are stored using the Backbone event model, an extra parameter - _isNotified_ - 
      *              can be used to control the event Backbone event listeners.</p>
      *              <p>If {@link escapeParameterValues} is true, then 
      *              {@link cdf.dashboard.Utf8Encoder#encode_prepare_arr|encode_prepare_arr} is called before the 
-     *              parameter value gets stored.</p>
+     *              parameter value is stored.</p>
      *
      * @param {String} parameterName The parameter name.
      * @param {Object} parameterValue The value of the parameter.
      * @param {Boolean} isNotified A flag indicating if a
      *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
      *   event is to be triggered when the parameter value changes.
-     * @returns {undefined} If parameter name is not valid  
+     * @returns {undefined} If parameter name is not valid.
      */
     setParameter: function(parameterName, parameterValue, isNotified) {
       if(parameterName == undefined || parameterName == "undefined") {
@@ -342,14 +342,14 @@ define([
 
     /**
      * @summary Alias for {@link cdf.dashboard.Dashboard#setParameter|setParameter}.
-     * @description Alias for {@link cdf.dashboard.Dashboard#setParameter|setParameter}
+     * @description Alias for {@link cdf.dashboard.Dashboard#setParameter|setParameter}.
      *
      * @param {String} parameterName The parameter name.
      * @param {Object} parameterValue The value of the parameter.
      * @param {Boolean} isNotified A flag indicating if a
      *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
      *   event is to be triggered when the parameter value changes.
-     * @returns {undefined} If parameter name is not valid  
+     * @returns {undefined} If parameter name is not valid.
      */
     setParam: function(parameterName, parameterValue, isNotified) {
       this.setParameter(parameterName, parameterValue, isNotified);

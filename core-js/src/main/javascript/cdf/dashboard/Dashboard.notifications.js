@@ -93,8 +93,8 @@ define([
     },
 
     /**
-     * @summary Renders a blocking div that can be dragged.
-     * @description Renders a blocking div that can be dragged.
+     * @summary Renders a blocking div which can be dragged.
+     * @description Renders a blocking div which can be dragged.
      */
     blockUIwithDrag: function() {
       if(typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
@@ -114,7 +114,7 @@ define([
     /**
      * @summary Makes the progress indicator visible. 
      * @description Makes the progress indicator visible. By default,
-     *              this is a draggable blocking div that shows a spinner.
+     *              this is a draggable blocking div which shows a spinner.
      */
     showProgressIndicator: function() {
       $.blockUI && this.blockUIwithDrag();
@@ -200,7 +200,7 @@ define([
      * @description Displays an error notification.
      *
      * @param {Object} err An object containing a `msg` property with the error message to display.
-     * @param {Object} [ph] A reference to the HTML element where to attach the error message.
+     * @param {Object} [ph] A reference to the HTML element to attach the error message.
      */
     errorNotification: function(err, ph) {
       if(ph) {
@@ -215,10 +215,10 @@ define([
 
     /**
      * @summary Shows a login error notification.
-     * @description Default implementation for the login alert that pops up when we
+     * @description Default implementation for the login alert which pops up when we
      *              detect the user is no longer logged in.
      *
-     * @param {Object} newOpts Options for the login popup.
+     * @param {Object} newOpts Options for the login pop-up.
      * @fires cdf.event:cdf
      * @fires cdf.dashboard.Dashboard#event:"cdf:loginError"
      */

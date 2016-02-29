@@ -36,12 +36,12 @@ define([
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * @summary Calls a xaction.
-     * @description Calls a xaction.
+     * @summary Calls an xaction.
+     * @description Calls an xaction.
      *
      * @param {Object} obj        DOM object where the response from the xaction should be written.
      * @param {string} solution   The solution folder.
-     * @param {string} path       Path to the xaction. Can be the full path, in which case you don't need the solution and action.
+     * @param {string} path       Path to the xaction. Can be the full path, in which case you do not need the solution and action.
      * @param {string} action     The xaction name.
      * @param {Object} parameters Parameter object to send to the xaction.
      * @param {function} callback Callback function to call when the xaction responds.
@@ -68,7 +68,7 @@ define([
      * @description Calls an arbitrary URL expecting the result content type to be xml.
      *
      * @param {string} url    The URL to call.
-     * @param {Object} params The parameters object.
+     * @param {Object} params The parameter object.
      * @param {function} func Callback function.
      * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
      * @see {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}
@@ -81,7 +81,7 @@ define([
 
     /**
      * @summary Executes an Ajax request.
-     * @description Executes an Ajax request. If no `func` callback is provided it executes asynchronously
+     * @description Executes an Ajax request. If no `func` callback is provided, it executes asynchronously
      *              and returns a jQuery XMLHttpRequest ({@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR})
      *              object. Otherwise, it executes {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} synchronously and
      *              returns the result of the HTTP request.
@@ -90,7 +90,7 @@ define([
      * @param {string}   url        The URL to call.
      * @param {Object}   params     The parameters object.
      * @param {function} func       Callback function.
-     * @return {*} If no `func` callback is provided it returns a jqXHR object.
+     * @return {*} If no `func` callback is provided, it returns a jqXHR object.
      *             Otherwise, it returns the result of the HTTP request.
      *
      * @deprecated
@@ -146,11 +146,11 @@ define([
     },
 
     /**
-     * @summary Another way to call a xaction.
-     * @description Another way to call a xaction.
+     * @summary Another way to call an xaction.
+     * @description Another way to call an xaction.
      *
      * @param {string}   solution Solution folder.
-     * @param {string}   path     Path to the xaction. Can be the full path, in which case you don't need the solution and action.
+     * @param {string}   path     Path to the xaction. Can be the full path, in which case you do not need the solution and action.
      * @param {string}   action   The xaction name.
      * @param {Object}   params   Parameter object to send to the xaction.
      * @param {function} func     Callback function to call when the xaction responds.
@@ -163,13 +163,13 @@ define([
     },
 
     /**
-     * @summary Calls a xaction.
-     * @description Calls a xaction.
+     * @summary Calls an xaction.
+     * @description Calls an xaction.
      *
      * @param {string}   serviceMethod Dom object where the response from the xaction should be written.
      * @param {string}   returntype    Expected return type of the response.
      * @param {string}   solution      Solution folder.
-     * @param {string}   path          Path to the xaction. Can be the full path, in which case you don't need the solution and action
+     * @param {string}   path          Path to the xaction. Can be the full path, in which case you do not need the solution and action
      * @param {string}   action        The xaction name.
      * @param {Object}   params        Parameter object to send to the xaction.
      * @param {function} func          Callback function to call when the xaction responds.
@@ -203,7 +203,7 @@ define([
 
     /**
      * @summary Creates an empty HTML div element for showing errors.
-     * @description Creates an empty HTML div element, with identifier
+     * @description Creates an empty HTML div element, with identifier 
      * {@link cdf.dashboard.Dashboard#CDF_ERROR_DIV|CDF_ERROR_DIV} for showing error messages.
      *
      * @deprecated
@@ -326,7 +326,7 @@ define([
     /**
      * @summary Fetches data from the server according to a Chart Definition `object`.
      * @description Fetches data from the server according to a Chart Definition `object`.
-     *              This method is deprecated, a {@link cdf.dashboard.Query|Query}
+     *              This method is deprecated, so a {@link cdf.dashboard.Query|Query}
      *              instance should be used instead.
      *
      * @param {Object}   cd       Chart definition object.
