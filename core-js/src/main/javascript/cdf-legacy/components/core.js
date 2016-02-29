@@ -995,7 +995,7 @@ var UnmanagedComponent = BaseComponent.extend({
     var handler = this.getSuccessHandler(success, always),
         errorHandler = this.getErrorHandler();
 
-    var query = this.queryState = this.query = Dashboards.getQuery( queryDef);
+    var query = this.queryState = this.query = Dashboards.getQuery(this._resolveQueryDefinition(queryDef));
     var ajaxOptions = {
       async: true
     }
@@ -1007,6 +1007,46 @@ var UnmanagedComponent = BaseComponent.extend({
       query.setPageSize(userQueryOptions.pageSize);
     }
     query.fetchData(this.parameters, handler, errorHandler);
+  },
+
+  /**
+   * @summary Resolves the correct query definition.
+   * @description <p>Resolves the correct query definition, always defaulting to `undefined`.</p>
+   *
+   * @param {Object|Function} queryDef The query definition `object` or a getter `function`.
+   * @return {Object} The resolved query definition `object`.
+   * @private
+   */
+  _resolveQueryDefinition: function(queryDef) {
+    var queryDefinition;
+    if(_.isFunction(this.getQueryDefinition)) {
+      queryDefinition = this.getQueryDefinition();
+    }
+    return this._isValidQueryDefinition(queryDefinition) ?
+        queryDefinition : (_.isFunction(queryDef) ? queryDef() : queryDef);
+  },
+
+  /**
+   * @summary Test if the query definition is valid.
+   * @description <p>Test if the query definition is an `object` which is not an `array` neither is empty nor a `string`.</p>
+   *
+   * @param {Object|Function} queryDef The query definition `object` or a getter `function`.
+   * @return {boolean} `true` if valid `false` otherwise.
+   * @private
+   */
+  _isValidQueryDefinition: function (queryDef) {
+    return _.isObject(queryDef) && !_.isArray(queryDef) && !_.isEmpty(queryDef) && !_.isString(queryDef);
+  },
+
+  /**
+   * @summary Gets the query definition `object`.
+   * @description <p>Gets the query definition `object`.</p>
+   *              <p>The properties used for retrieving the query definition are based on the known component implementations.</p>
+   *
+   * @return {Object|undefined} The query definition `object` or `undefined`.
+   */
+  getQueryDefinition: function() {
+    return this.queryDefinition || this.chartDefinition || this.trafficDefinition;
   },
 
   /*

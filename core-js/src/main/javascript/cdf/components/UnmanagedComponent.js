@@ -217,6 +217,35 @@ define([
     //priority: 5,
 
     /**
+     * @summary The query definition `object`.
+     * @description The query definition `object` used to hold the parameters for the query.
+     * 
+     * @name cdf.components.UnmanagedComponent#queryDefinition
+     * @type {object|function}
+     */
+    //queryDefinition: undefined,
+
+    /**
+     * @summary The chart definition `object`.
+     * @description The chart definition `object` used to hold the parameters for the query.
+     * 
+     * @name cdf.components.UnmanagedComponent#chartDefinition
+     * @see {@link cdf.components.UnmanagedComponent#queryDefinition|queryDefinition}.
+     * @type {object|function}
+     */
+    //chartDefinition: undefined,
+
+    /**
+     * @summary The traffic definition `object`.
+     * @description The traffic definition `object` used to hold the parameters for the query.
+     * 
+     * @name cdf.components.UnmanagedComponent#trafficDefinition
+     * @see {@link cdf.components.UnmanagedComponent#queryDefinition|queryDefinition}.
+     * @type {object|function}
+     */
+    //trafficDefinition: undefined,
+
+    /**
      * @summary Handles calling `preExecution` when it exists.
      * @description <p>Handles calling `preExecution` when it exists.</p>
      *              <p>All components extending UnmanagedComponent should either use one
@@ -488,8 +517,7 @@ define([
      */
     beginQuery: function(queryDef, callback, queryOptions) {
       this.execute(function() {
-        var query = this._setQuery(queryDef, queryOptions);
-
+        var query = this._setQuery(this._resolveQueryDefinition(queryDef), queryOptions);
         // `getSuccessHandler`:
         // * if this execution is subsumed by a following one, only calls `maybeUnlock`; `endExec` will not be called by _this_ execution
         // * calls postFetch with the results from `query.fetchData`
@@ -500,6 +528,34 @@ define([
           this.getSuccessHandler(callback, undefined, this._maybeUnblock),
           this.getErrorHandler());
       });
+    },
+
+    /**
+     * @summary Resolves the correct query definition.
+     * @description <p>Resolves the correct query definition, always defaulting to `undefined`.</p>
+     *
+     * @param {Object|Function} queryDef The query definition `object` or a getter `function`.
+     * @return {Object} The resolved query definition `object`.
+     * @private
+     */
+    _resolveQueryDefinition: function(queryDef) {
+      var queryDefinition;
+      if(_.isFunction(this.getQueryDefinition)) {
+        queryDefinition = this.getQueryDefinition();
+      }
+      return this.dashboard.isValidQueryDefinition(queryDefinition) ?
+            queryDefinition : (_.isFunction(queryDef) ? queryDef() : queryDef);
+    },
+
+    /**
+     * @summary Gets the query definition `object`.
+     * @description <p>Gets the query definition `object`.</p>
+     *              <p>The properties used for retrieving the query definition are based on the known component implementations.</p>
+     *
+     * @return {Object|undefined} The query definition `object` or `undefined`.
+     */
+    getQueryDefinition: function() {
+      return this.queryDefinition || this.chartDefinition || this.trafficDefinition;
     },
 
     /**
