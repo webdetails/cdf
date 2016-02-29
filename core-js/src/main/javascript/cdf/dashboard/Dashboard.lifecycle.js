@@ -32,7 +32,10 @@ define([
 
     /**
      * @summary Init counter.
-     * @description Init counter.
+     * @description Counter which stores the number of components in the dashboard being initialized. 
+     *              This counter is incremented for every component in the dashboard that is initialized
+     *              and decremented afterwards. The end result after the initialization process
+     *              should be zero.
      *
      * @type {Number}
      * @protected
@@ -42,7 +45,7 @@ define([
 
     /**
      * @summary Running calls counter.
-     * @description Running calls counter, used to control the progress indicator in asynchronous calls.
+     * @description Running calls counter used to control the progress indicator in asynchronous calls.
      *
      * @type {Number}
      * @protected
@@ -51,7 +54,7 @@ define([
 
     /**
      * @summary Last server response timestamp.
-     * @description Last server response timestamp, in milliseconds, used to know if the session expired.
+     * @description Last server response timestamp in milliseconds, which used to know if the session expired.
      *
      * @type {Number}
      * @protected
@@ -60,10 +63,10 @@ define([
 
     /**
      * @summary Timeout value in milliseconds.
-     * @description Timeout value in milliseconds, if `serverCheckResponseTimeout` passes between ajax
-     *              communications, when the next {@link cdf.dashboard.Dashboard#updateComponent|updateComponent}
+     * @description Timeout value in milliseconds. If 'serverCheckResponseTimeout' passes between ajax
+     *              communications, then when the next {@link cdf.dashboard.Dashboard#updateComponent|updateComponent}
      *              is called, the dashboard will first {@link cdf.dashboard.Dashboard#checkServer|checkServer},
-     *              showing a {@link cdf.dashboard.Dashboard#loginAlert|loginAlert} if it's unable to connect
+     *              showing a {@link cdf.dashboard.Dashboard#loginAlert|loginAlert} if it is unable to connect
      *              to the server.
      *
      * @type {Number}
@@ -141,8 +144,8 @@ define([
     },
 
     /**
-     * @summary Dashboards initialization function.
-     * @description Dashboards initialization function. Calling this method will trigger the dashboard execution and render.
+     * @summary Dashboard's initialization function.
+     * @description Dashboard's initialization function. Calling this method will trigger the dashboard execution and render.
      *
      * @param {Array<cdf.components.BaseComponent>} [components] List of components to be added to the dashboard.
      */
@@ -587,7 +590,7 @@ define([
      * @summary Adds a component to the "to be updated" queue.
      * @description Adds a component to the "to be updated" queue and starts a timer.
      *              If the timer finishes before this method is called again, the
-     *              {@link cdf.dashboard.Dashboard#updateAll|updateAll} method is called
+     *              {@link cdf.dashboard.Dashboard#updateAll|updateAll} method is called, 
      *              updating all the components in the queue.
      *
      * @param {cdf.components.BaseComponent} component The component to update.
@@ -731,14 +734,14 @@ define([
     /**
      * @summary Changes the value of a parameter, triggering a
      *          {@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"|`parameter`:fireChange} event.
-     * @description <p>Changes the value of a parameter with the provided name, triggers the
+     * @description <p>Changes the value of a parameter with the provided name. Triggers the
      *              {@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"|`parameter`:fireChange}
-     *              event and updates the components that listen for changes on the aforementioned parameter.</p>
-     *              <p>Because some browsers won't draw the blockUI widgets until the script has finished, we
+     *              event and updates the components which listen for changes on the aforementioned parameter.</p>
+     *              <p>Because some browsers will not draw the blockUI widgets until the script has finished, we
      *              find the list of components to update, then execute the actual update in a function wrapped
-     *              in a setTimeout, so the running script has the opportunity to finish.</p>
+     *              in a setTimeout so the running script has the opportunity to finish.</p>
      *
-     * @param {string} parameter The name of the parameter on which to fire change.
+     * @param {string} parameter The name of the parameter on which to fire the change.
      * @param {Object} value Value for the parameter.
      * @fires cdf.event:cdf
      * @fires cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"

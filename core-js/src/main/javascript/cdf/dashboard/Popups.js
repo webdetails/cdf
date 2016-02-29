@@ -35,7 +35,7 @@ define([
      * @staticClass
      * @summary The Ok Popup.
      * @classdesc <p>The Ok Popup object containing the default values for a success notification popup.</p>
-     *            <p>On Button click, the Popup is closed.</p>
+     *            <p>On button click, the Popup is closed.</p>
      * @example
      * <div class='cdfPopup'>
      *   <div class='cdfPopupHeader'>Title</div>
@@ -58,7 +58,7 @@ define([
       /**
        * @summary The template of the Popup.
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Ok Popup.</p>
-       *              <p>It has an header, description and a button. The default values for each of the template
+       *              <p>It has a header, a description and a button. The default values for each of the template
        *              variables are stored in {@link defaults} object.</p>
        * @type {String}
        *
@@ -83,7 +83,7 @@ define([
        * @description The Popup default properties, with the properties applied during the template render.
        * @type {Object}
        *
-       * @property {String} header=Title The Header of the popup.
+       * @property {String} header=Title The header of the popup.
        * @property {String} desc=Description Text - The description of the popup.
        * @property {String} button=Button Text - The text on the button used to close the popup.
        * @property {Function} callback Callback function executed when the button is clicked.
@@ -99,7 +99,7 @@ define([
 
       /**
        * @summary The {@link http://api.jquery.com/Types/#jQuery|jQuery} element.
-       * @description The {@link http://api.jquery.com/Types/#jQuery|jQuery} element that holds the popup's content.
+       * @description The {@link http://api.jquery.com/Types/#jQuery|jQuery} element which holds the popup's content.
        * @type {jQuery}
        */
       $el: undefined,
@@ -107,7 +107,7 @@ define([
       /**
        * @summary Shows the popup.
        * @description <p>Shows the popup based on the {@link $el} object.</p>
-       *              <p>If the popup is rendering for the first time or if show is called with the `opts` parameter then
+       *              <p>If the popup is rendering for the first time or if show is called with the `opts` parameter, then
        *              the render is called.</p>
        * @param {Object} [opts] Options object used to call the render.
        */
@@ -132,7 +132,7 @@ define([
        *              template.</p>
        *              <p>When the component is rendered, it gets hidden and appended to the body.</p>
        * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
-       *                           to the properties that define the content of the component.
+       *                           to the properties which define the content of the component.
        */
       render: function(newOpts) {
         var opts = _.extend({} , this.defaults, newOpts);
@@ -172,7 +172,7 @@ define([
        * @summary The template of the Popup.
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification Popup.
        *              </p>
-       *              <p>It has an title and description. The default values for each of the template variables are
+       *              <p>It has a title and description. The default values for each of the template variables are
        *              stored in {@link defaults} object.</p>
        * @type {String}
        *
@@ -209,11 +209,11 @@ define([
        * @summary Renders the Popup.
        * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
        *              template.</p>
-       *              <p>If the component has width smaller than 300, the css class small is added.</p>
+       *              <p>If the component has a width smaller than 300, the css class small is added.</p>
        *
        * @param {Element|Selector} ph The Html Element Object or the
        *                              {@link http://api.jquery.com/Types/#Selector|jQuery Selector} for the object.
-       *                              This is the container that will hold the content of the component.
+       *                              This is the container which will hold the content of the component.
        * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
        *                           to the properties that define the content of the component.
        */
@@ -230,7 +230,7 @@ define([
      * @class
      * @staticClass
      * @summary The Error Notification Growl Popup.
-     * @classdesc <p>The Error Notification Growl Popup object containing the default values for a error
+     * @classdesc <p>The Error Notification Growl Popup object containing the default values for an error
      *            notification growl popup.</p>
      * @example
      * <div class='cdfNotification growl'>
@@ -253,7 +253,7 @@ define([
        * @summary The template of the Popup.
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification
        *              Popup.</p>
-       *              <p>It has an title and description. The default values for each of the template variables are
+       *              <p>It has a title and a description. The default values for each of the template variables are
        *              stored in {@link defaults} object.</p>
        * @type {String}
        *
@@ -277,20 +277,20 @@ define([
       /**
        * @summary The Popup default properties.
        * @description <p>The Popup default properties, with the properties applied during the template render.</p>
-       *              <p>More info about some of the properties used detailed below.</p>
+       *              <p>More info about some of the properties used is detailed below.</p>
        * @type {Object}
        *
-       * @property {String} title=Title The Title of the popup.
+       * @property {String} title=Title The title of the popup.
        * @property {String} desc=Default CDF notification - The description of the popup.
        * @property {Number} timeout=4000 The timeout for the popup.
        * @property {Function} onUnblock Callback function called when onUnblock from
        *                                {@link http://malsup.com/jquery/block/|jQuery.blockUI} is called.
-       * @property {Object} css An object wit the {@link http://malsup.com/jquery/block/|jQuery.blockUI} default
+       * @property {Object} css An object with the {@link http://malsup.com/jquery/block/|jQuery.blockUI} default
        *                        options.
        * @property {String} css.position=Absolute The default popup css position value.
        * @property {String} css.width=100% The default popup css width value.
        * @property {String} css.top=10px The default popup css top value.
-       * @property {Boolean} showOverlay=false Boolean flag to control wether the overlay is shown or not.
+       * @property {Boolean} showOverlay=false Boolean flag to control whether the overlay is shown or not.
        * @property {Number} fadeIn=700 Time in milliseconds to show the Growl Popup.
        * @property {Number} fadeOut=1000 Time in milliseconds to hide the Growl Popup.
        * @property {Boolean} centerY=false Boolean to force the Growl Popup to now be centered in the Y axis.
@@ -321,7 +321,7 @@ define([
        *              attached in the body of the page. Otherwise, the component is shown, calling the
        *              {@link http://malsup.com/jquery/block/|jQuery.blockUI}.
        *              {@link http://malsup.com/jquery/block/#element|block} function with the defaults extended
-       *              with the newOpts argument, to allow user costumizations.</p>
+       *              with the newOpts argument to allow user customizations.</p>
        *
        * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values to the properties that define the content of the component.
        *

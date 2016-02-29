@@ -5,7 +5,7 @@
       <li>If you're interested in details about the Dashboard objects, start in the {@link cdf.dashboard.Dashboard|Dashboard} class. From
       there you can jump to the specific classes and their details.</li>
     
-      <li>If you want to go over the methods for the base component classes, start {@link cdf.components|here}.
+      <li>If you want to review the methods for the base component classes, start {@link cdf.components|here}.
       This module defines the {@link cdf.components.BaseComponent|BaseComponent} class (from where all other components inherit) 
       and the {@link cdf.components.UnmanagedComponent|UnmanagedComponent} (from where most of the default components inherit).</li>
     

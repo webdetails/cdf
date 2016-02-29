@@ -24,14 +24,14 @@ define([
    * @amd cdf/AddIn
    * @summary Class that allows creating Static or Scriptable add-ins.
    * @classdesc Creates a new add-in. Add-ins come in two varieties: Static add-ins
-   *            represent static data or behaviour, whereas Scriptable add-ins
-   *            represent dynamic, context-dependent behaviour.
-   * @param {Object}   options                  The options for the add-in. Needs a label, a name property and must have
+   *            represent static data or behavior, while Scriptable add-ins
+   *            represent dynamic, context-dependent behavior.
+   * @param {Object}   options                  The options for the add-in. Needs a label, a name property, and
    *                                            either a value (for static add-ins) or an implementation member (for
    *                                            scriptable add-ins). If the add-in supports configuration, it should
    *                                            be provided via the `options.defaults` property.
    * @param {string}   options.label            The human-readable label of the add-in.
-   * @param {string}   options.name             The name of the add-in, used as an internal identifier.
+   * @param {string}   options.name             The name of the add-in used as an internal identifier.
    * @param {function} [options.implementation] The implementation function of the add-in.
    * @param {Object}   [options.value]          The value of the add-in.
    * @param {Object}   [options.defaults]       The default values of the configurable settings.
@@ -130,10 +130,10 @@ define([
      * are irrelevant, and this method will simply return the value
      * of {@link cdf.AddIn~_value|_value}.</p>
      * 
-     * <p>In a dynamic add-in, the implementation will be passed the
-     * the target DOM Element (whatever element is relevant,
-     * e.g. the element that was clicked on, or the table cell
-     * that's being processed), a state object with whatever
+     * <p>In a dynamic add-in, the implementation will be passed to
+     * the target DOM Element (whatever element is relevant, 
+     * e.g. the element that was clicked on or the table cell
+     * that is being processed), a state object with whatever
      * context is relevant for the add-in to fulfill its purpose,
      * and optionally any overriding options.</p>
      *
@@ -143,7 +143,7 @@ define([
      *          returns the value of {@link cdf.AddIn~_value|_value}.
      *
      * @param {Element} target  The relevant DOM Element.
-     * @param {Object}  state   A representation of the necessary context for the add-n to operate.
+     * @param {Object}  state   A representation of the necessary context for the add-in to operate.
      * @param {Object}  options Configuration options for the add-in.
      * @return {Object} The value of {@link cdf.AddIn~_value|_value} if the
      *                  {@link cdf.AddIn~_implementation|_implementation} function is undefined.

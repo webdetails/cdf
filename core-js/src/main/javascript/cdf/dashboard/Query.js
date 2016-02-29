@@ -17,7 +17,7 @@ define(['amd!../lib/underscore', '../lib/jquery'], function(_, $) {
    * @class cdf.dashboard.Query
    * @amd cdf/dashboard/Query
    * @summary The Query class allows generating query instances.
-   * @classdesc The Query class allows generating query instances. Here mainly for legacy reasons.
+   * @classdesc The Query class allows generating query instances and is included here mainly for legacy reasons.
    *
    * @summary Builds a new Query object by calling {@link cdf.dashboard.Dashboard#getQuery|getQuery}.
    * @description <p>Builds a new Query instance by calling {@link cdf.dashboard.Dashboard#getQuery|getQuery}.

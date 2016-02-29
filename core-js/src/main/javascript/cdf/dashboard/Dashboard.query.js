@@ -80,8 +80,8 @@ define([
     },
 
     /**
-     * @summary Gets the base query object constructor, from where other query types can be extended.
-     * @description Gets the base query object constructor, from where other query types can be extended. 
+     * @summary Gets the base query object constructor from where other query types can be extended.
+     * @description Gets the base query object constructor from where other query types can be extended. 
      *
      * @return {cdf.queries.BaseQuery} The base query constructor.
      */
@@ -95,10 +95,10 @@ define([
      *              <p>If the `query` argument is an `object`, a new `object` will be created with
      *              a copy of the properties listed in the {@link cdf.queries.BaseQuery#deepProperties|deepProperties}
      *              list of the {@link cdf.queries.BaseQuery|BaseQuery}.</p>
-     *              <p>If `query` is a `function` it will be used to generate new query instances of the specified `type`
+     *              <p>If `query` is a `function`, it will be used to generate new query instances of the specified `type`
      *              with no dependency on the {@link cdf.queries.BaseQuery|BaseQuery} class.</p>
-     *              <p>The new query type will be registered at the dashboard instance level, and will not
-     *              be accessible to other dashboards. To register the query type globally please see the
+     *              <p>The new query type will be registered at the dashboard instance level and will not
+     *              be accessible to other dashboards. To register the query type globally see the
      *              {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery} function.</p>
      *
      * @param {string} type The type of the query constructor.
@@ -179,7 +179,7 @@ define([
     /**
      * @summary Given a type and options, returns the query object for running that particular query.
      * @description <p>Given a type and options, returns the query object for running that particular query.
-     *              If a data source name is provided as an option, also include all options from it.</p>
+     *              If a data source name is provided as an option, it also includes all options from it.</p>
      *
      * @param {String|Object} [type="cda"] A string with the query type,
      *                                     or a valid data source or query definition object.

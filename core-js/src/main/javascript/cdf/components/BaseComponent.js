@@ -23,7 +23,7 @@ define([
   return Base.extend(Backbone.Events).extend(/** @lends cdf.components.BaseComponent# */{
     /**
      * @summary Name of the component.
-     * @description The name of the component. Its name needs to be unique in the dashboard that they belong.
+     * @description The name of the component. Its name needs to be unique in the dashboard to which they belong.
      * @type {string}
      * @protected
      */
@@ -31,7 +31,7 @@ define([
 
     /**
      * @summary Type of the component.
-     * @description The type of the component. Usually is the class name of the component.
+     * @description The type of the component, usually the class name of the component.
      * @type {string}
      * @protected
      */
@@ -88,8 +88,8 @@ define([
     timerSplit: 0,
 
     /**
-     * @summary Number of milliseconds since timer split.
-     * @description Number of milliseconds since timer split.
+     * @summary Number of milliseconds since the timer split.
+     * @description Number of milliseconds since the timer split.
      *
      * @type {number}
      * @default -1
@@ -98,8 +98,8 @@ define([
     elapsedSinceSplit: -1,
 
     /**
-     * @summary Number of milliseconds since timer start.
-     * @description Number of milliseconds since timer start.
+     * @summary Number of milliseconds since the timer start.
+     * @description Number of milliseconds since the timer start.
      *
      * @type {number}
      * @default -1
@@ -118,8 +118,8 @@ define([
     logColor: undefined,
 
     /**
-     * @summary The Dashboard instance the component belongs to.
-     * @description The Dashboard instance the component belongs to.
+     * @summary The Dashboard instance to which the component belongs.
+     * @description The Dashboard instance to which the component belongs.
      *
      * @name cdf.components.BaseComponent#initInstance
      * @type {Number}
@@ -151,7 +151,7 @@ define([
      *
      * @constructs
      * @summary Holds the core functionalities present in all components.
-     * @classdesc The BaseComponent. Module that holds everything related to components.
+     * @classdesc The BaseComponent. Module which holds everything related to components.
      * @extends {@link http://dean.edwards.name/weblog/2006/03/base/|Base}
      * @extends {@link http://backbonejs.org/#Events|Backbone.Events}
      * @amd cdf/components/BaseComponent
@@ -209,7 +209,7 @@ define([
     /**
      * @summary General copy events methods.
      * @description General copy events methods. Given a target component and an event list,
-     *              adds the component as listener for all events in the list.
+     *              adds the component as a listener for all events in the list.
      *
      * @param {cdf.components.BaseComponent} target The target component object.
      * @param {Backbone.Events[]} events {@link http://backbonejs.org/#Events|Backbone.Events} list to copy.
@@ -289,9 +289,9 @@ define([
      * @summary Gets an add-in for this component.
      * @description Gets an add-in for this component.
      *
-     * @param {string} slot  Add-in sub type.
+     * @param {string} slot  Add-in subtype.
      * @param {string} addIn Add-in name.
-     * @return {cdf.AddIn} Add-in registered with the specified name and sub type.
+     * @return {cdf.AddIn} Add-in registered with the specified name and subtype.
      */
     getAddIn: function(slot, addIn) {
       if(!this.dashboard) {
@@ -303,10 +303,10 @@ define([
     },
 
     /**
-     * @summary Returns `true` if the add-in with the provided sub type and name exists.
-     * @description Returns `true` if the add-in with the provided sub type and name exists.
+     * @summary Returns `true` if the add-in with the provided subtype and name exists.
+     * @description Returns `true` if the add-in with the provided subtype and name exists.
      *
-     * @param {string} slot  Add-in sub type.
+     * @param {string} slot  Add-in subtype.
      * @param {string} addIn Add-in name.
      * @return {boolean} `true` if the add-in exists, `false` otherwise.
      */
@@ -496,8 +496,8 @@ define([
     },
 
     /**
-     * @summary Gets an add-in options.
-     * @description Gets an add-in options.
+     * @summary Gets an add-in option.
+     * @description Gets an add-in option.
      *
      * @param {string} slot  The add-in subtype.
      * @param {string} addIn The add-in name.
