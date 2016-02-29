@@ -193,7 +193,7 @@ define([
    *            <p>The constructor of this class is created dynamically and registered
    *            in the dashboard query container
    *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
-   *            <p>To create a new XML/A query use the dashboard function
+   *            <p>To create a new XML/A query, use the dashboard function
    *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
    * @staticClass
    * @extends cdf.queries.BaseQuery

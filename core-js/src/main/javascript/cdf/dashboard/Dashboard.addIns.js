@@ -97,7 +97,7 @@ define([
 
     /**
      * @description Registers a global add-in, to be used in all instances of
-     *              dashboards sharing the same context. Essentially calls the
+     *              dashboards sharing the same context. Essentially, it calls the
      *              static method with the same name.
      * @summary Registers a global add-in.
      *
@@ -111,8 +111,8 @@ define([
     },
 
     /**
-     * @description Registers an add-in, to be used only by this dashboard instance.
-     * @summary Registers an add-in, to be used only by this dashboard instance.
+     * @description Registers an add-in to be used only by this dashboard instance.
+     * @summary Registers an add-in to be used only by this dashboard instance.
      *
      * @param {string}     type    Type of the add-in, usually the component type
      *                             where this add-in will be available.
@@ -126,7 +126,7 @@ define([
     },
 
     /**
-     * @description Checks if the add-in with the specified name, sub type and
+     * @description Checks if the add-in with the specified name, subtype and
      *              type exists in the add-in registry for this dashboard.
      * @summary Checks if the add-in exists in the add-in registry.
      *
@@ -142,12 +142,12 @@ define([
     },
 
     /**
-     * @description Gets the add-in with the specified name, sub type and type
+     * @description Gets the add-in with the specified name, subtype and type
      *              from the add-in registry for this dashboard.
      * @summary Gets the add-in from the add-in registry.
      *
      * @param {string} type      Type of the add-in, usually the component type
-     *                           where this add-in will be available
+     *                           where this add-in will be available.
      * @param {string} subType   The subtype of the add-in.
      * @param {string} addInName The add-in name.
      * @return {?cdf.AddIn} The add-in if one is found, `null` otherwise.
@@ -186,7 +186,7 @@ define([
      * @summary Lists registered add-ins of a given type and subtype.
      *
      * @param {string} type    Type of the add-in, usually the component type
-     *                         where this add-in will be available
+     *                         where this add-in will be available.
      * @param {string} subType The subtype of the add-in.
      * @return {Array<cdf.AddIn>} An `array` containing the add-ins of the given
      *                            type and subtype.

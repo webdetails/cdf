@@ -43,7 +43,7 @@
 /**
  * @summary Event triggered by any other event.
  * @description The [`all`]{@link http://backbonejs.org/#Events-catalog} event is a
- *              special event that will trigger the bound callbacks when any event occurs.
+ *              special event which will trigger the bound callbacks when any event occurs.
  *
  * @event all
  * @memberof cdf.components.BaseComponent#
