@@ -30,7 +30,7 @@ define([
 
     var radioComponent = new RadioComponent({
       name: "radioComponent",
-      type: "radioComponent",
+      type: "RadioComponent",
       parameters:[],
       path: "/fake/regions.xaction",
       parameter: "region",
