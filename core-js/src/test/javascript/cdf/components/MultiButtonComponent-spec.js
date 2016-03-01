@@ -31,7 +31,7 @@ define([
 
     var multiButtonComponent = new MultiButtonComponent({
       name: componentName,
-      type: "multiButtonComponent",
+      type: "MultiButtonComponent",
       parameters: [],
       path: "/fake/regions.xaction",
       parameter: "region",
