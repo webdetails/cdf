@@ -1,0 +1,49 @@
+<?js
+var events = obj;
+var self = this;
+?>
+
+<table class="api-ref-table">
+    <thead>
+    <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <?js
+        var self = this;
+        if(events) {
+          events.forEach(function(event) {
+            if(!event) { return; }
+                var name = "event:" + encodeURIComponent(event.name);
+
+                var params = event.params;
+                if(params && params.length) {
+                    event.signature = "("
+                    params.forEach(function(p, i) {
+                        event.signature += p.name;
+                        event.signature += (i < params.length-1) ? "," : ")";
+                    });
+                }
+
+            ?>
+    <tr>
+        <td>
+            <a href='#<?js= name ?>'> <?js= (event.kind == "class" ? "new " : "") + event.parsedName + (event.signature || '()') ?> </a>
+            <?js if (event.returns && event.returns.length) { ?>
+            <?js event.returns.forEach(function(r, i) { ?>
+            <?js= self.partial('type.tmpl', r.type.names) ?>
+            <?js if (i < event.returns.length-1) { ?>|<?js } ?>
+            <?js });
+                  } ?>
+            <?js= self.partial('modifiers.tmpl', event) ?>
+        </td>
+        <td> <?js= event.summary ?> </td>
+    </tr>
+    <?js });
+        }?>
+    </tbody>
+</table>
+

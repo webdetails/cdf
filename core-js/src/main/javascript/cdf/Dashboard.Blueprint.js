@@ -19,7 +19,7 @@
  *            dashboard aggregating all the classes in the Dashboard
  *            hierarchy. It's a specialization of the base abstract
  *            {@link cdf.dashboard.Dashboard|Dashboard} class.
- * @see cdf.dashboard.Dashboard
+ * @see {@link cdf.dashboard.Dashboard|Dashboard}
  * @see http://www.blueprintcss.org
  * @extends cdf.dashboard.Dashboard
  * @example

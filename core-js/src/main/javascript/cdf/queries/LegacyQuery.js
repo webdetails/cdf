@@ -39,6 +39,7 @@ define([
 
   /**
    * @class cdf.queries.LegacyQuery
+   * @summary Class that represents MDX, SQL and legacy (calling xactions) queries.
    * @classdesc <p>Class that represents MDX, SQL and legacy (calling xactions) queries.
    *            These will be registered globally using the static dashboard function
    *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
@@ -52,8 +53,7 @@ define([
    * @deprecated
    * @example
    * dashboard.addDataSource("myMdxQuery", {queryType: "mdx", ...});
-   * dashboard.getQuery({dataSource: "myMdxQuery"})
-   *          .doQuery(successCallback, errorCallback);
+   * dashboard.getQuery({dataSource: "myMdxQuery"}).doQuery(successCallback, errorCallback);
    */
   var legacyOpts = /** @lends cdf.queries.LegacyQuery# */{
     /**

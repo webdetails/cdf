@@ -145,6 +145,7 @@ define([
      * @description Please use the dashboard function
      *              {@link cdf.dashboard.Dashboard#getQuery|getQuery}
      *              to create new queries.
+     * @summary Defines the base query type used by default by any dashboard.
      * @classdesc <p>Defines the base query type used by default by any dashboard.</p>
      *            <p>While loading this class' module, the static function
      *            {@link cdf.dashboard.Dashboard.setBaseQuery|setBaseQuery}

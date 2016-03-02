@@ -1,0 +1,28 @@
+<?js
+var list = obj;
+?>
+
+<table class="api-ref-table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Summary</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?js
+        var self = this;
+        if(list) {
+          list.forEach(function(item) {
+            if(!item) { return; }
+            ?>
+            <tr>
+              <td> <?js= self.linkto(item.longname, item.parsedName) ?> </td>
+              <td> <?js= item.summary ?> </td>          
+            </tr>
+        <?js }); 
+        }?>           
+    </tbody>
+</table>
+

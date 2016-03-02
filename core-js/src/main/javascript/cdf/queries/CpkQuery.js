@@ -23,6 +23,7 @@ define([
 
   /**
    * @class cdf.queries.CpkQuery
+   * @classdesc Class that represents a CPK query.
    * @classdesc <p>Class that represents a CPK query. This class will be registered
    *            globally using the static dashboard function
    *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
@@ -35,8 +36,7 @@ define([
    * @extends cdf.queries.BaseQuery
    * @example
    * dashboard.addDataSource("myCpkQuery", {queryType: "cpk", ...});
-   * dashboard.getQuery({dataSource: "myCpkQuery"})
-   *          .doQuery(successCallback, errorCallback);
+   * dashboard.getQuery({dataSource: "myCpkQuery"}).doQuery(successCallback, errorCallback);
    */
   var CpkEndpointsOpts = /** @lends cdf.queries.CpkQuery# */{
     /**
