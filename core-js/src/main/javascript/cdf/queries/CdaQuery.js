@@ -23,6 +23,7 @@ define([
 
   /**
    * @class cdf.queries.CdaQuery
+   * @summary Class that represents a CDA query.
    * @classdesc <p>Class that represents a CDA query. This class will be registered
    *            globally using the static dashboard function
    *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
@@ -37,8 +38,7 @@ define([
    * dashboard.addDataSource("myCdaQuery", {
    *   queryType: "cda", dataAccessId: "cdaQuery", path: "/public/myQ.cda"
    * });
-   * dashboard.getQuery({dataSource: "myCdaQuery"})
-   *          .doQuery(successCallback, errorCallback);
+   * dashboard.getQuery({dataSource: "myCdaQuery"}).doQuery(successCallback, errorCallback);
    */
   var cdaQueryOpts = /** @lends cdf.queries.CdaQuery# */{
     /**

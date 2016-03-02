@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -30,7 +30,6 @@ define([
    * @ignore
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
-
 
     /**
      * @summary Localization object.
@@ -120,13 +119,13 @@ define([
      * @summary Gets the path from which to load the locale-specific properties files.
      * @description <p>Gets the path from which to load the locale-specific properties files.</p>
      *              <p>If this method returns `undefined`, which is the most common case, the path will be the dashboards path.</p>
-     *              <p>It will be overriden returning the appropriate dashboard path in embedded scenarios.</p>
+     *              <p>It will be overridden returning the appropriate dashboard path in embedded scenarios.</p>
      *
      * @return {string} The path to the dashboard's locale-specific text files.
      * @abstract
      */
     getMessagesPath: function() {
-      // meant to be overriden, or return undefined
+      // meant to be overridden, or return undefined
     }
 
   });

@@ -16,6 +16,7 @@
     <js.project.list>ccc</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
+    <template.file>layout.tmpl</template.file>
   </properties>
 
   <dependencies>

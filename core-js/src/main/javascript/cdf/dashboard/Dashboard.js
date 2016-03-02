@@ -33,15 +33,15 @@ define([
      *            <p>Each dashboard instance can be localized by adding, in the same directory,
      *            the following properties files:</p>
      *            <ul><li>messages&#95;supported&#95;languages.properties - Defines supported languages,
-     *            if not present, i18n support will not be loaded, eg. <pre>en=English
+     *            if not present, i18n support will not be loaded, eg. <pre function="syntax.text">en=English<br>
      * pt=Portuguese</pre></li>
-     *            <li>messages.properties - Default messages file, eg. <pre>
+     *            <li>messages.properties - Default messages file, eg. <pre function="syntax.text">
      * myDashboard.title=Default title</pre></li>
-     *            <li>messages&#95;[language&#95;code].properties - Language code messages file, eg. <pre>
-     * myDashboard.title=Title # for messages_en.properties
+     *            <li>messages&#95;[language&#95;code].properties - Language code messages file, eg. <pre function="syntax.text">
+     * myDashboard.title=Title # for messages_en.properties<br>
      * myDashboard.title=Título # for messages_pt.properties</pre></li></ul>
      *            <p>Usage:</p>
-     *            <pre>dashboard.i18nSupport.prop("myDashboard.title");</pre>
+     *            <pre function="syntax.javascript">dashboard.i18nSupport.prop("myDashboard.title");</pre>
      *
      * @constructs
      * @description Abstract constructor for the Dashboard object.
@@ -364,21 +364,21 @@ define([
 
     /**
      * @summary Gets the dashboard's wcdfSettings.
-     * @description Gets the dashboard's wcdfSettings. It will be overriden returning 
+     * @description Gets the dashboard's wcdfSettings. It will be overridden returning 
      *              the proper wcdf settings in embedded scenarios.
      * 
      * @abstract
      * @return {Object} The dashboard's wcdf settings object.
      */
     getWcdfSettings: function() {
-      Logger.info("getWcdfSettings was not overriden, returning empty object");
+      Logger.info("getWcdfSettings was not overridden, returning empty object");
       return {};
     },
 
     /**
      * @summary Normalizes an HTML element identifier.
      * @description  Normalizes an HTML element identifier. This method is meant to be used when 
-     *               we need to directly manipulate an HTML element. It will be overriden returning 
+     *               we need to directly manipulate an HTML element. It will be overridden returning 
      *               the proper identifier in embedded scenarios.
      *
      * @abstract

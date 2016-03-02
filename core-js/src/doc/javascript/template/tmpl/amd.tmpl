@@ -6,7 +6,5 @@ var self = this;
 	<p>
 		<strong>AMD Module</strong>
 	</p>
-	<pre class="prettyprint">
-		<code>require("<?js= data.amd.value ?>", function(<?js= data.name ?>){ /* code goes here */ });</code>
-	</pre>
+	<pre function="syntax.javascript">require(["<?js= data.amd.value ?>"], function(<?js= data.name ?>){ /* code goes here */ });</pre>
 <?js } ?>

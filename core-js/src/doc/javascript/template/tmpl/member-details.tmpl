@@ -3,13 +3,12 @@ var data = obj;
 var self = this;
 ?>
 
-<table id="<?js= id ?>" class="<?js= data.access != null ? data.access : 'public' ?> <?js= data.deprecated ? 'deprecated' : '' ?> <?js= data.inherited ? 'inherited' : '' ?>">
+<table id="<?js= data.parsedName ?>">
     <thead>
         <tr>
-            <th>
-                <?js= id ?> 
+            <th><?js= data.parsedName+":" ?> 
                 <?js if(data.type) { ?>
-                    : <code> <?js= self.partial('type.tmpl', data.type.names) ?> </code>
+                    <code> <?js= self.partial('type.tmpl', data.type.names) ?></code>
                 <?js } ?>    
                 <?js= self.partial('modifiers.tmpl', data) ?>  
             </th>
@@ -18,13 +17,7 @@ var self = this;
     <tbody>
         <tr>
             <td>
-                <p>
-                <?js if(!data.description){ ?>
-                    <?js= data.summary ?> 
-                <?js } else { ?>
-                    <?js= data.description ?>
-                <?js } ?>
-                </p>
+                <?js= data.description ?>
 
                 <?js= this.partial('details.tmpl', data) ?>
 
@@ -38,6 +31,18 @@ var self = this;
                     <ul><?js fires.forEach(function(f) { ?>
                         <li><?js= self.linkto(f) ?></li>
                     <?js }); ?></ul>
+                <?js } ?>
+
+                <?js if (data.see && see.length) {?>
+                <p>
+                    <strong>See also:&nbsp;</strong>
+                    <?js see.forEach(function(s, i) { ?>
+                        <?js= self.linkto(s) ?>
+                        <?js if(i < see.length-1) { ?>
+                            <?js= ", " ?>
+                        <?js } ?>
+                    <?js }) ?>
+                </p>
                 <?js } ?>
 
                 <?js if (data.examples && data.examples.length) { ?>

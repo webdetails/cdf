@@ -105,7 +105,6 @@ define([
      *                             type where this add-in will be available.
      * @param {string}     subType The subtype of the add-in.
      * @param {cdf.AddIn}  addIn   The add-in instance to register.
-     * @see cdf.dashboard.Dashboard.registerGlobalAddIn
      */
     registerGlobalAddIn: function(type, subType, addIn) {
       Dashboard.registerGlobalAddIn(type, subType, addIn);

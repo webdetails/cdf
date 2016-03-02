@@ -127,19 +127,19 @@ define([
    * <code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code> lifecycle method to emulate
    * {@link cdf.components.BaseComponent|BaseComponent}'s behaviour:</p>
    *
-   * <pre><code>update: function() {
-   *   this.synchronous(this.redraw);
-   * }
-   * </code></pre>
+   * <pre function="syntax.javascript">update: function() {<br>
+   *   this.synchronous(this.redraw);<br>
+   * }<br>
+   * </pre>
    *
    * <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
    * <code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code>:</p>
    *
-   * <pre><code>update: function() {
-   *   // Will call this.redraw(1, 2, 3)
-   *   this.synchronous(this.redraw, [1, 2, 3]);
-   * }
-   * </code></pre>
+   * <pre function="syntax.javascript">update: function() {<br>
+   *   // Will call this.redraw(1, 2, 3)<br>
+   *   this.synchronous(this.redraw, [1, 2, 3]);<br>
+   * }<br>
+   * </pre>
    *
    * <h3>Use <code>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}</code> When You Want Your
    * Component To Use CDA/Query Objects</h3>
@@ -150,20 +150,20 @@ define([
    * minimum a query definition and a <code>redraw</code> callback to process the query results. The query definition
    * is an object of the form:</p>
    *
-   * <pre><code>{
-   *   dataAccessId: 'myQuery',
-   *   file: '/path/to/my/datasourceDefinition.cda'
-   * }
-   * </code></pre>
+   * <pre function="syntax.javascript">{<br>
+   *   dataAccessId: 'myQuery',<br>
+   *   file: '/path/to/my/datasourceDefinition.cda'<br>
+   * }<br>
+   * </pre>
    *
    * <p>Typically, if you're using CDE, these properties will be added to one of either
    * <code>this.queryDefinition</code> or <code>this.chartDefinition</code> so you can just use this pattern:</p>
    *
-   * <pre><code>update: function() {
-   *   var redraw = _.bind(this.redraw, this);
-   *   this.triggerQuery(this.queryDefinition, redraw);
-   * }
-   * </code></pre>
+   * <pre function="syntax.javascript">update: function() {<br>
+   *   var redraw = _.bind(this.redraw, this);<br>
+   *   this.triggerQuery(this.queryDefinition, redraw);<br>
+   * }<br>
+   * </pre>
    *
    * <h3>Alternating Between Static And Query-Based Data</h3>
    *
@@ -173,15 +173,15 @@ define([
    * <code>valuesArray</code> is provided, or a query if it is not. Using <code>UnmanagedComponent</code>, this
    * convention would look like this:</p>
    *
-   * <pre><code>update: function() {
-   *   var redraw = _.bind(this.redraw, this);
-   *   if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
-   *     this.synchronous(redraw, this.valuesArray);
-   *   } else {
-   *     this.triggerQuery(this.queryDefinition, redraw);
-   *   }
-   * }
-   * </code></pre>
+   * <pre function="syntax.javascript">update: function() {<br>
+   *   var redraw = _.bind(this.redraw, this);<br>
+   *   if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {<br>
+   *     this.synchronous(redraw, this.valuesArray);<br>
+   *   } else {<br>
+   *     this.triggerQuery(this.queryDefinition, redraw);<br>
+   *   }<br>
+   * }<br>
+   * </pre>
    *
    *
    * @param {object} properties An object with the properties to extend the UnmanagedComponent instance.
@@ -625,7 +625,7 @@ define([
      *   ajax call being made.
      * @param {function} success Success callback.
      * @param {function} [always] Callback that is ran independently of call status.
-     * @param {function} [canceled] Callback that is ran when the call has been superseeded by a more recent one.
+     * @param {function} [canceled] Callback that is ran when the call has been superseded by a more recent one.
      *   It receives the raw received data.
      * @return {function} Success handler function.
      */
@@ -682,7 +682,7 @@ define([
      * @description Trigger an error event on the component. Takes as arguments the error message 
      *              and, optionally, a `cause` object. It also calls 
      *              {@link cdf.components.UnmanagedComponent#errorNotification|errorNotification}
-     *              showning the notification to the user.
+     *              showing the notification to the user.
      *
      * @param {string} msg          Error message.
      * @param {string} [cause=null] Cause for the error.
