@@ -251,14 +251,11 @@
     }
   };
 
-  //OpenLayers 2.13.1 (patched)
-  requirePaths['cdf/lib/OpenLayers'] = prefix + "/OpenMap/OpenLayers/OpenLayers-patch-LayerGooglev3";
+  //OpenLayers 2.13.1
+  requirePaths['cdf/lib/OpenLayers'] = prefix + "/OpenMap/OpenLayers/OpenLayers";
   requireShims['cdf/lib/OpenLayers'] = {
     exports: 'OpenLayers',
-    deps: [
-      "cdf/lib/OpenMap/OpenLayers/OpenLayers",
-      "css!cdf/lib/OpenMap/OpenLayers/theme/default/style"
-    ]
+    deps: ['css!cdf/lib/OpenMap/OpenLayers/theme/default/style']
   };
 
   //OpenStreetMap
