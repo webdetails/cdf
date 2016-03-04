@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -149,6 +149,10 @@ requireCfg['shim']['cdf-legacy/components/FilterComponent'] = [
   'cdf-legacy/components/filter/js/TreeFilter/models/Tree',
   'cdf-legacy/components/filter/js/TreeFilter/models/SelectionTree',
   'cdf-legacy/components/filter/js/TreeFilter/templates',
+  'cdf-legacy/components/filter/js/TreeFilter/views/scrollbar/AbstractScrollBarHandler',
+  'cdf-legacy/components/filter/js/TreeFilter/views/scrollbar/OptiScrollBarEngine',
+  'cdf-legacy/components/filter/js/TreeFilter/views/scrollbar/MCustomScrollBarEngine',
+  'cdf-legacy/components/filter/js/TreeFilter/views/scrollbar/ScrollBarFactory',
   'cdf-legacy/components/filter/js/TreeFilter/views/Abstract',
   'cdf-legacy/components/filter/js/TreeFilter/views/Root',
   'cdf-legacy/components/filter/js/TreeFilter/views/Group',
