@@ -661,7 +661,10 @@ exports.publish = function(taffyData, opts, tutorials) {
     data().each(function(doclet) {
         if(!doclet.ignore) {
             if(!doclet.summary && (desc = (doclet.description || doclet.classdesc))) {
-                doclet.summary = desc.split(".")[0] + ".";
+                //Try to split when a "." or a ".</htmlTag>" is found.
+                //TODO: When markdown is present it fails the split and dumps all description in the summary.
+                var split = desc.split(/(\.(<\/?([^<]+)>)?\s*)$/)
+                doclet.summary = split[0] + (split[1] || "");
             }
 
             var checkP = function(prop) {
@@ -675,6 +678,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 
                 return prop;
             }
+
             var replaceCode = function(string) {
                 if(!string) return;
                 var flip = true;
