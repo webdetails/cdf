@@ -18,8 +18,8 @@ define([
   '../../../Logger',
   '../models/SelectionTree',
   '../../../lib/jquery',
-  'amd!../../../lib/jquery.mCustomScrollbar'
-], function (_, Mustache, BaseView, Logger, SelectionTree, $) {
+  './scrollbar/ScrollBarFactory'
+], function (_, Mustache, BaseView, Logger, SelectionTree, $, ScrollBarFactory) {
 
   /**
    * @class cdf.components.filter.views.Abstract
@@ -185,28 +185,7 @@ define([
         return this;
       }
       this.debug("Adding a scrollbar to " + (this.model.get('label')));
-      var that = this;
-      switch (this.config.view.scrollbar.engine) {
-        case 'optiscroll':
-          this._scrollBar = this.$(this.config.view.slots.children).addClass('optiscroll-content').parent().addClass('optiscroll').optiscroll().off('scrollreachbottom').on('scrollreachbottom', function (event) {
-            return that.trigger('scroll:reached:bottom', that.model, event);
-          }).off('scrollreachtop').on('scrollreachtop', function (event) {
-            return that.trigger('scroll:reached:top', that.model, event);
-          }).data('optiscroll');
-          break;
-        case 'mCustomScrollbar':
-          var options = $.extend(true, {}, this.config.view.scrollbar.options, {
-            callbacks: {
-              onTotalScroll: function () {
-                return that.trigger('scroll:reached:bottom', that.model);
-              },
-              onTotalScrollBack: function () {
-                return that.trigger('scroll:reached:top', that.model);
-              }
-            }
-          });
-          this._scrollBar = this.$(this.config.view.slots.children).parent().mCustomScrollbar(options);
-      }
+      this._scrollBar = ScrollBarFactory.createScrollBar(this.config.view.scrollbar.engine,this);
       if (this.config.options.isResizable) {
         var $container = this.$(this.config.view.slots.children).parent();
         if (_.isFunction($container.resizable)) {
@@ -219,11 +198,10 @@ define([
     },
     setScrollBarAt: function ($tgt) {
       if (this._scrollBar != null) {
-        this._scrollBar.scrollIntoView($tgt);
+        this._scrollBar.scrollToPosition($tgt);
       }
       return this;
     },
-
     /*
      * Events triggered by the user
      */
