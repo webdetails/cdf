@@ -91,6 +91,8 @@
         <?js }); ?></ul>
     <?js } ?>
 
+    <!-- Namespace Summary Start-->
+
     <?js var namespaces = self.find({kind: 'namespace', memberof: doc.longname});
     if (!isGlobalPage && namespaces && namespaces.length) { ?>
         <h3>Child Namespaces</h3>
@@ -113,6 +115,14 @@
         <?js= self.partial('summary.tmpl', events) ?>
     <?js } ?>
 
+    <?js 
+      var events = self.find({kind: 'interface', memberof: doc.longname});
+      if (!isGlobalPage && events && events.length) {
+    ?>
+        <h3>Interfaces</h3>
+        <?js= self.partial('summary.tmpl', events) ?>
+    <?js } ?>
+
     <?js var mixins = self.find({kind: 'mixin', memberof: doc.longname});
     if (!isGlobalPage && mixins && mixins.length) { ?>
         <h3>Mixins</h3>
@@ -122,7 +132,9 @@
         <?js }); ?></dl>
     <?js } ?>
 
+    <!-- Namespace Summary End -->
 
+    <!-- Class Summary Start -->
 
     <!-- Members composition -->
     <?js var members = [] ?>
@@ -150,6 +162,10 @@
         <h3>Events</h3>
         <?js= self.partial('events-summary.tmpl', events) ?>
     <?js } ?>
+
+    <!-- Class Summary End -->
+
+    <!-- Details Start -->
 
     <?js if (doc.kind === 'class' && !doc.static) { ?>
         <h3>Constructor Details</h3>
@@ -190,6 +206,9 @@
             <?js }
         }); ?>
     <?js } ?>
+
+    <!-- Details End -->
+
 <?js } ?>
 
 <?js }); ?>
