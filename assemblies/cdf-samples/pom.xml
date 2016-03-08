@@ -6,7 +6,6 @@
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin-assemblies</artifactId>
     <version>7.0-SNAPSHOT</version>
-
   </parent>
   <artifactId>pentaho-cdf-samples</artifactId>
   <version>7.0-SNAPSHOT</version>
