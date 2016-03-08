@@ -42,12 +42,20 @@
       return this;
     },
     close: function() {
+      this.empty();
       this.get('view').close();
       this.get('controller').stopListening().off();
       this.stopListening();
       this.off();
       this.clear();
       return this;
+    },
+    empty: function() {
+      if(!this.children()) return;
+      this.children().each(function(child) {
+        child.close();
+      });
+      this.base();
     },
     applyBindings: function() {
       var that = this;
