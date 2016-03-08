@@ -409,12 +409,7 @@ define([
     },
     close: function () {
       if (this.manager != null) {
-        this.manager.walkDown(function (m) {
-          if (!m.isRoot() /* CDF-598 */) {
-            m.close();
-            return m.remove();
-          }
-        });
+        this.manager.empty();
       }
       if (this.model != null) {
         this.model.stopListening().off();
