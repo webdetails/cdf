@@ -99,7 +99,8 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'cdf/compo
       parameter:"output_type",
       valueAsId: false,
       htmlObject: "selectorObject",
-      executeAtStart: true
+      executeAtStart: true,
+      priority: 4
     }));
 
     dashboard.addComponent(new PrptComponent({
@@ -112,7 +113,8 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent', 'cdf/compo
       paginate: false,
       showParameters: true,
       iframe: true,
-      executeAtStart: true
+      executeAtStart: true,
+      priority: 5
     }));
     dashboard.init();
 });
