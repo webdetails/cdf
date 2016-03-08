@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.pentaho</groupId>
@@ -9,12 +8,15 @@
     <version>1.1.7</version>
     <relativePath></relativePath>
   </parent>
-
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
+  <version>7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+<<<<<<< HEAD
   <version>6.0-16.01.22.1</version>
   
+=======
+>>>>>>> f62c7c2... [CLEANUP] updated versions via release version merger
   <modules>
     <module>core</module>
     <module>core-js</module>
@@ -22,13 +24,11 @@
     <module>pentaho-js</module>
     <module>assemblies</module>
   </modules>
-  
   <scm>
     <connection>scm:git:git@github.com:webdetails/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:webdetails/${project.artifactId}.git</developerConnection>
     <url>scm:git:git@github.com:webdetails/${project.artifactId}.git</url>
   </scm>
-  
   <distributionManagement>
     <site>
       <id>pentaho.public.snapshot.repo</id>
@@ -36,34 +36,33 @@
       <url>dav:${site.publish.url}/${project.groupId}/cdf-plugin-${project.version}</url>
     </site>
   </distributionManagement>
-
   <properties>
+    <do.documentation.javascript>false</do.documentation.javascript>
+    <js.project.list></js.project.list>
+    <docjs.config.file></docjs.config.file>
     <project.stage>master</project.stage>
+
 
     <dependency.cpf.revision>6.0-16.01.22</dependency.cpf.revision>
     <dependency.ccc.revision>16.01.22</dependency.ccc.revision>
     <project.github-name>cdf</project.github-name>
-    <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
-    <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
-    <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
-    <dependency.dom4j.revision>1.6.1</dependency.dom4j.revision>
-    <dependency.json.revision>6.1-SNAPSHOT</dependency.json.revision>
-    <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
-    <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
-    <dependency.orientdb.revision>1.5.0</dependency.orientdb.revision>
-
-    <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
-
-    <dependency.frontend-maven-plugin.revision>0.0.26</dependency.frontend-maven-plugin.revision>
-    <js.project.list></js.project.list>
-    <requirejs.build.file></requirejs.build.file>
-    <global.require.file></global.require.file>
-    <requirejs.config.files.pattern></requirejs.config.files.pattern>
-    <do.documentation.javascript>false</do.documentation.javascript>
     <documentation.javascript.root></documentation.javascript.root>
-    <docjs.config.file></docjs.config.file>
+    <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
+    <dependency.orientdb.revision>1.5.0</dependency.orientdb.revision>
+    <project.github-name>cdf</project.github-name>
+    <global.require.file></global.require.file>
+    <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
+    <requirejs.build.file></requirejs.build.file>
+    <dependency.dom4j.revision>1.6.1</dependency.dom4j.revision>
+    <dependency.cpf.revision>${project.version}</dependency.cpf.revision>
+    <dependency.frontend-maven-plugin.revision>0.0.26</dependency.frontend-maven-plugin.revision>
+    <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
+    <requirejs.config.files.pattern></requirejs.config.files.pattern>
+    <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
+    <dependency.json.revision>7.0-SNAPSHOT</dependency.json.revision>
+    <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
+    <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -82,7 +81,6 @@
         <version>${dependency.ccc.revision}</version>
         <type>zip</type>
       </dependency>
-
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
@@ -108,33 +106,30 @@
         <artifactId>json</artifactId>
         <version>${dependency.json.revision}</version>
       </dependency>
-
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate</artifactId>
         <version>${dependency.hibernate.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
+            <groupId>commons-logging</groupId>
           </exclusion>
           <exclusion>
-            <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
+            <groupId>commons-collections</groupId>
           </exclusion>
           <exclusion>
-            <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
+            <groupId>dom4j</groupId>
           </exclusion>
         </exclusions>
       </dependency>
-
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>${dependency.servlet-api.revision}</version>
       </dependency>
-
       <dependency>
         <groupId>com.orientechnologies</groupId>
         <artifactId>orient-commons</artifactId>
@@ -165,8 +160,6 @@
         <version>${dependency.orientdb.revision}</version>
         <scope>provided</scope>
       </dependency>
-
-      <!-- test libs -->
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
@@ -175,7 +168,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <profiles>
     <profile>
       <id>javascript-assembly</id>
@@ -207,7 +199,6 @@
         </plugins>
       </build>
     </profile>
-
     <profile>
       <id>javascript-build</id>
       <activation>
@@ -215,20 +206,9 @@
           <exists>${basedir}/src/main/javascript/config/${requirejs.build.file}</exists>
         </file>
       </activation>
-
-      <dependencies>
-        <dependency>
-          <groupId>pentaho</groupId>
-          <artifactId>pentaho-js-build</artifactId>
-          <version>1.0.0</version>
-          <type>zip</type>
-        </dependency>
-      </dependencies>
-
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
               <execution>
@@ -243,7 +223,6 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <artifactId>maven-resources-plugin</artifactId>
             <executions>
@@ -268,44 +247,37 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
             <version>1.7</version>
             <executions>
               <execution>
                 <id>Generate RequireCfg</id>
                 <phase>prepare-package</phase>
-                <configuration>
-                  <target>
-                    <concat destfile="${project.build.directory}/requireCfg.js" append="true" force="yes">
-                      <file file="${basedir}/src/main/javascript/config/context.js"/>
-                      <fileset dir="${basedir}/target/dependency/" casesensitive="yes">
-                        <include name="${requirejs.config.files.pattern}"/>
-                      </fileset>
-                    </concat>
-
-                    <path id="build.classpath">
-                      <fileset dir="${basedir}/target/dependency/pentaho-js-build/libs">
-                        <include name="*.jar"/>
-                      </fileset>
-                    </path>
-
-                    <java classname="org.mozilla.javascript.tools.shell.Main"
-                          fork="true"
-                          classpathref="build.classpath">
-                      <arg value="${basedir}/target/dependency/pentaho-js-build/profileBuilder.js"/>
-                    </java>
-                  </target>
-                </configuration>
                 <goals>
                   <goal>run</goal>
                 </goals>
+                <configuration>
+                  <target>
+                    <concat destfile="${project.build.directory}/requireCfg.js" force="yes" append="true">
+                      <file file="${basedir}/src/main/javascript/config/context.js" />
+                      <fileset casesensitive="yes" dir="${basedir}/target/dependency/">
+                        <include name="${requirejs.config.files.pattern}" />
+                      </fileset>
+                    </concat>
+                    <path id="build.classpath">
+                      <fileset dir="${basedir}/target/dependency/pentaho-js-build/libs">
+                        <include name="*.jar" />
+                      </fileset>
+                    </path>
+                    <java fork="true" classname="org.mozilla.javascript.tools.shell.Main" classpathref="build.classpath">
+                      <arg value="${basedir}/target/dependency/pentaho-js-build/profileBuilder.js" />
+                    </java>
+                  </target>
+                </configuration>
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <groupId>com.github.bringking</groupId>
             <artifactId>requirejs-maven-plugin</artifactId>
@@ -319,17 +291,22 @@
               </execution>
             </executions>
             <configuration>
-              <configFile>
-                ${basedir}/src/main/javascript/config/${requirejs.build.file}
-              </configFile>
+              <configFile>${basedir}/src/main/javascript/config/${requirejs.build.file}</configFile>
               <filterConfig>true</filterConfig>
               <skip>false</skip>
             </configuration>
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>pentaho</groupId>
+          <artifactId>pentaho-js-build</artifactId>
+          <version>1.0.0</version>
+          <type>zip</type>
+        </dependency>
+      </dependencies>
     </profile>
-
     <profile>
       <id>javascript-test</id>
       <activation>
@@ -337,15 +314,9 @@
           <exists>${basedir}/src/test/javascript</exists>
         </file>
       </activation>
-
-      <properties>
-        <karma.file.config>karma.ci.conf.js</karma.file.config>
-      </properties>
-
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
               <execution>
@@ -360,7 +331,6 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <artifactId>maven-resources-plugin</artifactId>
             <executions>
@@ -396,14 +366,12 @@
                   <npmVersion>2.10.1</npmVersion>
                 </configuration>
               </execution>
-
               <execution>
                 <id>npm-install</id>
                 <goals>
                   <goal>npm</goal>
                 </goals>
               </execution>
-
               <execution>
                 <id>javascript-tests</id>
                 <goals>
@@ -417,8 +385,10 @@
           </plugin>
         </plugins>
       </build>
+      <properties>
+        <karma.file.config>karma.ci.conf.js</karma.file.config>
+      </properties>
     </profile>
-
     <profile>
       <id>javascript-doc</id>
       <activation>
@@ -426,7 +396,6 @@
           <exists>${basedir}/src/doc/javascript/config/${docjs.config.file}</exists>
         </file>
       </activation>
-
       <build>
         <plugins>
           <plugin>
@@ -453,7 +422,6 @@
           </plugin>
         </plugins>
       </build>
-
       <reporting>
         <plugins>
           <plugin>
@@ -470,11 +438,9 @@
         </plugins>
       </reporting>
     </profile>
-    
     <profile>
       <id>aggregate-reporting</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
           <name>!skipTests</name>
         </property>
@@ -482,59 +448,55 @@
       <reporting>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jxr-plugin</artifactId>
-            <configuration>
-              <linkJavadoc>true</linkJavadoc>
-            </configuration>
             <reportSets>
               <reportSet>
                 <id>aggregate-jxr</id>
-                <inherited>false</inherited>
                 <reports>
                   <report>aggregate</report>
                 </reports>
+                <inherited>false</inherited>
               </reportSet>
             </reportSets>
+            <configuration>
+              <linkJavadoc>true</linkJavadoc>
+            </configuration>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-              <failOnError>false</failOnError>
-            </configuration>
             <reportSets>
               <reportSet>
                 <id>aggregate-javadoc</id>
-                <inherited>false</inherited>
                 <reports>
                   <report>aggregate</report>
                 </reports>
+                <inherited>false</inherited>
               </reportSet>
             </reportSets>
+            <configuration>
+              <failOnError>false</failOnError>
+            </configuration>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-checkstyle</id>
+                <reports>
+                  <report>checkstyle-aggregate</report>
+                </reports>
+                <inherited>false</inherited>
+              </reportSet>
+            </reportSets>
             <configuration>
               <configLocation>${checkstyle-config-url}</configLocation>
               <propertiesLocation>${checkstyle-properties-url}</propertiesLocation>
               <linkXRef>true</linkXRef>
               <cacheFile />
             </configuration>
-            <reportSets>
-              <reportSet>
-                <id>aggregate-checkstyle</id>
-                <inherited>false</inherited>
-                <reports>
-                  <report>checkstyle-aggregate</report>
-                </reports>
-              </reportSet>
-            </reportSets>
           </plugin>
         </plugins>
       </reporting>
     </profile>
-    
   </profiles>
 </project>
