@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -140,23 +140,27 @@
       prescript: "define = function(arr, setup) { setup(jQuery) };"
   };
 
-  //underscore 1.6.0
+  //underscore 1.8.3
   requirePaths['cdf/lib/underscore'] = prefix + "/underscore/underscore";
   amdShim['cdf/lib/underscore'] = {
     postscript: "return _.noConflict();"
   };
 
-  //backbone 1.1.2
+  //backbone 1.2.3
   requirePaths['cdf/lib/backbone'] = prefix + "/backbone/backbone";
   amdShim["cdf/lib/backbone"] = {
-     deps: {
-       "cdf/lib/jquery": "jQuery",
-       "amd!cdf/lib/underscore" : "_"
-     },
-     prescript: "var root = {jQuery: jQuery, _: _};\n"+
-     "(function() {\n",
-     postscript: "}.call(root));\n"
-     + "return root.Backbone;"
+    deps: {
+      "cdf/lib/jquery": "jQuery",
+      "amd!cdf/lib/underscore" : "_"
+    },
+    prescript: "var _self = self;\n" // storing the real `self`
+    + "var self = {jQuery: jQuery, _: _};\n" // mocking self
+    + "self.self = self;\n"
+    + "(function() {\n",
+    postscript: "}.call(self));\n"
+    + "var Backbone = self.Backbone;\n"
+    + "self = _self; \n" // recovering the real self
+    + "return Backbone;"
   };
 
   //mustache 0.8.1

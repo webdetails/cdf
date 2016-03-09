@@ -136,7 +136,7 @@ define(['./Dashboard', '../Logger', 'amd!../lib/underscore', '../components/Unma
       // Now we need to go through all components we have and attach this
       // initInstance to all
       _.chain(myself.components)
-        .where({initInstance: undefined})
+        .filter(function(c) { return typeof c.initInstance === "undefined"; })
         .each(function(c) { c.initInstance = initInstance});
 
       $(function() { myself._initEngine(initInstance); });
