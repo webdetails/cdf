@@ -15,7 +15,7 @@
  * @summary Event triggered along with lifecycle events.
  * @description This event is triggered along with any other dashboard or
  *              component main event. Can be used in a more generic way,
- *              e.g. to proxy dashboard/component lifecycle events.
+ *              e.g., to proxy dashboard/component lifecycle events.
  *
  * @event cdf
  * @memberof cdf

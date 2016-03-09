@@ -104,7 +104,7 @@ define([
      * @param {string} [opts.sortBy]        The sorting order.
      * @param {number} [opts.pageSize]      The page size.
      * @param {number} [opts.outputIndexId] The output index identifier.
-     * @throws {InvalidQuery} If the `opts` parameter doesn't contain a path
+     * @throws {InvalidQuery} If the `opts` parameter does not contain a path
      *                        nor a data access identifier.
      */
     init: function(opts) {
@@ -189,7 +189,7 @@ define([
      * @param {string} options.separator Separator.
      * @param {string} options.filename File name.
      * @param {string} options.template Template name.
-     * @param {object} options.columnHeaders The column headers' values.
+     * @param {object} options.columnHeaders The column headers.
      * @param {object} options.dtFilter Data table filter.
      * @param {object} options.dtSearchableColumns Data table searchable columns.
      */
@@ -244,8 +244,8 @@ define([
      * @description <p>Sets the sort by columns.</p>
      *              <p>CDA expects an array of terms consisting of a number and a letter
      *              that's either "A" or "D". Each term denotes, in order, a column
-     *              number and sort direction: 0A would then be sorting the first column
-     *              ascending, and 1D would sort the second column in descending order.
+     *              number and a sort direction: "0A" would then be sorting the first column
+     *              ascending, and "1D" would sort the second column in descending order.
      *              This function accepts either an array with the search terms, or
      *              a comma-separated string with the terms:  "0A,1D" would then mean
      *              the same as the array ["0A","1D"], which would sort the results

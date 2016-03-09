@@ -79,8 +79,8 @@ define(["../lib/jquery"], function($) {
    */
   return /** @lends cdf.dashboard.Utf8Encoder */ {
     /**
-     * @summary Prepares an UTF-8 string to be used in Opera or Internet Explorer.
-     * @description Prepares an UTF-8 string to be used in Opera or Internet Explorer.
+     * @summary Prepares a UTF-8 string to be used in Opera or Internet Explorer.
+     * @description Prepares a UTF-8 string to be used in Opera or Internet Explorer.
      *
      * @param {string} s String to be prepared.
      * @return {?string} The prepared string.

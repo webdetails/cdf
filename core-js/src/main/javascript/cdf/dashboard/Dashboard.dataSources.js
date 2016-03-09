@@ -29,7 +29,7 @@ define([
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * @summary Map of key value pairs, data source name - data source value.
+     * @summary Map of key value pairs: data source name - data source value.
      * @description Map of key value pairs where the keys are the data source names and the
      *              values are the corresponding data source `object`.
      *
@@ -78,12 +78,12 @@ define([
     /**
      * @summary Adds a new data source.
      * @description Adds a data source given a name, the data source object to be
-     *              added and an optional `boolean` indicating if any data source
+     *              added, and an optional `boolean` indicating if any data source
      *              with the same name should be deleted. If the `name` parameter
-     *              is an `object` its `name` property will be used as the data
+     *              is an `object`, its `name` property will be used as the data
      *              source name and the `obj` parameter will be used as the flag
-     *              that when evaluates as a truthy overwrites any previous data
-     *              source with the same name.
+     *              for indicating that previous data sources with the same name 
+     *              were overwritten.
      *
      * @param {string|Object}     name        The name of the data source.
      * @param {Object|boolean}    obj         The data source to be added.

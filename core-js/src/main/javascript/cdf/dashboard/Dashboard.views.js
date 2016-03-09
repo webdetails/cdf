@@ -42,10 +42,10 @@ define([
     viewParameters: undefined,
 
     /**
-     * @summary A view is a snapshot of the dashboard parameters state, useful
+     * @summary A view is a snapshot of the dashboard parameter's state, useful
      *          to restore a dashboard to a previous state.
-     * @description <p>Holds a snapshot of the dashboard parameters state,
-     *              useful to restore a dashboard to a previous state.</p>
+     * @description <p>Holds a snapshot of the dashboard parameter's state,
+     *              which is useful to restore a dashboard to a previous state.</p>
      *              <p>It can be initialized in two different ways. The main way is via
      *              the dashboard constructor. If not, it will be initialized via the
      *              {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration.</p>
@@ -93,8 +93,8 @@ define([
     /**
      * @summary Restores the dashboard parameters stored in a {@link cdf.dashboard.Dashboard#view|view}.
      * @description Restores the dashboard parameters stored in a {@link cdf.dashboard.Dashboard#view|view}.
-     *              Because we're storing the parameters in {@link http://orientdb.com/|OrientDB}, and
-     *              it has some serious issues when storing nested objects, we need to marshall the
+     *              Because we are storing the parameters in {@link http://orientdb.com/|OrientDB}, and
+     *              it has some serious issues when storing nested objects, we need to marshal the
      *              parameters into a JSON object and convert that JSON into a
      *              {@link http://www.webtoolkit.info/javascript_base64.html|Base64} blob before the
      *              storage operation. So, to restore the view parameters we need to revert this process.
@@ -126,7 +126,7 @@ define([
      *              it defaults to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
      *
      * @param {string} parameter    The name of the parameter.
-     * @param {string} value="view" The value of the view flag for the parameter. If none is provided
+     * @param {string} value="view" The value of the view flag for the parameter. If none is provided, 
      *                              it defaults to {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}.
      */
     setParameterViewMode: function(parameter, value) {
@@ -152,7 +152,7 @@ define([
      * @summary Gets a map with the dashboard parameters with the view flag set to
      *          {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}
      *          or {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.
-     * @description Gets a map, with the pairs parameter name - parameter value,
+     * @description Gets a map with the pairs parameter name - parameter value,
      *              with all dashboard parameters with the view flag set to
      *              {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.VIEW}
      *              or {@link cdf.dashboard.Dashboard#viewFlags|viewFlags.UNBOUND}.

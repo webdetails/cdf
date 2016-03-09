@@ -47,7 +47,7 @@ define([
 
     /**
      * @summary A list of properties to be extended to the registered queries.
-     * @description A list of properties to be extended to the registered queries that don't
+     * @description A list of properties to be extended to the registered queries that do not
      *              provide their own constructor function.
      *
      * @see {@link cdf.dashboard.Dashboard#registerQuery|registerQuery}
@@ -147,9 +147,9 @@ define([
      *              to create new queries.
      * @summary Defines the base query type used by default by any dashboard.
      * @classdesc <p>Defines the base query type used by default by any dashboard.</p>
-     *            <p>While loading this class' module, the static function
+     *            <p>While loading this class's module, the static function
      *            {@link cdf.dashboard.Dashboard.setBaseQuery|setBaseQuery}
-     *            is executed in order to make this the default base query class for any dashboard.</p>
+     *            is executed in order to make this class the default base query class for any dashboard.</p>
      *            <p>Additional query types might extend from this class, if no
      *            valid constructor is provided during the new query type registration.</p>
      * @param {Object} config The query configuration `object`.
@@ -166,7 +166,7 @@ define([
      * @summary Gets an option (fallback for when the OptionManager is not available).
      * @description Gets an option (fallback for when the OptionManager is not available).
      *
-     * @param {string} prop The property from where to get the options from.
+     * @param {string} prop The property from where to get the options.
      * @return {Object} Value for the option.
      */
     getOption: function(prop) {
@@ -209,7 +209,7 @@ define([
 
     /**
      * @summary Gets the success callback handler.
-     * @description Gets the success callback handler, that executes the provided callback
+     * @description Gets the success callback handler that executes the provided callback
      *              when the query executes successfully.
      *
      * @param {function} callback Callback to call after the query is successful.
@@ -308,7 +308,7 @@ define([
 
     /**
      * @summary Sorts the data and executes a callback.
-     * @description Sorts the data, specifying a callback that'll be called after the sorting takes place.
+     * @description Sorts the data, specifying a callback that will be called after the sorting takes place.
      *
      * @param {string}   sortBy          Sorting options.
      * @param {function} outsideCallback Post-sort callback.
@@ -376,7 +376,7 @@ define([
      * @description Gets the last retrieved result.
      *
      * @return {Object} A deep copy of the last result set obtained from the server.
-     * @throws {NoCachedResults} If there haven't been previous calls to the server.
+     * @throws {NoCachedResults} If there have not been previous calls to the server.
      */
     lastResults: function() {
       if(this.getOption('lastResultSet') !== null) {
@@ -392,7 +392,7 @@ define([
      *
      * @return {Object} A deep copy of the the last result set obtained from the server
      *                  after being processed by postFetch.
-     * @throws {NoCachedResults} If there haven't been previous calls to the server.
+     * @throws {NoCachedResults} If there have not been previous calls to the server.
      */
     lastProcessedResults: function() {
       if(this.getOption('lastProcessedResultSet') !== null) {
@@ -408,7 +408,7 @@ define([
      *
      * @param {function} outerCallback Success callback.
      * @return {Object} The result of calling the specified callback.
-     * @throws {NoCachedResults} If there haven't been previous calls to the server.
+     * @throws {NoCachedResults} If there have not been previous calls to the server.
      * @see {@link cdf.queries.BaseQuery#reprocessResults|reprocessResults}
      */
     reprocessLastResults: function(outerCallback) {
@@ -433,7 +433,7 @@ define([
      *
      * @param {function} outsideCallback Success callback.
      * @return {Object} The result of calling the specified callback.
-     * @throws {NoCachedResults} If there haven't been previous calls to the server.
+     * @throws {NoCachedResults} If there have not been previous calls to the server.
      * @see {@link cdf.queries.BaseQuery#reprocessLastResults|reprocessLastResults}
      */
     reprocessResults: function(outsideCallback) {
@@ -578,12 +578,12 @@ define([
      * @summary Runs the query, setting a starting page before doing so.
      * @description Runs the query, setting a starting page before doing so.
      *              If the starting page matches the already selected one,
-     *              the query run is cancelled and `false` is returned.
+     *              the query run is canceled and `false` is returned.
      *
      * @param {number}   page            Starting page index.
      * @param {function} outsideCallback Success callback to execute after the
-     *                                   server side query is processed.
-     * @return {boolean|Object} `false` if the query run is cancelled,
+     *                                   server-side query is processed.
+     * @return {boolean|Object} `false` if the query run is canceled,
      *                   otherwise the result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery}.
      */
     pageStartingAt: function(page, outsideCallback) {

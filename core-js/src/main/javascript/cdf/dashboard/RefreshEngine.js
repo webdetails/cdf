@@ -296,8 +296,8 @@ define([], function() {
     return /** @lends cdf.dashboard.RefreshEngine# */ {
 
       /**
-       * @summary Set a components refresh period and clears it from the queue.
-       * @description Set a components refresh period and clears it from the queue.
+       * @summary Sets a components refresh period and clears it from the queue.
+       * @description Sets a components refresh period and clears it from the queue.
        *              {@link cdf.dashboard.RefreshEngine#processComponent|processComponent}
        *              must be called to activate the refresh timer for the component.
        *
@@ -334,7 +334,7 @@ define([], function() {
       /**
        * @summary Removes and adds the given component into the refresh queue restarting the timer if it is the first in the queue.
        * @description Removes and adds the given component into the refresh queue. If the component is the first
-       *              in the sorted queue {cdf.dashboard.RefreshEngine.restartTimer|restartTimer} is executed.
+       *              in the sorted queue, {cdf.dashboard.RefreshEngine.restartTimer|restartTimer} is executed.
        *
        * @param {cdf.components.BaseComponent} component The component to process.
        * @return {boolean} `true` after the component was correctly processed.
@@ -349,8 +349,8 @@ define([], function() {
       },
 
       /**
-       * @summary Clears the queue, adds all the dashboard components into the queue and restarts the timer.
-       * @description Clears the queue, adds all the dashboard components into the queue and restarts the timer.
+       * @summary Clears the queue, adds all the dashboard components into the queue, and restarts the timer.
+       * @description Clears the queue, adds all the dashboard components into the queue, and restarts the timer.
        *
        * @return {boolean} `true` after the components are processed.
        */
@@ -364,8 +364,8 @@ define([], function() {
       },
 
       /**
-       * @summary Pop due items from the queue, refresh components and set the next timeout.
-       * @description Pop due items from the queue, refresh components and set the next timeout.
+       * @summary Pops up due items from the queue, refreshes components and sets the next timeout.
+       * @description Pops up due items from the queue, refreshes components and sets the next timeout.
        */
       fireRefresh: function() {
         activeTimer = null;
@@ -382,9 +382,9 @@ define([], function() {
       },
 
       /**
-       * @summary Updates all components that don't have a valid refresh period.
+       * @summary Updates all components that do not have a valid refresh period.
        * @description Called when a valid {@link cdf.dashboard.RefreshEngine#globalRefreshPeriod|globalRefreshPeriod}
-       *              exists, it updates all components that don't have a valid refresh period.
+       *              exists. It updates all components that do not have a valid refresh period.
        */
       fireGlobalRefresh: function() {
         for(var i = 0; i < dashboard.components.length; i++) {

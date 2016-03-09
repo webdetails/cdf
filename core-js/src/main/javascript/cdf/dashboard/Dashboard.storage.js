@@ -31,11 +31,11 @@ define([
     /**
      * @summary Allows a user to persist parameters server-side to be used across different dashboards.
      * @description <p>The dashboard storage is used for persisting parameters on the server and making them
-     *              available to other dashboards. It is sometimes refered to as a user parameter store.</p>
+     *              available to other dashboards. It is sometimes referred to as a user parameter store.</p>
      *              <p>It can be initialized in two different ways. The main way is via
-     *              the dashboard constructor. Otherwise it will be initialized via the
+     *              the dashboard constructor. Otherwise, it will be initialized via the
      *              {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration. If no
-     *              configuration is available it will be initialized as an empty `object`.</p>
+     *              configuration is available, it will be initialized as an empty `object`.</p>
      * 
      * @type {Object}
      * @protected
