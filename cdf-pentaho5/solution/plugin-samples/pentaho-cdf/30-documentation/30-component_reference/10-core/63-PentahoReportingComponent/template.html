@@ -98,7 +98,8 @@ var outputSelector = {
 	parameter:"output_type",
 	valueAsId: false,
 	htmlObject: "selectorObject",
-	executeAtStart: true
+	executeAtStart: true,
+	priority: 4
 };
 
 var orderStatusReport = {
@@ -111,7 +112,8 @@ var orderStatusReport = {
   paginate: false,
   showParameters: true,
   iframe: true,
-  executeAtStart: true
+  executeAtStart: true,
+  priority: 5
 };
 
 Dashboards.addParameter("output_type", output_type);
