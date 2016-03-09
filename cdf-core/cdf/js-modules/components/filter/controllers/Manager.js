@@ -41,13 +41,32 @@ define([
       this.applyBindings();
       return this;
     },
+    /**
+     * @summary Removes event handlers and closes the view from this node and its children.
+     * @description Removes event handlers and closes the view from this node and its children.
+     *              Also removes the children.
+     *
+     * @return {Object} Returns this node to allow chaining.
+     */
     close: function() {
+      this.empty();
       this.get('view').close();
       this.get('controller').stopListening().off();
       this.stopListening();
       this.off();
       this.clear();
       return this;
+    },
+    /**
+     * @summary Closes and removes the children from the tree.
+     * @description Closes and removes the children from the tree.
+     */
+    empty: function() {
+      if(!this.children()) return;
+      this.children().each(function(child) {
+        child.close();
+      });
+      this.base();
     },
     applyBindings: function() {
       var bindings, that, throttleFilter, throttleScroll;
