@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -62,7 +62,7 @@ define([
             msg: message || "",
             type: this.messages.config.style[type].type || "info",
             icon: this.messages.config.style[type].icon || "comment"};
-          return _.template(this.messages.config.template, completeMsg)
+          return _.template(this.messages.config.template)(completeMsg);
         },
 
         init: function() {
@@ -102,7 +102,7 @@ define([
             try {
               switch (opt.templateType.toUpperCase()) {
                 case 'UNDERSCORE':
-                  html = _.template((_.isFunction(opt.template) ? opt.template() : opt.template), model);
+                  html = _.template((_.isFunction(opt.template) ? opt.template() : opt.template))(model);
                   break;
                 case 'MUSTACHE':
                   html = Mustache.render((_.isFunction(opt.template) ? opt.template() : opt.template), model);
