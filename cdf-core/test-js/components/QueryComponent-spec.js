@@ -60,7 +60,7 @@ define([
       spyOn(queryComponentSync, 'synchronous').and.callThrough();
       spyOn(queryComponentSync, 'triggerQuery').and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
-        params.success("{'responseXML': '<test/>'}");
+        params.success(JSON.stringify({responseXML: "<test/>"}));
       });
       spyOn(queryComponentSync, 'postFetch').and.callThrough();
 
@@ -121,7 +121,7 @@ define([
       spyOn(queryComponentAsync, 'synchronous').and.callThrough();
       spyOn(queryComponentAsync, 'triggerQuery').and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
-        params.success("{'responseXML': '<test/>'}");
+        params.success(JSON.stringify({responseXML: "<test/>"}));
       });
       spyOn(queryComponentAsync, 'postFetch').and.callThrough();
 
