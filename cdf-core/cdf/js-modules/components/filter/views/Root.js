@@ -62,8 +62,8 @@ define([
           this.configuration.selectionStrategy.strategy.getSelectedItems(this.model, 'label') /*this.model.getSelectedItems('label')*/, function (label) {
             return label + " ";
           }),
-        allItemsSelected: this.model.get('numberOfSelectedItems') === this.model.get('numberOfItems'),
-        noItemsSelected: this.model.get('numberOfSelectedItems') === 0,
+        allItemsSelected: this.model.getSelection() === true,
+        noItemsSelected: this.model.getSelection() === false,
         hasChanged: this.model.hasChanged()
       });
       return viewModel;
