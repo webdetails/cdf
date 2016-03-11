@@ -273,7 +273,7 @@ Timeplot._Impl.prototype = {
             
             var fDone = function(xmlhttp) {
                 try {
-					var data = eval('(' + xmlhttp.responseText + ')');
+					var data = JSON.parse(xmlhttp.responseText);
 					if(eventFunction != undefined) eventFunction(data);
 					eventSource.loadJSON(data, url);
                 } finally {

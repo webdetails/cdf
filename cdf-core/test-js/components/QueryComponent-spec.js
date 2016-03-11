@@ -53,7 +53,7 @@ define(["cdf/Dashboard.Clean", "cdf/components/QueryComponent", "cdf/lib/jquery"
 
       spyOn(queryComponent, 'update').and.callThrough();
       spyOn($, "ajax").and.callFake(function(params) {
-        params.success("{'responseXML': '<test/>'}");
+        params.success(JSON.stringify({responseXML: "<test/>"}));
       });
       spyOn(queryComponent, 'postFetch').and.callThrough();
 
