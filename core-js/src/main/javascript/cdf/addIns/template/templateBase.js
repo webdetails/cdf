@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -67,7 +67,7 @@ define([
         type: opt.messages.config.style[type].type || "info",
         icon: opt.messages.config.style[type].icon || "comment"};
       Logger.log(opt.messages.error[message] || "", type);
-      return _.template(opt.messages.config.template, completeMsg);
+      return _.template(opt.messages.config.template)(completeMsg);
 
     },
 
@@ -108,7 +108,7 @@ define([
           switch(opt.templateType.toUpperCase()) {
             case 'UNDERSCORE':
               model = _.defaults({}, model, Utils.propertiesArrayToObject(helpers));
-              html = _.template((_.isFunction(opt.template) ? opt.template() : opt.template), model);
+              html = _.template(Utils.ev(opt.template))(model);
               break;
             case 'MUSTACHE':
               Mustache.Formatters = helpers;
