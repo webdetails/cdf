@@ -5,7 +5,7 @@
   <parent>
     <artifactId>cdf-plugin-assemblies</artifactId>
     <groupId>pentaho</groupId>
-    <version>6.0-16.01.22</version>
+    <version>6.0-16.01.22.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

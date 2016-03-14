@@ -13,7 +13,7 @@
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
   <packaging>pom</packaging>
-  <version>6.0-16.01.22</version>
+  <version>6.0-16.01.22.1</version>
   
   <modules>
     <module>core</module>
