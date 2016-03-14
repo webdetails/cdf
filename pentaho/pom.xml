@@ -25,12 +25,13 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-core</artifactId>
+<version>16.01.22</version>
     </dependency>
 
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-pentaho</artifactId>
-      <version>${project.version}</version>
+      <version>16.01.22</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
