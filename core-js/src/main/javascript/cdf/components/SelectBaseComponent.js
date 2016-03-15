@@ -193,7 +193,7 @@ define([
      * Indicates if the user can select multiple values.
      * The default implementation returns _false_.
      *
-     * @return {boolean} _true_ if multiple values are allowed, _false_ otherwise.
+     * @return {boolean} `true` if multiple values are allowed, `false` otherwise.
      * @private
      */
     _allowMultipleValues: function() {
@@ -201,7 +201,7 @@ define([
     },
 
     /**
-     * Returns the placeholder label for empty values, or false if it is an non-empty String.
+     * Returns the placeholder label for empty values, or `false` if it is an non-empty `string`.
      *
      * @return {string} The placeholder text.
      * @private
@@ -213,7 +213,7 @@ define([
 
     /**
      * The number of elements that the list should show without scrolling.
-     * The default implementation returns the value of the _size_ property.
+     * The default implementation returns the value of the `size` property.
      *
      * @param {Array.<Array.<*>>} values the values array.
      * @return {?number}
@@ -224,9 +224,8 @@ define([
     },
 
     /**
-     * Currently, reads extra options for the "chosen" and "select2" plugins,
-     * by transforming the array of key/value pair arrays
-     * in _extraOptions_ into a JS object.
+     * Currently, reads extra options for the _chosen_ and _select2_ plugins, by
+     * transforming the array of key/value pair arrays in `extraOptions` into an `object`.
      *
      * @return {undefined|!Object.<string, *>} an options object.
      * @private

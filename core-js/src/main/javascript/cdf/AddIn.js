@@ -142,7 +142,7 @@ define([
      * @summary Executes the add-in {@link cdf.AddIn~_implementation|_implementation} function or
      *          returns the value of {@link cdf.AddIn~_value|_value}.
      *
-     * @param {Element} target  The relevant DOM Element.
+     * @param {jQuery}  target  The relevant DOM element.
      * @param {Object}  state   A representation of the necessary context for the add-in to operate.
      * @param {Object}  options Configuration options for the add-in.
      * @return {Object} The value of {@link cdf.AddIn~_value|_value} if the

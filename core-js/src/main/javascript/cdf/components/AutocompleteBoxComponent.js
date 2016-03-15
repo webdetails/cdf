@@ -294,7 +294,7 @@ define([
      * if the _change_ parameter has a truthy value.
      *
      * @param {string}  id             The HTML element identifier.
-     * @param {boolean} [change=false] Flag indicating if {@link cdf.component.AutocompleteBoxComponent#processChange|processChange should execute.
+     * @param {boolean} [change=false] Flag indicating if {@link cdf.component.AutocompleteBoxComponent#processChange|processChange} should execute.
      * @private
      */
     _removeValue: function(id, change) {

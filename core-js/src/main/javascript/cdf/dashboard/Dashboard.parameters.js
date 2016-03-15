@@ -41,7 +41,8 @@ define([
      * @summary Backbone model connected with the parameters.
      * @description <p>Backbone model connected with the parameters to provide an events system
      *              over the CDF parameters.</p>
-     * @type {BackboneModel}
+     * @type {Backbone.Model}
+     * @see {@link http://backbonejs.org/#Model|Backbone.Model}
      * @protected
      */
     parameterModel: undefined,
@@ -65,7 +66,7 @@ define([
     /**
      * @summary Defines if the parameter value needs to be encoded before being stored.
      * @description <p>Defines if the parameter value needs to be encoded before being stored.</p>
-     *              <p>If true, then  {@link cdf.dashboard.Utf8Encoder#encode_prepare_arr|encode_prepare_arr} 
+     *              <p>If true, then {@link cdf.dashboard.Utf8Encoder.encode_prepare_arr|encode_prepare_arr} 
      *              is called before the parameter value gets stored.</p>
      * @protected
      * @type {Boolean}
@@ -122,28 +123,28 @@ define([
     /**
      * @summary Verifies if a parameter is available in the context.
      * @description <p>Verifies if a parameter is available in the context.</p>
-     *              <p>It checks if the _path_ is undefined.</p>
+     *              <p>It checks if the `path` is undefined.</p>
      *
      * @private
      * @param {Object} o The context of the assignment.
      * @param {String|Array<String>} path The path to the parameter.
-     * @return {Boolean} _true_ if the parameter is available in the context.
+     * @return {Boolean} `true` if the parameter is available in the context.
      */
     _isParameterInModel: function(o, path) {
       return this._getValueFromContext(o, path) !== undefined;
     },
 
     /**
-     * @summary Gets the value from a context _o_ from the property with a given _path_.
-     * @description <p>Gets the value from a context _o_ from the property with a given _path_.</p>
+     * @summary Gets the value from a context `o` from the property with a given `path`.
+     * @description <p>Gets the value from a context `o` from the property with a given `path`.</p>
      *              <p>This iterates over the context and will retrieve the correct value from a 
-     *              given _path_. This works either with flat parameter names or with parameters in 
+     *              given `path`. This works either with flat parameter names or with parameters in 
      *              nested objects.</p>
      *
      * @private
      * @param {Object} o The context of the assignment.
      * @param {string|string[]} path The path to the parameter.
-     * @return {Object} The value of the property or _undefined_ if the context object _o_ is a falsy value.
+     * @return {Object} The value of the property or `undefined` if the context object `o` is a falsy value.
      */
     _getValueFromContext: function(o, path) {
       if(!o) {
@@ -183,14 +184,14 @@ define([
     /**
      * @summary Sets a parameter value using a given path and a context object.
      * @description <p>Sets a parameter value using a given path and a context object.</p>
-     *              <p>This iterates over the context and will set the correct value, _v_, from a 
-     *              given _path_. This works either with flat parameters or with parameters in nested objects.</p>
+     *              <p>This iterates over the context and will set the correct value, `v`, from a 
+     *              given `path`. This works either with flat parameters or with parameters in nested objects.</p>
      *
      * @private
      * @param {Object} o The context of the assignment.
      * @param {String|Array<String>} path The path to the parameter.
      * @param {Object} v The value of the parameter.
-     * @return {Object} The value of the parameter assigned or _undefined_ if the context object _o_ is a falsy value.
+     * @return {Object} The value of the parameter assigned or `undefined` if the context object `o` is a falsy value.
      */
     _setValueInContext: function(o, path, v) {
       if(!o || path == null || v === undefined) {
@@ -221,8 +222,10 @@ define([
     },
 
     /**
-     * @summary Gets the parameter store location: _this.parameters_ or _this.storage_
-     * @description Gets the parameter store location: _this.parameters_ or _this.storage_
+     * @summary Gets the parameter store location: {cdf.dashboard.Dashboard#parameters|parameters} or
+     *          {cdf.dashboard.Dashboard#storage|storage}.
+     * @description Gets the parameter store location: {cdf.dashboard.Dashboard#parameters|parameters}
+     *              or {cdf.dashboard.Dashboard#storage|storage}
      *              according to its name and the new name, without the store prefix.
      *
      * @private
@@ -259,7 +262,7 @@ define([
      *
      * @param {string} parameterName  The name of the parameter.
      * @param {Object} parameterValue The initial value of the parameter.
-     * @return {Object} The value assigned to the parameter or _undefined_ if the parameter name is invalid.
+     * @return {Object} The value assigned to the parameter or `undefined` if the parameter name is invalid.
      */
     addParameter: function(parameterName, parameterValue) {
       if(parameterName == undefined || parameterName == "undefined") {
@@ -277,11 +280,11 @@ define([
 
     /**
      * @summary Gets a parameter value.
-     * @description <p>Gets the parameter value from a given parameter name. </p>
-     *              <p>If the argument is invalid, _undefined_ is returned.</p>
+     * @description <p>Gets the parameter value from a given parameter name.</p>
+     *              <p>If the argument is invalid, `undefined` is returned.</p>
      *
      * @param {String} parameterName The parameter name.
-     * @return {Object} The value of the parameter or _undefined_ if the parameter name is invalid.
+     * @return {Object} The value of the parameter or `undefined` if the parameter name is invalid.
      */
     getParameterValue: function(parameterName) {
       if(parameterName == undefined || parameterName == "undefined") {
@@ -298,7 +301,7 @@ define([
      * @description Alias for {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue}.
      *
      * @param {String} parameterName The parameter name.
-     * @return {Object} The parameter value or _undefined_ if the parameter name is invalid.
+     * @return {Object} The parameter value or `undefined` if the parameter name is invalid.
      */
     getParam: function(parameterName) {
       return this.getParameterValue(parameterName);
@@ -307,11 +310,11 @@ define([
     /**
      * @summary Stores a parameter with a certain value.
      * @description <p>Stores a parameter value with a certain parameter name. 
-     *              If parameter name is not valid, undefined is returned.</p>
-     *              <p>Since parameters are stored using the Backbone event model, an extra parameter - _isNotified_ - 
-     *              can be used to control the event Backbone event listeners.</p>
-     *              <p>If {@link escapeParameterValues} is true, then 
-     *              {@link cdf.dashboard.Utf8Encoder#encode_prepare_arr|encode_prepare_arr} is called before the 
+     *              If the parameter name is not valid, `undefined` is returned immediately.</p>
+     *              <p>Since parameters are stored using the Backbone event model, an extra parameter - `isNotified` - 
+     *              can be used to control the Backbone event listeners.</p>
+     *              <p>If {@link cdf.dashboard.Dashboard#escapeParameterValues|escapeParameterValues} is `true`, then 
+     *              {@link cdf.dashboard.Utf8Encoder.encode_prepare_arr|encode_prepare_arr} is called before the 
      *              parameter value is stored.</p>
      *
      * @param {String} parameterName The parameter name.
@@ -319,7 +322,6 @@ define([
      * @param {Boolean} isNotified A flag indicating if a
      *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
      *   event is to be triggered when the parameter value changes.
-     * @returns {undefined} If parameter name is not valid.
      */
     setParameter: function(parameterName, parameterValue, isNotified) {
       if(parameterName == undefined || parameterName == "undefined") {
