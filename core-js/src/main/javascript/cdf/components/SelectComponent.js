@@ -30,9 +30,9 @@ define(['./SelectBaseComponent'], function(SelectBaseComponent) {
     defaultIfEmpty: true,
 
     /**
-     * Gets the value of the _select_ placeholder.
+     * Gets the value of the `select` placeholder.
      *
-     * @return {string} The value of the corresponding HTML element.
+     * @return {string} The value of the corresponding DOM element.
      */
     getValue: function() {
       return this.placeholder("select").val();

@@ -25,7 +25,7 @@ define([
    * @amd cdf/dashboard/Popups
    * @summary A static class containing pre-built error and success popups.
    * @classdesc <p>A static class containing pre-built error and success popups.</p>
-   *            <p>Each exposed popup is an object with a _render_ method that can be called to show the popup with
+   *            <p>Each exposed popup is an object with a `render` method that can be called to show the popup with
    *            some default values for each case.</p>
    */
   return /** @lends cdf.dashboard.Popups */ {
@@ -59,7 +59,7 @@ define([
        * @summary The template of the Popup.
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Ok Popup.</p>
        *              <p>It has a header, a description and a button. The default values for each of the template
-       *              variables are stored in {@link defaults} object.</p>
+       *              variables are stored in {@link cdf.dashboard.Popups.okPopup.defaults|defaults} `object`.</p>
        * @type {String}
        *
        * @code
@@ -98,15 +98,15 @@ define([
       },
 
       /**
-       * @summary The {@link http://api.jquery.com/Types/#jQuery|jQuery} element.
-       * @description The {@link http://api.jquery.com/Types/#jQuery|jQuery} element which holds the popup's content.
+       * @summary The DOM element which holds the popup's content.
+       * @description The DOM element which holds the popup's content.
        * @type {jQuery}
        */
       $el: undefined,
 
       /**
        * @summary Shows the popup.
-       * @description <p>Shows the popup based on the {@link $el} object.</p>
+       * @description <p>Shows the popup based on the {@link cdf.dashboard.Popups.okPopup.$el|$el} `object`.</p>
        *              <p>If the popup is rendering for the first time or if show is called with the `opts` parameter, then
        *              the render is called.</p>
        * @param {Object} [opts] Options object used to call the render.
@@ -120,7 +120,7 @@ define([
 
       /**
        * @summary Hides the popup.
-       * @description Hides the popup, based on the {@link #$el} element.
+       * @description Hides the popup, based on the {@link cdf.dashboard.Popups.okPopup.$el|$el} element.
        */
       hide: function() {
         this.$el.hide();
@@ -128,11 +128,12 @@ define([
 
       /**
        * @summary Renders the Popup.
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
-       *              template.</p>
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the
+       *              {@link https://mustache.github.io/|Mustache} template.</p>
        *              <p>When the component is rendered, it gets hidden and appended to the body.</p>
-       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
-       *                           to the properties which define the content of the component.
+       * @param {Object} [newOpts] Options object used to extend the
+       *                           {@link cdf.dashboard.Popups.okPopup.defaults|defaults} `object`.
+       *                           This is used to assign values to the properties which define the content of the component.
        */
       render: function(newOpts) {
         var opts = _.extend({} , this.defaults, newOpts);
@@ -155,8 +156,7 @@ define([
      * @class
      * @staticClass
      * @summary The Error Notification Popup.
-     * @classdesc <p>The Error Notification Popup object containing the default values for a error notification
-     *            popup.</p>
+     * @classdesc <p>The Error Notification Popup object containing the default values for a error notification popup.</p>
      *
      * @example
      * <div class='cdfNotification component small>
@@ -167,13 +167,12 @@ define([
      *   </div>
      * </div>
      */
-    notificationsComponent: {
+    notificationsComponent: /** @lends cdf.dashboard.Popups.notificationsComponent */{
       /**
        * @summary The template of the Popup.
-       * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification Popup.
-       *              </p>
+       * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification Popup.</p>
        *              <p>It has a title and description. The default values for each of the template variables are
-       *              stored in {@link defaults} object.</p>
+       *              stored in {@link cdf.dashboard.Popups.notificationsComponent.defaults|defaults} `object`.</p>
        * @type {String}
        *
        * @code
@@ -207,15 +206,15 @@ define([
 
       /**
        * @summary Renders the Popup.
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
-       *              template.</p>
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the
+       *              {@link https://mustache.github.io/|Mustache} template.</p>
        *              <p>If the component has a width smaller than 300, the css class small is added.</p>
        *
-       * @param {Element|Selector} ph The Html Element Object or the
-       *                              {@link http://api.jquery.com/Types/#Selector|jQuery Selector} for the object.
-       *                              This is the container which will hold the content of the component.
-       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
-       *                           to the properties that define the content of the component.
+       * @param {jQuery|Selector} ph The DOM Element or the jQuery Selector.
+       *                             This is the container which will hold the content of the popup.
+       * @param {Object} [newOpts] Options object used to extend the
+       *                           {@link cdf.dashboard.Popups.notificationsComponent.defaults|defaults} `object`.
+       *                           This is used to assign values to the properties that define the content of the component.
        */
       render: function(ph, newOpts) {
         var opts = _.extend({}, this.defaults, newOpts);
@@ -240,7 +239,7 @@ define([
      *   </div>
      * </div>
      */
-    notificationsGrowl: {
+    notificationsGrowl: /** @lends cdf.dashboard.Popups.notificationsGrowl */{
       /**
        * @summary <code>Boolean</code> for component render state.
        * @description <code>Boolean</code> property used to define if the component was rendered or not.
@@ -254,7 +253,7 @@ define([
        * @description <p>The {@link https://mustache.github.io/|Mustache} template of the Error Notification
        *              Popup.</p>
        *              <p>It has a title and a description. The default values for each of the template variables are
-       *              stored in {@link defaults} object.</p>
+       *              stored in {@link cdf.dashboard.Popups.notificationsGrowl.defaults|defaults} `object`.</p>
        * @type {String}
        *
        * @code
@@ -285,8 +284,7 @@ define([
        * @property {Number} timeout=4000 The timeout for the popup.
        * @property {Function} onUnblock Callback function called when onUnblock from
        *                                {@link http://malsup.com/jquery/block/|jQuery.blockUI} is called.
-       * @property {Object} css An object with the {@link http://malsup.com/jquery/block/|jQuery.blockUI} default
-       *                        options.
+       * @property {Object} css An object with the {@link http://malsup.com/jquery/block/|jQuery.blockUI} default options.
        * @property {String} css.position=Absolute The default popup css position value.
        * @property {String} css.width=100% The default popup css width value.
        * @property {String} css.top=10px The default popup css top value.
@@ -315,15 +313,16 @@ define([
 
       /**
        * @summary Renders the Popup.
-       * @description <p>Renders the Popup based on the object containing the properties to apply to the Mustache
-       *              template.</p>
+       * @description <p>Renders the Popup based on the object containing the properties to apply to the
+       *              {@link https://mustache.github.io/|Mustache} template.</p>
        *              <p>If the render function is called for the first time, then the component is rendered and
        *              attached in the body of the page. Otherwise, the component is shown, calling the
        *              {@link http://malsup.com/jquery/block/|jQuery.blockUI}.
        *              {@link http://malsup.com/jquery/block/#element|block} function with the defaults extended
        *              with the newOpts argument to allow user customizations.</p>
        *
-       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values to the properties that define the content of the component.
+       * @param {Object} [newOpts] Options object used to extend the default object. This is used to assign values
+       *                           to the properties that define the content of the component.
        *
        * @see {@link http://malsup.com/jquery/block/|jQuery.blockUI}
        */

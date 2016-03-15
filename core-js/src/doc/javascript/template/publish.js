@@ -706,6 +706,9 @@ exports.publish = function(taffyData, opts, tutorials) {
             if(doclet.description && doclet.description.indexOf("syntax.javascript") == -1) {
                 doclet.description = split(doclet.description, '<br>');
             }
+            if(doclet.description && doclet.description.indexOf("syntax.text") == -1) {
+                doclet.description = split(doclet.description, '<br>');
+            }
             if(doclet.classdesc && doclet.classdesc.indexOf("syntax.javascript") == -1) {
                 doclet.classdesc = split(doclet.classdesc, '<br>');
             }

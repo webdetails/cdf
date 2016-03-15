@@ -162,12 +162,11 @@ define([
     },
 
     /**
-     * @summary Getter for the component's HTML object.
-     * @description Getter for the component's HTML object. Returns the jquery element that represents it.
+     * @summary Getter for the component's DOM element.
+     * @description Getter for the component's DOM element. Returns the jQuery `object` that represents it.
      *
-     * @param {string} selector Optional selector to use inside the HTML object.
-     * @return {jQuery|string} A {@link http://api.jquery.com/|jQuery} object that references the matched
-     *                  DOM elements or a new object if no match is found.
+     * @param {string} selector Optional `string` to append to the jQuery selector.
+     * @return {jQuery} The matched DOM element or a new element if no match is found.
      */
     placeholder: function(selector) {
       var ho = this.htmlObject;
@@ -175,8 +174,8 @@ define([
     },
 
     /**
-     * @summary Focus the first placeholder HTML element on the component.
-     * @description Focus the first placeholder HTML element on the component.
+     * @summary Focus the first placeholder DOM element on the component.
+     * @description Focus the first placeholder DOM element on the component.
      */
     focus: function() {
       try {
@@ -186,7 +185,7 @@ define([
 
     /**
      * @summary Autofocus on the component.
-     * @description  Autofocus on the component.
+     * @description Autofocus on the component.
      *
      * @private
      * @deprecated
@@ -230,7 +229,7 @@ define([
      *
      * @param {Object} parameterRemap Map containing parameter remapping.
      * @param {Object} componentRemap Map containing component remapping.
-     * @param {Object} htmlRemap      Map containing HTML object remapping.
+     * @param {Object} htmlRemap      Map containing DOM element remapping.
      * @return {cdf.components.BaseComponent} The cloned component.
      */
     clone: function(parameterRemap, componentRemap, htmlRemap) {

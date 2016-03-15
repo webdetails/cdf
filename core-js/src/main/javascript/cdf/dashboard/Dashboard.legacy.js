@@ -45,8 +45,12 @@ define([
      * @param {string} action     The xaction name.
      * @param {Object} parameters Parameter object to send to the xaction.
      * @param {function} callback Callback function to call when the xaction responds.
-     * @return {*} The xaction result.
-     *
+     * @return {Object|string} If `callback` is a `function` it returns the value of executing
+     *                         {@link cdf.dashboard.Dashboard#pentahoAction|pentahoAction}.
+     *                         Otherwise, it returns the value of executing
+     *                         {@link cdf.dashboard.Dashboard#parseXActionResult|parseXActionResult}.
+     * @see {@link cdf.dashboard.Dashboard#pentahoAction|pentahoAction}
+     * @see {@link cdf.dashboard.Dashboard#parseXActionResult|parseXActionResult}
      * @deprecated
      */
     callPentahoAction: function(obj, solution, path, action, parameters, callback) {
@@ -70,7 +74,7 @@ define([
      * @param {string} url    The URL to call.
      * @param {Object} params The parameter object.
      * @param {function} func Callback function.
-     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
+     * @return {Object|string} The return value of executing {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}.
      * @see {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}
      *
      * @deprecated
@@ -90,8 +94,9 @@ define([
      * @param {string}   url        The URL to call.
      * @param {Object}   params     The parameters object.
      * @param {function} func       Callback function.
-     * @return {*} If no `func` callback is provided, it returns a jqXHR object.
-     *             Otherwise, it returns the result of the HTTP request.
+     * @return {Object|string} If no `func` callback is provided, it returns a
+     *                         {@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR} object.
+     *                         Otherwise, it returns the result of the HTTP request.
      *
      * @deprecated
      */
@@ -154,7 +159,9 @@ define([
      * @param {string}   action   The xaction name.
      * @param {Object}   params   Parameter object to send to the xaction.
      * @param {function} func     Callback function to call when the xaction responds.
-     * @return {*} The xaction result.
+     * @return {Object|string} The return value of executing
+     *                         {@link cdf.dashboard.Dashboard#pentahoServiceAction|pentahoServiceAction}.
+     * @see {@link cdf.dashboard.Dashboard#pentahoServiceAction|pentahoServiceAction}
      *
      * @deprecated
      */
@@ -173,8 +180,8 @@ define([
      * @param {string}   action        The xaction name.
      * @param {Object}   params        Parameter object to send to the xaction.
      * @param {function} func          Callback function to call when the xaction responds.
-     * @return {*} The xaction result.
-     *
+     * @return {Object|string} The return value of executing {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}.
+     * @see {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}
      * @deprecated
      */
     pentahoServiceAction: function(serviceMethod, returntype, solution, path, action, params, func) {
@@ -236,11 +243,13 @@ define([
 
     /**
      * @summary Parses the xaction result.
-     * @description Parses the xaction result.
+     * @description Parses the xaction result. If errors are detected they will be writen in
+     *              the appropriate DOM object of the provided `obj` component.
      *
-     * @private
-     * @param {Object} obj  DOM object where the response will be written to.
+     * @param {cdf.components.BaseComponent} obj The target component.
      * @param {string} html HTML string containing the xaction result.
+     * @return {?Object} A DOM object containing the xaction result if no errors are detected.
+     *                   Otherwise, `null` is returned.
      *
      * @deprecated
      */
@@ -324,14 +333,14 @@ define([
     },
 
     /**
-     * @summary Fetches data from the server according to a Chart Definition `object`.
-     * @description Fetches data from the server according to a Chart Definition `object`.
+     * @summary Fetches data from the server according to a query definition `object`.
+     * @description Fetches data from the server according to a query definition `object`.
      *              This method is deprecated, so a {@link cdf.dashboard.Query|Query}
      *              instance should be used instead.
      *
-     * @param {Object}   cd       Chart definition object.
-     * @param {Object}   params   Parameter object.
-     * @param {function} callback Callback to be called with results.
+     * @param {Object}   cd       The query definition object.
+     * @param {Object}   params   The parameters to use in the query.
+     * @param {function} callback The callback `function` to be called with results.
      *
      * @deprecated
      */
