@@ -63,7 +63,7 @@ define([
     /**
      * Bets the isBusy parameter value.
      *
-     * @return {boolean} The _isBusy_ parameter value.
+     * @return {boolean} The `isBusy` parameter value.
      */
     isBusy: function() {
       return this.root().get('isBusy');

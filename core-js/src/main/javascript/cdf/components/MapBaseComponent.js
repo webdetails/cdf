@@ -66,14 +66,14 @@ define([
     /** 
      * Constructs and sets some initial values and calls show_map.
      *
-     * @param {string} div             The id of the div that contains the map
-     * @param {number} lon             The longitude coordinate.
-     * @param {number} lat             The latitude coordinate.
-     * @param {number} zoom            Zoom level for initial display.
-     * @param {string} b_layer_control _true_ to show Layer selector.
-     * @param {string} b_use_mercator  _true_ to show custom map.
-     * @param {string} b_custom_map    _true_ to show custom map.
-     * @param {string} str_custom_map  Custom map definition.
+     * @param {string}  div             The id of the div that contains the map
+     * @param {number}  lon             The longitude coordinate.
+     * @param {number}  lat             The latitude coordinate.
+     * @param {number}  zoom            Zoom level for initial display.
+     * @param {boolean} b_layer_control `true` to show Layer selector.
+     * @param {boolean} b_use_mercator  `true` to show custom map.
+     * @param {boolean} b_custom_map    `true` to show custom map.
+     * @param {string}  str_custom_map  Custom map definition.
      */
     init_map: function(div, lon, lat, zoom, b_use_mercator, b_layer_control, b_custom_map, str_custom_map) {
 

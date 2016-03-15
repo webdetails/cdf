@@ -25,115 +25,116 @@ define([
    * @extends cdf.components.BaseComponent
    * @amd cdf/components/UnmanagedComponent
    * @summary Advanced version of the {@link cdf.components.BaseComponent|BaseComponent}
-   *          that allows control over the core CDF lifecycle.
-   * @classdesc <p>The <code>UnmanagedComponent</code> is an advanced version of the
-   * {@link cdf.components.BaseComponent|BaseComponent} that allows control over the core CDF lifecycle for
-   * implementing components.</p>
-   * <p>It should be used as the base class for all components that desire to implement an asynchronous lifecycle, as CDF
-   * cannot otherwise ensure that the {@link cdf.components.UnmanagedComponent#postExec|postExecution} callback is
-   * correctly handled.</p>
+   *          which allows control over the core CDF lifecycle.
+   * @classdesc <p>The `UnmanagedComponent` is an advanced version of the
+   *  {@link cdf.components.BaseComponent|BaseComponent} which allows control over the core CDF lifecycle for
+   *  implementing components.</p>
+   * <p>It should be used as the base class for all components which desire to implement an asynchronous lifecycle, as CDF
+   *  cannot otherwise ensure that the {@link cdf.components.UnmanagedComponent#postExec|postExecution} callback is
+   *  correctly handled.</p>
    *
    * <h2>CDF Async Developer's Guide</h2>
    *
    * <p>CDF now supports proper, asynchronous, AJAX calls for all its querying. The following is a guide to converting
-   * old components and dashboards to the new async style, and developing new ones based on asynchronous querying.</p>
+   *  old components and dashboards to the new async style, and developing new ones based on asynchronous querying.</p>
    *
    * <h2>Rationale</h2>
    *
    * <p>The first step to understanding the changes in the async patch is understanding the CDF component lifecycle.
-   * When a component is updated, the basic update lifecycle looks like this:</p>
+   *  When a component is updated, the basic update lifecycle looks like this:</p>
    *
    * <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; update -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution}</code></pre>
    *
    * <p>Usually, though, there will be a call to a data source, with a subsequent call to
-   * {@link cdf.components.UnmanagedComponent#postFetchData|postFetch}, and only then is the component rendered:</p>
+   *  {@link cdf.components.UnmanagedComponent#postFetchData|postFetch}, and only then is the component rendered:</p>
    *
    * <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; update -&gt; {@link cdf.components.UnmanagedComponent#beginQuery|query} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; redraw -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution}</code></pre>
    *
    * <p>This is a more typical lifecycle, and one that has some important limitations. First,
-   * {@link cdf.components.UnmanagedComponent#preExec|preExecution} and
-   * {@link cdf.components.UnmanagedComponent#postExec|postExecution} are entirely the responsibility of CDF itself,
-   * rather than the component. Because CDF has no control over the contents of the update method, it has no way of
-   * ensuring that, should the component execute an asynchronous query,
-   *  {@link cdf.components.UnmanagedComponent#postExec|postExecution} only runs after redraw. In this case, you're
-   * likely to see this instead:</p>
+   *  {@link cdf.components.UnmanagedComponent#preExec|preExecution} and
+   *  {@link cdf.components.UnmanagedComponent#postExec|postExecution} are entirely the responsibility of CDF itself,
+   *  rather than the component. Because CDF has no control over the contents of the update method, it has no way of
+   *  ensuring that, should the component execute an asynchronous query,
+   *  {@link cdf.components.UnmanagedComponent#postExec|postExecution} only runs after redraw. In this case, you are
+   *  likely to see this instead:</p>
    *
    * <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; update -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#beginQuery|query} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; redraw</code></pre>
    *
-   * <p>Which breaks the contract for {@link cdf.components.UnmanagedComponent#postExec|postExecution} running after
-   * the component is done updating. The solution here is that the component itself must take control of
+   * <p>This breaks the contract for {@link cdf.components.UnmanagedComponent#postExec|postExecution} running after
+   *  the component is done updating. The solution here is that the component itself must take control of
    *  {@link cdf.components.UnmanagedComponent#postExec|postExecution}, while keeping the burden of implementing the
-   * lifecycle in CDF rather than passing it to the component developer. On a related topic,
+   *  lifecycle in CDF rather than passing it to the component developer. On a related topic,
    *  {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} has become a de facto standard part of the
-   * lifecycle, yet its implementation was left to the component implementers, which leads to a fairly large amount of
-   * boilerplate code.</p>
+   *  lifecycle, yet its implementation was left to the component implementers, which leads to a fairly large amount of
+   *  boilerplate code.</p>
    *
-   * <p>Our objective here was to retool the base component so as to deal with both of these issues, thus allowing
-   * queries to be performed asynchronously while reducing the developer effort involved in creating a component.</p>
+   * <p>Our objective here was to retool the base component to deal with both of these issues, thus allowing
+   *  queries to be performed asynchronously while reducing the developer effort involved in creating a component.</p>
    *
    *
    * <h2>Component Execution Order and Priority</h2>
    *
-   * <p>There are no major changes in the way components behave. There is, however an important caveat - since all
-   * components (that have been converted) will be executed simultaneously, we can no longer rely on the order of
-   * execution. </p>
+   * <p>There are no major changes in the way components behave. There is, however an important caveat: since all
+   *  components that have been converted will be executed simultaneously, we can no longer rely on the order of
+   *  execution.</p>
    *
-   * <p>There's now an additional property named <em>{@link cdf.components.UnmanagedComponent#priority|priority}</em>.
-   * The {@link cdf.components.UnmanagedComponent#priority|priority} of component execution, defaulting to 5. The lower
-   * the number, the higher {@link cdf.components.UnmanagedComponent#priority|priority} the component has. Components
-   * with the same {@link cdf.components.UnmanagedComponent#priority|priority} with be executed simultaneously. Useful
-   * in places where we need to give higher {@link cdf.components.UnmanagedComponent#priority|priority} to filters or
-   * other components that need to be executed before other components.</p>
+   * <p>There's now an additional property named {@link cdf.components.UnmanagedComponent#priority|priority}.
+   *  This is the {@link cdf.components.UnmanagedComponent#priority|priority} of component execution, defaulting to 5. The lower
+   *  the number, the higher {@link cdf.components.UnmanagedComponent#priority|priority} the component has. Components
+   *  with the same {@link cdf.components.UnmanagedComponent#priority|priority} with be executed simultaneously. This property
+   *  is useful in places where we need to give higher {@link cdf.components.UnmanagedComponent#priority|priority} to filters or
+   *  other components that need to be executed before other components.</p>
    *
-   * <p>This way there's no longer the need to use dummy parameters and postChange tricks to do, for instance, cascade
-   * prompts.</p>
+   * <p>This way there's no longer the need to use dummy parameters and postChange tricks to do, for instance, cascade prompts.</p>
    *
    *
    * <h2>Backward Compatibility and Changes</h2>
    *
-   * <p>We did a big effort in order to maintain backward compatibility, but some care has to be taken. What we do is
-   * assume that if components have no {@link cdf.components.UnmanagedComponent#priority|priority}, we give them a
-   * sequential value, trying to emulate the old behavior. It's recommended that proper priorities are set in order to
-   * take advantage of the new improvements.</p>
+   * <p>Maintaining backwards compatibility requires some care. If components have no
+   *  {@link cdf.components.UnmanagedComponent#priority|priority}, we give them a sequential value,
+   *  trying to emulate the old behavior. It's recommended that proper priorities are set in order to
+   *  take advantage of the new improvements.</p>
    *
-   * <p>If using <em>CDE</em>, please note that if you edit a dashboard and save it, <strong>all components will have a
-   * default priority of 5</strong>. This may break the old behavior. If you need to change a dashboard, make sure you
-   * tweak the priorities, if needed.</p>
+   * <p>If using Community Dashboard Editor (CDE), note that if you edit a dashboard and save it, <em>all components will have a
+   *  default priority of 5</em>. This may break the old behavior. If you need to change a dashboard, make sure you
+   *  tweak the priorities, if needed.</p>
    *
    *
    * <h2>Developing Components</h2>
    *
-   * <p>Components desiring to use asynchronous queries should inherit from the new <code>UnmanagedComponent</code>,
-   * instead of {@link cdf.components.BaseComponent|BaseComponent}. The <code>UnmanagedComponent</code> base class
-   * provides pre-composed methods that implement the core lifecycle, for a variety of different scenarios:</p>
+   * <p>Components desiring to use asynchronous queries should inherit from the new `UnmanagedComponent`,
+   *  instead of {@link cdf.components.BaseComponent|BaseComponent}. The `UnmanagedComponent` base class
+   *  provides pre-composed methods which implement the core lifecycle for a variety of different scenarios:</p>
    *
    * <ul>
-   * <li><code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code>: implements a synchronous lifecycle identical to the core CDF lifecycle.</li>
-   * <li><code>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}</code>: implements a simple interface to a lifecycle built around Query objects.</li>
-   * <li><code>{@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}</code>: implements a simple interface to a lifecycle built around AJAX calls.</li>
+   * <li>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}: implements a synchronous lifecycle identical to the core CDF lifecycle.</li>
+   * <li>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}: implements a simple interface to a lifecycle built around Query objects.</li>
+   * <li>{@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}: implements a simple interface to a lifecycle built around AJAX calls.</li>
    * </ul>
    *
-   * <p>Since all these lifecycle methods expect a callback that handles the actual component rendering, it's
-   * conventional style to have that callback as a method of the Component, called <code>redraw</code>. It's also
-   * considered standard practice to use <code>Function#bind</code> or <code>_.bind</code> to ensure that, inside the
-   * <code>redraw</code> callback, <code>this</code> points to the component itself.</p>
+   * <p>Since all these lifecycle methods expect a callback which handles the actual component rendering,
+   *  it's a conventional style to have that callback as a method of the component, called `redraw`.
+   *  It's also considered standard practice to use
+   *  {@link http://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_objects/Function/bind|Function#bind}
+   *  or {@link http://underscorejs.org/#bind|_.bind} to ensure that, inside the `redraw` callback,
+   *  `this` points to the component itself.</p>
    *
-   * <h3>Use <code>synchronous</code> If Your Component Doesn't Use External Data</h3>
+   * <h3>Use {@link cdf.components.UnmanagedComponent#synchronous|synchronous} If Your Component Does Not Use External Data</h3>
    *
-   * <p>Components that don't use any external data at all can continue subclassing
-   * {@link cdf.components.BaseComponent|BaseComponent} without any change of functionality. However, for the sake of
-   * consistency (or because you want querying to be optional -- see the section for details), you can use subclass
-   * <code>UnmanagedComponent</code> and use the
-   * <code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code> lifecycle method to emulate
-   * {@link cdf.components.BaseComponent|BaseComponent}'s behaviour:</p>
+   * <p>Components that do not use any external data at all can continue subclassing
+   *  {@link cdf.components.BaseComponent|BaseComponent} without any change of functionality. However, for the sake of
+   *  consistency (or because you want querying to be optional), you can use subclass
+   *  `UnmanagedComponent` and use the
+   *  {@link cdf.components.UnmanagedComponent#synchronous|synchronous} lifecycle method to emulate
+   *  {@link cdf.components.BaseComponent|BaseComponent}'s behavior:</p>
    *
    * <pre function="syntax.javascript">update: function() {<br>
    *   this.synchronous(this.redraw);<br>
    * }<br>
    * </pre>
    *
-   * <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
-   * <code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous}</code>:</p>
+   * <p>If you want to pass parameters to `redraw`, you can pass them as an array to
+   *  {@link cdf.components.UnmanagedComponent#synchronous|synchronous}:</p>
    *
    * <pre function="syntax.javascript">update: function() {<br>
    *   // Will call this.redraw(1, 2, 3)<br>
@@ -141,14 +142,14 @@ define([
    * }<br>
    * </pre>
    *
-   * <h3>Use <code>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}</code> When You Want Your
-   * Component To Use CDA/Query Objects</h3>
+   * <h3>Use {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery} When You Want Your
+   *  Component To Use CDA/Query Objects</h3>
    *
    * <p>If you're using a CDA data source, you probably want to use
-   * <code>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}</code> to handle the component
-   * lifecycle for you. <code>{@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}</code> expects at a
-   * minimum a query definition and a <code>redraw</code> callback to process the query results. The query definition
-   * is an object of the form:</p>
+   *  {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery} to handle the component
+   *  lifecycle for you. {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery} expects at a
+   *  minimum a query definition and a `redraw` callback to process the query results. The query definition
+   *  is an object of the form:</p>
    *
    * <pre function="syntax.javascript">{<br>
    *   dataAccessId: 'myQuery',<br>
@@ -156,8 +157,8 @@ define([
    * }<br>
    * </pre>
    *
-   * <p>Typically, if you're using CDE, these properties will be added to one of either
-   * <code>this.queryDefinition</code> or <code>this.chartDefinition</code> so you can just use this pattern:</p>
+   * <p>Typically, if you are using CDE, these properties will be added to one of either
+   *  `this.queryDefinition`, `this.chartDefinition` or `this.trafficDefinition` so you can just use this pattern:</p>
    *
    * <pre function="syntax.javascript">update: function() {<br>
    *   var redraw = _.bind(this.redraw, this);<br>
@@ -168,10 +169,10 @@ define([
    * <h3>Alternating Between Static And Query-Based Data</h3>
    *
    * <p>As the lifecycle methods are completely self-contained, you can switch between them at will, deciding on an
-   * appropriate lifecycle at runtime. A common pattern (used e.g. in <code>SelectComponent</code>, and the
-   * <code>CccComponent</code> family) is exposing a <code>valuesArray</code> property, and using static data if
-   * <code>valuesArray</code> is provided, or a query if it is not. Using <code>UnmanagedComponent</code>, this
-   * convention would look like this:</p>
+   *  appropriate lifecycle at runtime. A common pattern (used for example in `SelectComponent` and the
+   *  `CccComponent` family) is exposing a `valuesArray` property, and using static data if
+   *  `valuesArray` is provided, or a query if it is not. Using `UnmanagedComponent`, this
+   *  convention would look like this:</p>
    *
    * <pre function="syntax.javascript">update: function() {<br>
    *   var redraw = _.bind(this.redraw, this);<br>
@@ -198,7 +199,7 @@ define([
 
     /**
      * @summary Flag that defines if the component is running or not.
-     * @description Flag that defines if the component is running or not. 
+     * @description Flag that defines if the component is running or not.
      *
      * @type {boolean}
      * @default false
@@ -217,17 +218,19 @@ define([
 
     /**
      * @summary Handles calling `preExecution` when it exists.
-     * @description <p>Handles calling `preExecution` when it exists.</p> 
+     * @description <p>Handles calling `preExecution` when it exists.</p>
      *              <p>All components extending UnmanagedComponent should either use one
      *              of the three lifecycles declared in this class 
-     *              (<code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous} -&gt; {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery} -&gt; {@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}</code>)
-     *              or call this method explicitly at the very earliest opportunity.
-     *              If `preExecution` returns a falsy value, component execution should be cancelled as close to
+     *              ({@link cdf.components.UnmanagedComponent#synchronous|synchronous},
+     *              {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}
+     *              or {@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}),
+     *              or explicitly call this method at the very earliest opportunity.
+     *              If `preExecution` returns a falsy value, component execution should be canceled as
      *              immediately as possible.</p>
      *
-     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     * @return {boolean} `false` if component execution should be canceled, `true` otherwise.
      * @fires cdf.event:cdf
-     * @fires cdf.components.BaseComponent#event:"cdf:preExecution"
+     * @fires cdf.components.UnmanagedComponent#event:"cdf:preExecution"
      */
     preExec: function() {
       // runCounter gets incremented every time we run a query, allowing us to
@@ -253,14 +256,16 @@ define([
 
     /**
      * @summary Handles calling `postExecution` when it exists.
-     * @description  <p>Handles calling `postExecution` when it exists./p>
-     *               <p>All components extending UnmanagedComponent should either use one of the three 
+     * @description  <p>Handles calling `postExecution` when it exists.</p>
+     *               <p>All components extending UnmanagedComponent should either use one of the three
      *               lifecycles declared in this class
-     *               (<code>{@link cdf.components.UnmanagedComponent#synchronous|synchronous} -&gt; {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery} -&gt; {@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}</code>),
-     *               or call this method explicitly immediately before yielding control back to CDF.</p>
+     *               ({@link cdf.components.UnmanagedComponent#synchronous|synchronous},
+     *               {@link cdf.components.UnmanagedComponent#triggerQuery|triggerQuery}
+     *               or {@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}),
+     *               or explicitly call this method immediately before yielding control back to CDF.</p>
      *
      * @fires cdf.event:cdf
-     * @fires cdf.components.BaseComponent#event:"cdf:postExecution"
+     * @fires cdf.components.UnmanagedComponent#event:"cdf:postExecution"
      */
     postExec: function() {
       if(typeof this.postExecution === "function") {
@@ -271,8 +276,10 @@ define([
     },
 
     /**
-     * @summary Handles calling `postFetch`, when it exists, and of triggering the {@link event:cdf.postFetch|postFetch} event.
-     * @description Handles calling `postFetch`, when it exists, and of triggering the {@link event:cdf.postFetch|postFetch} event.
+     * @summary Handles calling `postFetch`, when it exists, and triggering the
+     *          {@link cdf.components.UnmanagedComponent#event:"cdf:postFetch"|postFetch} event.
+     * @description Handles calling `postFetch`, when it exists, and triggering the
+     *              {@link cdf.components.UnmanagedComponent#event:"cdf:postFetch"|postFetch} event.
      *
      * @param {object} data The fetched data.
      * @return {object} The resulting data.
@@ -328,7 +335,7 @@ define([
      *              lifecycle by calling either {@link cdf.components.UnmanagedComponent#endExec|endExec} or
      *              {@link cdf.components.UnmanagedComponent#failExec|failExec}.</p>
      *
-     * @return {boolean} `false` if component execution should be cancelled, `true` otherwise.
+     * @return {boolean} `false` if component execution should be canceled, `true` otherwise.
      */
     beginExec: function() {
       var exec = this.preExec();
@@ -341,9 +348,9 @@ define([
     /**
      * @summary Fails execution of the component, given an error object or the arguments of a
      *          {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
-     * @description  <p>Fails execution of the component, given an error object or the arguments of a
-     *               {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
-     *               This method handles parsing, signaling and logging of the error and unblocking the UI, if necessary.</p>
+     * @description <p>Fails execution of the component, given an error object or the arguments of a
+     *              {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
+     *              This method handles parsing, signaling and logging of the error and unblocking the UI, if necessary.</p>
      *
      * @param {object} arg An error object or the arguments of a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
      */
@@ -386,20 +393,20 @@ define([
      *          {@link cdf.components.UnmanagedComponent#postExec|postExecution} lifecycle tasks.
      * @description <p>Generic execute method that handles {@link cdf.components.UnmanagedComponent#preExec|preExecution} and
      *              {@link cdf.components.UnmanagedComponent#postExec|postExecution} lifecycle tasks.</p>
-     *              <p>The specified _callback_ function handles the component's core execution. If execution 
-     *              is not cancelled by the {@link cdf.components.UnmanagedComponent#preExec|preExecution} handler, 
+     *              <p>The specified `callback` function handles the component's core execution. If execution
+     *              is not canceled by the {@link cdf.components.UnmanagedComponent#preExec|preExecution} handler,
      *              it is called synchronously, from within a call to this method.
-     *              If it throws an error, it is like if {@link cdf.components.UnmanagedComponent#failExec|failExec} 
+     *              If it throws an error, it is like if {@link cdf.components.UnmanagedComponent#failExec|failExec}
      *              had been called with that error. This function is called with this component as the `this` context.</p>
      *              <p>This method is sugar for the following common pattern:</p>
      *
-     *              if(this.beginExec()) {
-     *                try {
-     *                  callback.call(this);
-     *                } catch(ex) {
-     *                  this.failExec(ex);
-     *                }
-     *              }
+     *       if(this.beginExec()) {
+     *         try {
+     *           callback.call(this);
+     *         } catch(ex) {
+     *           this.failExec(ex);
+     *         }
+     *       }
      *
      * @param {function} callback The function to execute. This function receives two arguments:
      *   1. resolve - call this function to signal that core execution has ended.
@@ -417,12 +424,12 @@ define([
     },
 
     /**
-     * @summary The synchronous lifecycle handler closely resembles the core CDF lifecycle
-     * @description  The synchronous lifecycle handler closely resembles the core CDF lifecycle, 
-     *               and is provided as an alternative for components that desire the option to 
-     *               alternate between a synchronous and asynchronous style lifecycles
-     *               depending on external configuration (e.g. if it can take values from 
-     *               either a static array or a query). It takes the component drawing method as a callback.
+     * @summary The synchronous lifecycle handler closely resembles the core CDF lifecycle.
+     * @description The synchronous lifecycle handler closely resembles the core CDF lifecycle,
+     *              and is provided as an alternative for components that desire the option to
+     *              alternate between a synchronous and asynchronous style lifecycles
+     *              depending on external configuration (e.g., if it can take values from 
+     *              either a static array or a query). It takes the component drawing method as a callback.
      *
      * @param {Function} callback Component drawing method.
      * @param {Array<Object>} [arg=[]] Argument for the callback.
@@ -448,16 +455,16 @@ define([
      * @summary The triggerQuery lifecycle handler builds a lifecycle around Query objects. 
      * @description <p>The triggerQuery lifecycle handler builds a lifecycle around Query objects.
      *              Execution ends immediately after the call to the specified callback.</p>
-     *              It takes a query definition object that is passed directly into the Query constructor, 
+     *              <p>It takes a query definition object which is passed directly into the Query constructor,
      *              and the component rendering callback, and implements the lifecycle:</p>
-     *              <p><pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.components.UnmanagedComponent#block|block} -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; callback -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional)</code></pre></p>
-     *              <p>This method detects concurrent updates to the component and ensures that only 
-     *              the redraw of the most recent update is performed. 
-     *              {@link UnmanagedComponent#endExec|endExec} is called after the <code>callback</code> execution.</p>
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; callback -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional)</code></pre>
+     *              <p>This method detects concurrent updates to the component and ensures that only
+     *              the redraw of the most recent update is performed.
+     *              {@link UnmanagedComponent#endExec|endExec} is called after the `callback` execution.</p>
      *
-     * @param {cdf.QueryDefinition} queryDef The query definition object.
+     * @param {object} queryDef The query definition object.
      * @param {function} callback Callback to run after query has ran. It receives the fetched data as an argument.
-     * @param {object} queryOptions User options for the query
+     * @param {object} queryOptions User options for the query.
      */
     triggerQuery: function(queryDef, callback, queryOptions) {
       this.beginQuery(queryDef, function(data) {
@@ -467,13 +474,13 @@ define([
     },
 
     /**
-     * @summary The beginQuery lifecycle handler implements the begin phase of a lifecycle around Query objects.
-     * @description <p>The beginQuery lifecycle handler implements the begin phase of a lifecycle around Query objects.
-     *              It implements the lifecycle:
-     *              <pre></code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.components.UnmanagedComponent#block|block} -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; callback </code></pre></p>
-     *              <p>Ending the execution, is the responsibility of the specified callback,
-     *              by calling {@link cdf.components.UnmanagedComponent#endExec|endExec} (resulting in:</p>
-     *              <p><code>{@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional) or {@link cdf.components.UnmanagedComponent#failExec|failExec}</code>).</p>
+     * @summary The beginQuery lifecycle handler implements the beginning phase of a lifecycle around Query objects.
+     * @description <p>The beginQuery lifecycle handler implements the beginning phase of a lifecycle around Query objects.
+     *              It implements the lifecycle:</p>
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; callback</code></pre>
+     *              <p>Ending the execution, is the responsibility of the specified callback
+     *              by calling {@link cdf.components.UnmanagedComponent#endExec|endExec}, resulting in:</p>
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional) or {@link cdf.components.UnmanagedComponent#failExec|failExec}</code></pre>
      *
      * @param {object} queryDef The query definition object.
      * @param {function} callback Callback to run after query has ran.
@@ -498,9 +505,9 @@ define([
     /**
      * @summary The triggerAjax lifecycle handler builds a lifecycle around generic AJAX calls.
      * @description <p>The triggerAjax lifecycle handler builds a lifecycle around generic AJAX calls.
-     *              It implements the lifecycle:
-     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.components.UnmanagedComponent#block|block} -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; render -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional)</code></pre></p>
-     *              <p>After the call to the <code>render callback</code>, the event {@link event:cdf.render|render} is fired, and then the execution ends.</p>
+     *              It implements the lifecycle:</p>
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; render -&gt; {@link cdf.components.UnmanagedComponent#postExec|postExecution} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional)</code></pre>
+     *              <p>After the call to the `render` callback, the event {@link cdf.components.UnmanagedComponent#event:"cdf:render"|cdf:render} is fired, and then the execution ends.</p>
      *              triggerAjax can be used with either of the following call conventions:
      *              <ul>
      *                <li>{@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}(url, params, callback);</li>
@@ -508,15 +515,17 @@ define([
      *                <li>{@link cdf.components.UnmanagedComponent#triggerAjax|triggerAjax}({url: url, data: params, ...}, callback, ajaxParameters);</li>
      *              </ul>
      *              <p>In the second case, you can add any other {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} parameters you desire to the
-     *              object, but <code>callback</code> will take control over the success and error callbacks.
-     *              If passed, the supplied _ajaxParameters_ will be passed to the default ajax call.</p>
+     *              object, but `callback` will take control over the success and error callbacks.
+     *              If passed, the supplied `ajaxParameters` will be passed to the default Ajax call.</p>
      *
      * @param {string|Object} url URL to call.
      * @param {string} url.url URL to call.
      * @param {object} url.params Parameters for the call.
      * @param {object} [params] Parameters for the call.
      * @param {function} callback Render callback, called with the response data.
-     * @param {object} [ajaxParameters={}] Parameters specific to the ajax call definition.
+     * @param {object} [ajaxParameters={}] Parameters specific to the Ajax call definition.
+     * @fires cdf.event:cdf
+     * @fires cdf.components.UnmanagedComponent#event:"cdf:render"
      */
     triggerAjax: function(url, params, callback, ajaxParameters) {
       // Process parameters
@@ -538,16 +547,17 @@ define([
     },
 
     /**
-     * @summary The beginAjax lifecycle handler implements the begin phase of a lifecycle based on generic AJAX calls.
-     * @description <p>The beginAjax lifecycle handler implements the begin phase of a lifecycle based on generic AJAX calls.
+     * @summary The beginAjax lifecycle handler implements the beginning phase of a lifecycle based on generic AJAX calls.
+     * @description <p>The beginAjax lifecycle handler implements the beginning phase of a lifecycle based on generic AJAX calls.
      *              It implements the lifecycle:</p>
-     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.components.UnmanagedComponent#block|block} -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; {@link cdf.components.UnmanagedComponent~beginAjaxCb|callback}</code></pre>
-     *              Ending the execution, is the responsibility of the specified callback, by calling
-     *              {@link cdf.components.UnmanagedComponent#endExec|endExec}, resulting in: <code>{@link cdf.components.UnmanagedComponent#postExec|postExec} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional) or {@link cdf.components.UnmanagedComponent#failExec|failExec} </code>.
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#preExec|preExecution} -&gt; {@link cdf.components.UnmanagedComponent#block|block} (optional) -&gt; {@link cdf.queries.BaseQuery#fetchData|fetchData} -&gt; {@link cdf.components.UnmanagedComponent#postFetchData|postFetch} -&gt; {@link cdf.components.UnmanagedComponent~beginAjaxCb|callback}</code></pre>
+     *              Ending the execution is the responsibility of the specified callback, by calling
+     *              {@link cdf.components.UnmanagedComponent#endExec|endExec}, resulting in:
+     *              <pre><code>{@link cdf.components.UnmanagedComponent#postExec|postExec} -&gt; {@link cdf.components.UnmanagedComponent#unblock|unblock} (optional) or {@link cdf.components.UnmanagedComponent#failExec|failExec}</code></pre>
      *
      * @param {object} ajaxParameters Parameters for {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax},
      *                                including, at a minimum, the `url` option. {@link cdf.components.UnmanagedComponent#beginAjax|beginAjax} will
-     *                                take control over the `success` and `error` callbacks, and default `async` to `true`.
+     *                                take control over the `success` and `error` callbacks and default `async` to `true`.
      * @param {string} ajaxParameters.url URL to call.
      * @param {function} callback Render callback, called with the response data.
      */
@@ -568,15 +578,15 @@ define([
     // ------------
 
     /**
-     * @summary Creates and sets the component's current query given its definition, and, optionally, query options.
-     * @description Creates and sets the component's current query given its definition, and, optionally, query options.
+     * @summary Creates and sets the component's current query given its definition, and optionally, query options.
+     * @description Creates and sets the component's current query given its definition, and optionally, query options.
      *
-     * @param {object} queryDef The query definition object.
-     * @param {object} [queryOptions] Query options object.
+     * @param {object} queryDef The query definition `object`.
+     * @param {object} [queryOptions] Query options `object`.
      * @param {object} [queryOptions.ajax] Options passed to {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax}.
-     *   The {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options _data_, _url_, _error_ and _success_ are reserved.
+     *   The {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options `data`, `url`, `error` and `success` are reserved.
      * @param {number} [queryOptions.pageSize] The page size of paginated results.
-     * @return {BaseQuery} The query object.
+     * @return {cdf.queries.BaseQuery} The query `object`.
      *
      * @protected
      */
@@ -607,12 +617,11 @@ define([
       return ++this.runCounter;
     },
 
-
     /**
-     * @summary Build a generic response handler that runs the success callback
-     * @description <p>Build a generic response handler that runs the success callback when being called in response to the most recent
+     * @summary Builds a generic response handler which runs the success callback.
+     * @description <p>Builds a generic response handler which runs the success callback when being called in response to the most recent
      *              AJAX request that was triggered for this component (as determined by comparing counter and this.runCounter),
-     *              and always calls the always callback. If the counter is not provided, it'll be generated automatically.</p>
+     *              and always calls the always callback. If the counter is not provided, it will be generated automatically.</p>
      *              <p>Accepts the following calling conventions:</p>
      *              <ul>
      *                <li>{@link cdf.components.UnmanagedComponent#getSuccessHandler|getSuccessHandler}(counter, success, always)</li>
@@ -624,8 +633,8 @@ define([
      * @param {number}   [counter={@link cdf.components.UnmanagedComponent#callCounter|callCounter}] Identifier for the
      *   ajax call being made.
      * @param {function} success Success callback.
-     * @param {function} [always] Callback that is ran independently of call status.
-     * @param {function} [canceled] Callback that is ran when the call has been superseded by a more recent one.
+     * @param {function} [always] Callback that is run independently of call status.
+     * @param {function} [canceled] Callback that is run when the call has been superseeded by a more recent one.
      *   It receives the raw received data.
      * @return {function} Success handler function.
      */
@@ -665,11 +674,10 @@ define([
 
     /**
      * @summary Gets an error handler suitable for use as a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback or a
-     * try/catch handler.
+     *          try/catch handler.
      * @description <p>Gets an error handler suitable for use as a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback or a
      *              try/catch handler.</p>
-     *              <p>This method returns a `this` free version of the {@link cdf.components.UnmanagedComponent#failExec|failExec}
-     *              method.</p>
+     *              <p>This method returns a `this` free version of the {@link cdf.components.UnmanagedComponent#failExec|failExec} method.</p>
      *
      * @return {cdf.components.UnmanagedComponent#failExec} Error handler.
      */
@@ -678,16 +686,16 @@ define([
     },
 
     /**
-     * @summary Trigger an error event on the component.
-     * @description Trigger an error event on the component. Takes as arguments the error message 
-     *              and, optionally, a `cause` object. It also calls 
+     * @summary Triggers an error event on the component.
+     * @description Triggers an error event on the component. Takes as arguments the error message
+     *              and optionally, a `cause` object. It also calls 
      *              {@link cdf.components.UnmanagedComponent#errorNotification|errorNotification}
      *              showing the notification to the user.
      *
      * @param {string} msg          Error message.
      * @param {string} [cause=null] Cause for the error.
      * @fires cdf.event:cdf
-     * @fires cdf.components.BaseComponent#event:"cdf:error"
+     * @fires cdf.components.UnmanagedComponent#event:"cdf:error"
      */
     error: function(msg, cause) {
       if(!msg) {
@@ -706,15 +714,14 @@ define([
     },
 
     /**
-     * @summary Triggers an error notification.
-     * @description Triggers an {@link cdf.dashboard.Popup.errorNotification|error notification popup} with 
-     *              the given messages and error.
+     * @summary Creates an error notification {@link cdf.dashboard.Popups|popup}.
+     * @description Creates an error notification {@link cdf.dashboard.Popups|popup} with the given messages and error.
      *
      * @param {object} err A CDF error object containing `msg` and `error` properties.
      * @param {string} err.msg Error message.
      * @param {string} err.error Cause for the error.
-     * @param {HtmlElement} [ph={@link cdf.components.UnmanagedComponent#placeholder|placeholder()}|undefined] HTML
-     *   element where to display the error notification.
+     * @param {jQuery} [ph] DOM element where to display the error notification.
+     * @see {@link cdf.dashboard.Dashboard#errorNotification|errorNotification}
      */
     errorNotification: function(err, ph) {
       if(!ph) {
@@ -727,9 +734,9 @@ define([
     },
 
     /**
-     * @summary Trigger UI blocking while the component is updating
-     * @description Trigger UI blocking while the component is updating. Default implementation uses the 
-     *              global CDF blockUI, but implementers are encouraged to override with per-component 
+     * @summary Trigger UI blocking while the component is updating.
+     * @description Trigger UI blocking while the component is updating. Default implementation uses the
+     *              global CDF blockUI, but implementers are encouraged to override with per-component
      *              blocking where appropriate (or no blocking at all in components that support it).
      */
     block: function() {
@@ -741,9 +748,9 @@ define([
 
     /**
      * @summary Trigger UI unblock when the component finishes updating.
-     * @description  Trigger UI unblock when the component finishes updating. Functionality is defined 
-     *               as undoing whatever was done in the block method. Should also be overridden in 
-     *               components that override {@link cdf.components.UnmanagedComponent#block|block}.
+     * @description Trigger UI unblock when the component finishes updating. Functionality is defined
+     *              as undoing whatever was done in the block method. Should also be overridden in
+     *              components that override {@link cdf.components.UnmanagedComponent#block|block}.
      */
     unblock: function() {
       if(this.isRunning) {
@@ -753,11 +760,11 @@ define([
     },
 
     /**
-     * @summary Returns _true_ if the component's lifecycle is marked as silent.
-     * @description Returns _true_ if the component's lifecycle is marked as silent. This means that any 
-     *              step in the lifecycle of the component will not try to block the UI. 
+     * @summary Returns `true` if the component's lifecycle is marked as silent.
+     * @description Returns `true` if the component's lifecycle is marked as silent. This means that any
+     *              step in the lifecycle of the component will not try to block the UI.
      *
-     * @return {boolean} _true_ if the component should not trigger an UI block when updating.
+     * @return {boolean} `true` if the component should not trigger an UI block when updating.
      */
     isSilent: function() {
       return !!(this.lifecycle && this.lifecycle.silent);
@@ -766,7 +773,7 @@ define([
     /**
      * @summary Blocks the UI if it isn't silent.
      * @description Blocks the UI, calling the {@link cdf.components.UnmanagedComponent#block|block}
-     *              function if the component execution is not silent.  
+     *              function if the component execution is not silent.
      *
      * @private
      */
@@ -777,7 +784,7 @@ define([
     /**
      * @summary Unblocks the UI if it isn't silent.
      * @description Unblocks the UI, calling the {@link cdf.components.UnmanagedComponent#block|block}
-     *              function if the component execution is not silent.  
+     *              function if the component execution is not silent.
      *
      * @private
      */
@@ -785,5 +792,4 @@ define([
       if(!this.isSilent()) this.unblock();
     }
   });
-
 });

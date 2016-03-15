@@ -52,9 +52,9 @@ define([
 
     /**
      * @summary Gets the component instance from a given name.
-     * @description <p>Gets the component given a string representing the component's name. </p>
+     * @description <p>Gets the component given a string representing the component's name.</p>
      *              <p>This method iterates over the components array and searches for the component with the name
-     *              used as the argument. If the component with that name is not found, then _undefined_ is returned. </p>
+     *              used as the argument. If the component with that name is not found, then `undefined` is returned.</p>
      *
      * @param {String} name The component's name.
      * @return {cdf.components.BaseComponent} The instance of {@link cdf.components.BaseComponent|BaseComponent} with the given name.
@@ -98,7 +98,7 @@ define([
      *              {@link cdf.dashboard.Dashboard#addComponent|addComponent} for each component.</p>
      *              <p>Along with the {@link cdf.dashboard.Dashboard#addComponent|addComponent}
      *              behaviour, if a component in the array fails to be added to the dashboard
-     *              instance, an error is thrown and the execution stops. </p>
+     *              instance, an error is thrown and the execution stops.</p>
      *
      * @param {Array<cdf.components.BaseComponent>} components The array of components to be added.
      * @throws {Error} Error if a component in the array is invalid or was already added.
@@ -122,7 +122,7 @@ define([
      *              a valid string, an exception is thrown.</p>
      *              <p>The <code>options</code> parameter is optional and when it is absent, the component is added
      *              to the end of the components array. The same rule is applied if `options.index` is false.
-     *              If not, the new component is appended to the array at position `options.index`. </p>
+     *              If not, the new component is appended to the array at position `options.index`.</p>
      * @param {cdf.components.BaseComponent} component The new component to be added.
      * @param {Object} [options] An option object.
      * @param {Number} [options.index] The index at which to add the component.
@@ -165,14 +165,14 @@ define([
     /**
      * @summary Gets the index of a component.
      * @description <p>Get the index of the array `components` that contains the component.</p>
-     *              <p>If `compOrNameOrIndex` is a _string_, it searches the component that first matches such name.
-     *              If `compOrNameOrIndex` is a _number_, it returns component index on the components array.
+     *              <p>If `compOrNameOrIndex` is a `string`, it searches the component that first matches such name.
+     *              If `compOrNameOrIndex` is a `number`, it returns component index on the components array.
      *              Lastly, if `compOrNameOrIndex` is a component instance, it returns the index where it is in
      *              `components` array.</p>
      *
      * @param {cdf.components.BaseComponent|string|number} compOrNameOrIndex
      *        The name, index, or the component to search.
-     * @return {number} The index where the component is at or _-1_ if not found.
+     * @return {number} The index where the component is at or `-1` if not found.
      */
     getComponentIndex: function(compOrNameOrIndex) {
       if(compOrNameOrIndex != null) {
@@ -293,7 +293,7 @@ define([
      *
      * @private
      * @param {cdf.components.BaseComponent} control The target component.
-     * @param {Object} Class   The new class to cast the component to.
+     * @param {Object} Class The new class to cast the component to.
      * @deprecated
      */
     _castControlToClass: function(control, Class) {
@@ -317,7 +317,7 @@ define([
     _getControlClass: function(control) {
       // see if there is a class defined for this control
       var typeName = control.type;
-      if(typeof typeName === 'function') { typeName = typeName.call(control); } // <=> control.type() ; the _this_ in the call is _control_
+      if(typeof typeName === 'function') { typeName = typeName.call(control); } // <=> control.type() ; the `this` in the call is `control`
 
       var TypeName = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
 
@@ -355,7 +355,8 @@ define([
     /**
      * @summary Extend control with BaseComponent methods.
      * @description Extend control with BaseComponent methods, if it's not an instance of it.
-     *              Also, avoid extending if _Class_ was already applied and it is a subclass of BaseComponent.
+     *              Also, avoid extending if `Class` was already applied and it is a subclass of
+     *              {@link cdf.components.BaseComponent|BaseComponent}.
      *
      * @private
      * @param {Object} control The target component.
@@ -390,12 +391,12 @@ define([
     /**
      * @summary Binds a callback function to the provided `control` component for debugging.
      * @description Binds a callback function to the provided `control` component using the special
-     * Backbone [all]{@link http://backbonejs.org/#Events-catalog} event that will be
+     * Backbone {@link http://backbonejs.org/#Events-catalog|all} event that will be
      * triggered whenever any event is triggered. The callback will log a message, using
-     * the [Logger]{@link cdf.Logger} class, whenever an event is triggered. The only
-     * exceptions are if the event triggered is the [cdf]{@link cdf.event:cdf} event, if
-     * [logLifeCycle]{@link cdf.dashboard.Dashboard#logLifecycle} is `false` or if the
-     * component is a _PostInitMarker_.
+     * the {@link cdf.Logger|Logger} class, whenever an event is triggered. The only
+     * exceptions are if the event triggered is the {@link cdf.event:cdf|cdf} event, if
+     * {@link cdf.dashboard.Dashboard#logLifecycle|logLifeCycle} is `false` or if the
+     * component is a `PostInitMarker`.
      *
      * @private
      * @param {cdf.components.BaseComponent} control The target component.
