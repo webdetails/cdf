@@ -113,7 +113,7 @@ define([
 
     /**
      * @summary Sets a pair parameter/value as bookmarkable.
-     * @description <p>It sets `parameter` as bookmarkable, with value=`true` or `value` if
+     * @description <p>It sets `parameter` as bookmarkable, with value equal to `true` or `value` if
      *              provided.</p>
      *
      * @param {string} parameter The name of the parameter to be stored.

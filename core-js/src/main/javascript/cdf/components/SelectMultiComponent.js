@@ -36,7 +36,7 @@ define(['./SelectBaseComponent', '../lib/jquery'], function(SelectBaseComponent,
      * Obtains the normalized and defaulted value of
      * the {@link #isMultiple} option.
      *
-     * @return {boolean} _true_ if multiple values are allowed, _false_ otherwise.
+     * @return {boolean} `true` if multiple values are allowed, `false` otherwise.
      * @private
      */
     _allowMultipleValues: function() {
