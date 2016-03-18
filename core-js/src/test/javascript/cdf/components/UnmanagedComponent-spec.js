@@ -83,7 +83,7 @@ define([
       executeAtStart: true,
       myFunction: function() {}
     });
-  
+
     var uhello = new HelloUnmanagedComponent({
       name: "uhello",
       type: "HelloUnmanaged",
@@ -91,7 +91,7 @@ define([
       executeAtStart: true,
       myFunction: function() {}
     });
-  
+
     var mquery = new HelloQueryBaseComponent({
       name: "mquery",
       type: "HelloQueryBase",
@@ -99,15 +99,8 @@ define([
       executeAtStart: true,
       queryDefinition: {dataSource: "fakeQuery"}
     });
-  
-    var uquery = new HelloQueryUnmanagedComponent({
-      name: "uquery",
-      type: "HelloQueryUnmanaged",
-      htmlObject: 'uquery',
-      executeAtStart: true,
-      queryDefinition: {dataSource: "fakeQuery"}
-    });
 
+    var uquery;       
     var uqueryWithParams = new HelloQueryUnmanagedComponent({
       name: "uqueryWithParams",
       type: "HelloQueryUnmanaged",
@@ -120,10 +113,21 @@ define([
         "MYPARAM3": "myparam3"
       }
     });
+    
+    function renewUquery(){
+      return new HelloQueryUnmanagedComponent({
+        name: "uquery",
+        type: "HelloQueryUnmanaged",
+        htmlObject: 'uquery',
+        executeAtStart: true,
+        queryDefinition: {dataSource: "fakeQuery"}
+       });
+      };
 
     beforeEach(function() {
       dashboard = new Dashboard();
       dashboard.init();
+      uquery = renewUquery();
       dashboard.addComponents([mhello, uhello, mquery, uquery, uqueryWithParams]);
       dashboard.addDataSource("fakeQuery", {dataAccessId: "1", path: "/test/path"});
     });
@@ -217,12 +221,93 @@ define([
 
       dashboard.update(uqueryWithParams);
     });
+   
+   /**
+    * ## Unmanaged Component # should return one of the known query definition properties
+    */
+    it("should return one of the known query definition properties", function() {
+      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+      var querydefinition = {dataSource: "otherDatasource"};
+      uquery.queryDefinition = querydefinition ;
+      uquery.trafficDefinition = undefined;
+      uquery.chartDefinition = undefined;
+      expect(uquery.getQueryDefinition()).toBe(querydefinition)
+      uquery = renewUquery();
+      uquery.chartDefinition = querydefinition;
+      uquery.queryDefinition = undefined;
+      uquery.trafficDefinition = undefined;
+      expect(uquery.getQueryDefinition()).toBe(querydefinition)
+      uquery = renewUquery();
+      uquery.trafficDefinition = querydefinition;
+      uquery.queryDefinition = undefined;
+      uquery.chartDefinition = undefined;
+      expect(uquery.getQueryDefinition()).toBe(querydefinition)  
+    });
+
+    /**
+     * ## Unmanaged Component # preExecution should allow changes in the query definition object
+     */
+    it("preExecution should allow updating the query definition object", function(done) {
+      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+      uquery.preExecution = function() {
+        this.queryDefinition.dataSource = "otherDatasource";
+      };
+      uquery._setQuery = function(queryDef, queryOptions) {
+        expect(queryDef.dataSource).toBe("otherDatasource");
+        done();
+      };
+      uquery.triggerQuery(uquery.queryDefinition);
+    });
+
+    /**
+     * ## Unmanaged Component # preExecution should allow overriding the query definition object
+     */
+    it("preExecution should allow overriding the query definition object", function(done) {
+      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+      uquery.preExecution = function() {
+        this.queryDefinition = $.extend( {}, this.queryDefinition , { dataSource: "otherDatasource"});
+      };
+      uquery._setQuery = function(queryDef, queryOptions) {
+        expect(queryDef.dataSource).toBe("otherDatasource");
+        done();
+      };
+      uquery.triggerQuery(uquery.queryDefinition);
+     });
+
+    /**
+     * ## Unmanaged Component # preExecution should allow overriding the query definition to a method
+     */
+    it("preExecution should allow overriding the query definition to a method", function(done) {
+      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+      uquery.preExecution = function() {
+        this.queryDefinition = function() { return { dataSource: "otherDatasource"}; };
+      };
+      uquery._setQuery = function(queryDef, queryOptions) {
+        expect(queryDef().dataSource).toBe("otherDatasource");
+        done();
+      };
+      uquery.triggerQuery(uquery.queryDefinition);
+     });
+
+    /**
+     * ## Unmanaged Component # preExecution should allow overriding the getQueryDefinition method
+     */
+    it("preExecution should allow overriding the getQueryDefinition method", function(done) {
+      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+      uquery.preExecution = function() {
+        uquery.getQueryDefinition = function() { return { dataSource: "otherDatasource"}; };
+      };
+      uquery._setQuery = function(queryDef, queryOptions) {
+        expect(queryDef.dataSource).toBe("otherDatasource");
+        done();
+      };
+      uquery.triggerQuery(uquery.queryDefinition);
+     });
 
     /**
      * ## Unmanaged Component # getSuccessHandler
      */
     describe("getSuccessHandler", function() {
-
       /**
        * ## Unmanaged Component # getSuccessHandler # returns a callback function that returns the processed data after calling postFetch on a successful data request
        */
