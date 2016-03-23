@@ -19,7 +19,7 @@ define([
 ], function(Dashboard, Logger, Backbone, Utf8Encoder) {
 
   /**
-   * @class cdf.dashboard.Dashboard.parameters
+   * @class cdf.dashboard."Dashboard.parameters"
    * @amd cdf/dashboard/Dashboard.parameters
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for parameters.
@@ -320,7 +320,7 @@ define([
      * @param {String} parameterName The parameter name.
      * @param {Object} parameterValue The value of the parameter.
      * @param {Boolean} isNotified A flag indicating if a
-     *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"}
+     *   [<em>parameterName</em>:fireChange]{@link cdf.dashboard.Dashboard#event:"parameterName:fireChange"}
      *   event is to be triggered when the parameter value changes.
      */
     setParameter: function(parameterName, parameterValue, isNotified) {

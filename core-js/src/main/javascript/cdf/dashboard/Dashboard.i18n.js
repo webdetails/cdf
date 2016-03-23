@@ -21,7 +21,7 @@ define([
 ], function(Logger, Dashboard, DashboardExt, moment, cdo, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.i18n
+   * @class cdf.dashboard."Dashboard.i18n"
    * @amd cdf/dashboard/Dashboard.i18n
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling internationalization and localization.

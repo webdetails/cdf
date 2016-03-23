@@ -1,19 +1,26 @@
 <?js
 var data = obj;
 var self = this;
-var name = (data.kind === "event" ? "event:" : "") + encodeURIComponent(data.name);
+var name = (data.scope === "static" ? "." : "") + (data.kind === "event" ? "event:" : "") + encodeURI(data.name);
 ?>
 
 <table id="<?js= name ?>">
     <thead>
         <tr>
-            <th><strong><?js= (data.kind == "class" ? "new " : "") + data.parsedName ?></strong><?js= (data.kind === "class" && data.scope === "static" ? '': data.signature || '') + (data.returns && data.returns.length? ":" : "") ?>
-                <?js if (data.returns && data.returns.length) { ?>
-                    <?js data.returns.forEach(function(r, i) { ?>
-                      <?js= self.partial('type.tmpl', r.type.names) ?>
-                      <?js if (i < data.returns.length-1) { ?>|<?js } ?>
-                    <?js });
-                  } ?>
+            <th><strong><?js= (data.kind == "class"
+                                 ? "new " + data.parsedName
+                                 : (data.kind == "event"
+                                     ? data.parsedName.replace(/(parameterName|parameter):fireChange/, "<em>$1</em>:fireChange")
+                                     : data.parsedName)) ?></strong><?js= (data.signature || '') ?>
+                <?js if (data.returns && data.returns.length) {
+                    ?>:<?js
+                    data.returns.forEach(function(r, i) { ?>
+                        <?js= self.partial('type.tmpl', r.type.names) ?>
+                        <?js if (i < data.returns.length-1) {
+                            ?>|<?js
+                        }
+                    });
+                } ?>
                 <?js= self.partial('modifiers.tmpl', data) ?>
             </th>
         </tr>
@@ -21,7 +28,7 @@ var name = (data.kind === "event" ? "event:" : "") + encodeURIComponent(data.nam
     <tbody>
         <tr>
             <td>
-                <?js= data.description ?>
+                <?js= (typeof data.description === "string") ? data.description.replace(/(\{@link [^}]+)&quot;([^\}]+)&quot;([^\}]*\})/g, "$1\"$2\"$3") : data.description ?>
 
                 <?js= this.partial('details.tmpl', data) ?>
 
@@ -32,7 +39,7 @@ var name = (data.kind === "event" ? "event:" : "") + encodeURIComponent(data.nam
                 <?js if (data.fires && fires.length) { ?>
                     <p><strong>Fires:</strong>
                     <?js fires.forEach(function(f,i) { ?>
-                        <?js= self.linkto(f, f.split('"').join('')) ?>
+                        <?js= decodeURI(self.linkto(f, f.split('"').join(''))) ?>
                         <?js if (i < fires.length-1) { ?>, <?js } ?>
                     <?js }); ?>
                     </p>

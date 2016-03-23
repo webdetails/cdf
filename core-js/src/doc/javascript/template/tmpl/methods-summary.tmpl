@@ -16,17 +16,19 @@ var methods = obj;
         if(methods) {
           methods.forEach(function(method) {
             if(!method) { return; }
-                var name = encodeURIComponent(method.name);
+
+            // hardcoded fix for "Dashboard.Blueprint", "Dashboard.Bootstrap" and "Dashboard.Clean"
+            method.parsedName = method.parsedName.replace(/"?(Dashboard)\.(Blueprint|Bootstrap|Clean)"?/, "$1");
             ?>
             <tr>
               <td> 
-                <a href="#<?js= name ?>"> <?js= (method.kind == "class" ? "new " : "") + method.parsedName + (method.signature || '') ?>
+                <a href="#<?js= (method.scope === "static" ? "." : "") + encodeURI(method.name) ?>"> <?js= (method.kind == "class" ? "new " : "") + method.parsedName + (method.signature || '') ?>
                 </a>
                 <?js if (method.returns && method.returns.length) { ?>
                 :
                     <?js method.returns.forEach(function(r, i) { ?>
                       <?js= self.partial('type.tmpl', r.type.names) ?>
-                      <?js if (i < method.returns.length-1) { ?>|<?js } ?>
+                      <?js if (i < method.returns.length-1) { ?> | <?js } ?>
                     <?js });
                   } ?>
                 <?js= self.partial('modifiers.tmpl', method) ?>  

@@ -31,8 +31,9 @@
         <?js if(doc.static) { ?>
             <?js= self.partial('modifiers.tmpl', doc) ?> 
         <?js } ?>
-        
-        <?js= doc.classdesc ?>
+        <?js= (typeof doc.classdesc === "string"
+            ? doc.classdesc.replace(/(\{@link [^}]+)&quot;([^\}]+)&quot;([^\}]*\})/g, "$1\"$2\"$3")
+            : doc.classdesc) ?>
         
     <?js } ?>
 
@@ -168,19 +169,19 @@
     <!-- Details Start -->
 
     <?js if (doc.kind === 'class' && !doc.static) { ?>
-        <h3>Constructor Details</h3>
+        <p class="h3">Constructor Details</p>
         <?js= self.partial('method-details.tmpl', doc) ?>
     <?js } ?>
 
     <?js if (members && members.length) { ?>
-        <h3>Members Detail</h3>
+        <p class="h3">Members Details</p>
         <?js members.forEach(function(p) { ?>
             <?js= self.partial('member-details.tmpl', p) ?>
         <?js }); ?>
     <?js } ?>
 
     <?js if (methods && methods.length) { ?>
-        <h3>Methods Details</h3>
+        <p class="h3">Methods Details</p>
         <?js methods.forEach(function(m) { ?>
             <?js= self.partial('method-details.tmpl', m) ?>
         <?js }); ?>
@@ -188,7 +189,7 @@
 
     <?js var events = self.find({kind: 'event', memberof: doc.longname});
     if (events && events.length) { ?>
-        <h3>Events Details</h3>
+        <p class="h3">Events Details</p>
         <?js events.forEach(function(e) { ?>
             <?js= self.partial('method-details.tmpl', e) ?>
         <?js }); ?>
