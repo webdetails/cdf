@@ -18,7 +18,7 @@ define([
 ], function(Dashboard, Logger, _) {
 
   /**
-   * @class cdf.dashboard.Dashboard.dataSources
+   * @class cdf.dashboard."Dashboard.dataSources"
    * @amd cdf/dashboard/Dashboard.dataSources
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling data sources.

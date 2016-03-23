@@ -3,7 +3,7 @@ var data = obj;
 var self = this;
 ?>
 
-<table id="<?js= data.parsedName ?>">
+<table id="<?js= (data.scope === "static" ? "." + data.parsedName : data.parsedName) ?>">
     <thead>
         <tr>
             <th><?js= data.parsedName+":" ?> 

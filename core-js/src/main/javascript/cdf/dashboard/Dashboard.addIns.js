@@ -65,7 +65,7 @@ define([
   };
 
   /**
-   * @class cdf.dashboard.Dashboard.addIns
+   * @class cdf.dashboard."Dashboard.addIns"
    * @amd cdf/dashboard/Dashboard.addIns
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling add-ins.

@@ -19,7 +19,7 @@ define([
 ], function($, Dashboard, DashboardExt, DashboardContextExt) {
 
   /**
-   * @class cdf.dashboard.Dashboard.context
+   * @class cdf.dashboard."Dashboard.context"
    * @amd cdf/dashboard/Dashboard.context
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling the context `object`.
