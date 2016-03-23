@@ -22,7 +22,7 @@ define([
 ], function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.legacy
+   * @class cdf.dashboard."Dashboard.legacy"
    * @amd cdf/dashboard/Dashboard.legacy
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling legacy calls.

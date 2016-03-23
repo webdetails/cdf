@@ -368,7 +368,13 @@ function createMemberData(data, member, kind) {
     }
 
     if(kind === 'event') {
-        memberData.title = prefix.replace("#event:", ".html#event:").replace(/\"/g, "_") + encodeURIComponent(member.name);
+        if(typeof member.scope === "string") {
+            if(member.scope === "static") {
+                memberData.title = prefix.replace("#event:", ".html#.event:").replace(/\"/g, "_") + encodeURI(member.name);
+            } else if(member.scope === "instance") {
+                memberData.title = prefix.replace("#event:", ".html#event:").replace(/\"/g, "_") + encodeURI(member.name);
+            }
+        }
     }
 
     return memberData;

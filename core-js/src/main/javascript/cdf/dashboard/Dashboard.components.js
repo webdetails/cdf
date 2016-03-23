@@ -20,7 +20,7 @@ define([
 ], function(Dashboard, Backbone, Mustache, Logger, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.components
+   * @class cdf.dashboard."Dashboard.components"
    * @amd cdf/dashboard/Dashboard.components
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling components.

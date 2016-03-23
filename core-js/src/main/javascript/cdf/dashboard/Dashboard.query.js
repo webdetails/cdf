@@ -45,7 +45,7 @@ define([
   var globalQueryFactories = new Container();
 
   /**
-   * @class cdf.dashboard.Dashboard.query
+   * @class cdf.dashboard."Dashboard.query"
    * @amd cdf/dashboard/Dashboard.query
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for managing queries.

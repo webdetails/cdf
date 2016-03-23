@@ -19,7 +19,7 @@ define([
 ], function(Dashboard, Logger, Utils, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.bookmarkable
+   * @class cdf.dashboard."Dashboard.bookmarkable"
    * @amd cdf/dashboard/Dashboard.bookmarkable
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for bookmarkable parameters.

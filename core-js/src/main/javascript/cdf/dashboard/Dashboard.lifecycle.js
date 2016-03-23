@@ -20,7 +20,7 @@ define([
 ], function(Dashboard, Logger, _, UnmanagedComponent, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.lifecycle
+   * @class cdf.dashboard."Dashboard.lifecycle"
    * @amd cdf/dashboard/Dashboard.lifecycle
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for lifecycle.
@@ -63,7 +63,7 @@ define([
 
     /**
      * @summary Timeout value in milliseconds.
-     * @description Timeout value in milliseconds. If 'serverCheckResponseTimeout' passes between ajax
+     * @description Timeout value in milliseconds. If `serverCheckResponseTimeout` passes between ajax
      *              communications, then when the next {@link cdf.dashboard.Dashboard#updateComponent|updateComponent}
      *              is called, the dashboard will first {@link cdf.dashboard.Dashboard#checkServer|checkServer},
      *              showing a {@link cdf.dashboard.Dashboard#loginAlert|loginAlert} if it is unable to connect
@@ -733,9 +733,9 @@ define([
 
     /**
      * @summary Changes the value of a parameter, triggering a
-     *          {@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"|`parameter`:fireChange} event.
+     *          {@link cdf.dashboard.Dashboard#event:"parameterName:fireChange"|<em>parameter</em>:fireChange} event.
      * @description <p>Changes the value of a parameter with the provided name. Triggers the
-     *              {@link cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"|`parameter`:fireChange}
+     *              {@link cdf.dashboard.Dashboard#event:"parameterName:fireChange"|<em>parameter</em>:fireChange}
      *              event and updates the components which listen for changes on the aforementioned parameter.</p>
      *              <p>Because some browsers will not draw the blockUI widgets until the script has finished, we
      *              find the list of components to update, then execute the actual update in a function wrapped
@@ -744,7 +744,7 @@ define([
      * @param {string} parameter The name of the parameter on which to fire the change.
      * @param {Object} value Value for the parameter.
      * @fires cdf.event:cdf
-     * @fires cdf.dashboard.Dashboard#event:"<em>parameterName</em>:fireChange"
+     * @fires cdf.dashboard.Dashboard#event:"parameterName:fireChange"
      */
     fireChange: function(parameter, value) {
       var myself = this;
