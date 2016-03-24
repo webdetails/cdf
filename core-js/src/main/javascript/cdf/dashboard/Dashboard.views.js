@@ -19,7 +19,7 @@ define([
 ], function(Dashboard, Base64, DashboardViewsExt, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.views
+   * @class cdf.dashboard."Dashboard.views"
    * @amd cdf/dashboard/Dashboard.views
    * @summary A class representing an extension to the
    *            {@link cdf.dashboard.Dashboard|Dashboard} class for managing views.

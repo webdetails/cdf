@@ -19,7 +19,7 @@ define([
 ], function(Dashboard, Logger, $, DashboardStorageExt) {
 
   /**
-   * @class cdf.dashboard.Dashboard.storage
+   * @class cdf.dashboard."Dashboard.storage"
    * @amd cdf/dashboard/Dashboard.storage
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling the storage `object`.
@@ -77,7 +77,7 @@ define([
     /**
      * @description Retrieves the {@link cdf.dashboard.Dashboard#storage|storage} value from the server using a
      *              {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} request and saves
-     *              it in the dashboard {@link cdf.dashboard.Dashboard.storage|storage} property.
+     *              it in the dashboard {@link cdf.dashboard.Dashboard#storage|storage} property.
      * @summary Loads the {@link cdf.dashboard.Dashboard#storage|storage} value from the server.
      */
     loadStorage: function() {

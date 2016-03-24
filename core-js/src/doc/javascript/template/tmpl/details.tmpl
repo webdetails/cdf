@@ -23,7 +23,8 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
 <?js } ?>
 
 <?js if (data.inherited && data.inherits && !data.overrides) { ?>
-    <p><strong>Inherited From:</strong> <?js= this.linkto(data.inherits, this.htmlsafe(data.inherits).split('"').join('')) ?></p>
+    <p><strong>Inherited From:</strong>
+        <?js= this.linkto(data.inherits, data.inherits.split('"').join('')) ?></p>
 <?js } ?>
 
 <?js if (data.defaultvalue || data.defaultvalue == false) {?>

@@ -23,7 +23,7 @@ define([
 ], function(Dashboard, DashboardNotificationsExt, Popups, Logger, _, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.notifications
+   * @class cdf.dashboard."Dashboard.notifications"
    * @amd cdf/dashboard/Dashboard.notifications
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for notifications.

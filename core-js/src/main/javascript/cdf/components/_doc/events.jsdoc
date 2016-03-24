@@ -24,7 +24,6 @@
  *
  * @event all
  * @memberof cdf.components.BaseComponent#
- * @see cdf.dashboard.Dashboard#_addLogLifecycleToControl
  * @see Backbone Events {@link http://backbonejs.org/#Events-catalog|catalog}.
  */
 

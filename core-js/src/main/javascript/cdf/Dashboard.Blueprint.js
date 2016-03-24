@@ -14,13 +14,13 @@
 /**
  * @class cdf."Dashboard.Blueprint"
  * @amd cdf/Dashboard.Blueprint
- * @summary Represents a {@link http://http://blueprintcss.org|blueprint} dashboard.
- * @classdesc Represents a {@link http://http://blueprintcss.org|blueprint}
+ * @summary Represents a {@link http://www.blueprintcss.org|Blueprint} dashboard.
+ * @classdesc Represents a {@link http://www.blueprintcss.org|Blueprint}
  *            dashboard aggregating all the classes in the Dashboard
  *            hierarchy. It's a specialization of the base abstract
  *            {@link cdf.dashboard.Dashboard|Dashboard} class.
  * @see {@link cdf.dashboard.Dashboard|Dashboard}
- * @see http://www.blueprintcss.org
+ * @see {@link http://www.blueprintcss.org|Blueprint}
  * @extends cdf.dashboard.Dashboard
  * @example
  *
