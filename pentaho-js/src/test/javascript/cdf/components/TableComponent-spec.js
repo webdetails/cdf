@@ -41,7 +41,10 @@ define([
         colTypes: ['string', 'numeric'],
         colFormats: [null, '%.0f'],
         colWidths: ['500px', null],
-        displayLength: 10
+        displayLength: 10,
+        colSearchable:['1', '2'],
+        colSortable:['true', 'true'],
+        sortBy:[]
       },
       htmlObject: "sampleObjectTable",
       executeAtStart: true
@@ -108,5 +111,77 @@ define([
     it("ignores null column headers", function(done) {
       testHeaders(null, done);
     });
+
+    /**
+     * ## The Table Component # executes with a empty result set and column types ,column widths ,column sortable and column searchable properties defined.
+     */
+    it("executes with a empty result set and column types ,column widths ,column sortable and column searchable properties defined.", function(done) {
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('');
+      });
+
+      var json = {
+        metadata: {
+          map: function() {
+            return [];
+          }
+        },
+        resultSet: []
+      }
+
+      var processTableComponentResponse = tableComponent.processTableComponentResponse;
+      spyOn(tableComponent, 'processTableComponentResponse').and.callFake(function() {
+        return processTableComponentResponse.call(tableComponent, json);
+      });
+
+      tableComponent.chartDefinition.colHeaders = [];
+      //listen to cdf:postExecution event
+      tableComponent.once("cdf:postExecution", function() {
+        expect(tableComponent.rawData).toBeDefined();
+        done();
+      });
+      dashboard.update(tableComponent);
+    });
+
+    /**
+     * ## The Table Component # executes with a result set that has less columns than column types ,column widths ,column searchable and column sortable properties defined.
+     */
+    it("executes with a result set that has less columns than column types ,column widths ,column searchable and column sortable properties defined.", function(done) {
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+      });
+      tableComponent.chartDefinition.colTypes = ['string', 'string', 'string', 'string'];
+      tableComponent.chartDefinition.colWidths = ['500px', '500px', '500px', '500px'];
+      tableComponent.chartDefinition.colSearchable = ['1', '2', '1', '2'];
+      tableComponent.chartDefinition.colSortable = ['true', 'true', 'true', 'true'];
+
+      //listen to cdf:postExecution event
+      tableComponent.once("cdf:postExecution", function() {
+        expect(tableComponent.rawData).toBeDefined();
+        done();
+      });
+      dashboard.update(tableComponent);
+    });
+
+    /**
+     * ## The Table Component # executes with a result set that has more columns than column types ,column widths ,column searchable and column sortable properties defined.
+     */
+    it("executes with a result set that has more columns than column types ,column widths ,column searchable and column sortable properties defined", function(done) {
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+      });
+      tableComponent.chartDefinition.colTypes = ['string'];
+      tableComponent.chartDefinition.colWidths = ['500px'];
+      tableComponent.chartDefinition.colSearchable = ['1'];
+      tableComponent.chartDefinition.colSortable = ['true'];
+
+      //listen to cdf:postExecution event
+      tableComponent.once("cdf:postExecution", function() {
+        expect(tableComponent.rawData).toBeDefined();
+        done();
+      });
+      dashboard.update(tableComponent);
+    });
+
   });
 });
