@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -724,8 +724,10 @@ define([
           dtData.aoColumns[i].sTitle = Utils.escapeHtml(val);
           if(val == "") { dtData.aoColumns[i].bVisible = false; }
         });  // colHeaders
-        if(options.colTypes != undefined) {
+
+        if((dtData.aoColumns.length != 0) && (options.colTypes != undefined)) {
           $.each(options.colTypes,function(i, val) {
+            if(i >= dtData.aoColumns.length){return false;}
             var col = dtData.aoColumns[i];
             // Specific case: hidden cols
             if(val == "hidden") { col.bVisible = false; }
@@ -733,35 +735,40 @@ define([
             col.sType = val;
           });
         };  // colTypes
+
         if(options.colFormats != undefined) {
           // Changes are made directly to the json
         }; // colFormats
 
         var bAutoWidth = true;
-        if(options.colWidths != undefined) {
+        if((dtData.aoColumns.length != 0) && (options.colWidths != undefined)) {
           $.each(options.colWidths,function(i, val) {
+            if(i >= dtData.aoColumns.length){return false;}
             if(val != null) {
               dtData.aoColumns[i].sWidth = val;
               bAutoWidth = false;
             }
           })
-        }; //colWidths
+        }; // colWidths
         dtData.bAutoWidth = bAutoWidth;
 
-        if(options.colSortable != undefined) {
+        if((dtData.aoColumns.length != 0) && (options.colSortable != undefined)) {
           $.each(options.colSortable, function(i, val) {
+            if(i >= dtData.aoColumns.length){return false;}
             if(val != null && (!val || val == "false")) {
               dtData.aoColumns[i].bSortable = false
             }
           })
-        }; //colSortable
-        if(options.colSearchable != undefined) {
+        }; // colSortable
+
+        if((dtData.aoColumns.length != 0) && (options.colSearchable != undefined)) {
           $.each(options.colSearchable, function(i, val) {
+            if(i >= dtData.aoColumns.length){return false;}
             if(val != null && (!val || val == "false")) {
               dtData.aoColumns[i].bSearchable = false
             }
           })
-        }; //colSearchable
+        }; // colSearchable
 
       }
 
