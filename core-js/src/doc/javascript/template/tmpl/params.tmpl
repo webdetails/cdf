@@ -95,7 +95,9 @@
                     <?js= self.htmlsafe(param.defaultvalue) ?>
                 <?js } ?>
             </td> 
-            <td><?js= param.description ?><?js if (param.subparams) { ?>
+            <td>
+                <?js= (typeof param.description === "string" ? param.description.replace(/(\{@link [^}]+)&quot;([^\}]+)&quot;([^\}]*\})/g, "$1\"$2\"$3") : param.description) ?>
+                <?js if (param.subparams) { ?>
                 <?js= self.partial('params.tmpl', param.subparams) ?>
             <?js } ?>
             </td>

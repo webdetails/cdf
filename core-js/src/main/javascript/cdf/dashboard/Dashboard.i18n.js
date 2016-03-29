@@ -21,7 +21,7 @@ define([
 ], function(Logger, Dashboard, DashboardExt, moment, cdo, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.i18n
+   * @class cdf.dashboard."Dashboard.i18n"
    * @amd cdf/dashboard/Dashboard.i18n
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling internationalization and localization.
@@ -31,9 +31,10 @@ define([
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
+
     /**
      * @summary Localization object.
-     * @description Localization object, this will contain the property/value map and
+     * @description Localization object, which will contain the property/value map and
      *              the method to get a value from a property.
      *
      * @type {Object}
@@ -42,8 +43,8 @@ define([
     i18nSupport: undefined,
 
     /**
-     * @summary Dashboards current language code.
-     * @description Dashboards current language code, used by other localizable components.
+     * @summary The dashboard's current language code.
+     * @description The dashboard's current language code, used by other localizable components.
      *
      * @type {String}
      * @protected
@@ -118,7 +119,7 @@ define([
     /**
      * @summary Gets the path from which to load the locale-specific properties files.
      * @description <p>Gets the path from which to load the locale-specific properties files.</p>
-     *              <p>If this method returns `undefined`, which is the most common case, the path will be the dashboards path.</p>
+     *              <p>If this method returns `undefined`, which is the most common case, the path will be the dashboard's path.</p>
      *              <p>It will be overridden returning the appropriate dashboard path in embedded scenarios.</p>
      *
      * @return {string} The path to the dashboard's locale-specific text files.

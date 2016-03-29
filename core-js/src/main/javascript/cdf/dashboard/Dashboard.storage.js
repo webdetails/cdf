@@ -19,7 +19,7 @@ define([
 ], function(Dashboard, Logger, $, DashboardStorageExt) {
 
   /**
-   * @class cdf.dashboard.Dashboard.storage
+   * @class cdf.dashboard."Dashboard.storage"
    * @amd cdf/dashboard/Dashboard.storage
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling the storage `object`.
@@ -31,11 +31,11 @@ define([
     /**
      * @summary Allows a user to persist parameters server-side to be used across different dashboards.
      * @description <p>The dashboard storage is used for persisting parameters on the server and making them
-     *              available to other dashboards. It is sometimes refered to as a user parameter store.</p>
+     *              available to other dashboards. It is sometimes referred to as a user parameter store.</p>
      *              <p>It can be initialized in two different ways. The main way is via
-     *              the dashboard constructor. Otherwise it will be initialized via the
+     *              the dashboard constructor. Otherwise, it will be initialized via the
      *              {@link cdf.dashboard.Dashboard|Dashboard} AMD module configuration. If no
-     *              configuration is available it will be initialized as an empty `object`.</p>
+     *              configuration is available, it will be initialized as an empty `object`.</p>
      * 
      * @type {Object}
      * @protected
@@ -77,7 +77,7 @@ define([
     /**
      * @description Retrieves the {@link cdf.dashboard.Dashboard#storage|storage} value from the server using a
      *              {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} request and saves
-     *              it in the dashboard {@link cdf.dashboard.Dashboard.storage|storage} property.
+     *              it in the dashboard {@link cdf.dashboard.Dashboard#storage|storage} property.
      * @summary Loads the {@link cdf.dashboard.Dashboard#storage|storage} value from the server.
      */
     loadStorage: function() {

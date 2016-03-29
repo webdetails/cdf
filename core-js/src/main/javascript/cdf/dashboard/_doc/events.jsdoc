@@ -38,11 +38,11 @@
  *              The name of the event is formed using the name of the
  *              parameter and the suffix `:fireChange`.
  *
- * @event "<em>parameterName</em>:fireChange"
+ * @event "parameterName:fireChange"
  * @memberof cdf.dashboard.Dashboard#
  * @param {object} obj           An object containing the parameter name and the new value.
  * @param {string} obj.parameter The name of the parameter.
- * @param {*}      obj.value     The new parameter value.
+ * @param {object} obj.value     The new parameter value.
  */
 
 /**

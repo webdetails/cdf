@@ -91,7 +91,7 @@ define([
     },
 
     /**
-     * Logs a warning message and removes the _warnOnce_ flag.
+     * Logs a warning message and removes the `warnOnce` flag.
      */
     warnOnce: function() {
       Logger.log("Warning: QueryComponent behaviour is due to change. See "

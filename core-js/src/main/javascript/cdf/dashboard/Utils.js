@@ -75,12 +75,12 @@ define([
 
   /**
    * @summary Gets the path from the URL.
-   * @description Given a URL containing an encoded Pentaho path, eg `:home:admin:Test.wcdf`,
+   * @description Given a URL containing an encoded Pentaho path, e.g. `:home:admin:Test.wcdf`,
    *              returns the encoded path.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string} url The URL to encode.
-   * @return {string|undefined} path The encoded URL or `undefined` if not available.
+   * @return {string|undefined} The encoded URL or `undefined` if not available.
    */
   Utils.getPathParameter = function(url) {
 
@@ -255,7 +255,7 @@ define([
    * @description Converts an array to an object.
    *
    * @memberof cdf.dashboard.Utils
-   * @param {Array<Array<Object>>} pArray An array of key-value pairs (array) to be converted. eg.`[["key","value"]]`.
+   * @param {Array<Array<Object>>} pArray An array of key-value pairs (array) to be converted, e.g.,`[["key","value"]]`.
    * @return {object|undefined} The object represented by the array or `undefined` if argument is not an array.
    */
   Utils.propertiesArrayToObject = function(pArray) {
@@ -271,7 +271,7 @@ define([
    * @memberof cdf.dashboard.Utils
    * @param {object} obj The object to be converted into an array.
    * @return {Array<Array<Object>>|undefined} An array of key-value pairs (array) or `undefined` if the
-   *                                          argument is not an object. eg.`[["key","value"]]`.
+   *                                          argument is not an object, e. g., `[["key","value"]]`.
    */
   Utils.objectToPropertiesArray = function(obj) {
     // Mantra 1: "Order matters!"
@@ -288,7 +288,7 @@ define([
    * @memberof cdf.dashboard.Utils
    * @param {string} sURL URL with the query string to be parsed.
    * @return {Array<Array<String>>} Array with the parsed parameters. Each element is an array with two positions, the
-   *                                first being the parameter name and the second the value. eg.`[["key","value"]]`.
+   *                                first being the parameter name and the second the value. For example, `[["key","value"]]`.
    */
   Utils.getURLParameters = function(sURL) {
     if(sURL.indexOf("?") > 0) {
@@ -334,8 +334,8 @@ define([
   };
 
   /**
-   * @summary Quote CSV values in a way compatible with CSVTokenizer.
-   * @description Quote CSV values in a way compatible with CSVTokenizer.
+   * @summary Quote CSV values in a way that is compatible with CSVTokenizer.
+   * @description Quote CSV values in a way that is compatible with CSVTokenizer.
    *
    * @memberof cdf.dashboard.Utils
    * @param {string}  value        Value quote.
@@ -459,7 +459,7 @@ define([
    * @summary Gets an argument value that was previously set by calling
    *          {@link cdf.dashboard.Utils.addArgs|addArgs}.
    * @description Gets an argument value that was previously set by calling
-   *              {@link cdf.dashboard.Utils.addArgs|addArgs}. This is deprecated, use
+   *              {@link cdf.dashboard.Utils.addArgs|addArgs}. This is deprecated, so use
    *              {@link cdf.dashboard.Utils.getQueryParameter|getQueryParameter} or
    *              `dashboard.context.params`.
    *
@@ -480,7 +480,7 @@ define([
   };
 
   /**
-   * @summary Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
+   * @summary Traverses each <i>value</i>, <i>label</i>, and <i>id</i> triple of a <i>values array</i>.
    * @description Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
    *
    * @memberof cdf.dashboard.Utils
@@ -491,11 +491,11 @@ define([
    *   It may have the following forms:
    *   </p>
    *   <ul>
-   *     <li>`[valueAndLabel]` - when having <i>length</i> one</li>
-   *     <li>`[value, label,...]` - when having <i>length</i> two or more and
+   *     <li>`[valueAndLabel]`: when having <i>length</i> one</li>
+   *     <li>`[value, label,...]`: when having <i>length</i> two or more and
    *         `opts.valueAsId` is falsy
    *     </li>
-   *     <li>`[id, valueAndLabel,..]` - when having <i>length</i> two or more and
+   *     <li>`[id, valueAndLabel,..]`: when having <i>length</i> two or more and
    *         `opts.valueAsId` is truthy
    *     </li>
    *   </ul>
@@ -503,12 +503,12 @@ define([
    * @param {boolean} [opts.valueAsId=false] Indicates if the first element of
    *   the value specification array is the id, instead of the value.
    *
-   * @param {function(string, string, string, number)} f the traversal function
-   * that is to be called with each value-label-id triple and
-   * with the JS context `x`. The function is called with arguments:
-   * `value`, `label`, `id` and `index`.
+   * @param {function(string, string, string, number)} f The traversal function 
+   * that is to be called with each value-label-id triple and 
+   * with the JS context `x`. The function is called with arguments: 
+   * `value`, `label`, `id`, and `index`.
    * <p>
-   * When the function returns the value `false`, traversal is stopped,
+   * When the function returns the value `false`, traversal is stopped, 
    * and `false` is returned.
    * </p>
    * @param {object} x The JS context object on which `f` is to be called.
@@ -549,8 +549,8 @@ define([
    * @summary Given a parameter value obtains an equivalent values array.
    * @description Given a parameter value obtains an equivalent values array.
    *              <p>The parameter value may encode multiple values in a string format.</p>
-   *              <p>A nully (i.e. `null` or `undefined`) input value or an empty string result
-   *              in `null`, and so the result of this method is normalized.</p>
+   *              <p>A nully (i.e. `null` or `undefined`) input value or an empty string results
+   *              in `null`, so the result of this method is normalized.</p>
    *              <p>A string value may contain multiple values separated by the character `|`.
    *              </p><p>An array or array-like object is returned without modification.</p>
    *              <p>Any other value type returns `null`.</p>
@@ -559,7 +559,7 @@ define([
    * @param {object} value A parameter value, as returned by
    *                 {@link cdf.dashboard.Dashboard#getParameterValue|getParameterValue}.
    *
-   * @return {?array|?object} an array, array-like object or `null`.
+   * @return {?array|?object} An array, an array-like object, or `null`.
    */
   Utils.parseMultipleValues = function(value) {
     if(value != null && value !== '') {
@@ -574,8 +574,8 @@ define([
 
   /**
    * @summary Normalizes a value.
-   * @description Normalizes a value so that `undefined`, empty string
-   *              and empty array, are all translated to `null`.
+   * @description Normalizes a value so that `undefined`, empty string, 
+   *              and empty array are all translated to `null`.
    *
    * @memberof cdf.dashboard.Utils
    * @param {object} value The value to normalize.
@@ -590,12 +590,12 @@ define([
   /**
    * @summary Determines if a value is considered an array.
    * @description <p>Determines if a value is considered an array.</p>
-   *              <p>Returns `true` if value is an array, or an array-like object (
-   *              object containing the methods `join` and `length`).</p>
+   *              <p>Returns `true` if value is an array, or an array-like object 
+   *              (object containing the methods `join` and `length`).</p>
    *
    * @memberof cdf.dashboard.Utils
-   * @param {object} value the value.
-   * @return {boolean} `true` if it's an array or array-like object, `false` otherwise.
+   * @param {object} value The value.
+   * @return {boolean} `true` if it is an array or an array-like object, `false` otherwise.
    */
   Utils.isArray = function(value) {
     // An array or array like?

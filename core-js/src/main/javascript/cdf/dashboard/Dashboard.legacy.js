@@ -22,7 +22,7 @@ define([
 ], function(CdaQueryExt, XactionComponentExt, DashboardExt, Dashboard, Logger, $) {
 
   /**
-   * @class cdf.dashboard.Dashboard.legacy
+   * @class cdf.dashboard."Dashboard.legacy"
    * @amd cdf/dashboard/Dashboard.legacy
    * @summary A class representing an extension to the {@link cdf.dashboard.Dashboard|Dashboard}
    *          class for handling legacy calls.
@@ -36,17 +36,21 @@ define([
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
     /**
-     * @summary Calls a xaction.
-     * @description Calls a xaction.
+     * @summary Calls an xaction.
+     * @description Calls an xaction.
      *
      * @param {Object} obj        DOM object where the response from the xaction should be written.
      * @param {string} solution   The solution folder.
-     * @param {string} path       Path to the xaction. Can be the full path, in which case you don't need the solution and action.
+     * @param {string} path       Path to the xaction. Can be the full path, in which case you do not need the solution and action.
      * @param {string} action     The xaction name.
      * @param {Object} parameters Parameter object to send to the xaction.
      * @param {function} callback Callback function to call when the xaction responds.
-     * @return {*} The xaction result.
-     *
+     * @return {Object|string} If `callback` is a `function` it returns the value of executing
+     *                         {@link cdf.dashboard.Dashboard#pentahoAction|pentahoAction}.
+     *                         Otherwise, it returns the value of executing
+     *                         {@link cdf.dashboard.Dashboard#parseXActionResult|parseXActionResult}.
+     * @see {@link cdf.dashboard.Dashboard#pentahoAction|pentahoAction}
+     * @see {@link cdf.dashboard.Dashboard#parseXActionResult|parseXActionResult}
      * @deprecated
      */
     callPentahoAction: function(obj, solution, path, action, parameters, callback) {
@@ -68,9 +72,9 @@ define([
      * @description Calls an arbitrary URL expecting the result content type to be xml.
      *
      * @param {string} url    The URL to call.
-     * @param {Object} params The parameters object.
+     * @param {Object} params The parameter object.
      * @param {function} func Callback function.
-     * @return {*} The parsed invocation result if no callback was supplied. Otherwise, null.
+     * @return {Object|string} The return value of executing {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}.
      * @see {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}
      *
      * @deprecated
@@ -81,7 +85,7 @@ define([
 
     /**
      * @summary Executes an Ajax request.
-     * @description Executes an Ajax request. If no `func` callback is provided it executes asynchronously
+     * @description Executes an Ajax request. If no `func` callback is provided, it executes asynchronously
      *              and returns a jQuery XMLHttpRequest ({@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR})
      *              object. Otherwise, it executes {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} synchronously and
      *              returns the result of the HTTP request.
@@ -90,8 +94,9 @@ define([
      * @param {string}   url        The URL to call.
      * @param {Object}   params     The parameters object.
      * @param {function} func       Callback function.
-     * @return {*} If no `func` callback is provided it returns a jqXHR object.
-     *             Otherwise, it returns the result of the HTTP request.
+     * @return {Object|string} If no `func` callback is provided, it returns a
+     *                         {@link http://api.jquery.com/jQuery.ajax/#jqXHR|jqXHR} object.
+     *                         Otherwise, it returns the result of the HTTP request.
      *
      * @deprecated
      */
@@ -146,15 +151,17 @@ define([
     },
 
     /**
-     * @summary Another way to call a xaction.
-     * @description Another way to call a xaction.
+     * @summary Another way to call an xaction.
+     * @description Another way to call an xaction.
      *
      * @param {string}   solution Solution folder.
-     * @param {string}   path     Path to the xaction. Can be the full path, in which case you don't need the solution and action.
+     * @param {string}   path     Path to the xaction. Can be the full path, in which case you do not need the solution and action.
      * @param {string}   action   The xaction name.
      * @param {Object}   params   Parameter object to send to the xaction.
      * @param {function} func     Callback function to call when the xaction responds.
-     * @return {*} The xaction result.
+     * @return {Object|string} The return value of executing
+     *                         {@link cdf.dashboard.Dashboard#pentahoServiceAction|pentahoServiceAction}.
+     * @see {@link cdf.dashboard.Dashboard#pentahoServiceAction|pentahoServiceAction}
      *
      * @deprecated
      */
@@ -163,18 +170,18 @@ define([
     },
 
     /**
-     * @summary Calls a xaction.
-     * @description Calls a xaction.
+     * @summary Calls an xaction.
+     * @description Calls an xaction.
      *
      * @param {string}   serviceMethod Dom object where the response from the xaction should be written.
      * @param {string}   returntype    Expected return type of the response.
      * @param {string}   solution      Solution folder.
-     * @param {string}   path          Path to the xaction. Can be the full path, in which case you don't need the solution and action
+     * @param {string}   path          Path to the xaction. Can be the full path, in which case you do not need the solution and action
      * @param {string}   action        The xaction name.
      * @param {Object}   params        Parameter object to send to the xaction.
      * @param {function} func          Callback function to call when the xaction responds.
-     * @return {*} The xaction result.
-     *
+     * @return {Object|string} The return value of executing {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}.
+     * @see {@link cdf.dashboard.Dashboard#executeAjax|executeAjax}
      * @deprecated
      */
     pentahoServiceAction: function(serviceMethod, returntype, solution, path, action, params, func) {
@@ -203,7 +210,7 @@ define([
 
     /**
      * @summary Creates an empty HTML div element for showing errors.
-     * @description Creates an empty HTML div element, with identifier
+     * @description Creates an empty HTML div element, with identifier 
      * {@link cdf.dashboard.Dashboard#CDF_ERROR_DIV|CDF_ERROR_DIV} for showing error messages.
      *
      * @deprecated
@@ -236,11 +243,13 @@ define([
 
     /**
      * @summary Parses the xaction result.
-     * @description Parses the xaction result.
+     * @description Parses the xaction result. If errors are detected they will be writen in
+     *              the appropriate DOM object of the provided `obj` component.
      *
-     * @private
-     * @param {Object} obj  DOM object where the response will be written to.
+     * @param {cdf.components.BaseComponent} obj The target component.
      * @param {string} html HTML string containing the xaction result.
+     * @return {?Object} A DOM object containing the xaction result if no errors are detected.
+     *                   Otherwise, `null` is returned.
      *
      * @deprecated
      */
@@ -324,14 +333,14 @@ define([
     },
 
     /**
-     * @summary Fetches data from the server according to a Chart Definition `object`.
-     * @description Fetches data from the server according to a Chart Definition `object`.
-     *              This method is deprecated, a {@link cdf.dashboard.Query|Query}
+     * @summary Fetches data from the server according to a query definition `object`.
+     * @description Fetches data from the server according to a query definition `object`.
+     *              This method is deprecated, so a {@link cdf.dashboard.Query|Query}
      *              instance should be used instead.
      *
-     * @param {Object}   cd       Chart definition object.
-     * @param {Object}   params   Parameter object.
-     * @param {function} callback Callback to be called with results.
+     * @param {Object}   cd       The query definition object.
+     * @param {Object}   params   The parameters to use in the query.
+     * @param {function} callback The callback `function` to be called with results.
      *
      * @deprecated
      */

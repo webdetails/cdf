@@ -1,24 +1,61 @@
 <?js
-    var data = obj;
-    var self = this;
-    var basicJavascriptTypes = ["string", "number", "boolean", "array", "object", "date", "function", "null"];
-    var basicJavascriptTypesLink = "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/";
+  var data = obj;
+  var self = this;
+  var mdnJsTypes = {
+    "array": "Array",
+    "boolean": "Boolean",
+    "date": "Date",
+    "error": "Error",
+    "typeerror": "TypeError",
+    "function": "Function",
+    "infinity": "Infinity",
+    "json": "JSON",
+    "nan": "NaN",
+    "null": "null",
+    "number": "Number",
+    "object": "Object",
+    "string": "String",
+    "undefined": "undefined"};
+  var mdnJsTypeBaseURL = "http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/";
+  var backboneTypeBaseURL = "http://backbonejs.org/#";
+  var jQueryTypes = {
+    "jquery": "jQuery",
+    "selector": "Selector"
+  }
+  var jQueryTypeBaseURL = "http://api.jquery.com/Types/#";
 
-    var capitalize = function(s){
-    	return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase(); } );
-    };
-    if(data){
-      data.forEach(function(name, i) {
-      	var regex = /array.<(.*)>/; ?>
-        <code>    
-        <?js if(basicJavascriptTypes.indexOf(name.toLowerCase()) >= 0){ ?>
-            <?js= self.linkto(basicJavascriptTypesLink + name, capitalize(name)) ?>
-        <?js} else if(m = regex.exec(name.toLowerCase())) { ?>
-    		<?js= self.linkto(basicJavascriptTypesLink + "Array", "Array") ?><?js= "&lt;" + self.linkto(basicJavascriptTypesLink + m[1], capitalize(m[1])) + "&gt;" ?>    	
-        <?js} else {?>
-          <?js= self.linkto(name, self.htmlsafe(name)) ?>
-        <?js}?>
-        </code>
-        <?js if (i < data.length-1) { ?>|<?js } ?>
-		  <?js });
-    } ?>
+  if(data) {
+    data.forEach(function(name, i) {
+      // check if it is an array type
+      var jsTypeLink,
+          jsType = name,
+          jsTypeLower,
+          isArray = /array\.<(.+)>/i.exec(name);
+      if(isArray) {
+        jsType = isArray[1];
+        jsTypeLower = isArray[1].toLowerCase();
+      } else {
+        jsTypeLower = name.toLowerCase();
+      }
+      if(typeof mdnJsTypes[jsTypeLower] !== "undefined") { // MDN link
+        jsType = mdnJsTypes[jsTypeLower];
+        jsTypeLink = self.linkto(mdnJsTypeBaseURL + jsType, self.htmlsafe(jsType));
+      } else if(/backbone\.([a-z]+)/i.exec(jsTypeLower) != null) { //Backbone link
+        jsTypeLink = self.linkto(backboneTypeBaseURL + jsType.split(".")[1], self.htmlsafe(jsType));
+      } else if(typeof jQueryTypes[jsTypeLower] !== "undefined") { // jQuery link
+        jsType = jQueryTypes[jsTypeLower];
+        jsTypeLink = self.linkto(jQueryTypeBaseURL + jsType, self.htmlsafe(jsType));
+      } else { // CTools or unknown type, output its value
+        jsTypeLink = self.linkto(jsType, self.htmlsafe(jsType));
+      }
+      if(isArray) {
+        ?><code><?js= self.linkto(mdnJsTypeBaseURL + "Array", "Array") + ".&lt;" + jsTypeLink + "&gt;" ?></code><?js
+      } else {
+        ?><code><?js= jsTypeLink ?></code><?js
+      }
+      if(i < data.length-1) {
+        ?> | <?js
+      }
+    });
+  }
+?>

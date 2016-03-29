@@ -12,26 +12,39 @@ var self = this;
     </thead>
 
     <tbody>
-    <?js
-        var self = this;
-        if(events) {
-          events.forEach(function(event) {
+<?js
+    var self = this;
+    if(events) {
+        events.forEach(function(event) {
             if(!event) { return; }
-                var name = "event:" + encodeURIComponent(event.name);
-
-                var params = event.params;
-                if(params && params.length) {
-                    event.signature = "("
-                    params.forEach(function(p, i) {
-                        event.signature += p.name;
-                        event.signature += (i < params.length-1) ? "," : ")";
-                    });
-                }
-
-            ?>
+            var name = "event:" + encodeURI(event.name);
+            var params = [];
+            var duplicate;
+            if(event.params && event.params.length) {
+                event.signature = "("
+                event.params.forEach(function(p, i) {
+                    duplicate = false;
+                    for(var i = 0; i < params.length; i++) {
+                        if(p.name.indexOf(params[i]) > -1) {
+                            duplicate = true;
+                        }
+                    }
+                    if(!duplicate) {
+                        if(params.length > 0) {
+                            event.signature += ", " + p.name;
+                        } else {
+                            event.signature += p.name;
+                        }
+                        params.push(p.name);
+                    }
+                });
+                event.signature += ")";
+            } else {
+                event.signature = "";
+            } ?>
     <tr>
         <td>
-            <a href='#<?js= name ?>'> <?js= (event.kind == "class" ? "new " : "") + event.parsedName + (event.signature || '()') ?> </a>
+            <a href='#<?js= name ?>'> <?js= event.parsedName.replace(/(parameterName|parameter):fireChange/, "<em>$1</em>:fireChange") + event.signature ?> </a>
             <?js if (event.returns && event.returns.length) { ?>
             <?js event.returns.forEach(function(r, i) { ?>
             <?js= self.partial('type.tmpl', r.type.names) ?>
@@ -42,8 +55,10 @@ var self = this;
         </td>
         <td> <?js= event.summary ?> </td>
     </tr>
-    <?js });
-        }?>
+<?js
+        });
+    }
+?>
     </tbody>
 </table>
 

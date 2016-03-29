@@ -17,33 +17,10 @@
  */
 
 /**
- * @summary Event triggered before execution.
- * @description Event triggered before a component starts executing.
- *
- * @event "cdf:preExecution"
- * @memberof cdf.components.BaseComponent#
- */
-
-/**
- * @summary Event triggered after execution.
- * @description Event triggered after a component finishes executing.
- *
- * @event "cdf:postExecution"
- * @memberof cdf.components.BaseComponent#
- */
-
-/**
- * @summary Event triggered on error.
- * @description Event triggered when an error occurs.
- *
- * @event "cdf:error"
- * @memberof cdf.components.BaseComponent#
- */
-
-/**
  * @summary Event triggered by any other event.
  * @description The [`all`]{@link http://backbonejs.org/#Events-catalog} event is a
- *              special event that will trigger the bound callbacks when any event occurs.
+ *              special event which will trigger the bound callbacks when any event occurs.
+ *              This event is mainly used for logging purposes.
  *
  * @event all
  * @memberof cdf.components.BaseComponent#
@@ -51,11 +28,44 @@
  */
 
 /**
+ * @summary Event triggered before execution.
+ * @description Event triggered before a component starts executing.
+ *
+ * @event "cdf:preExecution"
+ * @memberof cdf.components.UnmanagedComponent#
+ */
+
+/**
+ * @summary Event triggered after execution.
+ * @description Event triggered after a component finishes executing.
+ *
+ * @event "cdf:postExecution"
+ * @memberof cdf.components.UnmanagedComponent#
+ */
+
+/**
+ * @summary Event triggered on error.
+ * @description Event triggered when an error occurs.
+ *
+ * @event "cdf:error"
+ * @memberof cdf.components.UnmanagedComponent#
+ */
+
+/**
  * @summary Event triggered after fetching data.
- * @description Event triggered after an {@link cdf.component.UnmanagedComponent|Unmanaged}
- *              component fetches data.
+ * @description Event triggered after an {@link cdf.component.UnmanagedComponent|UnmanagedComponent}
+ *              fetches data.
  *
  * @event "cdf:postFetch"
  * @memberof cdf.components.UnmanagedComponent#
  * @param {object} data The data returned from the {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} call.
+ */
+
+/**
+ * @summary Event triggered after the `render` callback executes.
+ * @description Event triggered after the `render` callback executes and before
+ *              {@link cdf.components.UnmanagedComponent#endExec|endExec} executes.
+ *
+ * @event "cdf:render"
+ * @memberof cdf.components.UnmanagedComponent#
  */
