@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -31,7 +31,8 @@ define([
       events: [],
       modelHandler: function(st, opt) {
         var model = {};
-        return model[opt.rootElement] = $.parseJSON(st.value);
+        model[opt.rootElement] = $.parseJSON(st.value);
+        return model;
       },
       postProcess: function() {}
     },
@@ -67,7 +68,7 @@ define([
         type: opt.messages.config.style[type].type || "info",
         icon: opt.messages.config.style[type].icon || "comment"};
       Logger.log(opt.messages.error[message] || "", type);
-      return _.template(opt.messages.config.template)(completeMsg);
+      return _.template(opt.messages.config.template, completeMsg);
 
     },
 
@@ -96,7 +97,7 @@ define([
         model[opt.rootElement] = data;
       }
 
-      if((!_.isEmpty(data))) {
+      if(_.isObject(model)) {
         var helpers = {
           formatter: function(data, formatter, id) {
             return myself.applyFormatter(opt, data, formatter, id);
@@ -108,7 +109,7 @@ define([
           switch(opt.templateType.toUpperCase()) {
             case 'UNDERSCORE':
               model = _.defaults({}, model, Utils.propertiesArrayToObject(helpers));
-              html = _.template(Utils.ev(opt.template))(model);
+              html = _.template((_.isFunction(opt.template) ? opt.template() : opt.template), model);
               break;
             case 'MUSTACHE':
               Mustache.Formatters = helpers;
@@ -144,7 +145,7 @@ define([
             eventHandler = _.last(elem),
             event = _.first(handler).trim(),
             selector = _.last(handler).trim();
-        if (_.isFunction(eventHandler)) {
+        if(_.isFunction(eventHandler)) {
           if (event === selector) {
               $placeholder.off(event).on(event, info, eventHandler);
           } else {
