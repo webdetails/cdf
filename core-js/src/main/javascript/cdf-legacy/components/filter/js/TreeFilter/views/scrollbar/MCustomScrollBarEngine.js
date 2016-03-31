@@ -33,7 +33,7 @@ var MCustomScrollBarEngine;
       this.scrollbar = view.$(view.config.view.slots.children).parent().mCustomScrollbar(options);
     },
     scrollToPosition: function(position) {
-      this.scrollbar.mCustomScrollbar("scrollTo",position);
+      this.scrollbar.mCustomScrollbar("scrollTo",position,{callbacks:false});
     }
   });
 })(AbstractScrollBarHandler, $);
