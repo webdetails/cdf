@@ -37,7 +37,7 @@ define([
       
     },
     scrollToPosition: function(position) {
-      this.scrollbar.mCustomScrollbar("scrollTo",position);
+      this.scrollbar.mCustomScrollbar("scrollTo",position,{callbacks:false});
     }
   });
 });
