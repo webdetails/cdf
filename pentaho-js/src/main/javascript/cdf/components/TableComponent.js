@@ -270,7 +270,7 @@ define([
           } else {
             params = [];
           }
-          myself.queryState.fetchData(params, handler);
+          myself.queryState.fetchData(params, handler, myself.failureCallback);
         }
       } catch(e) {
         /*
@@ -305,7 +305,7 @@ define([
       this.queryState.setCallback(success);
       this.queryState.setParameters(this.parameters);
       this.queryState.setAjaxOptions({async: true});
-      this.queryState.fetchData(this.parameters, success);
+      this.queryState.fetchData(this.parameters, success, this.failureCallback);
      },
 
     /* Initial setup: clearing out the htmlObject and building the query object */
@@ -387,7 +387,8 @@ define([
         response.sEcho = p("sEcho");
         myself.rawData = d;
         callback(response);
-      });
+        
+      },this.failureCallback);
     },
     
     /* 
@@ -448,7 +449,13 @@ define([
         cd.drawCallback.apply(myself, arguments);
       }
     },
+    /** 
+     * @summary Callback for failed queries.
+     * @description <p> Callback used when a query fails </p>
+     */
+    failureCallback: function() {
 
+    },
     /* 
      * Handler for when the table finishes initialising. This only happens once,
      * when the table *initialises*, as opposed to every time the table is drawn,

@@ -358,7 +358,7 @@ define([
           }
           break;
         default:
-          // We're just going to discard anything over two params
+          // We're just going to discard anything over three params
           if(params) {
             this.setOption('params', params);
           }

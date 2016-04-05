@@ -113,6 +113,20 @@ define([
     });
 
     /**
+     * ## The Table Component # calls failureCallback when a query fails.
+     */
+    it("calls failureCallback when a query fails", function(done) {
+      spyOn($, 'ajax').and.callFake(function(params) {
+          params.error();
+      });
+      tableComponent.failureCallback = function () {
+         done();
+      }
+      spyOn(tableComponent, 'failureCallback').and.callThrough();
+      dashboard.update(tableComponent);
+    });
+
+    /**
      * ## The Table Component # executes with a empty result set and column types ,column widths ,column sortable and column searchable properties defined.
      */
     it("executes with a empty result set and column types ,column widths ,column sortable and column searchable properties defined.", function(done) {
