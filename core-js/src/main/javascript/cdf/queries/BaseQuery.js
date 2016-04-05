@@ -358,13 +358,16 @@ define([
           }
           break;
         default:
-          // We're just going to discard anything over two params
+          // We're just going to discard anything over three params
           if(params) {
             this.setOption('params', params);
           }
-
-          this.setOption('successCallback', successCallback);
-          this.setOption('errorCallback', errorCallback);
+          if(typeof arguments[1] == "function") {
+            this.setOption('successCallback', successCallback);
+          }
+          if(typeof arguments[2] == "function") {
+            this.setOption('errorCallback', errorCallback);
+          }
           return this.doQuery();
       }
       // If we haven't hit a return by this time, the user gave us some wrong input

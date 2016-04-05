@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -249,7 +249,7 @@ var TableComponent = UnmanagedComponent.extend({
         var handler = this.getSuccessHandler(success);
 
         this.queryState.setAjaxOptions({async:true});
-        this.queryState.fetchData(this.parameters == undefined ? [] : this.parameters, handler);
+        this.queryState.fetchData(this.parameters == undefined ? [] : this.parameters, handler, this.failureCallback);
       }
     } catch (e) {
       /*
@@ -284,7 +284,7 @@ var TableComponent = UnmanagedComponent.extend({
     this.queryState.setCallback(success);
     this.queryState.setParameters(this.parameters);
     this.queryState.setAjaxOptions({async:true});
-    this.queryState.fetchData(this.parameters, success);
+    this.queryState.fetchData(this.parameters, success, this.failureCallback);
    },
 
   /* Initial setup: clearing out the htmlObject and building the query object */
@@ -365,7 +365,7 @@ var TableComponent = UnmanagedComponent.extend({
       response.sEcho = p("sEcho");
       myself.rawData = d;
       callback(response);
-    });
+    }, this.failureCallback);
   },
   
   /* 
@@ -426,6 +426,13 @@ var TableComponent = UnmanagedComponent.extend({
       cd.drawCallback.apply(myself,arguments);
     }
   },
+
+  /**
+   * @summary Callback for failed queries.
+   * @description <p> Callback used when a query fails </p>
+   * @default undefined
+   */
+   //failureCallback : undefined
 
   /* 
    * Handler for when the table finishes initialising. This only happens once,

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -182,13 +182,16 @@
           }
           break;
         default:
-          /* We're just going to discard anything over two params */
+          /* We're just going to discard anything over three params */
           if(params) {
             this.setOption('params', params);
           }
-
-          this.setOption('successCallback', successCallback);
-          this.setOption('errorCallback', errorCallback);
+          if(typeof arguments[1] == "function") {
+            this.setOption('successCallback', successCallback);
+          }
+          if(typeof arguments[2] == "function") {
+            this.setOption('errorCallback', errorCallback);
+          }
           return this.doQuery();
       }
       /* If we haven't hit a return by this time,
