@@ -56,7 +56,7 @@ describe("Unmanaged Base Component #", function() {
       var redraw = _.bind(this.redraw,this);
       this.triggerQuery({
         dataAccessId: "foo",
-        path: "bar" 
+        path: "bar"
       }, redraw);
     },
     postFetch: function(d) {return d;},
@@ -79,12 +79,12 @@ describe("Unmanaged Base Component #", function() {
         url: "foo",
         type: "json",
         method: "get",
-        path: "bar" 
+        path: "bar"
       }, redraw);
     },
     postFetch: function(d) {return d;},
     redraw: function() {
-      this.testFlag = 0x4; 
+      this.testFlag = 0x4;
     },
     postExecution: function(){}
   };
@@ -226,7 +226,7 @@ describe("Unmanaged Base Component #", function() {
      * ## Unmanaged Base Component # Query Lifecycle # Doesn't overwrite data if postFetch returns undefined
      */
     it("Doesn't overwrite data if postFetch returns undefined", function(done) {
-      var timeoutmms = 150;
+      var timeoutmms = 200;
       var freeformQueryTemp = freeformQuery;
       spyOn(freeformQueryTemp,"preExecution");
       spyOn(freeformQueryTemp,"customfunction").and.callThrough();
@@ -267,7 +267,7 @@ describe("Unmanaged Base Component #", function() {
      * ## Unmanaged Base Component # Query Lifecycle # Only updates once if called concurrently
      */
     it("Only updates once if called concurrently", function(done) {
-      var timeoutmms = 150;
+      var timeoutmms = 200;
       var freeformQueryTemp = freeformQuery;
       spyOn(freeformQueryTemp,"preExecution");
       spyOn(freeformQueryTemp,"customfunction").and.callThrough();
@@ -538,4 +538,3 @@ describe("Unmanaged Base Component #", function() {
     });
   });
 });
-
