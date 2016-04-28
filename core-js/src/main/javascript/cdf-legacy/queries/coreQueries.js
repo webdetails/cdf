@@ -173,7 +173,9 @@
         case 2:
           if(typeof arguments[0] == "function") {
             this.setOption('successCallback', arguments[0]);
-            this.setOption('errorCallback', arguments[1]);
+            if(typeof arguments[1] == "function") {
+              this.setOption('errorCallback', arguments[1]);
+            }
             return this.doQuery();
           } else {
             this.setOption('params', arguments[0] || {});
@@ -687,6 +689,9 @@
           json = JSON.parse(json);
 
           var result = {metadata: [makeMetadataElement(0)], resultset: json.values || []};
+          if(json.queryInfo) {
+            result.queryInfo = json.queryInfo;
+          };
           _.each(json.metadata, function(el, idx) {
             return result.metadata.push(makeMetadataElement(idx + 1, el));
           });

@@ -196,5 +196,27 @@ define([
       dashboard.update(tableComponent);
     });
 
+    /**
+     * ## The Table Component # can update when server side is true
+     */
+    it("can update when server side is true", function(done) {
+      spyOn(tableComponent, 'update').and.callThrough();
+      spyOn(tableComponent, 'triggerQuery').and.callThrough();
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]],"queryInfo": {"totalRows":1}}');
+      });
+      
+      tableComponent.chartDefinition.paginateServerside = true;
+      tableComponent.parameters = [];
+ 
+      // listen to cdf:postExecution event
+      tableComponent.once("cdf:postExecution", function() {
+        expect(tableComponent.update).toHaveBeenCalled();
+        done();
+      });
+      
+      dashboard.update(tableComponent);
+    });
+
   });
 });
