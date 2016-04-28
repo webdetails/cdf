@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -33,7 +33,7 @@ define([
     /**
      * ## Base query # getSuccessHandler
      */
-    describe("Base query # getSuccessHandler", function() {
+    describe("getSuccessHandler", function() {
 
       /**
        * ## Base query # getSuccessHandler persists the last result and the post fetch processed result
@@ -50,7 +50,7 @@ define([
     /**
      * ## Base query # lastResults
      */
-    describe("Base query # lastResults", function() {
+    describe("lastResults", function() {
 
       /**
        * ## Base query # lastResults throws an exception if the lastResultSet option value wasn't set
@@ -73,7 +73,7 @@ define([
     /**
      * ## Base query # lastProcessedResults
      */
-    describe("Base query # lastProcessedResults", function() {
+    describe("lastProcessedResults", function() {
 
       /**
        * ## Base query # lastProcessedResults throws an exception if the lastProcessedResultSet option value wasn't set
@@ -96,7 +96,7 @@ define([
     /**
      * ## Base query # callbacks
      */
-    describe("Base query # callbacks", function() {
+    describe("callbacks", function() {
       beforeEach(function() {
         baseQuery.buildQueryDefinition = function() {};
       });
@@ -178,6 +178,47 @@ define([
             done();
           }
         );
+      });
+    });
+
+   /**
+    * ## Base query # fetchData
+    */
+    describe("fetchData", function () {
+
+    /**
+     * ## fetchData # sets the success callback option if called with two arguments the first being a function and second being undefined
+     */
+     it("sets the success callback option if called with two arguments the first being a function and second being undefined", function() {
+        spyOn(baseQuery, "doQuery").and.callFake(function(params) {
+          return "query";
+        });
+        var errorCallback = baseQuery._optionsManager._options.errorCallback.value;
+        var successCallback = function () {
+            return "ill be back";
+        };
+        baseQuery.fetchData(successCallback,undefined);
+        expect(baseQuery._optionsManager._options.successCallback.value).toEqual(successCallback);
+        expect(baseQuery._optionsManager._options.errorCallback.value).toEqual(errorCallback);
+        
+      });
+
+    /**
+     * ## fetchData # sets the success callback and error callback if called with two arguments
+     */
+     it("sets the success callback and error callback if called with two arguments", function() {
+        spyOn(baseQuery, "doQuery").and.callFake(function(params) {
+          return "query";
+        });
+        var errorCallback = function () {
+            return "i will not be back";
+        }
+        var successCallback = function () {
+            return "ill be back";
+        }
+        baseQuery.fetchData(successCallback,errorCallback);
+        expect(baseQuery._optionsManager._options.successCallback.value).toEqual(successCallback);
+        expect(baseQuery._optionsManager._options.errorCallback.value).toEqual(errorCallback);
       });
     });
   });
