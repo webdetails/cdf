@@ -111,7 +111,10 @@ define([
 
           var result = {
             metadata: [makeMetadataElement(0)],
-            resultset: json.values || []
+            resultset: json.values || [],
+          };
+          if(json.queryInfo) {
+            result.queryInfo = json.queryInfo;
           };
           _.each(json.metadata, function(el, idx) {
             return result.metadata.push(makeMetadataElement(idx + 1, el));

@@ -349,7 +349,9 @@ define([
         case 2:
           if(typeof arguments[0] == "function") {
             this.setOption('successCallback', arguments[0]);
-            this.setOption('errorCallback', arguments[1]);
+            if(typeof arguments[1] == "function") {
+              this.setOption('errorCallback', arguments[1]);
+            }
             return this.doQuery();
           } else {
             this.setOption('params', arguments[0] || {});
