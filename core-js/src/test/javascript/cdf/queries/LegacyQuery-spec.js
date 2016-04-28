@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -21,6 +21,13 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
       processedData = {data: [1, 2, 3]},
       dashboard,
       legacyQuery;
+
+  var unprocessedDataStringWithQueryInfo = "{\"metadata\":[\"Sales\"],\"values\":[[\"Euro+ Shopping's Channel\",\"914.11\"],[\"Mini Gifts Ltd.\",\"6558.02\"]],\"queryInfo\": {\"totalRows\":\"2\"}}",
+      unprocessedDataWithQueryInfo = {metadata: [{colIndex : 0, colType : "String", colName : "Name"},
+                                                 {colIndex : 1, colType : "String", colName : "Sales"}],
+                                      resultset: [["Euro+ Shopping's Channel", "914.11"], ["Mini Gifts Ltd.", "6558.02"]],
+                                      queryInfo: {totalRows:"2"}}
+      processedDataWithQueryInfo = {data: [1, 2, 3]};
 
   beforeEach(function() {
     dashboard = new Dashboard();
@@ -57,7 +64,14 @@ define(["cdf/Dashboard.Clean"], function(Dashboard) {
         it("should parse it successfully", function() {
           var actual = legacyQuery.interfaces.lastResultSet.reader(unprocessedDataString);
           expect(actual).toEqual(unprocessedData);
+          expect(actual.queryInfo).toBeUndefined();
         });
+
+        it("should parse it successfully with defined query info", function() {
+          var actual = legacyQuery.interfaces.lastResultSet.reader(unprocessedDataStringWithQueryInfo);
+          expect(actual).toEqual(unprocessedDataWithQueryInfo);
+        });
+
       });
 
       describe("when passing malicious code", function() {
