@@ -303,7 +303,9 @@ define([
       }, this);
 
       this.queryState.setCallback(success);
-      this.queryState.setParameters(this.parameters);
+      if(this.parameters) {
+        this.queryState.setParameters(this.parameters);
+      }
       this.queryState.setAjaxOptions({async: true});
       this.queryState.fetchData(this.parameters, success, this.failureCallback);
      },
@@ -379,10 +381,18 @@ define([
             d = mod;
           }
         }
-        var response = {
-          iTotalRecords: d.queryInfo.totalRows,
-          iTotalDisplayRecords: d.queryInfo.totalRows
-        };
+        var response;
+        if(d.queryInfo) {
+          response = {
+            iTotalRecords: d.queryInfo.totalRows,
+            iTotalDisplayRecords: d.queryInfo.totalRows
+          };
+        } else {
+          response = {
+            iTotalRecords: d.resultset.length,
+            iTotalDisplayRecords: d.resultset.length
+          };
+        }
         response.aaData = d.resultset;
         response.sEcho = p("sEcho");
         myself.rawData = d;
