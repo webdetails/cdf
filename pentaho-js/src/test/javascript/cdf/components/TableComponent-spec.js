@@ -217,5 +217,38 @@ define([
       dashboard.update(tableComponent);
     });
 
+    /**
+     * ## The Table Component # paginatingUpdate can execute without defined parameters
+     */
+    it("can update when server side is true and without defined parameters", function() {
+      tableComponent.queryState = jasmine.createSpyObj("queryState", ['setParameters'])
+      tableComponent.queryState.fetchData = jasmine.createSpy('fetchData');
+      tableComponent.queryState.setCallback = jasmine.createSpy('setCallback');
+      tableComponent.queryState.setPageSize = jasmine.createSpy('setPageSize');
+      tableComponent.queryState.setAjaxOptions = jasmine.createSpy('setAjaxOptions');
+
+      tableComponent.paginatingUpdate();
+      expect(tableComponent.queryState.setParameters).not.toHaveBeenCalled();
+      expect(tableComponent.queryState.setCallback).toHaveBeenCalled();
+      expect(tableComponent.queryState.setPageSize).toHaveBeenCalled();
+      expect(tableComponent.queryState.setAjaxOptions).toHaveBeenCalled();
+      expect(tableComponent.queryState.fetchData).toHaveBeenCalled();
+    });
+
+    /**
+     * ## The Table Component # paginatingUpdate can execute with defined parameters
+     */
+    it("can update when server side is true and without defined parameters", function() {
+      tableComponent.queryState = jasmine.createSpyObj("queryState", ['setParameters']);
+      tableComponent.queryState.fetchData = jasmine.createSpy('fetchData');
+      tableComponent.queryState.setCallback = jasmine.createSpy('setCallback');
+      tableComponent.queryState.setPageSize = jasmine.createSpy('setPageSize');
+      tableComponent.queryState.setAjaxOptions = jasmine.createSpy('setAjaxOptions');
+      tableComponent.parameters = jasmine.createSpy('parameters');
+
+      tableComponent.paginatingUpdate();
+      expect(tableComponent.queryState.setParameters).toHaveBeenCalled();
+      
+    });
   });
 });
