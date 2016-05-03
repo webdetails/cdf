@@ -49,8 +49,16 @@ module.exports = function(config) {
 
     //reporter: coverage
     coverageReporter: {
-      type: 'cobertura',
-      dir: 'target/coverage-reports/cdf-javascript'
+      reporters: [
+        {
+          type: 'html',
+          dir:  'target/coverage-reports/html/cdf-javascript'
+        },
+        {
+          type: 'cobertura',
+          dir:  'target/coverage-reports/cdf-javascript'
+        }
+      ]
     },
 
     //reporter: junit
