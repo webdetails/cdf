@@ -250,5 +250,50 @@ define([
       expect(tableComponent.queryState.setParameters).toHaveBeenCalled();
       
     });
+    /**
+     * ## The Table Component # should only trigger one query on start-up
+     */
+    it("should only trigger one query on start-up.", function(done) {
+      
+      spyOn($, 'ajax').and.callFake(function(params) {
+        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]],"queryInfo": {"totalRows":1}}');
+      });
+      
+      tableComponent.chartDefinition.colTypes = ['string'];
+      tableComponent.chartDefinition.colWidths = ['500px'];
+      tableComponent.chartDefinition.colSearchable = ['1'];
+      tableComponent.chartDefinition.colSortable = ['true'];
+      tableComponent.chartDefinition.paginateServerside = 'true';
+      tableComponent.parameters = [];
+
+      //listen to cdf:postExecution event
+      tableComponent.once("cdf:postExecution", function() {
+        expect($.ajax.calls.count()).toEqual(1);
+        done();
+      });
+      dashboard.update(tableComponent);
+    });
+    /**
+     * ## The Table Component # pagingCallback
+     */
+    describe("pagingCallback", function () {
+
+      it("should only setCallback without triggering a query the first run", function () {
+        tableComponent.queryState = jasmine.createSpyObj("queryState", ['fetchData', 'setCallback', 'setPageSize', 'setAjaxOptions', 'setParameters', 'setSortBy', 'setPageStartingAt', 'setSearchPattern']);
+        var callbackSpy = jasmine.createSpy("callback");
+        var jsonSpy = jasmine.createSpyObj("json", ['resultset']);
+        tableComponent.pagingCallback("url", [], callbackSpy, "datatable", jsonSpy, true);
+        expect(tableComponent.queryState.setCallback).toHaveBeenCalled();
+        expect(tableComponent.queryState.fetchData).not.toHaveBeenCalled();        
+      });
+
+      it("should not execute setCallback and should triggering a query after the first run", function () {
+        tableComponent.queryState = jasmine.createSpyObj("queryState", ['fetchData', 'setCallback', 'setPageSize', 'setAjaxOptions', 'setParameters', 'setSortBy', 'setPageStartingAt', 'setSearchPattern']);        var callbackSpy = jasmine.createSpy("callback");
+        var jsonSpy = jasmine.createSpyObj("json", ['resultset']);
+        tableComponent.pagingCallback("url", [], callbackSpy, "datatable", jsonSpy, false);
+        expect(tableComponent.queryState.setCallback).not.toHaveBeenCalled();
+        expect(tableComponent.queryState.fetchData).toHaveBeenCalled();        
+      });
+    });
   });
 });
