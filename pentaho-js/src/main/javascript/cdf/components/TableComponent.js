@@ -292,7 +292,7 @@ define([
       this.queryState.setPageSize(parseInt(cd.displayLength || 10));
       
       var success = _.bind(function(values) {
-        changedValues = undefined;
+        var changedValues = undefined;
         if(typeof this.postFetch == 'function') {
           changedValues = this.postFetch(values);
         }
@@ -351,7 +351,7 @@ define([
       this.queryState.setSortBy(sortOptions);
     },
 
-    pagingCallback: function(url, params, callback, dataTable) {
+    pagingCallback: function(url, params, callback, dataTable, json, firstRun) {
       function p(sKey) {
         for(var i = 0, iLen = params.length; i < iLen ; i++) {
           if(params[i].name == sKey) {
@@ -361,7 +361,7 @@ define([
         return null;
       }
       var sortingCols = p("order"), sort = [];
-      if(sortingCols.length > 0) {
+      if(sortingCols && sortingCols.length > 0) {
         for(var i = 0; i < sortingCols.length; i++) {
           var col = sortingCols[i].column;
           var dir = sortingCols[i].dir;
@@ -374,7 +374,7 @@ define([
       query.setPageSize(parseInt(p("length")));
       query.setPageStartingAt(p("start"));
       query.setSearchPattern(p("search") ? p("search").value : "");
-      query.fetchData(function(d) {
+      var success = function(d) {
         if(myself.postFetch) {
           var mod = myself.postFetch(d, dataTable);
           if(typeof mod !== "undefined") {
@@ -398,7 +398,14 @@ define([
         myself.rawData = d;
         callback(response);
         
-      }, this.failureCallback);
+      };
+
+      if(firstRun) {
+        query.setCallback(success);
+        success(json);
+      } else {
+        query.fetchData(success, this.failureCallback);
+      }
     },
     
     /* 
@@ -549,8 +556,10 @@ define([
       dtData.fnInitComplete = _.bind(myself.fnInitComplete, myself);
       /* fnServerData is required for server-side pagination */
       if(dtData.bServerSide) {
+        var firstRun = true;
         dtData.fnServerData = function(u, p, c) {
-          myself.pagingCallback(u, p, c, this);
+          myself.pagingCallback(u, p, c, this, json, firstRun);
+          firstRun = false;
         };
       }
 
@@ -558,7 +567,7 @@ define([
        * depending on whether we're using CDA
        */
       if(json) { dtData.aaData = json.resultset; }
-      
+
       var tableClassName = dtData.tableStyle == "bootstrap"
         ? 'table table-striped table-bordered form-inline table-responsive'
         : 'tableComponent compact';
