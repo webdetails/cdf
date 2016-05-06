@@ -533,11 +533,17 @@ var TableComponent = UnmanagedComponent.extend({
     /* fnServerData is required for server-side pagination */
     if (dtData.bServerSide) {
       var myself = this;
-       var firstRun = true;
+      var firstRun = true;
       dtData.fnServerData = function(u,p,c) {
         myself.pagingCallback(u,p,c,this);
         firstRun = false;
       };
+      //legacy queries do no support server-side pagination
+      if(!json.queryInfo) {
+          dtData.iDisplayLength = json.resultset.length;
+          dtData.bLengthChange = false;
+          Dashboards.log("Please use CDA queries to enable server-side pagination.", "warn");         
+        }
     }
 
     /* We need to make sure we're getting data from the right place,
