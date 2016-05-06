@@ -14,7 +14,7 @@
 define([
   "cdf/Dashboard.Clean",
   "cdf/components/TableComponent",
-  "cdf/lib/jquery"
+  "amd!cdf/lib/datatables"
 ], function(Dashboard, TableComponent, $) {
 
   /**
@@ -293,6 +293,40 @@ define([
         tableComponent.pagingCallback("url", [], callbackSpy, "datatable", jsonSpy, false);
         expect(tableComponent.queryState.setCallback).not.toHaveBeenCalled();
         expect(tableComponent.queryState.fetchData).toHaveBeenCalled();        
+      });
+    });
+
+    /**
+     * ## The Table Component # processTableComponentResponse
+     */
+    describe("processTableComponentResponse", function () {
+
+      it("should set the datatable display length if no query info is provided", function () {
+        var dataTableMock = jasmine.createSpyObj("dataTable", ["anOpen"]);  
+        var dataTableSpy = spyOn($.prototype, "dataTable").and.callFake(function(settings){
+          expect(settings.iDisplayLength).toBe(2);
+          expect(settings.bLengthChange).toBe(false);
+          return dataTableMock;
+        });
+        tableComponent.ph = jasmine.createSpyObj("ph", ['trigger','html']);
+        tableComponent.ph.find = function(param) { return {bind: function (click,fun) {return "bind"}};};
+        tableComponent.chartDefinition.dataTableOptions = {bServerSide: true};
+        var json = {"metadata":["Sales"],"resultset":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}
+        tableComponent.processTableComponentResponse(json);
+      });
+
+      it("should not set the datatable display length if the query info is provided", function () {
+        var dataTableMock = jasmine.createSpyObj("dataTable", ["anOpen"]);  
+        var dataTableSpy = spyOn($.prototype, "dataTable").and.callFake(function(settings){
+          expect(settings.iDisplayLength).toBe(10);
+          expect(settings.bLengthChange).toBe(undefined);
+          return dataTableMock;
+        });
+        tableComponent.ph = jasmine.createSpyObj("ph", ['trigger','html']);
+        tableComponent.ph.find = function(param) { return {bind: function (click,fun) {return "bind"}};};
+        tableComponent.chartDefinition.dataTableOptions = {bServerSide: true};
+        var json = {"metadata":["Sales"],"resultset":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]],"queryInfo": {"totalRows":2}}
+        tableComponent.processTableComponentResponse(json);     
       });
     });
   });

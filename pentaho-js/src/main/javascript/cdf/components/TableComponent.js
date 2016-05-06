@@ -561,6 +561,12 @@ define([
           myself.pagingCallback(u, p, c, this, json, firstRun);
           firstRun = false;
         };
+        // legacy queries do not support server-side pagination
+        if(!json.queryInfo) {
+          dtData.iDisplayLength = json.resultset.length;
+          dtData.bLengthChange = false;
+          Logger.warn("Please use CDA queries to enable server-side pagination.");          
+        }
       }
 
       /* We need to make sure we're getting data from the right place,
