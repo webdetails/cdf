@@ -535,7 +535,7 @@ var TableComponent = UnmanagedComponent.extend({
       var myself = this;
       var firstRun = true;
       dtData.fnServerData = function(u,p,c) {
-        myself.pagingCallback(u,p,c,this);
+        myself.pagingCallback(u, p, c, this, json, firstRun);
         firstRun = false;
       };
       //legacy queries do no support server-side pagination
