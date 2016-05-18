@@ -31,7 +31,8 @@ define([
       events: [],
       modelHandler: function(st, opt) {
         var model = {};
-        return model[opt.rootElement] = $.parseJSON(st.value);
+        model[opt.rootElement] = $.parseJSON(st.value);
+        return model;
       },
       postProcess: function() {}
     },
@@ -96,7 +97,7 @@ define([
         model[opt.rootElement] = data;
       }
 
-      if((!_.isEmpty(data))) {
+      if(_.isObject(model)) {
         var helpers = {
           formatter: function(data, formatter, id) {
             return myself.applyFormatter(opt, data, formatter, id);
