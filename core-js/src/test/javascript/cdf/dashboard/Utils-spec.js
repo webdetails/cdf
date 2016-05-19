@@ -87,7 +87,7 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
     });
 
     /**
-     * ## The Utils class # doesn't re-escape html
+     * ## The Utils class # already escaped html is not re-escaped
      */
     it("already escaped html is not re-escaped", function() {
       var alphabeticText = "&lt;&quot;&lsaquo;&Yuml;";
@@ -99,11 +99,22 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       expectEscapeHtml(hexText, hexText);
     });
 
+    /**
+     * ## The Utils class # returns an empty string if it receives anything other than a string
+     */
     it("returns an empty string if it receives anything other than a string", function() {
-      var nonStringArray = [{question: "answer"}, 42, 42.7, null, undefined, function(){}, false];
+      var nonStringArray = [{question: "answer"}, 42, 42.7, null, undefined, function() {}, false];
       for(var i = 0; i < nonStringArray.length; i++) {
         expectEscapeHtml(nonStringArray[i], "");
       }
+    });
+
+    /**
+     * ## The Utils class # ev function returns the input parameter or its return value if it's a function
+     */
+    it("ev function returns the input parameter or its return value if it's a function", function() {
+      expect(Utils.ev("1")).toBe("1");
+      expect(Utils.ev(function() { return "1"; })).toBe("1");
     });
   });
 });
