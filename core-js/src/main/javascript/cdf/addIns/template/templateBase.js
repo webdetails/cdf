@@ -31,7 +31,8 @@ define([
       events: [],
       modelHandler: function(st, opt) {
         var model = {};
-        return model[opt.rootElement] = $.parseJSON(st.value);
+        model[opt.rootElement] = $.parseJSON(st.value);
+        return model;
       },
       postProcess: function() {}
     },
@@ -85,18 +86,18 @@ define([
     },
 
     renderTemplate: function(tgt, st, opt) {
-      var data = "",
-          html = "",
-          model = {},
+      var model,
           myself = this;
       try {
         model = opt.modelHandler(st, opt);
       } catch(e) {
-        data = st.value;
-        model[opt.rootElement] = data;
+        if(!_.isEmpty(st.value)) {
+          model = {};
+          model[opt.rootElement] = st.value;
+        }
       }
 
-      if((!_.isEmpty(data))) {
+      if(!_.isEmpty(model)) {
         var helpers = {
           formatter: function(data, formatter, id) {
             return myself.applyFormatter(opt, data, formatter, id);
@@ -108,23 +109,19 @@ define([
           switch(opt.templateType.toUpperCase()) {
             case 'UNDERSCORE':
               model = _.defaults({}, model, Utils.propertiesArrayToObject(helpers));
-              html = _.template(Utils.ev(opt.template))(model);
-              break;
+              return _.template(Utils.ev(opt.template))(model);
             case 'MUSTACHE':
               Mustache.Formatters = helpers;
-              html = Mustache.render((_.isFunction(opt.template) ? opt.template() : opt.template), model);
-              break;
+              return Mustache.render(Utils.ev(opt.template), model);
             default:
-              html = this.processMessage(opt, 'invalidTemplateType', 'error');
-              break;
+              return this.processMessage(opt, 'invalidTemplateType', 'error');
           }
         } catch(e) {
-          html = this.processMessage(opt, 'invalidTemplate', 'error');
+          return this.processMessage(opt, 'invalidTemplate', 'error');
         }
       } else {
-        html = this.processMessage(opt, 'noData', 'error');
+        return this.processMessage(opt, 'noData', 'error');
       }
-      return html;
     },
 
     applyFormatter: function(opt, model, formatter, id) {
@@ -146,9 +143,9 @@ define([
             selector = _.last(handler).trim();
         if (_.isFunction(eventHandler)) {
           if (event === selector) {
-              $placeholder.off(event).on(event, info, eventHandler);
+            $placeholder.off(event).on(event, info, eventHandler);
           } else {
-              $placeholder.find(selector).off(event).on(event, info, eventHandler);
+            $placeholder.find(selector).off(event).on(event, info, eventHandler);
           }
         }
       });
