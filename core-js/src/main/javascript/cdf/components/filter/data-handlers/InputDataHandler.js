@@ -15,13 +15,13 @@ define([
   '../../../lib/jquery',
   'amd!../../../lib/underscore',
   '../baseevents/baseeventsModel',
-  '../../../Logger'
-], function($, _, BaseModel, Logger) {
+  '../../../Logger',
+  '../HtmlUtils'
+], function($, _, BaseModel, Logger, HtmlUtils) {
 
   var sanitizeInput = function(input) {
     return _.isString(input) ?
-      input.replace(/<script>/g, "&lt;script&gt;")
-        .replace(/<\/script>/g, "&lt;/script&gt;") :
+      HtmlUtils.sanitizeHtml(input) :
       input;
   };
   var getPageData = function(queryInfo, pageSize) {
