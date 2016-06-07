@@ -150,7 +150,12 @@ define([
       var modelData = [["One", "Label", "Value"],
         ["Two", "<script>Label</script>", "<script>Value</script>"],
         ["Three", "<b>Label</b>", "<b>Value</b>"],
-        ["Three", "<b><script>Label</script></b>", "<b><script>Value</script></b>"]];
+        ["Four", "<b><script>Label</script></b>", "<b><script>Value</script></b>"],
+        ["Five", "<b><iframe>Label</iframe></b>", "<b><iframe>Value</iframe></b>"],
+        ["Six", "<b><html>Label</html></b>", "<b><html>Value</html></b>"],
+        ["Seven", "<b><body>Label</body></b>", "<b><body>Value</body></b>"],
+        ["Eight", "<b><iframe>Label</iframe></b><b><script>Label</script></b>", "<b><html>Value</html></b>"]
+		];
       spyOn($, 'ajax').and.callFake(function(params) {
         params.success(getCdaJson(modelData,
           [{colIndex: 0, colType: "String", colName: "id"},
@@ -184,6 +189,7 @@ define([
         for (var i = 0; i < models.length; i++) {
           var data = override[i] || modelData[i];
           expect(models[i].get("label")).toEqual(data[1]);
+		  console.log("!!!");
           expect(models[i].get("value")).toEqual(data[2]);
         }
       };
@@ -194,6 +200,10 @@ define([
         var override = [];
         override[1] = ["", "&lt;script&gt;Label&lt;/script&gt;", "&lt;script&gt;Value&lt;/script&gt;"];
         override[3] = ["", "<b>&lt;script&gt;Label&lt;/script&gt;</b>", "<b>&lt;script&gt;Value&lt;/script&gt;</b>"];
+        override[4] = ["", "<b>&lt;iframe&gt;Label&lt;/iframe&gt;</b>", "<b>&lt;iframe&gt;Value&lt;/iframe&gt;</b>"];
+        override[5] = ["", "<b>&lt;html&gt;Label&lt;/html&gt;</b>", "<b>&lt;html&gt;Value&lt;/html&gt;</b>"];
+        override[6] = ["", "<b>&lt;body&gt;Label&lt;/body&gt;</b>", "<b>&lt;body&gt;Value&lt;/body&gt;</b>"];
+        override[7] = ["", "<b>&lt;iframe&gt;Label&lt;/iframe&gt;</b><b>&lt;script&gt;Label&lt;/script&gt;</b>", "<b>&lt;html&gt;Value&lt;/html&gt;</b>"];
         evaluateExpectations(childrenModels, override);
         done();
       });

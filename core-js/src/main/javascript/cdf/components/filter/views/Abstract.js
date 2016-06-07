@@ -18,8 +18,9 @@ define([
   '../../../Logger',
   '../models/SelectionTree',
   '../../../lib/jquery',
-  './scrollbar/ScrollBarFactory'
-], function (_, Mustache, BaseView, Logger, SelectionTree, $, ScrollBarFactory) {
+  './scrollbar/ScrollBarFactory',
+  '../HtmlUtils'
+], function (_, Mustache, BaseView, Logger, SelectionTree, $, ScrollBarFactory, HtmlUtils) {
 
   /**
    * @class cdf.components.filter.views.Abstract
@@ -77,6 +78,7 @@ define([
       return _.bind(function (viewModel) {
         if (this.template[slot]) {
           var html = Mustache.render(this.template[slot], viewModel);
+		  html = HtmlUtils.sanitizeHtml(html);
           this.$(this.config.view.slots[slot]).replaceWith(html);
         }
         this.injectContent(slot);
@@ -126,7 +128,9 @@ define([
       return this;
     },
     renderSkeleton: function (viewModel) {
-      this.$el.html(Mustache.render(this.template.skeleton, viewModel));
+	  var rHtml = Mustache.render(this.template.skeleton, viewModel);
+	  rHtml = HtmlUtils.sanitizeHtml(rHtml);
+      this.$el.html(rHtml);
       return this;
     },
     updateSelection: function (model, options) {
@@ -137,8 +141,9 @@ define([
       return this;
     },
     renderSelection: function (viewModel) {
-      var html = Mustache.render(this.template.selection, viewModel);
-      this.$(this.config.view.slots.selection).replaceWith(html);
+      var rHtml = Mustache.render(this.template.selection, viewModel);
+	  rHtml = HtmlUtils.sanitizeHtml(rHtml);
+      this.$(this.config.view.slots.selection).replaceWith(rHtml);
       this.injectContent('selection');
       return this;
     },
