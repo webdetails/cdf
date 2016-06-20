@@ -85,7 +85,7 @@
   requirePaths['cdf/lib/sanitizer/lib/uri'] = prefix + '/sanitizer/lib/uri';
   requirePaths['cdf/lib/sanitizer'] = prefix + '/sanitizer/sanitizer';
 
-  //jquery 1.9.1, without globally scoped variables
+  //jquery 1.12.4, without globally scoped variables
   requirePaths['cdf/lib/jquery'] = prefix + '/jQuery/jquery';
   requireShims['cdf/lib/jquery'] = {
     exports: '$',
