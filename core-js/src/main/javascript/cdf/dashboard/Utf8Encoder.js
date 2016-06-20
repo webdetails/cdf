@@ -88,8 +88,6 @@ define(["../lib/jquery"], function($) {
     encode_prepare: function(s) {
       if(s != null) {
         s = s.replace(/\+/g," ");
-        /* CDF-271 jQuery 1.9.1 deprecated function $.browser */
-        //if($.browser == "msie" || $.browser == "opera") {
         if((navigator.userAgent.toLowerCase().indexOf('msie') != -1)
           || (navigator.userAgent.toLowerCase().indexOf('opera') != -1)) {
 
