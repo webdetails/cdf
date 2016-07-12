@@ -20,11 +20,9 @@ define([
         });
       });
       it('has the correct parent id', function() {
-        console.log('BaseSelectionTree > accepts object literals nested around the "node" property > has the correct parent id');
         expect(model.get('id')).toBe('#parent');
       });
       it('has a single child', function() {
-        console.log('BaseSelectionTree > accepts object literals nested around the "node" property > has a single child');
         expect(model.children().models.length).toBe(1);
       });
     });
@@ -46,7 +44,6 @@ define([
         attributes = model.flatten().map(function(m) {
           return _.keys(m.attributes);
         }).value().join(', ');
-        return console.log('Model attributes:', attributes);
       });
       it('is nesting around the correct property', function() {
         expect(model.nodesAttribute).toBe('xchildren');
@@ -76,21 +73,18 @@ define([
         });
       });
       it('marks all children as selected upon selecting the root', function() {
-        console.log('BaseSelectionTree > at a depth of 1 level > marks all children as selected upon selecting the root');
         model.setSelection(true);
         expect(model.flatten().all(function(m) {
           return m.getSelection() === BaseSelectionTree.SelectionStates.ALL;
         }).value()).toBe(true);
       });
       it('marks all children as unselected upon unselecting the root', function() {
-        console.log('BaseSelectionTree > at a depth of 1 level > marks all children as unselected upon unselecting the root');
         model.setSelection(false);
         expect(model.flatten().all(function(m) {
           return m.getSelection() === BaseSelectionTree.SelectionStates.NONE;
         }).value()).toBe(true);
       });
       it('is partially selected if only some of its children are selected', function() {
-        console.log('BaseSelectionTree > at a depth of 1 level > is partially selected if only some of its children are selected');
         model.setSelection(false);
         model.children().last().setSelection(BaseSelectionTree.SelectionStates.ALL);
         expect(model.getSelection()).toBe(BaseSelectionTree.SelectionStates.SOME);
@@ -119,21 +113,18 @@ define([
         });
       });
       it('marks all children as selected upon selecting the root', function() {
-        console.log('BaseSelectionTree > at a depth of 2 level > marks all children as selected upon selecting the root');
         model.setSelection(true);
         expect(model.flatten().all(function(m) {
           return m.getSelection() === BaseSelectionTree.SelectionStates.ALL;
         }).value()).toBe(true);
       });
       it('marks all children as unselected upon unselecting the root', function() {
-        console.log('BaseSelectionTree > at a depth of 2 level > marks all children as unselected upon unselecting the root');
         model.setSelection(false);
         expect(model.flatten().all(function(m) {
           return m.getSelection() === BaseSelectionTree.SelectionStates.NONE;
         }).value()).toBe(true);
       });
       it('is partially selected if only some of its children are selected', function() {
-        console.log('BaseSelectionTree > at a depth of 2 level > is partially selected if only some of its children are selected');
         model.setSelection(false);
         model.children().last().children().first().setSelection(BaseSelectionTree.SelectionStates.ALL);
         expect(model.getSelection()).toBe(BaseSelectionTree.SelectionStates.SOME);
