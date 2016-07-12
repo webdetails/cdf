@@ -189,7 +189,6 @@ define([
         for (var i = 0; i < models.length; i++) {
           var data = override[i] || modelData[i];
           expect(models[i].get("label")).toEqual(data[1]);
-		  console.log("!!!");
           expect(models[i].get("value")).toEqual(data[2]);
         }
       };
