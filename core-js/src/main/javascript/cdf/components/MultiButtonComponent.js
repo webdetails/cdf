@@ -147,7 +147,7 @@ define([
           && myArray.length > 0) {
 
         //select first value
-        if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0))
+        if((currentVal == null || currentVal == "" || currentVal != firstVal || (typeof(currentVal) == "object" && currentVal.length == 0))
             && myself.parameter) {
 
           myself.dashboard.fireChange(myself.parameter, (myself.isMultiple) ? [firstVal] : firstVal);
