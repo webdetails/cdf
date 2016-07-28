@@ -197,12 +197,12 @@ define([
         filterComponent.dashboard.parameter;
         var childrenModels = filterComponent.model.children().models;
         var override = [];
-        override[1] = ["", "&lt;script&gt;Label&lt;/script&gt;", "&lt;script&gt;Value&lt;/script&gt;"];
-        override[3] = ["", "<b>&lt;script&gt;Label&lt;/script&gt;</b>", "<b>&lt;script&gt;Value&lt;/script&gt;</b>"];
-        override[4] = ["", "<b>&lt;iframe&gt;Label&lt;/iframe&gt;</b>", "<b>&lt;iframe&gt;Value&lt;/iframe&gt;</b>"];
-        override[5] = ["", "<b>&lt;html&gt;Label&lt;/html&gt;</b>", "<b>&lt;html&gt;Value&lt;/html&gt;</b>"];
-        override[6] = ["", "<b>&lt;body&gt;Label&lt;/body&gt;</b>", "<b>&lt;body&gt;Value&lt;/body&gt;</b>"];
-        override[7] = ["", "<b>&lt;iframe&gt;Label&lt;/iframe&gt;</b><b>&lt;script&gt;Label&lt;/script&gt;</b>", "<b>&lt;html&gt;Value&lt;/html&gt;</b>"];
+        override[1] = ["", "", ""];
+        override[3] = ["", "<b></b>", "<b></b>"];
+        override[4] = ["", "<b></b>", "<b></b>"];
+        override[5] = ["", "<b>Label</b>", "<b>Value</b>"];
+        override[6] = ["", "<b>Label</b>", "<b>Value</b>"];
+        override[7] = ["", "<b></b><b></b>", "<b>Value</b>"];
         evaluateExpectations(childrenModels, override);
         done();
       });

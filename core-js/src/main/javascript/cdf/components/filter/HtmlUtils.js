@@ -1,10 +1,11 @@
-define(function(){
+define([
+"sanitizer"
+],function(Sanitizer){
   return {
     sanitizeHtml: function(html){
-	  html = html.replace(/<script\b[^>]*>/gi, "&lt;script&gt;").replace(/<\/script>/gi, "&lt;/script&gt;");
-	  html = html.replace(/<iframe\b[^>]*>/gi, "&lt;iframe&gt;").replace(/<\/iframe>/gi, "&lt;/iframe&gt;");
-	  html = html.replace(/<html\b[^>]*>/gi, "&lt;html&gt;").replace(/<\/html>/gi, "&lt;/html&gt;");
-	  html = html.replace(/<body\b[^>]*>/gi, "&lt;body&gt;").replace(/<\/body>/gi, "&lt;/body&gt;");
+	  // here is iframe explicitly replaced by script to further sanitizing since sanitizer itself doesn't sanitize iframe tag
+	  html = html.replace(/<iframe\b[^>]*>/gi, "<script>").replace(/<\/iframe>/gi, "</script>");
+	  html = Sanitizer.sanitize(html)
       return html;
     }
   }
