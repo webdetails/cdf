@@ -80,20 +80,6 @@
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
 
-  requirejs.config({
-    paths: {
-		html4: prefix +"/sanitizer/lib/html4",
-		uri: prefix +"/sanitizer/lib/uri",
-		sanitizer: prefix +"/sanitizer/sanitizer"
-    },
-	shim: {
-		'sanitizer': {
-		    deps: ['html4', 'uri'],
-            exports: 'Sanitizer'
-        }
-	}
-  });
-
   //jquery 1.9.1, without globally scoped variables
   requirePaths['cdf/lib/jquery'] = prefix + '/jQuery/jquery';
   requireShims['cdf/lib/jquery'] = {
