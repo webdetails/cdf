@@ -113,12 +113,7 @@ define([
           async: true,
           data: params,
           complete: function(XMLHttpRequest, textStatus) {
-            /* CDF-271 jQuery 1.9.1 bug #13388 */
-            if(typeof XMLHttpRequest.responseXML == "undefined") {
-              func($.parseXML(XMLHttpRequest.responseText));
-            } else {
-              func(XMLHttpRequest.responseXML);
-            }
+            func(XMLHttpRequest.responseXML);
           },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
             Logger.error("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " + errorThrown);
@@ -139,12 +134,7 @@ define([
       });
 
       if(returnType == 'xml') {
-        /* CDF-271 jQuery 1.9.1 bug #13388 */
-        if(typeof result.responseXML == "undefined") {
-          return $.parseXML(result.responseText);
-        } else {
-          return result.responseXML;
-        }
+        return result.responseXML;
       } else {
         return result.responseText;
       }
