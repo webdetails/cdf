@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -31,10 +31,11 @@ import org.pentaho.cdf.utils.PluginHibernateUtil;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 
-public class StorageEngine {
+public class StorageEngine implements StorageEngineInterface {
 
   private static final Log logger = LogFactory.getLog( StorageEngine.class );
-  private static StorageEngine instance;
+  private static StorageEngineInterface instance;
+  private static StorageEngineInterface mockInstance = null;
 
   public static enum Operation {
     READ( "READ" ), STORE( "STORE" ), DELETE( "DELETE" ), UNKNOWN( "UNKNOWN" );
@@ -56,12 +57,20 @@ public class StorageEngine {
     }
   }
 
-  public static synchronized StorageEngine getInstance() {
+  public static synchronized StorageEngineInterface getInstance() {
+    if ( mockInstance != null ) {
+      return mockInstance;
+    }
+
     if ( instance == null ) {
       PluginHibernateUtil.initialize();
       instance = new StorageEngine();
     }
     return instance;
+  }
+
+  public static void setMockInstance( StorageEngineInterface mock ) {
+    mockInstance = mock;
   }
 
   public StorageEngine() {
@@ -74,6 +83,7 @@ public class StorageEngine {
     }
   }
 
+  @Override
   public JSONObject store( String value, String user ) throws JSONException, InvalidCdfOperationException,
     PluginHibernateException {
 
@@ -108,6 +118,7 @@ public class StorageEngine {
     return JsonUtil.makeJsonSuccessResponse( Boolean.TRUE );
   }
 
+  @Override
   public JSONObject read( String user ) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
     logger.debug( "Reading storage" );
@@ -126,6 +137,7 @@ public class StorageEngine {
     return JsonUtil.makeJsonSuccessResponse( result );
   }
 
+  @Override
   public JSONObject delete( String user ) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
     logger.debug( "Deleting storage for user " + user );
