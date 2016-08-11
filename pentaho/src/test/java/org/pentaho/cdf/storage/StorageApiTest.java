@@ -34,8 +34,6 @@ import org.pentaho.platform.api.engine.ISecurityHelper;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.security.SecurityHelper;
 
-import com.google.gwt.editor.client.Editor.Ignore;
-
 import pt.webdetails.cpf.messaging.MockHttpServletRequest;
 import pt.webdetails.cpf.messaging.MockHttpServletResponse;
 import pt.webdetails.cpf.utils.CharsetHelper;
@@ -87,7 +85,6 @@ public class StorageApiTest {
   }
 
   @Test
-  @Ignore
   public void storeTest() throws Exception {
     Assert.assertEquals( servletResponse.getContentType(), null );
     Assert.assertEquals( servletResponse.getCharacterEncoding(), null );
@@ -100,7 +97,6 @@ public class StorageApiTest {
   }
 
   @Test
-  @Ignore
   public void readTest() throws Exception {
     Assert.assertEquals( servletResponse.getContentType(), null );
     Assert.assertEquals( servletResponse.getCharacterEncoding(), null );
@@ -113,7 +109,6 @@ public class StorageApiTest {
   }
 
   @Test
-  @Ignore
   public void deleteTest() throws Exception {
     Assert.assertEquals( servletResponse.getContentType(), null );
     Assert.assertEquals( servletResponse.getCharacterEncoding(), null );
