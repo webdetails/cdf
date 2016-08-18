@@ -150,7 +150,12 @@ define([
       var modelData = [["One", "Label", "Value"],
         ["Two", "<script>Label</script>", "<script>Value</script>"],
         ["Three", "<b>Label</b>", "<b>Value</b>"],
-        ["Three", "<b><script>Label</script></b>", "<b><script>Value</script></b>"]];
+        ["Four", "<b><script>Label</script></b>", "<b><script>Value</script></b>"],
+        ["Five", "<b><iframe>Label</iframe></b>", "<b><iframe>Value</iframe></b>"],
+        ["Six", "<b><html>Label</html></b>", "<b><html>Value</html></b>"],
+        ["Seven", "<b><body>Label</body></b>", "<b><body>Value</body></b>"],
+        ["Eight", "<b><iframe>Label</iframe></b><b><script>Label</script></b>", "<b><html>Value</html></b>"]
+		];
       spyOn($, 'ajax').and.callFake(function(params) {
         params.success(getCdaJson(modelData,
           [{colIndex: 0, colType: "String", colName: "id"},
@@ -192,8 +197,12 @@ define([
         filterComponent.dashboard.parameter;
         var childrenModels = filterComponent.model.children().models;
         var override = [];
-        override[1] = ["", "&lt;script&gt;Label&lt;/script&gt;", "&lt;script&gt;Value&lt;/script&gt;"];
-        override[3] = ["", "<b>&lt;script&gt;Label&lt;/script&gt;</b>", "<b>&lt;script&gt;Value&lt;/script&gt;</b>"];
+        override[1] = ["", "", ""];
+        override[3] = ["", "<b></b>", "<b></b>"];
+        override[4] = ["", "<b></b>", "<b></b>"];
+        override[5] = ["", "<b>Label</b>", "<b>Value</b>"];
+        override[6] = ["", "<b>Label</b>", "<b>Value</b>"];
+        override[7] = ["", "<b></b><b></b>", "<b>Value</b>"];
         evaluateExpectations(childrenModels, override);
         done();
       });

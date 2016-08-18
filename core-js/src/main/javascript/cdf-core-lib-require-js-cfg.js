@@ -79,6 +79,11 @@
 
   //modernizr 2.8.3
   requirePaths['cdf/lib/modernizr'] = prefix + '/modernizr/modernizr-2.8.3';
+  
+  //Google Caja HTML Sanitizer 0.1.3 with dependencies
+  requirePaths['cdf/lib/sanitizer/lib/html4'] = prefix + '/sanitizer/lib/html4';
+  requirePaths['cdf/lib/sanitizer/lib/uri'] = prefix + '/sanitizer/lib/uri';
+  requirePaths['cdf/lib/sanitizer'] = prefix + '/sanitizer/sanitizer';
 
   //jquery 1.9.1, without globally scoped variables
   requirePaths['cdf/lib/jquery'] = prefix + '/jQuery/jquery';
