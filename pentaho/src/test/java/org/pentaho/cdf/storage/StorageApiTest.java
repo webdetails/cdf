@@ -17,7 +17,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -29,6 +28,7 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.ISecurityHelper;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -42,6 +42,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
@@ -71,9 +72,8 @@ public class StorageApiTest {
     when( se.read( anyString() ) ).thenReturn( dummy );
     when( se.store( anyString(), anyString() ) ).thenReturn( dummy );
 
-    StorageEngine.setMockInstance( se );
-    testee = spy( new StorageApi() );
-    doNothing().when( testee ).setCorsHeaders( anyObject(), anyObject() );
+    testee = spy( new StorageApi( se ) );
+    doNothing().when( testee ).setCorsHeaders( Matchers.<HttpServletRequest>anyObject(), Matchers.<HttpServletResponse>anyObject() );
   }
 
   @After
@@ -81,7 +81,6 @@ public class StorageApiTest {
     storageApi = null;
     servletRequest = null;
     servletResponse = null;
-    StorageEngine.setMockInstance( null );
   }
 
   @Test

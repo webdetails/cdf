@@ -35,7 +35,6 @@ public class StorageEngine implements StorageEngineInterface {
 
   private static final Log logger = LogFactory.getLog( StorageEngine.class );
   private static StorageEngineInterface instance;
-  private static StorageEngineInterface mockInstance = null;
 
   public static enum Operation {
     READ( "READ" ), STORE( "STORE" ), DELETE( "DELETE" ), UNKNOWN( "UNKNOWN" );
@@ -58,19 +57,11 @@ public class StorageEngine implements StorageEngineInterface {
   }
 
   public static synchronized StorageEngineInterface getInstance() {
-    if ( mockInstance != null ) {
-      return mockInstance;
-    }
-
     if ( instance == null ) {
       PluginHibernateUtil.initialize();
       instance = new StorageEngine();
     }
     return instance;
-  }
-
-  public static void setMockInstance( StorageEngineInterface mock ) {
-    mockInstance = mock;
   }
 
   public StorageEngine() {
