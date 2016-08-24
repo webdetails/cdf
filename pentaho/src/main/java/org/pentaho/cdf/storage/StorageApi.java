@@ -40,6 +40,16 @@ import pt.webdetails.cpf.utils.CharsetHelper;
 @Path( "/pentaho-cdf/api/storage" )
 public class StorageApi {
 
+  private StorageEngineInterface engine = null;
+
+  public StorageApi() {
+    this( StorageEngine.getInstance() );
+  }
+
+  public StorageApi( StorageEngineInterface engine ) {
+    this.engine = engine;
+  }
+
   @SuppressWarnings( "serial" )
   private static final Response FORBIDDEN = Response.status( Response.Status.FORBIDDEN ).entity( new JSONObject(
       new HashMap<String, String>() { { put( "error", "no session found" ); } }
@@ -108,7 +118,7 @@ public class StorageApi {
 
     try {
       return Response
-        .ok( StorageEngine.getInstance().store(
+        .ok( engine.store(
             storageValue,
             impersonate( user ) ).toString( 2 ) )
         .build();
@@ -120,7 +130,7 @@ public class StorageApi {
   protected String read( String user ) throws PluginHibernateException, JSONException,
       InvalidCdfOperationException, CdfStorageApiImpersonationException {
     try {
-      return StorageEngine.getInstance().read( impersonate( user ) ).toString( 2 );
+      return engine.read( impersonate( user ) ).toString( 2 );
     } catch ( CdfStorageApiImpersonationException e ) {
       throw e;
     }
@@ -131,7 +141,7 @@ public class StorageApi {
 
     try {
       return Response
-        .ok( StorageEngine.getInstance().delete(
+        .ok( engine.delete(
             impersonate( user ) ).toString( 2 ) )
         .build();
     } catch ( CdfStorageApiImpersonationException e ) {
