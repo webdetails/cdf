@@ -181,3 +181,17 @@ wd.cdf.endpoints = {
     return enc;
   }
 };
+
+wd.helpers = wd.helpers || {};
+
+wd.helpers.inputHelper = {
+  getCssWrapperClass: function() {return "class"},
+  getExtraCss: function() {return "class"},
+  getToggleButtonClass: function() {return "class"},
+  getToggleButtonHoveringClass: function() {return "class"},
+  getUnselectedCss: function() {return "class"},
+  getSelectedCss: function() {return "class"},
+  getExtraCss: function() {return "class"},
+  getCssWrapperClass: function() {return "class"},
+  getCssWrapperClass: function() {return "class"},
+};
