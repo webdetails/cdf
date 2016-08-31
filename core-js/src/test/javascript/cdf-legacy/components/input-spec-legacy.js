@@ -364,3 +364,186 @@ describe("The Checkbox Component #", function(){
     myDashboard.update(checkboxComponent);
   })
 });
+
+/**
+ * ## The Checkbox Component
+ */
+describe("The Multibutton Component #", function(){
+
+  var dashboard = _.extend({}, Dashboards);
+  var htmlObject = "sampleMultiButtonComponentObject";
+
+  dashboard.addParameter("region", "");
+
+  var multiButtonComponent = window.MultiButtonComponent = new MultiButtonComponent();
+  $.extend(multiButtonComponent, {
+    name: "multiButtonComponent",
+    type: "multiButtonComponent",
+    parameters: [],
+    path: "/fake/regions.xaction",
+    parameter: "region",
+    separator: ",&nbsp;",
+    valueAsId: true,
+    valuesArray: [["Button1","b1"],["Button2","b2"],["Button3","b3"]],
+    isMultiple: false,
+    htmlObject: htmlObject,
+    executeAtStart: true,
+    postChange: function() {
+      this.testCounter = this.testCounter ? this.testCounter + 1 : 1;
+      return "you chose: " + this.dashboard.getParameterValue(this.parameter);
+    }
+  });
+  MultiButtonComponent.prototype = {};
+  MultiButtonComponent.prototype.clickButton = function() {};
+  dashboard.addComponent(multiButtonComponent);
+
+  var $htmlObject = $('<div />').attr('id', htmlObject);
+
+//  beforeEach(function() {
+//    // add an element where the button will be inserted
+//    $('body').append($htmlObject);
+//  });
+//
+//  afterEach(function() {
+//    $htmlObject.remove();
+//  });
+
+  /**
+   * ## The Multi Button Component # draw() function behaves correctly
+   */
+  describe("draw() function behaves correctly #", function() {
+    beforeEach(function() {
+      multiButtonComponent.isMultiple = false;
+      spyOn($, "ajax").and.callFake(function() {
+        return {responseXML: "<test/>"};
+      });
+    });
+
+    /**
+     * ## The Multi Button Component # draw() function behaves correctly # with one element in values array
+     */
+    describe("with one element in values array #", function() {
+      beforeEach(function() {
+        multiButtonComponent.valuesArray = [["Button1","b1"]];
+      });
+
+      /**
+       * ## The Multi Button Component # draw() function behaves correctly # with one element in values array # with the current value equals to the first value
+       */
+      it("with the current value equals to the first value", function(done) {
+        dashboard.setParameter("region", "b1");
+
+        spyOn(Dashboards, 'fireChange');
+
+        // listen to cdf:postExecution event
+        multiButtonComponent.once("cdf:postExecution", function() {
+          expect(Dashboards.fireChange).not.toHaveBeenCalled();
+          done();
+        });
+
+        dashboard.update(multiButtonComponent);
+      });
+
+      /**
+       * ## The Multi Button Component # draw() function behaves correctly # with one element in values array # with the current value does not equal to the first value
+       */
+      it("with the current value does not equal to the first value", function(done) {
+        dashboard.setParameter("region", "b2");
+
+        spyOn(Dashboards, 'fireChange');
+
+        // listen to cdf:postExecution event
+        multiButtonComponent.once("cdf:postExecution", function() {
+          expect(Dashboards.fireChange).toHaveBeenCalled();
+          done();
+        });
+
+        dashboard.update(multiButtonComponent);
+      });
+    });
+
+    /**
+     * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array
+     */
+    describe("with several elements in values array #", function() {
+      beforeEach(function() {
+        multiButtonComponent.valuesArray = [["Button1","b1"],["Button2","b2"],["Button3","b3"]];
+      });
+
+      /**
+       * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value equals to the first value
+       */
+      it("with the current value equals to the first value", function(done) {
+        dashboard.setParameter("region", "b1");
+
+        spyOn(Dashboards, 'fireChange');
+
+        // listen to cdf:postExecution event
+        multiButtonComponent.once("cdf:postExecution", function() {
+          expect(Dashboards.fireChange).not.toHaveBeenCalled();
+          done();
+        });
+
+        dashboard.update(multiButtonComponent);
+      });
+
+      /**
+       * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value
+       */
+      describe("with the current value does not equal to the first value", function(done) {
+        /**
+         * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value # with the current value is present in values array
+         */
+        it("with the current value is present in values array", function(done) {
+          dashboard.setParameter("region", "b2");
+
+          spyOn(Dashboards, 'fireChange');
+
+          // listen to cdf:postExecution event
+          multiButtonComponent.once("cdf:postExecution", function() {
+            expect(Dashboards.fireChange).not.toHaveBeenCalled();
+            done();
+          });
+
+          dashboard.update(multiButtonComponent);
+        });
+
+        /**
+         * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value # with the current value is not present in values array
+         */
+        it("with the current value is not present in values array", function(done) {
+          dashboard.setParameter("region", "b4");
+
+          spyOn(Dashboards, 'fireChange');
+
+          // listen to cdf:postExecution event
+          multiButtonComponent.once("cdf:postExecution", function() {
+            expect(Dashboards.fireChange).not.toHaveBeenCalled();
+            done();
+          });
+
+          dashboard.update(multiButtonComponent);
+        });
+      });
+    });
+
+    /**
+     * ## The Multi Button Component # draw() function behaves correctly # with no elements in values array
+     */
+    it("with no elements in values array", function(done) {
+      multiButtonComponent.valuesArray = [];
+      dashboard.setParameter("region", undefined);
+
+      spyOn(Dashboards, 'fireChange');
+
+      // listen to cdf:postExecution event
+      multiButtonComponent.once("cdf:postExecution", function() {
+        expect(Dashboards.fireChange).not.toHaveBeenCalled();
+        done();
+      });
+
+      dashboard.update(multiButtonComponent);
+    });
+  });
+
+});
