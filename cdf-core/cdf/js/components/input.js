@@ -1198,7 +1198,8 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     }
     if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.defaultIfEmpty)) && myArray.length > 0){
       //select first value
-      if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0)) && this.parameter){
+      if((currentVal == null || currentVal == "" || ((currentVal !== firstVal) && myArray.length == 1) ||
+        (typeof(currentVal) == "object" && currentVal.length == 0)) && this.parameter){
         Dashboards.fireChange(this.parameter, (this.isMultiple) ? [firstVal] : firstVal);
       }
 
