@@ -182,6 +182,8 @@ wd.cdf.endpoints = {
   }
 };
 
+wd.helpers = wd.helpers || {};
+
 wd.helpers.inputHelper = {
   getCssWrapperClass: function() {return "class"},
   getExtraCss: function() {return "class"},
