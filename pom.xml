@@ -10,16 +10,9 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
-  <version>7.0-SNAPSHOT</version>
+  <version>6.1-16.08.18</version>
   <packaging>pom</packaging>
-<<<<<<< HEAD
-<<<<<<< HEAD
-  <version>6.0-16.01.22.1</version>
-  
-=======
->>>>>>> f62c7c2... [CLEANUP] updated versions via release version merger
-=======
->>>>>>> f62c7c2... [CLEANUP] updated versions via release version merger
+
   <modules>
     <module>core</module>
     <module>core-js</module>
@@ -44,7 +37,6 @@
     <js.project.list></js.project.list>
     <docjs.config.file></docjs.config.file>
     <project.stage>master</project.stage>
-    <dependency.cpf.revision>6.0-16.01.22</dependency.cpf.revision>    
     <documentation.javascript.root></documentation.javascript.root>
     <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
     <dependency.orientdb.revision>1.5.0</dependency.orientdb.revision>
@@ -58,10 +50,10 @@
     <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
     <requirejs.config.files.pattern></requirejs.config.files.pattern>
     <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
-    <dependency.json.revision>7.0-SNAPSHOT</dependency.json.revision>
+    <dependency.json.revision>6.1.0.1-196</dependency.json.revision>
     <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
     <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
-    <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
+    <dependency.ccc.revision>16.08.18</dependency.ccc.revision>
   </properties>
   <dependencyManagement>
     <dependencies>

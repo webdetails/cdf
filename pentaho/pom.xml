@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>6.1-16.08.18</version>
   </parent>
   <artifactId>cdf-pentaho</artifactId>
-  <version>7.0-SNAPSHOT</version>
+  <version>6.1-16.08.18</version>
   <properties>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
@@ -16,18 +16,18 @@
     <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
     <dependency.spring-core.revision>3.2.14.RELEASE</dependency.spring-core.revision>
     <dependency.spring-security-core.revision>2.0.8.RELEASE</dependency.spring-security-core.revision>
-    <dependency.pentaho-platform.revision>7.0-SNAPSHOT</dependency.pentaho-platform.revision>
+    <dependency.pentaho-platform.revision>6.1.0.1-196</dependency.pentaho-platform.revision>
   </properties>
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-core</artifactId>
-<version>6.0-16.01.22</version>
+<version>6.1-16.08.18</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-pentaho</artifactId>
-      <version>6.0-16.01.22</version>
+      <version>6.1-16.08.18</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
