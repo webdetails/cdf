@@ -21,7 +21,7 @@
       <groupId>pentaho</groupId>
       <artifactId>ccc</artifactId>
       <type>zip</type>
-      <version>16.01.22</version>
+      <version>16.08.18</version>
     </dependency>
   </dependencies>
   <profiles>
