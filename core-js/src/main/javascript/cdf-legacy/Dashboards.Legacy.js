@@ -44,12 +44,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
       async: true,
       data: params,
       complete: function (XMLHttpRequest, textStatus) {
-        /* CDF-271 jQuery 1.9.1 bug #13388 */
-        if (typeof XMLHttpRequest.responseXML == "undefined") {
-          func(jQuery.parseXML(XMLHttpRequest.responseText));
-        } else {
-          func(XMLHttpRequest.responseXML);
-        }
+        func(XMLHttpRequest.responseXML);
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         myself.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
@@ -70,12 +65,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
 
   });
   if (returnType == 'xml') {
-    /* CDF-271 jQuery 1.9.1 bug #13388 */
-    if (typeof result.responseXML == "undefined") {
-      return jQuery.parseXML(result.responseText);
-    } else {
-      return result.responseXML;
-    }
+    return result.responseXML;
   } else {
     return result.responseText;
   }
