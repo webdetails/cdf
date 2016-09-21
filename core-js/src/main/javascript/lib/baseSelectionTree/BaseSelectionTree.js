@@ -189,7 +189,8 @@ define([
       });
     },
     updateSelectedItems: function(options) {
-      return this.root().set('selectedItems', this._getSelectionSnapshot(), options);
+      var root = this.root();
+      return root.set('selectedItems', root._getSelectionSnapshot(), options);
     },
     restoreSelectedItems: function() {
       var selectedItems = this.root().get('selectedItems');
