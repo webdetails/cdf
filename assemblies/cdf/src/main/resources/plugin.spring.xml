@@ -17,7 +17,6 @@
   <bean id="comments" class="org.pentaho.cdf.comments.CommentsApi"/>
   <bean id="settings" class="org.pentaho.cdf.settings.SettingsApi"/>
   <bean id="cdfResources" class="org.pentaho.cdf.ResourcesApi"/>
-  <bean id="views" class="org.pentaho.cdf.views.ViewsApi"/>
   <bean id="cdfApi" class="org.pentaho.cdf.CdfApi"/>
 
   <!-- legacy -->

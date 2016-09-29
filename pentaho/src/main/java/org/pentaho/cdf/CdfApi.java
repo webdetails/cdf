@@ -145,7 +145,7 @@ public class CdfApi {
                             @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     return ContextEngine.getInstance()
-      .getContext( path, view, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
+      .getContext( path, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   @GET
@@ -355,7 +355,7 @@ public class CdfApi {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
           new EmbeddedHeadersGenerator(
             buildFullServerUrl( protocol, name, port ),
-            getConfiguration( "", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
+            getConfiguration( "",  Parameter.asHashMap( servletRequest ), inactiveInterval ) );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
       }
@@ -367,10 +367,9 @@ public class CdfApi {
   }
 
   protected String getConfiguration( String path,
-                                     String view,
                                      HashMap<String, String> parameterMap,
                                      int inactiveInterval ) throws JSONException {
-    return ContextEngine.getInstance().getConfig( path, view, parameterMap, inactiveInterval );
+    return ContextEngine.getInstance().getConfig( path, parameterMap, inactiveInterval );
   }
 
   protected String buildFullServerUrl( String protocol, String serverName, int serverPort  ) {
