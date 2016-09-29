@@ -68,7 +68,7 @@ public class ContextApi {
     servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
     setCorsHeaders( servletRequest, servletResponse );
 
-    writeConfig( path, view, servletRequest, servletResponse );
+    writeConfig( path, servletRequest, servletResponse );
   }
 
   protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {
@@ -92,7 +92,6 @@ public class ContextApi {
 
   protected void writeConfig(
       String path,
-      String view,
       HttpServletRequest servletRequest,
       HttpServletResponse servletResponse ) throws IOException {
 
@@ -101,7 +100,6 @@ public class ContextApi {
           servletResponse.getOutputStream(),
           ContextEngine.getInstance().getConfig(
             path,
-            view,
             Parameter.asHashMap( servletRequest ),
             servletRequest.getSession().getMaxInactiveInterval()
           )

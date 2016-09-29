@@ -38,7 +38,6 @@
     <project.stage>master</project.stage>
     <documentation.javascript.root></documentation.javascript.root>
     <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
-    <dependency.orientdb.revision>1.5.0</dependency.orientdb.revision>
     <project.github-name>cdf</project.github-name>
     <global.require.file></global.require.file>
     <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
@@ -120,36 +119,6 @@
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>${dependency.servlet-api.revision}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.orientechnologies</groupId>
-        <artifactId>orient-commons</artifactId>
-        <version>${dependency.orientdb.revision}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.orientechnologies</groupId>
-        <artifactId>orientdb-core</artifactId>
-        <version>${dependency.orientdb.revision}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.orientechnologies</groupId>
-        <artifactId>orientdb-server</artifactId>
-        <version>${dependency.orientdb.revision}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.orientechnologies</groupId>
-        <artifactId>orientdb-client</artifactId>
-        <version>${dependency.orientdb.revision}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.orientechnologies</groupId>
-        <artifactId>orientdb-enterprise</artifactId>
-        <version>${dependency.orientdb.revision}</version>
-        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>

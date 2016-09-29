@@ -74,6 +74,6 @@ public class ContextApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( contextApi, times( 1 ) ).writeConfig( PATH, VIEW, servletRequest, servletResponse );
+    verify( contextApi, times( 1 ) ).writeConfig( PATH, servletRequest, servletResponse );
   }
 }

@@ -37,7 +37,7 @@ public class CdfHtmlRendererTest extends TestCase {
     cdfHtmlRenderer = spy( new CdfHtmlRenderer() );
     try {
       doReturn( "" ).when( cdfHtmlRenderer )
-        .getConfiguration( anyString(), anyString(), any( HashMap.class ), anyInt() );
+        .getConfiguration(  anyString(), any( HashMap.class ), anyInt() );
     } catch ( JSONException e ) {
       e.printStackTrace();
     }
