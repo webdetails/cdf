@@ -48,31 +48,6 @@
       <version>2.6.12</version>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orient-commons</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-core</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-server</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-client</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-enterprise</artifactId>
-      <scope>runtime</scope>
-    </dependency>
   </dependencies>
   <build>
     <resources>

@@ -12,18 +12,22 @@
  */
 
 var VisualizationAPIComponent = (function() {
-  var VisualWrapper;
+  var Context;
+  var GlobalContextVars;
+  var BaseView;
 
   return UnmanagedComponent.extend({
 
     // Unit tests support.
     __require: (typeof require !== "undefined" ? require : null),
     __reset: function() {
-      VisualWrapper = null;
+      Context = null;
+      GlobalContextVars = null;
+      BaseView = null;
     },
 
     update: function() {
-      if(!VisualWrapper)
+      if(!Context)
         this._requireFilesAndUpdate();
       else
         this._updateCore();
@@ -32,9 +36,10 @@ var VisualizationAPIComponent = (function() {
     _requireFilesAndUpdate: function() {
       // Not caring about preExec()...
       var me = this;
-      me.__require(["pentaho/visual/Wrapper"], function(_VisualWrapper_) {
-        VisualWrapper = _VisualWrapper_;
-        
+      me.__require(["pentaho/type/Context", "pentaho/GlobalContextVars", "pentaho/visual/base/View"], function(_Context_, _GlobalContextVars_, _BaseView_) {
+        Context = _Context_;
+        GlobalContextVars = _GlobalContextVars_;
+        BaseView = _BaseView_;
         me._updateCore();
       });
     },
@@ -46,12 +51,21 @@ var VisualizationAPIComponent = (function() {
   
     render: function(data) {
       var domElem = this.placeholder()[0];
-      var wrapper = new VisualWrapper(domElem, /*containerTypeId:*/"cdf");
-      wrapper.data = data;
-      wrapper.visualSpec = this.getVisualSpec();
-      wrapper.update();
-      // execution is ended immediately afterwards, although in practice,
-      // the VisualizationAPI will not render synchronously.
+      
+      var contextVars = new GlobalContextVars({application: "pentaho-cdf"});
+
+      var _context = new Context(contextVars);      
+      var Model = _context.get(Dashboards.getParameterValue('vizTypeId'));
+      
+      var createdModel = new Model(this.getVisualSpec());
+      
+      BaseView.createAsync(domElem, createModel).then(function (view) {
+        view.update().then(function () {
+            //Nothing happens...
+        });
+      
+      
+      });
     },
 
     getVisualSpec: function() {
@@ -61,7 +75,6 @@ var VisualizationAPIComponent = (function() {
         visualSpec[key] = value;
       });
 
-      visualSpec.type = this.vizId;
 
       return visualSpec;
     }
