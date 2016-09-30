@@ -248,7 +248,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
                             @Context HttpServletRequest servletRequest ) {
     int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
     return ContextEngine.getInstance()
-      .getContext( path, view, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
+      .getContext( path, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   // InterPluginBroker calls this method within bean id 'xcdf'

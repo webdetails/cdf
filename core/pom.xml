@@ -43,26 +43,6 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orient-commons</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.orientechnologies</groupId>
-      <artifactId>orientdb-enterprise</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
     </dependency>

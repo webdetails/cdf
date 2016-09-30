@@ -14,9 +14,7 @@
 package org.pentaho.cdf.context;
 
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,9 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
@@ -39,8 +35,6 @@ import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
-import org.pentaho.cdf.utils.JsonUtil;
-import org.pentaho.cdf.views.ViewsEngine;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
@@ -58,7 +52,6 @@ import pt.webdetails.cpf.utils.XmlDom4JUtils;
 
 public class ContextEngine {
 
-  static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
   private static final String PREFIX_PARAMETER = "param";
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
@@ -122,8 +115,6 @@ public class ContextEngine {
     String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
     String file = StringUtils.defaultIfEmpty( paramMap.get( Parameter.FILE ), StringUtils.EMPTY );
     String action = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ACTION ), StringUtils.EMPTY );
-    // TODO: why does view default to action?
-    String view = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
     String fullPath = RepositoryHelper.joinPaths( solution, path, file );
 
     // old xcdf dashboards use solution + path + action
@@ -131,7 +122,7 @@ public class ContextEngine {
       fullPath = RepositoryHelper.joinPaths( fullPath, action );
     }
 
-    String dashboardContext = getContext( fullPath, view, action, paramMap, inactiveInterval );
+    String dashboardContext = getContext( fullPath, paramMap, inactiveInterval );
 
     if ( StringUtils.isEmpty( dashboardContext ) ) {
       logger.error( "empty dashboardContext" );
@@ -144,13 +135,11 @@ public class ContextEngine {
     return PentahoSessionHolder.getSession();
   }
 
-  public String getContext( String path, String view, String action, Map<String, String> parameters,
-                            int inactiveInterval ) {
+  public String getContext( String path,  Map<String, String> parameters, int inactiveInterval ) {
     String username = getUserSession().getName();
 
     try {
-      return buildContextScript( buildContext( path, username, parameters, inactiveInterval ), view, action,
-        username );
+      return buildContextScript( buildContext( path, username, parameters, inactiveInterval ) );
     } catch ( JSONException e ) {
       return "";
     }
@@ -287,18 +276,13 @@ public class ContextEngine {
     return contextObj;
   }
 
-  public String getConfig( String path, String view, Map<String, String> parameters,
+
+  public String getConfig( String path,  Map<String, String> parameters,
                            int inactiveInterval ) throws JSONException {
     final String username = getUserSession().getName();
     final StringBuilder s = new StringBuilder();
     s.append( "{\n" );
     s.append( "context: " ).append( buildContext( path, username, parameters, inactiveInterval ) );
-    if ( !StringUtils.isEmpty( view ) && !StringUtils.isEmpty( username ) ) {
-      JSONObject viewObj = ViewsEngine.getInstance().getView( view, username );
-      if ( viewObj.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
-        s.append( ",\nview: " ).append( viewObj.toString( 2 ) );
-      }
-    }
     final String storage = getStorage();
     if ( !StringUtils.isEmpty( storage ) ) {
       s.append( ",\nstorage: " ).append( storage );
@@ -307,7 +291,7 @@ public class ContextEngine {
     return s.toString();
   }
 
-  protected String buildContextScript( JSONObject contextObj, String view, String action, String user )
+  protected String buildContextScript( JSONObject contextObj )
     throws JSONException {
     final StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
@@ -315,16 +299,6 @@ public class ContextEngine {
     // append context
     s.append( "Dashboards.context = " ).append( contextObj.toString( 2 ) ).append( "\n" );
 
-    // append views
-    if ( !StringUtils.isEmpty( view ) && !StringUtils.isEmpty( user ) ) {
-      JSONObject viewObj = ViewsEngine.getInstance().getView( view, user );
-      if ( viewObj.get( JsonUtil.JsonField.STATUS.getValue() ).equals( JsonUtil.JsonStatus.SUCCESS.getValue() ) ) {
-        viewObj = (JSONObject) viewObj.get( JsonUtil.JsonField.RESULT.getValue() );
-        s.append( "Dashboards.view = " ).append( viewObj.toString( 2 ) ).append( "\n" );
-      } else {
-        logger.debug( "View not found: " + view );
-      }
-    }
     // append storage
     String storage = getStorage();
     if ( !StringUtils.isEmpty( storage ) ) {
@@ -370,27 +344,6 @@ public class ContextEngine {
     return result;
   }
 
-  private List<String> listQueries( String cda ) {
-    SAXReader reader = new SAXReader();
-    List<String> queryOutput = new ArrayList<String>();
-    try {
-      Map<String, Object> params = new HashMap<String, Object>();
-
-      params.put( "path", cda );
-      params.put( "outputType", "xml" );
-      InterPluginCall ipc = new InterPluginCall( InterPluginCall.CDA, "listQueries", params );
-      String reply = ipc.call();
-      Document queryList = reader.read( new StringReader( reply ) );
-      @SuppressWarnings( "unchecked" )
-      List<Node> queries = queryList.selectNodes( "//ResultSet/Row/Col[1]" );
-      for ( Node query : queries ) {
-        queryOutput.add( query.getText() );
-      }
-    } catch ( DocumentException e ) {
-      return null;
-    }
-    return queryOutput;
-  }
 
   protected String getStorage() {
     try {
