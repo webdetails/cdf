@@ -14,8 +14,8 @@
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
     <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
-    <dependency.spring-core.revision>3.2.14.RELEASE</dependency.spring-core.revision>
-    <dependency.spring-security-core.revision>2.0.8.RELEASE</dependency.spring-security-core.revision>
+    <dependency.spring-core.revision>4.3.2.RELEASE</dependency.spring-core.revision>
+    <dependency.spring-security-core.revision>4.1.3.RELEASE</dependency.spring-security-core.revision>
     <dependency.pentaho-platform.revision>7.0-SNAPSHOT</dependency.pentaho-platform.revision>
   </properties>
   <dependencies>
