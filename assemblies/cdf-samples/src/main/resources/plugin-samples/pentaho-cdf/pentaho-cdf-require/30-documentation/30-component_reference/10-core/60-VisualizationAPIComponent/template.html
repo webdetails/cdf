@@ -35,7 +35,8 @@
       <dd><i>Array - </i> Parameters who this component will react to</dd>
 
       <dt>vizOptions</dt>
-      <dd><i>Array - </i>Parameters to pass as options to the visualization</dd>
+      <dd><i>Array - </i>Parameters to pass as options to the visualization. This includes visual roles and other options
+        for the visualization</dd>
 
       <dt>queryDefinition</dt>
       <dd>MetaLayer object with the query definition (see MetaLayer options)</dd>
@@ -63,6 +64,13 @@
 
       <dt>postChange</dt>
       <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>height</dt>
+      <dd>Display Height of the visualization - this is a required argument</dd>
+
+      <dt>width</dt>
+      <dd>Display Width of the visualization - this is a required argument</dd>
+
 
     </dl>
 
@@ -108,7 +116,9 @@ require([
 
   var dashboard = new Dashboard();
 
-  dashboard.setParameter("optionParam", "MAX");
+  dashboard.setParameter("optionParam", "max");
+  dashboard.setParameter("levelsParam", ["Country"]);
+  dashboard.setParameter("measureParam", ["Quantity"]);
 
   dashboard.addDataSource("queryViz", {
     queryType: "mdx",
@@ -130,15 +140,19 @@ require([
       dataSource: "queryViz",
       opts: {}
     },
-    vizId: "x-sample_calc",
-    vizOptions: [["calc", "optionParam"]],
+    vizId: "pentaho/visual/samples/calc",
+    height: 200,
+    width: 400,
+    vizOptions: [["operation", "optionParam"],["levels", "levelsParam"],["measure", "measureParam"]],
     htmlObject: "sampleObject",
     executeAtStart: true,
     postFetch: function(data) {
       // Using postFetch to convert data types, because the query is passing
       // a Numeric field as String and that breaks the sample visualization.
-      var metaQuantity = data.metadata[1];
-      metaQuantity.colType = "Numeric";
+        data.metadata = [
+            {"colName":"Country","colType":"String","colIndex":0},
+            {"colName":"Quantity","colType":"Numeric","colIndex":1}
+        ];
 
       var resultset = data.resultset;
       for(var i = 0; i < resultset.length; i++) {
@@ -151,7 +165,7 @@ require([
 
   dashboard.finishedInit = false;
 });
-        </textarea>
+                </textarea>
         <br/>
         <button id="tryMe">Try me</button>
       </div>

@@ -98,14 +98,14 @@ define([
         options.success({resultset: "queryResults"});
       });
       spyOn(visualizationAPIComponent, 'render').and.callThrough();
-      spyOn(visualizationAPIComponent, 'getVisualSpec');
+
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
         expect(visualizationAPIComponent.update).toHaveBeenCalled();
         expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
         expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
-        expect(visualizationAPIComponent.getVisualSpec).toHaveBeenCalled();
+
 
         done();
       });

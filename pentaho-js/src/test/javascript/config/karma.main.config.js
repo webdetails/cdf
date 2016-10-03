@@ -25,8 +25,11 @@
   requireCfg.baseUrl = '/base';
 
   requireCfg.paths["common-ui"] = "src/test/javascript/cdf/mocks/common-ui";
-  requireCfg.paths["pentaho/visual"] = "src/test/javascript/cdf/mocks/common-ui/vizapi";
+  //requireCfg.paths["pentaho/visual"] = "src/test/javascript/cdf/mocks/common-ui/vizapi";
+  requireCfg.paths["pentaho"] = "src/test/javascript/cdf/mocks/common-ui/vizapi";
+  //requireCfg.paths["pentaho/data"] = "src/test/javascript/cdf/mocks/common-ui/vizapi/data";
   requireCfg.paths["cdf/lib/CCC"] = "target/dependency/ccc/amd";
+  requireCfg.paths["pentaho"] = "src/test/javascript/cdf/mocks/common-ui/vizapi";
 
   require.config(requireCfg);
 
