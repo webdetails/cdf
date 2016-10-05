@@ -22,6 +22,12 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'src/test/javascript/cdf/context.js',
+      'target/test-javascript/cdf-core-require-js-cfg.js',
+      'target/test-javascript/cdf-core-lib-require-js-cfg.js',
+
+      'src/test/javascript/cdf/karma.main.js',
+
       {pattern: 'target/test-javascript/cdf/**/*.css', included: false},
       {pattern: 'target/test-javascript/cdf/**/*.js', included: false},
       {pattern: 'target/test-javascript/cdf/**/*.html', included: false},
@@ -29,11 +35,7 @@ module.exports = function(config) {
       {pattern: 'target/test-javascript/lib/**/*.js', included: false},
       {pattern: 'target/dependency/ccc/amd/**/*.js', included: false},
       {pattern: 'target/dependency/ccc/amd/**/*.css', included: false},
-      'src/test/javascript/config/context.js',
       {pattern: 'src/test/javascript/cdf/**/*-spec.js', included: false},
-      'target/test-javascript/cdf-core-require-js-cfg.js',
-      'target/test-javascript/cdf-core-lib-require-js-cfg.js',
-      'src/test/javascript/config/karma.main.config.js',
       {pattern: 'src/test/javascript/cdf/**/*.ext.js', included: true},
       // fix 404 messages
       {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: false, served: true},

@@ -12,8 +12,45 @@
  */
 
 define(function() {
-    function GlobalContextVars( ) {
+
+  /* global Promise:false */
+
+  function Context() {
+  }
+
+  Context.prototype.get = function () {
+      return {
+        type: ""
+      }
+  };
+
+  Context.prototype.getAsync = function() {
+    var me = this;
+
+    function Model() {
     }
 
-    return GlobalContextVars;
+    Model.prototype.set = function() {};
+
+    Model.prototype.type =  {
+      context: me
+    };
+
+    return Promise.resolve(Model);
+  };
+
+  Context.prototype.enterChange = function() {
+    // TransactionScope
+    var scope = {
+      accept: function() {
+      },
+      using: function(f, x) {
+        return f.call(x, scope);
+      }
+    };
+
+    return scope;
+  };
+
+  return Context;
 });
