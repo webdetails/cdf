@@ -11,24 +11,29 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(function() {
-    return {
-        createAsync: function(a, b)
-        {
-            return {
-                then: function(callback) {
-                    var view = {
-                        update: function() {
-                            return {
-                                then: function (a,b) {
-                                    if (a) a();
-                                }
-                            }
-                        }
-                    };
-                    if (callback) callback(view);
-                }
-            }
-        }
+// Find and inject tests using require
+(function() {
+  var karma = window.__karma__;
+
+  var tests = [];
+  for(var file in karma.files) {
+    if((/test.*\-spec\.js$/).test(file)) {
+      tests.push(file);
     }
-});
+  }
+
+  requireCfg.baseUrl = '/base';
+
+  requireCfg.paths["common-ui"] = "src/test/javascript/cdf/mocks/common-ui";
+  requireCfg.paths["cdf/lib/CCC"] = "target/dependency/ccc/amd";
+
+  require.config(requireCfg);
+
+  console.log = function() {};
+  console.info = function() {};
+  console.debug = function() {};
+  console.warn = function() {};
+
+  // Ask Require.js to load all test files and start test run
+  require(tests, karma.start);
+})();

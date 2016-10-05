@@ -16,43 +16,6 @@
  */
 describe("The VisualizationAPI Component #", function() {
 
-  /**
-   * ## pentaho Object Mock
-   */
-  function DataTable(data) {
-    this.data = data;
-  }
-
-  // -----
-
-  function VisualWrapper(createOptions) {
-    this.domElement = createOptions && createOptions.domElement;
-  }
-
-  VisualWrapper.prototype.update = function(drawOptions) {
-    var _callback, done = false;
-
-    setTimeout(function() {
-      done = true;
-      if(_callback) _callback();
-    }, 0);
-
-    return {
-      then: function(callback) {
-        _callback = callback;
-
-        if(done && _callback) _callback();
-      }
-    }
-  };
-
-  // -----
-
-  var sampleVisual = {id: "sampleVisual"};
-  var visualTypeRegistry = {get: function() { return sampleVisual; }};
-
-  // -----
-
   var myDashboard = _.extend({}, Dashboards);
   myDashboard.init();
 
@@ -75,18 +38,6 @@ describe("The VisualizationAPI Component #", function() {
 
   myDashboard.addComponent(visualizationAPIComponent);
 
-  visualizationAPIComponent.__require = function(deps, callback) {
-    var mods = deps.map(function(dep) {
-      switch(dep) {
-        case "pentaho/visual/data/DataTable": return DataTable;
-        case "pentaho/visual/Wrapper": return VisualWrapper;
-        case "pentaho/visual/type/registry": return visualTypeRegistry;
-      }
-    });
-
-    setTimeout(function() { callback.apply(null, mods); }, 0);
-  };
-
   beforeEach(function() {
     visualizationAPIComponent.__reset();
   });
@@ -106,25 +57,27 @@ describe("The VisualizationAPI Component #", function() {
   });
 
   /**
-   * ## The VisualizationAPI Component # _requireFilesAndUpdate is called only in the first update
+   * ## The VisualizationAPI Component # __requireFilesAndUpdate is called only in the first update
    */
   it("_requireFilesAndUpdate is called only in the first update", function(done) {
+
     spyOn(visualizationAPIComponent, 'update').and.callThrough();
-    spyOn(visualizationAPIComponent, '_requireFilesAndUpdate').and.callThrough();
+    spyOn(visualizationAPIComponent, '__requireFilesAndUpdate').and.callThrough();
 
     myDashboard.update(visualizationAPIComponent);
 
     setTimeout(function() {
       expect(visualizationAPIComponent.update).toHaveBeenCalled();
-      expect(visualizationAPIComponent._requireFilesAndUpdate.calls.count()).toBe(1);
+      expect(visualizationAPIComponent.__requireFilesAndUpdate.calls.count()).toBe(1);
 
       myDashboard.update(visualizationAPIComponent);
 
       setTimeout(function() {
         expect(visualizationAPIComponent.update.calls.count()).toBe(2);
-        expect(visualizationAPIComponent._requireFilesAndUpdate.calls.count()).toBe(1);
+        expect(visualizationAPIComponent.__requireFilesAndUpdate.calls.count()).toBe(1);
         done();
       }, 100);
+
     }, 100);
   });
 
@@ -157,7 +110,6 @@ describe("The VisualizationAPI Component #", function() {
       options.success({resultset: "queryResults"});
     });
     spyOn(visualizationAPIComponent, 'render').and.callThrough();
-    spyOn(visualizationAPIComponent, 'getVisualSpec').and.callThrough();
 
     visualizationAPIComponent.update();
     setTimeout(function() {
@@ -165,7 +117,6 @@ describe("The VisualizationAPI Component #", function() {
       expect(visualizationAPIComponent.triggerQuery).toHaveBeenCalled();
       expect(visualizationAPIComponent.render).toHaveBeenCalledWith({ resultset : 'queryResults' });
 
-      expect(visualizationAPIComponent.getVisualSpec).toHaveBeenCalled();
       done();
     }, 100);
   });

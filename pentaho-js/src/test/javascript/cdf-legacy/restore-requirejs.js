@@ -1,0 +1,3 @@
+
+define  = definejs;
+require = requirejs;

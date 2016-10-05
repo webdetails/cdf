@@ -117,8 +117,8 @@ require([
   var dashboard = new Dashboard();
 
   dashboard.setParameter("optionParam", "max");
-  dashboard.setParameter("levelsParam", ["Country"]);
-  dashboard.setParameter("measureParam", ["Quantity"]);
+  dashboard.setParameter("levelsParam", {attributes: ["Country"]});
+  dashboard.setParameter("measureParam", {attributes: ["Quantity"]});
 
   dashboard.addDataSource("queryViz", {
     queryType: "mdx",
@@ -148,16 +148,11 @@ require([
     executeAtStart: true,
     postFetch: function(data) {
       // Using postFetch to convert data types, because the query is passing
-      // a Numeric field as String and that breaks the sample visualization.
-        data.metadata = [
-            {"colName":"Country","colType":"String","colIndex":0},
-            {"colName":"Quantity","colType":"Numeric","colIndex":1}
-        ];
+      // a Numeric field as String and that breaks the sample visualization
+      data.metadata[0].colName = "Country";
 
-      var resultset = data.resultset;
-      for(var i = 0; i < resultset.length; i++) {
-        resultset[i][1] = parseFloat(resultset[i][1]);
-      }
+      data.metadata[1].colName = "Quantity";
+      data.metadata[1].colType = "Numeric";
     }
   }));
 
