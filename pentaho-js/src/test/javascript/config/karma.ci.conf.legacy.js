@@ -23,8 +23,10 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'target/test-javascript/lib/shims.js',
-      'target/test-javascript/cdf-legacy/lib/pen-shim.js',
-      'src/main/javascript/cdf-legacy/testUtils.js',
+
+      'src/test/javascript/cdf-legacy/context.js',
+
+      // -- Load libs without require and defined defined, so that these publish their symbols locally.
       'target/test-javascript/cdf-legacy/wd.js',
       'target/test-javascript/cdf-legacy/lib/json.js',
       'target/test-javascript/lib/jQuery/jquery.js',
@@ -35,6 +37,15 @@ module.exports = function(config) {
       'target/test-javascript/lib/backbone/backbone.js',
       'target/test-javascript/lib/mustache/mustache.js',
       'target/test-javascript/lib/base/Base.js',
+
+      // -- Restore real requirejs
+      'src/test/javascript/cdf-legacy/restore-requirejs.js',
+      'target/test-javascript/cdf-legacy/lib/pen-shim.js',
+
+      // Load using real requirejs
+      {pattern: 'target/test-javascript/cdf/PentahoTypeContext.js', included: false},
+      {pattern: 'src/test/javascript/cdf/mocks/pentaho/**/*.js', included: false},
+
       'src/main/javascript/cdf-legacy/cdf-base.js',
       'target/test-javascript/cdf-legacy/Dashboards.Main.js',
       'target/test-javascript/cdf-legacy/Dashboards.Query.js',
@@ -48,8 +59,12 @@ module.exports = function(config) {
       'src/main/javascript/cdf-legacy/components/Pentaho.Reporting.js',
       'target/test-javascript/cdf-legacy/components/input.js',
       'target/test-javascript/cdf-legacy/queries/coreQueries.js',
+      'target/test-javascript/cdf-legacy/components/jfreechart.js',
+      'target/test-javascript/cdf-legacy/components/VisualizationAPIComponent.js',
       'src/test/javascript/cdf-legacy/lib/test-components.js',
-      'src/test/javascript/config/karma.main.legacy.config.js',
+
+      'src/test/javascript/cdf-legacy/karma.main.js',
+
       {pattern: 'src/test/javascript/cdf-legacy/**/*.js', included: false}
     ],
 

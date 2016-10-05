@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -24,7 +24,7 @@ module.exports = function(config) {
     files: [
       'target/test-javascript/lib/shims.js',
       'target/test-javascript/cdf-legacy/lib/pen-shim.js',
-      'src/test/javascript/cdf-legacy/testUtils.js',
+      'src/test/javascript/cdf-legacy/context.js',
       'target/test-javascript/cdf-legacy/wd.js',
       'target/test-javascript/cdf-legacy/lib/json.js',
       'target/test-javascript/lib/jQuery/jquery.js',
@@ -50,8 +50,10 @@ module.exports = function(config) {
       'target/test-javascript/cdf-legacy/queries/coreQueries.js',
       'target/test-javascript/cdf-legacy/components/simpleautocomplete.js',
       'src/test/javascript/cdf-legacy/lib/test-components.js',
-      {pattern: 'src/test/javascript/cdf-legacy/**/*-spec*.js', included: true},
-      'src/test/javascript/config/karma.main.legacy.config.js'
+
+      'src/test/javascript/cdf-legacy/karma.main.js',
+
+      {pattern: 'src/test/javascript/cdf-legacy/**/*-spec*.js', included: true}
     ],
 
     // test results reporter to use

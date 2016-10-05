@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -24,8 +24,9 @@
 
   requireCfg.baseUrl = '/base';
 
+  // mocks
+  requireCfg.paths["pentaho"] = "src/test/javascript/cdf/mocks/pentaho";
   requireCfg.paths["common-ui"] = "src/test/javascript/cdf/mocks/common-ui";
-  requireCfg.paths["pentaho/visual"] = "src/test/javascript/cdf/mocks/common-ui/vizapi";
   requireCfg.paths["cdf/lib/CCC"] = "target/dependency/ccc/amd";
 
   require.config(requireCfg);

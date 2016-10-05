@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,26 +12,9 @@
  */
 
 define(function() {
-  function VisualWrapper(createOptions) {
-    this.domElement = createOptions && createOptions.domElement;
+  function Table(data) {
+    this.data = data;
   }
 
-  VisualWrapper.prototype.update = function(drawOptions) {
-    var _callback, done = false;
-
-	  setTimeout(function() {
-      done = true;
-      if(_callback) _callback();
-    }, 0);
-
-    return {
-      then: function(callback) {
-        _callback = callback;
-
-        if(done && _callback) _callback();
-      }
-    }
-  };
-  
-  return VisualWrapper;
+  return Table;
 });
