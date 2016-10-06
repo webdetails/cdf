@@ -184,7 +184,7 @@ define([
      * @param {String|Object} [type="cda"] A string with the query type,
      *                                     or a valid data source or query definition object.
      * @param {Object} [opts] An `object` containing the query options.
-     * @param {Object} [opts.dataSource] The data source of the query.
+     * @param {String} [opts.dataSource] The data source of the query.
      * @param {String} [opts.queryType] The query type.
      * @return {cdf.queries.BaseQuery} The query instance from the required `type` extended with the options in `opts`.
      * @see {@link cdf.dashboard.Dashboard#getDataSource|getDataSource}
@@ -217,7 +217,7 @@ define([
           // remove the data source name from the query definition
           delete opts.dataSource;
         } else {
-          Logger.error("Invalid data source name '" + qd.dataSource + "'");
+          Logger.error("Invalid data source name '" + opts.dataSource + "'");
           return;
         }
       }
