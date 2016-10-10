@@ -18,7 +18,7 @@ define([
   '../UnmanagedComponent',
   '../../Logger',
   './BaseFilter',
-  './addIns/addIns',
+  './addIns',
   'css!./styles/filter'
 ], function ($, _, Backbone, UnmanagedComponent, Logger, BaseFilter) {
 

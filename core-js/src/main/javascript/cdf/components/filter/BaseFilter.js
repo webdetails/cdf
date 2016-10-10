@@ -12,7 +12,6 @@
  */
 
 define([
-  '../../Logger',
   './models/SelectionTree',
   './views/Views',
   './controllers/RootCtrl',
@@ -23,18 +22,14 @@ define([
   './strategies/SingleSelect',
   './data-handlers/InputDataHandler',
   './data-handlers/OutputDataHandler',
-  './extensions/sorters',
-  './extensions/renderers',
   './base/templates',
   './base/defaults'
 ], function (
-  Logger,
   SelectionTree,
   Views,
   RootCtrl, Manager,
   AbstractSelect, LimitedSelect, MultiSelect, SingleSelect,
   Input, Output,
-  sorters, renderers,
   templates,
   defaults
 ) {
@@ -55,7 +50,6 @@ define([
    */
   return /** @lends cdf.components.filter.BaseFilter */ {
 
-    Logger: Logger,
     /**
      * MVC Models used internally to represent and manipulate information
      */
@@ -102,13 +96,6 @@ define([
       Output: Output
     },
 
-    /**
-     * Extension points: Sorters and Renderers
-     */
-    Extensions: {
-      Sorters: sorters,
-      Renderers: renderers
-    },
     defaults: defaults,
     templates: templates,
     /**
