@@ -218,14 +218,13 @@ define([
       });
 
       /*
-       * Localize strings, if they are defined
+       * Localize strings, if they are defined in a bundle
        */
       var i18nMap = this.dashboard.i18nSupport.map || {};
       var that = this;
       _.each(['Root', 'Group', 'Item'], function (level) {
         return _.each(configuration.component[level].strings, function (value, token, list) {
-          var fullToken;
-          fullToken = "filter_" + level + "_" + token;
+          var fullToken = "filter_" + level + "_" + token;
           if (_.has(i18nMap, fullToken)) {
             return list[token] = that.dashboard.i18nSupport.prop(fullToken);
           }
@@ -294,27 +293,33 @@ define([
        * Create a hash map { slot: [ function($tgt, model, options) ]}
        */
       var that = this;
-      var addInList = _.chain(this.addIns).map(function (list, slot) {
-        var addIns = _.chain(list).map(function (name) {
-          var addInName = name.trim();
-          var addIn = that.getAddIn(slot, addInName);
-          if (addIn != null) {
-            var addInOptions = that.getAddInOptions(slot, addInName);
-            return function ($tgt, model, options) {
-              var st;
-              st = {
-                model: model,
-                configuration: options,
-                dashboard: that.dashboard
+      var addInList = _.chain(this.addIns)
+        .map(function(list, slot) {
+          var addIns = _.chain(list)
+            .map(function(name) {
+              var addInName = name.trim();
+              var addIn = that.getAddIn(slot, addInName);
+              if (addIn == null) {
+                return null;
+              }
+
+              var addInOptions = that.getAddInOptions(slot, addInName);
+              return function($tgt, model, options) {
+                var st = {
+                  model: model,
+                  configuration: options,
+                  dashboard: that.dashboard
+                };
+                return addIn.call($tgt, st, addInOptions);
               };
-              return addIn.call($tgt, st, addInOptions);
-            };
-          } else {
-            return null;
-          }
-        }).compact().value();
-        return [slot, addIns];
-      }).object().value();
+
+            })
+            .compact()
+            .value();
+          return [slot, addIns];
+        })
+        .object()
+        .value();
 
       /*
        * Place the functions in the correct location in the configuration object
@@ -330,30 +335,25 @@ define([
         sortGroup: 'component.Group.sorter',
         outputFormat: 'output.outputFormat'
       };
-      var configuration = {};
-      var getOrCreateEntry = function (memo, key) {
-        if (memo[key] != null) {
-          return memo[key];
-        } else {
-          return memo[key] = {};
-        }
-      };
-      _.each(addInList, function (functionList, addInSlot) {
 
-        /*
-         * I just wish we could do something like
-         *   configuration['component.Root.renderers.selection'] = foo
-         */
-        var childKey, configAddress, parent, parentAddress;
+      var configuration = {};
+      _.each(addInList, function (functionList, addInSlot) {
         if (!_.isEmpty(functionList)) {
-          configAddress = addInHash[addInSlot].split('.');
-          parentAddress = _.initial(configAddress);
-          childKey = _.last(configAddress);
-          parent = _.reduce(parentAddress, getOrCreateEntry, configuration);
-          return parent[childKey] = addInList[addInSlot];
+          var configAddress = addInHash[addInSlot].split('.');
+          var parentAddress = _.initial(configAddress);
+          var childKey = _.last(configAddress);
+          var parent = _.reduce(parentAddress, getOrCreateEntry, configuration);
+          parent[childKey] = addInList[addInSlot];
         }
       });
       return configuration;
+
+      function getOrCreateEntry(memo, key) {
+        if (memo[key] == null) {
+          memo[key] = {};
+        }
+        return memo[key];
+      }
     }
   };
 
