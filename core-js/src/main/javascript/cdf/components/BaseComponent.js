@@ -503,13 +503,8 @@ define([
      * @return {object} The options associated with the specified add-in.
      */
     getAddInOptions: function(slot, addIn) {
-      var opts = null;
-      try {
-        opts = this.addInOptions[slot][addIn];
-      } catch(e) {
-        /* opts is still null, no problem */
-      }
-      /* opts is falsy if null or undefined */
+      var addInOptions = this.addInOptions;
+      var opts = addInOptions && addInOptions[slot] && addInOptions[slot][addIn];
       return opts || {};
     },
 
