@@ -74,7 +74,7 @@ define([
   var IConfiguration = /** @lends cdf.components.filter.FilterComponent# */ {
 
     /**
-     * Default settings of the component
+     * Default settings of the component.
      * <pre>
      * <code>
      * {
@@ -99,7 +99,7 @@ define([
      * @type {object}
      */
     defaults: {
-      component: {},
+      component: BaseFilter.defaults,
       input: {
         defaultModel: {
           isDisabled: true,
@@ -126,20 +126,64 @@ define([
      *
      * @return {object} Returns a configuration object.
      */
-    getConfiguration: function () {
+    getConfiguration: function() {
+
+      var configuration = $.extend(true, {}, _.result(this, 'defaults'));
+
+      /*
+       *  Add input/output options to configuration object
+       */
+      $.extend(true, configuration.input, this.componentInput, {
+        query: this.query
+      });
+      $.extend(true, configuration.output, this.componentOutput);
+
+
+      /*
+       *  Configure the views
+       */
       var cd = this.componentDefinition;
       var selectionStrategy = cd.multiselect ? 'LimitedSelect' : 'SingleSelect';
-      var configuration = {
-        input: {},
-        output: {},
-        component: $.extend(true, {}, BaseFilter.defaults, BaseFilter.Enum.selectionStrategy[selectionStrategy], {
-          target: this.placeholder()
-        })
-      };
-      $.extend(true, configuration, _.result(this, 'defaults'));
-      var _getPage = function (page, searchPattern) {
+      $.extend(true, configuration.component,
+        BaseFilter.Enum.selectionStrategy[selectionStrategy],
+        {
+          target: this.placeholder(),
+          Root: {
+            options: {
+              styles: cd.showIcons ? [] : ['no-icons'],
+              alwaysExpanded: cd.alwaysExpanded,
+              showFilter: cd.showFilter,
+              useOverlay: cd.useOverlay
+            },
+            strings: {
+              title: cd.title
+            }
+          }
+        }
+      );
+
+      // Import localized strings, if they are defined in a bundle
+      var i18nMap = this.dashboard.i18nSupport.map || {};
+      var prop = this.dashboard.i18nSupport.prop;
+      _.each(['Root', 'Group', 'Item'], function(level) {
+        _.each(configuration.component[level].strings, function(value, token, list) {
+          var fullToken = "filter_" + level + "_" + token;
+          if (_.has(i18nMap, fullToken)) {
+            list[token] = prop(fullToken);
+          }
+        });
+      });
+
+
+      /*
+       *  Pagination and Server-side Search
+       */
+
+      var _getPage = function(page, searchPattern) {
         var deferred = $.Deferred();
-        var isPaginated = !!this.query && this.query.getOption('pageSize') > 0;
+
+        var query = this.query;
+        var isPaginated = !!query && query.getOption('pageSize') > 0;
         var searchServerSide = configuration.component.search.serverSide;
 
         /*
@@ -149,32 +193,35 @@ define([
           deferred.resolve({});
           return deferred;
         }
+
         var successCallback = _.bind(function (data) {
           this.inputDataHandler.updateModel(data);
           this.model.setBusy(false);
           deferred.resolve(data);
           return data;
         }, this);
+
         var errorCallback = _.bind(function () {
           this.model.setBusy(false);
           deferred.reject();
         }, this);
+
         this.model.setBusy(true);
+        var pattern = _.isEmpty(searchPattern) ? '' : searchPattern;
+        query.setSearchPattern(pattern);
         try {
-          var pattern = _.isEmpty(searchPattern) ? '' : searchPattern;
-          this.query.setSearchPattern(pattern);
           switch (page) {
             case 'previous':
-              if (this.query.getOption('page') !== 0) {
-                this.query.previousPage(successCallback);
+              if (query.getOption('page') !== 0) {
+                query.previousPage(successCallback);
               }
               break;
             case 'next':
-              this.query.nextPage(successCallback);
+              query.nextPage(successCallback);
               break;
             default:
-              this.query.setOption('page', page);
-              this.query.doQuery(successCallback, errorCallback);
+              query.setOption('page', page);
+              query.doQuery(successCallback, errorCallback);
           }
         } catch (_error) {
           deferred.reject({});
@@ -182,54 +229,25 @@ define([
         }
         return deferred;
       };
-      var styles = [];
-      if (!cd.showIcons) {
-        styles.push('no-icons');
-      }
 
-      /*
-       * validate pagination
-       */
-      var pageSize = Infinity;
-      if (this.queryDefinition.pageSize != null) {
-        if (_.isFinite(this.queryDefinition.pageSize) && this.queryDefinition.pageSize > 0) {
-          pageSize = this.queryDefinition.pageSize;
-        }
-      }
+      var p  = this.queryDefinition.pageSize;
+      var pageSize = (p && _.isFinite(p)) ? p : Infinity;
       $.extend(true, configuration.component, {
         pagination: {
           pageSize: pageSize,
           getPage: _.bind(_getPage, this)
-        },
-        selectionStrategy: {
-          limit: _.isNumber(cd.selectionLimit) ? cd.selectionLimit : Infinity
-        },
-        Root: {
-          options: {
-            styles: styles,
-            alwaysExpanded: cd.alwaysExpanded,
-            showFilter: cd.showFilter,
-            useOverlay: cd.useOverlay
-          },
-          strings: {
-            title: cd.title
-          }
         }
       });
 
       /*
-       * Localize strings, if they are defined in a bundle
+       * Selection strategy
        */
-      var i18nMap = this.dashboard.i18nSupport.map || {};
-      var that = this;
-      _.each(['Root', 'Group', 'Item'], function (level) {
-        return _.each(configuration.component[level].strings, function (value, token, list) {
-          var fullToken = "filter_" + level + "_" + token;
-          if (_.has(i18nMap, fullToken)) {
-            return list[token] = that.dashboard.i18nSupport.prop(fullToken);
-          }
-        });
+      $.extend(true, configuration.component, {
+        selectionStrategy: {
+          limit: _.isNumber(cd.selectionLimit) ? cd.selectionLimit : Infinity
+        }
       });
+
       var selectionStrategyConfig = configuration.component.selectionStrategy;
       var strategy = new BaseFilter.SelectionStrategies[selectionStrategyConfig.type](selectionStrategyConfig);
       configuration.component.selectionStrategy.strategy = strategy;
@@ -238,22 +256,15 @@ define([
        * Patches
        */
       if (selectionStrategyConfig.type !== 'SingleSelect') {
-        if (cd.showButtonOnlyThis === true || cd.showButtonOnlyThis === false) {
-          configuration.component.Root.options.showButtonOnlyThis = cd.showButtonOnlyThis;
-          configuration.component.Group.options.showButtonOnlyThis = cd.showButtonOnlyThis;
-          configuration.component.Item.options.showButtonOnlyThis = cd.showButtonOnlyThis;
+        var onlyThis = cd.showButtonOnlyThis;
+        if (_.isBoolean(onlyThis)) {
+          configuration.component.Root.options.showButtonOnlyThis = onlyThis;
+          configuration.component.Group.options.showButtonOnlyThis = onlyThis;
+          configuration.component.Item.options.showButtonOnlyThis = onlyThis;
         }
       }
 
-      /*
-       *  Add input/output options to configuration object
-       */
-      $.extend(true, configuration.input, this.componentInput, {
-        query: this.query
-      });
-      $.extend(true, configuration.output, this.componentOutput);
-      configuration = $.extend(true, configuration, this._mapAddInsToConfiguration(), _.result(this, 'options'));
-      return configuration;
+      return $.extend(true, configuration, this._mapAddInsToConfiguration(), _.result(this, 'options'));
     },
 
     /**
@@ -339,21 +350,11 @@ define([
       var configuration = {};
       _.each(addInList, function (functionList, addInSlot) {
         if (!_.isEmpty(functionList)) {
-          var configAddress = addInHash[addInSlot].split('.');
-          var parentAddress = _.initial(configAddress);
-          var childKey = _.last(configAddress);
-          var parent = _.reduce(parentAddress, getOrCreateEntry, configuration);
-          parent[childKey] = addInList[addInSlot];
+          setProperty(configuration, addInHash[addInSlot], addInList[addInSlot]);
         }
       });
       return configuration;
 
-      function getOrCreateEntry(memo, key) {
-        if (memo[key] == null) {
-          memo[key] = {};
-        }
-        return memo[key];
-      }
     }
   };
 
@@ -526,5 +527,23 @@ define([
       return "Filter component";
     }
   });
+
+  // auxiliary functions
+
+  function setProperty(obj, location, value) {
+    var address = location.split('.');
+    var parentAddress = _.initial(address);
+    var childKey = _.last(address);
+    var parent = _.reduce(parentAddress, getOrCreateEntry, obj);
+    parent[childKey] = value;
+
+    function getOrCreateEntry(memo, key) {
+      if (memo[key] == null) {
+        memo[key] = {};
+      }
+      return memo[key];
+    }
+  }
+
 
 });
