@@ -56,12 +56,6 @@
         $.map(this.parameters, function(k) {
             options[k[0]] = k.length == 3 ? k[2] : Dashboards.getParameterValue(k[1]);
         });
-        for (var option in options){
-            if (Date.parse(options[option])){
-                // see http://jira.pentaho.com/browse/CDF-887
-                options[option] = options[option] + " 00:00:00.0";
-            }
-        }
         return options;
     },
 
