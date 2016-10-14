@@ -85,7 +85,7 @@ define([
       // default value
       expect(dashboard.serverCheckResponseTimeout).toEqual(Infinity);
       dashboard.init();
-      // during init the value of context.sessionTimeout is passed via the "cdf/dasboard/Dashboard" AMD module configuration (see context.js)
+      // during init the value of context.sessionTimeout is passed via the "cdf/dashboard/Dashboard" AMD module configuration (see context.js)
       expect(dashboard.serverCheckResponseTimeout).toEqual(contextObj.sessionTimeout * 900); // 90% converted to milliseconds
     });
 

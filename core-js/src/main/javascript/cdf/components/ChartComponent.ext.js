@@ -16,7 +16,7 @@ define(['../dashboard/Dashboard.ext'], function(DashboardExt) {
   return {
 
     getCccScriptPath: function(scriptName) {
-      // Dasboards.context path example:
+      // Dashboards.context path example:
         // "/public/cde/mine/MySampleDash.wcdf"
         // Remove the last segment.
         // TODO: Using the script name without the dashboard name prefix, for backward compatibility.
