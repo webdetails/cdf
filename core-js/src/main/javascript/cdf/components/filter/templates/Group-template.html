@@ -13,7 +13,9 @@
   <div class="filter-controls">
     {{#showFilter}}
       <div class="filter-filter">
-        <input type="text" class="filter-filter-input" value="{{searchPattern}}">
+        <input type="text" value="{{searchPattern}}"
+               placeholder="{{strings.searchPlaceholder}}"
+        class="filter-filter-input">
         <div class="filter-filter-icon" />
         <div class="filter-filter-clear" />
       </div>
@@ -29,6 +31,7 @@
       </div>
     {{/showCommitButtons}}
   </div>
+
   {{#showGroupSelection}}
     <div class="filter-group-selection">
       <div class="filter-group-selection-icon
@@ -40,6 +43,7 @@
       <div class="filter-group-label">{{strings.groupSelection}}</div>
     </div>
   {{/showGroupSelection}}
+
   {{#showValue}}
   <div class="filter-group-selection-value">{{{value}}}</div>
   {{/showValue}}

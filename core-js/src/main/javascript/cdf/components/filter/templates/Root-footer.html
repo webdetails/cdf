@@ -1,20 +1,27 @@
 <div class="filter-root-footer">
-  {{#isBusy}}
+    {{#isBusy}}
     <div class="filter-busy clearfix">
-      <div class="floatingBarsG">
-        <div class="blockG rotateG_01"></div>
-        <div class="blockG rotateG_02"></div>
-        <div class="blockG rotateG_03"></div>
-        <div class="blockG rotateG_04"></div>
-        <div class="blockG rotateG_05"></div>
-        <div class="blockG rotateG_06"></div>
-        <div class="blockG rotateG_07"></div>
-        <div class="blockG rotateG_08"></div>
-      </div>
-      <div class="filter-busy-info">Fetching data...</div>
+        <div class="floatingBarsG">
+            <div class="blockG rotateG_01"></div>
+            <div class="blockG rotateG_02"></div>
+            <div class="blockG rotateG_03"></div>
+            <div class="blockG rotateG_04"></div>
+            <div class="blockG rotateG_05"></div>
+            <div class="blockG rotateG_06"></div>
+            <div class="blockG rotateG_07"></div>
+            <div class="blockG rotateG_08"></div>
+        </div>
+        <div class="filter-busy-info">{{strings.busyInfo}}</div>
     </div>
-  {{/isBusy}}
-  {{#reachedSelectionLimit}}
-    <div class="filter-root-notification">The selection limit (<span class="filter-notification-highlight">{{selectionStrategy.limit}}</span>) for specific items has been reached.</div>
-  {{/reachedSelectionLimit}}
+    {{/isBusy}}
+
+    {{#reachedSelectionLimit}}
+    <div class="filter-root-notification">
+        {{strings.reachedSelectionLimitBefore}}
+        <span class="filter-notification-highlight">
+        {{selectionStrategy.limit}}
+        </span>
+        {{strings.reachedSelectionLimitAfter}}
+    </div>
+    {{/reachedSelectionLimit}}
 </div>
