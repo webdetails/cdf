@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -19,6 +19,15 @@
  */
 
  var AnalyzerComponent = BaseComponent.extend({
+    /**
+     * @summary Store of parameterName/dateFormat Map - describes the dateFormats of the associated parameters.
+     * @description <p>Object which stores parameterName/dateFormat Map 
+     * - describes the dateFormats of the associated parameters eg. parameterName: "YYYY-MM-DD HH-mm-ss.0"</p>
+     * @type {Object}
+     * @default {}
+     */
+    dateFormats: {},
+ 
     update: function() {
         this.clear();
         var options = this.getOptions();
@@ -43,6 +52,7 @@
     },
 
     getOptions: function() {
+        var myself = this;
         var options = {
             solution: this.solution,
             path: this.path,
@@ -54,7 +64,13 @@
         };
         // process params and update options
         $.map(this.parameters, function(k) {
-            options[k[0]] = k.length == 3 ? k[2] : Dashboards.getParameterValue(k[1]);
+            options[k[0]] = Dashboards.getParameterValue(k[1]);           
+            if(myself.dateFormats[k[0]]) {
+                var formatedDate = moment(options[k[0]]).format(myself.dateFormats[k[0]]);
+                if(formatedDate !== 'Invalid date') {
+                    options[k[0]] = formatedDate;
+                }			    
+            }							
         });
         return options;
     },
