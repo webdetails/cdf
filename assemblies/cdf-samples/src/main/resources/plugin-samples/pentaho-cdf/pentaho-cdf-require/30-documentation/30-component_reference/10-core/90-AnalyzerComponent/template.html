@@ -70,7 +70,10 @@
 
       <dt>editMode</dt>
       <dd>Pentaho Analyzer editMode option. Default: true</dd>
-      
+
+      <dt>dateFormats</dt>
+      <dd>Object which stores parameterName/dateFormat Map that describes the dateFormats of the associated parameters e.g. <code>{current_date: "YYYY-MM-DD HH-mm-ss.0"}</code></dd>
+
     </dl>
 
     <h3>Sample</h3>
@@ -94,6 +97,8 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/AnalyzerComponent'],
 
     var dashboard = new Dashboard();
 
+    dashboard.addParameter("current_date", "2016/10/18 17:55:00");
+
     dashboard.addComponent(new AnalyzerComponent({
       name: "territorySales",
       type: "analyzer",
@@ -101,12 +106,13 @@ require(['cdf/Dashboard.Blueprint', 'cdf/components/AnalyzerComponent'],
       path: "Steel Wheels/Widget Library/Analysis Views",
       action: "Territory Sales.xanalyzer",
       listeners: [],
-      parameters: [],
+      parameters: [["current_date", "current_date"]],
       htmlObject: "sampleObject",
       editMode: true,
       showRepositoryButtons: false,
       showFieldList: false,
-      executeAtStart: true
+      executeAtStart: true,
+      dateFormats: {current_date: "YYYY-MM-DD HH-mm-ss.0"}
     }));
 
     dashboard.init();
