@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -19,23 +19,19 @@
  */
 
  var AnalyzerComponent = BaseComponent.extend({
+
     update: function() {
         this.clear();
         var options = this.getOptions();
 
-        var pathSegments = {
-            solution: options.solution,
-            path: options.path,
-            action: options.action
-        };
-        delete options.solution;
-        delete options.path;
-        delete options.action;
-
         var callVar = this.isEditMode() ? "editor" : "viewer";
 
         $.extend( options, { ts: new Date().getTime() } );
-        var url = wd.cdf.endpoints.getAnalyzer( pathSegments, callVar, options );
+        var url = wd.cdf.endpoints.getAnalyzer({
+            solution: this.solution,
+            path: this.path,
+            action: this.action
+        }, callVar, options);
 
         var iframe = this.generateIframe( url );
         $( "#" + this.htmlObject ).html( iframe );
@@ -43,18 +39,23 @@
     },
 
     getOptions: function() {
+        var myself = this;
         var options = {
-            solution: this.solution,
-            path: this.path,
-            action: this.action,
-            command: this.command == undefined ? "open" : this.command,
-            showFieldList: this.showFieldList == undefined ? false : this.showFieldList,
-            showRepositoryButtons: this.showRepositoryButtons == undefined ? false : this.showRepositoryButtons,
-            frameless: this.frameless == undefined ? false : this.frameless
+            command: myself.command == undefined ? "open" : myself.command,
+            showFieldList: myself.showFieldList == undefined ? false : myself.showFieldList,
+            showRepositoryButtons: myself.showRepositoryButtons == undefined ? false : myself.showRepositoryButtons,
+            frameless: myself.frameless == undefined ? false : myself.frameless
         };
+        myself.dateFormats == undefined ? {} : myself.dateFormats;
         // process params and update options
-        $.map(this.parameters, function(k) {
-            options[k[0]] = k.length == 3 ? k[2] : Dashboards.getParameterValue(k[1]);
+        $.map(myself.parameters, function(k) {
+            options[k[0]] = Dashboards.getParameterValue(k[1]);           
+            if(myself.dateFormats[k[0]]) {
+                var formatedDate = moment(options[k[0]]).format(myself.dateFormats[k[0]]);
+                if(formatedDate !== 'Invalid date') {
+                    options[k[0]] = formatedDate;
+                }			    
+            }							
         });
         return options;
     },
