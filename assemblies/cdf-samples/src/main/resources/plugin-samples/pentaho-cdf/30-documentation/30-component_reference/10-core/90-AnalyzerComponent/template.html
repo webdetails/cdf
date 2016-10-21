@@ -7,13 +7,11 @@
 
 		<h3>Description</h3>
 		<p>
-		This is a component that can execute the new Pentaho Analyzer Reports. The result is displayed in the PUC Analysis Report Viewer, including the show
-		field list and show repository features. For better use in CDF, show field list and show repository in the analysis report viewer can be turned on or off.
+			This is a component that can execute the new Pentaho Analyzer Reports. The result is displayed in the PUC Analysis Report Viewer, including the show
+			field list and show repository features. For better use in CDF, show field list and show repository in the analysis report viewer can be turned on or off.
 
-			<p>
-      			<b>Note:</b> To use this component, Pentaho Enterprise Edition is required.
-  			</p>
-
+			<br>
+			<b>Note:</b> To use this component, Pentaho Enterprise Edition is required.
 		</p>
 
 		<h3>Options</h3>
@@ -72,7 +70,10 @@
 
 			<dt>editMode</dt>
 			<dd>Pentaho Analyzer editMode option. Default: true</dd>
-			
+
+			<dt>dateFormats</dt>
+			<dd>Object which stores parameterName/dateFormat Map that describes the dateFormats of the associated parameters e.g. <code>{current_date: "YYYY-MM-DD HH-mm-ss.0"}</code></dd>
+
 		</dl>
 
 		<h3>Sample</h3>
@@ -93,6 +94,7 @@
 			<div id="code">
 				<textarea cols="80" rows="20" id="samplecode">
 
+Dashboards.addParameter("current_date", "2016/10/18 17:55:00");
 
 territorySalesAnalysis = 
 {
@@ -102,12 +104,13 @@ territorySalesAnalysis =
   path: "Steel Wheels/Widget Library/Analysis Views",
   action: "Territory Sales.xanalyzer",
   listeners:[],
-  parameters: [],
+  parameters: [["current_date", "current_date"]],
   htmlObject: "sampleObject",
   editMode: true,
   showRepositoryButtons: false,
   showFieldList: false,
-  executeAtStart: true
+  executeAtStart: true,
+  dateFormats: {current_date: "YYYY-MM-DD HH-mm-ss.0"}
 }
 				
 
