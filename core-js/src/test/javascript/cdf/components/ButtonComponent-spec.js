@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -41,7 +41,8 @@ define([
       failureCallback: function() {},
       tooltip: "My first dashboard"
     });
-    var $htmlObject = $('<div />').attr('id', buttonComponent.htmlObject);
+    var $htmlContainer = $("<div>");
+    var $htmlObject = $("<div />").attr("id", buttonComponent.htmlObject);
 
     beforeEach(function() {
       dashboard = new Dashboard();
@@ -51,11 +52,13 @@ define([
         path: "/public/CDF-236/CDF-236.cda"
       });
       // add an element where the button will be inserted
-      $('body').append($htmlObject);
+      $htmlContainer.append($htmlObject);
+      $("body").append($htmlContainer);
     });
-    
+
     afterEach(function() {
       $htmlObject.remove();
+      $htmlContainer.remove();
     });
 
     /**
