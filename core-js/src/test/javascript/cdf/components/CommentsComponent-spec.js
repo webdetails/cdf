@@ -76,7 +76,7 @@ define([
       /**
        * ## The Comments Component # processOperation should list all comments
        */
-      it("should list all comments", function(done) {
+      it("should list all comments", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [],
@@ -116,7 +116,6 @@ define([
           collection,
           callback
         );
-        done();
       });
 
       /**
@@ -411,11 +410,11 @@ define([
     /**
      * ## The Comments Component # requestProcessing
      */
-    describe("requestProcessing", function(done) {
+    describe("requestProcessing", function() {
       /**
        * ## The Comments Component # requestProcessing should use cache-buster to avoid browser caching
        */
-      it("should use cache-buster to avoid browser caching", function(done) {
+      it("should use cache-buster to avoid browser caching", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [],
@@ -428,7 +427,6 @@ define([
           collection,
           callback);
         expect($.ajax.calls.mostRecent().args[0].url).toMatch(/comments\/list\?ts=[0-9]+/);
-        done();
       });
     });
   });
