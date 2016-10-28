@@ -70,7 +70,7 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           }
         }
 
-        if(myself.type == 'radio' || myself.type == 'RadioComponent') {
+        if(myself.type == 'radio' || myself.type.toLowerCase() == 'radiocomponent') {
           if((i == 0 && !hasCurrentVal) || (hasCurrentVal && (myArray[i][vid] == currentVal))) {
             input.prop('checked', true);
           }
