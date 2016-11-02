@@ -40,4 +40,10 @@ public class CdfLifecycleListener extends SimpleLifeCycleListener {
   public PluginEnvironment getEnvironment() {
     return (PluginEnvironment) CdfEngine.getEnvironment();
   }
+  
+  @Override
+  public void unLoaded() throws PluginLifecycleException {  
+  }
+  
+  
 }
