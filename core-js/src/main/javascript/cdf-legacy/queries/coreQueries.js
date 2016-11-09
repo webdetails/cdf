@@ -559,6 +559,12 @@
         queryDefinition.settingcolumnHeaders = options.columnHeaders;
       }
 
+      // only relevant for a component with server side pagination
+      if(options.exportPage === false) { // only export the entire dataset when exportPage is false
+        queryDefinition.pageSize = 0;
+        queryDefinition.pageStart = 0;
+      }
+
       if(options.dtFilter != null) {
         queryDefinition.settingdtFilter = options.dtFilter;
         if(options.dtSearchableColumns != null) {
