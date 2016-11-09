@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -53,6 +53,35 @@ define([
   
       expect(settings.type).toEqual("GET");
       expect(settings.async).toBeTruthy();
+    });
+
+    /**
+     * ## The Query class # test export with exportPage option
+     */
+    it("test export with exportPage option", function() {
+      var ajax = spyOn($, "ajax").and.returnValue($.Deferred().resolve([]).promise());
+
+      var query = new Query({dataAccessId: "foo", path: "bar"}, null, new Dashboard());
+      query.setOption('pageSize', 10);
+      query.setOption('page', 20);
+
+      //exportPage = false
+      var options = {exportPage: false};
+      query.exportData('xls', {}, options);
+
+      var settings = ajax.calls.mostRecent().args[0];
+      expect(settings.data.pageSize).toEqual(0);
+      expect(settings.data.pageStart).toEqual(0);
+
+      ajax.calls.reset();
+
+      //exportPage = true (default value)
+      options.exportPage = true;
+      query.exportData('xls', {}, options);
+
+      settings = ajax.calls.mostRecent().args[0];
+      expect(settings.data.pageSize).toEqual(10);
+      expect(settings.data.pageStart).toEqual(20);
     });
 
     /**
