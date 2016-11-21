@@ -129,4 +129,29 @@ describe("The Query class #", function() {
     expect(cdaQueryDefinition.parammyParam11.test2).toBe('test2');
     expect(cdaQueryDefinition.parammyParam12).toBe('"test1;test2;test3"');
   });
+
+  it("Test export with exportPage option", function(){
+    var ajax = spyOn($, "ajax").and.returnValue($.Deferred().resolve([]).promise());
+    var query = new Query({dataAccessId: "foo", path: "bar"});
+    query.setOption('pageSize', 10);
+    query.setOption('page', 20);
+
+    //exportPage = false
+    var options = {exportPage: false};
+    query.exportData('xls', {}, options);
+
+    var settings = ajax.calls.mostRecent().args[0];
+    expect(settings.data.pageSize).toEqual(0);
+    expect(settings.data.pageStart).toEqual(0);
+
+    ajax.calls.reset();
+
+    //exportPage = true (default value)
+    options.exportPage = true;
+    query.exportData('xls', {}, options);
+
+    settings = ajax.calls.mostRecent().args[0];
+    expect(settings.data.pageSize).toEqual(10);
+    expect(settings.data.pageStart).toEqual(20);
+  });
 });
