@@ -52,6 +52,7 @@
     <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
     <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
     <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
+    <dependency.jxl.revision>2.6.12</dependency.jxl.revision>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -59,6 +60,12 @@
         <groupId>pentaho</groupId>
         <artifactId>cpf-core</artifactId>
         <version>${dependency.cpf.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>pentaho</groupId>
@@ -75,26 +82,56 @@
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
         <version>${dependency.commons-logging.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>${dependency.commons-io.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${dependency.commons-lang.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>dom4j</groupId>
         <artifactId>dom4j</artifactId>
         <version>${dependency.dom4j.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
         <version>${dependency.json.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
@@ -102,16 +139,8 @@
         <version>${dependency.hibernate.revision}</version>
         <exclusions>
           <exclusion>
-            <artifactId>commons-logging</artifactId>
-            <groupId>commons-logging</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>commons-collections</artifactId>
-            <groupId>commons-collections</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>dom4j</artifactId>
-            <groupId>dom4j</groupId>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -119,12 +148,31 @@
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>${dependency.servlet-api.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
+
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
         <version>${dependency.mockito-all.revision}</version>
         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>jexcelapi</groupId>
+        <artifactId>jxl</artifactId>
+        <version>${dependency.jxl.revision}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
