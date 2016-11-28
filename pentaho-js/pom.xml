@@ -21,11 +21,23 @@
       <artifactId>cdf-core-js</artifactId>
       <version>${project.version}</version>
       <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>ccc</artifactId>
       <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
   <build>
@@ -54,10 +66,13 @@
   </build>
   <profiles>
     <profile>
-      <id>javascript-test</id>
+      <id>javascript-legacy-test</id>
       <activation>
+        <property>
+          <name>!maven.test.skip</name>
+        </property>
         <file>
-          <exists>${basedir}/src/test/javascript</exists>
+          <exists>${build.javascriptTestSourceDirectory}/cdf-legacy</exists>
         </file>
       </activation>
       <build>
@@ -65,7 +80,6 @@
           <plugin>
             <groupId>com.github.eirslett</groupId>
             <artifactId>frontend-maven-plugin</artifactId>
-            <version>${dependency.frontend-maven-plugin.revision}</version>
             <executions>
               <execution>
                 <id>javascript-legacy-tests</id>
@@ -73,7 +87,7 @@
                   <goal>karma</goal>
                 </goals>
                 <configuration>
-                  <karmaConfPath>${basedir}/src/test/javascript/config/${karma.legacy.file.config}</karmaConfPath>
+                  <karmaConfPath>${build.javascriptTestConfigDirectory}/${karma.legacy.file.config}</karmaConfPath>
                 </configuration>
               </execution>
             </executions>

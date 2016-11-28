@@ -13,6 +13,7 @@
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
+    <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
     <dependency.spring-core.revision>4.3.2.RELEASE</dependency.spring-core.revision>
     <dependency.spring-security-core.revision>4.1.3.RELEASE</dependency.spring-security-core.revision>
@@ -27,6 +28,12 @@
       <groupId>pentaho</groupId>
       <artifactId>cpf-pentaho</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
@@ -61,21 +68,45 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
       <version>${dependency.javax.ws.rs-api.revision}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
       <version>${dependency.pentaho-platform.revision}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${dependency.pentaho-platform.revision}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
       <version>${dependency.pentaho-platform.revision}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
@@ -83,10 +114,14 @@
       <version>${dependency.pentaho-platform.revision}</version>
       <exclusions>
         <exclusion>
-          <artifactId>xbean</artifactId>
-          <groupId>org.apache.xbean</groupId>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>jexcelapi</groupId>
+      <artifactId>jxl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -124,6 +159,12 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
       <version>${dependency.spring-security-core.revision}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${dependency.jersey-common.revision}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
