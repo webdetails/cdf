@@ -10,6 +10,11 @@
     <p> It also allows to add custom require modules and load them along with the CDF modules. </p>
     <p> This will make it possible for any server and/or 3rd party applications to embed CDF Dashboards, from a Pentaho Server.</p>
 
+    <b>Note:</b>
+    <p> To properly allow the embedded scenario, which probably requires Cross-Origin Resource Sharing </p>
+    <p> there is one extra setting that needs to be turned on in the settings.xml of CDF:</p>
+    <pre>&lt;allow-cross-domain-resources&gt;true&lt;/allow-cross-domain-resources&gt;</pre>
+    
     <h3>Configurations</h3>
 
     <dl class="documentation">
