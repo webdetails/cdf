@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
   <properties>
     <js.project.list>pentaho-cdf-js</js.project.list>
-
     <maven-filtering.version>1.3</maven-filtering.version>
   </properties>
   <dependencies>
@@ -87,21 +86,6 @@
     </filters>
     <plugins>
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack-js-dependencies</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeArtifactIds>${js.project.list}</includeArtifactIds>
-              <includes>**/**</includes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
@@ -119,24 +103,6 @@
             <version>${maven-filtering.version}</version>
           </dependency>
         </dependencies>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>pentaho-cdf</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/assembly/descriptors/assembly.xml</descriptor>
-              </descriptors>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

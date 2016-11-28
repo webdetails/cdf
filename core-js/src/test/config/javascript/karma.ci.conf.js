@@ -11,7 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+var baseConfiguration = require('./karma.conf');
+
 module.exports = function(config) {
+  baseConfiguration(config);
+
   config.set({
 
     // base path, that will be used to resolve files and exclude

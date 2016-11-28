@@ -13,7 +13,6 @@
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
-
     <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
     <dependency.spring-core.revision>4.3.2.RELEASE</dependency.spring-core.revision>

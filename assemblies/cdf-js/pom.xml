@@ -14,7 +14,6 @@
     <js.project.list>cdf-core-js,cdf-pentaho-js,ccc</js.project.list>
     <global.require.file>cdf-require-js-cfg.js</global.require.file>
     <requirejs.config.files.pattern>**/*-require-js-cfg.js</requirejs.config.files.pattern>
-    <requirejs.build.file>cdf.build.compile.js</requirejs.build.file>
   </properties>
   <dependencies>
     <dependency>
@@ -67,7 +66,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>${basedir}/src/assembly/descriptors/build.assembly.xml</descriptor>
+                <descriptor>${basedir}/src/assembly/build.assembly.xml</descriptor>
               </descriptors>
               <finalName>src-javascript</finalName>
               <appendAssemblyId>false</appendAssemblyId>
