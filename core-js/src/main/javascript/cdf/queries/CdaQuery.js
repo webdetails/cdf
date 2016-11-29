@@ -192,6 +192,7 @@ define([
      * @param {object} options.columnHeaders The column headers.
      * @param {object} options.dtFilter Data table filter.
      * @param {object} options.dtSearchableColumns Data table searchable columns.
+     * @param {boolean} options.exportPage Export only one page (true) or full data set (false).
      */
     exportData: function(outputType, overrides, options) {
       if(!options) {
@@ -210,6 +211,12 @@ define([
       }
       if(options.columnHeaders) {
         queryDefinition.settingcolumnHeaders = options.columnHeaders;
+      }
+
+      // only relevant for a component with server side pagination
+      if(options.exportPage === false) { // only export the entire data set when exportPage is false
+        queryDefinition.pageSize = 0;
+        queryDefinition.pageStart = 0;
       }
 
       if(options.dtFilter != null) {
