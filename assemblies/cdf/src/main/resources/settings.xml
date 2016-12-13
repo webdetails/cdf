@@ -23,6 +23,14 @@
 
         accepted values are: true | false
      -->
-    <legacy-dashboard-context>false</legacy-dashboard-context>    
+    <legacy-dashboard-context>false</legacy-dashboard-context>
+
+
+    <!--
+        allow-cross-domain-resources: Flag indicating cross-origin resource sharing
+
+        accepted values are: true | false
+     -->
+    <allow-cross-domain-resources>false</allow-cross-domain-resources>
     
 </settings>
