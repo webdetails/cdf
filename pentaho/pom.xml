@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>cdf-plugin</artifactId>
-    <groupId>pentaho</groupId>
-    <version>6.1-SNAPSHOT</version>
-  </parent>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>pentaho</groupId>
+    <artifactId>cdf-plugin</artifactId>
+    <version>6.1.0.9-307</version>
+  </parent>
   <artifactId>cdf-pentaho</artifactId>
-
+  <version>6.1.0.9-307</version>
   <properties>
-    <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
-    <dependency.pentaho-platform.revision>${project.version}</dependency.pentaho-platform.revision>
-    <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
+    <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
+    <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
     <dependency.spring-core.revision>3.2.14.RELEASE</dependency.spring-core.revision>
     <dependency.spring-security-core.revision>2.0.8.RELEASE</dependency.spring-security-core.revision>
+    <dependency.pentaho-platform.revision>6.1.0.9-307</dependency.pentaho-platform.revision>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-core</artifactId>
     </dependency>
-
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-pentaho</artifactId>
@@ -37,7 +33,6 @@
       <artifactId>cdf-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
@@ -62,13 +57,11 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
       <version>${dependency.javax.ws.rs-api.revision}</version>
     </dependency>
-
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
@@ -90,17 +83,15 @@
       <version>${dependency.pentaho-platform.revision}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.xbean</groupId>
           <artifactId>xbean</artifactId>
+          <groupId>org.apache.xbean</groupId>
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate</artifactId>
     </dependency>
-
     <dependency>
       <groupId>com.orientechnologies</groupId>
       <artifactId>orient-commons</artifactId>
@@ -121,12 +112,10 @@
       <groupId>com.orientechnologies</groupId>
       <artifactId>orientdb-enterprise</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -139,14 +128,12 @@
       <version>${dependency.commons-collections.revision}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
       <version>${dependency.google-collections.revision}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
