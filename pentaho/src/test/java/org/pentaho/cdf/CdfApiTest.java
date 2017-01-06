@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -17,6 +17,9 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.pentaho.platform.api.engine.IPentahoRequestContext;
+import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;
 import pt.webdetails.cpf.messaging.MockHttpServletRequest;
 import pt.webdetails.cpf.messaging.MockHttpServletResponse;
 import pt.webdetails.cpf.utils.CharsetHelper;
@@ -67,5 +70,14 @@ public class CdfApiTest {
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
     verify( cdfApi, times( 1 ) ).writeJSONSolution( PATH, DEPTH, SHOW_HIDDEN_FILES, MODE, servletResponse );
+  }
+  @Test
+  public void testBuildFullServerUrl() throws Exception {
+    CdfApi cdfApi = new CdfApi();
+    IPentahoRequestContext requestContext = Mockito.mock( IPentahoRequestContext.class );
+    Mockito.when( requestContext.getContextPath( ) ).thenReturn( "/rootContext" );
+    PentahoRequestContextHolder.setRequestContext( requestContext );
+    Assert.assertTrue( cdfApi.buildFullServerUrl( "HTTP/1.1", "localhost", 8080, true ).startsWith( "https://" ) );
+    Assert.assertTrue( cdfApi.buildFullServerUrl( "HTTP/1.1", "localhost", 8080, false ).startsWith( "http://" ) );
   }
 }
