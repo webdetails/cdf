@@ -10,7 +10,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
-  <version>7.0-SNAPSHOT</version>
+  <version>7.0.0.2-52</version>
   <packaging>pom</packaging>
   <modules>
     <module>core</module>
@@ -46,9 +46,9 @@
     <dependency.cpf.revision>${project.version}</dependency.cpf.revision>
     <dependency.frontend-maven-plugin.revision>0.0.26</dependency.frontend-maven-plugin.revision>
     <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
-    <requirejs.config.files.pattern></requirejs.config.files.pattern>
     <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
-    <dependency.json.revision>7.0-SNAPSHOT</dependency.json.revision>
+    <requirejs.config.files.pattern></requirejs.config.files.pattern>
+    <dependency.json.revision>7.0.0.2-52</dependency.json.revision>
     <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
     <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
     <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
