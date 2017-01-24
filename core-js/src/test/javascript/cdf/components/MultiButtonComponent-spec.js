@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -50,17 +50,11 @@ define([
     dashboard.addComponent(multiButtonComponent);
     dashboard.init();
 
-    var $htmlObject = $('<div />').attr('id', htmlObject);
-
-    beforeEach(function() {
-      // add an element where the button will be inserted
-      $('body').append($htmlObject);
-    });
-    
-    afterEach(function() {
-      $htmlObject.remove();
-    });
-
+    var $htmlContainer = $("<div>");
+    var $htmlObject = $("<div />").attr("id", htmlObject);
+    // add an element where the button will be inserted
+    $($htmlContainer).append($htmlObject);
+    $("body").append($htmlContainer);
 
     /**
      * ## The Multi Button Component # allows a dashboard to execute update
@@ -217,7 +211,7 @@ define([
         /**
          * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value
          */
-        describe("with the current value does not equal to the first value", function(done) {
+        describe("with the current value does not equal to the first value", function() {
           /**
            * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value # with the current value is present in values array
            */

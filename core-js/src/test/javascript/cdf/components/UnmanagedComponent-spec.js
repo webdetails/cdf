@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -69,6 +69,8 @@ define([
     }
   });
 
+  var queryDefinitionMock = {dataSource: "fakeQuery"};
+
   /**
    * ## Unmanaged Component #
    */
@@ -97,7 +99,7 @@ define([
       type: "HelloQueryBase",
       htmlObject: 'mquery',
       executeAtStart: true,
-      queryDefinition: {dataSource: "fakeQuery"}
+      queryDefinition: queryDefinitionMock
     });
 
     var uquery;       
@@ -106,7 +108,7 @@ define([
       type: "HelloQueryUnmanaged",
       htmlObject: 'uquery',
       executeAtStart: true,
-      queryDefinition: {dataSource: "fakeQuery"},
+      queryDefinition: queryDefinitionMock,
       parameters: {
         "MYPARAM1": "myparam1",
         "MYPARAM2": "myparam2",
@@ -120,7 +122,7 @@ define([
         type: "HelloQueryUnmanaged",
         htmlObject: 'uquery',
         executeAtStart: true,
-        queryDefinition: {dataSource: "fakeQuery"}
+        queryDefinition: queryDefinitionMock
        });
       };
 
@@ -226,82 +228,100 @@ define([
     * ## Unmanaged Component # should return one of the known query definition properties
     */
     it("should return one of the known query definition properties", function() {
-      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
-      var querydefinition = {dataSource: "otherDatasource"};
-      uquery.queryDefinition = querydefinition ;
+      spyOn(uquery.dashboard, "isValidQueryDefinition").and.returnValue(true);
+      var otherQDMock = {dataSource: "otherDatasource"};
+      uquery.queryDefinition = otherQDMock;
       uquery.trafficDefinition = undefined;
       uquery.chartDefinition = undefined;
-      expect(uquery.getQueryDefinition()).toBe(querydefinition)
+      expect(uquery.getQueryDefinition()).toBe(otherQDMock)
       uquery = renewUquery();
-      uquery.chartDefinition = querydefinition;
+      uquery.chartDefinition = otherQDMock;
       uquery.queryDefinition = undefined;
       uquery.trafficDefinition = undefined;
-      expect(uquery.getQueryDefinition()).toBe(querydefinition)
+      expect(uquery.getQueryDefinition()).toBe(otherQDMock)
       uquery = renewUquery();
-      uquery.trafficDefinition = querydefinition;
+      uquery.trafficDefinition = otherQDMock;
       uquery.queryDefinition = undefined;
       uquery.chartDefinition = undefined;
-      expect(uquery.getQueryDefinition()).toBe(querydefinition)  
+      expect(uquery.getQueryDefinition()).toBe(otherQDMock)
     });
 
     /**
      * ## Unmanaged Component # preExecution should allow changes in the query definition object
      */
-    it("preExecution should allow updating the query definition object", function(done) {
-      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+    it("preExecution should allow updating the query definition object", function() {
+      spyOn(uquery.dashboard, "isValidQueryDefinition").and.returnValue(true);
       uquery.preExecution = function() {
         this.queryDefinition.dataSource = "otherDatasource";
       };
-      uquery._setQuery = function(queryDef, queryOptions) {
-        expect(queryDef.dataSource).toBe("otherDatasource");
-        done();
-      };
+      spyOn(uquery, "beginQuery").and.callThrough();
+      var querySpy = jasmine.createSpyObj("querySpy", ["fetchData"]);
+      spyOn(uquery, "_setQuery").and.returnValue(querySpy);
+
       uquery.triggerQuery(uquery.queryDefinition);
+
+      expect(uquery.beginQuery).toHaveBeenCalledWith(queryDefinitionMock, jasmine.any(Function), undefined);
+      expect(uquery._setQuery).toHaveBeenCalledWith({dataSource: "otherDatasource"}, undefined);
+      expect(querySpy.fetchData).toHaveBeenCalled();
     });
 
     /**
      * ## Unmanaged Component # preExecution should allow overriding the query definition object
      */
-    it("preExecution should allow overriding the query definition object", function(done) {
-      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+    it("preExecution should allow overriding the query definition object", function() {
+      spyOn(uquery.dashboard, "isValidQueryDefinition").and.returnValue(true);
+      var otherQDMock = $.extend({}, uquery.queryDefinition , {dataSource: "otherDatasource"});
       uquery.preExecution = function() {
-        this.queryDefinition = $.extend( {}, this.queryDefinition , { dataSource: "otherDatasource"});
+        this.queryDefinition = otherQDMock;
       };
-      uquery._setQuery = function(queryDef, queryOptions) {
-        expect(queryDef.dataSource).toBe("otherDatasource");
-        done();
-      };
+      spyOn(uquery, "beginQuery").and.callThrough();
+      var querySpy = jasmine.createSpyObj("querySpy", ["fetchData"]);
+      spyOn(uquery, "_setQuery").and.returnValue(querySpy);
+
       uquery.triggerQuery(uquery.queryDefinition);
-     });
+
+      expect(uquery.beginQuery).toHaveBeenCalledWith(queryDefinitionMock, jasmine.any(Function), undefined);
+      expect(uquery._setQuery).toHaveBeenCalledWith(otherQDMock, undefined);
+      expect(querySpy.fetchData).toHaveBeenCalled();
+    });
 
     /**
      * ## Unmanaged Component # preExecution should allow overriding the query definition to a method
      */
-    it("preExecution should allow overriding the query definition to a method", function(done) {
-      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+    it("preExecution should allow overriding the query definition to a method", function() {
+      spyOn(uquery.dashboard, "isValidQueryDefinition").and.returnValue(true);
       uquery.preExecution = function() {
-        this.queryDefinition = function() { return { dataSource: "otherDatasource"}; };
+        this.queryDefinition = function() { return {dataSource: "otherDatasource"}; };
       };
-      uquery._setQuery = function(queryDef, queryOptions) {
-        expect(queryDef().dataSource).toBe("otherDatasource");
-        done();
-      };
+      spyOn(uquery, "beginQuery").and.callThrough();
+      var querySpy = jasmine.createSpyObj("querySpy", ["fetchData"]);
+      spyOn(uquery, "_setQuery").and.returnValue(querySpy);
+
       uquery.triggerQuery(uquery.queryDefinition);
+
+      expect(uquery.beginQuery).toHaveBeenCalledWith(queryDefinitionMock, jasmine.any(Function), undefined);
+      expect(uquery._setQuery).toHaveBeenCalledWith(jasmine.any(Function), undefined);
+      expect(querySpy.fetchData).toHaveBeenCalled();
      });
 
     /**
      * ## Unmanaged Component # preExecution should allow overriding the getQueryDefinition method
      */
-    it("preExecution should allow overriding the getQueryDefinition method", function(done) {
-      spyOn(uquery.dashboard,'isValidQueryDefinition').and.returnValue(true);
+    it("preExecution should allow overriding the getQueryDefinition method", function() {
+      spyOn(uquery.dashboard, "isValidQueryDefinition").and.returnValue(true);
+      var otherQDMock = {dataSource: "otherDatasource"};
       uquery.preExecution = function() {
-        uquery.getQueryDefinition = function() { return { dataSource: "otherDatasource"}; };
+        this.getQueryDefinition = function() { return otherQDMock; };
       };
-      uquery._setQuery = function(queryDef, queryOptions) {
-        expect(queryDef.dataSource).toBe("otherDatasource");
-        done();
-      };
+      spyOn(uquery, "beginQuery").and.callThrough();
+      var querySpy = jasmine.createSpyObj("querySpy", ["fetchData"]);
+      spyOn(uquery, "_setQuery").and.returnValue(querySpy);
+
       uquery.triggerQuery(uquery.queryDefinition);
+
+      expect(uquery.beginQuery).toHaveBeenCalledWith(queryDefinitionMock, jasmine.any(Function), undefined);
+      expect(uquery._setQuery).toHaveBeenCalledWith(otherQDMock, undefined);
+      expect(querySpy.fetchData).toHaveBeenCalled();
      });
 
     /**

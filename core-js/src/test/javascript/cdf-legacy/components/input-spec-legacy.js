@@ -490,7 +490,7 @@ describe("The Multibutton Component #", function(){
       /**
        * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value
        */
-      describe("with the current value does not equal to the first value", function(done) {
+      describe("with the current value does not equal to the first value", function() {
         /**
          * ## The Multi Button Component # draw() function behaves correctly # with several elements in values array # with the current value does not equal to the first value # with the current value is present in values array
          */
