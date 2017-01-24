@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -67,6 +67,8 @@ import pt.webdetails.cpf.utils.PluginIOUtils;
 public class CdfApi {
 
   private static final Log logger = LogFactory.getLog( CdfApi.class );
+  private static final String HTTP = "http";
+  private static final String HTTPS = "https";
 
   @GET
   @Path( "/ping" )
@@ -354,7 +356,7 @@ public class CdfApi {
     try {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
           new EmbeddedHeadersGenerator(
-            buildFullServerUrl( protocol, name, port ),
+            buildFullServerUrl( protocol, name, port, servletRequest.isSecure() ),
             getConfiguration( "", "", Parameter.asHashMap( servletRequest ), inactiveInterval ) );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
@@ -373,10 +375,13 @@ public class CdfApi {
     return ContextEngine.getInstance().getConfig( path, view, parameterMap, inactiveInterval );
   }
 
-  protected String buildFullServerUrl( String protocol, String serverName, int serverPort  ) {
-    String p = "http";
+  protected String buildFullServerUrl( String protocol, String serverName, int serverPort, boolean secure ) {
+    String p = HTTP;
     if ( !StringUtils.isEmpty( protocol ) ) {
       p = protocol.split( "/" )[ 0 ].toLowerCase();
+    }
+    if ( HTTP.equalsIgnoreCase( p ) && secure ) {
+      p = HTTPS;
     }
     return p + "://" + serverName + ":" + serverPort + PentahoRequestContextHolder.getRequestContext().getContextPath();
   }
