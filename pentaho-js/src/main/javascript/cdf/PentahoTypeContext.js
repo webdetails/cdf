@@ -11,9 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 define([
-  "pentaho/type/Context",
-  "pentaho/GlobalContextVars"
-], function(Context, GlobalContextVars) {
+  "pentaho/type/Context"
+], function(Context) {
 
   var _context;
 
@@ -32,8 +31,7 @@ define([
      */
     getInstance: function() {
       if(!_context) {
-        var contextVars = new GlobalContextVars({application: "pentaho-cdf"});
-        _context = new Context(contextVars);
+        _context = new Context({application: "pentaho-cdf"});
       }
       return _context;
     }
