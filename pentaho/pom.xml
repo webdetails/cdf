@@ -22,12 +22,12 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-core</artifactId>
-<version>6.1-16.08.18</version>
+<version>6.1-16.08.18.1</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>cpf-pentaho</artifactId>
-      <version>6.1-16.08.18</version>
+      <version>6.1-16.08.18.1</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
