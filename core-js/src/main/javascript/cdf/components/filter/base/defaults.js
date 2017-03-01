@@ -130,6 +130,7 @@ define(['../../../lib/jquery'], function( $ ) {
         showGroupSelection: true,
         showButtonOnlyThis: false,
         showSelectedItems: false,
+        showListOfSelectedItems: false,
         showNumberOfSelectedItems: true,
         showValue: false,
         showIcons: true,
@@ -144,7 +145,12 @@ define(['../../../lib/jquery'], function( $ ) {
         noItems: 'None',
         groupSelection: 'All',
         btnApply: 'Apply',
-        btnCancel: 'Cancel'
+        btnCancel: 'Cancel',
+        busyInfo: 'Fetching data...',
+        searchPlaceholder: "Search",
+        reachedSelectionLimitBefore: 'The selection limit (',
+        reachedSelectionLimitAfter: ') for specific items has been reached.'
+
       },
       view: {
         scrollbar: {
@@ -180,7 +186,8 @@ define(['../../../lib/jquery'], function( $ ) {
         noItems: 'None',
         groupSelection: 'All',
         btnApply: 'Apply',
-        btnCancel: 'Cancel'
+        btnCancel: 'Cancel',
+        moreData: 'More...'
       }
     },
 
