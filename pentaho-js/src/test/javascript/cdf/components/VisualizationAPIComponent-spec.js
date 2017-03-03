@@ -191,9 +191,9 @@ define([
     });
 
     /**
-     * ## The VisualizationAPI Component # updates the model with the width and height property
+     * ## The VisualizationAPI Component # updates the view with the width and height property
      */
-    it("should update the model with the width and height property", function(done) {
+    it("should update the view with the width and height property", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
@@ -202,8 +202,8 @@ define([
       visualizationAPIComponent.once("cdf:postExecution", function() {
         var view = visualizationAPIComponent.vizView;
 
-        expect(view.model.width).toBe(200);
-        expect(view.model.height).toBe(300);
+        expect(view.width).toBe(200);
+        expect(view.height).toBe(300);
         done();
       });
 
@@ -216,7 +216,7 @@ define([
     /**
      * ## The VisualizationAPI Component # updates the view when the component updates
      */
-    it("should update the model with the width and height property", function(done) {
+    it("should update the view when the component updates", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });

@@ -18,10 +18,14 @@ define(function() {
   function Context() {
   }
 
-  Context.prototype.get = function () {
-      return {
-        type: ""
-      }
+  Context.prototype.get = function (factory) {
+    if(typeof factory === "function") {
+      return factory(this);
+    }
+
+    return {
+      type: ""
+    }
   };
 
   Context.prototype.getAsync = function() {

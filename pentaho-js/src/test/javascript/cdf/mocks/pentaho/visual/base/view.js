@@ -14,19 +14,37 @@
 define(function () {
   /* global Promise:false */
 
-  return {
-    createAsync: function(domElem, model) {
+  return function(context) {
 
-      var view = {
+    return {
+      createAsync: function(viewSpec) {
 
-        model: model,
+        var view = {
+          width: (viewSpec && viewSpec.width),
+          height: (viewSpec && viewSpec.height),
+          type: {
+            context: context
+          },
+          model: {
+            type: {
+              context: context
+            },
+            set: function(p, v) {
+              this[p] = v;
+            }
+          },
 
-        update: function () {
-          return Promise.resolve();
-        }
-      };
+          update: function () {
+            return Promise.resolve();
+          },
 
-      return Promise.resolve(view);
-    }
-  }
+          set: function(p, v) {
+            this[p] = v;
+          }
+        };
+
+        return Promise.resolve(view);
+      }
+    };
+  };
 });

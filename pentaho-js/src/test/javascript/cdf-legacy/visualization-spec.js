@@ -120,5 +120,4 @@ describe("The VisualizationAPI Component #", function() {
       done();
     }, 100);
   });
-
 });
