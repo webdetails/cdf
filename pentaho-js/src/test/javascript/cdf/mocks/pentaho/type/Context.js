@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -38,6 +38,12 @@ define(function() {
 
     Model.prototype.type =  {
       context: me
+    };
+
+    Model.type = {
+      extensionEffective: {
+        definition: 'dummy'
+      }
     };
 
     return Promise.resolve(Model);

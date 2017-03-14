@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -18,32 +18,34 @@ define([
   './CggComponent.ext',
   '../lib/jquery',
   'amd!../lib/underscore'
-], function(Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $, _) {
+], function (Utils, UnmanagedComponent, ChartComponentExt, CggComponentExt, $, _) {
 
   return UnmanagedComponent.extend({
-    exportChart: function(outputType, overrides) {
+    exportChart: function (outputType, overrides) {
       var me = this;
 
-      var buildUrlParameters = function(overrides) {
+      var buildUrlParameters = function (overrides) {
         overrides = overrides || {};
 
         var urlParams = {};
 
         // Pass the parameters defined in this component to the used data source.
         var paramDefsArray = me.parameters;
-        if(paramDefsArray && paramDefsArray.length) {
+        if (paramDefsArray && paramDefsArray.length) {
           var paramDefs = $.extend({}, Utils.propertiesArrayToObject(paramDefsArray), overrides);
-          for(var name in paramDefs) {
-            if(paramDefs.hasOwnProperty(name)) {
+          for (var name in paramDefs) {
+            if (paramDefs.hasOwnProperty(name)) {
               // Works with eval ...
               var value = this.dashboard.getParameterValue(paramDefs[name]);
-              if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
+              if ($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
                 // Special case where single element will wrongly be treated as a parsable array by cda
-                value = Utils.doCsvQuoting(value[0],';');
+                value = Utils.doCsvQuoting(value[0], ';');
               }
               //else Will not be correctly handled for functions that return arrays
 
-              if(typeof value == 'function') { value = value(); }
+              if (typeof value === 'function') {
+                value = value();
+              }
 
               urlParams['param' + name] = value;
             }
@@ -52,12 +54,12 @@ define([
 
         // Check debug level and pass as parameter
         var level = me.dashboard.debug;
-        if(level > 1) {
+        if (level > 1) {
           urlParams.paramdebug = true;
           urlParams.paramdebugLevel = level;
         }
 
-        var scriptName =  me.name.replace(/render_/, '');
+        var scriptName = me.name.replace(/render_/, '');
 
         urlParams.script = ChartComponentExt.getCccScriptPath(scriptName);
 
@@ -72,7 +74,7 @@ define([
       var url = CggComponentExt.getCggDrawUrl() + "?" + $.param(urlParams);
 
       var $exportIFrame = $('#cccExportIFrame');
-      if(!$exportIFrame.length) {
+      if (!$exportIFrame.length) {
         $exportIFrame = $('<iframe id="cccExportIFrame" style="display:none">');
         $exportIFrame[0].src = url;
         $exportIFrame.appendTo($('body'));
@@ -81,16 +83,18 @@ define([
       }
     },
 
-    renderChart: function() {
+    renderChart: function () {
       var cd = this.chartDefinition;
 
-      if(this.dashboard.isValidQueryDefinition(cd)) {
-        this.triggerQuery(cd, _.bind(this.render, this));
-      } else if(this.valuesArray != undefined) {
-        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
+      if (this.dashboard.isValidQueryDefinition(cd)) {
+        this.beginQuery(cd, _.bind(this.render, this));
+      } else if (this.valuesArray != undefined) {
+        this.execute(_.bind(function () {
+          this.render(this.valuesArray);
+        }, this));
       } else {
         // initialize the component only
-        this.synchronous(_.bind(this.render, this));
+        this.execute(_.bind(this.render, this));
       }
     }
   });
