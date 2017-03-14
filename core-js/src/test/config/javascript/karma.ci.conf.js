@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -41,6 +41,7 @@ module.exports = function(config) {
       {pattern: 'target/dependency/ccc/amd/**/*.css', included: false},
       {pattern: 'src/test/javascript/cdf/**/*-spec.js', included: false},
       {pattern: 'src/test/javascript/cdf/**/*.ext.js', included: true},
+      {pattern: 'src/test/javascript/cdf/mocks/**/*.js', included: false},
       // fix 404 messages
       {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: false, served: true},
       {pattern: 'target/test-javascript/**/*.png', watched: false, included: false, served: true},
