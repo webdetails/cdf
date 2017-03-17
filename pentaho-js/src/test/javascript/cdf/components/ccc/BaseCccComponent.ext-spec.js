@@ -120,7 +120,7 @@ define([
     })
 
     it("Gets the correct colors", function () {
-      expect(BaseCccComponentExt.getColors('')[0]).toBe('dummy');
+      expect(BaseCccComponentExt.getColors()[0]).toBe('dummy');
     });
   });
 

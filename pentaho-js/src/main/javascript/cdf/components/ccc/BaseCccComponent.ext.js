@@ -151,11 +151,10 @@ define([
   /**
    * Gets the Colors Array Registered in the Palette
    *
-   * @param {String} [type=default] The type of palette to get
    * @returns {Array} The Array with the registered colors
    */
-  var getColors = function (type) {
-    return paletteRegistry.get('cdf_' + (type ? type : 'default')).colors;
+  var getColors = function () {
+    return paletteRegistry.get().colors;
   }
 
   return {

@@ -33,7 +33,7 @@ define([
      * The variable to hold the ccc visualization type name
      */
     _cccVizName: null,
-    
+
     /**
      * Gets and assigns the Ccc Visualization name
      *
@@ -41,7 +41,7 @@ define([
      */
     getCccVisualizationName: function () {
       if (!this._cccVizName && this.cccType) {
-        this._cccVizName = BaseCccComponentExt.getVizDigestedName(def.qualNameOf(this.cccType).name);
+        this._cccVizName = BaseCccComponentExt.getVizDigestedName(def.qualNameOf(this.cccType).name, this.chartDefinition);
       }
       return this._cccVizName;
     },
@@ -133,7 +133,7 @@ define([
     /**
      * The internal render function, which creates the html object, extends the chart definitions, applies colors
      * and starts the ccc render for a given visualization type
-     * 
+     *
      * @param {Object} data The result set to render
      * @param {Object} [externalChartDefinition] The extensions to apply to the chart render
      * @private
@@ -160,7 +160,7 @@ define([
       }
 
       if (this._vizApiStyles && (!cd.colors || (cd.colors && cd.colors.length == 0))) {
-        cd.colors = BaseCccComponentExt.getColors('default');
+        cd.colors = BaseCccComponentExt.getColors();
       }
 
       this.chart = new this.cccType(cd);
