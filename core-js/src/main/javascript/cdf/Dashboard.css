@@ -47,3 +47,13 @@ body.draggable-popup-fix {
 .container .container{
   width: auto;
 }
+
+@font-face {
+  font-family: 'OpenSansRegular';
+  src: url('../lib/fonts/opensans/opensans-regular.eot');
+  src: url('../lib/fonts/opensans/opensans-regular.eot') format('embedded-opentype'),
+  url('../lib/fonts/opensans/opensans-regular.woff') format('woff'),
+  url('../lib/fonts/opensans/opensans-regular.ttf') format('truetype'),
+  url('../lib/fonts/opensans/opensans-regular.svg#OpenSansRegular') format('svg');
+}
+
