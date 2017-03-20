@@ -90,7 +90,6 @@ define([
       expect(BaseCccComponentExt.isValidVisualization(undefined)).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization(null)).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization('')).toBeFalsy();
-      expect(BaseCccComponentExt.isValidVisualization('boxplot')).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization('bullet')).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization('treemap')).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization('waterfall')).toBeFalsy();
