@@ -35,7 +35,7 @@ define([
    * @type {String[]}
    * @private
    */
-  var _chartTypesBlackList = ['boxplot', 'bullet', 'treemap', 'waterfall'];
+  var _chartTypesBlackList = ['bullet', 'treemap', 'waterfall'];
 
   /**
    * List of viz types to exclude from the form verification
@@ -43,7 +43,7 @@ define([
    * @type {String[]}
    * @private
    */
-  var _chartFormExceptions = ['heatGrid', 'line', 'areaStacked', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
+  var _chartFormExceptions = ['boxplot', 'heatGrid', 'line', 'areaStacked', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
 
   /**
    * List of viz types to do not apply normalized to the viz type name
@@ -82,6 +82,9 @@ define([
 
     // transformations
     switch (fullName) {
+      case 'boxplot':
+        fullName = 'categoricalContinuousAbstract';
+        break;
       case 'metricDot':
         fullName = 'bubble';
         break;
@@ -146,7 +149,7 @@ define([
       // no external extensions
       return Promise.resolve(null);
     }
-  }
+  };
 
   /**
    * Gets the Colors Array Registered in the Palette
@@ -155,7 +158,7 @@ define([
    */
   var getColors = function () {
     return paletteRegistry.get().colors;
-  }
+  };
 
   return {
     getVizDigestedName: getVizDigestedName,
