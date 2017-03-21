@@ -50,10 +50,10 @@ body.draggable-popup-fix {
 
 @font-face {
   font-family: 'OpenSansRegular';
-  src: url('../lib/fonts/opensans/opensans-regular.eot');
-  src: url('../lib/fonts/opensans/opensans-regular.eot') format('embedded-opentype'),
-  url('../lib/fonts/opensans/opensans-regular.woff') format('woff'),
-  url('../lib/fonts/opensans/opensans-regular.ttf') format('truetype'),
-  url('../lib/fonts/opensans/opensans-regular.svg#OpenSansRegular') format('svg');
+  src: url('lib/fonts/opensans/opensans-regular.eot');
+  src: url('lib/fonts/opensans/opensans-regular.eot') format('embedded-opentype'),
+  url('lib/fonts/opensans/opensans-regular.woff') format('woff'),
+  url('lib/fonts/opensans/opensans-regular.ttf') format('truetype'),
+  url('lib/fonts/opensans/opensans-regular.svg#OpenSansRegular') format('svg');
 }
 
