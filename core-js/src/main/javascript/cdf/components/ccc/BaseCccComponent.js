@@ -144,6 +144,11 @@ define([
       // Always clone the original chartDefinition.
       var cd = $.extend({}, this.chartDefinition);
 
+      // special case for this array which $.extend does not smash
+      if (cd.baseAxisLabelDesiredAngles && cd.baseAxisLabelDesiredAngles.length == 0) {
+        cd.baseAxisLabelDesiredAngles = undefined;
+      }
+
       if (externalChartDefinition) {
         cd = $.extend(externalChartDefinition, cd);
       }
