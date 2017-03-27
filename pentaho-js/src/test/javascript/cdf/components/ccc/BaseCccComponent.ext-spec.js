@@ -91,8 +91,6 @@ define([
       expect(BaseCccComponentExt.isValidVisualization(null)).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization('')).toBeFalsy();
       expect(BaseCccComponentExt.isValidVisualization('bullet')).toBeFalsy();
-      expect(BaseCccComponentExt.isValidVisualization('treemap')).toBeFalsy();
-      expect(BaseCccComponentExt.isValidVisualization('waterfall')).toBeFalsy();
 
       expect(BaseCccComponentExt.isValidVisualization('dummyChart')).toBeTruthy();
     });

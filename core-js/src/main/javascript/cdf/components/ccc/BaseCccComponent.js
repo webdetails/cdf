@@ -144,13 +144,20 @@ define([
       // Always clone the original chartDefinition.
       var cd = $.extend({}, this.chartDefinition);
 
-      // special case for this array which $.extend does not smash
-      if (cd.baseAxisLabelDesiredAngles && cd.baseAxisLabelDesiredAngles.length == 0) {
-        cd.baseAxisLabelDesiredAngles = undefined;
-      }
-
       if (externalChartDefinition) {
         cd = $.extend(externalChartDefinition, cd);
+      }
+
+      if (this._vizApiStyles) {
+        // special case for this array which $.extend does not smash
+        if (cd.baseAxisLabelDesiredAngles && cd.baseAxisLabelDesiredAngles.length == 0) {
+          cd.baseAxisLabelDesiredAngles = undefined;
+        }
+
+        // apply colors if that is intended
+        if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
+          cd.colors = BaseCccComponentExt.getColors();
+        }
       }
 
       cd.canvas = this.htmlObject + "protovis";
@@ -162,10 +169,6 @@ define([
           ep[a[0]] = a[1];
         });
         cd.extensionPoints = ep;
-      }
-
-      if (this._vizApiStyles && (!cd.colors || (cd.colors && cd.colors.length == 0))) {
-        cd.colors = BaseCccComponentExt.getColors();
       }
 
       this.chart = new this.cccType(cd);
