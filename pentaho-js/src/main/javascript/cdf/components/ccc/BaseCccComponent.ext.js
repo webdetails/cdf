@@ -35,7 +35,7 @@ define([
    * @type {String[]}
    * @private
    */
-  var _chartTypesBlackList = ['bullet', 'treemap', 'waterfall'];
+  var _chartTypesBlackList = ['bullet'];
 
   /**
    * List of viz types to exclude from the form verification
@@ -43,7 +43,7 @@ define([
    * @type {String[]}
    * @private
    */
-  var _chartFormExceptions = ['boxplot', 'heatGrid', 'line', 'areaStacked', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
+  var _chartFormExceptions = ['waterfall', 'treemap', 'boxplot', 'heatGrid', 'line', 'areaStacked', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
 
   /**
    * List of viz types to do not apply normalized to the viz type name
@@ -82,9 +82,6 @@ define([
 
     // transformations
     switch (fullName) {
-      case 'boxplot':
-        fullName = 'categoricalContinuousAbstract';
-        break;
       case 'metricDot':
         fullName = 'bubble';
         break;
