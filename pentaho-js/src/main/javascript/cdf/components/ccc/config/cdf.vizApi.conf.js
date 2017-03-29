@@ -17,18 +17,7 @@ define([], function() {
 
   return {
     rules: [
-      {
-        priority: -1,
-        select: {
-          application: "pentaho-cdf",
-          type: "pentaho/ccc/visual/pie"
-        },
-        apply: {
-          extension: {
-            valuesVisible: false
-          }
-        }
-      }
+        
     ]
   };
 });
