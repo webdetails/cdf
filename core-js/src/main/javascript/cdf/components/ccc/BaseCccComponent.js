@@ -24,7 +24,12 @@ define([
 
   pvc.defaultCompatVersion(3);
 
-  return ChartComponent.extend({
+  /**
+   * @class cdf.components.ccc.BaseCccComponent
+   * @extends cdf.components.ChartComponent
+   * @ignore
+   */
+  return ChartComponent.extend(/** @lends cdf.components.ccc.BaseCccComponent# */{
 
     query: null,
     chart: null,
