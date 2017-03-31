@@ -149,19 +149,29 @@ define([
       // Always clone the original chartDefinition.
       var cd = $.extend({}, this.chartDefinition);
 
-      if (externalChartDefinition) {
-        cd = $.extend(externalChartDefinition, cd);
-      }
-
+      // Handle cleanups
       if (this._vizApiStyles) {
         // special case for this array which $.extend does not smash
         if (cd.baseAxisLabelDesiredAngles && cd.baseAxisLabelDesiredAngles.length == 0) {
           cd.baseAxisLabelDesiredAngles = undefined;
         }
 
+        // special case for this array which $.extend does not smash
+        if (cd.orthoAxisLabelDesiredAngles && cd.orthoAxisLabelDesiredAngles.length == 0) {
+          cd.orthoAxisLabelDesiredAngles = undefined;
+        }
+      }
+
+      if (externalChartDefinition) {
+        cd = $.extend(externalChartDefinition, cd);
+      }
+
+      // Handle overrides
+      if (this._vizApiStyles) {
         // apply colors if that is intended
         if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
-          cd.colors = BaseCccComponentExt.getColors();
+          cd.continuousColorAxisColors = BaseCccComponentExt.getColors("blue-3");
+          cd.discreteColorAxisColors = BaseCccComponentExt.getColors();
         }
       }
 

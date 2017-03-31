@@ -151,10 +151,11 @@ define([
   /**
    * Gets the Colors Array Registered in the Palette
    *
+   * @param {String} [colorPalette] The color palette to retrieve. By default all colors are returned
    * @returns {Array} The Array with the registered colors
    */
-  var getColors = function () {
-    return paletteRegistry.get().colors;
+  var getColors = function (colorPalette) {
+    return paletteRegistry.get(colorPalette ? colorPalette : undefined).colors;
   };
 
   return {
