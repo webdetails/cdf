@@ -43,7 +43,7 @@ define([
    * @type {String[]}
    * @private
    */
-  var _chartFormExceptions = ['waterfall', 'treemap', 'boxplot', 'heatGrid', 'line', 'areaStacked', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
+  var _chartFormExceptions = ['waterfall', 'treemap', 'boxplot', 'heatGrid', 'line', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
 
   /**
    * List of viz types to do not apply normalized to the viz type name
@@ -51,7 +51,7 @@ define([
    * @type {String[]}
    * @private
    */
-  var _valuesNormalizedExceptions = ['barNormalized'];
+  var _valuesNormalizedExceptions = ['barNormalized', 'area', 'areaStacked'];
 
   /**
    * List of viz types to do not apply stacked to the viz type name
@@ -59,7 +59,15 @@ define([
    * @type {String[]}
    * @private
    */
-  var _stackedExceptions = ['barNormalized'];
+  var _stackedExceptions = ['barNormalized', 'areaStacked'];
+
+  /**
+   * List of viz types to do not apply orientation to the viz type name
+   *
+   * @type {String[]}
+   * @private
+   */
+  var _orientationException = ['area', 'areaStacked'];
 
   /**
    * Gets a raw visualization type name and digests that returning a valid name to be used to fetch the
@@ -98,7 +106,6 @@ define([
       case 'stackedLine':
         fullName = 'line';
         break;
-      case 'area':
       case 'stackedArea':
         fullName = 'areaStacked';
         break;
@@ -111,7 +118,8 @@ define([
       if (chartDefinition.stacked && !_.contains(_stackedExceptions, fullName)) {
         fullName += 'Stacked';
       }
-      if ((chartDefinition.orientation || '').toLowerCase() === 'horizontal') {
+      if ((chartDefinition.orientation || '').toLowerCase() === 'horizontal'
+          && !_.contains(_orientationException, fullName)) {
         fullName += 'Horizontal';
       }
     }

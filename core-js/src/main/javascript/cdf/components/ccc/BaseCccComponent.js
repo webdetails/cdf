@@ -170,7 +170,10 @@ define([
       if (this._vizApiStyles) {
         // apply colors if that is intended
         if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
-          cd.continuousColorAxisColors = BaseCccComponentExt.getColors("blue-3");
+          if (!cd.continuousColorAxisColors
+              || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
+            cd.continuousColorAxisColors = BaseCccComponentExt.getColors("blue-3");
+          }
           cd.discreteColorAxisColors = BaseCccComponentExt.getColors();
         }
       }

@@ -38,7 +38,7 @@ define([
         stacked: true
       })).toBe('pointAbstract');
       expect(BaseCccComponentExt.getVizDigestedName('stackedLineChart', {})).toBe('line');
-      expect(BaseCccComponentExt.getVizDigestedName('areaChart', {})).toBe('areaStacked');
+      expect(BaseCccComponentExt.getVizDigestedName('areaChart', {})).toBe('area');
       expect(BaseCccComponentExt.getVizDigestedName('areaChart', {
         stacked: true
       })).toBe('areaStacked');
