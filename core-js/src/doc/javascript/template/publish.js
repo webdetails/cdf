@@ -19,21 +19,17 @@ helper.htmlsafe = function(str){
 var htmlsafe = helper.htmlsafe;
 var linkto = helper.linkto;
 var resolveAuthorLinks = helper.resolveAuthorLinks;
-var scopeToPunc = helper.scopeToPunc;
-var hasOwnProp = Object.prototype.hasOwnProperty;
 
 var data;
 var view;
 
-var version = '' + env.opts.githubConfig.branch;
-var github = '' + env.opts.githubConfig.name;
+env.opts.githubConfig = env.opts.githubConfig || {};
 
 var outdir = path.normalize(env.opts.destination);
 
-function trimDoubleQuotes(s) {
-    var pattern = /^\"(.+)\"$/;
-    var m = pattern.exec(s);
-    return m != null ? m[1] : s;
+function trimDoubleQuotes(string) {
+    var match = /^"(.+)"$/.exec(string);
+    return match !== null ? match[1] : string;
 }
 
 function find(spec) {
@@ -51,9 +47,8 @@ function getAncestorLinks(doclet) {
 function hashToLink(doclet, hash) {
     if ( !/^(#.+)/.test(hash) ) { return hash; }
 
-    var url = helper.createLink(doclet);
+    var url = helper.createLink(doclet).replace(/(#.+|$)/, hash);
 
-    url = url.replace(/(#.+|$)/, hash);
     return '<a href="' + url + '">' + hash + '</a>';
 }
 
@@ -78,26 +73,8 @@ function needsSignature(doclet) {
     return needsSig;
 }
 
-function getSignatureAttributes(item) {
-    var attributes = [];
-
-    if (item.optional) {
-        attributes.push('opt');
-    }
-
-    if (item.nullable === true) {
-        attributes.push('nullable');
-    }
-    else if (item.nullable === false) {
-        attributes.push('non-null');
-    }
-
-    return attributes;
-}
-
 function updateItemName(item) {
-    var itemName = item.name || '';
-    return itemName;
+  return item.name || '';
 }
 
 function addParamAttributes(params) {
@@ -128,52 +105,10 @@ function buildAttribsString(attribs) {
     return attribsString;
 }
 
-function addNonParamAttributes(items) {
-    var types = [];
-
-    items.forEach(function(item) {
-        types = types.concat( buildItemTypeStrings(item) );
-    });
-
-    return types;
-}
-
 function addSignatureParams(f) {
     var params = f.params ? addParamAttributes(f.params) : [];
 
     f.signature = util.format( '%s(%s)', (f.signature || ''), params.join(', ') );
-}
-
-function addSignatureReturns(f) {
-    var attribs = [];
-    var attribsString = '';
-    var returnTypes = [];
-    var returnTypesString = '';
-
-    // jam all the return-type attributes into an array. this could create odd results (for example,
-    // if there are both nullable and non-nullable return types), but let's assume that most people
-    // who use multiple @return tags aren't using Closure Compiler type annotations, and vice-versa.
-    if (f.returns) {
-        f.returns.forEach(function(item) {
-            helper.getAttribs(item).forEach(function(attrib) {
-                if (attribs.indexOf(attrib) === -1) {
-                    attribs.push(attrib);
-                }
-            });
-        });
-
-        attribsString = buildAttribsString(attribs);
-    }
-
-    if (f.returns) {
-        returnTypes = addNonParamAttributes(f.returns);
-    }
-    if (returnTypes.length) {
-        returnTypesString = util.format( ' &rarr; %s{%s}', attribsString, returnTypes.join('|') );
-    }
-
-    f.signature = '<span class="signature">' + (f.signature || '') + '</span>' +
-        '<span class="type-signature">' + returnTypesString + '</span>';
 }
 
 function addSignatureTypes(f) {
@@ -191,8 +126,9 @@ function addAttribs(f) {
 }
 
 function shortenPaths(files, commonPrefix) {
-    Object.keys(files).forEach(function(file) {
-        files[file].shortened = files[file].resolved.replace(commonPrefix, '')
+    Object.keys(files).forEach(function(filename) {
+        var file = files[filename];
+        file.shortened = file.resolved.replace(commonPrefix, '')
             // always use forward slashes
             .replace(/\\/g, '/');
     });
@@ -210,42 +146,84 @@ function getPathFromDoclet(doclet) {
         doclet.meta.filename;
 }
 
+function getSourceFromDoclet(doclet, gitRepoName) {
+  var path = doclet.meta.path.replace(/\\/g,"/");
+  var pathLength = path.length;
+
+  var nameLength = gitRepoName ? gitRepoName.length : 0;
+  var nameIndexOf = gitRepoName ? path.indexOf(gitRepoName) + 1 : 0;
+
+  return path.substring(nameIndexOf + nameLength, pathLength);
+}
+
 function getLinkFromDoclet(doclet) {
-    if (!doclet.meta) {
-        return null;
-    }
-    var linkBase = 'https://github.com/webdetails/';
-    var type = 'tree';
+  if (!doclet.meta) {
+    return null;
+  }
 
-    if (doclet.meta.shortpath && doclet.meta.shortpath !== 'null'
-            && doclet.meta.shortpath.indexOf('.js') != -1) {
-        type = 'blob';
-    }
+  var filename = doclet.meta.filename;
+  var shortPath = doclet.meta.shortpath;
+  var lineNumber = doclet.meta.lineno;
 
-    var cdfPath = doclet.meta.path.replace(/\\/g,"/");
-    cdfPath = cdfPath.substring(cdfPath.indexOf(github) + 4, cdfPath.length);
+  var repoName     = _getGitHubName();
+  var repoVersion  = _getGitHubBranch();
 
-    linkBase = linkBase + github + '/' + type + '/' + version + '/' + cdfPath;
+  var isJavascriptFile = shortPath && shortPath.indexOf('.js') !== -1;
+  var type = isJavascriptFile ? 'tree' : 'blob';
 
-    var fileName = doclet.meta.shortpath.indexOf('/') != -1 ?
-        doclet.meta.shortpath.substr(
-            doclet.meta.shortpath.lastIndexOf('/') + 1, 
-            doclet.meta.shortpath.length) :
-        doclet.meta.shortpath;
-    var url = linkBase + '/' + fileName;
+  var path = getSourceFromDoclet(doclet, repoName);
+  var linkBase = _getGitHubUrl() + '/' + type + '/' + repoVersion + '/' + path;
 
-    var linkText = doclet.meta.shortpath;    
+  var url = linkBase + '/' + filename + (lineNumber ? '#L' + lineNumber : '');
+  var linkText = shortPath + (lineNumber ? ', line ' + lineNumber : '');
 
-    if (doclet.meta.lineno) {
-        url += '#L' + doclet.meta.lineno;
-        linkText += ', line ' + doclet.meta.lineno;
-    }
+  return '<a href="' + url + '" target="_blank">' + linkText + '</a>';
+}
 
-    return '<a href="' + url + '" target="_blank">' + linkText + '</a>';
+function _getGitHubName() {
+  var config = env.opts.githubConfig;
+
+  if (config.name) {
+    return config.name;
+  }
+
+  if (config.url) {
+    var url = config.url.replace(/(^\/|\/$)/, '');
+    var lastSlash = url.lastIndexOf('/');
+
+    return lastSlash !== -1 ? url.substring(lastSlash, url.length) : url;
+  }
+
+  return null;
+}
+
+function _getGitHubBranch() {
+  var config = env.opts.githubConfig;
+
+  var branch = config.branch;
+  if (!branch) {
+    branch = 'master';
+  }
+
+  return branch;
+}
+
+function _getGitHubUrl() {
+  var config = env.opts.githubConfig;
+
+  var url = config.url;
+  if (!url) {
+    var urlBase = "https://github.com/";
+    url =  urlBase + config.company + "/" + config.name;
+  } else {
+    url = url.replace(/\/$/, '');
+  }
+
+  return url;
 }
 
 function generate(title, docs, filename, resolveLinks) {
-    resolveLinks = resolveLinks === false ? false : true;
+    resolveLinks = resolveLinks !== false;
 
     var docData = {
         title: title,
@@ -260,29 +238,6 @@ function generate(title, docs, filename, resolveLinks) {
     }
 
     fs.writeFileSync(outpath, html, 'utf8');
-}
-
-function generateSourceFiles(sourceFiles, encoding) {
-    encoding = encoding || 'utf8';
-    Object.keys(sourceFiles).forEach(function(file) {
-        var source;
-        // links are keyed to the shortened path in each doclet's `meta.shortpath` property
-        var sourceOutfile = helper.getUniqueFilename(sourceFiles[file].shortened);
-        helper.registerLink(sourceFiles[file].shortened, sourceOutfile);
-
-        try {
-            source = {
-                kind: 'source',
-                code: helper.htmlsafe( fs.readFileSync(sourceFiles[file].resolved, encoding) )
-            };
-        }
-        catch(e) {
-            logger.error('Error while generating source file %s: %s', file, e.message);
-        }
-
-        generate('Source: ' + sourceFiles[file].shortened, [source], sourceOutfile,
-            false);
-    });
 }
 
 /**
@@ -324,14 +279,6 @@ function attachModuleSymbols(doclets, modules) {
                 });
         }
     });
-}
-
-function linktoTutorial(longName, name) {
-    return tutoriallink(name);
-}
-
-function linktoExternal(longName, name) {
-    return linkto(longName, name.replace(/(^"|"$)/g, ''));
 }
 
 function findMembers(data, kind, memberOf) {
@@ -428,6 +375,257 @@ function buildToggleScript() {
         "</script>";
 }
 
+function registerTypeHelpers(view) {
+  view._typeBuilder = typeBuilder;
+
+  var mdnJsTypeBaseURL = "http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/";
+  var mdnJsTypes = {
+    "string" : true,  "String": true,
+    "number": true,   "Number": true,
+    "boolean": true,  "Boolean": true,
+    "array": true,    "Array": true,
+    "object": true,   "Object": true,
+    "function": true, "Function": true,
+    "Date": true,     "Promise": true,
+    "null": true,     "undefined": true,
+
+    "RegExp": true,    "Reflect": true,
+    "DataView": true,  "Intl": true,
+    "Generator": true, "GeneratorFunction": true,
+    "Proxy": true,     "JSON": true,
+
+    "Error": true,      "EvalError": true,
+    "TypeError": true,  "SyntaxError": true,
+    "RangeError": true, "InternalError": true,
+    "URIError": true,   "ReferenceError": true,
+
+    "TypedArray": true,    "ArrayBuffer": true,
+    "Float32Array": true,  "Float64Array": true,
+    "Int8Array": true,     "Int32Array": true,
+    "Inttrue6Array": true, "Uinttrue6Array": true,
+    "Uint8Array": true,     "Uint8ClampedArray": true,
+    "Uint32Array": true,
+
+    "Map": true, "WeakMap": true,
+    "Set": true, "WeakSet": true,
+    "Math": true, "Symbol": true
+  };
+
+  var backboneTypeBaseURL = "http://backbonejs.org/#";
+  var jQueryTypes = {
+    "jquery": "jQuery",
+    "selector": "Selector"
+  };
+  var jQueryTypeBaseURL = "http://api.jquery.com/Types/#";
+
+  var modifiers = "[?!]?";
+  var left_p = "\\(?";
+  var right_p = "\\)?";
+  var remainder = "$|(?:[|,]\\s*)(.+)";
+  var complexProps = "[<(?!\\w|,. )>]+";
+  var BACKBONE_TYPE_REGX = /backbone\.([a-z]+)/i;
+
+  // regx: /([?!]?)([\w.*]+)(?:())?/
+  //
+  // Examples:
+  // input: "Object"
+  // match: [ input, '', 'Object' ]
+  //
+  // input: "!Object"
+  // match: [ input, '!', 'Object' ]
+  //
+  // input: "Object.<Boolean>"
+  // match: null
+  var SIMPLE_TYPE_REGX = new RegExp("(" + modifiers + ")([\\w.*]+)(?:\\(\\))?");
+
+  // regx: /^(?:([?!]?)([\w.]+))\.<([<(?!\w|,. )>]+)>/
+  //
+  // Examples:
+  // input: "Array"
+  // match: null;
+  //
+  // input: "!Array.<Object>"
+  // match: [ input, '!', 'Array', 'Object' ]
+  //
+  // input: "Class.<Object.<String, Date>, Boolean>"
+  // match: [ input, '', 'Class', 'Object.<String, Date>, Boolean' ]
+  var COMPLEX_TYPE_REGX = new RegExp("^(?:(" + modifiers + ")([\\w.]+))\\.<(" + complexProps + ")>");
+  var TYPE_MODIFIER = 1;
+  var TYPE_NAME = 2;
+  var COMPLEX_TYPE_PROPS = 3;
+
+  // regx: /(\(?(?:[\w|.*!?]+)\)?(?:\.<(?:[<(?!\w|,. )>]+)>)?)(?:$|(?:[|,]\s*)(.+))/
+  //
+  // Examples:
+  // input: "Object.<String, Date>, Boolean, Date, Class.<Function>"
+  // match: [ input, 'Object.<String, Date>', 'Date, Class.<Function>' ]
+  //
+  // input: "Boolean, Date, Class.<Function>"
+  // match: [ input, 'Boolean', 'Date, Class.<Function>' ]
+  //
+  // input: "Date, Class.<Function>"
+  // match: [ input, 'Date', 'Class.<Function>' ]
+  //
+  // input: "Class.<Function>"
+  // match: [ input, 'Class.<Function>', undefined ]
+  var C_PROPS_RECURSIVE_REGX = new RegExp(
+      "(" + left_p + "(?:[\\w|.*!?]+)" + right_p +
+      "(?:\\.<(?:" + complexProps + ")>)?)" +
+      "(?:" + remainder + ")"
+  );
+  var C_PROPS_RECURSIVE_FIRST = 1;
+  var C_PROPS_RECURSIVE_REMAINDER = 2;
+
+  // regx: /\(((?:.|\|)+)\)/
+  //
+  // Examples:
+  // input: "( String | pentaho.type.Instance | Promise )"
+  // match: [ input, 'String | pentaho.type.Instance | Promise' ]
+  var MULTIPLE_OR_TYPE_REGX = new RegExp("\\(((?:.|\\|)+)\\)");
+  var MULTIPLE_OR_TYPES = 1;
+
+  // -------
+
+  /**
+   * Build a type documentation link by checking if it is a simple or complex type declaration
+   * and for the later, try to build recursively other type declarations nested inside.
+   * @example Simple Type:
+   * `Boolean -> `<code><a href="link/to/Boolean">Boolean</a></code>`
+   *
+   * @example Complex Type:
+   * `Object.&lt;Date, String&gt;` -> `<code>
+   *                                     <a href="link/to/Object">Object</a>.&lt;
+   *                                     <code><a href="link/to/Date">Date</a></code>,
+   *                                     <code><a href="link/to/String">String</a></code>&gt;
+   *                                   </code>`
+   *
+   * @example Complex Nested:
+   * `Object.&lt;Class.&lt;String&gt;&gt;` -> `<code>
+   *                                             <a href="link/to/Object">Object</a>.&lt;
+   *                                             <code>
+   *                                               <a href="link/to/Class">Class</a>.&lt;
+   *                                               <code><a href="link/to/String">String</a></code>&gt;
+   *                                             </code>&gt;
+   *                                           </code>`
+   *
+   * @param {String} name       - The type name.
+   * @param {Number} [index]    - The type position in the data array
+   * @param {Number} [dataSize] - The data array size.
+   *
+   * @return {String} the html with links for the type declaration.
+   */
+  function typeBuilder(name, index, dataSize) {
+    // check if it is an array type
+    var jsType = name;
+    var complexType = COMPLEX_TYPE_REGX.exec(name);
+
+    var complexTypeProps = null;
+    var prefix;
+    if (complexType !== null) {
+      prefix = complexType[TYPE_MODIFIER];
+      jsType = complexType[TYPE_NAME];
+      complexTypeProps = complexType[COMPLEX_TYPE_PROPS];
+    } else {
+      var simpleType = SIMPLE_TYPE_REGX.exec(name);
+      prefix = simpleType[TYPE_MODIFIER];
+      jsType = simpleType[TYPE_NAME];
+    }
+
+    var separator = index != null && index < dataSize - 1 ? " | " : "";
+    return buildLink(prefix, jsType, complexTypeProps) + separator;
+  }
+
+  /**
+   * Parse the properties that are nested inside a complex type declaration
+   * and build each nested type documentation link.
+   *
+   * @param {String} complexTypeProps - The complex type nested properties.
+   *
+   * @return {String} the html with links for the type declaration.
+   */
+  function parseComplexTypeProps(complexTypeProps) {
+    var result = "";
+    if (!complexTypeProps) return result;
+
+    var isFinished = false;
+    var recursiveMatch;
+    while (!isFinished && (recursiveMatch = C_PROPS_RECURSIVE_REGX.exec(complexTypeProps)) != null) {
+      var firstType = recursiveMatch[C_PROPS_RECURSIVE_FIRST];
+      complexTypeProps = recursiveMatch[C_PROPS_RECURSIVE_REMAINDER];
+
+      var multipleOrTypes = MULTIPLE_OR_TYPE_REGX.exec(firstType);
+      if (multipleOrTypes != null) {
+        var html = "";
+        var multipleArray = multipleOrTypes[MULTIPLE_OR_TYPES].split("|");
+        var dataSize = multipleArray.length;
+
+        multipleArray.forEach(function (name, index) {
+          html += typeBuilder(name, index, dataSize);
+        });
+
+        result += "(" + html + ")";
+      } else {
+        result += typeBuilder(firstType);
+      }
+
+      isFinished = complexTypeProps == null;
+      if (!isFinished) result += ", ";
+    }
+
+    return result;
+  }
+
+  function buildLink(prefix, jsType, complexTypeProps) {
+    var typeLinkInfo = getLinkInfo(jsType);
+
+    var safeHtml = helper.htmlsafe(prefix + typeLinkInfo.jsType);
+    var jsTypeLink = helper.linkto(typeLinkInfo.link, safeHtml);
+
+    if (complexTypeProps != null) {
+      return "<code>" + jsTypeLink + ".&lt;" + parseComplexTypeProps(complexTypeProps) + "&gt;</code>";
+    } else {
+      return "<code>" + jsTypeLink + "</code>";
+    }
+  }
+
+  /**
+   * Gets the link for a single type.
+   * The type might be changed inside so we return it was well
+   *
+   * @param {String} jsType - The type name.
+   *
+   * @return {{String, String}} the type name and the documentation link.
+   */
+  function getLinkInfo(jsType) {
+    var jsTypeLower = jsType.toLowerCase();
+
+    var isMdnJsType = mdnJsTypes[jsType];
+    var isJQueryType = typeof jQueryTypes[jsTypeLower] !== "undefined";
+    var isBackboneType = BACKBONE_TYPE_REGX.exec(jsType) !== null;
+
+    var link;
+    if (isMdnJsType) {
+      link = mdnJsTypeBaseURL + jsType;
+
+    } else if (isBackboneType) {
+      link = backboneTypeBaseURL + jsType.split(".")[1];
+
+    } else if (isJQueryType) {
+      jsType = jQueryTypes[jsTypeLower];
+      link = jQueryTypeBaseURL + jsType;
+
+    } else { // CTools or unknown type, output its value
+      link = jsType;
+    }
+
+    return {
+      jsType: jsType,
+      link: link
+    }
+  }
+
+}
+
 /**
     @param {TAFFY} taffyData See <http://taffydb.com/>.
     @param {object} opts
@@ -440,6 +638,9 @@ exports.publish = function(taffyData, opts, tutorials) {
     conf.default = conf.default || {};
     var templatePath = path.normalize(opts.template);
     view = new template.Template( path.join(templatePath, 'tmpl') );
+
+    //This will create all the type links for the template
+    registerTypeHelpers(view);
 
     // claim some special filenames in advance, so the All-Powerful Overseer of Filename Uniqueness
     // doesn't try to hand them out later
@@ -462,7 +663,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     var sourceFiles = {};
     var sourceFilePaths = [];
     data().each(function(doclet) {
-         doclet.attribs = '';
+        doclet.attribs = '';
 
         if (doclet.examples) {
             doclet.examples = doclet.examples.map(function(example) {
@@ -683,7 +884,7 @@ exports.publish = function(taffyData, opts, tutorials) {
                 } 
 
                 return prop;
-            }
+            };
 
             var replaceCode = function(string) {
                 if(!string) return;
@@ -710,19 +911,19 @@ exports.publish = function(taffyData, opts, tutorials) {
                 if(str) {
                     return str.split(sep).join('');
                 } 
-            }
+            };
 
             //dont split for code
-            if(doclet.description && doclet.description.indexOf("syntax.javascript") == -1) {
+            if(doclet.description && doclet.description.indexOf("syntax.javascript") === -1) {
                 doclet.description = split(doclet.description, '<br>');
             }
-            if(doclet.description && doclet.description.indexOf("syntax.text") == -1) {
+            if(doclet.description && doclet.description.indexOf("syntax.text") === -1) {
                 doclet.description = split(doclet.description, '<br>');
             }
-            if(doclet.classdesc && doclet.classdesc.indexOf("syntax.javascript") == -1) {
+            if(doclet.classdesc && doclet.classdesc.indexOf("syntax.javascript") === -1) {
                 doclet.classdesc = split(doclet.classdesc, '<br>');
             }
-            if(doclet.summary && doclet.summary.indexOf("syntax.javascript") == -1) { 
+            if(doclet.summary && doclet.summary.indexOf("syntax.javascript") === -1) {
                 doclet.summary = split(doclet.summary, '<br>');
             }
             

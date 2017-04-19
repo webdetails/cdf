@@ -12,6 +12,7 @@
   <packaging>pom</packaging>
   <properties>
     <js.project.list>ccc</js.project.list>
+    <docjs.config.templates.directory>${project.basedir}/src/doc/javascript/template</docjs.config.templates.directory>
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
     <template.file>layout.tmpl</template.file>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
