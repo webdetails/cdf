@@ -17,12 +17,14 @@
     
   },
   "opts": {
-    "template": "${basedir}/src/doc/javascript/template",
+    "template": "${docjs.config.templates.directory}",
     "encoding": "utf8",
     "outputSourceFiles": false,
     "githubConfig": {
-      "branch": "${project.stage}",
-      "name": "${project.github-name}" 
+      "name": "cdf",
+      "url": "https://github.com/webdetails/cdf/",
+      "company": "webdetails",
+      "branch": "${project.stage}"
     },
     "recurse": true,
     "private": false,
