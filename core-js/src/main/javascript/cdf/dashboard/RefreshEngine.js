@@ -377,7 +377,7 @@ define([], function() {
           refreshComponent(info.component);
         }
         if(refreshQueue.length > 0) {
-          activeTimer = setTimeout(this.fireRefresh, refreshQueue[0].nextRefresh - currentTime);
+          activeTimer = setTimeout(dashboard.refreshEngine.fireRefresh, refreshQueue[0].nextRefresh - currentTime);
         }
       },
 
