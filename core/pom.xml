@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0.6-95</version>
   </parent>
   <artifactId>cdf-core</artifactId>
-  <version>7.0-SNAPSHOT</version>
+  <version>7.0.0.6-95</version>
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
