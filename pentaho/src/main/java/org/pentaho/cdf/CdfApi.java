@@ -353,10 +353,22 @@ public class CdfApi {
                                     @QueryParam( "locale" ) String locale,
                                     @Context HttpServletRequest servletRequest,
                                     @Context HttpServletResponse servletResponse ) throws Exception {
+    buildCdfEmbedContextSecure( protocol, name, port, inactiveInterval, locale, servletRequest.isSecure(), servletRequest, servletResponse );
+  }
+
+  // CDE will call buildCdfEmbedContext via InterPluginCall
+  public void buildCdfEmbedContextSecure( @QueryParam( "protocol" ) String protocol,
+                                    @QueryParam( "name" ) String name,
+                                    @QueryParam( "port" ) int port,
+                                    @QueryParam( "inactiveInterval" ) int inactiveInterval,
+                                    @QueryParam( "locale" ) String locale,
+                                    @QueryParam( "secure" ) boolean secure,
+                                    @Context HttpServletRequest servletRequest,
+                                    @Context HttpServletResponse servletResponse ) throws Exception {
     try {
       EmbeddedHeadersGenerator embeddedHeadersGenerator =
           new EmbeddedHeadersGenerator(
-            buildFullServerUrl( protocol, name, port, servletRequest.isSecure() ),
+            buildFullServerUrl( protocol, name, port, secure ),
             getConfiguration( "",  Parameter.asHashMap( servletRequest ), inactiveInterval ) );
       if ( !StringUtils.isEmpty( locale ) ) {
         embeddedHeadersGenerator.setLocale( new Locale( locale ) );
