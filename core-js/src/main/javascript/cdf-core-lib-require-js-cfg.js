@@ -370,6 +370,18 @@
   requireConfig['cdf/lib/moment'] = {
     noGlobal: true
   };
+ 
+  //mapping all moment requests from inside cdf to 'cdf/lib/moment'
+  requireCfg.map['cdf']['moment'] = 'cdf/lib/moment';
+
+  // Moment-timezone with data 0.5.13-2017b
+  requirePaths['cdf/lib/moment-timezone'] = prefix + '/moment-timezone/moment-timezone-with-data';
+  amdShim["cdf/lib/moment-timezone"] = {
+    exports: "moment",
+    deps: {
+      "cdf/lib/moment": "moment"
+    }
+  };
 
   //xmla4js
   requirePaths['cdf/lib/xmla'] = prefix + "/xmla/Xmla";
