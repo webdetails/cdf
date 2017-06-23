@@ -14,12 +14,13 @@
 /**
  * Configuration file for cdf pentaho
  */
-
 (function() {
 
   var isDebug = typeof document === "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" &&  ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
+  if(typeof ENVIRONMENT_CONFIG !== "undefined" &&
+     typeof ENVIRONMENT_CONFIG.paths !== "undefined" &&
+     typeof ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
     requireCfg.paths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
   } else if(typeof KARMA_RUN !== "undefined") { // unit tests
     requireCfg.paths['cdf'] = 'target/test-javascript/cdf';
