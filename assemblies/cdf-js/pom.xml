@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>cdf-plugin-assemblies</artifactId>
-    <groupId>pentaho</groupId>
-    <version>6.1-SNAPSHOT</version>
-  </parent>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>pentaho</groupId>
+    <artifactId>cdf-plugin-assemblies</artifactId>
+    <version>6.1.0.15-363</version>
+  </parent>
   <artifactId>pentaho-cdf-js</artifactId>
+  <version>6.1.0.15-363</version>
   <packaging>pom</packaging>
-
   <properties>
     <js.project.list>cdf-core-js,cdf-pentaho-js,ccc</js.project.list>
-    <requirejs.build.file>cdf.build.compile.js</requirejs.build.file>
     <global.require.file>cdf-require-js-cfg.js</global.require.file>
     <requirejs.config.files.pattern>**/*-require-js-cfg.js</requirejs.config.files.pattern>
+    <requirejs.build.file>cdf.build.compile.js</requirejs.build.file>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
@@ -36,32 +33,29 @@
       <type>zip</type>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
             <id>generate-cdf-global-requirejs-config</id>
             <phase>prepare-package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
             <configuration>
               <target>
-                <concat destfile="${project.build.directory}/${global.require.file}" append="true" force="yes">
+                <concat append="true" force="yes" destfile="${project.build.directory}/${global.require.file}">
                   <fileset dir="${basedir}/target/dependency/" casesensitive="yes">
-                    <include name="${requirejs.config.files.pattern}"/>
+                    <include name="${requirejs.config.files.pattern}" />
                   </fileset>
                 </concat>
               </target>
             </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
@@ -83,5 +77,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
