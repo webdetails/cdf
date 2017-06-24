@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -14,7 +14,6 @@
 /**
  * Configuration file for cdf core libs
  */
-
 (function() {
   if(!requireCfg.map) requireCfg.map = {};
   if(!requireCfg.map['*']) requireCfg.map['*'] = {};
@@ -40,8 +39,10 @@
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   var prefix = "";
-  if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" && ENVIRONMENT_CONFIG.paths["cdf/lib"] !== "undefined") { // environment is configured, checking
-    prefix = requirePaths['cdf/lib'] = ENVIRONMENT_CONFIG.paths["cdf/lib"];
+  if(typeof ENVIRONMENT_CONFIG !== "undefined" &&
+     typeof ENVIRONMENT_CONFIG.paths !== "undefined" &&
+     typeof ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
+    prefix = requirePaths['cdf/lib'] = ENVIRONMENT_CONFIG.paths["cdf"] + "/lib";
   } else if(typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf/lib'] = 'target/test-javascript/lib';
   } else if(typeof CONTEXT_PATH !== "undefined") { // production

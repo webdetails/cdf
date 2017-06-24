@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,7 +13,7 @@
 
 /* this file allows platform plugins to use the non-RequireJS version of CDF */
 
-if(typeof CONTEXT_PATH != 'undefined') { // production
+if(typeof CONTEXT_PATH !== 'undefined') { // production
   requireCfg['paths']['cdf-legacy'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js-legacy';
 } else { // build / unit tests
   requireCfg['paths']['cdf-legacy'] = 'cdf/js-legacy';

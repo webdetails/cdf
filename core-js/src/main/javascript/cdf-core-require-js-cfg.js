@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-/*
+/**
  * Configuration file for cdf core
  */
 (function() {
@@ -21,7 +21,9 @@
 
   var isDebug = typeof document === "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(typeof ENVIRONMENT_CONFIG !== "undefined" && ENVIRONMENT_CONFIG.paths !== "undefined" &&  ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
+  if(typeof ENVIRONMENT_CONFIG !== "undefined" &&
+     typeof ENVIRONMENT_CONFIG.paths !== "undefined" &&
+     typeof ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
     requireCfg.paths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
   } else if(typeof KARMA_RUN !== "undefined") { // unit tests
     requireCfg.paths['cdf'] = 'target/test-javascript/cdf';
@@ -35,7 +37,7 @@
     requireCfg.paths['cdf'] = "cdf";
   }
 
-  /*
+  /**
    * Because some components are in subfolders, we need to map their module ids so we are able to use the format {plugin}/componentes/{component_name}
    */
   requireCfg.map['*']['cdf/components/BaseCccComponent'] = 'cdf/components/ccc/BaseCccComponent';
@@ -57,7 +59,7 @@
   requireCfg.map['*']['cdf/components/CccTreemapChartComponent'] = 'cdf/components/ccc/CccTreemapChartComponent';
   requireCfg.map['*']['cdf/components/CccWaterfallChartComponent'] = 'cdf/components/ccc/CccWaterfallChartComponent';
   requireCfg.map['*']['cdf/components/CccSunburstChartComponent'] = 'cdf/components/ccc/CccSunburstChartComponent';
-  /*
+  /**
    * Filter component is in a subfolder of its own
    */
   requireCfg.map['*']['cdf/components/FilterComponent'] = 'cdf/components/filter/FilterComponent';
