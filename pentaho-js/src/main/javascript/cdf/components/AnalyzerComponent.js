@@ -46,7 +46,7 @@ define([
         showRepositoryButtons: myself.showRepositoryButtons == undefined ? false : myself.showRepositoryButtons,
         frameless: myself.frameless == undefined ? false : myself.frameless
       };
-      myself.dateFormats == undefined ? {} : myself.dateFormats;
+      myself.dateFormats == undefined ? myself.dateFormats = {} : myself.dateFormats;
       // process params and update options
       var d = myself.dashboard;
       $.map(myself.parameters, function(k) {
