@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -66,6 +66,22 @@ define([
     describe("getOptions", function() {
       it("appends to the options object the parameter name and corresponding date format value", function() {
         expect(analyzerComponent.getOptions().current_date).toBe("2016-10-18 17-55-00.0");
+      });
+
+      it("does not change parameters that don't have a date format definition", function() {
+        var _dateFormats = analyzerComponent.dateFormats;
+        analyzerComponent.dateFormats = undefined;
+        expect(analyzerComponent.getOptions()).toEqual(jasmine.objectContaining({
+          current_date: "2016/10/18 17:55:00"
+        }));
+        analyzerComponent.dateFormats = _dateFormats;
+      });
+
+      it("should format the date parameter if the latter has a date format value defined", function() {
+        expect(analyzerComponent.dateFormats).toEqual({current_date: "YYYY-MM-DD HH-mm-ss.0"});
+        expect(analyzerComponent.getOptions()).toEqual(jasmine.objectContaining({
+          current_date: "2016-10-18 17-55-00.0"
+        }));
       });
     });
   });

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -46,7 +46,7 @@
             showRepositoryButtons: myself.showRepositoryButtons == undefined ? false : myself.showRepositoryButtons,
             frameless: myself.frameless == undefined ? false : myself.frameless
         };
-        myself.dateFormats == undefined ? {} : myself.dateFormats;
+        myself.dateFormats = myself.dateFormats == undefined ? {} : myself.dateFormats;
         // process params and update options
         $.map(myself.parameters, function(k) {
             options[k[0]] = Dashboards.getParameterValue(k[1]);           
@@ -100,11 +100,13 @@ var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
         }
         o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
         o.bind("click", function() {
-            var success = typeof (myself.preChange) == 'undefined' ? true : myself.preChange();
+            var success = typeof myself.preChange === 'function' ? myself.preChange() : true ;
             if (success) {
                 myself.executeAnalyzerComponent();
             }
-            typeof (myself.postChange) == 'undefined' ? true : myself.postChange();
+            if (typeof myself.postChange === 'function') {
+              myself.postChange();
+            }
         });
     },
     executeAnalyzerComponent: function() {
