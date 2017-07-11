@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -46,7 +46,7 @@ define([
         showRepositoryButtons: myself.showRepositoryButtons == undefined ? false : myself.showRepositoryButtons,
         frameless: myself.frameless == undefined ? false : myself.frameless
       };
-      myself.dateFormats == undefined ? {} : myself.dateFormats;
+      myself.dateFormats = myself.dateFormats == undefined ? {} : myself.dateFormats;
       // process params and update options
       var d = myself.dashboard;
       $.map(myself.parameters, function(k) {
