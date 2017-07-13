@@ -20,6 +20,7 @@
     "url": "http://jira.pentaho.com/browse/CDF"
   },
   "devDependencies": {
+    "jasmine-core": "^2.6.4",
     "karma": "^0.13.19",
     "karma-cli": "^0.1.2",
     "karma-jasmine": "^0.3.6",
@@ -30,6 +31,7 @@
     "karma-coverage": "^0.5.3",
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-chrome-launcher": "^0.2.2",
-    "karma-mocha-reporter": "^1.1.6"
+    "karma-mocha-reporter": "^1.1.6",
+    "requirejs": "^2.1.0"
   }
 }
