@@ -299,14 +299,13 @@
     }
   };
 
-  //jQuery Select2 3.5.0
+  //jQuery Select2 4.0.3
   requirePaths['cdf/lib/jquery.select2'] = prefix + "/select2/select2";
   amdShim["cdf/lib/jquery.select2"] = {
     exports: "jQuery",
     deps: {
       "cdf/lib/jquery": "jQuery",
-      "css!cdf/lib/select2/select2": "",
-      "css!cdf/lib/select2/select2-bootstrap": ""
+      "css!cdf/lib/select2/select2": ""
     }
   };
 
