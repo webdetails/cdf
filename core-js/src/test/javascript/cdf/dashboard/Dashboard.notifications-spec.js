@@ -1,5 +1,5 @@
 /*!
- * Copyright 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2016 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -47,10 +47,29 @@ define(["cdf/Dashboard.Clean", "amd!cdf/lib/jquery.blockUI"], function(Dashboard
       expect($.blockUI).toHaveBeenCalledWith(expectedOptions);
     });
 
+    it("should not blockUIwithDrag if the dashboard is in silent mode", function() {
+      spyOn($, "blockUI");
+
+      dashboard.isSilent = true;
+      dashboard.blockUIwithDrag();
+      expect($.blockUI).not.toHaveBeenCalled();
+
+      dashboard._setBlockUiOptions(blockUiOptions);
+      dashboard.blockUIwithDrag();
+      expect($.blockUI).not.toHaveBeenCalled();
+    });
+
     it("showProgressIndicator", function() {
       spyOn(dashboard, "blockUIwithDrag");
       dashboard.showProgressIndicator();
       expect(dashboard.blockUIwithDrag).toHaveBeenCalled();
+    });
+
+    it("should not showProgressIndicator if the dashboard is in silent mode", function() {
+      spyOn(dashboard, "blockUIwithDrag");
+      dashboard.isSilent = true;
+      dashboard.showProgressIndicator();
+      expect(dashboard.blockUIwithDrag).not.toHaveBeenCalled();
     });
 
     it("hideProgressIndicator", function() {
@@ -67,6 +86,23 @@ define(["cdf/Dashboard.Clean", "amd!cdf/lib/jquery.blockUI"], function(Dashboard
       expect($.unblockUI).toHaveBeenCalled();
       expect(dashboard.resetRunningCalls).toHaveBeenCalled();
       expect(dashboard.showErrorTooltip).toHaveBeenCalled();
+    });
+
+    it("should not call hideProgressIndicator if the dashboard is in silent mode", function() {
+      spyOn($, "unblockUI");
+      spyOn(dashboard, "resetRunningCalls");
+      spyOn(dashboard, "showErrorTooltip");
+      dashboard.isSilent = true;
+
+      dashboard.hideProgressIndicator();
+      expect($.unblockUI).not.toHaveBeenCalled();
+      expect(dashboard.resetRunningCalls).not.toHaveBeenCalled();
+      expect(dashboard.showErrorTooltip).not.toHaveBeenCalled();
+
+      dashboard.hideProgressIndicator(true);
+      expect($.unblockUI).not.toHaveBeenCalled();
+      expect(dashboard.resetRunningCalls).not.toHaveBeenCalled();
+      expect(dashboard.showErrorTooltip).not.toHaveBeenCalled();
     });
   });
 });

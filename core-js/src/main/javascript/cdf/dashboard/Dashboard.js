@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -48,6 +48,7 @@ define([
      * @param {Object} [options.context] The context of the dashboard retrieved from the server.
      * @param {Object} [options.storage] The storage of the dashboard retrieved from the server.
      * @param {Object} [options.view] The views of the dashboard retrieved from the server.
+     * @param {boolean} [options.isSilent] Allows disabling the dashboard notifications.
      * @abstract
      */
     constructor: function(options) {
@@ -66,6 +67,7 @@ define([
         if(options.view) {
           this.view = options.view;
         }
+        this.isSilent = !!options.isSilent;
       }
 
       _.extend(this, Backbone.Events);
@@ -285,6 +287,16 @@ define([
      */
     monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'],
+
+    /**
+     * @summary Allows disabling dashboard notifications.
+     * @description Allows disabling dashboard notifications.
+     *
+     * @name cdf.dashboard.Dashboard#isSilent
+     * @protected
+     * @type {boolean}
+     */
+    isSilent: false,
 
     /**
      * @summary Registers a callback function in the dashboard's events property.
