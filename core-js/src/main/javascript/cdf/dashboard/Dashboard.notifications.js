@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -83,7 +83,7 @@ define([
      * @see {@link http://malsup.com/jquery/block/|jQuery.blockUI}
      */
     _setBlockUiOptions: function(options) {
-       if(typeof $.blockUI == 'function') {
+      if(typeof $.blockUI == 'function') {
         this.blockUiOptions = $.extend({}, $.blockUI.defaults); // Clone block ui defaults
 
         for (var key in options) {
@@ -97,6 +97,9 @@ define([
      * @description Renders a blocking div which can be dragged.
      */
     blockUIwithDrag: function() {
+      if(this.isSilent) {
+        return;
+      }
       if(typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
         // If i18n support is enabled process the message accordingly
         // but we're just setting the same img
@@ -112,21 +115,28 @@ define([
     },
 
     /**
-     * @summary Makes the progress indicator visible. 
-     * @description Makes the progress indicator visible. By default,
-     *              this is a draggable blocking div which shows a spinner.
+     * @summary Makes the progress indicator visible if the dashboard is not in silent mode.
+     * @description Makes the progress indicator visible if the dashboard is not in silent mode.
+     *              By default this is a draggable blocking div which shows a spinner.
      */
     showProgressIndicator: function() {
+      if(this.isSilent) {
+        return;
+      }
       $.blockUI && this.blockUIwithDrag();
     },
 
     /**
-     * @summary Hides the progress indicator. 
-     * @description Hides the progress indicator. Optionally, resets the running calls counter.
+     * @summary Hides the progress indicator if the dashboard is not in silent mode.
+     * @description Hides the progress indicator if the dashboard is not in silent mode.
+     *              Optionally, resets the running calls counter.
      *
      * @param {boolean} force `true` if the running calls counter should be reset, `false` otherwise
      */
     hideProgressIndicator: function(force) {
+      if(this.isSilent) {
+        return;
+      }
       if(force) {
         this.resetRunningCalls();
       }
@@ -196,13 +206,16 @@ define([
     },
 
     /**
-     * @summary Displays an error notification.
-     * @description Displays an error notification.
+     * @summary Displays an error notification if the dashboard is not in silent mode.
+     * @description Displays an error notification if the dashboard is not in silent mode.
      *
      * @param {Object} err An object containing a `msg` property with the error message to display.
      * @param {Object} [ph] A reference to the HTML element to attach the error message.
      */
     errorNotification: function(err, ph) {
+      if(this.isSilent) {
+        return;
+      }
       if(ph) {
         Popups.notificationsComponent.render($(ph), {title: err.msg, desc: ""});
       } else {
@@ -214,15 +227,18 @@ define([
     },
 
     /**
-     * @summary Shows a login error notification.
-     * @description Default implementation for the login alert which pops up when we
-     *              detect the user is no longer logged in.
+     * @summary Shows a login error notification if the dashboard is not in silent mode.
+     * @description Shows a login error notification if the dashboard is not in silent mode.
+     *              Provides a default implementation for the login alert which pops up when the login session expires.
      *
      * @param {Object} newOpts Options for the login pop-up.
      * @fires cdf.event:cdf
      * @fires cdf.dashboard.Dashboard#event:"cdf:loginError"
      */
     loginAlert: function(newOpts) {
+      if(this.isSilent) {
+        return;
+      }
       var opts = {
         header: "Warning",
         desc: "You are no longer logged in or the connection to the server timed out",
