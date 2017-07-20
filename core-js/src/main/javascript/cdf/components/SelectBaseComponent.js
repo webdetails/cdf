@@ -43,6 +43,8 @@ define([
     //size: when isMultiple==true, the default value is the number of possible values
     //externalPlugin:
     //extraOptions:
+    //NOTE: When using select2 and there is the need to add the dropdown result to a specific container it is now
+    //      possible to send the container id inside the property dropdownParentId
     //changeMode: ['immediate'], 'focus', 'timeout-focus'
     //NOTE: changeMode 'timeout-focus' is not supported in mobile and fallsback to 'focus'
     //changeTimeout: [2000], // in milliseconds
@@ -181,7 +183,12 @@ define([
           if(!extraOps.width) {
             extraOps.width = "off";
           }
-          ph.find("select.select2-container").select2(extraOps);
+          // To avoid errors with circular objects, we need to create a clone of extraOps to be sent into select2
+          var extraOpsSelect2 = Utils.clone(extraOps);
+          if(extraOpsSelect2.dropdownParentId) {
+            extraOpsSelect2.dropdownParent = $("#" + extraOpsSelect2.dropdownParentId);
+          }		  
+          ph.find("select.select2-container").select2(extraOpsSelect2);		  
           break;
         }
       }
