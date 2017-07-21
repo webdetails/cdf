@@ -83,8 +83,18 @@
 
   //Google Caja HTML Sanitizer 0.1.3 with dependencies
   requirePaths['cdf/lib/sanitizer/lib/html4'] = prefix + '/sanitizer/lib/html4';
+  requireShims['cdf/lib/sanitizer/lib/html4'] = {
+    exports: 'html4'
+  };
   requirePaths['cdf/lib/sanitizer/lib/uri'] = prefix + '/sanitizer/lib/uri';
+  requireShims['cdf/lib/sanitizer/lib/uri'] = {
+    exports: 'URI'
+  };
   requirePaths['cdf/lib/sanitizer'] = prefix + '/sanitizer/sanitizer';
+  requireShims['cdf/lib/sanitizer'] = {
+    exports: 'Sanitizer',
+    deps: ['cdf/lib/sanitizer/lib/html4', 'cdf/lib/sanitizer/lib/uri']
+  };
 
   //jquery 1.12.4, without globally scoped variables
   requirePaths['cdf/lib/jquery'] = prefix + '/jQuery/jquery';
@@ -93,7 +103,7 @@
     init: function() {
       return $.noConflict(true);
     }
-  }
+  };
   //mapping all jquery requests from inside cdf to 'cdf/lib/jquery'
   requireCfg.map['cdf']['jquery'] = 'cdf/lib/jquery';
 
