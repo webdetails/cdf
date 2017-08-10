@@ -525,40 +525,73 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 var TextInputComponent = BaseComponent.extend({
   update: function() {
     var myself = this;
-    var name = myself.name;
-    var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
-      "' value='" + Dashboards.getParameterValue(myself.parameter) +
-      (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "" ) ) +
-      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "" ) ) + "'>";
-    if(myself.size) {
-      Dashboards.log("Warning: attribute 'size' is deprecated");
-    }
-    if(myself.maxLength) {
-      Dashboards.log("Warning: attribute 'maxLength' is deprecated");
-    }
 
-    myself.placeholder().html(selectHTML);
+    myself._addHtmlToPlaceholder();
 
-    var el = $("#" + name);
+    var el = $("#" + myself.name);
 
-    el
-      .change(function() {
-        if(Dashboards.getParameterValue(myself.parameter) !== el.val()) {
-          Dashboards.processChange(name);
-        }
-      })
-      .keyup(function(ev) {
-        if(ev.keyCode == 13 &&
-          Dashboards.getParameterValue(myself.parameter) !== el.val()) {
+    el.change(function() {
+      if(myself._isValueChanged(el)) {
+        myself._runValidation(el.val());
+        Dashboards.processChange(myself.name);
+      }
+    }).keyup(function(ev) {
+      if((myself.refreshOnEveryKeyUp || ev.keyCode === 13) && myself._isValueChanged(el)) {
+        myself._runValidation(el.val());
+        Dashboards.processChange(myself.name);
+      }
+    });
 
-          Dashboards.processChange(name);
-        }
+    if(myself.clearButton) {
+      $("#" + myself.name + "-clear-icon").click(function() {
+        el.val("");
+        myself._runValidation(el.val());
+        Dashboards.processChange(myself.name);
       });
+    }
 
     myself._doAutoFocus();
   },
-  getValue : function() {
+
+  getValue: function() {
     return $("#" + this.name).val();
+  },
+
+  _addHtmlToPlaceholder: function() {
+    var componentHTML = "<input" +
+      " type='text'" +
+      " id='" + this.name + "'" +
+      " name='" + this.name + "'" +
+      " value='" + Dashboards.getParameterValue(this.parameter) +
+      (this.size ? ("' size='" + this.size) : (this.charWidth ? ("' size='" + this.charWidth) : "")) +
+      (this.maxLength ? ("' maxlength='" + this.maxLength) : (this.maxChars ? ("' maxlength='" + this.maxChars) : "")) + "'>";
+    if(this.clearButton) {
+      var className = "clear-icon" + (this.clearButton.className ? " " + this.clearButton.className : "");
+      componentHTML += "<div id='" + this.name + "-clear-icon' class='" + className + "'></div>";
+    }
+    if(this.size) {
+      Dashboards.log("Warning: attribute 'size' is deprecated");
+    }
+    if(this.maxLength) {
+      Dashboards.log("Warning: attribute 'maxLength' is deprecated");
+    }
+    this.placeholder().html(componentHTML);
+  },
+
+  _isValueChanged: function(element) {
+    return Dashboards.getParameterValue(this.parameter) !== element.val();
+  },
+
+  _runValidation: function(value) {
+    if(this.validation && this.validation.validate) {
+      var validationInfo = this.validation.validate(value);
+
+      if(validationInfo.isValid) {
+        this.placeholder().removeClass(this.validation.invalidClassName || "invalid");
+      } else {
+        this.placeholder().addClass(this.validation.invalidClassName || "invalid");
+      }
+    }
   }
 });
 

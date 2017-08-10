@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -20,39 +20,73 @@ define([
   return BaseComponent.extend({
     update: function() {
       var myself = this;
-      var name = myself.name;
 
-      var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
-        "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
-        (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "")) +
-        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "")) + "'>";
-      if(myself.size) {
-        Logger.warn("Attribute 'size' is deprecated");
-      }
-      if(myself.maxLength) {
-        Logger.warn("Attribute 'maxLength' is deprecated");
-      }
+      myself._addHtmlToPlaceholder();
 
-      myself.placeholder().html(selectHTML);
-
-      var el = $("#" + name);
+      var el = $("#" + myself.name);
 
       el.change(function() {
-        if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-          myself.dashboard.processChange(name);
+        if(myself._isValueChanged(el)) {
+          myself._runValidation(el.val());
+          myself.dashboard.processChange(myself.name);
         }
       }).keyup(function(ev) {
-        if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-          myself.dashboard.processChange(name);
+        if((myself.refreshOnEveryKeyUp || ev.keyCode === 13) && myself._isValueChanged(el)) {
+          myself._runValidation(el.val());
+          myself.dashboard.processChange(myself.name);
         }
       });
+
+      if(myself.clearButton) {
+        $("#" + myself.name + "-clear-icon").click(function() {
+          el.val("");
+          myself._runValidation(el.val());
+          myself.dashboard.processChange(myself.name);
+        });
+      }
 
       myself._doAutoFocus();
     },
 
     getValue: function() {
       return $("#" + this.name).val();
+    },
+
+    _addHtmlToPlaceholder: function() {
+      var componentHTML = "<input" +
+        " type='text'" +
+        " id='" + this.name + "'" +
+        " name='" + this.name + "'" +
+        " value='" + this.dashboard.getParameterValue(this.parameter) +
+        (this.size ? ("' size='" + this.size) : (this.charWidth ? ("' size='" + this.charWidth) : "")) +
+        (this.maxLength ? ("' maxlength='" + this.maxLength) : (this.maxChars ? ("' maxlength='" + this.maxChars) : "")) + "'>";
+      if(this.clearButton) {
+        var className = "clear-icon" + (this.clearButton.className ? " " + this.clearButton.className : "");
+        componentHTML += "<div id='" + this.name + "-clear-icon' class='" + className + "'></div>";
+      }
+      if(this.size) {
+        Logger.warn("Attribute 'size' is deprecated");
+      }
+      if(this.maxLength) {
+        Logger.warn("Attribute 'maxLength' is deprecated");
+      }
+      this.placeholder().html(componentHTML);
+    },
+
+    _isValueChanged: function(element) {
+      return this.dashboard.getParameterValue(this.parameter) !== element.val();
+    },
+
+    _runValidation: function(value) {
+      if(this.validation && this.validation.validate) {
+        var validationInfo = this.validation.validate(value);
+
+        if(validationInfo.isValid) {
+          this.placeholder().removeClass(this.validation.invalidClassName || "invalid");
+        } else {
+          this.placeholder().addClass(this.validation.invalidClassName || "invalid");
+        }
+      }
     }
   });
-
 });
