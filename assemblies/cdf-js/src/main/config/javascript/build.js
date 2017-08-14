@@ -187,7 +187,6 @@
         "cdf/queries/BaseQuery",
         "cdf/queries/CdaQuery",
         "cdf/queries/CpkQuery",
-        "cdf/queries/LegacyQuery",
         "cdf/queries/XmlaQuery"
       ],
 
@@ -273,7 +272,6 @@
         "cdf/queries/BaseQuery",
         "cdf/queries/CdaQuery",
         "cdf/queries/CpkQuery",
-        "cdf/queries/LegacyQuery",
         "cdf/queries/XmlaQuery"
       ],
 
@@ -370,7 +368,6 @@
         "cdf/queries/BaseQuery",
         "cdf/queries/CdaQuery",
         "cdf/queries/CpkQuery",
-        "cdf/queries/LegacyQuery",
         "cdf/queries/XmlaQuery"
       ],
 

@@ -27,7 +27,9 @@ define([
     dashboard.init();
 
     dashboard.addDataSource("templateQuery", {
-      queryType: "mdx",
+      queryType: "cda",
+      dataAccessId: "1",
+      path: "samplePath",
       catalog: "mondrian:/SteelWheels",
       jndi: "SampleData",
       query: function() {
@@ -70,13 +72,13 @@ define([
 
     /**
      * ## The Template Component # allows a dashboard to execute update
-     */
+     **/
     it("allows a dashboard to execute update", function(done) {
       spyOn(templateComponent, 'update').and.callThrough();
       spyOn(templateComponent, 'init').and.callThrough();
       spyOn(templateComponent, 'triggerQuery').and.callThrough();
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+        params.success({"metadata":[{"colName":"Product","colType":"String","colIndex":0}, {"colName":"Sales","colType":"Numeric","colIndex":1}],"resultset":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]});
       });
 
       // listen to cdf:postExecution event
@@ -86,6 +88,7 @@ define([
       });
       dashboard.update(templateComponent);
     });
+
 
     /**
      * ## The Template Component # apply a custom formatter to a value
