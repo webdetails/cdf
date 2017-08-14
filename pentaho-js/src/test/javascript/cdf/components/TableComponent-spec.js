@@ -23,7 +23,9 @@ define([
   describe("The Table Component #", function() {
     var dashboard;
     var dataSource = {
-      queryType: "mdx",
+      queryType: "cda",
+      dataAccessId: "1",
+      path: "path",
       catalog: "mondrian:/SteelWheels",
       jndi: "SampleData",
       query: function() {
@@ -50,6 +52,7 @@ define([
       executeAtStart: true
     };
 
+    var resultSet = '{"metadata":[{"colName":"Product","colType":"String","colIndex":0}, {"colName":"Sales","colType":"Numeric","colIndex":1}],"resultset":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}';
     var tableComponent;
 
     // DataTables manages it's own events, the event 'aoInitComplete' executes
@@ -76,7 +79,7 @@ define([
       spyOn(tableComponent, 'update').and.callThrough();
       spyOn(tableComponent, 'triggerQuery').and.callThrough();
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+        params.success(resultSet);
       });
 
       // listen to cdf:postExecution event
@@ -92,7 +95,7 @@ define([
       tableComponent.chartDefinition.colHeaders[0] = value;
       var text = value || "";
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+        params.success(resultSet);
       });
       tableComponent.once("cdf:postExecution", function() {
         //find the first column header, and make sure it is html escaped
@@ -161,7 +164,7 @@ define([
      */
     it("executes with a result set that has less columns than column types ,column widths ,column searchable and column sortable properties defined.", function(done) {
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+        params.success(JSON.parse(resultSet));
       });
       tableComponent.chartDefinition.colTypes = ['string', 'string', 'string', 'string'];
       tableComponent.chartDefinition.colWidths = ['500px', '500px', '500px', '500px'];
@@ -181,7 +184,7 @@ define([
      */
     it("executes with a result set that has more columns than column types ,column widths ,column searchable and column sortable properties defined", function(done) {
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}');
+        params.success(JSON.parse(resultSet));
       });
       tableComponent.chartDefinition.colTypes = ['string'];
       tableComponent.chartDefinition.colWidths = ['500px'];
@@ -202,7 +205,7 @@ define([
     it("can update when server side is true", function(done) {
       spyOn(tableComponent, 'update').and.callThrough();
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]],"queryInfo": {"totalRows":1}}');
+        params.success(JSON.parse(resultSet));
       });
       
       tableComponent.chartDefinition.paginateServerside = true;
@@ -256,7 +259,7 @@ define([
     it("should only trigger one query on start-up.", function(done) {
       
       spyOn($, 'ajax').and.callFake(function(params) {
-        params.success('{"metadata":["Sales"],"values":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]],"queryInfo": {"totalRows":1}}');
+        params.success(JSON.parse(resultSet));
       });
       
       tableComponent.chartDefinition.colTypes = ['string'];
@@ -311,8 +314,8 @@ define([
         tableComponent.ph = jasmine.createSpyObj("ph", ['trigger','html']);
         tableComponent.ph.find = function(param) { return {bind: function (click,fun) {return "bind"}};};
         tableComponent.chartDefinition.dataTableOptions = {bServerSide: true};
-        var json = {"metadata":["Sales"],"resultset":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]]}
-        tableComponent.processTableComponentResponse(json);
+
+        tableComponent.processTableComponentResponse(JSON.parse(resultSet));
       });
 
       it("should not set the datatable display length if the query info is provided", function () {
@@ -326,7 +329,7 @@ define([
         tableComponent.ph.find = function(param) { return {bind: function (click,fun) {return "bind"}};};
         tableComponent.chartDefinition.dataTableOptions = {bServerSide: true};
         var json = {"metadata":["Sales"],"resultset":[["Euro+ Shopping Channel","914.11"],["Mini Gifts Ltd.","6558.02"]],"queryInfo": {"totalRows":2}}
-        tableComponent.processTableComponentResponse(json);     
+        tableComponent.processTableComponentResponse(json);
       });
     });
   });

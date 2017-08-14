@@ -28,8 +28,9 @@ define([
       dashboard.init();
       dashboard.addParameter("result", "");
       dashboard.addDataSource("topTenQuery", {
-        queryType: "mdx",
-        catalog: "mondrian:/SteelWheels",
+        queryType: "cda",
+        dataAccessId: "1",
+        path: "samplePath",
         jndi: "SampleData",
         query: function() {
           return "SELECT NON EMPTY [Measures].[Sales] ON COLUMNS, "
@@ -89,7 +90,9 @@ define([
       dashboard.init();
       dashboard.addParameter("result", "");
       dashboard.addDataSource("topTenQuery", {
-        queryType: "mdx",
+        queryType: "cda",
+        dataAccessId: "1",
+        path: "samplePath",
         catalog: "mondrian:/SteelWheels",
         jndi: "SampleData",
         query: function() {

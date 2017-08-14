@@ -92,25 +92,12 @@ define(["cdf/Dashboard.Clean", "cdf/lib/jquery"], function(Dashboard, $) {
       expect(dashboard.detectQueryType(obj)).toEqual(undefined);
       expect(obj.queryType).toEqual(undefined);
 
-      // given a legacy definition object with a queryType property
-      obj = {queryType: "mdx"};
-      expect(dashboard.detectQueryType(obj)).toEqual("mdx");
-      expect(obj.queryType).toEqual("mdx");
-
-      // if no query type detected, when query property exists set it to legacy
-      obj = {query: "select *"};
-      expect(dashboard.detectQueryType(obj)).toEqual("legacy");
-      expect(obj.queryType).toEqual("legacy");
 
       // if no query type detected, when path and dataAccessId properties exist set it to cda
       obj = {path: "p", dataAccessId: "dAId"};
       expect(dashboard.detectQueryType(obj)).toEqual("cda");
       expect(obj.queryType).toEqual("cda");
 
-      // given a dataSource property containing a valid data source name
-      dashboard.addDataSource("sampleMdxDataSourceObj", sampleMdxDataSourceObj);
-      expect(dashboard.detectQueryType({dataSource: "sampleMdxDataSourceObj"})).toEqual("mdx");
-      expect(dashboard.getDataSource("sampleMdxDataSourceObj").queryType).toEqual("mdx");
 
       // given a dataSource property containing a valid data source name with no query type
       obj = $.extend({}, sampleCdaDataSourceObj);

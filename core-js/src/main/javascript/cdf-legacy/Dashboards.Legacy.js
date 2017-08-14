@@ -180,16 +180,6 @@ Dashboards.fetchData = function(cd, params, callback) {
         callback(json);
       },'json').error(Dashboards.handleServerError);
   }
-  // When we're not working with a CDA data source, we default to using jtable to fetch the data...
-  else if (cd != undefined){
-
-    var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
-
-    $.post(wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
-      function(result) {
-        callback(result.values);
-      },'json');
-  }
   // ... or just call the callback when no valid definition is passed
   else {
     callback([]);
