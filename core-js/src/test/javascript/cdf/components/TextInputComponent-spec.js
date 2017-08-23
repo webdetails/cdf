@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,26 +13,24 @@
 
 define([
   "cdf/Dashboard.Clean",
-  "cdf/components/TextInputComponent"
-], function(Dashboard, TextInputComponent) {
+  "cdf/components/TextInputComponent",
+  "cdf/lib/jquery"
+], function(Dashboard, TextInputComponent, $) {
 
   /**
    * ## The Text Input Component
    */
   describe("The Text Input Component #", function() {
-
     var dashboard = new Dashboard();
-    
+    var htmlObject = "sampleObjectTextInput";
     dashboard.addParameter("input", "");
-
-    dashboard.init();
 
     var textInputComponent = new TextInputComponent({
       name: "textInputComponent",
       type: "textInputComponent",
       parameters: [],
       parameter: "input",
-      htmlObject: "sampleObjectTextInput",
+      htmlObject: htmlObject,
       executeAtStart: true,
       postChange: function() {
         return "you typed: " + this.dashboard.getParameterValue(this.parameter);
@@ -40,16 +38,40 @@ define([
     });
 
     dashboard.addComponent(textInputComponent);
+    dashboard.init();
+
+    var $htmlObject = $("<div />").attr("id", htmlObject);
+
+    beforeEach(function() {
+      $("body").append($htmlObject);
+    });
+    afterEach(function() {
+      $htmlObject.remove();
+    });
 
     /**
      * ## The Text Input Component # allows a dashboard to execute update
      */
-    it("allows a dashboard to execute update", function(done) {
+    it("allows a dashboard to execute update with empty value", function(done) {
       spyOn(textInputComponent, 'update').and.callThrough();
 
       // listen to cdf:postExecution event
       textInputComponent.once("cdf:postExecution", function() {
         expect(textInputComponent.update).toHaveBeenCalled();
+        expect(textInputComponent.getValue()).toEqual("");
+        done();
+      });
+
+      dashboard.update(textInputComponent);
+    });
+
+    it("allows a dashboard to execute update with html specific value", function(done) {
+      dashboard.setParameter("input", "'<>'");
+      spyOn(textInputComponent, 'update').and.callThrough();
+
+      textInputComponent.once("cdf:postExecution", function() {
+        expect(textInputComponent.update).toHaveBeenCalled();
+        expect(textInputComponent.getValue()).toEqual("'<>'");
         done();
       });
 
