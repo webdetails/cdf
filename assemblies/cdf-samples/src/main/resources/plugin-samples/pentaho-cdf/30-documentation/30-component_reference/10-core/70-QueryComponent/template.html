@@ -89,14 +89,8 @@ Dashboards.addParameter("result", "");
 
 var MetaLayerHome2 = {
 	executeQueryComponentDefinition: {
-		queryType: 'mdx',
-		jndi: "SampleData",
-		catalog: "mondrian:/SteelWheels",
-		query: function() {
-			return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-			"NON EMPTY TopCount([Customers].[All Customers].Children," +
-			"10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-		}
+      dataAccessId: "region",
+        path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"
 	}
 };
 

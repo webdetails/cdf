@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CDADescriptor>
+
+    <!-- DataSource definition. 
+	
+	Type controls what the datasource type is.
+	The connection and query controls how the data is fetched. These values
+	are specific to each access type
+
+	-->
+    <DataSources>
+        <Connection id="1" type="sql.jndi">
+            <Jndi>SampleData</Jndi>
+        </Connection>
+        <Connection id="1" type="mondrian.jndi">
+    		<Jndi>SampleData</Jndi>
+			<Catalog>mondrian:/SteelWheels</Catalog>
+			<Cube>SteelWheelsSales</Cube>
+        </Connection>        
+        
+    </DataSources>
+    <!-- DataAccess object controls the query itself
+
+	Access controls if the datasource can be seen from the outside or is to
+	be used from a Compound datasource only
+
+	-->
+    <DataAccess id="region" connection="1" type="mdx" access="public" cache="true" cacheDuration="3600">
+		<Name>Region query for Check Component</Name>
+        <BandedMode>compact</BandedMode>
+        <Query>
+		SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,
+        NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales]) ON ROWS FROM [SteelWheelsSales]
+		</Query>
+    </DataAccess>
+    
+  <DataAccess id="auto-complete" connection="1" type="mdx" access="public" cache="true" cacheDuration="3600">
+    	<Name>Query for Auto-complete Component</Name>
+        <BandedMode>compact</BandedMode>
+        <Query>
+        select NON EMPTY {[Measures].[Sales]} ON COLUMNS,
+    	NON EMPTY TopCount( Filter([Customers].[All Customers].Children, (Left([Customers].CurrentMember.Name, Len("")) = "")),100.0,[Measures].[Sales]) ON ROWS
+		from [SteelWheelsSales]
+        </Query>
+    </DataAccess>    
+    
+  <DataAccess id="template" connection="1" type="mdx" access="public" cache="true" cacheDuration="3600">
+        <Name>Query for Template Component</Name>
+        <BandedMode>compact</BandedMode>
+        <Query>    
+    select NON EMPTY {[Measures].[Sales]} ON COLUMNS,
+        NON EMPTY TopCount([Customers].[All Customers].Children, 6.0, [Measures].[Sales]) ON ROWS from [SteelWheelsSales]
+        </Query>
+    </DataAccess>    
+
+<DataAccess id="viz-query" connection="1" type="mdx" access="public" cache="true" cacheDuration="3600">
+        <Name>Query for Viz Api Component</Name>
+        <BandedMode>compact</BandedMode>
+        <Query>    
+   select
+      NON EMPTY {[Measures].[Quantity]} ON COLUMNS,
+      NON EMPTY {[Markets].[Country].Members} ON ROWS
+      from [SteelWheelsSales]
+        </Query>
+    </DataAccess>    
+    
+
+
+</CDADescriptor>

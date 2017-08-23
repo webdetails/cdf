@@ -93,16 +93,7 @@ require([
   
   dashboard.addParameter("result", "");
   
-  dashboard.addDataSource("queryQ", {
-    queryType: "mdx",
-    jndi: "SampleData",
-    catalog: "mondrian:/SteelWheels",
-    query: function() {
-      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
-        + " NON EMPTY TopCount([Customers].[All Customers].Children,"
-        + " 10.0, [Measures].[Sales]) ON ROWS FROM [SteelWheelsSales]";
-    }
-  });
+
 
   dashboard.addComponent(new QueryComponent({
     name: "executeQueryComponent",
@@ -111,7 +102,8 @@ require([
     asynchronousMode: true,
     executeAtStart: true,
     resultvar: "result",
-    queryDefinition: {dataSource: "queryQ"},
+    queryDefinition: {      dataAccessId: "region",
+        path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
     postFetch: function(data) {
       $('#sampleObjectResult').html("" + data.resultset[3]);
     }

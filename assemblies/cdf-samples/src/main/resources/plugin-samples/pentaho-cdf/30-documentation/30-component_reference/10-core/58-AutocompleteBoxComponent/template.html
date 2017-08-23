@@ -121,26 +121,14 @@
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
 
-var MetaLayerHome2 = {
-clientSelectorDefinition: {
-	queryType: 'mdx',
-	jndi: "SampleData",
-	catalog: "mondrian:/SteelWheels",
-	query: function() {
-		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+
-		"(Left([Customers].CurrentMember.Name, Len(\"\")) = \"\")),100.0,[Measures].[Sales]) ON ROWS "+
-		"from [SteelWheelsSales]";
-		}
-	}
-}
+
 
 
 var clientSelector = {
 	name: "clientSelector",
 	type: "autocompleteBox",
 	matchType: "fromStart",
-	queryDefinition: MetaLayerHome2.clientSelectorDefinition,
+	queryDefinition: {dataAccessId: "auto-complete", path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
 	selectMulti: true,
 	showApplyButton: true,
 	minTextLength: 0,

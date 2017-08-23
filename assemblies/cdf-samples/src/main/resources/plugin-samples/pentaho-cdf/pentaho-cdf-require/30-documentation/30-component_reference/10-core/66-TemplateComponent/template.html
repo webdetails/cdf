@@ -111,22 +111,11 @@ require(['cdf/Dashboard.Blueprint', 'cdf/dashboard/Utils', 'cdf/components/Templ
 
   var dashboard = new Dashboard();
 
-  dashboard.addDataSource("templateQuery", {
-    queryType: "mdx",
-    catalog: "mondrian:/SteelWheels",
-    jndi: "SampleData",
-    query: function() {
-      return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
-        + " NON EMPTY TopCount([Customers].[All Customers].Children, 6.0, [Measures].[Sales])"
-        + " ON ROWS from [SteelWheelsSales]";
-    }
-  });
 
   dashboard.addComponent(new TemplateComponent({
     name: "template_component",
     type: "TemplateComponent",
-
-    chartDefinition: {dataSource: "templateQuery"},
+    chartDefinition: {dataAccessId: "template", path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
     htmlObject: "sampleObject",
     executeAtStart: true,
 

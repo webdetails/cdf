@@ -117,22 +117,12 @@ require([
   var dashboard = new Dashboard();
   dashboard.addParameter("region", "");
   
-  dashboard.addDataSource("checkQuery", {
-    queryType: "mdx",
-    catalog: "mondrian:/SteelWheels",
-    jndi: "SampleData",
-    query: function() {
-      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
-        + " NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales])"
-        + " ON ROWS FROM [SteelWheelsSales]";
-    }
-  });
 
   dashboard.addComponent(new CheckComponent({
     name: "checkComponent",
     type: "checkComponent",
     parameters: [],
-    queryDefinition: {dataSource: "checkQuery"},
+    queryDefinition: {dataAccessId: "region", path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
     parameter: "region",
     separator: ",&nbsp;",
     valueAsId: true,
