@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -14,6 +14,7 @@
 package org.pentaho.cdf.embed;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginManager;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -28,40 +29,48 @@ import java.util.List;
 import java.util.Locale;
 
 public class EmbeddedHeadersGenerator {
+  static final String DEPRECATED_COMMENT = "\n/** @deprecated - use 'pentaho/environment' module's variable instead */";
+
   // embedded constants
-  private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n"
+  static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n"
       + "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
-  private static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
+  static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
       + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n\n";
 
-  private static final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
+  static final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
       "requireCfg.config[''cdf/dashboard/Dashboard''] = {0};\n";
 
-  private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
-  private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
+  static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
+  static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
 
-  private static final String URL_CONTEXT_BUILDER =
-      "var CONTEXT_PATH = ''{0}'';\n\nvar FULL_QUALIFIED_URL = ''{1}'';\n\nvar SERVER_PROTOCOL = ''{2}'';\n\n";
-  private static final String SESSION_NAME_BUILDER = "var SESSION_NAME = ''{0}'';\n";
-  private static final String LOCALE_BUILDER =
-      "//Providing computed Locale for session\nvar SESSION_LOCALE = ''{0}'';\n";
-  private static final String HOME_FOLDER_BUILDER =
-      "//Providing home folder location for UI defaults\nvar HOME_FOLDER = ''{0}'';\n";
-  private static final String RESERVED_CHARS_BUILDER = "var RESERVED_CHARS = ''{0}'';\n";
-  private static final String RESERVED_CHARS_DISPLAY_BUILDER = "var RESERVED_CHARS_DISPLAY = ''{0}'';\n";
-  private static final String RESERVED_CHARS_REGEX_PATTERN_BUILDER = "var RESERVED_CHARS_REGEX_PATTERN = /{0}/;\n";
+  private static final String CONTEXT_PATH_BUILDER = "\nvar CONTEXT_PATH = ''{0}'';\n";
+  private static final String FULL_QUALIFIED_URL_BUILDER = "\nvar FULL_QUALIFIED_URL = ''{0}'';\n";
+  private static final String SERVER_PROTOCOL_BUILDER = "\nvar SERVER_PROTOCOL = ''{0}'';\n";
+  private static final String SESSION_NAME_BUILDER = "\nvar SESSION_NAME = ''{0}'';\n";
+  private static final String LOCALE_BUILDER = "\nvar SESSION_LOCALE = ''{0}'';\n";
+  private static final String HOME_FOLDER_BUILDER = "\nvar HOME_FOLDER = ''{0}'';\n";
 
-  private static final String DOCUMENT_SCRIPT =
+  private static final String RESERVED_CHARS_BUILDER = "\nvar RESERVED_CHARS = ''{0}'';\n";
+  private static final String RESERVED_CHARS_DISPLAY_BUILDER = "\nvar RESERVED_CHARS_DISPLAY = ''{0}'';\n";
+  private static final String RESERVED_CHARS_REGEX_PATTERN_BUILDER = "\nvar RESERVED_CHARS_REGEX_PATTERN = /{0}/;\n";
+
+  static final String DOCUMENT_SCRIPT =
       "document.write(\"<script language=''javascript'' type=''text/javascript'' src=''{0}''></script>\");\n";
   private static final String REQUIRE_JS = "requirejs";
   private static final String JS = ".js";
 
   protected Locale locale;
+  protected String serverProtocol;
   protected String fullQualifiedURL;
   protected String contextConfiguration;
 
   public EmbeddedHeadersGenerator( String fullUrl, String contextConfiguration ) {
     this.locale = LocaleHelper.getLocale();
+
+    this.serverProtocol = fullUrl.startsWith( "http" )
+        ? fullUrl.substring( 0, fullUrl.indexOf( ":" ) )
+        : "http";
+
     this.fullQualifiedURL = fullUrl;
     this.contextConfiguration = contextConfiguration;
   }
@@ -70,6 +79,7 @@ public class EmbeddedHeadersGenerator {
     StringBuilder sb = new StringBuilder();
     sb.append( printScriptsContext() )
       .append( printRequireJs() )
+      .append( printEnvironmentConfig() )
       .append( printUrlContext() )
       .append( printSessionName() )
       .append( printLocale() )
@@ -77,10 +87,16 @@ public class EmbeddedHeadersGenerator {
       .append( printReservedChars() )
       .append( printReservedCharsDisplay() )
       .append( printReservedRegexPattern() );
+
     return sb.toString();
   }
 
-  protected String printScriptsContext() {
+  public void setLocale( Locale locale ) {
+    this.locale = locale;
+  }
+
+  // region Print Methods
+  private String printScriptsContext() {
 
     StringBuilder sb = new StringBuilder();
 
@@ -88,6 +104,7 @@ public class EmbeddedHeadersGenerator {
       .append( REQUIRE_JS_CFG_START )
       .append( MessageFormat.format( REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION, contextConfiguration ) )
       .append( "// injecting document writes to append the cdf require files\n" );
+
     List<String> contextScripts = getContextScripts();
     for ( String s : contextScripts ) {
       sb.append( MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + s ) );
@@ -96,7 +113,7 @@ public class EmbeddedHeadersGenerator {
     return sb.toString();
   }
 
-  protected String printRequireJs() {
+  private String printRequireJs() {
     StringBuilder sb = new StringBuilder();
     sb.append( MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + REQUIRE_PATH ) )
       .append( MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + REQUIRE_START_PATH ) );
@@ -104,37 +121,61 @@ public class EmbeddedHeadersGenerator {
     return sb.toString();
   }
 
-  protected String printUrlContext() {
-    String serverProtocolValue;
-    if ( fullQualifiedURL.startsWith( "http" ) ) {
-      serverProtocolValue = fullQualifiedURL.substring( 0, fullQualifiedURL.indexOf( ":" ) );
-    } else {
-      serverProtocolValue = "http";
+  private String printEnvironmentConfig() {
+    String userID = getSessionName();
+    String userHomeFolder = getUserHomeFolderPath();
+
+    StringBuilder reservedChars = new StringBuilder();
+    for ( char reserved : getReservedChars() ) {
+      reservedChars.append( reserved );
     }
-    return MessageFormat.format( URL_CONTEXT_BUILDER, fullQualifiedURL, fullQualifiedURL, serverProtocolValue );
+
+    return "\nrequireCfg.config[\"pentaho/environment\"] = {" +
+        "\n  theme: null," +
+        "\n  locale: \"" + this.locale + "\"," +
+        "\n  user: {" +
+        "\n    id: \"" + userID + "\"," +
+        "\n    home: \"" + userHomeFolder + "\"" +
+        "\n  }," +
+        "\n  server: {" +
+        "\n    root: \"" + this.fullQualifiedURL + "\"" +
+        "\n  }," +
+        "\n  reservedChars: \"" + escapeEnvironmentVariable( reservedChars.toString() ) + "\"" +
+        "\n};\n";
   }
 
-  protected String printSessionName() throws IOException {
-    return MessageFormat.format( SESSION_NAME_BUILDER, getSessionName() );
+  private String printUrlContext() {
+    String contextPath = DEPRECATED_COMMENT + MessageFormat.format( CONTEXT_PATH_BUILDER, this.fullQualifiedURL );
+    String fullQualifiedUrl = DEPRECATED_COMMENT +
+        MessageFormat.format( FULL_QUALIFIED_URL_BUILDER, this.fullQualifiedURL );
+    String serverProtocol = DEPRECATED_COMMENT + MessageFormat.format( SERVER_PROTOCOL_BUILDER, this.serverProtocol );
+
+    return contextPath + fullQualifiedUrl + serverProtocol;
   }
 
-  protected String printLocale() throws IOException {
-    return MessageFormat.format( LOCALE_BUILDER, locale.toString() );
+  private String printSessionName() throws IOException {
+    return DEPRECATED_COMMENT + MessageFormat.format( SESSION_NAME_BUILDER, getSessionName() );
   }
 
-  protected String printHomeFolder() throws IOException {
-    return MessageFormat.format( HOME_FOLDER_BUILDER, getUserHomeFolderPath() );
+  private String printLocale() throws IOException {
+    return DEPRECATED_COMMENT + MessageFormat.format( LOCALE_BUILDER, locale.toString() );
   }
 
-  protected String printReservedChars() throws IOException {
+  private String printHomeFolder() throws IOException {
+    return DEPRECATED_COMMENT + MessageFormat.format( HOME_FOLDER_BUILDER, getUserHomeFolderPath() );
+  }
+
+  private String printReservedChars() throws IOException {
     StringBuilder sb = new StringBuilder();
     for ( char c : getReservedChars() ) {
       sb.append( c );
     }
-    return MessageFormat.format( RESERVED_CHARS_BUILDER, StringEscapeUtils.escapeJavaScript( sb.toString() ) );
+
+    String reservedChars = escapeEnvironmentVariable( sb.toString() );
+    return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_BUILDER, reservedChars );
   }
 
-  protected String printReservedCharsDisplay() throws IOException {
+  private String printReservedCharsDisplay() throws IOException {
     List<Character> reservedCharacters = getReservedChars();
     StringBuffer sb = new StringBuffer();
     for ( int i = 0; i < reservedCharacters.size(); i++ ) {
@@ -147,41 +188,45 @@ public class EmbeddedHeadersGenerator {
         sb.append( ", " );
       }
     }
-    return MessageFormat.format( RESERVED_CHARS_DISPLAY_BUILDER, StringEscapeUtils.escapeJavaScript( sb.toString() ) );
+
+    String reservedCharsDisplay = escapeEnvironmentVariable( sb.toString() );
+    return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_DISPLAY_BUILDER, reservedCharsDisplay );
   }
 
-  protected String printReservedRegexPattern() throws IOException {
-    return MessageFormat.format( RESERVED_CHARS_REGEX_PATTERN_BUILDER, makeReservedCharPattern() );
+  private String printReservedRegexPattern() throws IOException {
+    return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_REGEX_PATTERN_BUILDER, makeReservedCharPattern() );
   }
+  // endregion
 
-  protected String makeReservedCharPattern() {
+  private String makeReservedCharPattern() {
     // escape all reserved characters as they may have special meaning to regex engine
     StringBuilder buf = new StringBuilder();
     buf.append( ".*[" );
     for ( Character ch : getReservedChars() ) {
-      buf.append( StringEscapeUtils.escapeJavaScript( ch.toString() ) );
+      buf.append( escapeEnvironmentVariable( ch.toString() ) );
     }
     buf.append( "]+.*" );
+
     return buf.toString();
   }
 
-  public void setLocale( Locale locale ) {
-    this.locale = locale;
-  }
-
   protected String getSessionName() {
-    if ( PentahoSessionHolder.getSession() == null ) {
+    IPentahoSession session = getPentahoSession();
+    if ( session == null ) {
       return "null";
     }
-    return StringEscapeUtils.escapeJavaScript( PentahoSessionHolder.getSession().getName() );
+
+    return escapeEnvironmentVariable( session.getName() );
   }
 
   protected String getUserHomeFolderPath() {
-    if ( PentahoSessionHolder.getSession() != null ) {
-      return ClientRepositoryPaths.getUserHomeFolderPath( StringEscapeUtils
-        .escapeJavaScript( PentahoSessionHolder.getSession().getName() ) );
+    IPentahoSession session = getPentahoSession();
+    if ( session == null ) {
+      return "null";
     }
-    return "null";
+
+    String sessionName = escapeEnvironmentVariable( session.getName() );
+    return ClientRepositoryPaths.getUserHomeFolderPath( sessionName );
   }
 
   protected List<Character> getReservedChars() {
@@ -189,7 +234,7 @@ public class EmbeddedHeadersGenerator {
   }
 
   protected List<String> getContextScripts() {
-    List<String> scripts = new ArrayList<String>();
+    List<String> scripts = new ArrayList<>();
     IPluginManager pluginManager = PentahoSystem.get( IPluginManager.class );
     List<String> externalResources = pluginManager.getExternalResourcesForContext( REQUIRE_JS );
     for ( String res : externalResources ) {
@@ -201,5 +246,17 @@ public class EmbeddedHeadersGenerator {
       }
     }
     return scripts;
+  }
+
+  private String escapeEnvironmentVariable( String value ) {
+    if ( value == null) {
+      return "null";
+    }
+
+    return StringEscapeUtils.escapeJavaScript( value );
+  }
+
+  private IPentahoSession getPentahoSession() {
+    return PentahoSessionHolder.getSession();
   }
 }

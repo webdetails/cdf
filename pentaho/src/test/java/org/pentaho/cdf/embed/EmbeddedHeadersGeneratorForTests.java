@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,37 +15,49 @@ package org.pentaho.cdf.embed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class EmbeddedHeadersGeneratorForTests extends EmbeddedHeadersGenerator {
 
-  public EmbeddedHeadersGeneratorForTests( String fullQualifiedUrl, String contextConfiguration ) {
-    super( fullQualifiedUrl, contextConfiguration );
+  private Map<String, String> mockVariables;
+  private List<String> mockContextScripts;
+
+  EmbeddedHeadersGeneratorForTests( Map<String, String> mockVariables, List<String> mockContextScripts ) {
+    super( mockVariables.get( "FULL_QUALIFIED_URL" ), mockVariables.get( "CDF_CONTEXT_CONFIG" ) );
+
+    this.mockVariables = mockVariables;
+    this.mockContextScripts = mockContextScripts;
+
+    this.locale = new Locale( mockVariables.get( "LOCALE" ) );
   }
 
   @Override
   protected String getSessionName() {
-    return "TEST_SESSION_NAME";
+    return this.mockVariables.get( "SESSION_NAME" );
   }
 
   @Override
   protected String getUserHomeFolderPath() {
-    return "TEST_USER_HOME_FOLDER_PATH";
+    return this.mockVariables.get( "HOME_FOLDER" );
   }
 
   @Override
   protected List<Character> getReservedChars() {
-    List<Character> characters = new ArrayList<Character>();
-    characters.add( 'a' );
-    characters.add( 'b' );
+    String reservedChars = this.mockVariables.get( "RESERVED_CHARS" );
+    int rCharsSize = reservedChars.length();
+
+    List<Character> characters = new ArrayList<>();
+    for ( int rChar = 0; rChar < rCharsSize; rChar++ ) {
+      characters.add( reservedChars.charAt( rChar ) );
+    }
+
     return characters;
   }
 
   @Override
   protected List<String> getContextScripts() {
-    List<String> configurations = new ArrayList<String>();
-    configurations.add( "content/pentaho-cdf/js/cdf-require-js-cfg.js" );
-    configurations.add( "content/common-ui/resources/web/common-ui-require-js-cfg.js" );
-    return configurations;
+    return this.mockContextScripts;
   }
 
 }
