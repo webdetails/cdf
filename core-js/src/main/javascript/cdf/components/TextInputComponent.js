@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -20,30 +20,18 @@ define([
   return BaseComponent.extend({
     update: function() {
       var myself = this;
-      var name = myself.name;
 
-      var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
-        "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
-        (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "")) +
-        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "")) + "'>";
-      if(myself.size) {
-        Logger.warn("Attribute 'size' is deprecated");
-      }
-      if(myself.maxLength) {
-        Logger.warn("Attribute 'maxLength' is deprecated");
-      }
+      myself._addHtmlToPlaceholder();
 
-      myself.placeholder().html(selectHTML);
-
-      var el = $("#" + name);
-
+      var el = $("#" + myself.name);
+      el.val(myself.dashboard.getParameterValue(myself.parameter));
       el.change(function() {
         if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-          myself.dashboard.processChange(name);
+          myself.dashboard.processChange(myself.name);
         }
       }).keyup(function(ev) {
         if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-          myself.dashboard.processChange(name);
+          myself.dashboard.processChange(myself.name);
         }
       });
 
@@ -52,6 +40,33 @@ define([
 
     getValue: function() {
       return $("#" + this.name).val();
+    },
+
+    _addHtmlToPlaceholder: function() {
+      var attrs = {
+        type: "text",
+        id: this.name,
+        name: this.name,
+        size: this.size || this.charWidth || undefined,
+        maxlength: this.maxLength || this.maxChars || undefined
+      };
+
+      var componentHTML = '<input ' + processAttrs(attrs) + '>';
+
+      if(this.size) Logger.warn("Attribute 'size' is deprecated");
+      if(this.maxLength) Logger.warn("Attribute 'maxLength' is deprecated");
+
+      this.placeholder().html(componentHTML);
+
+      function processAttrs(conf) {
+        var list = [];
+        for(prop in conf) {
+          if(conf.hasOwnProperty(prop) && conf[prop] != null) {
+            list.push(prop + '="' + conf[prop] + '"');
+          }
+        }
+        return list.join(" ");
+      }
     }
   });
 

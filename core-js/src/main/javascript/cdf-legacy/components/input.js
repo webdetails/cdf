@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -172,7 +172,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
       hasChanged = true;
     }
 
-    // jQuery only cleans the value if it receives an empty array. 
+    // jQuery only cleans the value if it receives an empty array.
     $("select", ph).val(currentVals == null ? [] : currentVals);
 
     // Automatically assume a given top scroll position, given by value or index.
@@ -200,7 +200,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
       case "chosen": {
         var jqBrowser = $.browser;
         $.browser = "";
-        ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); 
+        ph.find("select.chzn-select" ).chosen(this._readExtraOptions());
         $.browser = jqBrowser;
         break;
       }
@@ -281,7 +281,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
     var stop;
     var check = function() {
       stop && stop();
-      
+
       // Have been disposed?
       var dash = me.dashboard;
       if(dash) {
@@ -292,9 +292,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
         }
       }
     };
-    
+
     var selElem = $("select", elem);
-    
+
     selElem
         .keypress(function(ev) { if(ev.which === 13) { check(); } });
 
@@ -303,17 +303,17 @@ var SelectBaseComponent = InputBaseComponent.extend({
       selElem
         .on(me._changeTrigger(), check);
     } else {
-      
+
       var timScrollFraction = me.changeTimeoutScrollFraction;
       timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
-      
+
       var timChangeFraction = me.changeTimeoutChangeFraction;
       timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 5/8);
-      
+
       var changeTimeout = Math.max(100, me.changeTimeout || 2000);
       var changeTimeoutScroll = timScrollFraction * changeTimeout;
       var changeTimeoutChange = timChangeFraction * changeTimeout;
-      
+
       var timeoutHandle;
 
       stop = function() {
@@ -329,7 +329,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
         timeoutHandle = setTimeout(check, tim || changeTimeout);
         }
       };
-      
+
       selElem
         .change(function() { renew(changeTimeoutChange); })
         .scroll(function() { renew(changeTimeoutScroll); })
@@ -339,15 +339,15 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
   /**
    * Obtains the change mode to use.
-   * 
+   *
    * <p>
    * The default implementation normalizes, validates and defaults
    * the change mode value.
    * </p>
    *
-   * @return {!string} one of values: 
-   * <tt>'immediate'</tt>, 
-   * <tt>'focus'</tt> or 
+   * @return {!string} one of values:
+   * <tt>'immediate'</tt>,
+   * <tt>'focus'</tt> or
    * <tt>'timeout-focus'</tt>.
    */
   _getChangeMode: function() {
@@ -357,8 +357,8 @@ var SelectBaseComponent = InputBaseComponent.extend({
       switch(changeMode) {
         case 'immediate':
         case 'focus':  return changeMode;
-          
-        case 'timeout-focus': 
+
+        case 'timeout-focus':
           // Mobiles do not support this strategy. Downgrade to 'focus'.
           if((/android|ipad|iphone/i).test(navigator.userAgent)) { return 'focus'; }
           return changeMode;
@@ -373,7 +373,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
   /**
    * Obtains an appropriate jQuery event name
    * for when testing for changes is done.
-   * 
+   *
    * @return {!string} the name of the event.
    */
   _changeTrigger: function() {
@@ -437,7 +437,7 @@ var SelectMultiComponent = SelectBaseComponent.extend({
   /**
    * Obtains the normalized and defaulted value of
    * the {@link #isMultiple} option.
-   * 
+   *
    * @override
    * @return {boolean}
    */
@@ -450,7 +450,7 @@ var SelectMultiComponent = SelectBaseComponent.extend({
    * and multiple values are allowed,
    * returns the number of items in the
    * provided possible values list.
-   * 
+   *
    * @override
    */
   _getListSize: function(values) {
@@ -467,7 +467,7 @@ var SelectMultiComponent = SelectBaseComponent.extend({
   topIndex: function(_) {
     var $elem = this.placeholder("select");
     var elem = $elem[0];
-    
+
     var L = elem.length;
     if(!L) { return arguments.length ? this : 0; }
 
@@ -476,11 +476,11 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 
     if(arguments.length) {
       var topIndex = +_;
-      
+
       topIndex = isNaN(topIndex) ? 0 : Math.max(0, Math.min(topIndex, L - 1));
-      
+
       $elem.scrollTop(Math.ceil(topIndex * hi));
-      
+
       return this;
     }
     return Math.round($elem.scrollTop() / hi);
@@ -493,8 +493,8 @@ var SelectMultiComponent = SelectBaseComponent.extend({
         if(L) {
           value = String(value);
           for(var i = 0; i < L; i++) {
-            if($options[i].value === value) { 
-              return i; 
+            if($options[i].value === value) {
+              return i;
             }
           }
         }
@@ -516,7 +516,7 @@ var SelectMultiComponent = SelectBaseComponent.extend({
       }
       return this;
     }
-    
+
     return this.valueAt(this.topIndex());
   }
 });
@@ -525,33 +525,21 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 var TextInputComponent = BaseComponent.extend({
   update: function() {
     var myself = this;
-    var name = myself.name;
-    var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
-      "' value='" + Dashboards.getParameterValue(myself.parameter) +
-      (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "" ) ) +
-      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "" ) ) + "'>";
-    if(myself.size) {
-      Dashboards.log("Warning: attribute 'size' is deprecated");
-    }
-    if(myself.maxLength) {
-      Dashboards.log("Warning: attribute 'maxLength' is deprecated");
-    }
 
-    myself.placeholder().html(selectHTML);
+    myself._addHtmlToPlaceholder();
 
-    var el = $("#" + name);
-
+    var el = $("#" + myself.name);
+    el.val(Dashboards.getParameterValue(myself.parameter));
     el
       .change(function() {
         if(Dashboards.getParameterValue(myself.parameter) !== el.val()) {
-          Dashboards.processChange(name);
+          Dashboards.processChange(myself.name);
         }
       })
       .keyup(function(ev) {
         if(ev.keyCode == 13 &&
           Dashboards.getParameterValue(myself.parameter) !== el.val()) {
-
-          Dashboards.processChange(name);
+          Dashboards.processChange(myself.name);
         }
       });
 
@@ -559,6 +547,32 @@ var TextInputComponent = BaseComponent.extend({
   },
   getValue : function() {
     return $("#" + this.name).val();
+  },
+  _addHtmlToPlaceholder: function() {
+    var attrs = {
+      type: "text",
+      id: this.name,
+      name: this.name,
+      size: this.size || this.charWidth || undefined,
+      maxlength: this.maxLength || this.maxChars || undefined
+    };
+
+    var componentHTML = '<input ' + processAttrs(attrs) + '>';
+
+    if(this.size) Logger.warn("Attribute 'size' is deprecated");
+    if(this.maxLength) Logger.warn("Attribute 'maxLength' is deprecated");
+
+    this.placeholder().html(componentHTML);
+
+    function processAttrs(conf) {
+      var list = [];
+      for(prop in conf) {
+        if(conf.hasOwnProperty(prop) && conf[prop] != null) {
+          list.push(prop + '="' + conf[prop] + '"');
+        }
+      }
+      return list.join(" ");
+    }
   }
 });
 
@@ -882,7 +896,7 @@ var MonthPickerComponent = BaseComponent.extend({
     // rebuild picker
     var selectHTML = myself.getMonthPicker(name, myself.size, d, myself.minDate, myself.maxDate, myself.months);
     myself.placeholder().html(selectHTML);
-    
+
     $("#" + name).change(function() {
       Dashboards.processChange(name);
     });
@@ -920,7 +934,7 @@ var MonthPickerComponent = BaseComponent.extend({
     var yearsAppart = (max.getFullYear() - min.getFullYear());
     var monthsToAdd = yearsAppart * 12;
     var monthCount = (max.getMonth() - min.getMonth()) + monthsToAdd; //TODO verify this calculation
-    
+
     return monthCount;
   },normalizeDateToCompare : function(dateObject){
     var normalizedDate = dateObject;
@@ -1646,7 +1660,7 @@ var ButtonComponent = ActionComponent.extend({
 
           if(myself.hasAction() && !(proceed === false)) {
             return myself.triggerAction.apply(myself);
-          } 
+          }
         });
 
       if(this._isJQueryUiButton()) {
@@ -1682,13 +1696,13 @@ var ButtonComponent = ActionComponent.extend({
     */
     var validatedLabel = typeof label === 'function' ? label.call(this) : (label || "");
     this.label = validatedLabel.toString();
-      
+
       // if we have a jQueryUi button change the text with appropriate method
     if(this._isJQueryUiButton()) {
       this.placeholder('button').button('option', 'label', this.label);
     } else {
       this.placeholder('button').text(this.label);
-    }  
+    }
   },
 
   /**
