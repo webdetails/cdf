@@ -217,18 +217,9 @@
         colTypes: ['string','numeric'],
         colFormats: [null,'%.0f'],
         colWidths: ['500px',null],
-        queryType: 'mdx',
         displayLength: 10,
-
-        catalog: 'mondrian:/SteelWheels',
-        jndi: "SampleData",
-        query: function(){
-
-        var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-        " NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales]) " +
-        " ON ROWS from [SteelWheelsSales]"
-        return query;
-        }
+        dataAccessId: "region",
+        path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"
         }
         };
 

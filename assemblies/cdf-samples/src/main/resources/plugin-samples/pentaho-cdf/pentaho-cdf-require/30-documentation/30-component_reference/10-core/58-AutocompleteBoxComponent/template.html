@@ -177,24 +177,12 @@ require([
 
   dashboard.addParameter("clients", "");
   
-  dashboard.addDataSource("clientQuery", {
-    queryType: "mdx",
-    jndi: "SampleData",
-    catalog: "mondrian:/SteelWheels",
-    query: function() {
-      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
-        + " NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"
-        + " (Left([Customers].CurrentMember.Name, Len(\"\")) = \"\")), 100.0, [Measures].[Sales]) ON ROWS"
-        + " FROM [SteelWheelsSales]";
-    }
-  });
-
   dashboard.addComponent(new AutocompleteBoxComponent({
 
     name: "autocompleteBox",
     type: "autocompleteBox",
     matchType: "fromStart",
-    queryDefinition: {dataSource: "clientQuery"},
+    queryDefinition: {dataAccessId: "auto-complete", path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
     selectMulti: true,
     showApplyButton: true,
     minTextLength: 0,

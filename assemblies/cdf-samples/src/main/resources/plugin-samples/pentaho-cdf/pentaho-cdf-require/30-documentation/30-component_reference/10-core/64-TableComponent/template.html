@@ -214,22 +214,13 @@ require([
 
   var dashboard = new Dashboard();
   
-  dashboard.addDataSource("tableQuery", {
-    queryType: "mdx",
-    catalog: "mondrian:/SteelWheels",
-    jndi: "SampleData",
-    query: function() {
-      return "SELECT NON EMPTY {[Measures].[Sales]} ON COLUMNS,"
-        + " NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales])"
-        + " ON ROWS FROM [SteelWheelsSales]";
-    }
-  });
 
   dashboard.addComponent(new TableComponent({
     name: "topTenCustomers",
     type: "tableComponent",
     chartDefinition: {
-      dataSource: "tableQuery",
+      dataAccessId: "region",
+          path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda",
       colHeaders: ["Customers", "Sales"],
       colTypes: ["string", "numeric"],
       colFormats: [null, "%.0f"],

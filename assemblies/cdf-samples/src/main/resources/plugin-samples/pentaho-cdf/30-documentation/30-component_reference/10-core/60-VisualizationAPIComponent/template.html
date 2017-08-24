@@ -117,16 +117,9 @@ Dashboards.setParameter("measureParam", {attributes: ["Quantity"]});
 
 MetaLayer = {
   sampleVisualization: {
-    queryType: 'mdx',
-    jndi: "SampleData",
-    catalog: "mondrian:/SteelWheels",
+          dataAccessId: "viz-query",
+      path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda",
     opts: {},
-    query: function() {
-      return "select " +
-      "NON EMPTY {[Measures].[Quantity]} ON COLUMNS, " +
-      "NON EMPTY {[Markets].[Country].Members} ON ROWS " +
-      "from [SteelWheelsSales]";
-    }
   }
 }
 

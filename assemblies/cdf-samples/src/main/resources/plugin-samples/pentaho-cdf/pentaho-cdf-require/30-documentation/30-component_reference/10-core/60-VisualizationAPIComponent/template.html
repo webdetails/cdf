@@ -120,24 +120,14 @@ require([
   dashboard.setParameter("levelsParam", {attributes: ["Country"]});
   dashboard.setParameter("measureParam", {attributes: ["Quantity"]});
 
-  dashboard.addDataSource("queryViz", {
-    queryType: "mdx",
-    jndi: "SampleData",
-    catalog: "mondrian:/SteelWheels",
-    query: function() {
-      return "select " +
-      "NON EMPTY {[Measures].[Quantity]} ON COLUMNS, " +
-      "NON EMPTY {[Markets].[Country].Members} ON ROWS " +
-      "from [SteelWheelsSales]";
-    }
-  });
 
   dashboard.addComponent(new VisualizationAPIComponent({
     name: "sampleVisualization",
     type: "visualizationAPIComponent",
     listeners: [],
     queryDefinition: {
-      dataSource: "queryViz",
+      dataAccessId: "viz-query",
+      path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda",
       opts: {}
     },
     vizId: "pentaho/visual/samples/calc",
