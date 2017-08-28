@@ -559,8 +559,8 @@ var TextInputComponent = BaseComponent.extend({
 
     var componentHTML = '<input ' + processAttrs(attrs) + '>';
 
-    if(this.size) Logger.warn("Attribute 'size' is deprecated");
-    if(this.maxLength) Logger.warn("Attribute 'maxLength' is deprecated");
+    if(this.size) Dashboards.log("Attribute 'size' is deprecated", "warn");
+    if(this.maxLength) Dashboards.log("Attribute 'maxLength' is deprecated", "warn");
 
     this.placeholder().html(componentHTML);
 
