@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>cdf-plugin</artifactId>
-    <groupId>pentaho</groupId>
-    <version>6.1-SNAPSHOT</version>
-  </parent>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>pentaho</groupId>
+    <artifactId>cdf-plugin</artifactId>
+    <version>6.1.0.18-381</version>
+  </parent>
   <artifactId>cdf-core-js</artifactId>
+  <version>6.1.0.18-381</version>
   <packaging>pom</packaging>
-
   <properties>
     <js.project.list>ccc</js.project.list>
-    <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
     <template.file>layout.tmpl</template.file>
+    <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
@@ -26,7 +23,6 @@
       <type>zip</type>
     </dependency>
   </dependencies>
-
   <profiles>
     <profile>
       <id>javascript-test</id>
@@ -57,5 +53,4 @@
       </build>
     </profile>
   </profiles>
-
 </project>
