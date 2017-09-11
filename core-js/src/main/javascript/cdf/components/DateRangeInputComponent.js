@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -28,10 +28,14 @@ define([
       var inputSeparator = this.inputSeparator = this.inputSeparator || ">";
 
       if (this.singleInput == undefined || this.singleInput == true) {
-        dr = $('<input class="date-range-single-input" id="' + inputId + '" value="' + startValue + ' ' + inputSeparator + ' ' + endValue + '"/>');
+        dr = $('<input class="date-range-single-input" id="' + inputId + '"/>');
+        dr.val(startValue + ' ' + inputSeparator + ' ' + endValue);
       } else {
-        dr = $('<input class="date-range-multiple-input" id="' + inputId + '" value="' + startValue + '"/>' + inputSeparator +
-        '<input class="date-range-multiple-input-2" id="' + inputId + '2" value="' + endValue + '"/>');
+        dr = $('<input class="date-range-multiple-input" id="' + inputId + '"/>'  + inputSeparator);
+        dr.val(startValue);
+        var dre = $('<input class="date-range-multiple-input-2" id="' + inputId + '2' + '"/>');
+        dre.val(endValue);
+        dr = dr.add(dre);
       }
 
       this.placeholder()
