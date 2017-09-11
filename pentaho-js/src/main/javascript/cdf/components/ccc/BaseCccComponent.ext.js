@@ -13,11 +13,10 @@
 
 define([
   '../../PentahoTypeContext',
-  'pentaho/visual/color/paletteRegistry',
   'amd!../../lib/underscore',
   '../../lib/jquery',
   'pentaho/shim/es6-promise'
-], function(PentahoTypeContext, paletteRegistry, _, $, Promise){
+], function(PentahoTypeContext, _, $, Promise){
 
   /**
    * The Regex to extract the chart type from its ccc visualization type
@@ -137,7 +136,7 @@ define([
   var isValidVisualization = function (name) {
     return !!name && name != '' && !_.contains(_chartTypesBlackList, name);
   };
-  
+
   /**
    * Gets a Promise with the Visualization Type Extensions ready to be used when it is resolved
    *
@@ -163,7 +162,18 @@ define([
    * @returns {Array} The Array with the registered colors
    */
   var getColors = function (colorPalette) {
-    return paletteRegistry.get(colorPalette ? colorPalette : undefined).colors;
+    var palette;
+    if(!colorPalette) {
+      palette = _context.instances.getByType("pentaho/visual/color/palette", {
+        filter: function(onePalette) {
+          return onePalette.level === "nominal";
+        }
+      });
+    } else {
+      palette = _context.instances.getById(colorPalette);
+    }
+
+    return palette.colors.toArray().map(function(color) { return color.value; });
   };
 
   return {
@@ -172,5 +182,4 @@ define([
     getExtensionsPromise: getExtensionsPromise,
     getColors: getColors
   }
-
 });

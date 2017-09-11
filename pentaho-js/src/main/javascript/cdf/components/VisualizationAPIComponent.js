@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,13 +16,10 @@ define([
   './UnmanagedComponent',
   'pentaho/data/Table',
   '../PentahoTypeContext',
-  'pentaho/visual/base/view',
   'pentaho/shim/es6-promise'
-], function (_, UnmanagedComponent, Table, PentahoTypeContext, baseViewFactory, Promise) {
+], function (_, UnmanagedComponent, Table, PentahoTypeContext, Promise) {
 
   "use strict";
-
-  var BaseView = PentahoTypeContext.getInstance().get(baseViewFactory);
 
   return UnmanagedComponent.extend({
 
@@ -195,7 +192,11 @@ define([
 
       var me = this;
 
-      return BaseView.createAsync(viewSpec)
+      return PentahoTypeContext.getInstance()
+          .getAsync("pentaho/visual/base/view")
+          .then(function(BaseView) {
+            return BaseView.createAsync(viewSpec);
+          })
           .then(function(vizView) {
 
             me.vizView = vizView;
@@ -240,7 +241,7 @@ define([
 
         // Transactions can throw, when proposed changes are canceled by an event handler.
         try {
-          vizView.type.context.enterChange().using(syncWithinTxn, me);
+          vizView.$type.context.enterChange().using(syncWithinTxn, me);
         } finally {
           // Restore auto update.
           if(isAutoUpdate) vizView.isAutoUpdate = true;

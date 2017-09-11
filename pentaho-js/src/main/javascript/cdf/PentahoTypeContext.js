@@ -11,10 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 define([
-  "pentaho/type/Context"
-], function(Context) {
-
-  var _context;
+  "./_context!"
+], function(_context) {
 
   /**
    * @class cdf.PentahoTypeContext
@@ -30,9 +28,6 @@ define([
      * @return {!pentaho.type.Context} The types context.
      */
     getInstance: function() {
-      if(!_context) {
-        _context = new Context({application: "pentaho-cdf"});
-      }
       return _context;
     }
   };
