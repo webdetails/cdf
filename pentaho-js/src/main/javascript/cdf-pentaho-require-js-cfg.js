@@ -34,8 +34,8 @@
     requireCfg.paths['cdf'] = "cdf";
   }
 
-  var requireTypes = requireCfg.config["pentaho/service"] || (requireCfg.config["pentaho/service"] = {});
-  requireTypes["cdf/components/ccc/config/cdf.vizApi.conf"] = "pentaho.config.spec.IRuleSet";
+  var requireInstInfo = requireCfg.config["pentaho/instanceInfo"] || (requireCfg.config["pentaho/instanceInfo"] = {});
+  requireInstInfo["cdf/components/ccc/config/cdf.vizApi.conf"] = {type: "pentaho.config.spec.IRuleSet"};
 
 })();
 
