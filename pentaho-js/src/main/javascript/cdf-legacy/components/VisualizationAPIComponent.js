@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,19 +15,19 @@
 
 var VisualizationAPIComponent = (function() {
 
-  var BaseView;
   var Table;
+  var PentahoTypeContext;
 
   return UnmanagedComponent.extend({
 
     // Unit tests support.
     __reset: function () {
-      BaseView = null;
       Table = null;
+      PentahoTypeContext = null;
     },
 
     update: function () {
-      if (!BaseView)
+      if (!PentahoTypeContext)
         this.__requireFilesAndUpdate();
       else
         this._updateCore();
@@ -40,12 +40,11 @@ var VisualizationAPIComponent = (function() {
       require([
         "pentaho/data/Table",
         "cdf/PentahoTypeContext",
-        "pentaho/visual/base/view",
         "pentaho/shim/es6-promise"
-      ], function(_Table_, PentahoTypeContext, baseViewFactory) {
+      ], function(_Table_, _PentahoTypeContext) {
 
         Table = _Table_;
-        BaseView = PentahoTypeContext.getInstance().get(baseViewFactory);
+        PentahoTypeContext = _PentahoTypeContext;
 
         me._updateCore();
       });
@@ -227,7 +226,11 @@ var VisualizationAPIComponent = (function() {
 
       var me = this;
 
-      return BaseView.createAsync(viewSpec)
+      return PentahoTypeContext.getInstance()
+          .getAsync("pentaho/visual/base/view")
+          .then(function(BaseView) {
+            return BaseView.createAsync(viewSpec);
+          })
           .then(function(vizView) {
 
             me.vizView = vizView;
@@ -258,7 +261,6 @@ var VisualizationAPIComponent = (function() {
       var vizView = this.vizView;
 
       var me = this;
-
       return new Promise(function(resolve) {
 
         // Disable while setting values, to not trigger an update.
@@ -273,7 +275,7 @@ var VisualizationAPIComponent = (function() {
 
         // Transactions can throw, when proposed changes are canceled by an event handler.
         try {
-          vizView.type.context.enterChange().using(syncWithinTxn, me);
+          vizView.$type.context.enterChange().using(syncWithinTxn, me);
         } finally {
           // Restore auto update.
           if(isAutoUpdate) vizView.isAutoUpdate = true;

@@ -16,11 +16,47 @@ define(function() {
   /* global Promise:false */
 
   function Context() {
+    this.instances = {
+      getById: function(paletteId) {
+        switch(paletteId) {
+          case "pentaho/visual/color/palettes/nominalPrimary":
+          case "pentaho/visual/color/palettes/quantitativeBlue3":
+            return {
+              colors: {
+                toArray: function(){
+                  return [
+                    {value: "dummy"}
+                  ];
+                }
+              }
+            };
+        }
+      },
+
+      getByType: function(typeId) {
+        switch(typeId) {
+          case "pentaho/visual/color/palette":
+            return {
+              colors: {
+                toArray: function(){
+                  return [
+                    {value: "dummy"}
+                  ];
+                }
+              }
+            };
+        }
+      }
+    };
   }
+
+  Context.createAsync = function(envSpec) {
+    return Promise.resolve(new Context());
+  };
 
   Context.prototype.get = function (factory) {
     if(typeof factory === "function") {
-      return factory(this);
+      return factory.call(this);
     }
 
     return {
@@ -28,15 +64,54 @@ define(function() {
     }
   };
 
-  Context.prototype.getAsync = function() {
+  Context.prototype.getDependencyAsync = function() {
+    return Promise.resolve();
+  };
+
+  Context.prototype.getAsync = function(id) {
     var me = this;
+
+    if(id === "pentaho/visual/base/view") {
+      function BaseView() {}
+
+      BaseView.createAsync = function(viewSpec) {
+
+        var view = {
+          width: (viewSpec && viewSpec.width),
+          height: (viewSpec && viewSpec.height),
+          $type: {
+            context: me
+          },
+          model: {
+            $type: {
+              context: me
+            },
+            set: function(p, v) {
+              this[p] = v;
+            }
+          },
+
+          update: function () {
+            return Promise.resolve();
+          },
+
+          set: function(p, v) {
+            this[p] = v;
+          }
+        };
+
+        return Promise.resolve(view);
+      };
+
+      return Promise.resolve(BaseView);
+    }
 
     function Model() {
     }
 
     Model.prototype.set = function() {};
 
-    Model.prototype.type =  {
+    Model.prototype.$type =  {
       context: me
     };
 

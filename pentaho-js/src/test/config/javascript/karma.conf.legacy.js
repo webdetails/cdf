@@ -42,6 +42,7 @@ module.exports = function(config) {
       'target/test-javascript/cdf-legacy/lib/pen-shim.js',
 
       // Load using real requirejs
+      {pattern: 'target/test-javascript/cdf/_context.js', included: false},
       {pattern: 'target/test-javascript/cdf/PentahoTypeContext.js', included: false},
       {pattern: 'src/test/javascript/cdf/mocks/pentaho/**/*.js', included: false},
 

@@ -172,7 +172,8 @@ define([
         if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
           if (!cd.continuousColorAxisColors
               || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
-            cd.continuousColorAxisColors = BaseCccComponentExt.getColors("blue-3");
+            cd.continuousColorAxisColors =
+                BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3");
           }
           cd.discreteColorAxisColors = BaseCccComponentExt.getColors();
         }

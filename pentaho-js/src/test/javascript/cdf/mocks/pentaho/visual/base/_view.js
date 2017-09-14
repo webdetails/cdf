@@ -22,11 +22,11 @@ define(function () {
         var view = {
           width: (viewSpec && viewSpec.width),
           height: (viewSpec && viewSpec.height),
-          type: {
+          $type: {
             context: context
           },
           model: {
-            type: {
+            $type: {
               context: context
             },
             set: function(p, v) {
