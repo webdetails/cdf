@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -619,9 +619,12 @@ var DateInputComponent = BaseComponent.extend({
     //ToDo: stretch interval to catch defaultValue?..
     //Dashboards.getParameterValue(myself.parameter))
 
+    var $el = $('<input class="date-input" id="' + inputId + '"/>');
+    $el.val(inputValue);
+
     myself.placeholder()
-        .addClass('date-input-container')
-        .html('<input class="date-input" id="' + inputId + '" value="' + inputValue + '"/>');
+      .addClass('date-input-container')
+      .html($el);
 
     $(function(){
       myself.placeholder("input").datepicker({
