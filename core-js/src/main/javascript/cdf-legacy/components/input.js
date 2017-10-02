@@ -619,9 +619,12 @@ var DateInputComponent = BaseComponent.extend({
     //ToDo: stretch interval to catch defaultValue?..
     //Dashboards.getParameterValue(myself.parameter))
 
+    var $el = $('<input class="date-input" id="' + inputId + '"/>');
+    $el.val(inputValue);
+
     myself.placeholder()
-        .addClass('date-input-container')
-        .html('<input class="date-input" id="' + inputId + '" value="' + inputValue + '"/>');
+      .addClass('date-input-container')
+      .html($el);
 
     $(function(){
       myself.placeholder("input").datepicker({
