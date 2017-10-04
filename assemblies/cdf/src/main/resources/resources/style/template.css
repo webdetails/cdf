@@ -47,7 +47,6 @@ body {
 	height: 39px;
 	margin: 10px 0px 20px 50px;
 	display: inline-block;
-	background: url('images/logo.png') no-repeat left;
 	float: left;
 }
 
@@ -207,8 +206,8 @@ body {
 }
 
 .webdetailsFooter > .webdetailsFooterWebdetails {
-	background: url('images/logobottomWebdetails.png') center no-repeat;
 	width: 292px;
+	display: none;
 }
 
 .webdetailsFooter > .webdetailsFooterCtools {
@@ -257,7 +256,6 @@ body {
 .pentahoLogo {
 
 	display: block;
-	background: url('images/pentaho.png') no-repeat center center;
 	height: 27px;
 	width: 100%;
 }
