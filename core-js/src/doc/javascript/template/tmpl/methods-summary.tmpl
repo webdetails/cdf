@@ -16,6 +16,7 @@ var methods = obj;
         if(methods) {
           methods.forEach(function(method) {
             if(!method) { return; }
+            var isConstructor = method.kind === 'class' && !method.static;
 
             // hardcoded fix for "Dashboard.Blueprint", "Dashboard.Bootstrap" and "Dashboard.Clean"
             method.parsedName = method.parsedName.replace(/"?(Dashboard)\.(Blueprint|Bootstrap|Clean)"?/, "$1");
@@ -33,7 +34,7 @@ var methods = obj;
                   } ?>
                 <?js= self.partial('modifiers.tmpl', method) ?>  
               </td>
-              <td> <?js= method.summary ?> </td>          
+              <td> <?js= (isConstructor ? method.constructorSummary : method.summary) ?> </td>
             </tr>
         <?js }); 
         }?>           

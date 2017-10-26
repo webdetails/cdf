@@ -16,10 +16,11 @@ var list = obj;
         if(list) {
           list.forEach(function(item) {
             if(!item) { return; }
+            var isClass = item.kind === "class";
             ?>
             <tr>
               <td> <?js= self.linkto(item.longname, item.parsedName) ?> </td>
-              <td> <?js= item.summary ?> </td>          
+              <td> <?js= (isClass ? item.classSummary : item.summary) ?> </td>
             </tr>
         <?js }); 
         }?>           
