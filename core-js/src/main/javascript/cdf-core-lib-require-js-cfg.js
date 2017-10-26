@@ -20,7 +20,14 @@
   if(!requireCfg.map['cdf']) requireCfg.map['cdf'] = {};
 
   //RequireJS css! loader plugin 0.1.2
-  requireCfg.map['*']['css'] = 'cdf/lib/require-css/css';
+  // Do NOT overwrite common-ui's global mapping.
+  // Otherwise, files bundled with the common-ui mapping would not
+  // be found in the bundle under the cdf css plugin mapping and cause
+  // these to be fetched again, or worse, if `bundles` is used,
+  // to possibly fail loading altogether.
+  if(requireCfg.map['*']['css'] === undefined) {
+    requireCfg.map['*']['css'] = 'cdf/lib/require-css/css';
+  }
 
   requireCfg.config = requireCfg.config || {};
 
@@ -380,7 +387,7 @@
   requireConfig['cdf/lib/moment'] = {
     noGlobal: true
   };
- 
+
   //mapping all moment requests from inside cdf to 'cdf/lib/moment'
   requireCfg.map['cdf']['moment'] = 'cdf/lib/moment';
 
