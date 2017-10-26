@@ -2,12 +2,14 @@
 var data = obj;
 var self = this;
 var paramName;
+var module;
 if(data.amd != null) {
   // hardcoded fix for "Dashboard.Blueprint", "Dashboard.Bootstrap" and "Dashboard.Clean"
   paramName = data.name.replace(/"?(Dashboard)\.(Blueprint|Bootstrap|Clean)"?/, "$1");
+  module =  data.amd.module;
 ?>
 	<p>
 		<strong>AMD Module</strong>
 	</p>
-	<pre function="syntax.javascript">require(["<?js= data.amd.value ?>"], function(<?js= paramName ?>) { /* code goes here */ });</pre>
+	<pre function="syntax.javascript">require(["<?js= module ?>"], function(<?js= paramName ?>) { /* code goes here */ });</pre>
 <?js } ?>

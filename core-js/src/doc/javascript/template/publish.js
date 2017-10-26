@@ -12,8 +12,8 @@ var util = require('util');
 
 //override htmlsafe function
 helper.htmlsafeOrig = helper.htmlsafe;
-helper.htmlsafe = function(str){
-    return helper.htmlsafeOrig(str).replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+helper.htmlsafe = function( string ) {
+    return helper.htmlsafeOrig( string ).replace(/>/g, '&gt;').replace(/\n/g, '<br>');
 };
 
 var htmlsafe = helper.htmlsafe;
@@ -379,6 +379,7 @@ function registerTypeHelpers(view) {
   view._typeBuilder = typeBuilder;
 
   var mdnJsTypeBaseURL = "http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/";
+  var mdnJsWindowBaseURL = "https://developer.mozilla.org/en-US/docs/Web/API/Window/";
   var mdnJsTypes = {
     "string" : true,  "String": true,
     "number": true,   "Number": true,
@@ -409,6 +410,10 @@ function registerTypeHelpers(view) {
     "Map": true, "WeakMap": true,
     "Set": true, "WeakSet": true,
     "Math": true, "Symbol": true
+  };
+
+  var mdnJsWindow = {
+    "URL": true
   };
 
   var backboneTypeBaseURL = "http://backbonejs.org/#";
@@ -600,12 +605,16 @@ function registerTypeHelpers(view) {
     var jsTypeLower = jsType.toLowerCase();
 
     var isMdnJsType = mdnJsTypes[jsType];
+    var isMdnJsWindow = mdnJsWindow[jsType];
     var isJQueryType = typeof jQueryTypes[jsTypeLower] !== "undefined";
     var isBackboneType = BACKBONE_TYPE_REGX.exec(jsType) !== null;
 
     var link;
     if (isMdnJsType) {
       link = mdnJsTypeBaseURL + jsType;
+
+    } else if(isMdnJsWindow) {
+      link = mdnJsWindowBaseURL + jsType;
 
     } else if (isBackboneType) {
       link = backboneTypeBaseURL + jsType.split(".")[1];
@@ -716,15 +725,15 @@ exports.publish = function(taffyData, opts, tutorials) {
     });
 
     /*
-     * Handle the defaul values for non optional properties correctly. 
-     * 
+     * Handle the defaul values for non optional properties correctly.
+     *
      */
     data().each(function(doclet) {
         if (doclet.properties) {
             doclet.properties = doclet.properties.map(function(property) {
                 var separator = " - ",
                     separatorLength = separator.length;
-                
+
                 var defaultvalue = property.defaultvalue;
                 var description = property.description;
 
@@ -739,8 +748,8 @@ exports.publish = function(taffyData, opts, tutorials) {
                     description: description,
                     type: property.type,
                     name: property.name
-                }  
-            });                  
+                }
+            });
         }
     });
 
@@ -867,21 +876,16 @@ exports.publish = function(taffyData, opts, tutorials) {
     // handle summary, description and class description default values properly
     data().each(function(doclet) {
         if(!doclet.ignore) {
-            if(!doclet.summary && (desc = (doclet.description || doclet.classdesc))) {
-                //Try to split when a "." or a ".</htmlTag>" is found.
-                //TODO: When markdown is present it fails the split and dumps all description in the summary.
-                var split = desc.split(/(\.(<\/?([^<]+)>)?\s*)$/)
-                doclet.summary = split[0] + (split[1] || "");
-            }
-
             var checkP = function(prop) {
-                if(!prop) return;
+                if (!prop) return;
+                var START_P = "<p>";
+                var END_P   = "</p>";
 
-                prop = prop.replace(/<p><p>/g, "<p>");
+                prop = prop.replace(/<p><p>/g, START_P);
 
-                if(prop.indexOf("<p>") == -1) {
-                    return "<p>" + prop + "</p>";
-                } 
+                if (prop.indexOf(START_P) === -1) {
+                    return START_P + prop + END_P;
+                }
 
                 return prop;
             };
@@ -898,6 +902,11 @@ exports.publish = function(taffyData, opts, tutorials) {
                 return string;
             };
 
+            if ( doclet.kind === "class" ) {
+              doclet.classSummary = replaceCode(checkP(doclet.classSummary));
+              doclet.constructorSummary = replaceCode(checkP(doclet.constructorSummary));
+            }
+
             doclet.summary = replaceCode(checkP(doclet.summary));
             doclet.description = replaceCode(checkP(doclet.description));
             doclet.classdesc = replaceCode(checkP(doclet.classdesc));
@@ -910,7 +919,7 @@ exports.publish = function(taffyData, opts, tutorials) {
             var split = function(str, sep) {
                 if(str) {
                     return str.split(sep).join('');
-                } 
+                }
             };
 
             //dont split for code
@@ -926,22 +935,22 @@ exports.publish = function(taffyData, opts, tutorials) {
             if(doclet.summary && doclet.summary.indexOf("syntax.javascript") === -1) {
                 doclet.summary = split(doclet.summary, '<br>');
             }
-            
-            doclet.parsedName = split(doclet.name, '"')
+
+            doclet.parsedName = split(doclet.name, '"');
             doclet.parsedLongname = split(doclet.longname, '"')
         }
     });
 
     var members = helper.getMembers(data);
     members.tutorials = tutorials.children;
-    
+
     // add template helpers
     view.find = find;
     view.linkto = linkto;
     view.resolveAuthorLinks = resolveAuthorLinks;
     view.tutoriallink = tutoriallink;
     view.htmlsafe = htmlsafe;
-    
+
     // once for all
     view.nav = buildNav(findMembers(data, 'namespace'));
     attachModuleSymbols( find({ longname: {left: 'module:'} }), members.modules );

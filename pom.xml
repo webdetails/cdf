@@ -18,11 +18,13 @@
     <module>pentaho-js</module>
     <module>assemblies</module>
   </modules>
+
   <scm>
     <connection>scm:git:git@github.com:webdetails/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:webdetails/${project.artifactId}.git</developerConnection>
     <url>scm:git:git@github.com:webdetails/${project.artifactId}.git</url>
   </scm>
+
   <distributionManagement>
     <site>
       <id>pentaho.public.snapshot.repo</id>
