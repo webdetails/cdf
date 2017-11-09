@@ -43,6 +43,11 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           }
         }
       }
+	  if (myself.useFirstValue !== undefined && myself.useFirstValue == false){
+		  if (!hasCurrentVal){
+			  myself.defaultIfEmpty = false;
+		  }
+	  }
       // if there will be no selected value, but we're to default if empty, select the first
       if(!hasCurrentVal && myself.defaultIfEmpty) {
         currentValArray = [myArray[0][vid]];
@@ -71,7 +76,7 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
         }
 
         if(myself.type == 'radio' || myself.type.toLowerCase() == 'radiocomponent') {
-          if((i == 0 && !hasCurrentVal) || (hasCurrentVal && (myArray[i][vid] == currentVal))) {
+          if((i == 0 && !hasCurrentVal && myself.defaultIfEmpty) || (hasCurrentVal && (myArray[i][vid] == currentVal))) {
             input.prop('checked', true);
           }
           input.attr({type: "radio"});
