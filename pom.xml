@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.6-76</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.6-76</version>
   <packaging>pom</packaging>
   <modules>
     <module>core</module>
@@ -31,21 +31,21 @@
     </site>
   </distributionManagement>
   <properties>
-    <project.stage>master</project.stage>
-    <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
-    <project.github-name>cdf</project.github-name>
-    <global.require.file></global.require.file>
-    <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
-    <dependency.dom4j.revision>1.6.1</dependency.dom4j.revision>
-    <dependency.cpf.revision>${project.version}</dependency.cpf.revision>
-    <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
-    <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
-    <requirejs.config.files.pattern></requirejs.config.files.pattern>
-    <dependency.json.revision>7.1-SNAPSHOT</dependency.json.revision>
-    <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
     <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
+    <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
+    <dependency.cpf.revision>${project.version}</dependency.cpf.revision>
+    <dependency.json.revision>7.1.0.6-76</dependency.json.revision>
+    <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
+    <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
     <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
+    <dependency.dom4j.revision>1.6.1</dependency.dom4j.revision>
+    <global.require.file></global.require.file>
+    <requirejs.config.files.pattern></requirejs.config.files.pattern>
+    <project.stage>master</project.stage>
+    <project.github-name>cdf</project.github-name>
+    <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
     <dependency.jxl.revision>2.6.12</dependency.jxl.revision>
+    <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -55,8 +55,8 @@
         <version>${dependency.cpf.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -77,8 +77,8 @@
         <version>${dependency.commons-logging.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -88,8 +88,8 @@
         <version>${dependency.commons-io.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -99,8 +99,8 @@
         <version>${dependency.commons-lang.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -110,8 +110,8 @@
         <version>${dependency.dom4j.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -121,8 +121,8 @@
         <version>${dependency.json.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -132,8 +132,8 @@
         <version>${dependency.hibernate.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -143,27 +143,25 @@
         <version>${dependency.servlet-api.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
-
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
         <version>${dependency.mockito-all.revision}</version>
         <scope>test</scope>
       </dependency>
-
       <dependency>
         <groupId>jexcelapi</groupId>
         <artifactId>jxl</artifactId>
         <version>${dependency.jxl.revision}</version>
         <exclusions>
           <exclusion>
-            <groupId>*</groupId>
             <artifactId>*</artifactId>
+            <groupId>*</groupId>
           </exclusion>
         </exclusions>
       </dependency>
