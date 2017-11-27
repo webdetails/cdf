@@ -70,7 +70,7 @@ var InputBaseComponent = UnmanagedComponent.extend({
 var SelectBaseComponent = InputBaseComponent.extend({
   visible: false,
 
-  //defaultIfEmpty: [false]
+  //useFirstValue:
   //isMultiple: [true]
   //size: when isMultiple==true, the default value is the number of possible values
   //externalPlugin:
@@ -161,12 +161,12 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
     /* If the current value for the parameter is invalid or empty,
      * we need to pick a sensible default.
-     * If defaultIfEmpty is true, the first possible value is selected,
+     * If useFirstValue is `true`, the first possible value is selected,
      * otherwise, nothing is selected.
      */
     var isEmpty    = currentVals == null;
     var hasChanged = !currentIsValid;
-    if(isEmpty && this.defaultIfEmpty && firstVal != null) {
+    if(isEmpty && this.useFirstValue && firstVal != null) {
       // Won't remain empty
       currentVals = [firstVal];
       hasChanged = true;
@@ -420,7 +420,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
 });
 
 var SelectComponent = SelectBaseComponent.extend({
-  defaultIfEmpty: true,
+  useFirstValue: true,
   getValue : function() {
     return this.placeholder("select").val();
   }
@@ -1064,15 +1064,14 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
           }
         }
       }
-    // if there will be no selected value, but we're to default if empty, select the first
-    if(!hasCurrentVal && this.defaultIfEmpty){
+    // if empty and use first value, set the first value and update the parameter
+    if(!hasCurrentVal && this.useFirstValue){
       currentValArray = [myArray[0][vid]];
 
       this.currentVal = currentValArray;
       Dashboards.setParameter(this.parameter,currentValArray);
       Dashboards.processChange(this.name);
     }
-    // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
 
 
     selectHTML += "<ul class='" + ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal") + "'>"
@@ -1096,7 +1095,7 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
         }
         selectHTML += " type='radio'";
       }else{
-        if ((i == 0 && !hasCurrentVal && this.defaultIfEmpty) ||
+        if ((i == 0 && !hasCurrentVal && this.useFirstValue) ||
           (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
         }
@@ -1224,7 +1223,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         }
       }
     }
-    if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.defaultIfEmpty)) && myArray.length > 0){
+    if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.useFirstValue)) && myArray.length > 0){
       //select first value
       if((currentVal == null || currentVal == "" || ((currentVal !== firstVal) && myArray.length == 1) ||
         (typeof(currentVal) == "object" && currentVal.length == 0)) && this.parameter){
