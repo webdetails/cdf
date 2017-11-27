@@ -37,7 +37,7 @@ define([
           separator: ",&nbsp;",
           valueAsId: true,
           htmlObject: "sampleObject",
-          defaultIfEmpty: true
+          useFirstValue: true
         });
         dashboard.addComponent(comp);
 
@@ -81,7 +81,7 @@ define([
           valueAsId: false,
           htmlObject: "sampleObject",
           verticalOrientation: true,
-          defaultIfEmpty: true
+          useFirstValue: true
         });
         dashboard.addComponent(comp);
 
@@ -127,7 +127,7 @@ define([
           htmlObject: "sampleObject",
           executeAtStart: true,
           verticalOrientation: true,
-          defaultIfEmpty: true
+          useFirstValue: true
         });
         dashboard.addComponent(comp);
 
