@@ -22,12 +22,12 @@ define(['./SelectBaseComponent'], function(SelectBaseComponent) {
    */
   return SelectBaseComponent.extend(/** @lends cdf.components.SelectComponent# */{
     /**
-     * Flag indicating if the default should show when the value is empty.
+     * Flag indicating if the first value available should be selected when the value is empty.
      *
      * @type {boolean}
      * @default
      */
-    defaultIfEmpty: true,
+    useFirstValue: true,
 
     /**
      * Gets the value of the `select` placeholder.

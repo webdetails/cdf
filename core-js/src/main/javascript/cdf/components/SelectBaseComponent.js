@@ -38,7 +38,7 @@ define([
      */
     visible: false,
 
-    //defaultIfEmpty: [false]
+    //useFirstValue:
     //isMultiple: [true]
     //size: when isMultiple==true, the default value is the number of possible values
     //externalPlugin:
@@ -131,12 +131,12 @@ define([
 
       /* If the current value for the parameter is invalid or empty,
        * we need to pick a sensible default.
-       * If defaultIfEmpty is true, the first possible value is selected,
+       * If useFirstValue is `true`, the first possible value is selected,
        * otherwise, nothing is selected.
        */
       var isEmpty = currentVals == null;
       var hasChanged = !currentIsValid;
-      if(isEmpty && this.defaultIfEmpty && firstVal != null) {
+      if(isEmpty && this.useFirstValue && firstVal != null) {
         // Won't remain empty
         currentVals = [firstVal];
         hasChanged = true;
