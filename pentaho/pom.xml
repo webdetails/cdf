@@ -17,7 +17,7 @@
     <dependency.spring-core.revision>4.3.2.RELEASE</dependency.spring-core.revision>
     <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <dependency.spring-security-core.revision>4.1.3.RELEASE</dependency.spring-security-core.revision>
-    <dependency.pentaho-platform.revision>8.1-SNAPSHOT</dependency.pentaho-platform.revision>
+    <platform.version>8.1-SNAPSHOT</platform.version>
   </properties>
   <dependencies>
     <dependency>
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
-      <version>${dependency.pentaho-platform.revision}</version>
+      <version>${platform.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>*</artifactId>
@@ -89,7 +89,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${dependency.pentaho-platform.revision}</version>
+      <version>${platform.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>*</artifactId>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
-      <version>${dependency.pentaho-platform.revision}</version>
+      <version>${platform.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>*</artifactId>
@@ -111,7 +111,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-extensions</artifactId>
-      <version>${dependency.pentaho-platform.revision}</version>
+      <version>${platform.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>*</artifactId>
