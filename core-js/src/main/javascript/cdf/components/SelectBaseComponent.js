@@ -136,6 +136,12 @@ define([
        */
       var isEmpty = currentVals == null;
       var hasChanged = !currentIsValid;
+	  
+	  if (this.useFirstValue !== undefined && this.useFirstValue == false){
+		  if (isEmpty){
+			  this.defaultIfEmpty = false;
+		  }
+	  }
       if(isEmpty && this.defaultIfEmpty && firstVal != null) {
         // Won't remain empty
         currentVals = [firstVal];

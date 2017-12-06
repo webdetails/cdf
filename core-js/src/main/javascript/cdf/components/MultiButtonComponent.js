@@ -143,6 +143,10 @@ define([
           if(!myself.isMultiple) { break; }
         }
       }
+      if (myself.useFirstValue !== undefined && myself.useFirstValue == false){
+        foundDefault = true;
+        myself.defaultIfEmpty = false;
+	  }
       if(((!foundDefault && !myself.isMultiple) || (!foundDefault && myself.isMultiple && myself.defaultIfEmpty))
           && myArray.length > 0) {
 
