@@ -43,15 +43,15 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           }
         }
       }
-      // if there will be no selected value, but we're to default if empty, select the first
-      if(!hasCurrentVal && myself.defaultIfEmpty) {
+      // if empty and use first value, set the first value and update the parameter
+      if(!hasCurrentVal && myself.useFirstValue) {
         currentValArray = [myArray[0][vid]];
 
         myself.currentVal = currentValArray;
         myself.dashboard.setParameter(myself.parameter, currentValArray);
         myself.dashboard.processChange(myself.name);
       }
-      // (currentValArray == null && myself.defaultIfEmpty)? firstVal : null
+      // (currentValArray == null && myself.useFirstValue)? firstVal : null
 
       var elClass = (myself.verticalOrientation) ? "toggleGroup vertical" : "toggleGroup horizontal";
       var selectHTML = $('<ul/>').attr({class: elClass});
@@ -76,7 +76,7 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           }
           input.attr({type: "radio"});
         } else {
-          if((i == 0 && !hasCurrentVal && myself.defaultIfEmpty) || (hasCurrentVal && isSelected)) {
+          if((i == 0 && !hasCurrentVal && myself.useFirstValue) || (hasCurrentVal && isSelected)) {
             input.prop('checked', true);
           }
           input.attr({type: "checkbox"});
