@@ -143,7 +143,7 @@ define([
           if(!myself.isMultiple) { break; }
         }
       }
-      if(((!foundDefault && !myself.isMultiple) || (!foundDefault && myself.isMultiple && myself.defaultIfEmpty))
+      if(((!foundDefault && !myself.isMultiple) || (!foundDefault && myself.isMultiple && myself.useFirstValue))
           && myArray.length > 0) {
 
         //select first value
