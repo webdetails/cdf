@@ -420,6 +420,45 @@
         // Exclude css files
 
       ]
+    },
+    {
+      name: "cdf/components/filter/FilterComponent",
+      exclude: [
+        // CSSs, otherwise paths (e.g. background images) are rewritten relative to the page and not the CSS file path
+        "css!cdf/lib/impromptu/jquery-impromptu",
+        "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
+        "css!cdf/Dashboard",
+        "css!cdf/dashboard/Dashboard.legacy",
+        "css!cdf/dashboard/Popups",
+        "css!cdf/dashboard/Dashboard.notifications",
+        "css!cdf/components/filter/styles/filter",
+        // CDF dependencies (overhead, these might already have been loaded)
+        "cdf/Logger",
+        "cdf/lib/jquery",
+        "cdf/lib/cdf.jquery.i18n",
+        "cdf/lib/sanitizer",
+        "cdf/lib/Base",
+        "cdf/lib/mustache",
+        "cdf/lib/BaseSelectionTree",
+        "cdf/lib/Tree",
+        "cdf/lib/BaseEvents",
+        "cdf/lib/shims",
+        "cdf/lib/base64",
+        "amd!cdf/lib/underscore",
+        "amd!cdf/lib/backbone",
+        "amd!cdf/lib/jquery.mCustomScrollbar",
+        "cdf/AddIn",
+        "cdf/Dashboard.Clean",
+        "cdf/dashboard/Dashboard.context.ext",
+        "cdf/dashboard/Dashboard.notifications.ext",
+        "cdf/dashboard/Dashboard.storage.ext",
+        "cdf/dashboard/Dashboard.views.ext",
+        "cdf/dashboard/Utf8Encoder",
+        "cdf/components/UnmanagedComponent",
+        "cdf/components/XactionComponent.ext",
+        "cdf/queries/CdaQuery.ext",
+        "cdf/queries/XmlaQuery.ext"
+      ]
     }
   ]
-})
+});
