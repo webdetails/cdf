@@ -169,6 +169,7 @@ define([
         }
         queryDefinition['param' + name] = paramValue;
       });
+
       queryDefinition.path = this.getOption('file');
       queryDefinition.dataAccessId = this.getOption('id');
       queryDefinition.outputIndexId = this.getOption('outputIdx');
@@ -176,6 +177,7 @@ define([
       queryDefinition.pageStart = this.getOption('page');
       queryDefinition.sortBy = this.getOption('sortBy');
       queryDefinition.paramsearchBox = this.getOption('searchPattern');
+
       return queryDefinition;
     },
 

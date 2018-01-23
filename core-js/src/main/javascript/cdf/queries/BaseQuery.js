@@ -421,10 +421,10 @@ define([
         var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = outerCallback || this.getOption('successCallback');
 
-        myself.setOption('lastProcessedResultSet', clone);
+        this.setOption('lastProcessedResultSet', clone);
         var result = callback(clone);
         if(result !== undefined && result !== clone) {
-          myself.setOption('lastProcessedResultSet', result);
+          this.setOption('lastProcessedResultSet', result);
         }
         return result;
       } else {

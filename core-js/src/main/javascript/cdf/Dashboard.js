@@ -32,6 +32,7 @@ define([
   './queries/CpkQuery',
   './queries/CdaQuery',
   './queries/XmlaQuery',
+  './queries/SolrQuery',
   './components/BaseComponent',
   './components/UnmanagedComponent',
   'css!./Dashboard'
