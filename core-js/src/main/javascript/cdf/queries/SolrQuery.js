@@ -127,7 +127,13 @@ define([
             var elem = docElem[keyElem];
             //deal with nesting
             if(elem === undefined){
-              elem = _.get(docElem, keyElem);
+              // elem = _.get(docElem, keyElem);
+              var keys = keyElem.split('.');
+              var node = docElem;
+              keys.forEach(function (key, keyIndex) {
+                node = node[key];
+              });
+              elem = node;
             }
             docRow.push(Array.isArray(elem) ? elem[0] : elem)
           });
