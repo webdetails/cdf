@@ -29,9 +29,9 @@ define([
     defaults: {
       endpoint: SolrQueryExt.getEndpoint(),
       collection: SolrQueryExt.getCollection(),
-      successCallback: function (data) {
-        console.log("i'm here: ",data);
-      },
+      solrQuery: "*:*",
+      requestHandler: "select",
+      responseType: "json",
       ajaxOptions: {
         async: true,
         type: "GET",
@@ -47,17 +47,15 @@ define([
     init: function(options) {
       Logger.log("Apache Solr - Initializing Apache Solr Query");
 
-      var endpoint = options.endpoint !== null ? options.endpoint : this.getOption("endpoint");
-      var collection = options.collection !== null ? options.collection : this.getOption("collection");
-      var requestHandler = options.requestHandler !== null ? options.requestHandler : this.getOption("requestHandler");
-      var responseType = options.responseType !== null ? options.responseType : this.getOption("responseType");
-      var solrQuery = options.solrQuery !== null ? options.solrQuery : this.getOption("solrQuery");
+      Object.keys(options).forEach(function(opt) {
+        var value = options[opt] || this.getOption(opt);
 
-      if ( !endpoint.endsWith('/') ) {
-        endpoint = endpoint + "/";
-      }
+        if (value != null) {
+          this.setOption(opt, value);
+        }
+      }, this);
 
-      this.setOption( 'url', endpoint + collection + '/' + requestHandler + '?q=' + solrQuery + '&wt=' + responseType);
+      this.setOption("url", this._buildRequestUrl());
     },
 
     /** @override */
@@ -73,63 +71,74 @@ define([
     getSuccessHandler: function(callback) {
 
       var baseSuccessCallback = this.base(callback);
+      var myself = this;
 
       return function(json) {
+        if (!!json.metadata && !!json.resultset) {
+          console.log("Received mock data already in correct format!");
+          return baseSuccessCallback(json);
+        }
+
+        var data = {
+          resultset: [],
+          metadata: []
+        };
 
         // Transform into CDA format
         var jsonObjects = JSON.parse(json);
-        var soltResponse = jsonObjects.response;
-        var docs = soltResponse.docs;
 
-        /*
-         *  TODO: This is a mock schema, replace with real schema from CDE editor
-         **/
-        var cdeSchema = {
-          "columnNames":[
-            "Winner",
-            "WRank"
-          ],
-          "columnTypes":[
-            "string",
-            "int"
-          ],
-          "columnPaths":[
-            "Winner",
-            "WRank"
-          ]
-        }
+        var solrResponse = jsonObjects.response;
+        var docList = solrResponse && solrResponse.docs;
 
-
-        var cdaData = {
-          "resultset":[],
-          "metadata":[]
-        }
+        var schema = myself._getSchema();
 
         // Get Metadata
-        var colIndex = 0;
-        cdeSchema.columnNames.forEach(function(elem, index){
-          var metadataRow = {
-            "colName": elem,
-            "colType": cdeSchema.columnTypes[index],
-            "colIndex": colIndex++
-          }
-          cdaData.metadata.push(metadataRow);
+        schema.columnNames.forEach(function(column, index) {
+          data.metadata.push({
+            "colName": column,
+            "colType": schema.columnTypes[index],
+            "colIndex": index
+          });
         });
 
         // Get Resultset
-        docs.forEach(function(docElem, docIndex){
-          var docRow = [];
-          cdeSchema.columnPaths.forEach(function(keyElem, keyIndex){
-            var elem = docElem[keyElem];
-            docRow.push(Array.isArray(elem) ? elem[0] : elem)
+        docList.forEach(function(doc) {
+          var row = [];
+          schema.columnPaths.forEach(function(path) {
+            var value = doc[path];
+            row.push(Array.isArray(value) ? value[0] : value);
           });
-          cdaData.resultset.push(docRow);
+
+          data.resultset.push(row);
         });
 
-
-        // console.log(cdaData); // TODO: Delete, was used for debugging
-        baseSuccessCallback(cdaData);
+        baseSuccessCallback(data);
       };
+    },
+
+    _getSchema: function() {
+      return {
+        columnNames: this.getOption("colHeaders"),
+        columnTypes: this.getOption("colTypes"),
+        columnPaths: this.getOption("colHeaders")  // needs a property of its own, or removed
+      };
+    },
+
+    _buildRequestUrl: function() {
+      var endpoint = this.getOption("endpoint");
+      if ( endpoint.endsWith('/') ) {
+        endpoint = endpoint.slice(0, -1);
+      }
+
+      var collection = this.getOption("collection");
+      var requestHandler = this.getOption("requestHandler");
+      var solrQuery = this.getOption("solrQuery");
+      var responseType = this.getOption("responseType");
+
+
+      return endpoint + "/" + collection + "/" + requestHandler + "?" +
+        "q=" + solrQuery +
+        "wt=" + responseType;
     }
   };
 
