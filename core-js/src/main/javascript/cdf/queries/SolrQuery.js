@@ -15,9 +15,8 @@ define([
     './BaseQuery',
     './SolrQuery.ext',
     '../dashboard/Dashboard.query',
-    '../Logger',
-    'amd!../lib/lodash'
-], function(BaseQuery, SolrQueryExt, Dashboard, Logger,_) {
+    '../Logger'
+], function(BaseQuery, SolrQueryExt, Dashboard, Logger) {
   "use strict";
 
   var SOLR_TYPE = "solr";
@@ -88,18 +87,15 @@ define([
         var cdeSchema = {
           "columnNames":[
             "Winner",
-            "WRank",
-            "nested"
+            "WRank"
           ],
           "columnTypes":[
             "string",
-            "int",
             "int"
           ],
           "columnPaths":[
             "Winner",
-            "WRank",
-            "nested.element.very.deep"
+            "WRank"
           ]
         }
 
@@ -125,16 +121,6 @@ define([
           var docRow = [];
           cdeSchema.columnPaths.forEach(function(keyElem, keyIndex){
             var elem = docElem[keyElem];
-            //deal with nesting
-            if(elem === undefined){
-              // elem = _.get(docElem, keyElem);
-              var keys = keyElem.split('.');
-              var node = docElem;
-              keys.forEach(function (key, keyIndex) {
-                node = node[key];
-              });
-              elem = node;
-            }
             docRow.push(Array.isArray(elem) ? elem[0] : elem)
           });
           cdaData.resultset.push(docRow);
