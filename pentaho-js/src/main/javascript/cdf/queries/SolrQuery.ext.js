@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,10 +16,20 @@ define([], function() {
   "use strict";
 
   return {
+    /**
+     * Gets the Apache Solr Service Endpoint
+     *
+     * @return {string} the Solr Endpoint
+     */
     getEndpoint: function() {
-      return "http://localhost:1337/solr/";
+      return "http://172.20.43.56:8983/solr";
     },
 
+    /**
+     * Gets the Apache Solr Service Collection
+     *
+     * @return {string} the Solr Collection
+     */
     getCollection: function() {
       return "tenis";
     }
