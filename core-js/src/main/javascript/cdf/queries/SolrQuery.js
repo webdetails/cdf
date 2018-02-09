@@ -18,12 +18,63 @@ define([
 ], function(BaseQuery, Dashboard, SolrQueryExt) {
   "use strict";
 
-  var SOLR_TYPE = "solr";
+  var SOLR_CLASS_NAME = "solr";
+  var SOLR_CLASS_LABEL = "Apache Solr Query";
 
-  var solrQueryOpts = {
-    name: "solr",
+  /**
+   * @class cdf.queries.SolrQuery
+   * @summary Class that represents a Solr query.
+   *
+   * @classdesc <p>Class that represents a Solr query. This class will be registered
+   *            globally using the static dashboard function
+   *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
+   *            <p>The constructor of this class is created dynamically and registered
+   *            in the dashboard query container
+   *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
+   *            <p>To create a new Solr query use the dashboard function
+   *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
+   *
+   * @staticClass
+   * @extends cdf.queries.BaseQuery
+   *
+   * @example
+   * dashboard.addDataSource("mySolrQuery", {
+   *   queryType:      "solr",
+   *
+   *   endpoint:       "http://some.domain/solr",
+   *   collection:     "solr_collection",
+   *
+   *   requestHandler: "select",
+   *   responseType:   "json",
+   *   solrQuery:      "*:*"
+   * });
+   *
+   * dashboard.getQuery({dataSource: "mySolrQuery"}).doQuery(successCallback, errorCallback);
+   */
+  var solrQueryOpts = /** @lends cdf.queries.SolrQuery# */{
+    // region Properties
 
-    label: "Apache Solr Query",
+    /**
+     * Gets the Solr Query class name
+     *
+     * @type {string}
+     * @readonly
+     */
+    _name: SOLR_CLASS_NAME,
+    get name() {
+      return this._name;
+    },
+
+    /**
+     * Gets the Solr Query class label.
+     *
+     * @type {string}
+     * @readonly
+     */
+    _label: SOLR_CLASS_LABEL,
+    get label() {
+      return this._label;
+    },
 
     defaults: {
       // Datasource
@@ -49,9 +100,11 @@ define([
       }
     },
 
-    // ---- methods
+    // endregion
 
-    /** @override */
+    // region Public Methods
+
+    /** @Override */
     init: function(options) {
       Object.keys(options).forEach(function(opt) {
         var value = options[opt] || this.getOption(opt);
@@ -61,30 +114,20 @@ define([
         }
       }, this);
 
-      this.setOption("url", this._buildRequestUrl());
+      this.setOption("url", this.__buildSolrUrl());
     },
 
-    /** @override */
+    /** @Override */
     buildQueryDefinition: function(overrides) {
       return {
-        // Datasource
-        endpoint: this.getOption('endpoint'),
-        collection: this.getOption('collection'),
-
-        solrQuery: this.getOption('solrQuery'),
-        requestHandler: this.getOption('requestHandler'),
-        responseType: this.getOption('responseType'),
-
-        // Schema
-        sColumnNames: this.getOption('sColumnNames'),
-        sColumnTypes: this.getOption('sColumnTypes'),
-        sColumnPaths: this.getOption('sColumnPaths'),
-
-        url: this.getOption('url')
+        start: 0,
+        rows:  this.getOption("rowsLimit"),
+        wt:    this.getOption('responseType'),
+        q:     this.getOption('solrQuery')
       };
     },
 
-    /** @override */
+    /** @Override */
     getSuccessHandler: function(callback) {
       var baseSuccessCallback = this.base(callback);
       var myself = this;
@@ -102,20 +145,16 @@ define([
         }
 
         // Result in CDA format
-        var data = {
-          resultset: [],
-          metadata: [],
-          queryInfo: {}
-        };
+        var data = { resultset: [], metadata: [], queryInfo: {} };
 
         if (jsonObjects) {
           var solrResponse = jsonObjects.response;
-          var docList = solrResponse && solrResponse.docs;
+          var docList = solrResponse ? solrResponse.docs : [];
 
-          var schema = myself._getSchema();
+          var schema = myself.__buildSchema();
 
-          // Fill Query Info
-          data.queryInfo.totalRows = String(schema.columnNames.length);
+          // Get Query Info
+          data.queryInfo = { totalRows: String(docList.length) };
 
           // Get Metadata
           schema.columnNames.forEach(function(name, column) {
@@ -127,14 +166,14 @@ define([
           });
 
           // Get Resultset
-          docList.forEach(function(doc, row) {
-            data.resultset.push([]);
+          docList.forEach(function(doc) {
+            var row = [];
 
             schema.columnPaths.forEach(function(path) {
-              var value = myself._search(doc, path);
-
-              data.resultset[row].push(value);
+              row.push(myself.__search(doc, path));
             });
+
+            data.resultset.push(row);
           });
         }
 
@@ -142,7 +181,21 @@ define([
       };
     },
 
-    _search: function(doc, path) {
+    // endregion
+
+    // region Private Methods
+
+    /**
+     * Search in a Solr document for the value defined by {@code path}.
+     *
+     * @param {object} doc  - Solr document.
+     * @param {string} path - Path to a Solr document field.
+     *
+     * @return {?any} the document's field value.
+     *
+     * @private
+     */
+    __search: function(doc, path) {
       var value = doc[path];
 
       if (Array.isArray(value)) {
@@ -152,8 +205,16 @@ define([
       return value !== undefined ? value : null;
     },
 
-    _getSchema: function() {
-
+    /**
+     * Build a schema based on user provided information,
+     * to use in the conversion of the result set, from Solr to CDA format.
+     *
+     * @return {{columnNames: Array.<String>, columnTypes: Array.<String>, columnPaths: Array.<String>}}
+     *         the schema to convert from Solr to CDA format.
+     *
+     * @private
+     */
+    __buildSchema: function() {
       var columnNames = this.getOption("sColumnNames");
       var columnTypes = this.getOption("sColumnTypes");
       var columnPaths = this.getOption("sColumnPaths");
@@ -165,7 +226,14 @@ define([
       };
     },
 
-    _buildRequestUrl: function() {
+    /**
+     * Builds the {@link URL} to request data from a Apache Solr Service.
+     *
+     * @return {String} the solr request url.
+     *
+     * @private
+     */
+    __buildSolrUrl: function() {
       var endpoint = this.getOption("endpoint");
       if ( endpoint.endsWith('/') ) {
         endpoint = endpoint.slice(0, -1);
@@ -173,15 +241,12 @@ define([
 
       var collection = this.getOption("collection");
       var requestHandler = this.getOption("requestHandler");
-      var solrQuery = this.getOption("solrQuery");
-      var responseType = this.getOption("responseType");
 
-
-      return endpoint + "/" + collection + "/" + requestHandler +
-        "?q=" + solrQuery +
-        "&wt=" + responseType;
+      return endpoint + "/" + collection + "/" + requestHandler;
     }
+
+    // endregion
   };
 
-  Dashboard.registerGlobalQuery(SOLR_TYPE, solrQueryOpts);
+  Dashboard.registerGlobalQuery(SOLR_CLASS_NAME, solrQueryOpts);
 });
