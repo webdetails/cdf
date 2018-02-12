@@ -14,12 +14,12 @@
 define([
   './BaseQuery',
   '../dashboard/Dashboard.query',
-  './SolrQuery.ext'
-], function(BaseQuery, Dashboard, SolrQueryExt) {
+  '../dashboard/Utils',
+  '../Logger'
+], function(BaseQuery, Dashboard, Utils, Logger) {
   "use strict";
 
   var SOLR_CLASS_NAME = "solr";
-  var SOLR_CLASS_LABEL = "Apache Solr Query";
 
   /**
    * @class cdf.queries.SolrQuery
@@ -71,24 +71,25 @@ define([
      * @type {string}
      * @readonly
      */
-    _label: SOLR_CLASS_LABEL,
+    _label: "Apache Solr Query",
     get label() {
       return this._label;
     },
 
     defaults: {
       // Datasource
-      endpoint: SolrQueryExt.getEndpoint(),
-      collection: SolrQueryExt.getCollection(),
-
+      endpoint: "",
+      collection: "",
       solrQuery: "*:*",
+
+      rowsLimit: 0,
       requestHandler: "select",
       responseType: "json",
 
       // Schema
-      sColumnNames: [],
-      sColumnTypes: [],
-      sColumnPaths: [],
+      schemaColumnNames: [],
+      schemaColumnTypes: [],
+      schemaColumnPaths: [],
 
       // Ajax
       ajaxOptions: {
@@ -106,19 +107,21 @@ define([
 
     /** @Override */
     init: function(options) {
-      Object.keys(options).forEach(function(opt) {
-        var value = options[opt] || this.getOption(opt);
 
-        if (value != null && value.length > 0) {
-          this.setOption(opt, value);
-        }
-      }, this);
+      Object.keys(options)
+        .filter(function(value) {
+          var isEmptyArray = Array.isArray(value) && !value.length;
+          return value != null && (value !== "" || !isEmptyArray);
+        })
+        .forEach(function(name) {
+          this.setOption(name, options[name]);
+        }, this);
 
       this.setOption("url", this.__buildSolrUrl());
     },
 
     /** @Override */
-    buildQueryDefinition: function(overrides) {
+    buildQueryDefinition: function() {
       return {
         start: 0,
         rows:  this.getOption("rowsLimit"),
@@ -132,20 +135,19 @@ define([
       var baseSuccessCallback = this.base(callback);
       var myself = this;
 
-      return function(json) {
+      return function solrAjaxSuccessHandler(jsonString) {
         // Transform into CDA format
         var jsonObjects = null;
 
         try {
-          jsonObjects = JSON.parse(json);
+          jsonObjects = JSON.parse(jsonString);
         } catch (parseException) {
-          if (!!json.metadata && !!json.resultset) {
-            return baseSuccessCallback(json);
-          }
+          Logger.error('Could not parse json result ' + jsonString, parseException);
         }
 
-        // Result in CDA format
-        var data = { resultset: [], metadata: [], queryInfo: {} };
+        var metadata = [];
+        var resultset = [];
+        var queryInfo = {};
 
         if (jsonObjects) {
           var solrResponse = jsonObjects.response;
@@ -154,30 +156,31 @@ define([
           var schema = myself.__buildSchema();
 
           // Get Query Info
-          data.queryInfo = { totalRows: String(docList.length) };
+          queryInfo.totalRows = String(docList.length);
 
           // Get Metadata
-          schema.columnNames.forEach(function(name, column) {
-            data.metadata.push({
+          metadata = schema.columnNames.map(function(name, columnIndex) {
+            return {
               "colName": name,
-              "colType": schema.columnTypes[column],
-              "colIndex": column
-            });
+              "colType": schema.columnTypes[columnIndex],
+              "colIndex": columnIndex
+            };
           });
 
           // Get Resultset
-          docList.forEach(function(doc) {
-            var row = [];
-
-            schema.columnPaths.forEach(function(path) {
-              row.push(myself.__search(doc, path));
+          resultset = docList.map(function(doc) {
+            return schema.columnPaths.map(function(path) {
+              return myself.__search(doc, path);
             });
-
-            data.resultset.push(row);
           });
         }
 
-        baseSuccessCallback(data);
+        // Result in CDA format
+        baseSuccessCallback({
+          metadata: metadata,
+          resultset: resultset,
+          queryInfo: queryInfo
+        });
       };
     },
 
@@ -191,7 +194,7 @@ define([
      * @param {object} doc  - Solr document.
      * @param {string} path - Path to a Solr document field.
      *
-     * @return {?any} the document's field value.
+     * @return {?any} The document's field value.
      *
      * @private
      */
@@ -209,15 +212,15 @@ define([
      * Build a schema based on user provided information,
      * to use in the conversion of the result set, from Solr to CDA format.
      *
-     * @return {{columnNames: Array.<String>, columnTypes: Array.<String>, columnPaths: Array.<String>}}
-     *         the schema to convert from Solr to CDA format.
+     * @return {{columnNames: Array.<string>, columnTypes: Array.<string>, columnPaths: Array.<string>}}
+     *         The schema to convert from Solr to CDA format.
      *
      * @private
      */
     __buildSchema: function() {
-      var columnNames = this.getOption("sColumnNames");
-      var columnTypes = this.getOption("sColumnTypes");
-      var columnPaths = this.getOption("sColumnPaths");
+      var columnNames = this.getOption("schemaColumnNames");
+      var columnTypes = this.getOption("schemaColumnTypes");
+      var columnPaths = this.getOption("schemaColumnPaths");
 
       return {
         columnNames: columnNames,
@@ -229,7 +232,7 @@ define([
     /**
      * Builds the {@link URL} to request data from a Apache Solr Service.
      *
-     * @return {String} the solr request url.
+     * @return {string} The solr request url.
      *
      * @private
      */

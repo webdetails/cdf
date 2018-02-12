@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -20,6 +20,9 @@ define([
   '../Logger',
   '../lib/jquery'
 ], function(CdaQueryExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
+  "use strict";
+
+  var CDA_CLASS_NAME = "cda";
 
   /**
    * @class cdf.queries.CdaQuery
@@ -32,8 +35,10 @@ define([
    *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
    *            <p>To create a new CDA query use the dashboard function
    *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
+   *
    * @staticClass
    * @extends cdf.queries.BaseQuery
+   *
    * @example
    * dashboard.addDataSource("myCdaQuery", {
    *   queryType: "cda", dataAccessId: "cdaQuery", path: "/public/myQ.cda"
@@ -51,7 +56,10 @@ define([
      * @protected
      * @default "cda"
      */
-    name: "cda",
+    _name: CDA_CLASS_NAME,
+    get name() {
+      return this._name;
+    },
 
     /**
      * @summary The class label.
@@ -63,7 +71,10 @@ define([
      * @protected
      * @default "CDA Query"
      */
-    label: "CDA Query",
+    _label: "CDA Query",
+    get label() {
+      return this._label;
+    },
 
     /**
      * @summary The default properties.
@@ -104,20 +115,24 @@ define([
      * @param {string} [opts.sortBy]        The sorting order.
      * @param {number} [opts.pageSize]      The page size.
      * @param {number} [opts.outputIndexId] The output index identifier.
+     *
      * @throws {InvalidQuery} If the `opts` parameter does not contain a path
      *                        nor a data access identifier.
      */
     init: function(opts) {
-      if(typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined') {
+      if(typeof opts.path !== 'undefined' && typeof opts.dataAccessId !== 'undefined') {
         // CDA-style cd object
         this.setOption('file', opts.path);
         this.setOption('id', opts.dataAccessId);
-        if(typeof opts.sortBy == 'string' && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-          this.setOption('sortBy', opts.sortBy);
+
+        if(Utils.isString(opts.sortBy) && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+          this.setSortBy(opts.sortBy);
         }
+
         if(opts.pageSize != null) {
-          this.setOption('pageSize', opts.pageSize);
+          this.setPageSize(opts.pageSize);
         }
+
         if(opts.outputIndexId != null) {
           this.setOption('outputIdx', opts.outputIndexId);
         }
@@ -134,39 +149,46 @@ define([
      * @return {object} Query definition object.
      */
     buildQueryDefinition: function(overrides) {
-      var myself = this;
-      overrides = (overrides instanceof Array) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+
+      var dashboard = this.dashboard;
+      var cachedParams = this.getOption('params');
+      var params = $.extend({}, cachedParams, overrides);
+
       var queryDefinition = {};
-
-      var cachedParams = this.getOption('params'),
-          params = $.extend({}, cachedParams, overrides);
-
       _.each(params, function(value, name) {
         var paramValue;
+
         try {
-          paramValue = myself.dashboard.getParameterValue(value);
+          paramValue = dashboard.getParameterValue(value);
         } catch(e) {
           var printValue = "";
-          if(!_.isObject(value) || _.isFunction(value)) {
+
+          if(!_.isObject(value) || Utils.isFunction(value)) {
             printValue = value;
           } else {
             printValue = JSON.stringify(value);
           }
+
           Logger.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
             "The parameter will be used instead the parameter value");
           paramValue = value;
         }
+
         if(paramValue === undefined) {
           paramValue = value;
         }
-        if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0) {
+
+        if(Array.isArray(paramValue) && paramValue.length === 1 && String(paramValue[0]).indexOf(';') >= 0) {
           //special case where single element will wrongly be treated as a parsable array by cda
           paramValue = Utils.doCsvQuoting(paramValue[0], ';');
         }
+
         //else will not be correctly handled for functions that return arrays
-        if(typeof paramValue == 'function') {
+        if(Utils.isFunction(paramValue)) {
           paramValue = paramValue();
         }
+
         queryDefinition['param' + name] = paramValue;
       });
 
@@ -197,20 +219,23 @@ define([
      * @param {boolean} options.exportPage Export only one page (true) or full data set (false).
      */
     exportData: function(outputType, overrides, options) {
-      if(!options) {
-        options = {};
-      }
+      options = options != null ? options : {};
+
       var queryDefinition = this.buildQueryDefinition(overrides);
       queryDefinition.outputType = outputType;
-      if(outputType == 'csv' && options.separator) {
+
+      if(outputType === 'csv' && options.separator) {
         queryDefinition.settingcsvSeparator = options.separator;
       }
+
       if(options.filename) {
         queryDefinition.settingattachmentName = options.filename;
       }
-      if(outputType == 'xls' && options.template) {
+
+      if(outputType === 'xls' && options.template) {
         queryDefinition.settingtemplateName = options.template;
       }
+
       if(options.columnHeaders) {
         queryDefinition.settingcolumnHeaders = options.columnHeaders;
       }
@@ -267,8 +292,9 @@ define([
      * @throws {InvalidSortExpression} If the sort by columns are not correctly defined.
      */
     setSortBy: function(sortBy) {
-      var newSort,
-          myself = this;
+      var newSort;
+      var myself = this;
+
       if(sortBy === null || sortBy === undefined || sortBy === '') {
         newSort = '';
       }
@@ -277,18 +303,20 @@ define([
        * type, we need to convert everything to upper case, since want
        * to accept 'a' and 'd' even though CDA demands capitals.
        */
-      else if(typeof sortBy == "string") {
+      else if(Utils.isString(sortBy)) {
         /* Valid sortBy Strings are column numbers, optionally
          * succeeded by A or D (ascending or descending), and separated by commas.
          */
         if(!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
           throw "InvalidSortExpression";
         }
+
         /* Break the string into its constituent terms, filter out empty terms, if any. */
         newSort = sortBy.toUpperCase().split(',').filter(function(e) {
           return e !== "";
         });
-      } else if(sortBy instanceof Array) {
+
+      } else if(Array.isArray(sortBy)) {
         newSort = sortBy.map(function(d) {
           return d.toUpperCase();
         });
@@ -296,6 +324,7 @@ define([
         var invalidEntries = newSort.filter(function(e) {
           return !e.match("^[0-9]+[adAD]?,?$");
         });
+
         if(invalidEntries.length > 0) {
           throw "InvalidSortExpression";
         }
@@ -305,7 +334,7 @@ define([
        * and notify the caller on whether it changed.
        */
       var same;
-      if(newSort instanceof Array) {
+      if(Array.isArray(newSort)) {
         same = newSort.length != myself.getOption('sortBy').length;
         $.each(newSort,function(i, d) {
           same = (same && d == myself.getOption('sortBy')[i]);
@@ -345,5 +374,5 @@ define([
 
   // Registering an object will use it to create a class by extending BaseQuery,
   // and use that class to generate new queries.
-  Dashboard.registerGlobalQuery("cda", cdaQueryOpts);
+  Dashboard.registerGlobalQuery(CDA_CLASS_NAME, cdaQueryOpts);
 });
