@@ -85,10 +85,10 @@ define([
      *              for indicating that previous data sources with the same name 
      *              were overwritten.
      *
-     * @param {string|Object}     name        The name of the data source.
-     * @param {Object|boolean}    obj         The data source to be added.
-     * @param {boolean|undefined} force=false A flag indicating if any previous data sources with the
-     *                                        same name are to be replaced.
+     * @param {string|Object}     name          The name of the data source.
+     * @param {Object|boolean}    obj           The data source to be added.
+     * @param {boolean|undefined} [force=false] A flag indicating if any previous data sources with the
+     *                                          same name are to be replaced.
      */
     addDataSource: function(name, obj, force) {
       // if no name is provided, try to extract it from the data source object

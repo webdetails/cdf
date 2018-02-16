@@ -16,9 +16,10 @@ define([
   '../lib/Base',
   'amd!../lib/underscore',
   '../Logger',
+  '../dashboard/Utils',
   '../dashboard/OptionsManager',
   '../dashboard/Dashboard.query'
-], function($, Base, _, Logger, OptionsManager, DashboardQuery) {
+], function($, Base, _, Logger, Utils, OptionsManager, DashboardQuery) {
  
   var BaseQuery = Base.extend(/** @lends cdf.queries.BaseQuery# */{
     /**
@@ -31,7 +32,10 @@ define([
      * @protected
      * @default "baseQuery"
      */
-    name: "baseQuery",
+    _name: "baseQuery",
+    get name() {
+      return this._name;
+    },
 
     /**
      * @summary The class label.
@@ -43,7 +47,10 @@ define([
      * @protected
      * @default "Base Query"
      */
-    label: "Base Query",
+    _label: "Base Query",
+    get label() {
+      return this._label;
+    },
 
     /**
      * @summary A list of properties to be extended to the registered queries.
@@ -89,12 +96,14 @@ define([
         Logger.log('Query success callback not defined. Override.');
       },
       errorCallback: function(jqXHR, textStatus, errorThrown) {
-        if(this.dashboard && typeof this.dashboard.handleServerError === "function") {
+        if(this.dashboard && Utils.isFunction(this.dashboard.handleServerError)) {
           this.dashboard.handleServerError(jqXHR, textStatus, errorThrown);
           return;
         }
+
         Logger.log('Query error callback not defined. Override.');
       },
+
       lastResultSet: null,
       lastProcessedResultSet: null,
       page: 0,
@@ -104,6 +113,7 @@ define([
         async: false,
         type: "POST"
       },
+
       url: ""
     },
 
@@ -200,7 +210,7 @@ define([
      * @summary Builds the query definition `object`.
      * @description Builds the query definition `object`.
      *
-     * @param {object} overrides Options that override the existing ones.
+     * @param {object} [overrides] Options that override the existing ones.
      * @abstract
      */
     buildQueryDefinition: function(overrides) {
@@ -251,11 +261,11 @@ define([
      * @summary Executes a server-side query.
      * @description Executes a server-side query.
      *
-     * @param {function} successCallback Success callback.
-     * @param {function} errorCallback   Error callback.
+     * @param {function} [successCallback] Success callback.
+     * @param {function} [errorCallback]   Error callback.
      */
     doQuery: function(successCallback, errorCallback) {
-      if(typeof this.getOption('successCallback') != 'function') {
+      if(!Utils.isFunction(this.getOption('successCallback'))) {
         throw 'QueryNotInitialized';
       }
 
@@ -325,53 +335,66 @@ define([
      * @param {Object}   params          Parameters for the query.
      * @param {function} successCallback Success callback.
      * @param {function} errorCallback   Error callback.
+     *
      * @return {Object} The result of calling {@link cdf.queries.BaseQuery#doQuery|doQuery} with the specified arguments.
+     *
      * @throws {InvalidInput} If the arguments are not correct.
      */
     fetchData: function(params, successCallback, errorCallback) {
+      var firstArgument = arguments[0];
+      var secondArgument = arguments[1];
+      var thirdArgument = arguments[2];
+
       switch(arguments.length) {
         case 0:
           if(this.getOption('params') &&  this.getOption('successCallback')) {
             return this.doQuery();
           }
           break;
-        case 1:
-          if(typeof arguments[0] == "function") {
-            // If we're receiving _only_ the callback, we're not going to change the internal callback
-            return this.doQuery(arguments[0]);
-          } else if(!_.isEmpty(arguments[0])
-            && (_.isObject(arguments[0]) || _.isArray(arguments[0]))) {
 
-            this.setOption('params', arguments[0] || {});
+        case 1:
+          if(Utils.isFunction(firstArgument)) {
+            // If we're receiving _only_ the callback, we're not going to change the internal callback
+            return this.doQuery(firstArgument);
+
+          } else if(!_.isEmpty(firstArgument) && (_.isObject(firstArgument) || Array.isArray(firstArgument))) {
+            this.setParameters(firstArgument || {});
+
             return this.doQuery();
           }
           break;
+
         case 2:
-          if(typeof arguments[0] == "function") {
-            this.setOption('successCallback', arguments[0]);
-            if(typeof arguments[1] == "function") {
-              this.setOption('errorCallback', arguments[1]);
+          if(Utils.isFunction(firstArgument)) {
+            this.setCallback(firstArgument);
+
+            if(Utils.isFunction(secondArgument)) {
+              this.setErrorCallback(secondArgument);
             }
-            return this.doQuery();
           } else {
-            this.setOption('params', arguments[0] || {});
-            this.setOption('successCallback', arguments[1]);
-            return this.doQuery();
+            this.setParameters(firstArgument || {});
+            this.setCallback(secondArgument);
           }
-          break;
+
+          return this.doQuery();
+
         default:
           // We're just going to discard anything over three params
           if(params) {
-            this.setOption('params', params);
+            this.setParameters(params);
           }
-          if(typeof arguments[1] == "function") {
-            this.setOption('successCallback', successCallback);
+
+          if(Utils.isFunction(secondArgument)) {
+            this.setCallback(successCallback);
           }
-          if(typeof arguments[2] == "function") {
-            this.setOption('errorCallback', errorCallback);
+
+          if(Utils.isFunction(thirdArgument)) {
+            this.setErrorCallback(errorCallback);
           }
+
           return this.doQuery();
       }
+
       // If we haven't hit a return by this time, the user gave us some wrong input
       throw "InvalidInput";
     },
@@ -421,10 +444,10 @@ define([
         var clone = $.extend(true, {}, this.getOption('lastResultSet'));
         var callback = outerCallback || this.getOption('successCallback');
 
-        myself.setOption('lastProcessedResultSet', clone);
+        this.setOption('lastProcessedResultSet', clone);
         var result = callback(clone);
         if(result !== undefined && result !== clone) {
-          myself.setOption('lastProcessedResultSet', result);
+          this.setOption('lastProcessedResultSet', result);
         }
         return result;
       } else {
@@ -552,7 +575,7 @@ define([
           pageSize = this.getOption('pageSize');
       if(targetPage * pageSize == page) {
         return false;
-      } else if(typeof targetPage == 'number' && targetPage >= 0) {
+      } else if(Utils.isNumber(targetPage) && targetPage >= 0) {
         this.setOption('page', targetPage * pageSize);
         return this.doQuery(outsideCallback);
       } else {
@@ -572,7 +595,7 @@ define([
     setPageStartingAt: function(targetPage) {
       if(targetPage == this.getOption('page')) {
         return false;
-      } else if(typeof targetPage == 'number' && targetPage >= 0) {
+      } else if(Utils.isNumber(targetPage) && targetPage >= 0) {
         this.setOption('page', targetPage);
       } else {
         throw "InvalidPage";
@@ -622,7 +645,7 @@ define([
     initPage: function(pageSize, outsideCallback) {
       if(pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {
         return false;
-      } else if(typeof pageSize == 'number' && pageSize > 0) {
+      } else if(Utils.isNumber(pageSize) && pageSize > 0) {
         this.setOption('page', 0);
         this.setOption('pageSize', pageSize);
         return this.doQuery(outsideCallback);
@@ -637,5 +660,4 @@ define([
   DashboardQuery.setBaseQuery(BaseQuery);
 
   return BaseQuery;
-
 });

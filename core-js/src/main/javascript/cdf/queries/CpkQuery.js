@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -20,10 +20,13 @@ define([
   '../Logger',
   '../lib/jquery'
 ], function(DashboardExt, BaseQuery, Dashboard, _, Utils, Logger, $) {
+  "use strict";
+
+  var CPK_CLASS_NAME = "cpk";
 
   /**
    * @class cdf.queries.CpkQuery
-   * @classdesc Class that represents a CPK query.
+   * @summary Class that represents a CPK query.
    * @classdesc <p>Class that represents a CPK query. This class will be registered
    *            globally using the static dashboard function
    *            {@link cdf.dashboard.Dashboard.registerGlobalQuery|registerGlobalQuery}.</p>
@@ -31,9 +34,11 @@ define([
    *            in the dashboard query container
    *            {@link cdf.dashboard.Dashboard#queryFactories|queryFactories}.</p>
    *            <p>To create a new CPK query use the dashboard function
-   *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p>
+   *            {@link cdf.dashboard.Dashboard#getQuery|getQuery}.</p
+   *
    * @staticClass
    * @extends cdf.queries.BaseQuery
+   *
    * @example
    * dashboard.addDataSource("myCpkQuery", {queryType: "cpk", ...});
    * dashboard.getQuery({dataSource: "myCpkQuery"}).doQuery(successCallback, errorCallback);
@@ -49,7 +54,10 @@ define([
      * @protected
      * @default "cpk"
      */
-    name: "cpk",
+    _name: CPK_CLASS_NAME,
+    get name() {
+      return this._name;
+    },
 
     /**
      * @summary The class label.
@@ -61,7 +69,10 @@ define([
      * @protected
      * @default "CPK Query"
      */
-    label: "CPK Query",
+    _label: "CPK Query",
+    get label() {
+      return this._label;
+    },
 
     /**
      * @summary The default properties.
@@ -101,6 +112,7 @@ define([
      * @param {string} opts.stepName     The target step name.
      * @param {object} opts.systemParams System parameters.
      * @param {object} opts.ajaxOptions  {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} options.
+     *
      * @see {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax}
      */
     init: function(opts) {
@@ -109,14 +121,16 @@ define([
         this.setOption('endpoint', opts.endpoint);
         this.setOption('url', DashboardExt.getPluginEndpoint(opts.pluginId, opts.endpoint));
       }
+
       this.setOption('kettleOutput', opts.kettleOutput);
       this.setOption('stepName', opts.stepName);
       this.setOption('systemParams', opts.systemParams || {} );
-      this.setOption('ajaxOptions' , $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
+      this.setAjaxOptions($.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
+
       var ajaxOptions = this.getOption('ajaxOptions');
-      if(ajaxOptions.dataType == 'json') {
+      if(ajaxOptions.dataType === 'json') {
         ajaxOptions.mimeType = 'application/json; charset utf-8'; //solves "not well formed" error in Firefox 24
-        this.setOption('ajaxOptions', ajaxOptions);
+        this.setAjaxOptions(ajaxOptions);
       }
     },
 
@@ -125,40 +139,45 @@ define([
      * @description Builds the query definition object.
      *
      * @param {object} overrides Options that override the existing ones.
+     *
      * @return {object} Query definition object.
      */
     buildQueryDefinition: function(overrides) {
-      var myself = this;
-      overrides = (overrides instanceof Array) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
 
+      var dashboard = this.dashboard;
       var queryDefinition = {
         kettleOutput: this.getOption('kettleOutput'),
         stepName: this.getOption('stepName')
       };
+
       // We clone queryDefinition to remove undefined
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
-      var cachedParams = this.getOption('params'),
-          params = $.extend({}, cachedParams, overrides);
+      var cachedParams = this.getOption('params');
+      var params = $.extend({}, cachedParams, overrides);
 
       _.each(params, function(value, name) {
         var paramValue, printValue;
         try {
-          paramValue = myself.dashboard.getParameterValue(value);
+          paramValue = dashboard.getParameterValue(value);
         } catch(e) {
-          if(!_.isObject(value) || _.isFunction(value)) {
+          if(!_.isObject(value) || Utils.isFunction(value)) {
             printValue = value;
           } else {
             printValue = JSON.stringify(value);
           }
+
           Logger.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
             "The parameter will be used as value instead its value obtained from getParameterValue");
           paramValue = value;
         }
+
         if(paramValue === undefined) {
           paramValue = value;
         }
-        if(_.isFunction(paramValue)) {
+
+        if(Utils.isFunction(paramValue)) {
           paramValue = paramValue();
         } else if(_.isObject(paramValue)) {
           // kettle does not handle arrays natively,
@@ -170,6 +189,7 @@ define([
           // value = value.split('],').join(';').split('[').join('').split(']').join('');
           // which transforms [[0,1],[2,3]] into "0,1;2,3"
         }
+
         queryDefinition['param' + name] = paramValue;
       });
 
@@ -207,5 +227,5 @@ define([
   };
 
   // Registering a class will use that class directly when getting new queries.
-  Dashboard.registerGlobalQuery("cpk", CpkEndpointsOpts);
+  Dashboard.registerGlobalQuery(CPK_CLASS_NAME, CpkEndpointsOpts);
 });

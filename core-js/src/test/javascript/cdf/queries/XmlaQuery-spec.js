@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,101 +16,79 @@ define([
   "amd!cdf/lib/underscore",
   "cdf/Dashboard.Clean"
 ], function($, _, Dashboard) {
+  "use strict";
 
-  var unprocessedData = {data: 0},
-      processedData = {data: [1, 2, 3]},
-      dashboard;
+  /* globals beforeEach, describe, it, expect, spyOn */
 
-  /**
-   * ## XMLA query #
-   */
-  describe("XMLA query #", function() {
+  var unprocessedData = { data: 0 };
+  var processedData = { data: [1, 2, 3] };
+  var dashboard;
 
-    var xmlaQuery;
-
+  describe("Xmla Queries", function() {
     beforeEach(function() {
       dashboard = new Dashboard();
-      dashboard.addDataSource("queryXMLA", {
-        queryType: "xmla",
-        catalog: "SteelWheels",
-        query: function() {
-          return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
-                 "NON EMPTY TopCount([Customers].[All Customers].Children," +
-                 "10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
-        }
-      });
-      dashboard.init();
     });
 
-    /**
-     * ## XMLA query # doQuery
-     */
-    describe("XMLA query # doQuery", function() {
-      /**
-       * ## XMLA query # doQuery # persists the last result and the post fetch processed result
-       */
-      it("persists the last result and the post fetch processed result", function() {
-        spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function() { /* noop */ });
-        xmlaQuery = dashboard.getQuery("xmla", {dataSource: "queryXMLA"});
+    function testXmlaDoQuery(type, name, queryOverrides) {
+      spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function() { /* noop */ });
+      var xmlaQuery = dashboard.getQuery(type, {dataSource: name});
 
-        var fakeXmlaDoQuery = _.bind(
-          xmlaQuery.doQuery,
-          // override some of the original methods to avoid having to mock XMLHttpRequests 
-          $.extend(true, xmlaQuery, {
-            _executeQuery: function(qd) { return unprocessedData;},
-            transformXMLAResults: function(results) { return unprocessedData; }
-          })
-        );
-        fakeXmlaDoQuery(function(data) { return processedData; });
+      var fakeXmlaDoQuery = _.bind(
+        xmlaQuery.doQuery,
+        // override some of the original methods to avoid having to mock XMLHttpRequests
+        $.extend(true, xmlaQuery, queryOverrides)
+      );
 
-        expect(xmlaQuery.getOption("lastResultSet")).toEqual(unprocessedData);
-        expect(xmlaQuery.getOption("lastProcessedResultSet")).toEqual(processedData);
+      fakeXmlaDoQuery(function(/* data */) { return processedData; });
+
+      expect(xmlaQuery.getOption("lastResultSet")).toEqual(unprocessedData);
+      expect(xmlaQuery.getOption("lastProcessedResultSet")).toEqual(processedData);
+    }
+
+    describe("XmlaQuery", function() {
+      beforeEach(function() {
+        dashboard.addDataSource("queryXMLA", {
+          queryType: "xmla",
+          catalog: "SteelWheels",
+          query: function() {}
+        });
+
+        dashboard.init();
       });
-    });
-  });
 
-  /**
-   * ## XMLA discover query #
-   */
-  describe("XMLA discover query #", function() {
+      describe("#doQuery", function() {
+        var queryOverrides = {
+          _executeQuery: function(/* qd */) { return unprocessedData;},
+          transformXMLAResults: function(/* results */) { return unprocessedData; }
+        };
 
-    var xmlaDiscoverQuery;
-
-    beforeEach(function() {
-      dashboard = new Dashboard();
-      dashboard.addDataSource("queryXMLADiscover", {
-        queryType: "xmlaDiscover",
-        catalog: "SteelWheels",
-        query: function() { return Xmla.DBSCHEMA_CATALOGS; }
-      });
-      dashboard.init();
-    });
-
-    /**
-     * ## XMLA discover query # doQuery
-     */
-    describe("XMLA discover query # doQuery", function() {
-      /**
-       * ## XMLA discover query # doQuery # persists the last result and the post fetch processed result
-       */
-      it("persists the last result and the post fetch processed result", function() {
-        spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function() { /* noop */ });
-        xmlaDiscoverQuery = dashboard.getQuery("xmlaDiscover", {dataSource: "queryXMLADiscover"});
-
-        var fakeXmlaDoQuery = _.bind(
-          xmlaDiscoverQuery.doQuery,
-          // override some of the original methods to avoid having to mock XMLHttpRequests 
-          $.extend(true, xmlaDiscoverQuery, {
-            _executeDiscoverQuery: function(qd) { return unprocessedData;},
-            transformXMLADiscoverResults: function(results) { return unprocessedData; }
-          })
-        );
-        fakeXmlaDoQuery(function(data) { return processedData; });
-
-        expect(xmlaDiscoverQuery.getOption("lastResultSet")).toEqual(unprocessedData);
-        expect(xmlaDiscoverQuery.getOption("lastProcessedResultSet")).toEqual(processedData);
+        it("should persist the last result and the post fetch processed result.", function() {
+          testXmlaDoQuery("xmla", "queryXMLA", queryOverrides);
+        });
       });
     });
 
+    describe("XmlaDiscoverQuery", function() {
+      beforeEach(function() {
+        dashboard.addDataSource("queryXMLADiscover", {
+          queryType: "xmlaDiscover",
+          catalog: "SteelWheels",
+          query: function() {}
+        });
+
+        dashboard.init();
+      });
+
+      describe("#doQuery", function() {
+        var queryOverrides = {
+          _executeDiscoverQuery: function(/* qd */) { return unprocessedData;},
+          transformXMLADiscoverResults: function(/* results */) { return unprocessedData; }
+        };
+
+        it("should persist the last result and the post fetch processed result.", function() {
+          testXmlaDoQuery("xmlaDiscover", "queryXMLADiscover", queryOverrides);
+        });
+      });
+    });
   });
 });
