@@ -20,6 +20,12 @@ define([
   "use strict";
 
   var SOLR_CLASS_NAME = "solr";
+  var SOLR_REST_API_PARAMS = {
+    solrQuery: "q",
+    rowsStart: "start",
+    rowsLimit: "rows",
+    responseType: "wt"
+  };
 
   /**
    * @class cdf.queries.SolrQuery
@@ -82,7 +88,8 @@ define([
       collection: "",
       solrQuery: "*:*",
 
-      rowsLimit: 0,
+      rowsStart: 0,
+      rowsLimit: 10,
       requestHandler: "select",
       responseType: "json",
 
@@ -107,11 +114,13 @@ define([
 
     /** @Override */
     init: function(options) {
+      if (options.endpoint == null || options.collection == null) {
+        throw 'InvalidQuery';
+      }
 
-      Object.keys(options)
-        .filter(function(value) {
-          var isEmptyArray = Array.isArray(value) && !value.length;
-          return value != null && (value !== "" || !isEmptyArray);
+      Object.keys(options || {})
+        .filter(function(name) {
+          return Utils.normalizeValue(options[name]) !== null;
         })
         .forEach(function(name) {
           this.setOption(name, options[name]);
@@ -121,13 +130,32 @@ define([
     },
 
     /** @Override */
-    buildQueryDefinition: function() {
-      return {
-        start: 0,
+    buildQueryDefinition: function(overrides) {
+      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+
+      var overrideParameters = Object.keys(overrides);
+      var queryDefinition = {
+        start: this.getOption("rowsStart"),
         rows:  this.getOption("rowsLimit"),
-        wt:    this.getOption('responseType'),
-        q:     this.getOption('solrQuery')
+        wt:    this.getOption("responseType"),
+        q:     this.getOption("solrQuery")
       };
+
+      overrideParameters
+        .filter(function(definition) {
+          return Utils.normalizeValue(overrides[definition]) !== null;
+        })
+        .forEach(function(definition) {
+          var solrDefinition = this.__getSolrRestApiParam(definition);
+
+          if (!solrDefinition) {
+            solrDefinition = definition;
+          }
+
+          queryDefinition[solrDefinition] = overrides[definition];
+        }, this);
+
+      return queryDefinition;
     },
 
     /** @Override */
@@ -159,11 +187,13 @@ define([
           queryInfo.totalRows = String(docList.length);
 
           // Get Metadata
-          metadata = schema.columnNames.map(function(name, columnIndex) {
+          metadata = schema.columnNames.map(function(colName, colIndex) {
+            var colType = schema.columnTypes[colIndex];
+
             return {
-              "colName": name,
-              "colType": schema.columnTypes[columnIndex],
-              "colIndex": columnIndex
+              colName: colName,
+              colType: colType,
+              colIndex: colIndex
             };
           });
 
@@ -246,6 +276,12 @@ define([
       var requestHandler = this.getOption("requestHandler");
 
       return endpoint + "/" + collection + "/" + requestHandler;
+    },
+
+    __getSolrRestApiParam: function(definition) {
+      var param = SOLR_REST_API_PARAMS[definition];
+
+      return param != null ? param : definition;
     }
 
     // endregion
