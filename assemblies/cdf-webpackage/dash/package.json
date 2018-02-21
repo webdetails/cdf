@@ -1,0 +1,7 @@
+{
+  "name": "dash",
+  "version": "1.0",
+  "dependencies": {
+    "@pentaho/cdf": "8.1.0.0-SNAPSHOT"
+  }
+}

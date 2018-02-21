@@ -1,0 +1,259 @@
+<html>
+<head>
+<script src="/requirejs-manager/js/require-init.js?useFullyQualifiedUrl=false"></script>
+</head>
+<body>
+<style>
+    body.fouc-protected {
+        display: none;
+    }
+</style>
+<script type="text/javascript">
+  document.getElementsByTagName("body")[0].className = "fouc-protected";
+</script>
+
+<div class='container'><div id='4ae12a40-d7e7-f5ff-7a8c-04971aad0751'  class='row clearfix ' ><div class='col-xs-12'><div id='col' ></div></div><div class='col-xs-12 last'><div id='col2' ></div></div></div>
+</div>
+<script language="javascript" type="text/javascript">
+  SESSION_LOCALE = "en-us";
+
+  require([
+      'cdf/Dashboard.Bootstrap',
+      'cdf/Logger',
+      'cdf/lib/jquery',
+      'amd!cdf/lib/underscore',
+      'cdf/lib/moment',
+      'cdf/lib/CCC/cdo',
+      'cdf/lib/CCC/def',
+      'cdf/lib/CCC/protovis-compat!',
+      'cdf/lib/CCC/pvc',
+      'cdf/dashboard/Utils',
+      'cdf/components/TableComponent',
+      'cdf/components/CccBarChartComponent'],
+    function(
+      Dashboard,
+      Logger,
+      $,
+      _,
+      moment,
+      cdo,
+      def,
+      pv,
+      pvc,
+      Utils,
+      TableComponent,
+      CccBarChartComponent) {
+// resources were loaded, removing FOUC protection. (Flash of Unstyled Content)
+      $("body").removeClass("fouc-protected");
+
+      var dashboard = new Dashboard({
+        context: {"path":"","solution":"home","serverLocalDate":1519212561344,"queryData":{},"roles":["Administrator","Authenticated"],"sessionTimeout":7200,"sessionAttributes":{},"locale":"en_US","params":{},"serverUTCDate":1519212561344,"user":"admin"},
+        storage: {}
+      });
+
+      dashboard.getWcdfSettings = function() {
+        return {
+          "author": "",
+          "description": "shutdown",
+          "rendererType": "bootstrap",
+          "require": true,
+          "style": "CleanRequire",
+          "title": "shutdown",
+          "widget": false,
+          "widgetName": "",
+          "widgetParameters": []
+        };
+      };
+
+      dashboard.addDataSource("solr", {
+        queryType: "solr",
+        Name: "solr",
+        endpoint: "http://172.20.43.56:8983/solr",
+        collection: "sales",
+        requestHandler: "select",
+        responseType: "json",
+        solrQuery: "*:*",
+        schemaColumnNames: ["country","sales"],
+        schemaColumnTypes: ["string","numeric"],
+        schemaColumnPaths: ["COUNTRY","SALES"],
+        rowsLimit: 1000
+      });
+
+      var render_table = new TableComponent({
+        type: "TableComponent",
+        name: "render_table",
+        priority: 5,
+        htmlObject: "col",
+        listeners: [],
+        parameters: [],
+        executeAtStart: true,
+        extraOptions: [],
+        expandParameters: [],
+        expandOnClick: false,
+        chartDefinition:  {
+          dataSource: "solr",
+          colHeaders: [],
+          colTypes: [],
+          colFormats: [],
+          colWidths: [],
+          colSortable: [],
+          colSearchable: [],
+          paginate: true,
+          paginateServerside: false,
+          paginationType: "simple_numbers",
+          filter: true,
+          info: true,
+          sort: true,
+          sortBy: [],
+          lengthChange: true
+        }
+      });
+      var render_bar = new CccBarChartComponent({
+        type: "CccBarChartComponent",
+        name: "render_bar",
+        priority: 5,
+        parameters: [],
+        executeAtStart: true,
+        htmlObject: "col2",
+        listeners: [],
+        chartDefinition:  {
+          dataSource: "solr",
+          width: 960,
+          height: 600,
+          extensionPoints: [],
+          colors: [],
+          animate: true,
+          barOrthoSizeMin: 1.5,
+          barStackedMargin: 0,
+          baseAxisLabelDesiredAngles: [],
+          baseAxisOffset: 0,
+          baseAxisTicks: true,
+          baseAxisTitleMargins: "0",
+          baseAxisTooltipAutoContent: "value",
+          baseAxisTooltipEnabled: true,
+          baseAxisVisible: true,
+          clearSelectionMode: "emptySpaceClick",
+          clickable: false,
+          color2AxisColors: [],
+          color2AxisLegendClickMode: "toggleVisible",
+          color2AxisLegendVisible: true,
+          color2AxisPreserveMap: false,
+          colorPreserveMap: false,
+          compatVersion: 3,
+          crosstabMode: true,
+          ctrlSelectMode: true,
+          dataIgnoreMetadataLabels: false,
+          dataSeparator: "~",
+          groupedLabelSep: " ~ ",
+          hoverable: false,
+          ignoreNulls: true,
+          isMultiValued: false,
+          leafContentOverflow: "auto",
+          legendClickMode: "toggleVisible",
+          legendVisible: true,
+          measuresIndexes: [],
+          multiChartColumnsMax: 3,
+          multiChartIndexes: [],
+          multiChartOverflow: "grow",
+          multiChartSingleColFillsHeight: true,
+          multiChartSingleRowFillsHeight: true,
+          nullInterpolationMode: "none",
+          orientation: "vertical",
+          ortho2AxisDomainAlign: "center",
+          ortho2AxisDomainRoundMode: "tick",
+          ortho2AxisDomainScope: "global",
+          ortho2AxisMinorTicks: true,
+          ortho2AxisOffset: 0,
+          ortho2AxisTicks: true,
+          ortho2AxisTickUnitMax: "Infinity",
+          ortho2AxisTickUnitMin: "0",
+          ortho2AxisTitleMargins: "0",
+          ortho2AxisVisible: true,
+          ortho2AxisZeroLine: true,
+          orthoAxisDomainAlign: "center",
+          orthoAxisDomainRoundMode: "tick",
+          orthoAxisDomainScope: "global",
+          orthoAxisOffset: 0,
+          orthoAxisTicks: true,
+          orthoAxisTickUnitMax: "Infinity",
+          orthoAxisTickUnitMin: "0",
+          orthoAxisTitleMargins: "0",
+          orthoAxisVisible: true,
+          orthoAxisZeroLine: true,
+          overflowMarkersVisible: true,
+          plot2: false,
+          plot2AreasFillOpacity: 0.5,
+          plot2AreasVisible: false,
+          plot2ColorAxis: 2,
+          plot2DotsVisible: true,
+          plot2LinesVisible: true,
+          plot2NullInterpolationMode: "none",
+          plot2OrthoAxis: 1,
+          plot2Series: [],
+          plot2SeriesIndexes: -1,
+          plot2Stacked: false,
+          plot2ValuesMask: "{value}",
+          plot2ValuesVisible: false,
+          pointingMode: "near",
+          preserveLayout: false,
+          readers: [],
+          selectable: false,
+          seriesInRows: false,
+          slidingWindow: false,
+          smallContentMargins: "0",
+          smallContentPaddings: "0",
+          smallMargins: "2%",
+          smallPaddings: "0",
+          smallTitleMargins: "0",
+          smallTitlePaddings: "0",
+          smallTitlePosition: "top",
+          stacked: false,
+          timeSeries: false,
+          timeSeriesFormat: "%Y-%m-%d",
+          titleMargins: "0",
+          titlePaddings: "0",
+          tooltipEnabled: true,
+          tooltipFade: true,
+          tooltipFollowMouse: false,
+          tooltipHtml: true,
+          tooltipOpacity: 0.9,
+          trendAreasFillOpacity: 0.5,
+          trendAreasVisible: false,
+          trendColorAxis: 2,
+          trendDotsVisible: false,
+          trendLinesVisible: true,
+          trendOrthoAxis: 1,
+          trendStacked: false,
+          trendValuesAnchor: "right",
+          trendValuesVisible: false,
+          valuesNormalized: false,
+          valuesOverflow: "hide"
+        }
+      });
+
+      dashboard.addComponents([render_table, render_bar]);
+
+      dashboard.init();
+      return dashboard;
+    });
+</script>
+
+
+<script type="text/javascript">
+  require(['cdf/lib/jquery', 'amd!cdf/lib/jquery.corner'], function($) {
+    $(function() {
+      //$(".round").corner();
+      $(".cdfdd-round").corner();
+      $(".cdfdd-bevel").corner("bevel");
+      $(".cdfdd-notch").corner("notch");
+      $(".cdfdd-bite").corner("bite");
+      $(".cdfdd-bevel_top").corner("bevel top");
+      $(".cdfdd-dog_tr").corner("dog tr");
+    });
+  });
+</script>
+
+
+</body>
+</html>
+
