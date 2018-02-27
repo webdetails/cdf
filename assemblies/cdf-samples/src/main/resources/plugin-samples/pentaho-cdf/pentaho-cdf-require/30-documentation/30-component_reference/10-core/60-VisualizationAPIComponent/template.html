@@ -115,8 +115,8 @@ require([
   var dashboard = new Dashboard();
 
   dashboard.setParameter("optionParam", "max");
-  dashboard.setParameter("levelsParam", {attributes: ["Country"]});
-  dashboard.setParameter("measureParam", {attributes: ["Quantity"]});
+  dashboard.setParameter("levelsParam", {fields: ["Country"]});
+  dashboard.setParameter("measureParam", {fields: ["Quantity"]});
 
 
   dashboard.addComponent(new VisualizationAPIComponent({
