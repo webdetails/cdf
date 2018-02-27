@@ -32,29 +32,32 @@
       <url>dav:${site.publish.url}/${project.groupId}/cdf-plugin-${project.version}</url>
     </site>
   </distributionManagement>
+
   <properties>
-    <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
-    <dependency.commons-logging.revision>1.1</dependency.commons-logging.revision>
-    <dependency.cpf.revision>${project.version}</dependency.cpf.revision>
+    <commons-io.version>1.3</commons-io.version>
+    <commons-lang.version>2.2</commons-lang.version>
+    <commons-logging.version>1.1</commons-logging.version>
+    <dom4j.version>1.6.1</dom4j.version>
+    <hibernate.version>3.2.6.ga</hibernate.version>
+    <jxl.version>2.6.12</jxl.version>
+    <mockito-all.version>1.8.4</mockito-all.version>
+    <pentaho-ccc-plugin.version>${project.version}</pentaho-ccc-plugin.version>
+    <pentaho-cpf-plugin.version>${project.version}</pentaho-cpf-plugin.version>
     <pentaho-json.version>8.1.0.0-SNAPSHOT</pentaho-json.version>
-    <dependency.mockito-all.revision>1.8.4</dependency.mockito-all.revision>
-    <dependency.commons-io.revision>1.3</dependency.commons-io.revision>
-    <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
-    <dependency.dom4j.revision>1.6.1</dependency.dom4j.revision>
+    <servlet-api.version>2.4</servlet-api.version>
+
     <global.require.file></global.require.file>
     <requirejs.config.files.pattern></requirejs.config.files.pattern>
     <project.stage>master</project.stage>
     <project.github-name>cdf</project.github-name>
-    <dependency.servlet-api.revision>2.4</dependency.servlet-api.revision>
-    <dependency.jxl.revision>2.6.12</dependency.jxl.revision>
-    <dependency.commons-lang.revision>2.2</dependency.commons-lang.revision>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>pentaho</groupId>
         <artifactId>cpf-core</artifactId>
-        <version>${dependency.cpf.revision}</version>
+        <version>${pentaho-cpf-plugin.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -65,18 +68,18 @@
       <dependency>
         <groupId>pentaho</groupId>
         <artifactId>cpf-pentaho</artifactId>
-        <version>${dependency.cpf.revision}</version>
+        <version>${pentaho-cpf-plugin.version}</version>
       </dependency>
       <dependency>
-        <groupId>pentaho</groupId>
+        <groupId>org.pentaho.ctools</groupId>
         <artifactId>ccc</artifactId>
-        <version>${dependency.ccc.revision}</version>
+        <version>${pentaho-ccc-plugin.version}</version>
         <type>zip</type>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>${dependency.commons-logging.revision}</version>
+        <version>${commons-logging.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -87,7 +90,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>${dependency.commons-io.revision}</version>
+        <version>${commons-io.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -98,7 +101,7 @@
       <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
-        <version>${dependency.commons-lang.revision}</version>
+        <version>${commons-lang.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -109,7 +112,7 @@
       <dependency>
         <groupId>dom4j</groupId>
         <artifactId>dom4j</artifactId>
-        <version>${dependency.dom4j.revision}</version>
+        <version>${dom4j.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -131,7 +134,7 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate</artifactId>
-        <version>${dependency.hibernate.revision}</version>
+        <version>${hibernate.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -142,7 +145,7 @@
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
-        <version>${dependency.servlet-api.revision}</version>
+        <version>${servlet-api.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -153,13 +156,13 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
-        <version>${dependency.mockito-all.revision}</version>
+        <version>${mockito-all.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>jexcelapi</groupId>
         <artifactId>jxl</artifactId>
-        <version>${dependency.jxl.revision}</version>
+        <version>${jxl.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
