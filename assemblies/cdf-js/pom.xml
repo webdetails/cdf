@@ -27,7 +27,7 @@
       <type>zip</type>
     </dependency>
     <dependency>
-      <groupId>pentaho</groupId>
+      <groupId>org.pentaho.ctools</groupId>
       <artifactId>ccc</artifactId>
       <type>zip</type>
     </dependency>
