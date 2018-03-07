@@ -269,18 +269,12 @@ define([
         throw 'QueryNotInitialized';
       }
 
-      var settings = _.extend({}, this.getOption('ajaxOptions'), {
+      var settings = _.extend({}, this.getAjaxOptions(), {
         data: this.buildQueryDefinition(),
         url: this.getOption('url'),
         success: this.getSuccessHandler(successCallback ? successCallback : this.getOption('successCallback')),
         error: this.getErrorHandler(errorCallback ? errorCallback : _.bind(this.getOption('errorCallback'), this))
       });
-
-      var async = settings.async == null ? $.ajaxSettings.async : settings.async;
-      if(!async && settings.xhrFields && settings.xhrFields.withCredentials) {
-        Logger.log("Cross-domain requests are deprecated for synchronous operations.");
-        delete settings.xhrFields.withCredentials;
-      }
 
       $.ajax(settings);
     },
@@ -301,8 +295,20 @@ define([
      *
      * @param {Object} newOptions Ajax options to be added.
      */
-     setAjaxOptions: function(newOptions) {
+    setAjaxOptions: function(newOptions) {
       this.setOption('ajaxOptions', _.extend({}, this.getOption('ajaxOptions'), newOptions));
+    },
+
+    getAjaxOptions: function() {
+      var options = this.getOption('ajaxOptions');
+
+      var async = options.async == null ? $.ajaxSettings.async : options.async;
+      if(!async && options.xhrFields && options.xhrFields.withCredentials) {
+        Logger.log("Cross-domain requests are deprecated for synchronous operations.");
+        delete settings.xhrFields.withCredentials;
+      }
+
+      return options;
     },
 
     /**

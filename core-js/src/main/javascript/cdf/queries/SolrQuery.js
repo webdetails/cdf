@@ -15,9 +15,12 @@ define([
   './BaseQuery',
   '../dashboard/Dashboard.query',
   '../dashboard/Utils',
-  '../Logger'
-], function(BaseQuery, Dashboard, Utils, Logger) {
+  '../Logger',
+  '../lib/jquery'
+], function(BaseQuery, Dashboard, Utils, Logger, $) {
   "use strict";
+
+  /* global Object */
 
   var SOLR_CLASS_NAME = "solr";
   var SOLR_REST_API_PARAMS = {
@@ -127,6 +130,68 @@ define([
         }, this);
 
       this.setOption("url", this.__buildSolrUrl());
+    },
+
+    exportData: function(exportType, overrides, options) {
+      options.exportType = exportType;
+
+      if (Utils.normalizeValue(exportType) !== null) {
+        this.setOption("responseType", exportType);
+      }
+
+      var settings = this.getAjaxOptions();
+      settings.url = this.getOption('url');
+      settings.data = this.buildQueryDefinition(overrides);
+      settings.success = this.__exportSuccess.bind(this, options);
+      settings.error = this.getErrorHandler(this.getOption('errorCallback').bind(this));
+
+      $.ajax(settings);
+    },
+
+    __exportSuccess: function(options, data) {
+      var isBlobAvailable = Blob != null;
+
+      if (options.exportType === "json") {
+        data = JSON.stringify(data, null, 2);
+      }
+
+      var url;
+      if (isBlobAvailable) {
+        var blob = new Blob([data], {type: "octet/stream"});
+        url = window.URL.createObjectURL(blob);
+      } else {
+        url = this.getOption('url');
+      }
+
+      this.__downloadData(url, options);
+
+      if (isBlobAvailable) {
+        window.URL.revokeObjectURL(url);
+      }
+    },
+
+    __downloadData: function(url, options) {
+      var link = document.createElement("a");
+      var canExportData = link.download != null;
+
+      if (canExportData) {
+
+        // 1. Setup
+        link.setAttribute("href", url);
+        link.setAttribute("download", this.__getExportDataName(options));
+        link.setAttribute("type", this.__getExportMineType(options));
+
+        // 2. Download
+        link.setAttribute("style", "visibility: hidden;");
+        document.body.appendChild(link);
+        link.click();
+
+        // 3. Cleanup
+        document.body.removeChild(link);
+      } else {
+        Logger.warn("Can not export the query data on this browser!");
+      }
+
     },
 
     /** @Override */
@@ -282,6 +347,29 @@ define([
       var param = SOLR_REST_API_PARAMS[definition];
 
       return param != null ? param : definition;
+    },
+
+    __getExportMineType: function(options) {
+      switch (options.exportType) {
+        case "csv":
+          return "text/csv";
+        case "json":
+          return "application/json";
+        case "xml":
+          return "application/xml";
+        default:
+          return "text/plain";
+      }
+    },
+
+    __getExportDataName: function(options) {
+      var exportFilename = options.filename;
+
+      if (Utils.normalizeValue(exportFilename) === null) {
+        exportFilename = "solr-export." + options.exportType;
+      }
+
+      return exportFilename;
     }
 
     // endregion
