@@ -823,7 +823,7 @@ define([
      * @return {boolean} `true` if the component should not trigger an UI block when updating.
      */
     isSilent: function() {
-      return !!(this.lifecycle && this.lifecycle.silent);
+      return !!this.hideOverlay || !!(this.lifecycle && this.lifecycle.silent);
     },
 
     /**

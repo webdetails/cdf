@@ -356,7 +356,7 @@ Dashboards.blockUIwithDrag = function() {
 };
 
 Dashboards.updateLifecycle = function(object) {
-    var silent = object.lifecycle ? !!object.lifecycle.silent : false;
+    var silent = !!object.hideOverlay || (object.lifecycle ? !!object.lifecycle.silent : false);
 
     if( object.disabled ){
       return;
@@ -860,6 +860,8 @@ Dashboards.initEngine = function(initInstance) {
     lifecycle: {
       silent: true
     },
+    hideOverlay: false,
+    cleanElementBeforeRender: true,
     executeAtStart: true,
     priority:999999999
   };
