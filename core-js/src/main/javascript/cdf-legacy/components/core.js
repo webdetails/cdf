@@ -1214,7 +1214,7 @@ var UnmanagedComponent = BaseComponent.extend({
   },
 
   isSilent: function (){
-    return (this.lifecycle) ? !!this.lifecycle.silent : false;
+    return !!this.hideOverlay || ((this.lifecycle) ? !!this.lifecycle.silent : false);
   }
 });
 

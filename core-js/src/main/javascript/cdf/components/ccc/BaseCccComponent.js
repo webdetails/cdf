@@ -100,7 +100,7 @@ define([
       }
 
       // clear placeholder
-      var ph = $("#" + this.htmlObject).empty();
+      var ph = !!this.cleanElementBeforeRender ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
       var me = this;
 
       // Set up defaults for height and width
@@ -199,7 +199,13 @@ define([
         });
       }
 
-      this.chart.render();
+      if (!!this.cleanElementBeforeRender) {
+        this.chart.render();
+      } else {
+        this.chart.render({
+          bypassAnimation: true
+        });
+      }
     }
   });
 

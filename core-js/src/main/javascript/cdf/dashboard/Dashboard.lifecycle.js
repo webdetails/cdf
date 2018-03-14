@@ -392,7 +392,7 @@ define([
      * @fires cdf.components.BaseComponent#event:"cdf:postExecution"
      */
     updateLifecycle: function(object) {
-      var silent = object.lifecycle ? !!object.lifecycle.silent : false;
+      var silent = !!object.hideOverlay || (object.lifecycle ? !!object.lifecycle.silent : false);
 
       if(object.disabled) {
         return;
