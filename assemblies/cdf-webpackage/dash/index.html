@@ -1,57 +1,65 @@
 <html>
-<head>
-<script src="/requirejs-manager/js/require-init.js?useFullyQualifiedUrl=false"></script>
-</head>
-<body>
+
+  <head>
+    <!--<script src="/requirejs-manager/js/require-init.js?useFullyQualifiedUrl=false"></script>-->
+    <script src="/webcontext.js"></script>
+  </head>
+
+  <body>
     <style>
-        .msgContainer {
-            background-color: #4682B4;
-            color: white;
-        }
+      .msgContainer {
+        background-color: #4682B4;
+        color: white;
+      }
     </style>
+
     <div class="container-fluid">
-        <div id="container" class="container">
-            <div id="row" class="row">
-                <div id="col" class="col-sx-12">
-                    <div id="msgContainer" class="msgContainer"></div>
-                </div>
-            </div>
+      <div id="container" class="container">
+        <div id="row" class="row">
+          <div id="col" class="col-sx-12">
+            <div id="msgContainer" class="msgContainer"></div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div id="showTextHere"></div>
 
     <script language="javascript" type="text/javascript">
-      SESSION_LOCALE = "en-us";
 
-      var dashboard;
-      require(['cdf/Dashboard.Bootstrap', 'cdf/components/TextComponent', 'HelloWorldComponent'],
-        function(Dashboard, TextComponent, HelloWorldComponent) {
-          dashboard = new Dashboard();
-          dashboard.addComponent(new TextComponent({
-            name: "myTextComponent",
-            type: "textComponent",
-            parameters:[],
-            listeners: [],
-            htmlObject: "msgContainer",
-            executeAtStart: true,
-            priority: 5,
-            expression: function() {
-              return "Hello World from Text Component!";
-            }
-          }));
+      require([
+        'cdf/Dashboard.Bootstrap',
+        'cdf/components/TextComponent',
+        'HelloWorldComponent'
+      ], function(Dashboard, TextComponent, HelloWorldComponent) {
 
-          dashboard.addComponent(new HelloWorldComponent({
-            name: "HelloWorld",
-            type: "HelloWorldComponent",
-            htmlObject: "showTextHere",
-            executeAtStart: true
-          }));
-          dashboard.init();
-          return dashboard;
-        }
-      );
+        var dashboard = new Dashboard();
+        dashboard.addComponent(new TextComponent({
+          name: "myTextComponent",
+          type: "textComponent",
+          parameters:[],
+          listeners: [],
+          htmlObject: "msgContainer",
+          executeAtStart: true,
+          priority: 5,
+          expression: function() {
+            return "Hello World from Text Component!";
+          }
+        }));
+
+        dashboard.addComponent(new HelloWorldComponent({
+          name: "HelloWorld",
+          type: "HelloWorldComponent",
+          htmlObject: "showTextHere",
+          executeAtStart: true
+        }));
+
+        dashboard.init();
+        return dashboard;
+      });
+
     </script>
-</body>
-</html>
 
+  </body>
+
+</html>

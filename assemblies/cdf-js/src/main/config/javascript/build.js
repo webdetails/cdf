@@ -62,7 +62,8 @@
   //file should be skipped because it has no dependencies.
   paths: {
     'requireLib': 'require',
-    'common-ui/util/URLEncoder': 'empty:'
+    'common-ui/util/URLEncoder': 'empty:',
+    'pentaho/environment': 'empty:'
   },
 
   //By default all the configuration for optimization happens from the command

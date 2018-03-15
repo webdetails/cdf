@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,6 +15,9 @@
  * Configuration file for cdf core libs
  */
 (function() {
+
+  /* globals ENVIRONMENT_CONFIG, CONTEXT_PATH, FULL_QUALIFIED_URL */
+
   if(!requireCfg.map) requireCfg.map = {};
   if(!requireCfg.map['*']) requireCfg.map['*'] = {};
   if(!requireCfg.map['cdf']) requireCfg.map['cdf'] = {};
@@ -38,39 +41,48 @@
   if(!requireConfig['amd']) {
     requireConfig['amd'] = {};
   }
+
   if(!requireConfig['amd']['shim']) {
     requireConfig['amd']['shim'] = {};
   }
+
   var amdShim = requireConfig['amd']['shim'];
 
-  var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
+  var isDebug = typeof document === "undefined" || document.location.href.indexOf("debug=true") > 0;
+  var isCdfPathDefined = typeof ENVIRONMENT_CONFIG !== "undefined" &&
+                         typeof ENVIRONMENT_CONFIG.paths !== "undefined" &&
+                         typeof ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined";
 
   var prefix = "";
-  if(typeof ENVIRONMENT_CONFIG !== "undefined" &&
-     typeof ENVIRONMENT_CONFIG.paths !== "undefined" &&
-     typeof ENVIRONMENT_CONFIG.paths["cdf"] !== "undefined") { // environment is configured, checking
+  if (isCdfPathDefined) { // environment is configured, checking
     prefix = requirePaths['cdf/lib'] = ENVIRONMENT_CONFIG.paths["cdf"] + "/lib";
-  } else if(typeof KARMA_RUN !== "undefined") { // unit tests
+
+  } else if (typeof KARMA_RUN !== "undefined") { // unit tests
     prefix = requirePaths['cdf/lib'] = 'target/test-javascript/lib';
-  } else if(typeof CONTEXT_PATH !== "undefined") { // production
 
-    //if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
+  } else {
+    var cdfResourcesPath = 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
 
-    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
-  } else if(typeof FULL_QUALIFIED_URL != "undefined") { // embedded
+    if (typeof CONTEXT_PATH !== "undefined") { // production
+      // if (!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
+      prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + cdfResourcesPath;
 
-    //if(!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
+    } else if (typeof FULL_QUALIFIED_URL !== "undefined") { // embedded
+      // if (!isDebug) { requireCfg.urlArgs = "ts=" + (new Date()).getTime(); } // enable cache buster
+      prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + cdfResourcesPath;
 
-    prefix = requirePaths['cdf/lib'] = FULL_QUALIFIED_URL + 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
-  } else { // build
-    prefix = requirePaths['cdf/lib'] = "cdf/lib";
+    } else { // build
+      prefix = requirePaths['cdf/lib'] = "cdf/lib";
+
+    }
   }
 
   //RequireJS text! loader plugin 2.0.14
   requirePaths['text'] = prefix + '/require-text/text';
+
   // configure text! plugin for usage in embedded environments (CORS)
   requireConfig['text'] = {
-    onXhr: function(xhr, url) {
+    onXhr: function(xhr/*, url*/) {
       //Called after the XHR has been created and after the
       //xhr.open() call, but before the xhr.send() call.
       //Useful time to set headers.

@@ -78,7 +78,7 @@ define([
       //TODO: when we start including the webcontext from the server we must review this part
       var serverRoot = environment.server.root;
       if (serverRoot != null) {
-        this.webAppPath = serverRoot;
+        this.webAppPath = serverRoot.toString();
       }
       
       if (this.webAppPath == null) {
