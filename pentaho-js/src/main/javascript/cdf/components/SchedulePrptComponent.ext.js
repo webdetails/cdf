@@ -11,16 +11,18 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([], function() {
+define([
+  'pentaho/environment'
+], function(environment) {
 
   return {
 
     getEmailConfig: function() {
-      return CONTEXT_PATH + "api/emailconfig";
+      return environment.server.root + "api/emailconfig";
     },
 
     getScheduledJob: function() {
-      return CONTEXT_PATH + "api/scheduler/job";
+      return environment.server.root + "api/scheduler/job";
     }
 
   };

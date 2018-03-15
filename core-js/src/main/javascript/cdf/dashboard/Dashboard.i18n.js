@@ -15,10 +15,13 @@ define([
   '../Logger',
   './Dashboard',
   './Dashboard.ext',
+  'pentaho/environment',
   '../lib/moment',
   '../lib/CCC/cdo',
   '../lib/cdf.jquery.i18n'
-], function(Logger, Dashboard, DashboardExt, moment, cdo, $) {
+], function(Logger, Dashboard, DashboardExt, environment, moment, cdo, $) {
+
+  var I18N_INIT_WARNING = "i18n support wasn't properly initiated. Is the file messages_supported_languages.properties present?";
 
   /**
    * @class cdf.dashboard."Dashboard.i18n"
@@ -31,25 +34,38 @@ define([
    */
   Dashboard.implement(/** @lends cdf.dashboard.Dashboard# */{
 
-
     /**
      * @summary Localization object.
      * @description Localization object, which will contain the property/value map and
      *              the method to get a value from a property.
      *
-     * @type {Object}
+     * @type {?object}
      * @protected
      */
-    i18nSupport: undefined,
+    _i18nSupport: undefined,
+    set i18nSupport(options) {
+      $.extend(this._i18nSupport, options);
+    },
+
+    get i18nSupport() {
+      return this._i18nCurrentLanguageCode;
+    },
 
     /**
      * @summary The dashboard's current language code.
      * @description The dashboard's current language code, used by other localizable components.
      *
-     * @type {String}
+     * @type {?string}
      * @protected
      */
-    i18nCurrentLanguageCode: undefined,
+    _i18nCurrentLanguageCode: undefined,
+    set i18nCurrentLanguageCode(locale) {
+      this._i18nCurrentLanguageCode = locale
+    },
+
+    get i18nCurrentLanguageCode() {
+      return this._i18nCurrentLanguageCode;
+    },
 
     /**
      * @summary Method used by the Dashboard constructor for i18n initialization.
@@ -59,44 +75,23 @@ define([
      * @private
      */
     _initI18n: function() {
-      var myself = this;
-      myself.i18nCurrentLanguageCode = undefined;
-      //when correctly initiated, prop will be replaced
-      myself.i18nSupport = {
-      prop: function(text) {
-        Logger.warn("i18n support wasn't properly initiated. Is the file messages_supported_languages.properties present?");
-        return text;
-      }}; // Reference to i18n objects
-
-      var normalizeLocale = function(sessionLocale) {
-        if(!sessionLocale) {
-          return;
+      this.i18nCurrentLanguageCode = undefined;
+      this.i18nSupport = {
+        prop: function(text) { //when correctly initiated, prop will be replaced
+          Logger.warn(I18N_INIT_WARNING);
+          return text;
         }
-        var bits = sessionLocale.split('-');
-        if(bits.length > 1) {
-          return bits.join('_');
-        }
-        return sessionLocale;
       };
-      var normalizedLocale = normalizeLocale(SESSION_LOCALE);
+
+      var normalizedLocale = this.__normalizeLocale();
+
       //gets localization from templates
       $.i18n.properties({
         name: 'messages',
-        path: DashboardExt.getStaticResource("resources/languages/"),
         mode: 'map',
         language: normalizedLocale,
-        callback: function() {
-          $.i18n.properties({
-            path: myself.getMessagesPath(),
-            name: 'messages',
-            mode: 'map',
-            type: 'GET',
-            language: normalizedLocale,
-            callback: function() {
-              myself.setI18nSupport(normalizedLocale, $.i18n);
-            }
-          });
-        }
+        path: DashboardExt.getStaticResource("resources/languages/"),
+        callback: this.__initI18nCallback.bind(this, normalizedLocale)
       });
 
       var formProvider = cdo.format.language(normalizedLocale);
@@ -104,16 +99,38 @@ define([
       moment.locale(normalizedLocale);
     },
 
+    __initI18nCallback: function(locale) {
+      var finalCallback = function() {
+        this.i18nCurrentLanguageCode = locale;
+        this.i18nSupport = $.i18n;
+      };
+
+      $.i18n.properties({
+        name: 'messages',
+        mode: 'map',
+        type: 'GET',
+        language: locale,
+        path: this.getMessagesPath(),
+        callback: finalCallback.bind(this)
+      });
+    },
+
+    __normalizeLocale: function() {
+      var locale = environment.locale;
+
+      return locale != null ? locale.split("-").join("_") : null;
+    },
+
     /**
      * @summary Sets the current locale and i18n options.
      * @description Sets the current locale and i18n options.
      *
-     * @param {string} lc Locale code.
+     * @param {string} locale Locale code.
      * @param {Object} i18nRef Additional i18 options.
      */
-    setI18nSupport: function(lc, i18nRef) {
-      this.i18nCurrentLanguageCode = lc;
-      $.extend(this.i18nSupport, i18nRef);
+    setI18nSupport: function(locale, i18nRef) {
+      this.i18nCurrentLanguageCode = locale;
+      this.i18nSupport = i18nRef;
     },
 
     /**
@@ -123,6 +140,7 @@ define([
      *              <p>It will be overridden returning the appropriate dashboard path in embedded scenarios.</p>
      *
      * @return {string} The path to the dashboard's locale-specific text files.
+     *
      * @abstract
      */
     getMessagesPath: function() {

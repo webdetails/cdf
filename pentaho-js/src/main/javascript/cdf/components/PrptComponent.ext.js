@@ -11,26 +11,23 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../dashboard/Dashboard.ext', 'common-ui/util/URLEncoder'],
-  function(DashboardExt, Encoder) {
+define([
+  '../dashboard/Dashboard.ext',
+  'common-ui/util/URLEncoder',
+  'pentaho/environment'
+], function(DashboardExt, Encoder, environment) {
 
   return {
 
     getReport: function(path, callvar, parameters) {
+      var isStringPath = typeof path === "string" || path instanceof String;
+
       /* callvar = report || viewer */
-      if(typeof path === "string" || path instanceof String) {
-        return Encoder.encode(
-          CONTEXT_PATH + "api/repos/{0}/" + callvar,
-          Encoder.encodeRepositoryPath(path),
-          parameters
-        );
-      } else {
-        return Encoder.encode(
-          CONTEXT_PATH + "api/repos/{0}/" + callvar,
-          Encoder.encodeRepositoryPath(DashboardExt.composePath(path)),
-          parameters
-        );
-      }
+      var url = environment.server.root + "api/repos/{0}/" + callvar;
+      var encodedPath = Encoder.encodeRepositoryPath(
+        isStringPath ? path : DashboardExt.composePath(path));
+
+      return Encoder.encode(url, encodedPath, parameters);
     }
 
   };

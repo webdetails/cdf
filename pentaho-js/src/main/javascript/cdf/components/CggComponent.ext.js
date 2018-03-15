@@ -11,12 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([], function() {
+define([
+  'pentaho/environment'
+], function(environment) {
 
   return {
 
     getCggDrawUrl: function() {
-      return CONTEXT_PATH + "plugin/cgg/api/services/draw";
+      return environment.server.root + "plugin/cgg/api/services/draw";
     }
   };
 

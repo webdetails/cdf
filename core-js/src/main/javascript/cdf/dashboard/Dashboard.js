@@ -15,13 +15,14 @@ define([
   '../lib/Base',
   '../Logger',
   './RefreshEngine',
+  'pentaho/environment',
   'amd!../lib/underscore',
   'amd!../lib/backbone',
   '../lib/jquery',
   'module',
   'amd!../lib/jquery.impromptu',
   '../lib/shims'
-], function(Base, Logger, RefreshEngine, _, Backbone, $, module) {
+], function(Base, Logger, RefreshEngine, environment, _, Backbone, $, module) {
 
   return Base.extend(/** @lends cdf.dashboard.Dashboard# */{
     /**
@@ -75,14 +76,16 @@ define([
       _configurePlugins();
 
       //TODO: when we start including the webcontext from the server we must review this part
-      if(typeof(CONTEXT_PATH) != 'undefined') {
-        this.webAppPath = CONTEXT_PATH;
+      var serverRoot = environment.server.root;
+      if (serverRoot != null) {
+        this.webAppPath = serverRoot;
       }
-      if(this.webAppPath === undefined) {
+      
+      if (this.webAppPath == null) {
         this.webAppPath = "/" + window.location.pathname.split('/')[1];
       }
 
-      if(this.webAppPath.endsWith("/")) {
+      if (this.webAppPath.endsWith("/")) {
         this.webAppPath = this.webAppPath.substr(0, this.webAppPath.length - 1);
       }
 

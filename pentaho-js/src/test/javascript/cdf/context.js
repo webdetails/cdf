@@ -11,10 +11,25 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-requireCfg = {
+var KARMA_RUN = true;
+
+/* Legacy Environment Variables */
+var SESSION_NAME = "dummy";
+var SESSION_LOCALE = "en-US";
+var CONTEXT_PATH = "/pentaho/";
+
+var requireCfg = {
+  waitSeconds: 30,
   paths: {},
   shim: {},
-  config: {}
+  map: {
+    "*": {}
+  },
+  bundles: {},
+  config: {
+    "pentaho/service": {}
+  },
+  packages: []
 };
 
 var contextObj = {
@@ -45,8 +60,9 @@ requireCfg.config['cdf/dashboard/Dashboard'] = {
   view: viewObj
 };
 
-var KARMA_RUN = true;
-
-var SESSION_NAME = "dummy";
-var SESSION_LOCALE = "en-US";
-var CONTEXT_PATH = "/pentaho/";
+requireCfg.config['pentaho/environment'] = {
+  locale: SESSION_LOCALE,
+  server: {
+    root: CONTEXT_PATH
+  }
+};

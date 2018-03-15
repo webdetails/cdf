@@ -15,9 +15,10 @@ define([
   '../dashboard/Dashboard.ext',
   '../dashboard/Utils',
   './NavigatorBaseComponent',
+  'pentaho/environment',
   '../lib/jquery',
   'amd!../lib/jquery.fancybox'
-], function(DashboardExt, Utils, NavigatorBaseComponent, $) {
+], function(DashboardExt, Utils, environment, NavigatorBaseComponent, $) {
 
   return NavigatorBaseComponent.extend({
     update: function() {
@@ -105,7 +106,7 @@ define([
                 myself.draw($(this).attr("parentPath"));
               });
           } else {
-            var path = CONTEXT_PATH;
+            var path = environment.server.root;
             if(this.url != undefined) {
               //cls = "folder";
               cls = "action greybox";
