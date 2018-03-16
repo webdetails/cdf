@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -356,7 +356,7 @@ Dashboards.blockUIwithDrag = function() {
 };
 
 Dashboards.updateLifecycle = function(object) {
-    var silent = !!object.hideOverlay || (object.lifecycle ? !!object.lifecycle.silent : false);
+    var silent = object.lifecycle ? !!object.lifecycle.silent : false;
 
     if( object.disabled ){
       return;
@@ -860,8 +860,6 @@ Dashboards.initEngine = function(initInstance) {
     lifecycle: {
       silent: true
     },
-    hideOverlay: false,
-    cleanElementBeforeRender: true,
     executeAtStart: true,
     priority:999999999
   };
