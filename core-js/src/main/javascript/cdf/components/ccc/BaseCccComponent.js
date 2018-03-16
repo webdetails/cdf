@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -100,7 +100,7 @@ define([
       }
 
       // clear placeholder
-      var ph = !!this.cleanElementBeforeRender ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
+      var ph = this.clearsBeforePreExecution ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
       var me = this;
 
       // Set up defaults for height and width
@@ -199,13 +199,7 @@ define([
         });
       }
 
-      if (!!this.cleanElementBeforeRender) {
-        this.chart.render();
-      } else {
-        this.chart.render({
-          bypassAnimation: true
-        });
-      }
+      this.chart.render();
     }
   });
 

@@ -333,7 +333,7 @@ define([
       });
 
       // Clear previous table
-      this.ph = !!this.cleanElementBeforeRender ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
+      this.ph = this.clearsBeforePreExecution ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
       // remove drawCallback from the parameters, or
       // it'll be called before we have an actual table...
       var croppedCd = $.extend({}, cd);
