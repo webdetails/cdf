@@ -13,11 +13,6 @@
 
 var KARMA_RUN = true;
 
-/* Legacy Environment Variables */
-var SESSION_NAME = "dummy";
-var SESSION_LOCALE = "en-US";
-var CONTEXT_PATH = "/pentaho/";
-
 var requireCfg = {
   waitSeconds: 30,
   paths: {},
@@ -57,11 +52,4 @@ requireCfg.config['cdf/dashboard/Dashboard'] = {
   context: contextObj,
   storage: storageObj,
   view: viewObj
-};
-
-requireCfg.config['pentaho/environment'] = {
-  locale: SESSION_LOCALE,
-  server: {
-    root: CONTEXT_PATH
-  }
 };

@@ -305,7 +305,7 @@ define([
       var async = options.async == null ? $.ajaxSettings.async : options.async;
       if(!async && options.xhrFields && options.xhrFields.withCredentials) {
         Logger.log("Cross-domain requests are deprecated for synchronous operations.");
-        delete settings.xhrFields.withCredentials;
+        delete options.xhrFields.withCredentials;
       }
 
       return options;

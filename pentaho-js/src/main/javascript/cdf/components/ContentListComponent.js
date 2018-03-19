@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -18,7 +18,7 @@ define([
   'pentaho/environment',
   '../lib/jquery',
   'amd!../lib/jquery.fancybox'
-], function(DashboardExt, Utils, environment, NavigatorBaseComponent, $) {
+], function(DashboardExt, Utils, NavigatorBaseComponent, environment, $) {
 
   return NavigatorBaseComponent.extend({
     update: function() {
@@ -41,19 +41,20 @@ define([
       // 1 - Get my solution and path from the object;
       // 2 - get the content
 
-      $("#"+this.htmlObject).empty();
+      $("#" + this.htmlObject).empty();
+
       var files = json.content || [];
       files.sort(function(a,b) {
-        var _a = (a.type == "FOLDER" ? "000" : "") + a.name;
-        var _b = (b.type == "FOLDER" ? "000" : "") + b.name;
+        var _a = (a.type === "FOLDER" ? "000" : "") + a.name;
+        var _b = (b.type === "FOLDER" ? "000" : "") + b.name;
         return _a > _b;
       });
+
       // Create the outmost ul
-      var container = $("<ul></ul>").attr("id","contentList-" + this.name).appendTo("#" + this.htmlObject);
+      var container = $("<ul></ul>").attr("id", "contentList-" + this.name).appendTo("#" + this.htmlObject);
 
       // We need to append the parent dir
-      if(this.mode != 1
-        && this.mode != 4
+      if(this.mode !== 1 && this.mode !== 4
         && (NavigatorBaseComponent.path || Utils.getPathParameter(NavigatorBaseComponent.path))) {
 
         var parentDir =  {
@@ -65,6 +66,7 @@ define([
           solution: NavigatorBaseComponent.getParentSolution(),
           path: path.substring(0, path.lastIndexOf("/"))
         };
+
         files.reverse().push(parentDir);
         files.reverse();
       }
@@ -89,13 +91,10 @@ define([
           var cls = "";
           var target = "";
           var href = "";
-          var template = (NavigatorBaseComponent.template != undefined &&
-            NavigatorBaseComponent.template.length != undefined && 
-            NavigatorBaseComponent.template.length > 0)
-            ? "&template=" + NavigatorBaseComponent.template : "";
+
           var anchor;
       
-          if(this.type=="FOLDER") {
+          if(this.type == "FOLDER") {
             cls = "folder";
 
             anchor = $("<a></a>")
@@ -136,8 +135,7 @@ define([
 
       $('#contentList-' + this.name + ' a').tooltip({showURL: false});
       $("li.greybox a").click(function() {
-        var t = this.title || this.innerHTML || this.href;
-        //$(window).scrollTop(0);
+
         var _href = this.href.replace(/'/g, "&#39;");
         $.fancybox({
           type: "iframe",
@@ -145,6 +143,7 @@ define([
           width: $(window).width(),
           height: $(window).height()
         });
+
         return false;
       });
     }

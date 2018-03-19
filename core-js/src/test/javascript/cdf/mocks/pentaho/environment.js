@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,11 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/queries/XmlaQuery.ext', ['pentaho/environment'], function(env) {
+define(function() {
 
-  var XmlaQueryExt = {
-    getXmla: function() { return env.server.root + "Xmla"; }
+  return {
+    locale: "en-US",
+    server: {
+      root: "/pentaho/"
+    }
   };
-  
-  return XmlaQueryExt;
+
 });
