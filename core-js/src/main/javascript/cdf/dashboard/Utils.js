@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2016 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -17,7 +17,8 @@ define([
   '../lib/moment',
   '../lib/CCC/cdo',
   '../lib/jquery',
-  'amd!../lib/queryParser'
+  'amd!../lib/queryParser',
+  '../lib/sanitizer'
 ], function(Logger, _, moment, cdo, $) {
 
   /**
@@ -71,6 +72,22 @@ define([
     .replace(/>/g, "&gt;")
     .replace(/'/g, "&#39;")
     .replace(/"/g, "&#34;");
+  };
+
+  /**
+   * @summary Sanitizes input HTML.
+   * @description Uses https://code.google.com/archive/p/google-caja/source.
+   *       Strips unsafe tags and attributes from html.
+   *
+   * @memberof cdf.dashboard.Utils
+   * @param {string} html The HTML to be sanitized.
+   * @return {!string} safe HTML based on input.
+   */
+  Utils.sanitizeHtml = function(html) {
+    // here is iframe explicitly replaced by script to further sanitizing since sanitizer itself doesn't sanitize iframe tag
+    html = html.replace(/<iframe\b[^>]*>/gi, "<script>").replace(/<\/iframe>/gi, "</script>");
+    html = Sanitizer.sanitize(html);
+    return html;
   };
 
   /**
@@ -594,7 +611,9 @@ define([
    *              (object containing the methods `join` and `length`).</p>
    *
    * @memberof cdf.dashboard.Utils
+   *
    * @param {object} value The value.
+   *
    * @return {boolean} `true` if it is an array or an array-like object, `false` otherwise.
    */
   Utils.isArray = function(value) {
@@ -604,12 +623,55 @@ define([
   };
 
   /**
+   * @summary Determines if a value is considered a function.
+   * @description Determines if a value is considered a function.
+   *
+   * @memberof cdf.dashboard.Utils
+   *
+   * @param {any} value - The value to be tested.
+   *
+   * @return {boolean} `true` if is a function; `false` otherwise.
+   */
+  Utils.isFunction = function(value) {
+    return typeof value === 'function';
+  };
+
+  /**
+   * @summary Determines if a value is considered a string.
+   * @description Determines if a value is considered a string.
+   *
+   * @memberof cdf.dashboard.Utils
+   *
+   * @param {any} value - The value to be tested.
+   *
+   * @return {boolean} `true` if is a string; `false` otherwise.
+   */
+  Utils.isString = function(value) {
+    return typeof value === 'string' || value instanceof String;
+  };
+
+  /**
+   * @summary Determines if a value is considered a number.
+   * @description Determines if a value is considered a number.
+   *
+   * @memberof cdf.dashboard.Utils
+   *
+   * @param {any} value - The value to be tested.
+   *
+   * @return {boolean} `true` if is a string; `false` otherwise.
+   */
+  Utils.isNumber = function(value) {
+    return typeof value === 'number' && isFinite(value);
+  };
+
+  /**
    * @summary Determines if two values are considered equal.
    * @description Determines if two values are considered equal.
    *
    * @memberof cdf.dashboard.Utils
    * @param {object} a The first value.
    * @param {object} b The second value.
+   *
    * @return {boolean} `true` if equal, `false` otherwise.
    */
   Utils.equalValues = function(a, b) {
