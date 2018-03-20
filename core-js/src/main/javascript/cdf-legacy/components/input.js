@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -1102,7 +1102,7 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
         selectHTML += " type='checkbox'";
       }
       selectHTML += "class='" + this.name + "' id='" + this.name + i + "' name='" + this.name + "' value='" + myArray[i][vid]
-        + "' /><label for='" + this.name + i + "'>" + myArray[i][1] + "</label></li>"
+        + "' /><label for='" + this.name + i + "'>" + Dashboards.sanitizeHtml(myArray[i][1]) + "</label></li>"
         + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
     }
     selectHTML += "</ul>"
