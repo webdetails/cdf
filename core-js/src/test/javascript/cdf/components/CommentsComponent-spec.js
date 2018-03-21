@@ -121,7 +121,7 @@ define([
       /**
        * ## The Comments Component # processOperation should list active comments
        */
-      it("should list active comments", function(done) {
+      it("should list active comments", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [{
@@ -181,13 +181,12 @@ define([
           collection,
           callback
         );
-        done();
       });
 
       /**
        * ## The Comments Component # processOperation should get last comment
        */
-      it("should get the last comment", function(done) {
+      it("should get the last comment", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [{
@@ -237,13 +236,12 @@ define([
           collection,
           callback
         );
-        done();
       });
 
       /**
        * ## The Comments Component # processOperation should delete a comment
        */
-      it("should delete a comment", function(done) {
+      it("should delete a comment", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [{
@@ -293,13 +291,12 @@ define([
           collection,
           callback
         );
-        done();
       });
 
       /**
        * ## The Comments Component # processOperation should archive a comment
        */
-      it("should archive a comment", function(done) {
+      it("should archive a comment", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [{
@@ -348,13 +345,12 @@ define([
           collection,
           callback
         );
-        done();
       });
 
       /**
        * ## The Comments Component # processOperation should add a comment
        */
-      it("should add a comment", function(done) {
+      it("should add a comment", function() {
         spyOn($, "ajax").and.callFake(function(params) {
           params.success({
             result: [{
@@ -403,7 +399,6 @@ define([
           collection,
           callback
         );
-        done();
       });
     });
 
