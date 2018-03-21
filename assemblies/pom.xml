@@ -15,9 +15,6 @@
   <packaging>pom</packaging>
 
   <properties>
-    <karaf-maven-plugin.version>3.0.8</karaf-maven-plugin.version>
-    <karaf-maven-plugin.aggregateFeatures>false</karaf-maven-plugin.aggregateFeatures>
-
     <assembly.tarLongFileMode>posix</assembly.tarLongFileMode>
   </properties>
 
@@ -44,21 +41,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.karaf.tooling</groupId>
-          <artifactId>karaf-maven-plugin</artifactId>
-          <version>${karaf-maven-plugin.version}</version>
-          <extensions>true</extensions>
-
-          <configuration>
-            <aggregateFeatures>${karaf-maven-plugin.aggregateFeatures}</aggregateFeatures>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
