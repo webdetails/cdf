@@ -378,6 +378,8 @@ define([], function() {
         }
         if(refreshQueue.length > 0) {
           activeTimer = setTimeout(dashboard.refreshEngine.fireRefresh, refreshQueue[0].nextRefresh - currentTime);
+        } else {
+          dashboard.refreshEngine.processComponents();
         }
       },
 
