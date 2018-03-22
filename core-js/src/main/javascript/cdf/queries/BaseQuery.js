@@ -552,7 +552,7 @@ define([
         page -= pageSize;
         this.setOption('page', page);
         return this.doQuery(outsideCallback);
-      } else if(_pageSize > 0) {
+      } else if(pageSize > 0) {
         this.setOption('page', 0);
         return this.doQuery(outsideCallback);
       } else {
