@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,9 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([], function() {
+define([
+  'amd!../lib/underscore'
+], function(_) {
 
   /**
    * @description Builds a new refresh engine for the provided dashboard.
@@ -293,6 +295,17 @@ define([], function() {
       }
     };
 
+    /**
+     * @summary Removes and inserts the component in the refresh queue.
+     * @description Removes and inserts the component in the refresh queue.
+     *
+     * @param {cdf.components.BaseComponent} component The target component.
+     */
+    var reinsertInQueue = function(component) {
+      clearFromQueue(component);
+      insertInQueue(component);
+    };
+
     return /** @lends cdf.dashboard.RefreshEngine# */ {
 
       /**
@@ -340,8 +353,7 @@ define([], function() {
        * @return {boolean} `true` after the component was correctly processed.
        */
       processComponent: function(component) {
-        clearFromQueue(component);
-        insertInQueue(component);
+        reinsertInQueue(component);
         if(isFirstInQueue(component)) {
           restartTimer();
         }
@@ -370,16 +382,23 @@ define([], function() {
       fireRefresh: function() {
         activeTimer = null;
         var currentTime = getCurrentTime();
+        var component = null;
 
         while(refreshQueue.length > 0 && refreshQueue[0].nextRefresh <= currentTime) {
           var info = refreshQueue.shift();//pop first
-          //call update, which calls processComponent
-          refreshComponent(info.component);
+          component = info.component;
+
+          //call update, which calls processComponent, but only if not updating
+          //if the component is updating we reinsert it into the queue
+          if(!dashboard.isComponentUpdating(component)) {
+            refreshComponent(component);
+          }else {
+            insertInQueue(component);
+          }
         }
+
         if(refreshQueue.length > 0) {
           activeTimer = setTimeout(dashboard.refreshEngine.fireRefresh, refreshQueue[0].nextRefresh - currentTime);
-        } else {
-          dashboard.refreshEngine.processComponents();
         }
       },
 
