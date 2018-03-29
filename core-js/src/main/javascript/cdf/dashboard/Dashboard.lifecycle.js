@@ -506,7 +506,8 @@ define([
       if(!this.updating) {
         this.updating = {
           tiers: {},
-          current: null
+          current: null,
+          updatingInFlight: []
         };
       }
       if(components && _.isArray(components) && !_.isArray(components[0])) {
@@ -562,6 +563,7 @@ define([
           current.components = _.without(current.components, component);
           var tiers = this.updating.tiers;
           tiers[current.priority] = _.without(tiers[current.priority], component);
+          this.updating.updatingInFlight = _.without(this.updating.updatingInFlight, component);
           this.updateAll();
         };
         /*
@@ -581,6 +583,9 @@ define([
           // Logger.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
           //  _(this.updating.tiers).map(function(v,k) {return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
           this.updateComponent(component);
+          if(this.updating.updatingInFlight.indexOf(component) == -1) {
+            this.updating.updatingInFlight.push(component);
+          }
         }
       }
 
@@ -805,6 +810,53 @@ define([
       // componentsToUpdate has components with equal or higher priority than the component
       // that is currently being executed, that await execution themselves
       return true;
+    },
+
+    /**
+     * @summary Cheks if a component is being updated in the dashboard lifecycle.
+     * @description When a component is upodated in the dashboard it goes through a series of states,
+     *              and tracking all those states can be difficult. This function eases that by checking in all the
+     *              appropriate lifecycle states if the component is being updated.
+     *
+     * @param {cdf.components.BaseComponent} the component to check if is being updated.
+     */
+    isComponentUpdating: function(component) {
+      if(this.updateQueue && this.updateQueue.indexOf(component) != -1) {
+        return true;
+      }
+
+      if(this.updating) {
+        if (this.updating.current && this.updating.current.components) {
+          var isRunningCurrent = _.some(this.updating.current.components, function (updatingComp) {
+            if (updatingComp === component) {
+              return true;
+            }
+          });
+          if (isRunningCurrent) {
+            return isRunningCurrent;
+          }
+        }
+
+        if (this.updating.tiers) {
+          var isRunningTier = _.some(this.updating.tiers, function (tier) {
+            return _.some(tier, function (tierComponent) {
+              return tierComponent === component;
+            });
+          });
+          if (isRunningTier) {
+            return isRunningTier;
+          }
+        }
+
+        if (this.updating.updatingInFlight) {
+          return _.some(this.updating.updatingInFlight, function (inFlightComponent) {
+            return inFlightComponent === component;
+          });
+        }
+      }
+
+      return false;
     }
+
   });
 });
