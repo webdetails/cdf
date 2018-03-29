@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -119,6 +119,12 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       sortedInsert(refreshQueue, info);
     }
   };
+
+  var reinsertInQueue = function(component) {
+    clearFromQueue(component);
+    insertInQueue(component);
+  };
+
   return {
 
     //set a component's refresh period and clears it from the queue if there;
@@ -141,8 +147,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
     //sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed
     processComponent : function(component){
-      clearFromQueue(component);
-      insertInQueue(component);
+      reinsertInQueue(component);
       if(isFirstInQueue(component)) restartTimer();
       return true;//dbg
     },
@@ -161,12 +166,20 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
     fireRefresh : function(){
       activeTimer = null;
       var currentTime = getCurrentTime();
+      var component = null;
 
-      while(refreshQueue.length > 0 &&
-        refreshQueue[0].nextRefresh <= currentTime){
+      while(refreshQueue.length > 0 && refreshQueue[0].nextRefresh <= currentTime){
         var info = refreshQueue.shift();//pop first
         //call update, which calls processComponent
-        refreshComponent(info.component);
+        component = info.component;
+
+        //call update, which calls processComponent, but only if not updating
+        //if the component is updating we reinsert it into the queue
+        if(!Dashboards.isComponentUpdating(component)) {
+          refreshComponent(component);
+        }else {
+          insertInQueue(component);
+        }
       }
       if(refreshQueue.length > 0){
         activeTimer = setTimeout("Dashboards.refreshEngine.fireRefresh()", refreshQueue[0].nextRefresh - currentTime );//ToDo: cleaner way to call

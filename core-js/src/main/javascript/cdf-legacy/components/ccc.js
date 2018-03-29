@@ -162,7 +162,7 @@ require(["cdf-legacy/lib/CCC/protovis","cdf-legacy/lib/CCC/cdo","cdf-legacy/lib/
             }
 
             // clear placeholder
-            var ph = $("#"+this.htmlObject).empty();
+            var ph = this.clearsBeforePreExecution ? $("#"+this.htmlObject).empty() : $("#"+this.htmlObject);
             var me = this;
 
             // Set up defaults for height and width
