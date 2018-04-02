@@ -294,7 +294,7 @@ define([
 
         var mockUpdateCurrent = {components: [comp1priority5], priority: comp1priority5.priority};
 
-        dashboard.updating = {tiers: mockUpdateTiers, current: mockUpdateCurrent};
+        dashboard.updating = {tiers: mockUpdateTiers, current: mockUpdateCurrent, updatingInFlight:[]};
 
         spyOn(dashboard, 'othersAwaitExecution').and.callThrough();
         spyOn(dashboard, 'updateComponent').and.callThrough();
@@ -351,7 +351,7 @@ define([
 
         var mockUpdateCurrent = null;
 
-        dashboard.updating = {tiers: mockUpdateTiers, current: mockUpdateCurrent};
+        dashboard.updating = {tiers: mockUpdateTiers, current: mockUpdateCurrent, updatingInFlight:[]};
 
         spyOn(dashboard, 'othersAwaitExecution').and.callThrough();
         spyOn(dashboard, 'updateComponent').and.callThrough();
@@ -434,7 +434,7 @@ define([
 
         var mockUpdateCurrent = {components: [comp1priority5], priority: comp1priority5.priority};
 
-        dashboard.updating = {tiers: mockUpdateTiers, current: mockUpdateCurrent};
+        dashboard.updating = {tiers: mockUpdateTiers, current: mockUpdateCurrent, updatingInFlight:[]};
 
         spyOn(dashboard, 'othersAwaitExecution').and.callThrough();
         spyOn(dashboard, 'updateComponent').and.callThrough();
