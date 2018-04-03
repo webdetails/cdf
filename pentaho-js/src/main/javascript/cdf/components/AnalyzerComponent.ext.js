@@ -13,17 +13,17 @@
 
 define([
   '../dashboard/Dashboard.ext',
-  'common-ui/util/URLEncoder'
+  'common-ui/util/URLEncoder',
+  'pentaho/enviroment'
 ], function(DashboardExt, Encoder) {
 
   return {
 
     getAnalyzer: function(path, callvar, parameters) {
-      return Encoder.encode(
-        CONTEXT_PATH + "api/repos/{0}/" + callvar,
-        Encoder.encodeRepositoryPath(DashboardExt.composePath(path)),
-        parameters
-      );
+      var url = environment.server.root + "api/repos/{0}/" + callvar;
+      var encodedPath = Encoder.encodeRepositoryPath(DashboardExt.composePath(path));
+
+      return Encoder.encode(url, encodedPath, parameters);
     }
 
   };

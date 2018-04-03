@@ -11,10 +11,20 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-requireCfg = {
+var KARMA_RUN = true;
+
+var requireCfg = {
+  waitSeconds: 30,
   paths: {},
   shim: {},
-  config: {}
+  map: {
+    "*": {}
+  },
+  bundles: {},
+  config: {
+    "pentaho/service": {}
+  },
+  packages: []
 };
 
 var contextObj = {
@@ -44,9 +54,3 @@ requireCfg.config['cdf/dashboard/Dashboard'] = {
   storage: storageObj,
   view: viewObj
 };
-
-var KARMA_RUN = true;
-
-var SESSION_NAME = "dummy";
-var SESSION_LOCALE = "en-US";
-var CONTEXT_PATH = "/pentaho/";

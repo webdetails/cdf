@@ -1,0 +1,314 @@
+{
+  "name": "@pentaho/cdf",
+  "version": "${project.version}",
+
+  "dependencies": {
+    "@pentaho/common-ui": "${project.version}"
+  },
+
+  "paths": {
+    "cdf": "/",
+    "cdf/lib": "/compressed/lib",
+
+    "css": "/compressed/lib/require-css/css",
+    "text": "/compressed/lib/require-text/text",
+    "amd": "/compressed/lib/require-amd/nonamd",
+    "dash": "/compressed/lib/require-dashboard/dashboard",
+
+    "cdf/lib/modernizr": "/compressed/lib/modernizr/modernizr-2.8.3",
+    "cdf/lib/sanitizer/lib/html4": "/compressed/lib/sanitizer/lib/html4",
+    "cdf/lib/sanitizer/lib/uri": "/compressed/lib/sanitizer/lib/uri",
+    "cdf/lib/sanitizer": "/compressed/lib/sanitizer/sanitizer",
+    "cdf/lib/jquery": "/compressed/lib/jQuery/jquery",
+    "cdf/lib/jquery.ui": "/compressed/lib/jQuery/jquery.ui",
+    "cdf/lib/jquery.blockUI": "/compressed/lib/blockUI/jquery.blockUI",
+    "cdf/lib/jquery.impromptu": "/compressed/lib/impromptu/jquery-impromptu",
+    "cdf/lib/jquery.fancybox": "/compressed/lib/fancybox/jquery.fancybox",
+    "cdf/lib/daterangepicker.jQuery": "/compressed/lib/daterangepicker/daterangepicker.jQuery",
+    "cdf/lib/underscore": "/compressed/lib/underscore/underscore",
+    "cdf/lib/backbone": "/compressed/lib/backbone/backbone",
+    "cdf/lib/mustache": "/compressed/lib/mustache/mustache",
+    "cdf/lib/mustache-wax": "/compressed/lib/mustacheWax/mustache-wax",
+    "cdf/lib/Base": "/compressed/lib/base/Base",
+    "cdf/lib/BaseEvents": "/compressed/lib/baseEvents/BaseEvents",
+    "cdf/lib/BaseSelectionTree": "/compressed/lib/baseSelectionTree/BaseSelectionTree",
+    "cdf/lib/Tree": "/compressed/lib/baseSelectionTree/Tree",
+    "cdf/lib/datatables": "/compressed/lib/dataTables/js/jquery.dataTables",
+    "cdf/lib/captify": "/compressed/lib/captify/captify",
+    "cdf/lib/jquery.bgiframe": "/compressed/lib/bgiframe/jquery.bgiframe",
+    "cdf/lib/jquery.positionBy": "/compressed/lib/positionBy/jquery.positionBy",
+    "cdf/lib/jquery.jdMenu": "/compressed/lib/jdMenu/jquery.jdMenu",
+    "cdf/lib/cdf.jquery.i18n": "/compressed/lib/i18n/cdf.jquery.i18n",
+    "cdf/lib/jquery.i18n": "/compressed/lib/i18n/jquery.i18n.properties",
+    "cdf/lib/OpenLayers": "/compressed/lib/OpenMap/OpenLayers/OpenLayers",
+    "cdf/lib/OpenStreetMap": "/compressed/lib/OpenStreetMap",
+    "cdf/lib/queryParser": "/compressed/lib/uriQueryParser/jquery-queryParser",
+    "cdf/lib/jquery.sparkline": "/compressed/lib/sparkline/jquery.sparkline",
+    "cdf/lib/jquery.corner": "/compressed/lib/corner/jquery.corner",
+    "cdf/lib/select2": "/compressed/lib/select2/select2",
+    "cdf/lib/chosen.jquery": "/compressed/lib/chosen/chosen.jquery",
+    "cdf/lib/jquery.multiselect": "/compressed/lib/hynds/jquery.multiselect",
+    "cdf/lib/shims": "/compressed/lib/shims",
+    "cdf/lib/html5shiv": "/compressed/lib/html5shiv/html5shiv",
+    "cdf/lib/respond": "/compressed/lib/respond/respond",
+    "cdf/lib/bootstrap": "/compressed/lib/Bootstrap/js/bootstrap",
+    "cdf/lib/raphael": "/compressed/lib/Raphael/raphael",
+    "cdf/lib/base64": "/compressed/lib/base64",
+    "cdf/lib/moment": "/compressed/lib/moment/moment",
+    "cdf/lib/moment-timezone": "/compressed/lib/moment-timezone/moment-timezone-with-data",
+    "cdf/lib/xmla": "/compressed/lib/xmla/Xmla",
+    "cdf/lib/backbone.treemodel": "/compressed/lib/backboneTreemodel/backbone.treemodel",
+    "cdf/lib/jquery.mCustomScrollbar": "/compressed/lib/mCustomScrollbar/jquery.mCustomScrollbar.concat.min"
+  },
+
+  "map": {
+    "cdf": {
+      "jquery": "cdf/lib/jquery",
+      "moment": "cdf/lib/moment"
+    },
+
+    "*": {
+      "cdf/components/BaseCccComponent": "cdf/components/ccc/BaseCccComponent",
+      "cdf/components/CccAreaChartComponent": "cdf/components/ccc/CccAreaChartComponent",
+      "cdf/components/CccBarChartComponent": "cdf/components/ccc/CccBarChartComponent",
+      "cdf/components/CccBoxplotChartComponent": "cdf/components/ccc/CccBoxplotChartComponent",
+      "cdf/components/CccBulletChartComponent": "cdf/components/ccc/CccBulletChartComponent",
+      "cdf/components/CccDotChartComponent": "cdf/components/ccc/CccDotChartComponent",
+      "cdf/components/CccHeatGridChartComponent": "cdf/components/ccc/CccHeatGridChartComponent",
+      "cdf/components/CccLineChartComponent": "cdf/components/ccc/CccLineChartComponent",
+      "cdf/components/CccMetricDotChartComponent": "cdf/components/ccc/CccMetricDotChartComponent",
+      "cdf/components/CccMetricLineChartComponent": "cdf/components/ccc/CccMetricLineChartComponent",
+      "cdf/components/CccNormalizedBarChartComponent": "cdf/components/ccc/CccNormalizedBarChartComponent",
+      "cdf/components/CccParCoordComponent": "cdf/components/ccc/CccParCoordComponent",
+      "cdf/components/CccPieChartComponent": "cdf/components/ccc/CccPieChartComponent",
+      "cdf/components/CccStackedAreaChartComponent": "cdf/components/ccc/CccStackedAreaChartComponent",
+      "cdf/components/CccStackedDotChartComponent": "cdf/components/ccc/CccStackedDotChartComponent",
+      "cdf/components/CccStackedLineChartComponent": "cdf/components/ccc/CccStackedLineChartComponent",
+      "cdf/components/CccTreemapChartComponent": "cdf/components/ccc/CccTreemapChartComponent",
+      "cdf/components/CccWaterfallChartComponent": "cdf/components/ccc/CccWaterfallChartComponent",
+      "cdf/components/CccSunburstChartComponent": "cdf/components/ccc/CccSunburstChartComponent",
+      "cdf/components/FilterComponent": "cdf/components/filter/FilterComponent"
+    }
+  },
+
+  "config": {
+    "pentaho/instanceInfo": {
+      "cdf/components/ccc/config/cdf.vizApi.conf": {
+        "type": "pentaho.config.spec.IRuleSet"
+      }
+    },
+    "amd": {
+      "shim": {
+        "cdf/lib/jquery.ui": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom": ""
+          }
+        },
+        "cdf/lib/jquery.blockUI": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "amd!cdf/lib/jquery.ui": ""
+          }
+        },
+        "cdf/lib/jquery.impromptu": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/impromptu/jquery-impromptu": ""
+          }
+        },
+        "cdf/lib/jquery.fancybox": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/fancybox/jquery.fancybox": ""
+          }
+        },
+        "cdf/lib/daterangepicker.jQuery": {
+          "exports": "jQuery",
+          "deps": {
+            "amd!cdf/lib/jquery.ui": "jQuery",
+            "css!cdf/lib/daterangepicker/ui.daterangepicker": ""
+          },
+          "prescript": "define = function(arr, setup) { setup(jQuery) };"
+        },
+        "cdf/lib/underscore": {
+          "postscript": "return _.noConflict();"
+        },
+        "cdf/lib/backbone": {
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "amd!cdf/lib/underscore": "_"
+          },
+          "prescript": "var _self = self;\nvar self = {jQuery: jQuery, _: _};\nself.self = self;\n(function() {\n",
+          "postscript": "}.call(self));\nvar Backbone = self.Backbone;\nself = _self; \nreturn Backbone;"
+        },
+        "cdf/lib/mustache-wax": {
+          "exports": "Mustache",
+          "deps": {
+            "cdf/lib/mustache": "Mustache"
+          },
+          "prescript": "var root = {Mustache: Mustache};\n(function() {\n",
+          "postscript": "}.call(root));\nreturn root.Mustache;"
+        },
+        "cdf/lib/datatables": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/dataTables/css/jquery.dataTables_themeroller": "",
+            "css!cdf/lib/dataTables/css/jquery.dataTables": ""
+          }
+        },
+        "cdf/lib/captify": {
+          "exports": "$",
+          "deps": {
+            "cdf/lib/jquery": "$",
+            "css!cdf/lib/captify": ""
+          }
+        },
+        "cdf/lib/jquery.bgiframe": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery"
+          }
+        },
+        "cdf/lib/jquery.positionBy": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery"
+          }
+        },
+        "cdf/lib/jquery.jdMenu": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "amd!cdf/lib/jquery.positionBy": "",
+            "amd!cdf/lib/jquery.bgiframe": "",
+            "css!cdf/lib/jquery.jdMenu": "",
+            "css!cdf/lib/jdMenu/jquery.jdMenu.slate": ""
+          },
+          "prescript": "var $ = jQuery;"
+        },
+        "cdf/lib/jquery.i18n": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery"
+          }
+        },
+        "cdf/lib/queryParser": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery"
+          }
+        },
+        "cdf/lib/jquery.sparkline": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery"
+          }
+        },
+        "cdf/lib/jquery.corner": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery"
+          }
+        },
+        "cdf/lib/jquery.select2": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/select2/select2": ""
+          }
+        },
+        "cdf/lib/jquery.chosen": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/chosen/chosen": ""
+          }
+        },
+        "cdf/lib/jquery.multiselect": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "amd!cdf/lib/jquery.ui": "",
+            "css!cdf/lib/hynds/jquery.multiselect": ""
+          }
+        },
+        "cdf/lib/bootstrap": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/Bootstrap/css/bootstrap.css": ""
+          }
+        },
+        "cdf/lib/moment-timezone": {
+          "exports": "moment",
+          "deps": {
+            "cdf/lib/moment": "moment"
+          }
+        },
+        "cdf/lib/xmla": {
+          "exports": "Xmla"
+        },
+        "cdf/lib/backbone.treemodel": {
+          "exports": "Backbone",
+          "deps": {
+            "amd!cdf/lib/underscore": "_",
+            "amd!cdf/lib/backbone": "Backbone"
+          },
+          "prescript": "var root = { Backbone: Backbone, _: _ };\n(function() {\n",
+          "postscript": "}.call(root));\nreturn root.Backbone;"
+        },
+        "cdf/lib/jquery.mCustomScrollbar": {
+          "exports": "jQuery",
+          "deps": {
+            "cdf/lib/jquery": "jQuery",
+            "css!cdf/lib/mCustomScrollbar/jquery.mCustomScrollbar.min": ""
+          }
+        }
+      }
+    },
+    "cdf/lib/moment": {
+      "noGlobal": true
+    }
+  },
+
+  "shim": {
+    "cdf/lib/sanitizer/lib/html4": {
+      "exports": "html4"
+    },
+    "cdf/lib/sanitizer/lib/uri": {
+      "exports": "URI"
+    },
+    "cdf/lib/sanitizer": {
+      "exports": "Sanitizer",
+      "deps": [
+        "cdf/lib/sanitizer/lib/html4",
+        "cdf/lib/sanitizer/lib/uri"
+      ]
+    },
+    "cdf/lib/OpenLayers": {
+      "exports": "OpenLayers",
+      "deps": [
+        "css!cdf/lib/OpenMap/OpenLayers/theme/default/style"
+      ]
+    },
+    "cdf/lib/OpenStreetMap": [
+      "cdf/lib/OpenLayers"
+    ],
+    "cdf/lib/respond": [
+      "amd!cdf/lib/bootstrap"
+    ],
+    "cdf/lib/base64": {
+      "exports": "Base64"
+    }
+  },
+
+  "scripts": {
+    "preconfig": "preconfig.js"
+  }
+}

@@ -11,7 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['common-ui/util/URLEncoder'], function(Encoder) {
+define([
+  'common-ui/util/URLEncoder',
+  'pentaho/environment'
+], function(Encoder, environment) {
   return {
     pluginName: "pentaho-cdf",
     samplesBasePath: "/public/plugin-samples/",
@@ -23,7 +26,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
      * @return {string} the base path of the plugin
      */
     getPluginBase: function(plugin) {
-      return CONTEXT_PATH + "plugin/" + plugin + "/api";
+      return environment.server.root + "plugin/" + plugin + "/api";
     },
 
     /**
@@ -142,7 +145,7 @@ define(['common-ui/util/URLEncoder'], function(Encoder) {
       arr.wrapper = false;
       arr.action = action;
       arr.url = Encoder.encode(
-        CONTEXT_PATH + "api/repos/{0}/generatedContent",
+        environment.server.root + "api/repos/{0}/generatedContent",
         Encoder.encodeRepositoryPath(this.getFullPath(path, action))
       );
 

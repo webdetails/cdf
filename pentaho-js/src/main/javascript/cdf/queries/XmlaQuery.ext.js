@@ -11,10 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define([], function() {
+define([
+  'pentaho/environment'
+], function(environment) {
 
   return {
-    getXmla: function() { return CONTEXT_PATH + "Xmla"; }
+    getXmla: function() {
+      return environment.server.root + "Xmla";
+    }
   };
 
 });

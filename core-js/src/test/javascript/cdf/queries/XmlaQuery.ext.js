@@ -11,10 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/queries/XmlaQuery.ext', [], function() {
+define('cdf/queries/XmlaQuery.ext', ['pentaho/environment'], function(env) {
 
   var XmlaQueryExt = {
-    getXmla: function() { return CONTEXT_PATH + "Xmla"; }
+    getXmla: function() { return env.server.root + "Xmla"; }
   };
   
   return XmlaQueryExt;

@@ -2,19 +2,29 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
     <version>8.1.0.0-SNAPSHOT</version>
   </parent>
+
   <artifactId>cdf-plugin-assemblies</artifactId>
   <version>8.1.0.0-SNAPSHOT</version>
+
   <packaging>pom</packaging>
+
+  <properties>
+    <assembly.tarLongFileMode>posix</assembly.tarLongFileMode>
+  </properties>
+
   <modules>
     <module>cdf-js</module>
     <module>cdf</module>
     <module>cdf-samples</module>
+    <module>cdf-webpackage</module>
   </modules>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
