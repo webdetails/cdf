@@ -100,7 +100,8 @@ define([
       }
 
       // clear placeholder
-      var ph = this.clearsBeforePreExecution ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
+      var clear = !!this.clearsBeforePreExecution && this.effectiveRenderMode === "total";
+      var ph = clear ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
       var me = this;
 
       // Set up defaults for height and width
@@ -135,6 +136,10 @@ define([
           .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
     },
 
+    get effectiveRenderMode() {
+      return !this.chart || !this.renderMode ? "total" : this.renderMode;
+    },
+
     /**
      * The internal render function, which creates the html object, extends the chart definitions, applies colors
      * and starts the ccc render for a given visualization type
@@ -144,7 +149,15 @@ define([
      * @private
      */
     _renderInner: function (data, externalChartDefinition) {
-      $("#" + this.htmlObject).append('<div id="' + this.htmlObject + 'protovis"></div>');
+      
+      var renderMode = this.effectiveRenderMode;
+
+      var createCanvas = $("#" + this.htmlObject).length === 0 ||
+        (!!this.clearsBeforePreExecution && renderMode === "total");
+
+      if(createCanvas) {
+        $("#" + this.htmlObject).append('<div id="' + this.htmlObject + 'protovis"></div>');
+      }
 
       // Always clone the original chartDefinition.
       var cd = $.extend({}, this.chartDefinition);
@@ -190,16 +203,52 @@ define([
         cd.extensionPoints = ep;
       }
 
-      this.chart = new this.cccType(cd);
+      switch (renderMode) {
+        
+        case "total":
+          this.chart = new this.cccType(cd);
+    
+          if (arguments.length > 0) {
+            this.chart.setData(data, {
+              crosstabMode: this.crosstabMode,
+              seriesInRows: this.seriesInRows
+            });
+          }
+    
+          this.chart.render();
+          break;
 
-      if (arguments.length > 0) {
-        this.chart.setData(data, {
-          crosstabMode: this.crosstabMode,
-          seriesInRows: this.seriesInRows
-        });
+        case "partialSameMetadata":
+          this.chart.options = cd;
+
+          if (arguments.length > 0) {
+            this.chart.setData(data, {
+              crosstabMode: this.crosstabMode,
+              seriesInRows: this.seriesInRows
+            });
+          }
+
+          this.chart.render({
+            recreate: true,
+            dataOnRecreate: this.dataAdditiveMode ? "add" : "reload"
+          });
+          break;
+
+        case "partialSameData":
+          this.chart.options = cd;
+          
+          this.chart.render({
+            recreate: true,
+            dataOnRecreate: null // do not reload data
+          });
+          break;
+
+        case "partialSameLayout":
+          this.chart.options = cd;
+          
+          this.chart.renderInteractive();
+          break;
       }
-
-      this.chart.render();
     }
   });
 
