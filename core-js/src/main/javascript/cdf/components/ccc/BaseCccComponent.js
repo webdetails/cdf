@@ -100,7 +100,7 @@ define([
       }
 
       // clear placeholder
-      var clear = !!this.clearsBeforePreExecution && this.effectiveRenderMode === "total";
+      var clear = !!this.clearsBeforePreExecution && this._getEffectiveRenderMode() === "total";
       var ph = clear ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
       var me = this;
 
@@ -122,6 +122,17 @@ define([
       }
     },
 
+    /** @inheritDoc */
+    renderChart: function () {
+      var renderMode = this._getEffectiveRenderMode();
+      var doesRenderModeLoadData = renderMode === "total" || renderMode === "partialSameMetadata";
+      if(doesRenderModeLoadData) {
+        this.base();
+      } else {
+        this.execute(_.bind(this.render, this));
+      }
+    },
+
     /**
      * Picks the data and renders the chart, either applying the Viz Api definitions (if it is enabled) or runs the
      * render without those extensions
@@ -136,7 +147,7 @@ define([
           .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
     },
 
-    get effectiveRenderMode() {
+    _getEffectiveRenderMode: function() {
       return !this.chart || !this.renderMode ? "total" : this.renderMode;
     },
 
@@ -149,12 +160,10 @@ define([
      * @private
      */
     _renderInner: function (data, externalChartDefinition) {
-      
-      var renderMode = this.effectiveRenderMode;
 
-      var createCanvas = $("#" + this.htmlObject).length === 0 ||
-        (!!this.clearsBeforePreExecution && renderMode === "total");
+      var renderMode = this._getEffectiveRenderMode();
 
+      var createCanvas = $("#" + this.htmlObject).children().length === 0;
       if(createCanvas) {
         $("#" + this.htmlObject).append('<div id="' + this.htmlObject + 'protovis"></div>');
       }
@@ -204,28 +213,37 @@ define([
       }
 
       switch (renderMode) {
-        
+
         case "total":
+          // Recreate the CCC chart each time.
+          // Data can be completely different each time.
+
+          // Dispose of the existing chart to not leak memory.
+          if(this.chart && this.chart.dispose) {
+            this.chart.dispose();
+          }
+
           this.chart = new this.cccType(cd);
-    
+
           if (arguments.length > 0) {
             this.chart.setData(data, {
               crosstabMode: this.crosstabMode,
               seriesInRows: this.seriesInRows
             });
           }
-    
+
           this.chart.render();
           break;
 
         case "partialSameMetadata":
+          // Preserve CCC chart.
+          // * Reload data (must have the same metadata)
+          // * Relayout
+          // * Refresh interactive state
           this.chart.options = cd;
 
           if (arguments.length > 0) {
-            this.chart.setData(data, {
-              crosstabMode: this.crosstabMode,
-              seriesInRows: this.seriesInRows
-            });
+            this.chart.setData(data);
           }
 
           this.chart.render({
@@ -235,8 +253,11 @@ define([
           break;
 
         case "partialSameData":
+          // Preserve CCC chart.
+          // * Relayout
+          // * Refresh interactive state
           this.chart.options = cd;
-          
+
           this.chart.render({
             recreate: true,
             dataOnRecreate: null // do not reload data
@@ -244,8 +265,10 @@ define([
           break;
 
         case "partialSameLayout":
+          // Preserve CCC chart.
+          // * Refresh interactive state
           this.chart.options = cd;
-          
+
           this.chart.renderInteractive();
           break;
       }
