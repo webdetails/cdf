@@ -64,8 +64,8 @@ define([
         var compatVersion = chartDef.compatVersion;
         if (compatVersion == null) {
           compatVersion = typeof pvc.defaultCompatVersion === 'function'
-              ? pvc.defaultCompatVersion()
-              : 1;
+            ? pvc.defaultCompatVersion()
+            : 1;
         }
 
         if (compatVersion <= 1) {
@@ -143,8 +143,8 @@ define([
       this._preProcessChartDefinition();
 
       BaseCccComponentExt.getExtensionsPromise(this.getCccVisualizationName(), this._vizApiStyles)
-          .then(_.bind(this._renderInner, this, data))
-          .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
+        .then(_.bind(this._renderInner, this, data))
+        .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
     },
 
     _getEffectiveRenderMode: function() {
@@ -193,9 +193,9 @@ define([
         // apply colors if that is intended
         if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
           if (!cd.continuousColorAxisColors
-              || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
+            || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
             cd.continuousColorAxisColors =
-                BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3");
+              BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3");
           }
           cd.discreteColorAxisColors = BaseCccComponentExt.getColors();
         }
@@ -240,7 +240,7 @@ define([
           // * Reload data (must have the same metadata)
           // * Relayout
           // * Refresh interactive state
-          this.chart.options = cd;
+          this._updateChartOptions(cd);
 
           if (arguments.length > 0) {
             this.chart.setData(data);
@@ -256,7 +256,7 @@ define([
           // Preserve CCC chart.
           // * Relayout
           // * Refresh interactive state
-          this.chart.options = cd;
+          this._updateChartOptions(cd);
 
           this.chart.render({
             recreate: true,
@@ -267,11 +267,15 @@ define([
         case "partialSameLayout":
           // Preserve CCC chart.
           // * Refresh interactive state
-          this.chart.options = cd;
+          this._updateChartOptions(cd);
 
           this.chart.renderInteractive();
           break;
       }
+    },
+
+    _updateChartOptions: function(cd) {
+      $.extend(true, this.chart.options, cd);
     }
   });
 
