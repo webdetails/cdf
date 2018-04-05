@@ -64,8 +64,8 @@ define([
         var compatVersion = chartDef.compatVersion;
         if (compatVersion == null) {
           compatVersion = typeof pvc.defaultCompatVersion === 'function'
-              ? pvc.defaultCompatVersion()
-              : 1;
+            ? pvc.defaultCompatVersion()
+            : 1;
         }
 
         if (compatVersion <= 1) {
@@ -100,7 +100,8 @@ define([
       }
 
       // clear placeholder
-      var ph = this.clearsBeforePreExecution ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
+      var clear = !!this.clearsBeforePreExecution && this._getEffectiveRenderMode() === "total";
+      var ph = clear ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
       var me = this;
 
       // Set up defaults for height and width
@@ -121,6 +122,17 @@ define([
       }
     },
 
+    /** @inheritDoc */
+    renderChart: function () {
+      var renderMode = this._getEffectiveRenderMode();
+      var doesRenderModeLoadData = renderMode === "total" || renderMode === "partialSameMetadata";
+      if(doesRenderModeLoadData) {
+        this.base();
+      } else {
+        this.execute(_.bind(this.render, this));
+      }
+    },
+
     /**
      * Picks the data and renders the chart, either applying the Viz Api definitions (if it is enabled) or runs the
      * render without those extensions
@@ -131,8 +143,12 @@ define([
       this._preProcessChartDefinition();
 
       BaseCccComponentExt.getExtensionsPromise(this.getCccVisualizationName(), this._vizApiStyles)
-          .then(_.bind(this._renderInner, this, data))
-          .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
+        .then(_.bind(this._renderInner, this, data))
+        .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
+    },
+
+    _getEffectiveRenderMode: function() {
+      return !this.chart || !this.renderMode ? "total" : this.renderMode;
     },
 
     /**
@@ -144,7 +160,13 @@ define([
      * @private
      */
     _renderInner: function (data, externalChartDefinition) {
-      $("#" + this.htmlObject).append('<div id="' + this.htmlObject + 'protovis"></div>');
+
+      var renderMode = this._getEffectiveRenderMode();
+
+      var createCanvas = $("#" + this.htmlObject).children().length === 0;
+      if(createCanvas) {
+        $("#" + this.htmlObject).append('<div id="' + this.htmlObject + 'protovis"></div>');
+      }
 
       // Always clone the original chartDefinition.
       var cd = $.extend({}, this.chartDefinition);
@@ -171,9 +193,9 @@ define([
         // apply colors if that is intended
         if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
           if (!cd.continuousColorAxisColors
-              || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
+            || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
             cd.continuousColorAxisColors =
-                BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3");
+              BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3");
           }
           cd.discreteColorAxisColors = BaseCccComponentExt.getColors();
         }
@@ -190,16 +212,70 @@ define([
         cd.extensionPoints = ep;
       }
 
-      this.chart = new this.cccType(cd);
+      switch (renderMode) {
 
-      if (arguments.length > 0) {
-        this.chart.setData(data, {
-          crosstabMode: this.crosstabMode,
-          seriesInRows: this.seriesInRows
-        });
+        case "total":
+          // Recreate the CCC chart each time.
+          // Data can be completely different each time.
+
+          // Dispose of the existing chart to not leak memory.
+          if(this.chart && this.chart.dispose) {
+            this.chart.dispose();
+          }
+
+          this.chart = new this.cccType(cd);
+
+          if (arguments.length > 0) {
+            this.chart.setData(data, {
+              crosstabMode: this.crosstabMode,
+              seriesInRows: this.seriesInRows
+            });
+          }
+
+          this.chart.render();
+          break;
+
+        case "partialSameMetadata":
+          // Preserve CCC chart.
+          // * Reload data (must have the same metadata)
+          // * Relayout
+          // * Refresh interactive state
+          this._updateChartOptions(cd);
+
+          if (arguments.length > 0) {
+            this.chart.setData(data);
+          }
+
+          this.chart.render({
+            recreate: true,
+            dataOnRecreate: this.dataAdditiveMode ? "add" : "reload"
+          });
+          break;
+
+        case "partialSameData":
+          // Preserve CCC chart.
+          // * Relayout
+          // * Refresh interactive state
+          this._updateChartOptions(cd);
+
+          this.chart.render({
+            recreate: true,
+            dataOnRecreate: null // do not reload data
+          });
+          break;
+
+        case "partialSameLayout":
+          // Preserve CCC chart.
+          // * Refresh interactive state
+          this._updateChartOptions(cd);
+
+          this.chart.renderInteractive();
+          break;
       }
+    },
 
-      this.chart.render();
+    _updateChartOptions: function(cd) {
+      $.extend(true, this.chart.options, cd);
     }
   });
 
