@@ -287,11 +287,13 @@ define([
         component.refreshPeriod = NO_REFRESH;
 
         //tries to fetch the component refresh rate from the data source definition
-        if(component.chartDefinition && component.chartDefinition.dataSource) {
-          if(dashboard.dataSources && dashboard.dataSources[component.chartDefinition.dataSource]) {
-            if(!isNaN(+dashboard.dataSources[component.chartDefinition.dataSource].componentRefreshPeriod) &&
-              (+dashboard.dataSources[component.chartDefinition.dataSource].componentRefreshPeriod) > 0) {
-              component.refreshPeriod = +dashboard.dataSources[component.chartDefinition.dataSource].componentRefreshPeriod;
+        var dataSourceId = component.chartDefinition && component.chartDefinition.dataSource ? dataSourceId = component.chartDefinition.dataSource :
+            (component.queryDefinition && component.queryDefinition.dataSource ? component.queryDefinition.dataSource : null);
+        if(dataSourceId !== null) {
+          if(dashboard.dataSources && dashboard.dataSources[dataSourceId]) {
+            if(!isNaN(+dashboard.dataSources[dataSourceId].componentRefreshPeriod) &&
+              (+dashboard.dataSources[dataSourceId].componentRefreshPeriod) > 0) {
+              component.refreshPeriod = +dashboard.dataSources[dataSourceId].componentRefreshPeriod;
             }
           }
         }

@@ -112,12 +112,10 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       component.refreshPeriod = NO_REFRESH;
 
       //tries to fetch the component refresh rate from the data source definition
-      if(component.chartDefinition && component.chartDefinition.dataSource) {
-        if(dashboard.dataSources && dashboard.dataSources[component.chartDefinition.dataSource]) {
-          if(!isNaN(+dashboard.dataSources[component.chartDefinition.dataSource].componentRefreshPeriod) &&
-            (+dashboard.dataSources[component.chartDefinition.dataSource].componentRefreshPeriod) > 0) {
-            component.refreshPeriod = +dashboard.dataSources[component.chartDefinition.dataSource].componentRefreshPeriod;
-          }
+      if(component.datasourceProperties && component.datasourceProperties.componentRefreshPeriod) {
+        if(!isNaN(+component.datasourceProperties.componentRefreshPeriod) &&
+          (+component.datasourceProperties.componentRefreshPeriod) > 0) {
+          component.refreshPeriod = +component.datasourceProperties.componentRefreshPeriod;
         }
       }
 
