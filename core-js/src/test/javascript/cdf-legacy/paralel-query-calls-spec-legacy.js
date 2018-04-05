@@ -18,8 +18,8 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     startTimer: function() {},
     on: function() {},
     off: function() {},
-    trigger: function( trigger, obj, bool ) { 
-      if( trigger.indexOf('cdf:preExecution') > 0 ){ this.preExecution(); } 
+    trigger: function( trigger, obj, bool ) {
+      if( trigger.indexOf('cdf:preExecution') > 0 ){ this.preExecution(); }
       if( trigger.indexOf('cdf:postExecution') > 0 ){ this.postExecution(); }
     },
     preExecution: function() { this.preExecutionFlag = 1; return true; },
@@ -47,8 +47,8 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     on: function() {},
     off: function() {},
     trigger: function( trigger, obj, bool ) {
-      if( trigger.indexOf('cdf:preExecution') > 0 ){ this.preExecution(); } 
-      if( trigger.indexOf('cdf:postExecution') > 0 ){ this.postExecution(); } 
+      if( trigger.indexOf('cdf:preExecution') > 0 ){ this.preExecution(); }
+      if( trigger.indexOf('cdf:postExecution') > 0 ){ this.postExecution(); }
     },
     preExecution: function() { this.preExecutionFlag = 1; return true; },
     update: function() { this.updateFlag = 1; },
@@ -72,10 +72,10 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     testFlag: 0,
     executeAtStart: true,
     on: function() {},
-    off: function() {},  
+    off: function() {},
     trigger: function( trigger, obj, bool ) {
-      if( trigger.indexOf('cdf:preExecution') > 0 ){ this.preExecution(); } 
-      if( trigger.indexOf('cdf:postExecution') > 0 ){ this.postExecution(); } 
+      if( trigger.indexOf('cdf:preExecution') > 0 ){ this.preExecution(); }
+      if( trigger.indexOf('cdf:postExecution') > 0 ){ this.postExecution(); }
     },
     startTimer: function() {},
     preExecution: function() { this.preExecutionFlag = 1; return true; },
@@ -133,7 +133,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     comp3priority10.reset();
 
     mockDashboard.components = [ comp1priority5, comp2priority5, comp3priority10 ];
-    
+
     spyOn(mockDashboard, 'othersAwaitExecution').and.callThrough();
     spyOn(mockDashboard, 'updateComponent').and.callThrough();
 
@@ -147,7 +147,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     var validate = function(){
 
       // Dashboards.updateAll call component.on when the updating begins (@see Dashboards.main:updateAll)
-      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 ); 
+      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 );
 
       expect( comp1priority5.preExecutionFlag ).toEqual( 1 );
       expect( comp1priority5.updateFlag ).toEqual( 1 );
@@ -156,7 +156,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
       done();
     }
 
-    setTimeout( validate, 100 ); 
+    setTimeout( validate, 100 );
   });
 
   it("Should go through Dashboards.updateAll handling comp2priority5 and *not* comp1priority5 (because it's already in an updated status), with an updateTier array already holding comp1priority5 and a new update call made to comp2priority5", function(done){
@@ -174,11 +174,11 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
 
     var mockUpdateCurrent = { components: [ comp1priority5 ], priority: comp1priority5.priority };
 
-    mockDashboard.updating = { tiers: mockUpdateTiers, current: mockUpdateCurrent };
-        
+    mockDashboard.updating = { tiers: mockUpdateTiers, current: mockUpdateCurrent, updatingInFlight:[] };
+
     spyOn(mockDashboard, 'othersAwaitExecution').and.callThrough();
-    spyOn(mockDashboard, 'updateComponent').and.callThrough();    
-    
+    spyOn(mockDashboard, 'updateComponent').and.callThrough();
+
     spyOn(comp1priority5, 'preExecution').and.callThrough();
     spyOn(comp1priority5, 'update').and.callThrough();
     spyOn(comp1priority5, 'postExecution').and.callThrough();
@@ -201,7 +201,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
       expect( comp1priority5.postExecutionFlag ).toEqual( 0 );
 
       // Dashboards.updateAll call component.on when the updating begins (@see Dashboards.main:updateAll)
-      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 ); 
+      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 );
 
       expect( comp2priority5.preExecutionFlag ).toEqual( 1 );
       expect( comp2priority5.updateFlag ).toEqual( 1 );
@@ -210,7 +210,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
       done();
     }
 
-    setTimeout( validateUpdateCycle, 100 ); 
+    setTimeout( validateUpdateCycle, 100 );
 
   });
 
@@ -229,11 +229,11 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
 
     var mockUpdateCurrent = null;
 
-    mockDashboard.updating = { tiers: mockUpdateTiers, current: mockUpdateCurrent };
-        
+    mockDashboard.updating = { tiers: mockUpdateTiers, current: mockUpdateCurrent, updatingInFlight:[] };
+
     spyOn(mockDashboard, 'othersAwaitExecution').and.callThrough();
-    spyOn(mockDashboard, 'updateComponent').and.callThrough();    
-    
+    spyOn(mockDashboard, 'updateComponent').and.callThrough();
+
     spyOn(comp1priority5, 'preExecution').and.callThrough();
     spyOn(comp1priority5, 'update').and.callThrough();
     spyOn(comp1priority5, 'postExecution').and.callThrough();
@@ -243,8 +243,8 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     spyOn(comp3priority10, 'postExecution').and.callThrough();
 
     // call Dashboards.updateAll
-    mockDashboard.updateAll( [ comp3priority10 ] ); 
- 
+    mockDashboard.updateAll( [ comp3priority10 ] );
+
     // although comp3priority10 has been triggered for updating, it *should* be discarded from this execution cycle due to lower priority rate
     // ( read: 1rst is comp1priority5, then is comp3priority10 )
     expect( mockDashboard.othersAwaitExecution ).toBeTruthy();
@@ -261,7 +261,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
       expect( comp3priority10.postExecutionFlag ).toEqual( 0 );
 
       // Dashboards.updateAll calls updateComponent (@see Dashboards.main:updateAll)
-      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 ); 
+      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 );
 
       // we need to do this by hand because we cannot mock this (Dashboards.Main:1107)
       /*
@@ -283,7 +283,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     var validateNextUpdateCycle = function(){
 
       // Dashboards.updateAll has updated comp3priority10
-      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 2 ); 
+      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 2 );
 
       expect( comp3priority10.preExecutionFlag ).toEqual( 1 );
       expect( comp3priority10.updateFlag ).toEqual( 1 );
@@ -293,7 +293,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     }
 
     setTimeout( validateUpdateCycle, 100 );
-    setTimeout( validateNextUpdateCycle, 200 ); 
+    setTimeout( validateNextUpdateCycle, 200 );
 
   });
 
@@ -313,11 +313,11 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
 
     var mockUpdateCurrent = { components: [ comp1priority5 ], priority: comp1priority5.priority };
 
-    mockDashboard.updating = { tiers: mockUpdateTiers, current: mockUpdateCurrent };
-        
+    mockDashboard.updating = { tiers: mockUpdateTiers, current: mockUpdateCurrent, updatingInFlight:[] };
+
     spyOn(mockDashboard, 'othersAwaitExecution').and.callThrough();
-    spyOn(mockDashboard, 'updateComponent').and.callThrough();    
-    
+    spyOn(mockDashboard, 'updateComponent').and.callThrough();
+
     spyOn(comp1priority5, 'preExecution').and.callThrough();
     spyOn(comp1priority5, 'update').and.callThrough();
     spyOn(comp1priority5, 'postExecution').and.callThrough();
@@ -331,8 +331,8 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     spyOn(comp3priority10, 'postExecution').and.callThrough();
 
     // call Dashboards.updateAll
-    mockDashboard.updateAll( [ comp2priority5 ] ); 
- 
+    mockDashboard.updateAll( [ comp2priority5 ] );
+
     // although comp3priority10 has been triggered for updating, it *should* be discarded from this execution cycle due to lower priority rate
     // ( read: 1rst is comp2priority5, then is comp3priority10 )
     expect( mockDashboard.othersAwaitExecution ).toBeTruthy();
@@ -356,7 +356,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
       expect( comp3priority10.postExecutionFlag ).toEqual( 0 );
 
       // Dashboards.updateAll calls updateComponent (@see Dashboards.main:updateAll)
-      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 ); 
+      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 1 );
 
       // we need to do this by hand because we cannot mock this (Dashboards.Main:1107)
       /*
@@ -378,7 +378,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     var validateNextUpdateCycle = function(){
 
       // Dashboards.updateAll has updated comp3priority10
-      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 2 ); 
+      expect( mockDashboard.updateComponent.calls.count() ).toEqual( 2 );
 
       expect( comp3priority10.preExecutionFlag ).toEqual( 1 );
       expect( comp3priority10.updateFlag ).toEqual( 1 );
@@ -388,7 +388,7 @@ describe("Dashboards.othersAwaitExecution behaviour unit testing #", function() 
     }
 
     setTimeout( validateUpdateCycle, 100 );
-    setTimeout( validateNextUpdateCycle, 200 ); 
+    setTimeout( validateNextUpdateCycle, 200 );
 
   });
 
