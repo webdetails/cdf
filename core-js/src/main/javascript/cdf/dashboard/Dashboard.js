@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -73,7 +73,7 @@ define([
 
       _.extend(this, Backbone.Events);
 
-      _configurePlugins();
+      _configurePlugins.call(myself);
 
       //TODO: when we start including the webcontext from the server we must review this part
       var serverRoot = environment.server.root;
