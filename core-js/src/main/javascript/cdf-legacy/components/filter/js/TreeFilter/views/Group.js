@@ -43,7 +43,7 @@
       var collapsable;
       this.renderSelection(viewModel);
       collapsable = ['.filter-group-body', '.filter-group-footer'].join(', ');
-      if (viewModel.isCollapsed) {
+      if (!viewModel.isCollapsed) {
         return this.$(collapsable).hide();
       } else {
         return this.$(collapsable).show();
