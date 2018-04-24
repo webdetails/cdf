@@ -12,12 +12,10 @@
  */
 
 define(function() {
-
   return {
     locale: "en-US",
     server: {
-      root: "/pentaho/"
+      root: {href: "/pentaho/", toString: function() { return this.href; }}
     }
   };
-
 });

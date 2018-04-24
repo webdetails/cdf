@@ -14,8 +14,8 @@
 define([
   '../dashboard/Dashboard.ext',
   'common-ui/util/URLEncoder',
-  'pentaho/enviroment'
-], function(DashboardExt, Encoder) {
+  'pentaho/environment'
+], function(DashboardExt, Encoder, environment) {
 
   return {
 
