@@ -105,7 +105,7 @@ define([
                 myself.draw($(this).attr("parentPath"));
               });
           } else {
-            var path = environment.server.root;
+            var path = environment.server.root.toString();
             if(this.url != undefined) {
               //cls = "folder";
               cls = "action greybox";
