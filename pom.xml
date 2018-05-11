@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>8.2.0.0-SNAPSHOT</version>
+    <version>9.0.0.0-SNAPSHOT</version>
   </parent>
 
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
-  <version>8.2.0.0-SNAPSHOT</version>
+  <version>9.0.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -44,9 +44,9 @@
     <hibernate.version>3.2.6.ga</hibernate.version>
     <jxl.version>2.6.12</jxl.version>
     <mockito-all.version>1.8.4</mockito-all.version>
-    <pentaho-ccc-plugin.version>8.2.0.0-SNAPSHOT</pentaho-ccc-plugin.version>
-    <pentaho-cpf-plugin.version>8.2.0.0-SNAPSHOT</pentaho-cpf-plugin.version>
-    <pentaho-json.version>8.2.0.0-SNAPSHOT</pentaho-json.version>
+    <pentaho-ccc-plugin.version>9.0.0.0-SNAPSHOT</pentaho-ccc-plugin.version>
+    <pentaho-cpf-plugin.version>9.0.0.0-SNAPSHOT</pentaho-cpf-plugin.version>
+    <pentaho-json.version>9.0.0.0-SNAPSHOT</pentaho-json.version>
     <servlet-api.version>2.4</servlet-api.version>
 
     <global.require.file></global.require.file>
