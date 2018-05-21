@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>PrptComponent</title>
+	<author>Ingo Klose</author>
+	<description>PrptComponent Documentation</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>

@@ -46,7 +46,7 @@
       <component-definition> 
         <chart-attributes> 
           <chart-type>PieChart</chart-type>  
-          <url-template><![CDATA[javascript:Dashboards.fireChange('productLine', encode_prepare('{PRODUCTLINE}'))]]></url-template>  
+          <url-template><![CDATA[javascript:require(['cdf/dashboard/Utf8Encoder'],function(Utf8Encoder){dashboard.fireChange('productLine',Utf8Encoder.encode_prepare('{PRODUCTLINE}'));});void(0);]]></url-template>  
           <paramName>PRODUCTLINE</paramName>  
           <include-legend>false</include-legend>  
           <title-font> 

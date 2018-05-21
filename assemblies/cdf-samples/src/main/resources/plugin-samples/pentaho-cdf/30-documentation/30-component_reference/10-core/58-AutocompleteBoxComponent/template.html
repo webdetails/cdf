@@ -1,171 +1,224 @@
-<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3Apentaho-cdf-require%3A30-documentation%3A30-component_reference%3Asamples.js"></script>
 
 <div class="shadow">
 
-	<div class="contents">
 
-		<h2>AutocompleteBoxComponent</h2>
 
-		<h3>Description</h3>
-		<p>
-			Renders a auto complete box to choose the correct option from.
-		</p>
-
-		<h3>Options</h3>
-
-		<dl class="documentation">
-			<dt>name</dt>
-			<dd>The name of the component</dd>
-
-			<dt>type</dt>
-			<dd><code>autocompleteBox</code></dd>
-
-			<dt>parameter</dt>
-			<dd>Variable where the selection is stored</dd>
-
-			<dt>listeners</dt>
-			<dd><i>Array - </i> Parameters who this component will react to</dd>
-
-			<dt>htmlObject</dt>
-			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
-
-			<dt>refreshPeriod</dt>
-			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+  <div class="contents">
 
 
 
-			<dt>executeAtStart</dt>
-			<dd>True to execute the component at start, false otherwise</dd>
-
-			<dt>preExecution</dt>
-			<dd><i>Function - </i> Function to be called before the component is executed</dd>
-
-			<dt>postExecution</dt>
-			<dd><i>Function - </i> Function to be called after the component is executed</dd>
-
-			<dt>preChange</dt>
-			<dd><i>Function(value) - </i> Function to be called before the component is changed</dd>
-
-			<dt>postChange</dt>
-			<dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
-
-			<dt>queryDefinition</dt>
-			<dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
-
-			<dt>addTextElements</dt>
-			<dd>If true adds selected values bellow the input box. Default: true</dd>
-
-			<dt>selectMulti</dt>
-			<dd>Allow multiple selection. Default: false</dd>
-
-			<dt>minTextLength</dt>
-			<dd>The minimal word length to check if there is a match</dd>
-
-			<dt>matchType</dt>
-			<dd>The type of the word match (fromStart/all). Default: fromStart </dd>
-
-			<dt>scrollHeight</dt>
-			<dd>The size of the scrollbar. Default: Not defined (without scrollbar) </dd>
-
-			<dt>showApplyButton</dt>
-			<dd>Show apply Button in multi selection mode. Default: true </dd>
-
-			<dt>externalApplyButtonId</dt>
-			<dd>Id of a external button, to apply changes on the component.</dd>
-
-			<dt>tooltipMessage</dt>
-			<dd>Tooltip to be displayed when mouse hovers</dd>
-
-			<dt>autoUpdateFunction</dt>
-			<dd>Function to be called every X second according to the autoUpdateTimeout setting</dd>
-
-			<dt>autoUpdateTimeout</dt>
-			<dd>timeout in milliseconds to call the function defined by autoUpdateFunction. Default 3 secs </dd>
-
-			<dt>reloadOnUpdate</dt>
-			<dd>on update event the component should be reloaded or only update the list of values</dd>
-
-		</dl>
-
-		<h3>MetaLayer options</h3>
-
-		<dl class="documentation">
-			<dt>queryType</dt>
-			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
-
-			<dt>jndi</dt>
-			<dd>Connection to use for the query</dd>
-
-			<dt>query</dt>
-			<dd>sql or mdx Query to execute</dd>
-
-			<dt>cube</dt>
-			<dd>Cube name to use when queryType is mdx</dd>
-
-			<dt>catalog</dt>
-			<dd>Mondrian schema to use when queryType is mdx</dd>
-		</dl>
-
-		<h3>Sample</h3>
-
-		<div id="example" class="flora" style="height:400px">
-			<ul>
-				<li><a href="#sample"><span>Sample</span></a></li>
-				<li><a href="#code"><span>Code</span></a></li>
-			</ul>
-			<div id="sample">
-				<div id="sampleObject"></div>
-				<div id="sampleObjectResult"></div>
-			</div>
-
-				<div id="code">
-					<textarea cols="80" rows="20" id="samplecode">
+    <h2>AutocompleteBoxComponent</h2>
 
 
 
+    <h3>Description</h3>
 
-var clientSelector = {
-	name: "clientSelector",
-	type: "autocompleteBox",
-	matchType: "fromStart",
-	queryDefinition: {dataAccessId: "auto-complete", path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
-	selectMulti: true,
-	showApplyButton: true,
-	minTextLength: 0,
-	scrollHeight: 250,
-	parameter: "clients",
-	htmlObject: "sampleObject",
-	reloadOnUpdate: true,
-	autoUpdateTimeout: 3000,
-	executeAtStart: true,
-	autoUpdateFunction: function() {
-		if(!clients) {
-			clients="";
-		}
-		var inputValue=$("#autoboxInput").val();
-		Dashboards.log("inputValue: " + inputValue);
-		Dashboards.log("clients: " + clients);
-		if(clients!=inputValue) {
-			clients=inputValue;
-			Dashboards.update(clientSelector);
-		}
-  }
-}
+    <p>
 
-Dashboards.init([clientSelector]);
-Dashboards.finishedInit = false;
+      Renders a auto complete box to choose the correct option from.
 
-					</textarea>
-					<br />
-					<button onclick="evaluateCode(true)">Try me</button>
-				</div>
-			</div>
+    </p>
 
-		</div>
-	</div>
 
-	<script language="javascript" type="text/javascript">
-		var clients = "";
-		var tabs = $("#example").tabs();
-		evaluateCode(false);
-	</script>
+
+    <h3>Options</h3>
+
+
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>autocompleteBox</code></dd>
+
+      <dt>parameter</dt>
+      <dd>Variable where the selection is stored</dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function(value) - </i> Function to be called before the component is changed</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
+
+      <dt>queryDefinition</dt>
+      <dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
+
+      <dt>addTextElements</dt>
+      <dd>If true adds selected values bellow the input box. Default: true</dd>
+
+      <dt>selectMulti</dt>
+      <dd>Allow multiple selection. Default: false</dd>
+
+      <dt>minTextLength</dt>
+      <dd>The minimal word length to check if there is a match</dd>
+
+      <dt>matchType</dt>
+      <dd>The type of the word match (fromStart/all). Default: fromStart </dd>
+
+      <dt>scrollHeight</dt>
+      <dd>The size of the scrollbar. Default: Not defined (without scrollbar) </dd>
+
+      <dt>showApplyButton</dt>
+      <dd>Show apply Button in multi selection mode. Default: true </dd>
+
+      <dt>externalApplyButtonId</dt>
+      <dd>Id of a external button, to apply changes on the component.</dd>
+
+      <dt>tooltipMessage</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
+
+      <dt>autoUpdateFunction</dt>
+      <dd>Function to be called every X second according to the autoUpdateTimeout setting</dd>
+
+      <dt>autoUpdateTimeout</dt>
+      <dd>timeout in milliseconds to call the function defined by autoUpdateFunction. Default 3 secs </dd>
+
+      <dt>reloadOnUpdate</dt>
+      <dd>on update event the component should be reloaded or only update the list of values</dd>
+
+      <dt>silent</dt>
+      <dd>If true no UI blocking will happen on load and when fetching data</dd>
+
+    </dl>
+
+    <h3>MetaLayer options</h3>
+
+
+
+    <dl class="documentation">
+
+      <dt>queryType</dt>
+
+      <dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+
+
+      <dt>jndi</dt>
+
+      <dd>Connection to use for the query</dd>
+
+
+
+      <dt>query</dt>
+
+      <dd>sql or mdx Query to execute</dd>
+
+
+
+      <dt>cube</dt>
+
+      <dd>Cube name to use when queryType is mdx</dd>
+
+
+
+      <dt>catalog</dt>
+
+      <dd>Mondrian schema to use when queryType is mdx</dd>
+
+    </dl>
+
+
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora" style="height:400px">
+
+      <ul>
+
+        <li><a href="#sample"><span>Sample</span></a></li>
+
+        <li><a href="#code"><span>Code</span></a></li>
+
+      </ul>
+
+      <div id="sample">
+
+        <div id="sampleObject"></div>
+
+        <div id="sampleObjectResult"></div>
+
+        <br/>
+
+      </div>
+
+
+
+      <div id="code">
+
+        <textarea cols="80" rows="40" id="samplecode">
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/components/AutocompleteBoxComponent'
+], function(Dashboard, AutocompleteBoxComponent) {
+
+  var dashboard = new Dashboard();
+
+  dashboard.addParameter("clients", "");
+  
+  dashboard.addComponent(new AutocompleteBoxComponent({
+
+    name: "autocompleteBox",
+    type: "autocompleteBox",
+    matchType: "fromStart",
+    queryDefinition: {dataAccessId: "auto-complete", path: "/public/plugin-samples/pentaho-cdf/actions/data-for-samples.cda"},
+    selectMulti: true,
+    showApplyButton: true,
+    minTextLength: 0,
+    scrollHeight: 250,
+    parameter: "clients",
+    htmlObject: "sampleObject",
+    reloadOnUpdate: true,
+    autoUpdateTimeout: 3000,
+    executeAtStart: true,
+    silent: true,
+    autoUpdateFunction: function() {
+
+      if(!this.dashboard.getParameterValue(this.parameter)) {
+        this.dashboard.setParameter(this.parameter, "");
+      }
+
+      if(this.dashboard.getParameterValue(this.parameter) != this._getTextBoxValue()) {
+        this.dashboard.setParameter(this.parameter, this._getTextBoxValue());
+        this.dashboard.update(this);
+      }
+    }
+  }));
+
+  dashboard.init();
+
+});
+        </textarea>
+
+        <br/>
+
+        <button id="tryMe">Try me</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

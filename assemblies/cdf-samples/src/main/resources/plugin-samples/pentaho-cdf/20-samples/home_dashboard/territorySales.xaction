@@ -44,9 +44,7 @@
       </action-outputs>
       <component-definition> 
         <chart-attributes> 
-          <chart-type>PieChart</chart-type>  
-          <!--<url-template><![CDATA[javascript:Dashboards.fireChange('territory', '{TERRITORY}')]]></url-template>-->  
-          <!--<url-template><![CDATA[javascript:Dashboards.fireChange(clickOnTerritory('{TERRITORY}'))]]></url-template>-->  
+          <chart-type>PieChart</chart-type>
           <url-template><![CDATA[javascript:clickOnTerritory('{TERRITORY}')]]></url-template>  
           <paramName>TERRITORY</paramName>  
           <include-legend>false</include-legend>  

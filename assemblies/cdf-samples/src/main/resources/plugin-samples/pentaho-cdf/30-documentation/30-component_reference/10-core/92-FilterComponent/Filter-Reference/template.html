@@ -326,20 +326,52 @@ By default, the filter is expecting the columns in the folowing order:
 
 
 <script language="javascript" type="text/javascript">
-wcdfSettings = {
-  "author": "",
-  "description": "filter",
-  "rendererType": "blueprint",
-  "require": false,
-  "style": "WDDocs",
-  "title": "filter_reference",
-  "widget": false,
-  "widgetName": "",
-  "widgetParameters": []
+
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/Logger',
+  'cdf/lib/jquery',
+  'amd!cdf/lib/underscore',
+  'cdf/lib/moment',
+  'cdf/lib/CCC/cdo',
+  'cdf/dashboard/Utils',
+  'cdf/components/FilterComponent',
+  'cdf/components/TableComponent',
+  'cdf/components/TextComponent'],
+function(
+  Dashboard,
+  Logger,
+  $,
+  _,
+  moment,
+  cdo,
+  Utils,
+  FilterComponent,
+  TableComponent,
+  TextComponent) {
+
+var dashboard = new Dashboard();
+
+  dashboard.getWcdfSettings = function() {
+    return {
+      "author": "",
+      "description": "filter_selector",
+      "rendererType": "blueprint",
+      "require": true,
+      "style": "WDDocsRequire",
+      "title": "filter_reference",
+      "widget": false,
+      "widgetName": "",
+      "widgetParameters": []
 };
+  };
 
+  dashboard.addDataSource("getData_IdValue_IdGroup", {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-Reference/filter_reference.cda"
+  });
 
-var render_singleFilter_group = {
+var render_singleFilter_group = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_group",
   priority: 5,
@@ -352,8 +384,7 @@ var render_singleFilter_group = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-Reference/filter_reference.cda"
+      dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -382,9 +413,8 @@ var render_singleFilter_group = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_group = {
+});
+var render_multiFilter_group = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_group",
   priority: 5,
@@ -397,8 +427,7 @@ var render_multiFilter_group = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-Reference/filter_reference.cda"
+      dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -427,16 +456,13 @@ var render_multiFilter_group = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-Dashboards.addParameter("singleSelectionParam_group", function() { return []
-}());
-
-Dashboards.addParameter("multiSelectionParam_group", function() { return []
-}());
-
-var render_table_groups = {
-  type: "Table",
+});
+dashboard.addParameter("singleSelectionParam_group", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+dashboard.addParameter("multiSelectionParam_group", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+var render_table_groups = new TableComponent({
+  type: "TableComponent",
   name: "render_table_groups",
   priority: 5,
   htmlObject: "tableObj_groups",
@@ -446,9 +472,8 @@ var render_table_groups = {
   extraOptions: [],
   expandParameters: [],
   expandOnClick: false,
-  chartDefinition:{
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-Reference/filter_reference.cda",
+  chartDefinition:  {
+    dataSource: "getData_IdValue_IdGroup",
     colHeaders: [],
     colTypes: [],
     colFormats: [],
@@ -464,10 +489,9 @@ var render_table_groups = {
     lengthChange: false,
     tableStyle: "bootstrap"
   }
-};
-
-var render_txt_singleSelection_group = {
-  type: "textComponent",
+});
+var render_txt_singleSelection_group = new TextComponent({
+  type: "TextComponent",
   name: "render_txt_singleSelection_group",
   priority: 5,
   expression: function(){
@@ -477,10 +501,9 @@ var render_txt_singleSelection_group = {
   htmlObject: "txt_singleSelectionObj_group",
   listeners: ['singleSelectionParam_group'],
   executeAtStart: true
-};
-
-var render_txt_multiSelection_group = {
-  type: "textComponent",
+});
+var render_txt_multiSelection_group = new TextComponent({
+  type: "TextComponent",
   name: "render_txt_multiSelection_group",
   priority: 5,
   expression: function(){
@@ -496,9 +519,11 @@ var render_txt_multiSelection_group = {
   htmlObject: "txt_multiSelectionObj_group",
   listeners: ['multiSelectionParam_group'],
   executeAtStart: true
-};
+});
 
-Dashboards.addComponents([render_singleFilter_group, render_multiFilter_group, render_table_groups, render_txt_singleSelection_group, render_txt_multiSelection_group]);
+dashboard.addComponents([render_singleFilter_group, render_multiFilter_group, render_table_groups, render_txt_singleSelection_group, render_txt_multiSelection_group]);
 
-Dashboards.init();
+dashboard.init();
+return dashboard;
+});
 </script>

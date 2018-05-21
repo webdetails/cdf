@@ -1,0 +1,302 @@
+<style>
+<!--
+.filter-accordion .filter-root-body{
+    position: relative;
+}
+
+.filter-accordion .filter-root-header:hover{
+   border: 1px solid #000;   
+}
+
+.filter-accordion{
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #fee;
+    padding: 30px;
+}
+dt {
+    padding-left: 10px;
+    font-family: monospace;
+}
+dd {
+    padding-left: 30px;
+} 
+-->
+</style>
+<h1>Filter Component Add-in Reference</h1>
+
+        <h2>Accordion addIn</h2>
+		<p>
+			If you a have a group of related filters, 
+			you might want to have them behave as an accordion: whenever a filter is opened, 
+			the remaining filters should close themselves.
+		</p>
+
+		<h3>Implementation</h3>
+		<p>
+			This addIn acts on the slot <code>postUpdate</code>, which runs when data is imported into the filter's <code>model</code>.
+			The addIn works by 
+			hooking a callback to an event emitted by <code>model</code> whenever the filter 
+			is expanded/collapsed.
+			<br/>
+			Whenever the user expands a filter, a global event on the "Dashboards" object is issued.
+			The remaining filters configured to use this addIn will listen to the event. 
+			If they share the same "group", they will close themselves accordingly.
+		</p>
+
+		<h3>Reference</h3>
+		<p>
+		To override the default configuration of the addIn, add the following snippet to
+		the filter's <code>preExecution</code> callback:
+		</p>
+		<pre>
+			this.setAddInOptions('postUpdate', 'accordion', {
+				group: 'myGroup' // Name of the group whose this filter belongs to
+			});
+		</pre>
+		<p>
+		Also, add the following CSS. Note that <code>.filter-accordion</code> is the CSS class 
+		of a container that holds the group of filters
+		</p>
+		<pre>
+			
+		.filter-accordion .filter-root-body{
+			position: relative; /* we want the filters to expand */
+		}
+		</pre>
+
+		<h3>Example</h3>
+          <div class='col-xs-6'><div id='filterAccordion'  class='filter-accordion ' >
+              <div class='col-xs-12'><div id='singleFilterObj_simple' >
+              </div></div>
+              <div class='col-xs-12'><div id='multiFilterObj_simple' >
+              </div></div>
+              <div class='col-xs-12'><div id='singleFilterObj_group' >
+              </div></div>
+              <div class='col-xs-12 last'><div id='multiFilterObj_group' >
+              </div></div>
+          </div></div>
+          
+              <div class='col-xs-12'><div id='button0' >
+              </div></div>
+              <div class='col-xs-12'><div id='button1' >
+              </div></div>
+              <div class='col-xs-12'><div id='button2' >
+              </div></div>
+              <div class='col-xs-12 last'><div id='button3' >
+              </div></div>
+
+<script language="javascript" type="text/javascript">
+
+wcdfSettings = {
+  "author": "",
+  "description": "Filter AddIn Reference: Accordion",
+  "rendererType": "blueprint",
+  "require": false,
+  "style": "WDDocs",
+  "title": "filter_addIn_reference_accordion",
+  "widget": false,
+  "widgetName": "",
+  "widgetParameters": []
+};
+
+var render_singleFilter_simple = {
+  type: "FilterComponent",
+  name: "render_singleFilter_simple",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_simple",
+  listeners: ['multiSelectionParam_simple','multiSelectionParam_group'],
+  parameter: "singleSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {};
+} ,
+  queryDefinition:  {},
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],[1.5,"Five","Ones"],[1.6,"Six","Ones"],[1.7,"Seven","Ones"],[1.8,"Eight","Ones"],[1.9,"Nine","Ones"],
+                  [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"],[2.5,"Five","Twos"],[2.6,"Six","Twos"],[2.7,"Seven","Twos"],[2.8,"Eight","Twos"],[2.9,"Nine","Twos"]]
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection: multiSelect = False",
+    alwaysExpanded: false,
+    multiselect: false,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: false,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: ["accordion"],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_simple = {
+  type: "FilterComponent",
+  name: "render_multiFilter_simple",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_simple",
+  listeners: ['singleSelectionParam_simple','singleSelectionParam_group'],
+  parameter: "multiSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {};
+} ,
+  queryDefinition:  {},
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: [[1.1,"One","Ones"],[1.2,"Two","Ones"],[1.3,"Three","Ones"],[1.4,"Four","Ones"],[1.5,"Five","Ones"],[1.6,"Six","Ones"],[1.7,"Seven","Ones"],[1.8,"Eight","Ones"],[1.9,"Nine","Ones"],
+                  [2.1,"One","Twos"],[2.2,"Two","Twos"],[2.3,"Three","Twos"],[2.4,"Four","Twos"],[2.5,"Five","Twos"],[2.6,"Six","Twos"],[2.7,"Seven","Twos"],[2.8,"Eight","Twos"],[2.9,"Nine","Twos"]]
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection: multiSelect = true",
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: false,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: ["accordion"],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_group = {
+  type: "FilterComponent",
+  name: "render_singleFilter_group",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_group",
+  listeners: ['multiSelectionParam_simple','multiSelectionParam_group'],
+  parameter: "singleSelectionParam_group",
+  parameters: [],
+  options: function(){
+    return {};
+} ,
+  queryDefinition:  {},
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: [["[Zeroes].[One]","One","[Zeroes]","Zeroes"],["[Zeroes].[Two]","Two","[Zeroes]","Zeroes"],["[Zeroes].[Three]","Three","[Zeroes]","Zeroes"],["[Zeroes].[Four]","Four","[Zeroes]","Zeroes"],
+                  ["[Zeroes].[Five]","Five","[Zeroes]","Zeroes"],["[Zeroes].[Six]","Six","[Zeroes]","Zeroes"],["[Zeroes].[Seven]","Seven","[Zeroes]","Zeroes"],["[Zeroes].[Eight]","Eight","[Zeroes]","Zeroes"],
+                  ["[Zeroes].[Nine]","Nine","[Zeroes]","Zeroes"],["[Ones].[Ten]","Ten","[Ones]","Ones"],["[Ones].[Eleven]","Eleven","[Ones]","Ones"],["[Ones].[Twelve]","Twelve","[Ones]","Ones"],
+                  ["[Ones].[Thirteen]","Thirteen","[Ones]","Ones"],["[Ones].[Fourteen]","Fourteen","[Ones]","Ones"],["[Ones].[Fifteen]","Fifteen","[Ones]","Ones"],["[Ones].[Sixteen]","Sixteen","[Ones]","Ones"],
+                  ["[Ones].[Seventeen]","Seventeen","[Ones]","Ones"],["[Ones].[Eighteen]","Eighteen","[Ones]","Ones"],["[Ones].[Nineteen]","Nineteen","[Ones]","Ones"],["[Twos].[Twenty]","Twenty","[Twos]","Twos"],
+                  ["[Twos].[Twenty-one]","Twenty-one","[Twos]","Twos"],["[Twos].[Twenty-two]","Twenty-two","[Twos]","Twos"],["[Twos].[Twenty-three]","Twenty-three","[Twos]","Twos"],["[Twos].[Twenty-four]","Twenty-four","[Twos]","Twos"],
+                  ["[Twos].[Twenty-five]","Twenty-five","[Twos]","Twos"],["[Twos].[Twenty-six]","Twenty-six","[Twos]","Twos"],["[Twos].[Twenty-seven]","Twenty-seven","[Twos]","Twos"],["[Twos].[Twenty-eight]","Twenty-eight","[Twos]","Twos"],
+                  ["[Twos].[Twenty-nine]","Twenty-nine","[Twos]","Twos"]]
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection",
+    alwaysExpanded: false,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: false,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: ["accordion"],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_group = {
+  type: "FilterComponent",
+  name: "render_multiFilter_group",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_group",
+  listeners: ['singleSelectionParam_simple','singleSelectionParam_group'],
+  parameter: "multiSelectionParam_group",
+  parameters: [],
+  options: function(){
+    return {};
+} ,
+  queryDefinition:  {},
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: [["[Zeroes].[One]","One","[Zeroes]","Zeroes"],["[Zeroes].[Two]","Two","[Zeroes]","Zeroes"],["[Zeroes].[Three]","Three","[Zeroes]","Zeroes"],["[Zeroes].[Four]","Four","[Zeroes]","Zeroes"],
+                  ["[Zeroes].[Five]","Five","[Zeroes]","Zeroes"],["[Zeroes].[Six]","Six","[Zeroes]","Zeroes"],["[Zeroes].[Seven]","Seven","[Zeroes]","Zeroes"],["[Zeroes].[Eight]","Eight","[Zeroes]","Zeroes"],
+                  ["[Zeroes].[Nine]","Nine","[Zeroes]","Zeroes"],["[Ones].[Ten]","Ten","[Ones]","Ones"],["[Ones].[Eleven]","Eleven","[Ones]","Ones"],["[Ones].[Twelve]","Twelve","[Ones]","Ones"],
+                  ["[Ones].[Thirteen]","Thirteen","[Ones]","Ones"],["[Ones].[Fourteen]","Fourteen","[Ones]","Ones"],["[Ones].[Fifteen]","Fifteen","[Ones]","Ones"],["[Ones].[Sixteen]","Sixteen","[Ones]","Ones"],
+                  ["[Ones].[Seventeen]","Seventeen","[Ones]","Ones"],["[Ones].[Eighteen]","Eighteen","[Ones]","Ones"],["[Ones].[Nineteen]","Nineteen","[Ones]","Ones"],["[Twos].[Twenty]","Twenty","[Twos]","Twos"],
+                  ["[Twos].[Twenty-one]","Twenty-one","[Twos]","Twos"],["[Twos].[Twenty-two]","Twenty-two","[Twos]","Twos"],["[Twos].[Twenty-three]","Twenty-three","[Twos]","Twos"],["[Twos].[Twenty-four]","Twenty-four","[Twos]","Twos"],
+                  ["[Twos].[Twenty-five]","Twenty-five","[Twos]","Twos"],["[Twos].[Twenty-six]","Twenty-six","[Twos]","Twos"],["[Twos].[Twenty-seven]","Twenty-seven","[Twos]","Twos"],["[Twos].[Twenty-eight]","Twenty-eight","[Twos]","Twos"],
+                  ["[Twos].[Twenty-nine]","Twenty-nine","[Twos]","Twos"]]
+  },
+  componentOutput:  {
+    outputFormat: "highestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection",
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: false,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: ["accordion"],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+Dashboards.addParameter("singleSelectionParam_simple", function() { return []
+}());
+
+Dashboards.addParameter("multiSelectionParam_simple", function() { return [1]
+}());
+
+Dashboards.addParameter("singleSelectionParam_group", function() { return []
+}());
+
+Dashboards.addParameter("multiSelectionParam_group", function() { return [1]
+}());
+
+Dashboards.addComponents([render_singleFilter_simple, render_multiFilter_simple, render_singleFilter_group, render_multiFilter_group]);
+
+Dashboards.init();
+
+</script>

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>TextAreaInput</title>
-	<author>Webdetails</author>
-	<description>TextAreaInput</description>
-	<icon></icon>
-	<template>template.html</template>
-	<style>mantle</style>
+  <title>TextareaInputComponent</title>
+  <author>Webdetails</author>
+  <description>TextareaInputComponent</description>
+  <icon></icon>
+  <template>template.html</template>
+  <style>mantle</style>
+  <require>true</require>
 </cdf>

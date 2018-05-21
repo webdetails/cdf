@@ -371,19 +371,71 @@ function options(){
                       </div></div>
 
 <script language="javascript" type="text/javascript">
-wcdfSettings = {
-  "author": "",
-  "description": "Filter Component Visual Guide",
-  "rendererType": "blueprint",
-  "require": false,
-  "style": "WDDocs",
-  "title": "filter_visual_guide",
-  "widget": false,
-  "widgetName": "",
-  "widgetParameters": []
-};
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/Logger',
+  'cdf/lib/jquery',
+  'amd!cdf/lib/underscore',
+  'cdf/lib/moment',
+  'cdf/lib/CCC/cdo',
+  'cdf/dashboard/Utils',
+  'cdf/components/FilterComponent',
+  'cdf/components/TableComponent',
+  'cdf/components/TextComponent'],
+function(
+  Dashboard,
+  Logger,
+  $,
+  _,
+  moment,
+  cdo,
+  Utils,
+  FilterComponent,
+  TableComponent,
+  TextComponent) {
 
-var render_defaultFilter = {
+var dashboard = new Dashboard();
+
+  dashboard.getWcdfSettings = function() {
+    return {
+      "author": "",
+      "description": "Filter Component Visual Guide",
+      "rendererType": "blueprint",
+      "require": true,
+      "style": "WDDocsRequire",
+      "title": "filter_visual_guide",
+      "widget": false,
+      "widgetName": "",
+      "widgetParameters": []
+};
+  };
+
+  dashboard.addDataSource("getData_IdValue", {
+    dataAccessId: "getData_IdValue",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  });
+
+  dashboard.addDataSource("getData_IdValue_IdGroup", {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  });
+
+  dashboard.addDataSource("getData_IdValueGroup", {
+    dataAccessId: "getData_IdValueGroup",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  });
+
+  dashboard.addDataSource("getData_idValue_long", {
+    dataAccessId: "getData_idValue_long",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  });
+
+  dashboard.addDataSource("getDataSearchable", {
+    dataAccessId: "getDataSearchable",
+    path: "/public/plugin-samples/pentaho-cdf/pentaho-cdf-require/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  });
+
+var render_defaultFilter = new FilterComponent({
   type: "FilterComponent",
   name: "render_defaultFilter",
   priority: 5,
@@ -425,9 +477,8 @@ var render_defaultFilter = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_simple = {
+});
+var render_singleFilter_simple = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_simple",
   priority: 5,
@@ -440,8 +491,7 @@ var render_singleFilter_simple = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue"
   },
   componentInput:  {
     valueAsId: false,
@@ -469,9 +519,8 @@ var render_singleFilter_simple = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_limited = {
+});
+var render_multiFilter_limited = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_limited",
   priority: 5,
@@ -492,8 +541,7 @@ var render_multiFilter_limited = {
     };
 } ,
   queryDefinition:  {
-    dataAccessId: "getData_IdValue",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue"
   },
   componentInput:  {
     valueAsId: false,
@@ -522,9 +570,8 @@ var render_multiFilter_limited = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_simple = {
+});
+var render_multiFilter_simple = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_simple",
   priority: 5,
@@ -553,7 +600,7 @@ var render_multiFilter_simple = {
 } ,
   postExecution: function(){
 
-    this.dashboard.log('Running postExecution!');
+    //this.dashboard.log('Running postExecution!');
 } ,
   parameter: "multiSelectionParam_simple",
   parameters: [],
@@ -561,8 +608,7 @@ var render_multiFilter_simple = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue"
   },
   componentInput:  {
     valueAsId: false,
@@ -591,9 +637,8 @@ var render_multiFilter_simple = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_group = {
+});
+var render_singleFilter_group = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_group",
   priority: 5,
@@ -606,8 +651,7 @@ var render_singleFilter_group = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -636,9 +680,8 @@ var render_singleFilter_group = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_group = {
+});
+var render_multiFilter_group = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_group",
   priority: 5,
@@ -651,8 +694,7 @@ var render_multiFilter_group = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -681,9 +723,8 @@ var render_multiFilter_group = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_values = {
+});
+var render_singleFilter_values = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_values",
   priority: 5,
@@ -718,8 +759,7 @@ var render_singleFilter_values = {
     };
 } ,
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -748,9 +788,8 @@ var render_singleFilter_values = {
     sortGroup: [],
     sortItem: ["sortByValue"]
   }
-};
-
-var render_multiFilter_values = {
+});
+var render_multiFilter_values = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_values",
   priority: 5,
@@ -792,8 +831,7 @@ var render_multiFilter_values = {
     };
 } ,
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -822,9 +860,8 @@ var render_multiFilter_values = {
     sortGroup: [],
     sortItem: ["sortByValue"]
   }
-};
-
-var render_singleFilter_simple_paginated = {
+});
+var render_singleFilter_simple_paginated = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_simple_paginated",
   priority: 5,
@@ -834,11 +871,10 @@ var render_singleFilter_simple_paginated = {
   parameter: "singleSelectionParam_simple",
   parameters: [],
   options: function(){
-	return {};
+    return {};
 } ,
   queryDefinition:  {
-    dataAccessId: "getDataSearchable",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    dataSource: "getDataSearchable",
     pageSize: 50
   },
   componentInput:  {
@@ -868,9 +904,8 @@ var render_singleFilter_simple_paginated = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_simple_paginated = {
+});
+var render_multiFilter_simple_paginated = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_simple_paginated",
   priority: 5,
@@ -880,7 +915,7 @@ var render_multiFilter_simple_paginated = {
   parameter: "multiSelectionParam_simple",
   parameters: [],
   options: function(){
-	return {
+    return {
         component: {
             search: {
                 serverSide: true
@@ -889,8 +924,7 @@ var render_multiFilter_simple_paginated = {
     };
 } ,
   queryDefinition:  {
-    dataAccessId: "getDataSearchable",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    dataSource: "getDataSearchable",
     pageSize: 50
   },
   componentInput:  {
@@ -920,9 +954,8 @@ var render_multiFilter_simple_paginated = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_expanded = {
+});
+var render_singleFilter_expanded = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_expanded",
   priority: 5,
@@ -935,8 +968,7 @@ var render_singleFilter_expanded = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -965,9 +997,8 @@ var render_singleFilter_expanded = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_expanded = {
+});
+var render_multiFilter_expanded = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_expanded",
   priority: 5,
@@ -980,8 +1011,7 @@ var render_multiFilter_expanded = {
     return {};
 },
   queryDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue_IdGroup"
   },
   componentInput:  {
     valueAsId: false,
@@ -1010,9 +1040,8 @@ var render_multiFilter_expanded = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_noData = {
+});
+var render_singleFilter_noData = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_noData",
   priority: 5,
@@ -1063,9 +1092,8 @@ var render_singleFilter_noData = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_noData_custom = {
+});
+var render_singleFilter_noData_custom = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_noData_custom",
   priority: 5,
@@ -1124,9 +1152,8 @@ var render_singleFilter_noData_custom = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_addIn = {
+});
+var render_singleFilter_addIn = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_addIn",
   priority: 5,
@@ -1162,8 +1189,7 @@ var render_singleFilter_addIn = {
     };
 } ,
   queryDefinition:  {
-    dataAccessId: "getData_IdValue",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+    dataSource: "getData_IdValue"
   },
   componentInput:  {
     valueAsId: false,
@@ -1191,23 +1217,18 @@ var render_singleFilter_addIn = {
     sortGroup: [],
     sortItem: []
   }
-};
+});
+dashboard.addParameter("singleSelectionParam_simple", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+dashboard.addParameter("multiSelectionParam_simple", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+dashboard.addParameter("singleSelectionParam_group", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+dashboard.addParameter("multiSelectionParam_group", _.bind(function() { return []
+}, {"dashboard": dashboard})());
 
-Dashboards.addParameter("singleSelectionParam_simple", function() { return []
-}());
-
-Dashboards.addParameter("multiSelectionParam_simple", function() { return []
-}());
-
-Dashboards.addParameter("singleSelectionParam_group", function() { return []
-}());
-
-Dashboards.addParameter("multiSelectionParam_group", function() { return []
-}());
-
-
-var render_table_groups = {
-  type: "Table",
+var render_table_groups = new TableComponent({
+  type: "TableComponent",
   name: "render_table_groups",
   priority: 5,
   htmlObject: "tableObj_groups",
@@ -1218,8 +1239,7 @@ var render_table_groups = {
   expandParameters: [],
   expandOnClick: false,
   chartDefinition:  {
-    dataAccessId: "getData_IdValue_IdGroup",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    dataSource: "getData_IdValue_IdGroup",
     colHeaders: [],
     colTypes: [],
     colFormats: [],
@@ -1235,10 +1255,9 @@ var render_table_groups = {
     lengthChange: false,
     tableStyle: "bootstrap"
   }
-};
-
-var render_table_simple = {
-  type: "Table",
+});
+var render_table_simple = new TableComponent({
+  type: "TableComponent",
   name: "render_table_simple",
   priority: 5,
   htmlObject: "tableObj_simple",
@@ -1249,8 +1268,7 @@ var render_table_simple = {
   expandParameters: [],
   expandOnClick: false,
   chartDefinition:  {
-    dataAccessId: "getData_IdValue",
-    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    dataSource: "getData_IdValue",
     colHeaders: [],
     colTypes: [],
     colFormats: [],
@@ -1266,10 +1284,9 @@ var render_table_simple = {
     lengthChange: false,
     tableStyle: "bootstrap"
   }
-};
-
-var render_txt_singleSelection_simple = {
-  type: "textComponent",
+});
+var render_txt_singleSelection_simple = new TextComponent({
+  type: "TextComponent",
   name: "render_txt_singleSelection_simple",
   priority: 5,
   expression: function(){
@@ -1279,10 +1296,9 @@ var render_txt_singleSelection_simple = {
   htmlObject: "txt_singleSelectionObj_simple",
   listeners: ['singleSelectionParam_simple'],
   executeAtStart: true
-};
-
-var render_txt_multiSelection_simple = {
-  type: "textComponent",
+});
+var render_txt_multiSelection_simple = new TextComponent({
+  type: "TextComponent",
   name: "render_txt_multiSelection_simple",
   priority: 5,
   expression: function(){
@@ -1292,10 +1308,9 @@ var render_txt_multiSelection_simple = {
   htmlObject: "txt_multiSelectionObj_simple",
   listeners: ['multiSelectionParam_simple'],
   executeAtStart: true
-};
-
-var render_txt_singleSelection_group = {
-  type: "textComponent",
+});
+var render_txt_singleSelection_group = new TextComponent({
+  type: "TextComponent",
   name: "render_txt_singleSelection_group",
   priority: 5,
   expression: function(){
@@ -1305,10 +1320,9 @@ var render_txt_singleSelection_group = {
   htmlObject: "txt_singleSelectionObj_group",
   listeners: ['singleSelectionParam_group'],
   executeAtStart: true
-};
-
-var render_txt_multiSelection_group = {
-  type: "textComponent",
+});
+var render_txt_multiSelection_group = new TextComponent({
+  type: "TextComponent",
   name: "render_txt_multiSelection_group",
   priority: 5,
   expression: function(){
@@ -1318,9 +1332,11 @@ var render_txt_multiSelection_group = {
   htmlObject: "txt_multiSelectionObj_group",
   listeners: ['multiSelectionParam_group'],
   executeAtStart: true
-};
+});
 
-Dashboards.addComponents([render_defaultFilter, render_singleFilter_simple, render_multiFilter_limited, render_multiFilter_simple, render_singleFilter_group, render_multiFilter_group, render_singleFilter_values, render_multiFilter_values, render_singleFilter_simple_paginated, render_multiFilter_simple_paginated, render_singleFilter_expanded, render_multiFilter_expanded, render_singleFilter_noData, render_singleFilter_noData_custom, render_singleFilter_addIn, render_table_groups, render_table_simple, render_txt_singleSelection_simple, render_txt_multiSelection_simple, render_txt_singleSelection_group, render_txt_multiSelection_group]);
+dashboard.addComponents([render_defaultFilter, render_singleFilter_simple, render_multiFilter_limited, render_multiFilter_simple, render_singleFilter_group, render_multiFilter_group, render_singleFilter_values, render_multiFilter_values, render_singleFilter_simple_paginated, render_multiFilter_simple_paginated, render_singleFilter_expanded, render_multiFilter_expanded, render_singleFilter_noData, render_singleFilter_noData_custom, render_singleFilter_addIn, render_table_groups, render_table_simple, render_txt_singleSelection_simple, render_txt_multiSelection_simple, render_txt_singleSelection_group, render_txt_multiSelection_group]);
 
-Dashboards.init();
+dashboard.init();
+return dashboard;
+});
 </script>
