@@ -1,0 +1,1326 @@
+<h1>Filter Component Visual Guide</h1>
+<h2>Introduction </h2>
+<p>
+Reading documentation is usually boring.
+It takes time and people are usually too busy to read things thoroughly.
+
+This is a visual guide to the filter component.
+Is also serves as a showcase of some of the options available in the component.
+</p>
+
+<h2>Getting Started</h2>
+<p> 
+If you just added a new filter to the dashboard, 
+assigned it an <tt>HtmlObject</tt>, and rendered your dashboard, this is what you get:
+a disabled filter. 
+</p> 
+
+          <div class='col-xs-12 col-sm-6 well last'><div id='filterObj_defaults' >
+          </div></div>
+    
+
+<h3>Adding data: simple lists of options</h3> 
+<p>
+Without data there is not much a filter can do. 
+To populate the filter with a list of options, you can:
+<ol>
+    <li>Define a datasource a query and assign it to the component</li>
+    <li>Fill in the property <tt>valuesArray</tt>, which is useful if you have a static dataset</li>
+</ol>   
+</p>
+
+<p>
+In the simplest approach, the first column contains the ID of the items, 
+whereas the second column holds the label that will allow the user to identify the item.
+For instance, the following table and the two filters below are populated by the same data set.
+</p> 
+            
+          <div class='col-xs-12'><div id='tableObj_simple' >
+          </div></div>
+          <div class='col-xs-12 well'><div id='example_simple' >
+            <div class='col-xs-12'><div id='singleFilterObj_simple' >
+            </div></div>
+            <div class='col-xs-12 last'><div id='txt_singleSelectionObj_simple' >
+            </div></div>
+          </div></div>
+            <div class='col-xs-12'><div id='multiFilterObj_simple' >
+            </div></div>
+            <div class='col-xs-12 last'><div id='txt_multiSelectionObj_simple' >
+            </div></div>
+            
+<p>
+Here, we created two filters that differ only
+<ul>
+    <li>on the value of the "Multi Select" property </li>
+    <li>on the parameter they read from/write to</li>    
+</ul>
+</p>
+<p>
+By default, both filter have filters (search boxes) enabled.
+</p>
+    
+<ul>
+    <li>
+        If the filter is configured as single-select (default behaviour), 
+        clicking on a option immediately closes the filter and writes the selection to a parameter.  
+    </li>
+   <li>
+        If the filter is configured as multi-select, 
+        the filter only closes if the user clicks outside, cancels or commits the current selection.
+        The parameter is only updated when the user presses the "Apply" button.
+   </li> 
+</ul>
+            
+          <div class='col-xs-12 last'><div id='example_limited' >
+          </div></div>
+          
+<h3>Limiting the number of selectable items</h3> 
+<p>
+In some cases, the user should not be allowed to choose beyond a certain number of items. 
+Here we set <tt>Selection Limit</tt> to 5.
+</p> 
+                
+
+        <div class='col-xs-12 last'><div id='multiFilterObj_limited' >
+        </div></div>
+        
+<h2>Organizing options into groups</h2>
+<p>
+The filter can also support groups of options.
+The grouping is automatically done for you if the data contains four or more columns.
+By default, the filter is expecting the columns in the folowing order:
+</p>
+<ol>
+    <li>Item Id</li>
+    <li>Item Label</li>
+    <li>Group Id</li>
+    <li>Group Label</li>
+</ol>
+<p>
+If your data source has a different format, look into the "advanced options" of the reference page.
+</p> 
+            
+          <div class='col-xs-12'><div id='tableObj_groups' >
+          </div></div>
+            <div class='col-xs-12'><div id='singleFilterObj_group' >
+            </div></div>
+            <div class='col-xs-12 last'><div id='txt_singleSelectionObj_group' >
+            </div></div>
+            <div class='col-xs-12'><div id='multiFilterObj_group' >
+            </div></div>
+            <div class='col-xs-12 last'><div id='txt_multiSelectionObj_group' >
+            </div></div>
+            
+<h2>Always expanded</h2>
+<p>
+    Sometimes it is best to keep the filters permanently expanded.
+    Simply set the property <tt>Always Expanded</tt> to <tt>True</tt>.
+</p> 
+            
+
+              <div class='col-xs-12 col-sm-6 col-md-4'><div id='singleFilterObj_expanded' >
+              </div></div>
+              <div class='col-xs-12 col-sm-6 col-md-4 last'><div id='multiFilterObj_expanded' >
+              </div></div>
+              
+<h2>Handling large list of options (CDA queries only)</h2>
+<p>
+By default, the filter attempts to load the entire dataset defined by a datasource. 
+However, in some cases, the list of options might be quite large. 
+If the datasource that populates the filter with data is a CDA query, you may
+want to take advantage of CDA's support for pagination and server-side search. 
+</p>
+
+<h3>Pagination</h3>
+<p>
+You can configure the filter to sequentially load pages of items from the server.
+Then, as you scroll down the list, the filter loads more data from the server 
+and updates the list of visible items.
+<br/>
+You will typically need to:
+</p>
+<ul>
+    <li>    
+        set the filter's property <tt>Page Length</tt> to some finite integer value (e.g. 20)
+    </li>
+</ul>
+<p>
+    When the user reaches the bottom of the scrollbar, a new page is loaded and added to the list of items.
+</p>
+<h3>Server-side Search</h3>
+<p>
+You may be interested in 
+delegating to the server the task of filtering the items. To do so, you will need to:
+</p>
+<ul>
+    <li>
+        write a CDA query that accepts a parameter <tt>searchBox</tt> and that takes responsability for any filtering
+        e.g. 
+        <pre><code>
+        SELECT optionID,optionLabel FROM myTable 
+        WHERE optionLabel LIKE '${searchBox}';
+        </code></pre>
+    </li>
+    <li>
+        as mentioned in filter reference page add the following section in <tt>Advanced Settings</tt>:
+        <pre><code>
+        component: {
+            search: {
+                serverSide: true
+            }
+        }
+        </code></pre>
+    </li>
+</ul>
+
+
+                  <div class='col-xs-12'><div id='singleFilterObj_simple_paginated' >
+                  </div></div>
+                  <div class='col-xs-12 last'><div id='multiFilterObj_simple_paginated' >
+                  </div></div>
+                  
+<p>
+Whenever the scrollbar reaches the bottom (or the top, for that matter), 
+a new page is requested to the server, and more items are added to the filter.
+</p> 
+            
+<h2>Advanced configuration</h2>
+<p>
+CDE only exposes the most relevant options, the one that are most likely to be used.
+Specific dashboards may have custom requirements, some of which can even be dynamic.
+Just because there is no visual way of defining a behaviour, it does not mean it cannot be done.
+<br/>
+To modify or extend the default behaviour of the filter, you can:
+</p>
+<ul>
+    <li>
+    specify a set of add-ins, 
+    which operate on strategic parts of the filter, at specific times    
+    </li>
+    
+    <li>
+    set the <tt>Advanced Options</tt> property
+    which allows you define/override pre-existing options dynamically
+    </li>
+</ul>
+<p>
+For more information, look into the filter reference page. 
+<br/>Keep on reading for some examples of advanced configurations.
+</p> 
+
+<h3>Using add-ins</h3>
+<p>
+An add-in is basically a snippet of code wrapped in a reusable way that modifies the component.
+Below, we used the addIns "randomColor" and "template" to the slot "renderItemSelection".
+</p> 
+
+              <div class='col-xs-12 col-sm-6 well'><div id='singleFilterObj_addIn' >
+              </div></div>
+<p>
+You can customize the addIn options programmatically via the <code>setAddInOptions</code>
+method of the component:
+</p>
+<pre>
+<code>    
+function preExecution(){
+ 
+    this.setAddInOptions('renderItemSelection', 'template', {
+        template: '&lt;a href=&quot;http://en.wikipedia.org/w/index.php?search={{label}}&quot; target=&quot;_blank&quot;&gt;{{{label}}}&lt;/a&gt;',
+        filter: '.filter-item-value',
+        postRender: function($tgt, st, opt){
+            $tgt
+                .find('.filter-item-value a')
+                .click(function(event){
+                    event.stopPropagation();
+                });
+        }
+    });
+} 
+</code>
+</pre> 
+
+<p>
+    For more information on filter add-ins, please consult the component's reference page.
+</p> 
+
+<h3>Changing default messages</h3>
+<p>
+As you saw above, if a filter has no options to show, it simply displays a message "Unavailable".
+While generic enough, this message may not be suitable for your dashboard:
+</p> 
+                
+              <div class='col-xs-12 col-sm-6 well'><div id='singleFilterObj_noData' >
+              </div></div>
+              
+<p>
+Your business may require a different message, perhaps because it serves users that do not speak English.
+<br/> 
+One mechanism is to create a file <tt>messages_${locale}.properties</tt> next to the component
+</p>
+<pre><code>
+filter_Root_isDisabled = Not Available
+...
+</code></pre>
+<p>
+You can also customize the messages on a per-component basis via the &quot;Advanced options&quot; property:
+</p>
+<pre>
+<code>    
+function options(){
+    return {
+        component:{        
+            Root: {
+                strings:{
+                    isDisabled: 'No available data'
+                }
+            }
+        }
+    };    
+} 
+</code>
+</pre> 
+ 
+                
+
+              <div class='col-xs-12 col-sm-6 well'><div id='singleFilterObj_noData_custom' >
+              </div></div>
+              
+<p>
+    For a list of the strings used by the filter, please consult the component's reference page.
+</p> 
+                
+
+          <div class='col-xs-12 last'><div id='showValues' >
+          </div></div>
+          
+<h3>Showing values</h3>
+<p>
+In rare cases, it might be useful to show some extra information next to each item.
+</p>
+
+<h4>Example: Selecting a single item with an associated value</h4>
+<p>
+In the example below, each item is associated with a value.
+Under <tt>Advanced Options</tt> we enabled showing of values:
+</p>
+<pre>
+function options(){
+    return {
+        component: {
+            Item: {
+                options: {
+                    showValue: true
+                }
+            }
+        }
+    };
+} 
+</pre>
+<p>
+    We also assigned the <tt>sortByValue</tt> addIn to the <tt>sortItem</tt> addIn slot, 
+    so that the items are sorted by decreasing value.
+</p> 
+                    
+                  <div class='col-xs-12 well'><div id='showValues_single' >
+                  </div></div>
+                      <div class='col-xs-12 col-sm-6 last'><div id='singleFilterObj_values' >
+                      </div></div>
+                      
+<h4>Example: Multiple selection with associated values</h4>
+<p>
+In the next example, we can take the customization to the next level,
+by automatically adding the values of the selected items.
+</p>
+<p>
+    Under <tt>Advanced Options</tt> we enabled showing of values for all levels:
+</p>
+<pre>
+function options(){
+    return {
+        component: {
+            Root: {
+                options: {
+                    showValue: true
+                }
+            },
+            Group: {
+                options: {
+                    showValue: true
+                }
+            },
+            Item: {
+                options: {
+                    showValue: true
+                }
+            }
+        }
+    };
+} 
+</pre>
+<p>
+    As before, we assigned the <tt>sortByValue</tt> addIn to the <tt>sortItem</tt> addIn slot.
+    Also, we assigned the <tt>sumValues</tt> addIn to add-in slots 
+    <tt>renderRootSelection</tt>, <tt>renderGroupSelection</tt>  and
+    <tt>renderItemSelection</tt>
+
+</p> 
+
+                  <div class='col-xs-12 well last'><div id='showValues_multi' >
+                  </div></div>
+                      <div class='col-xs-12 col-sm-6 last'><div id='multiFilterObj_values' >
+                      </div></div>
+
+<script language="javascript" type="text/javascript">
+wcdfSettings = {
+  "author": "",
+  "description": "Filter Component Visual Guide",
+  "rendererType": "blueprint",
+  "require": false,
+  "style": "WDDocs",
+  "title": "filter_visual_guide",
+  "widget": false,
+  "widgetName": "",
+  "widgetParameters": []
+};
+
+var render_defaultFilter = {
+  type: "FilterComponent",
+  name: "render_defaultFilter",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "filterObj_defaults",
+  listeners: [],
+  parameters: [],
+  options: function options(){
+    return {};
+},
+  queryDefinition:  {
+
+
+  },
+  componentInput:  {
+    valueAsId: true,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 200,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_simple = {
+  type: "FilterComponent",
+  name: "render_singleFilter_simple",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_simple",
+  listeners: [],
+  parameter: "singleSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection: multiSelect = False",
+    alwaysExpanded: false,
+    multiselect: false,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_limited = {
+  type: "FilterComponent",
+  name: "render_multiFilter_limited",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_limited",
+  listeners: [],
+  parameter: "multiSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {
+        component: {
+            Root: {
+                options: {
+                    showGroupSelection: false  
+                }
+            }            
+        }
+    };
+} ,
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Choose up to 5 items",
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 5,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_simple = {
+  type: "FilterComponent",
+  name: "render_multiFilter_simple",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_simple",
+  listeners: [],
+  preExecution: function(){
+    
+    this.options = {
+        input:{
+            root:{
+                id: 'all'
+            }
+            
+        }
+    };    
+    
+} ,
+  postFetch: function( json){
+    
+    _.each( json.resultset, function(row, idx){
+        row[0] = idx;
+        row[2] = 'Group';
+    })
+    return json;
+} ,
+  postExecution: function(){
+
+    this.dashboard.log('Running postExecution!');
+} ,
+  parameter: "multiSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection: multiSelect = true",
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_group = {
+  type: "FilterComponent",
+  name: "render_singleFilter_group",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_group",
+  listeners: [],
+  parameter: "singleSelectionParam_group",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection",
+    alwaysExpanded: false,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_group = {
+  type: "FilterComponent",
+  name: "render_multiFilter_group",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_group",
+  listeners: [],
+  parameter: "multiSelectionParam_group",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "highestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection",
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_values = {
+  type: "FilterComponent",
+  name: "render_singleFilter_values",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_values",
+  listeners: [],
+  postFetch: function f(json){
+    json.resultset = _.map(json.resultset, function(row){
+        row.push(_.random(100));
+        return row;
+    });
+    json.metadata.push({
+        colIndex: 4,
+        colType: "Numeric",
+        colName: "Value"
+    });
+    
+    console.log(json);
+    return json;
+} ,
+  parameter: "singleSelectionParam_group",
+  parameters: [],
+  options: function(){
+    return {
+        component: {
+            Item: {
+                options: {
+                    showValue: true
+                }
+            }
+        }
+    };
+} ,
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection",
+    alwaysExpanded: true,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: ["sortByValue"]
+  }
+};
+
+var render_multiFilter_values = {
+  type: "FilterComponent",
+  name: "render_multiFilter_values",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_values",
+  listeners: [],
+  postFetch: function f(json){
+    _.each(json.resultset, function(row){
+        row[4] = _.random(100);
+    });
+    json.metadata.push({
+        colIndex: 4,
+        colType: "Numeric",
+        colName: "Value"
+    });
+    return json;
+} ,
+  parameter: "multiSelectionParam_group",
+  parameters: [],
+  options: function(){
+    return {
+        component: {
+            Root: {
+                options: {
+                    showValue: true
+                }
+            },
+            Group: {
+                options: {
+                    showValue: true
+                }
+            },
+            Item: {
+                options: {
+                    showValue: true
+                }
+            }
+        }
+    };
+} ,
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection",
+    alwaysExpanded: true,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: ["sumValues"],
+    renderRootFooter: [],
+    renderGroupSelection: ["sumValues"],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: ["sortByValue"]
+  }
+};
+
+var render_singleFilter_simple_paginated = {
+  type: "FilterComponent",
+  name: "render_singleFilter_simple_paginated",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_simple_paginated",
+  listeners: [],
+  parameter: "singleSelectionParam_simple",
+  parameters: [],
+  options: function(){
+	return {};
+} ,
+  queryDefinition:  {
+    dataAccessId: "getDataSearchable",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    pageSize: 50
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection (no server-side search)",
+    alwaysExpanded: false,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_simple_paginated = {
+  type: "FilterComponent",
+  name: "render_multiFilter_simple_paginated",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_simple_paginated",
+  listeners: [],
+  parameter: "multiSelectionParam_simple",
+  parameters: [],
+  options: function(){
+	return {
+        component: {
+            search: {
+                serverSide: true
+            }
+        }
+    };
+} ,
+  queryDefinition:  {
+    dataAccessId: "getDataSearchable",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    pageSize: 50
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection (using server-side search)",
+    alwaysExpanded: false,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_expanded = {
+  type: "FilterComponent",
+  name: "render_singleFilter_expanded",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_expanded",
+  listeners: [],
+  parameter: "singleSelectionParam",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "highestID"
+  },
+  componentDefinition:  {
+    title: "Single Selection",
+    alwaysExpanded: true,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_multiFilter_expanded = {
+  type: "FilterComponent",
+  name: "render_multiFilter_expanded",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "multiFilterObj_expanded",
+  listeners: [],
+  parameter: "multiSelectionParam",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "highestID"
+  },
+  componentDefinition:  {
+    title: "Multiple Selection",
+    alwaysExpanded: true,
+    multiselect: true,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_noData = {
+  type: "FilterComponent",
+  name: "render_singleFilter_noData",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_noData",
+  listeners: [],
+  postFetch: function( json){
+    
+    _.each( json.resultset, function(row, idx){
+        row[0] = idx;
+        row[2] = 'Group';
+    })
+    return json;
+} ,
+  parameter: "singleSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {};
+},
+  queryDefinition:  {
+
+
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Truly honest politicians",
+    alwaysExpanded: false,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_noData_custom = {
+  type: "FilterComponent",
+  name: "render_singleFilter_noData_custom",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_noData_custom",
+  listeners: [],
+  postFetch: function( json){
+    
+    _.each( json.resultset, function(row, idx){
+        row[0] = idx;
+        row[2] = 'Group';
+    })
+    return json;
+} ,
+  parameter: "singleSelectionParam_simple",
+  parameters: [],
+  options: function options(){
+    return {
+        component:{        
+            Root: {
+                strings:{
+                    isDisabled: 'No available data'
+                }
+            }
+        }
+    };
+} ,
+  queryDefinition:  {
+
+
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Truly honest politicians",
+    alwaysExpanded: false,
+    multiselect: false,
+    selectionLimit: 2000,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: [],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+var render_singleFilter_addIn = {
+  type: "FilterComponent",
+  name: "render_singleFilter_addIn",
+  priority: 5,
+  executeAtStart: true,
+  htmlObject: "singleFilterObj_addIn",
+  listeners: [],
+  preExecution: function(){
+
+    this.setAddInOptions('renderItemSelection', 'template', {
+        template: '<a href="http://en.wikipedia.org/w/index.php?search={{label}}" target="_blank">{{{label}}}</a>',
+        filter: '.filter-item-value',
+        postRender: function($tgt, st, opt){
+            $tgt
+                .find('.filter-item-value a')
+                .click(function(event){
+                    event.stopPropagation();
+                });
+        }
+    });
+    
+} ,
+  parameter: "singleSelectionParam_simple",
+  parameters: [],
+  options: function(){
+    return {
+        component: {
+            Item: {
+                options: {
+                    showValue: true
+                }
+            }
+        }
+    };
+} ,
+  queryDefinition:  {
+    dataAccessId: "getData_IdValue",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda"
+  },
+  componentInput:  {
+    valueAsId: false,
+    valuesArray: []
+  },
+  componentOutput:  {
+    outputFormat: "lowestID"
+  },
+  componentDefinition:  {
+    title: "Random colors, link to Wikipedia",
+    alwaysExpanded: false,
+    multiselect: false,
+    showIcons: true,
+    showButtonOnlyThis: true,
+    useOverlay: true,
+    showFilter: true
+  },
+  addIns:  {
+    postUpdate: [],
+    renderRootHeader: [],
+    renderRootSelection: [],
+    renderRootFooter: [],
+    renderGroupSelection: [],
+    renderItemSelection: ["randomColor","template"],
+    sortGroup: [],
+    sortItem: []
+  }
+};
+
+Dashboards.addParameter("singleSelectionParam_simple", function() { return []
+}());
+
+Dashboards.addParameter("multiSelectionParam_simple", function() { return []
+}());
+
+Dashboards.addParameter("singleSelectionParam_group", function() { return []
+}());
+
+Dashboards.addParameter("multiSelectionParam_group", function() { return []
+}());
+
+
+var render_table_groups = {
+  type: "Table",
+  name: "render_table_groups",
+  priority: 5,
+  htmlObject: "tableObj_groups",
+  listeners: [],
+  parameters: [],
+  executeAtStart: true,
+  extraOptions: [],
+  expandParameters: [],
+  expandOnClick: false,
+  chartDefinition:  {
+    dataAccessId: "getData_IdValue_IdGroup",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    colHeaders: [],
+    colTypes: [],
+    colFormats: [],
+    colWidths: ["25%","25%","25%","25%"],
+    colSortable: [],
+    colSearchable: [],
+    paginate: true,
+    paginateServerside: false,
+    paginationType: "simple_numbers",
+    info: false,
+    sort: false,
+    sortBy: [],
+    lengthChange: false,
+    tableStyle: "bootstrap"
+  }
+};
+
+var render_table_simple = {
+  type: "Table",
+  name: "render_table_simple",
+  priority: 5,
+  htmlObject: "tableObj_simple",
+  listeners: [],
+  parameters: [],
+  executeAtStart: true,
+  extraOptions: [],
+  expandParameters: [],
+  expandOnClick: false,
+  chartDefinition:  {
+    dataAccessId: "getData_IdValue",
+    path: "/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/92-FilterComponent/Filter-VisualGuide/filter_visual_guide.cda",
+    colHeaders: [],
+    colTypes: [],
+    colFormats: [],
+    colWidths: [],
+    colSortable: [],
+    colSearchable: [],
+    paginate: true,
+    paginateServerside: false,
+    paginationType: "simple_numbers",
+    info: false,
+    sort: false,
+    sortBy: [],
+    lengthChange: false,
+    tableStyle: "bootstrap"
+  }
+};
+
+var render_txt_singleSelection_simple = {
+  type: "textComponent",
+  name: "render_txt_singleSelection_simple",
+  priority: 5,
+  expression: function(){
+    
+    return "Result: " + JSON.stringify(this.dashboard.getParameterValue('singleSelectionParam_simple'));
+} ,
+  htmlObject: "txt_singleSelectionObj_simple",
+  listeners: ['singleSelectionParam_simple'],
+  executeAtStart: true
+};
+
+var render_txt_multiSelection_simple = {
+  type: "textComponent",
+  name: "render_txt_multiSelection_simple",
+  priority: 5,
+  expression: function(){
+    
+    return "Result: " + JSON.stringify(this.dashboard.getParameterValue('multiSelectionParam_simple'));
+} ,
+  htmlObject: "txt_multiSelectionObj_simple",
+  listeners: ['multiSelectionParam_simple'],
+  executeAtStart: true
+};
+
+var render_txt_singleSelection_group = {
+  type: "textComponent",
+  name: "render_txt_singleSelection_group",
+  priority: 5,
+  expression: function(){
+    
+    return "Result: " + JSON.stringify(this.dashboard.getParameterValue('singleSelectionParam_group'));
+} ,
+  htmlObject: "txt_singleSelectionObj_group",
+  listeners: ['singleSelectionParam_group'],
+  executeAtStart: true
+};
+
+var render_txt_multiSelection_group = {
+  type: "textComponent",
+  name: "render_txt_multiSelection_group",
+  priority: 5,
+  expression: function(){
+    
+    return "Result: " + JSON.stringify(this.dashboard.getParameterValue('multiSelectionParam_group'));
+} ,
+  htmlObject: "txt_multiSelectionObj_group",
+  listeners: ['multiSelectionParam_group'],
+  executeAtStart: true
+};
+
+Dashboards.addComponents([render_defaultFilter, render_singleFilter_simple, render_multiFilter_limited, render_multiFilter_simple, render_singleFilter_group, render_multiFilter_group, render_singleFilter_values, render_multiFilter_values, render_singleFilter_simple_paginated, render_multiFilter_simple_paginated, render_singleFilter_expanded, render_multiFilter_expanded, render_singleFilter_noData, render_singleFilter_noData_custom, render_singleFilter_addIn, render_table_groups, render_table_simple, render_txt_singleSelection_simple, render_txt_multiSelection_simple, render_txt_singleSelection_group, render_txt_multiSelection_group]);
+
+Dashboards.init();
+</script>

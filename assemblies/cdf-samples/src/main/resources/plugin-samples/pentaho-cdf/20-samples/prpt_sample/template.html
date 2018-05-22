@@ -16,61 +16,62 @@
 
 <script language="javascript" type="text/javascript">
 
+var dashboard;
 
-var PROD_CODE = "S18_3136";
+require([
+    'cdf/Dashboard.Blueprint',
+    'cdf/components/TextComponent',
+    'cdf/components/SelectComponent',
+    'cdf/components/PrptComponent'],
+  function(Dashboard, TextComponent, SelectComponent, PrptComponent) {
 
-titleString = 
-{
-  name: "titleString",
-  type: "text",
-  title: "Order Status",
-  listeners:["PROD_CODE"],
-  htmlObject: "titleObject",
-  executeAtStart: true,
-  expression: function(){return this.title},
-  preExecution:function(){
-  	if( PROD_CODE != "null" ) {
-		  this.title = "Selected Product (" + PROD_CODE + ")";
-	  }
-	  else  {
-		  this.title = "Selected Product";
-	  }
-  },
-  postExecution:function(){}
-}
+  dashboard = new Dashboard();
+  dashboard.addParameter("PROD_CODE","S18_3136");
+  dashboard.addComponent(new TextComponent({
+    name: "titleString",
+    type: "text",
+    title: "Product Code",
+    listeners: ["PROD_CODE"],
+    htmlObject: "titleObject",
+    executeAtStart: true,
+    expression: function() { return this.title; },
+    preExecution:function() {
+      var PROD_CODE = this.dashboard.getParameterValue("PROD_CODE");
+
+    	if(PROD_CODE != "null") {
+  		  this.title = "Selected Product (" + PROD_CODE + ")";
+  	  } else {
+  		  this.title = "Selected Product";
+  	  }
+    },
+    postExecution:function() {}
+  }));
 
 
-ProductSelector = 
-{
-  name: "ProductSelector",
-  type: "select",
-  parameter:"PROD_CODE",
-  parameters: [],
-  valuesArray: [["S18_3136", "S18_3136"],["S24_2011", "S24_2011"]],
-  htmlObject: "selectStatusObject",
-  executeAtStart: true,
-  preExecution:function(){},
-  postExecution:function(){Dashboards.processChange(this.name);}
-}
+  dashboard.addComponent(new SelectComponent({
+    name: "statusSelector",
+    type: "select",
+    parameter: "PROD_CODE",
+    parameters: [],
+    valuesArray: [["S18_3136", "S18_3136"],["S24_2011", "S24_2011"]],
+    htmlObject: "selectStatusObject",
+    executeAtStart: true,
+    preExecution: function() {},
+    postExecution: function() { this.dashboard.processChange(this.name); }
+  }));
 
-ProductReport = 
-{
-  name: "orderStatus",
-  type: "prpt",
-  path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
-  listeners:["PROD_CODE"],
-  parameters: [["PROD_CODE","PROD_CODE"]],
-  htmlObject: "ProductNamePrptObject",
-  executeAtStart: true,
-  postExecution:function(){}
-}
+  dashboard.addComponent(new PrptComponent({
+    name: "orderStatus",
+    type: "prpt",
+    path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
+    listeners: ["PROD_CODE"],
+    parameters: [["PROD_CODE","PROD_CODE"]],
+    htmlObject: "ProductNamePrptObject",
+    executeAtStart: true,
+    postExecution: function() {}
+  }));
 
-function load(){
-  var components = [titleString, ProductSelector, ProductReport];
-	Dashboards.init(components);
-}
-
-load();
+  dashboard.init();
+});
 
 </script>
-

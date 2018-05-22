@@ -88,19 +88,40 @@ dd {
 
 <script language="javascript" type="text/javascript">
 
-wcdfSettings = {
-  "author": "",
-  "description": "Filter AddIn Reference: Accordion",
-  "rendererType": "blueprint",
-  "require": false,
-  "style": "WDDocs",
-  "title": "filter_addIn_reference_accordion",
-  "widget": false,
-  "widgetName": "",
-  "widgetParameters": []
-};
+require([
+  'cdf/Dashboard.Blueprint',
+  'cdf/Logger',
+  'amd!cdf/lib/underscore',
+  'cdf/lib/moment',
+  'cdf/lib/CCC/cdo',
+  'cdf/dashboard/Utils',
+  'cdf/components/FilterComponent'],
+function(
+  Dashboard,
+  Logger,
+  _,
+  moment,
+  cdo,
+  Utils,
+  FilterComponent) {
 
-var render_singleFilter_simple = {
+var dashboard = new Dashboard();
+
+  dashboard.getWcdfSettings = function() {
+    return {
+      "author": "",
+      "description": "Filter AddIn Reference: Accordion",
+      "rendererType": "blueprint",
+      "require": true,
+      "style": "WDDocsRequire",
+      "title": "filter_addIn_reference_accordion",
+      "widget": false,
+      "widgetName": "",
+      "widgetParameters": []
+};
+  };
+
+var render_singleFilter_simple = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_simple",
   priority: 5,
@@ -140,9 +161,8 @@ var render_singleFilter_simple = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_simple = {
+});
+var render_multiFilter_simple = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_simple",
   priority: 5,
@@ -183,9 +203,8 @@ var render_multiFilter_simple = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_singleFilter_group = {
+});
+var render_singleFilter_group = new FilterComponent({
   type: "FilterComponent",
   name: "render_singleFilter_group",
   priority: 5,
@@ -232,9 +251,8 @@ var render_singleFilter_group = {
     sortGroup: [],
     sortItem: []
   }
-};
-
-var render_multiFilter_group = {
+});
+var render_multiFilter_group = new FilterComponent({
   type: "FilterComponent",
   name: "render_multiFilter_group",
   priority: 5,
@@ -281,22 +299,20 @@ var render_multiFilter_group = {
     sortGroup: [],
     sortItem: []
   }
-};
+});
+dashboard.addParameter("singleSelectionParam_simple", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+dashboard.addParameter("multiSelectionParam_simple", _.bind(function() { return [1]
+}, {"dashboard": dashboard})());
+dashboard.addParameter("singleSelectionParam_group", _.bind(function() { return []
+}, {"dashboard": dashboard})());
+dashboard.addParameter("multiSelectionParam_group", _.bind(function() { return [1]
+}, {"dashboard": dashboard})());
 
-Dashboards.addParameter("singleSelectionParam_simple", function() { return []
-}());
 
-Dashboards.addParameter("multiSelectionParam_simple", function() { return [1]
-}());
+dashboard.addComponents([render_singleFilter_simple, render_multiFilter_simple, render_singleFilter_group, render_multiFilter_group]);
 
-Dashboards.addParameter("singleSelectionParam_group", function() { return []
-}());
-
-Dashboards.addParameter("multiSelectionParam_group", function() { return [1]
-}());
-
-Dashboards.addComponents([render_singleFilter_simple, render_multiFilter_simple, render_singleFilter_group, render_multiFilter_group]);
-
-Dashboards.init();
-
+dashboard.init();
+return dashboard;
+});
 </script>
