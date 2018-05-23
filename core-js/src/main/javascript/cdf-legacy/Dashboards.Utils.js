@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -26,6 +26,12 @@ Dashboards.escapeHtml = function(input) {
   .replace(/"/g,"&#34;");
 };
 
+Dashboards.sanitizeHtml = function(html) {
+  // here is iframe explicitly replaced by script to further sanitizing since sanitizer itself doesn't sanitize iframe tag
+  html = html.replace(/<iframe\b[^>]*>/gi, "<script>").replace(/<\/iframe>/gi, "</script>");
+  html = Sanitizer.sanitize(html);
+  return html;
+};
 
 Dashboards.getPathParameter = function ( url ) {
 

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,11 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent) {
+define([
+  '../lib/jquery',
+  './InputBaseComponent',
+  '../dashboard/Utils'
+  ], function($, InputBaseComponent, Utils) {
 
   return InputBaseComponent.extend({
     draw: function(myArray) {
@@ -88,9 +92,10 @@ define(['../lib/jquery', './InputBaseComponent'], function($, InputBaseComponent
           value: myArray[i][vid]
         });
         input.appendTo(li);
+        var sanitizedHtml = Utils.sanitizeHtml(myArray[i][1]);
         li.append($("<label/>")
           .attr({'for': myself.name + i})
-          .html(myArray[i][1]));
+          .html(sanitizedHtml));
         selectHTML
           .append(li)
           .append((myself.separator == undefined || myself.separator == null || myself.separator == "null") 
