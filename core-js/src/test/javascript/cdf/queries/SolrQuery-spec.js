@@ -101,10 +101,10 @@ define([
           endpoint: "",   // isRequired
           collection: "", // isRequired
 
-          rowsStart: 5,
-          rowsLimit: 50,
-          responseType: "rType",
-          solrQuery: "foo:bar"
+          start: 5,
+          rows: 50,
+          wt: "rType",
+          q: "foo:bar"
         };
 
         solrQuery.init(solrOptions);
@@ -115,18 +115,18 @@ define([
 
         expect(queryDefinition).not.toBeNull();
 
-        expect(queryDefinition.start).toBe(solrOptions.rowsStart);
-        expect(queryDefinition.rows).toBe(solrOptions.rowsLimit);
-        expect(queryDefinition.wt).toBe(solrOptions.responseType);
-        expect(queryDefinition.q).toBe(solrOptions.solrQuery);
+        expect(queryDefinition.start).toBe(solrOptions.start);
+        expect(queryDefinition.rows).toBe(solrOptions.rows);
+        expect(queryDefinition.wt).toBe(solrOptions.wt);
+        expect(queryDefinition.q).toBe(solrOptions.q);
       });
 
       it("should return a query definition object, which values were overridden by the specified definitions",
         function() {
 
         var overrides = {
-          rowsLimit: 100,
-          solrQuery: "bar:foo",
+          rows: 100,
+          q: "bar:foo",
           otherDefinition: "otherValue"
         };
 
@@ -134,10 +134,10 @@ define([
 
         expect(queryDefinition).not.toBeNull();
 
-        expect(queryDefinition.start).toBe(solrOptions.rowsStart);
-        expect(queryDefinition.rows).toBe(overrides.rowsLimit);
-        expect(queryDefinition.wt).toBe(solrOptions.responseType);
-        expect(queryDefinition.q).toBe(overrides.solrQuery);
+        expect(queryDefinition.start).toBe(solrOptions.start);
+        expect(queryDefinition.rows).toBe(overrides.rows);
+        expect(queryDefinition.wt).toBe(solrOptions.wt);
+        expect(queryDefinition.q).toBe(overrides.q);
         expect(queryDefinition.otherDefinition).toBe(overrides.otherDefinition);
       });
     });
