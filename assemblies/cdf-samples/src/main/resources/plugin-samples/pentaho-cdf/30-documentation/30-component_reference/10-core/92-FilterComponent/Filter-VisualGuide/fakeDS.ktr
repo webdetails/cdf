@@ -6,7 +6,7 @@
     <trans_version/>
     <trans_type>Normal</trans_type>
     <trans_status>0</trans_status>
-    <directory>&#x2f;public&#x2f;plugin-samples&#x2f;pentaho-cdf&#x2f;pentaho-cdf-require&#x2f;30-documentation&#x2f;30-component_reference#x2f;10-core#x2f;92-FilterComponent#x2f;Filter-VisualGuide</directory>
+    <directory>&#x2f;public&#x2f;plugin-samples&#x2f;pentaho-cdf&#x2f;30-documentation&#x2f;30-component_reference#x2f;10-core#x2f;92-FilterComponent#x2f;Filter-VisualGuide</directory>
     <parameters>
         <parameter>
             <name>searchBox</name>
