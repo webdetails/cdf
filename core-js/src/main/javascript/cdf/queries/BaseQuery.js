@@ -514,8 +514,8 @@ define([
       this.setOption('searchPattern', pattern);
     },
 
-    /* Pagination
-     *
+    // region Pagination
+    /*
      * We paginate by having an initial position (page) and page size (pageSize).
      * Paginating consists of incrementing/decrementing the initial position by
      * the page size. All paging operations change the paging cursor.
@@ -658,6 +658,25 @@ define([
       } else {
         throw "InvalidPageSize";
       }
+    },
+    // endregion
+
+    __getDashboardParameterValue: function(name, value) {
+      var paramValue;
+
+      try {
+        paramValue = this.dashboard.getParameterValue(value);
+
+      } catch(e) {
+        var printValue = !_.isObject(value) || Utils.isFunction(value) ? value : JSON.stringify(value);
+
+        Logger.log(
+          "BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
+          "The parameter will be used instead the parameter value"
+        );
+      }
+
+      return paramValue !== undefined ? paramValue : value;
     }
   });
 
