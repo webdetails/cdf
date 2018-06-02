@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,5 +11,20 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-// this file is used by config/context.js for bypassing missing AMD dependencies
-define('missing/dependency', [], function() { return; });
+define(["pentaho/visual/base/View"], function (ViewMock) {
+
+  function BarViewMock(viewSpec) {
+    ViewMock.call(this, viewSpec);
+  }
+
+  BarViewMock.prototype = Object.create(ViewMock.prototype);
+  BarViewMock.prototype.constructor = BarViewMock;
+
+  BarViewMock.type = {
+    extensionEffective: {
+      definition: 'dummy'
+    }
+  };
+
+  return BarViewMock;
+});

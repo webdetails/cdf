@@ -15,18 +15,21 @@ define([
   'amd!../lib/underscore',
   './UnmanagedComponent',
   'pentaho/data/Table',
-  '../PentahoTypeContext',
+  'pentaho/visual/base/View',
   'pentaho/shim/es6-promise'
-], function (_, UnmanagedComponent, Table, PentahoTypeContext, Promise) {
+], function (_, UnmanagedComponent, Table, BaseView, Promise) {
 
   "use strict";
+
+  // ATTENTION: A part of this code is synchronized with:
+  // cdf/pentaho-js/src/main/javascript/cdf-legacy/components/VisualizationAPIComponent.js
 
   return UnmanagedComponent.extend({
 
     /**
      * Gets the visualization view instance.
      *
-     * @type {pentaho.type.visual.base.View}
+     * @type {?pentaho.type.visual.base.View}
      * @readOnly
      */
     vizView: null,
@@ -94,31 +97,6 @@ define([
 
     //region private members
     /**
-     * Synchronizes the given visualization view instance using several of the component properties.
-     *
-     * The `width` and `height` properties are updated from the corresponding
-     * component properties.
-     *
-     * The `model.data` property is updated from the given `dataSpec` argument, when specified and defined.
-     *
-     * Arbitrary visualization model properties are updated from the contents of
-     * the `vizOptions` component property and the current values of referenced dashboard parameters.
-     *
-     * Lastly, the `_onVizViewSync` method is called so that subclasses may further update the view and the model.
-     *
-     * All changes to the view and the model are performed from within a single transaction.
-     *
-     * The view update operation is not performed.
-     *
-     * @param {!pentaho.type.visual.base.View} vizView - The visualization view.
-     * @param {object} [dataSpec] - The data specification.
-     *
-     * @private
-     */
-    __syncVizView: function(vizView, dataSpec) {
-    },
-
-    /**
      * Gets an updated view specification from several component properties.
      *
      * The `width` and `height` properties are read from the corresponding component properties.
@@ -131,7 +109,8 @@ define([
      * Lastly, the `_onVizViewSyncSpec` method is called so that subclasses may further update the view and the model.
      *
      * @param {object} [dataSpec] - The data specification.
-     * @return {!pentaho.visual.base.spec.IView} The visualization view specification.
+     *
+     * @return {pentaho.visual.base.spec.IView} The visualization view specification.
      *
      * @private
      */
@@ -177,7 +156,7 @@ define([
      *
      * @param {object} dataSpec - The data specification.
      *
-     * @return {!Promise.<pentaho.type.visual.base.View>} A promise for the created visualization view.
+     * @return {Promise.<pentaho.type.visual.base.View>} A promise for the created visualization view.
      *
      * @private
      */
@@ -186,25 +165,60 @@ define([
       var viewSpec = this.__getVizViewSyncSpec(dataSpec);
       viewSpec.domContainer = this.placeholder()[0];
 
-      if(viewSpec.isAutoUpdate == null) viewSpec.isAutoUpdate = false; // Disable, by default.
+      // Disable, by default.
+      if(viewSpec.isAutoUpdate == null) {
+        viewSpec.isAutoUpdate = false;
+      }
 
       viewSpec.model._ = this.vizId;
 
       var me = this;
 
-      return PentahoTypeContext.getInstance()
-          .getAsync("pentaho/visual/base/view")
-          .then(function(BaseView) {
-            return BaseView.createAsync(viewSpec);
-          })
-          .then(function(vizView) {
+      return BaseView.createAsync(viewSpec)
+        .then(function(vizView) {
 
-            me.vizView = vizView;
+          me.vizView = vizView;
 
-            me._onVizViewCreated(vizView);
+          me._onVizViewCreated(vizView);
 
-            return vizView;
-          });
+          return vizView;
+        });
+    },
+
+    /**
+     * Synchronizes the current visualization view using several of the component properties.
+     *
+     * This method obtains the new view specification by calling `__getVizViewSyncSpec`
+     * and then applies it, in a single transaction scope, to the current view and model objects.
+     *
+     * The view update operation is not performed.
+     *
+     * @param {!pentaho.type.visual.base.View} vizView - The visualization view.
+     * @param {object} [dataSpec] - The data specification.
+     *
+     * @private
+     */
+    __syncVizView: function(dataSpec) {
+
+      var vizView = this.vizView;
+
+      // Disable while setting values, to not trigger an update.
+      var isAutoUpdate = vizView.isAutoUpdate;
+      if (isAutoUpdate) {
+        vizView.isAutoUpdate = false;
+      }
+
+      var viewSpec = this.__getVizViewSyncSpec(dataSpec);
+
+      // The transaction can throw, when proposed changes are canceled by an event handler.
+      try {
+        vizView.configure(viewSpec);
+      } finally {
+        // Restore auto update.
+        if (isAutoUpdate) {
+          vizView.isAutoUpdate = true;
+        }
+      }
     },
 
     /**
@@ -218,59 +232,19 @@ define([
      *
      * @param {object} dataSpec - The data specification.
      *
-     * @return {!Promise.<pentaho.type.visual.base.View>} A promise for the existing visualization view.
+     * @return {Promise.<pentaho.type.visual.base.View>} A promise for the existing visualization view.
      *
      * @private
      */
     __syncVizViewAsync: function(dataSpec) {
 
-      var vizView = this.vizView;
-
       var me = this;
+
       return new Promise(function(resolve) {
 
-        // Disable while setting values, to not trigger an update.
-        var isAutoUpdate = vizView.isAutoUpdate;
-        if(isAutoUpdate) vizView.isAutoUpdate = false;
+        me.__syncVizView(dataSpec);
 
-        var viewSpec = me.__getVizViewSyncSpec(dataSpec);
-
-        // Use a transaction to ensure that only a single model change action occurs.
-        // This is relevant mostly for event handlers, which will be given a single changeset
-        // with all of the changes.
-
-        // Transactions can throw, when proposed changes are canceled by an event handler.
-        try {
-          vizView.$type.context.enterChange().using(syncWithinTxn, me);
-        } finally {
-          // Restore auto update.
-          if(isAutoUpdate) vizView.isAutoUpdate = true;
-        }
-
-        function syncWithinTxn(scope) {
-
-          // TODO: Because #configure currently doesn't correctly handled nested specs properly
-          // we have to do it by hand here.
-
-          Object.keys(viewSpec).forEach(function(p) {
-            if(p !== "model") {
-              vizView.set(p, viewSpec[p]);
-            }
-          });
-
-          var vizModel = vizView.model;
-          var modelSpec = viewSpec.model;
-          if(vizModel && modelSpec) {
-            Object.keys(modelSpec).forEach(function(p) {
-              vizModel.set(p, modelSpec[p]);
-            });
-          }
-
-          // Accept changes.
-          scope.accept();
-        }
-
-        resolve(vizView);
+        resolve(me.vizView);
       });
     }
     // endregion

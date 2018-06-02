@@ -4,7 +4,7 @@
   // to let a real define/require implementation be installed through webcontext.js
   delete define; delete require;
 </script>
-<script src="webcontext.js?context=mantle&amp;requireJsOnly=true"></script>
+<script src="webcontext.js?context=mantle&amp;requireJsOnly=true&amp;application=pentaho-cdf"></script>
 
 <div class="shadow">
 
@@ -128,7 +128,7 @@ require([
       path: "/public/plugin-samples/pentaho-cdf/legacy/actions/data-for-samples.cda",
       opts: {}
     },
-    vizId: "pentaho/visual/samples/calc/model",
+    vizId: "pentaho/visual/samples/calc/Model",
     height: 200,
     width: 400,
     vizOptions: [["operation", "optionParam"],["levels", "levelsParam"],["measure", "measureParam"]],
