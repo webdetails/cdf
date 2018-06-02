@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -175,11 +175,14 @@ define([
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
         var view = visualizationAPIComponent.vizView;
-        spyOn(view.model, "set").and.callThrough();
+        spyOn(view, "configure").and.callThrough();
 
         setTimeout(function() {
           visualizationAPIComponent.once("cdf:postExecution", function () {
-            expect(view.model.set).toHaveBeenCalledWith("param1", "value");
+            expect(view.configure).toHaveBeenCalledWith(jasmine.objectContaining({
+              model: jasmine.objectContaining({"param1": "value"})
+            }));
+
             done();
           });
 

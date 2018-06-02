@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2017 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -15,98 +15,67 @@ define([
   'cdf/components/ccc/BaseCccComponent.ext'
 ], function (BaseCccComponentExt) {
 
-  /**
+  function viewId(name) {
+    return 'pentaho/ccc/visual/' + name;
+  }
+
+    /**
    * ## The Base Ccc Component Ext
    */
   describe("The Base Ccc Component Ext #", function () {
-    it("Gets the correct Visualization Digested Name", function () {
-      expect(BaseCccComponentExt.getVizDigestedName('', {})).toBeUndefined();
-      expect(BaseCccComponentExt.getVizDigestedName('dummyChart', {})).toBe('dummy');
-      expect(BaseCccComponentExt.getVizDigestedName('dummyChrt', {})).toBeUndefined();
-      expect(BaseCccComponentExt.getVizDigestedName('metricDotChart', {})).toBe('bubble');
-      expect(BaseCccComponentExt.getVizDigestedName('metricLineChart', {})).toBe('scatter');
-      expect(BaseCccComponentExt.getVizDigestedName('metricLineChart', {
+    it("Gets the correct Visualization View Id", function () {
+      expect(BaseCccComponentExt.getMatchingVizViewId('', {})).toBe(null);
+      expect(BaseCccComponentExt.getMatchingVizViewId('dummyChrt', {})).toBe(null);
+      expect(BaseCccComponentExt.getMatchingVizViewId('dummyChart', {})).toBe(viewId('dummy'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('MetricDotChart', {})).toBe(viewId('Bubble'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('MetricLineChart', {})).toBe(viewId('Scatter'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('MetricLineChart', {
         stacked: true
-      })).toBe('scatter');
-      expect(BaseCccComponentExt.getVizDigestedName('normalizedBarChart', {})).toBe('barNormalized');
-      expect(BaseCccComponentExt.getVizDigestedName('dotChart', {})).toBe('pointAbstract');
-      expect(BaseCccComponentExt.getVizDigestedName('dotChart', {
+      })).toBe(viewId('Scatter'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('NormalizedBarChart', {})).toBe(viewId('BarNormalized'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {})).toBe(viewId('PointAbstract'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {
         stacked: true
-      })).toBe('pointAbstract');
-      expect(BaseCccComponentExt.getVizDigestedName('stackedDotChart', {})).toBe('pointAbstract');
-      expect(BaseCccComponentExt.getVizDigestedName('stackedDotChart', {
+      })).toBe(viewId('PointAbstract'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedDotChart', {})).toBe(viewId('PointAbstract'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedDotChart', {
         stacked: true
-      })).toBe('pointAbstract');
-      expect(BaseCccComponentExt.getVizDigestedName('stackedLineChart', {})).toBe('line');
-      expect(BaseCccComponentExt.getVizDigestedName('areaChart', {})).toBe('area');
-      expect(BaseCccComponentExt.getVizDigestedName('areaChart', {
-        stacked: true
-      })).toBe('areaStacked');
-      expect(BaseCccComponentExt.getVizDigestedName('stackedAreaChart', {})).toBe('areaStacked');
-      expect(BaseCccComponentExt.getVizDigestedName('stackedAreaChart', {
-        stacked: true
-      })).toBe('areaStacked');
+      })).toBe(viewId('PointAbstract'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedLineChart', {})).toBe(viewId('Line'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('AreaChart', {})).toBe(viewId('Area'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('AreaChart', {stacked: true})).toBe(viewId('AreaStacked'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedAreaChart', {})).toBe(viewId('AreaStacked'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedAreaChart', {stacked: true})).toBe(viewId('AreaStacked'));
 
-      expect(BaseCccComponentExt.getVizDigestedName('heatGridChart', {})).toBe('heatGrid');
-      expect(BaseCccComponentExt.getVizDigestedName('heatGridChart', {
-        stacked: true
-      })).toBe('heatGrid');
+      expect(BaseCccComponentExt.getMatchingVizViewId('HeatGridChart', {})).toBe(viewId('HeatGrid'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('HeatGridChart', {stacked: true})).toBe(viewId('HeatGrid'));
 
-      expect(BaseCccComponentExt.getVizDigestedName('lineChart', {})).toBe('line');
-      expect(BaseCccComponentExt.getVizDigestedName('lineChart', {
-        stacked: true
-      })).toBe('line');
+      expect(BaseCccComponentExt.getMatchingVizViewId('LineChart', {})).toBe(viewId('Line'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('LineChart', {stacked: true})).toBe(viewId('Line'));
 
-      expect(BaseCccComponentExt.getVizDigestedName('pieChart', {})).toBe('pie');
-      expect(BaseCccComponentExt.getVizDigestedName('pieChart', {
-        stacked: true
-      })).toBe('pie');
+      expect(BaseCccComponentExt.getMatchingVizViewId('PieChart', {})).toBe(viewId('Pie'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('PieChart', {stacked: true})).toBe(viewId('Pie'));
 
-      expect(BaseCccComponentExt.getVizDigestedName('sunburstChart', {})).toBe('sunburst');
-      expect(BaseCccComponentExt.getVizDigestedName('sunburstChart', {
-        stacked: true
-      })).toBe('sunburst');
+      expect(BaseCccComponentExt.getMatchingVizViewId('SunburstChart', {})).toBe(viewId('Sunburst'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('SunburstChart', {stacked: true})).toBe(viewId('Sunburst'));
 
-      expect(BaseCccComponentExt.getVizDigestedName('barChart', {})).toBe('bar');
-      expect(BaseCccComponentExt.getVizDigestedName('barChart', {
+      expect(BaseCccComponentExt.getMatchingVizViewId('BarChart', {})).toBe(viewId('Bar'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('BarChart', {
         valuesNormalized: true
-      })).toBe('barNormalized');
-      expect(BaseCccComponentExt.getVizDigestedName('barChart', {
-        stacked: true
-      })).toBe('barStacked');
-      expect(BaseCccComponentExt.getVizDigestedName('barChart', {
+      })).toBe(viewId('BarNormalized'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('BarChart', {stacked: true})).toBe(viewId('BarStacked'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('BarChart', {
         stacked: true,
         orientation: 'vertical'
-      })).toBe('barStacked');
-      expect(BaseCccComponentExt.getVizDigestedName('barChart', {
+      })).toBe(viewId('BarStacked'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('BarChart', {
         stacked: true,
         orientation: 'horizontal'
-      })).toBe('barStackedHorizontal');
-
-
-    });
-
-    it("Gets the boolean describing if the Visualization is valid", function () {
-      expect(BaseCccComponentExt.isValidVisualization(undefined)).toBeFalsy();
-      expect(BaseCccComponentExt.isValidVisualization(null)).toBeFalsy();
-      expect(BaseCccComponentExt.isValidVisualization('')).toBeFalsy();
-      expect(BaseCccComponentExt.isValidVisualization('bullet')).toBeFalsy();
-
-      expect(BaseCccComponentExt.isValidVisualization('dummyChart')).toBeTruthy();
-    });
-
-    it("Gets the correct Promise and Visualization extension as null when no vizapi styles are on", function (done) {
-      var returnedPromise = BaseCccComponentExt.getExtensionsPromise("", false);
-      expect(returnedPromise).toBeDefined();
-
-      returnedPromise.then(function (extension) {
-        expect(extension).toBeNull();
-        done();
-      });
+      })).toBe(viewId('BarStackedHorizontal'));
     });
 
     it("Gets the correct Promise and the Visualization Extension", function (done) {
-      var returnedPromise = BaseCccComponentExt.getExtensionsPromise("", true);
+      var returnedPromise = BaseCccComponentExt.getExtensionsPromise("pentaho/ccc/visual/Bar");
       expect(returnedPromise).toBeDefined();
 
       returnedPromise.then(function(extension){
@@ -114,10 +83,15 @@ define([
         expect(extension.definition).toBe('dummy');
         done();
       });
-    })
+    });
 
-    it("Gets the correct colors", function () {
-      expect(BaseCccComponentExt.getColors()[0]).toBe('dummy');
+    it("Gets the correct default colors", function () {
+      expect(BaseCccComponentExt.getColors()).toEqual(['dummyA', 'dummyB']);
+    });
+
+    it("Gets the correct colors of a given palette", function () {
+      expect(BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3")).toEqual(
+        ['dummy1', 'dummy2', 'dummy3']);
     });
   });
 

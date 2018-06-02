@@ -6,7 +6,7 @@
   // to let a real define/require implementation be installed through webcontext.js
   delete define; delete require;
 </script>
-<script src="webcontext.js?context=mantle&amp;requireJsOnly=true"></script>
+<script src="webcontext.js?context=mantle&amp;requireJsOnly=true&amp;application=pentaho-cdf"></script>
 
 <div class="shadow">
 
@@ -128,7 +128,7 @@ sampleVisualization = {
   type: "visualizationAPIComponent",
   listeners: [],
   queryDefinition: MetaLayer.sampleVisualization,
-  vizId: "pentaho/visual/samples/calc/model",
+  vizId: "pentaho/visual/samples/calc/Model",
   width: 400,
   height: 200,
   vizOptions: [["operation", "optionParam"],["levels", "levelsParam"],["measure", "measureParam"]],

@@ -131,6 +131,7 @@ public class EmbeddedHeadersGenerator {
     }
 
     return "\nrequireCfg.config[\"pentaho/environment\"] = {" +
+        "\n  application: \"pentaho-cdf\"," +
         "\n  theme: null," +
         "\n  locale: \"" + this.locale + "\"," +
         "\n  user: {" +

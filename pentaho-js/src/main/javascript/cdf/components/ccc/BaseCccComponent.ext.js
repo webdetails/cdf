@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2017 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,174 +12,187 @@
  */
 
 define([
-  '../../PentahoTypeContext',
+  "require",
+  'pentaho/module/instancesOf!pentaho/visual/color/Palette',
   'amd!../../lib/underscore',
   '../../lib/jquery',
   'pentaho/shim/es6-promise'
-], function(PentahoTypeContext, _, $, Promise){
+], function(localRequire, allPalettes, _, $, Promise) {
+
+  var defaultNominalPalette = getFirstNominalPalette();
+
+  // Release memory.
+  allPalettes = null;
 
   /**
-   * The Regex to extract the chart type from its ccc visualization type
+   * The RegExp to extract a clean CCC chart class name from its somewhat already cleaned CCC class name...
+   *
+   * Example: "BarChart" -> "Bar".
    *
    * @type {RegExp}
    * @private
    */
-  var _reCccName = /^(.*)Chart$/;
-
-  var _context = PentahoTypeContext.getInstance();
+  var __reCccClassName = /^(.*)Chart$/;
 
   /**
-   * List of viz types to exclude from the Viz Api chart defaults
+   * List of chart types for which there is no corresponding visualization type.
    *
-   * @type {String[]}
+   * @type {string[]}
    * @private
    */
-  var _chartTypesBlackList = ['bullet'];
+  var __chartTypesBlackList = ['Bullet'];
 
   /**
-   * List of viz types to exclude from the form verification
+   * List of chart types to exclude from the form verification.
    *
-   * @type {String[]}
+   * @type {string[]}
    * @private
    */
-  var _chartFormExceptions = ['waterfall', 'treemap', 'boxplot', 'heatGrid', 'line', 'scatter', 'pie', 'pointAbstract', 'sunburst'];
+  var __chartFormExceptions = [
+    'Waterfall', 'Treemap', 'Boxplot', 'HeatGrid', 'Line', 'Scatter', 'Pie', 'PointAbstract', 'Sunburst'
+  ];
 
   /**
-   * List of viz types to do not apply normalized to the viz type name
+   * List of chart types for which `Normalized` should not be applied to the viz view identifier.
    *
-   * @type {String[]}
+   * @type {string[]}
    * @private
    */
-  var _valuesNormalizedExceptions = ['barNormalized', 'area', 'areaStacked'];
+  var __valuesNormalizedExceptions = ['BarNormalized', 'Area', 'AreaStacked'];
 
   /**
-   * List of viz types to do not apply stacked to the viz type name
+   * List of chart types for which `Stacked` should not be applied to the viz view identifier.
    *
-   * @type {String[]}
+   * @type {string[]}
    * @private
    */
-  var _stackedExceptions = ['barNormalized', 'areaStacked'];
+  var __stackedExceptions = ['BarNormalized', 'AreaStacked'];
 
   /**
-   * List of viz types to do not apply orientation to the viz type name
+   * List of chart types for which the orientation modifier should not be applied to the viz view identifier.
    *
-   * @type {String[]}
+   * @type {string[]}
    * @private
    */
-  var _orientationException = ['area', 'areaStacked'];
+  var __orientationException = ['Area', 'AreaStacked'];
+
+  return {
+    getMatchingVizViewId: getMatchingVizViewId,
+    getExtensionsPromise: getExtensionsPromise,
+    getColors: getColors
+  };
 
   /**
-   * Gets a raw visualization type name and digests that returning a valid name to be used to fetch the
-   * visualization type extension defaults
+   * Gets the identifier of the visualization view associated with a given CCC chart class name.
    *
-   * @param {String} name The raw name of the visualization
-   * @param {Object} chartDefinition The chart definition to use as source of information
-   * @returns {String|undefined} The digested visualization type name or undefined if it is an invalid name
-   * @private
+   * @param {string} name - The CCC chart class name.
+   * @param {?object} chartDefinition - The component's chart definition object.
+   * @returns {?string} The identifier of the visualization view, if any; `null` if none.
    */
-  var getVizDigestedName = function (name, chartDefinition) {
-    var fullName;
+  function getMatchingVizViewId(name, chartDefinition) {
 
-    var m = _reCccName.exec(name);
-    if (m) {
-      fullName = m[1].charAt(0).toLowerCase() + m[1].substr(1);
-    } else {
-      return;
+    var match = __reCccClassName.exec(name);
+    if (!match) {
+      return null;
+    }
+
+    var fullName = match[1];
+
+    if (_.contains(__chartTypesBlackList, fullName)) {
+      return null;
     }
 
     // transformations
     switch (fullName) {
-      case 'metricDot':
-        fullName = 'bubble';
+      case 'MetricDot':
+        fullName = 'Bubble';
         break;
-      case 'metricLine':
-        fullName = 'scatter';
+      case 'MetricLine':
+        fullName = 'Scatter';
         break;
-      case 'normalizedBar':
-        fullName = 'barNormalized';
+      case 'NormalizedBar':
+        fullName = 'BarNormalized';
         break;
-      case 'dot':
-      case 'stackedDot':
-        fullName = 'pointAbstract';
+      case 'Dot':
+      case 'StackedDot':
+        fullName = 'PointAbstract';
         break;
-      case 'stackedLine':
-        fullName = 'line';
+      case 'StackedLine':
+        fullName = 'Line';
         break;
-      case 'stackedArea':
-        fullName = 'areaStacked';
+      case 'StackedArea':
+        fullName = 'AreaStacked';
         break;
     }
 
-    if (chartDefinition && !_.contains(_chartFormExceptions, fullName)) {
-      if (chartDefinition.valuesNormalized && !_.contains(_valuesNormalizedExceptions, fullName)) {
+    if (chartDefinition != null && !_.contains(__chartFormExceptions, fullName)) {
+
+      if (chartDefinition.valuesNormalized && !_.contains(__valuesNormalizedExceptions, fullName)) {
         fullName += 'Normalized';
       }
-      if (chartDefinition.stacked && !_.contains(_stackedExceptions, fullName)) {
+
+      if (chartDefinition.stacked && !_.contains(__stackedExceptions, fullName)) {
         fullName += 'Stacked';
       }
-      if ((chartDefinition.orientation || '').toLowerCase() === 'horizontal'
-          && !_.contains(_orientationException, fullName)) {
+
+      var orientation = (chartDefinition.orientation || '').toLowerCase();
+      if (orientation === 'horizontal' && !_.contains(__orientationException, fullName)) {
         fullName += 'Horizontal';
       }
     }
 
-    return fullName;
-  };
+    return 'pentaho/ccc/visual/' + fullName;
+  }
 
   /**
-   * Checks if the Viz Api Visualization type extensions should be applied, based on its name, if the compat
-   * version is 3 and if it is a valid visualization type
+   * Gets a promise for the extensions object of a visualization view type.
    *
-   * @param {String} name The Visualization Type Name
-   * @returns {Boolean} True if the Viz Api Visualization Type extensions should be applied, False otherwise
+   * @param {string} vizViewId - The identifier of the visualization view type.
+   * @returns {Promise.<Object>} A promise for its extensions object.
    */
-  var isValidVisualization = function (name) {
-    return !!name && name != '' && !_.contains(_chartTypesBlackList, name);
-  };
+  function getExtensionsPromise(vizViewId) {
+    return new Promise(function(resolve, reject) {
+
+      localRequire([vizViewId], function(View) {
+
+        var extension = $.extend({}, View.type.extensionEffective);
+        resolve(extension);
+
+      }, reject);
+    });
+  }
 
   /**
-   * Gets a Promise with the Visualization Type Extensions ready to be used when it is resolved
+   * Gets the array of color values of a registered palette, given its identifier, or,
+   * when unspecified, those of the default nominal palette.
    *
-   * @param {String} name The Visualization Type Name
-   * @param {Boolean} applyVizApiStyles True If the viz api styles should be applied, False otherwise
-   * @returns {Promise} A Promise with the Visualization Type Extensions when it is resolved
-   */
-  var getExtensionsPromise = function (name, applyVizApiStyles) {
-    if (!!applyVizApiStyles) {
-      return _context.getAsync('pentaho/ccc/visual/' + name).then(function (View) {
-        return $.extend({}, View.type.extensionEffective);
-      });
-    } else {
-      // no external extensions
-      return Promise.resolve(null);
-    }
-  };
-
-  /**
-   * Gets the Colors Array Registered in the Palette
+   * @param {?string} [colorPaletteId] The identifier of the color palette.
    *
-   * @param {String} [colorPalette] The color palette to retrieve. By default all colors are returned
-   * @returns {Array} The Array with the registered colors
+   * @returns {string[]} An array of color values.
    */
-  var getColors = function (colorPalette) {
+  function getColors(colorPaletteId) {
     var palette;
-    if(!colorPalette) {
-      palette = _context.instances.getByType("pentaho/visual/color/palette", {
-        filter: function(onePalette) {
-          return onePalette.level === "nominal";
-        }
-      });
+    if(colorPaletteId == null) {
+      palette = defaultNominalPalette;
     } else {
-      palette = _context.instances.getById(colorPalette);
+      palette = localRequire(colorPaletteId);
     }
 
-    return palette.colors.toArray().map(function(color) { return color.value; });
-  };
+    // Extract the color values.
+    return palette.colors.toArray().map(function (color) { return color.value; });
+  }
 
-  return {
-    getVizDigestedName: getVizDigestedName,
-    isValidVisualization: isValidVisualization,
-    getExtensionsPromise: getExtensionsPromise,
-    getColors: getColors
+  /**
+   * Gets the first palette of a `nominal` level, if there is one.
+   *
+   * @returns {?pentaho.visual.color.Palette} The first nominal palette, or `null`.
+   */
+  function getFirstNominalPalette () {
+
+    var nominalPalettes = allPalettes.filter(function (onePalette) {
+      return onePalette.level === "nominal";
+    });
+
+    return nominalPalettes.length > 0 ? nominalPalettes[0] : null;
   }
 });

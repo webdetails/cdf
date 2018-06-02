@@ -92,9 +92,9 @@
   },
 
   "config": {
-    "pentaho/instanceInfo": {
+    "pentaho/modules": {
       "cdf/components/ccc/config/cdf.vizApi.conf": {
-        "type": "pentaho.config.spec.IRuleSet"
+        "type": "pentaho/config/spec/IRuleSet"
       }
     },
     "amd": {

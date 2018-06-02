@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,26 +11,24 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define('cdf/components/ccc/BaseCccComponent.ext', [
-  'pentaho/shim/es6-promise'
-], function(Promise){
+define(function () {
 
-  var getMatchingVizViewId = function (name, chartDefinition) {
-    return name;
-  };
+  function ViewMock(viewSpec) {
+    this.width = viewSpec && viewSpec.width;
+    this.height = viewSpec && viewSpec.height;
 
-  var getExtensionsPromise = function (name, applyVizApiStyles) {
-    return Promise.resolve(null);
-  };
+    this.update = function () {
+      return Promise.resolve();
+    };
 
-  var getColors = function (type) {
-    return ['dummy'];
-  };
-
-  return {
-    getMatchingVizViewId: getMatchingVizViewId,
-    getExtensionsPromise: getExtensionsPromise,
-    getColors: getColors
+    this.configure = function(spec) {
+    };
   }
 
+  ViewMock.createAsync = function(viewSpec) {
+
+    return Promise.resolve(new ViewMock(viewSpec));
+  };
+
+  return ViewMock;
 });
