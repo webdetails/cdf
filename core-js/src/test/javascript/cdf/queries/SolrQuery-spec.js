@@ -103,8 +103,10 @@ define([
 
           start: 5,
           rows: 50,
-          wt: "rType",
-          q: "foo:bar"
+          wt: "xml",
+          q: "foo:* AND bar:*",
+          fl: "foo,bar"
+
         };
 
         solrQuery.init(solrOptions);
@@ -119,6 +121,9 @@ define([
         expect(queryDefinition.rows).toBe(solrOptions.rows);
         expect(queryDefinition.wt).toBe(solrOptions.wt);
         expect(queryDefinition.q).toBe(solrOptions.q);
+        expect(queryDefinition.fl).toBe(solrOptions.fl);
+        expect(queryDefinition.fq).toBeUndefined();
+        expect(queryDefinition.df).toBeUndefined();
       });
 
       it("should return a query definition object, which values were overridden by the specified definitions",
@@ -126,7 +131,8 @@ define([
 
         var overrides = {
           rows: 100,
-          q: "bar:foo",
+          q: "bar:* AND foo:*",
+          df: "bar",
           otherDefinition: "otherValue"
         };
 
@@ -138,6 +144,7 @@ define([
         expect(queryDefinition.rows).toBe(overrides.rows);
         expect(queryDefinition.wt).toBe(solrOptions.wt);
         expect(queryDefinition.q).toBe(overrides.q);
+        expect(queryDefinition.df).toBe(overrides.df);
         expect(queryDefinition.otherDefinition).toBe(overrides.otherDefinition);
       });
     });
