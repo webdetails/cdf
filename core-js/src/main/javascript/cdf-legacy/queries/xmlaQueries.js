@@ -16,6 +16,8 @@
  * Author: Andy Grohe
  * Contact: agrohe21@gmail.com
  */
+
+;
 (function() {
 
   SharedXmla = Base.extend({

@@ -123,22 +123,27 @@ define([
      * Gets the object containing the key/value pair
      * of the parameters macros used in Solr Query Request.
      *
+     * @param {object} [overrides] - New query parameters to override any existing query parameters.
+     *
      * @return {object} The macros' values in the request.
      */
-    getParameterMacros: function() {
+    getParameterMacros: function(overrides) {
       var parameterMacros = {};
 
-      var macros = this.getOption("macros");
-      if (!macros) return parameterMacros;
+      var paramsFromComponent = this.getOption('params');
+      var macros = $.extend({}, paramsFromComponent, overrides);
 
-      macros.forEach(function(macro) {
-        var name = macro[0];
-        var value = this.__getDashboardParameterValue(name, macro[1]);
+      for (var name in macros) {
+        if (macros.hasOwnProperty(name)) {
+          var value = this.__getDashboardParameterValue(name, macros[name]);
 
-        if (Utils.isString(value)) value = value.split(/,\s*/);
+          if (Utils.normalizeValue(value) !== null) {
+            if (Utils.isString(value)) value = value.split(/\s*,\s*/);
 
-        parameterMacros[name] = value;
-      }, this);
+            parameterMacros[name] = value;
+          }
+        }
+      }
 
       return parameterMacros;
     },
@@ -223,21 +228,8 @@ define([
     buildQueryDefinition: function(overrides) {
       var queryDefinition = $.extend({}, this.getSolrQueryParameters());
 
-      var overrideParameters = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
-      for (var name in overrideParameters) {
-        if (overrideParameters.hasOwnProperty(name)) {
-          var isQueryOption = name === "q";
-
-          var value = overrideParameters[name];
-          if (isQueryOption) {
-            value = this.__expandQueryMacros(value);
-          }
-
-          queryDefinition[name] = value;
-        }
-      }
-
-      var parameterMacros = this.getParameterMacros();
+      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+      var parameterMacros = this.getParameterMacros(overrides);
       for (var macro in parameterMacros) {
         if (parameterMacros.hasOwnProperty(macro)) {
           var macroValue = parameterMacros[macro];
@@ -321,7 +313,7 @@ define([
 
     // region Private Methods
     __exportDataSuccess: function(options, data) {
-      var isBlobAvailable = Blob != null;
+      var isBlobAvailable = typeof Blob !== "undefined";
 
       if (options.exportType === "json") {
         data = JSON.stringify(data, null, 2);
@@ -383,8 +375,8 @@ define([
     },
 
     __expandQueryMacros: function(query) {
-      // Matches with -> field:${macro}
-      var queryRegx = new RegExp("(\\w+):\\${(\\w+)}", "g");
+      // Matches with -> field:${macro:defaultValue}
+      var queryRegx = new RegExp("(\\w+):\\${(\\w+)(?::[^}]+)?}", "g");
 
       var parameterMacros = this.getParameterMacros();
       return query.replace(queryRegx, function(match, field, macro) {

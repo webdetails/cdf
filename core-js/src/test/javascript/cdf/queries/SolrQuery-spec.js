@@ -106,7 +106,6 @@ define([
           wt: "xml",
           q: "foo:* AND bar:*",
           fl: "foo,bar"
-
         };
 
         solrQuery.init(solrOptions);
@@ -146,6 +145,28 @@ define([
         expect(queryDefinition.q).toBe(overrides.q);
         expect(queryDefinition.df).toBe(overrides.df);
         expect(queryDefinition.otherDefinition).toBe(overrides.otherDefinition);
+      });
+
+      it("should return a query definition object, which parameters values sent from a component, " +
+        "were overridden by the specified definitions", function() {
+
+        var parametersFromComponent = {
+          "param1": "value1",
+          "param2": "value2"
+        };
+
+        solrQuery.setParameters(parametersFromComponent);
+
+        var overrides = {
+          "param2": "newValue2"
+        };
+
+        var queryDefinition = solrQuery.buildQueryDefinition(overrides);
+
+        expect(queryDefinition).not.toBeNull();
+
+        expect(queryDefinition.param1).toBe(parametersFromComponent.param1);
+        expect(queryDefinition.param2).toBe(overrides.param2);
       });
     });
 
