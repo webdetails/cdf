@@ -125,7 +125,7 @@ define([
       this.setOption('kettleOutput', opts.kettleOutput);
       this.setOption('stepName', opts.stepName);
       this.setOption('systemParams', opts.systemParams || {} );
-      this.setAjaxOptions($.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
+      this.setAjaxOptions(opts.ajaxOptions);
 
       var ajaxOptions = this.getOption('ajaxOptions');
       if(ajaxOptions.dataType === 'json') {
@@ -143,9 +143,6 @@ define([
      * @return {object} Query definition object.
      */
     buildQueryDefinition: function(overrides) {
-      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
-
-      var dashboard = this.dashboard;
       var queryDefinition = {
         kettleOutput: this.getOption('kettleOutput'),
         stepName: this.getOption('stepName')
@@ -154,28 +151,12 @@ define([
       // We clone queryDefinition to remove undefined
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
+      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
       var cachedParams = this.getOption('params');
       var params = $.extend({}, cachedParams, overrides);
 
       _.each(params, function(value, name) {
-        var paramValue, printValue;
-        try {
-          paramValue = dashboard.getParameterValue(value);
-        } catch(e) {
-          if(!_.isObject(value) || Utils.isFunction(value)) {
-            printValue = value;
-          } else {
-            printValue = JSON.stringify(value);
-          }
-
-          Logger.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
-            "The parameter will be used as value instead its value obtained from getParameterValue");
-          paramValue = value;
-        }
-
-        if(paramValue === undefined) {
-          paramValue = value;
-        }
+        var paramValue = this.__getDashboardParameterValue(name, value);
 
         if(Utils.isFunction(paramValue)) {
           paramValue = paramValue();
@@ -191,7 +172,7 @@ define([
         }
 
         queryDefinition['param' + name] = paramValue;
-      });
+      }, this);
 
       return queryDefinition;
     },

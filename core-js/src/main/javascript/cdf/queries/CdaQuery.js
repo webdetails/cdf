@@ -149,48 +149,27 @@ define([
      * @return {object} Query definition object.
      */
     buildQueryDefinition: function(overrides) {
-      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+      var queryDefinition = {};
 
-      var dashboard = this.dashboard;
+      overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
       var cachedParams = this.getOption('params');
       var params = $.extend({}, cachedParams, overrides);
 
-      var queryDefinition = {};
       _.each(params, function(value, name) {
-        var paramValue;
-
-        try {
-          paramValue = dashboard.getParameterValue(value);
-        } catch(e) {
-          var printValue = "";
-
-          if(!_.isObject(value) || Utils.isFunction(value)) {
-            printValue = value;
-          } else {
-            printValue = JSON.stringify(value);
-          }
-
-          Logger.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
-            "The parameter will be used instead the parameter value");
-          paramValue = value;
-        }
-
-        if(paramValue === undefined) {
-          paramValue = value;
-        }
+        var paramValue = this.__getDashboardParameterValue(name, value);
 
         if(Array.isArray(paramValue) && paramValue.length === 1 && String(paramValue[0]).indexOf(';') >= 0) {
-          //special case where single element will wrongly be treated as a parsable array by cda
+          // special case where single element will wrongly be treated as a parsable array by cda
           paramValue = Utils.doCsvQuoting(paramValue[0], ';');
         }
 
-        //else will not be correctly handled for functions that return arrays
+        // else will not be correctly handled for functions that return arrays
         if(Utils.isFunction(paramValue)) {
           paramValue = paramValue();
         }
 
         queryDefinition['param' + name] = paramValue;
-      });
+      }, this);
 
       queryDefinition.path = this.getOption('file');
       queryDefinition.dataAccessId = this.getOption('id');

@@ -12,23 +12,53 @@
  */
 
 define([
-  './BaseQuery',
-  '../dashboard/Dashboard.query',
-  '../dashboard/Utils',
-  '../Logger',
-  '../lib/jquery'
+  "./BaseQuery",
+  "../dashboard/Dashboard.query",
+  "../dashboard/Utils",
+  "../Logger",
+  "../lib/jquery"
 ], function(BaseQuery, Dashboard, Utils, Logger, $) {
   "use strict";
 
   /* global Object */
 
+  var MACRO_PREFIX = "param";
+
   var SOLR_CLASS_NAME = "solr";
-  var SOLR_REST_API_PARAMS = {
-    solrQuery: "q",
-    rowsStart: "start",
-    rowsLimit: "rows",
-    responseType: "wt"
+
+  var SOLR_DEFAULT_PARAMS = {
+    // Solr Url Parameters
+    endpoint: "",
+    collection: "",
+    requestHandler: "select",
+
+    // Solr Query String Parameters
+    q: "*:*",
+    fq: null,
+    fl: null,
+    df: null,
+
+    start: 0,
+    rows: 10,
+    wt: "json",
+    rawQueryParameters: "",
+
+    // Solr to CDA Schema Parameters
+    schemaColumnNames: [],
+    schemaColumnTypes: [],
+    schemaColumnPaths: [],
+
+    // Ajax
+    ajaxOptions: {
+      async: true,
+      type: "GET",
+      xhrFields: {
+        withCredentials: true
+      }
+    }
   };
+
+  var SOLR_QUERY_STRING_PARAMS = ["q", "fq", "fl", "df", "wt", "start", "rows"];
 
   /**
    * @class cdf.queries.SolrQuery
@@ -62,7 +92,6 @@ define([
    */
   var solrQueryOpts = /** @lends cdf.queries.SolrQuery# */{
     // region Properties
-
     /**
      * Gets the Solr Query class name
      *
@@ -85,140 +114,142 @@ define([
       return this._label;
     },
 
-    defaults: {
-      // Datasource
-      endpoint: "",
-      collection: "",
-      solrQuery: "*:*",
-
-      rowsStart: 0,
-      rowsLimit: 10,
-      requestHandler: "select",
-      responseType: "json",
-
-      // Schema
-      schemaColumnNames: [],
-      schemaColumnTypes: [],
-      schemaColumnPaths: [],
-
-      // Ajax
-      ajaxOptions: {
-        async: true,
-        type: "GET",
-        xhrFields: {
-          withCredentials: true
-        }
-      }
+    _defaults: SOLR_DEFAULT_PARAMS,
+    get defaults() {
+      return this._defaults;
     },
 
+    /**
+     * Gets the object containing the key/value pair
+     * of the parameters macros used in Solr Query Request.
+     *
+     * @param {object} [overrides] - New query parameters to override any existing query parameters.
+     *
+     * @return {object} The macros' values in the request.
+     */
+    getParameterMacros: function(overrides) {
+      var parameterMacros = {};
+
+      var paramsFromComponent = this.getOption('params');
+      var macros = $.extend({}, paramsFromComponent, overrides);
+
+      for (var name in macros) {
+        if (macros.hasOwnProperty(name)) {
+          var value = this.__getDashboardParameterValue(name, macros[name]);
+
+          if (Utils.normalizeValue(value) !== null) {
+            if (Utils.isString(value)) value = value.split(/\s*,\s*/);
+
+            parameterMacros[name] = value;
+          }
+        }
+      }
+
+      return parameterMacros;
+    },
+
+    /**
+     * Gets Solr's {@link https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html|Query Parameters},
+     * which hold the Solr query specification.
+     *
+     * @return {object} The Solr Query Parameters.
+     */
+    getSolrQueryParameters: function() {
+      var parameters = {};
+
+      var rawQueryParameters = this.getOption("rawQueryParameters");
+      if (Utils.normalizeValue(rawQueryParameters) !== null) {
+        rawQueryParameters.split("&").forEach(function(rawQP) {
+          var parameter = rawQP.split("=");
+
+          var name = parameter[0];
+          var value = parameter[1];
+
+          if (name != null && value != null) {
+            parameters[name] = value;
+          }
+        });
+      }
+
+      SOLR_QUERY_STRING_PARAMS.forEach(function(name) {
+        var value = this.getOption(name);
+
+        if (Utils.normalizeValue(value) !== null) {
+          var isQueryOption = name === "q";
+
+          if (isQueryOption) {
+            value = this.__expandQueryMacros(value);
+          }
+
+          parameters[name] = value;
+        }
+
+      }, this);
+
+      return parameters;
+    },
     // endregion
 
     // region Public Methods
-
     /** @Override */
     init: function(options) {
       if (options.endpoint == null || options.collection == null) {
-        throw 'InvalidQuery';
+        throw "InvalidQuery";
       }
 
-      Object.keys(options || {})
-        .filter(function(name) {
-          return Utils.normalizeValue(options[name]) !== null;
-        })
-        .forEach(function(name) {
+      for(var name in options) {
+        if(options.hasOwnProperty(name)) {
           this.setOption(name, options[name]);
-        }, this);
+        }
+      }
 
       this.setOption("url", this.__buildSolrUrl());
     },
 
+    /** @Override */
     exportData: function(exportType, overrides, options) {
       options.exportType = exportType;
 
       if (Utils.normalizeValue(exportType) !== null) {
-        this.setOption("responseType", exportType);
+        this.setOption("wt", exportType);
       }
 
       var settings = this.getAjaxOptions();
-      settings.url = this.getOption('url');
+
+      settings.url = this.getOption("url");
       settings.data = this.buildQueryDefinition(overrides);
-      settings.success = this.__exportSuccess.bind(this, options);
-      settings.error = this.getErrorHandler(this.getOption('errorCallback').bind(this));
+      settings.success = this.__exportDataSuccess.bind(this, options);
+      settings.error = this.getErrorHandler(this.getOption("errorCallback").bind(this));
 
       $.ajax(settings);
     },
 
-    __exportSuccess: function(options, data) {
-      var isBlobAvailable = Blob != null;
-
-      if (options.exportType === "json") {
-        data = JSON.stringify(data, null, 2);
-      }
-
-      var url;
-      if (isBlobAvailable) {
-        var blob = new Blob([data], {type: "octet/stream"});
-        url = window.URL.createObjectURL(blob);
-      } else {
-        url = this.getOption('url');
-      }
-
-      this.__downloadData(url, options);
-
-      if (isBlobAvailable) {
-        window.URL.revokeObjectURL(url);
-      }
-    },
-
-    __downloadData: function(url, options) {
-      var link = document.createElement("a");
-      var canExportData = link.download != null;
-
-      if (canExportData) {
-
-        // 1. Setup
-        link.setAttribute("href", url);
-        link.setAttribute("download", this.__getExportDataName(options));
-        link.setAttribute("type", this.__getExportMineType(options));
-
-        // 2. Download
-        link.setAttribute("style", "visibility: hidden;");
-        document.body.appendChild(link);
-        link.click();
-
-        // 3. Cleanup
-        document.body.removeChild(link);
-      } else {
-        Logger.warn("Can not export the query data on this browser!");
-      }
-
-    },
-
     /** @Override */
     buildQueryDefinition: function(overrides) {
+      var queryDefinition = $.extend({}, this.getSolrQueryParameters());
+
       overrides = Array.isArray(overrides) ? Utils.propertiesArrayToObject(overrides) : (overrides || {});
+      var parameterMacros = this.getParameterMacros(overrides);
+      for (var macro in parameterMacros) {
+        if (parameterMacros.hasOwnProperty(macro)) {
+          var macroValue = parameterMacros[macro];
 
-      var overrideParameters = Object.keys(overrides);
-      var queryDefinition = {
-        start: this.getOption("rowsStart"),
-        rows:  this.getOption("rowsLimit"),
-        wt:    this.getOption("responseType"),
-        q:     this.getOption("solrQuery")
-      };
+          var isArrayMacro = Array.isArray(macroValue);
 
-      overrideParameters
-        .filter(function(definition) {
-          return Utils.normalizeValue(overrides[definition]) !== null;
-        })
-        .forEach(function(definition) {
-          var solrDefinition = this.__getSolrRestApiParam(definition);
+          if (isArrayMacro) {
+            var L = macroValue.length;
+            var hasMultipleValues = L > 1;
 
-          if (!solrDefinition) {
-            solrDefinition = definition;
+            for (var index = 0; index < L; index++) {
+              var suffix = hasMultipleValues ? "_" + index : "";
+
+              queryDefinition[macro + suffix] = macroValue[index];
+            }
           }
 
-          queryDefinition[solrDefinition] = overrides[definition];
-        }, this);
+          queryDefinition[macro] = isArrayMacro ? macroValue.join(",") : macroValue;
+        }
+      }
 
       return queryDefinition;
     },
@@ -235,7 +266,7 @@ define([
         try {
           jsonObjects = JSON.parse(jsonString);
         } catch (parseException) {
-          Logger.error('Could not parse json result ' + jsonString, parseException);
+          Logger.error("Could not parse json result " + jsonString, parseException);
         }
 
         var metadata = [];
@@ -278,10 +309,104 @@ define([
         });
       };
     },
-
     // endregion
 
     // region Private Methods
+    __exportDataSuccess: function(options, data) {
+      var isBlobAvailable = typeof Blob !== "undefined";
+
+      if (options.exportType === "json") {
+        data = JSON.stringify(data, null, 2);
+      }
+
+      var url;
+      if (isBlobAvailable) {
+        var blob = new Blob([data], {type: "octet/stream"});
+        url = window.URL.createObjectURL(blob);
+      } else {
+        url = this.getOption("url");
+      }
+
+      this.__exportDataDownload(url, options);
+
+      if (isBlobAvailable) {
+        window.URL.revokeObjectURL(url);
+      }
+    },
+
+    __exportDataDownload: function(url, options) {
+      var link = document.createElement("a");
+      var canExportData = link.download != null;
+
+      if (canExportData) {
+
+        // 1. Setup
+        link.setAttribute("href", url);
+        link.setAttribute("download", this.__getExportDataName(options));
+        link.setAttribute("type", this.__getExportMineType(options));
+
+        // 2. Download
+        link.setAttribute("style", "visibility: hidden;");
+        document.body.appendChild(link);
+        link.click();
+
+        // 3. Cleanup
+        document.body.removeChild(link);
+      } else {
+        Logger.warn("Can not export the query data on this browser!");
+      }
+
+    },
+
+    __replaceSchemaMacros: function(name) {
+      var schemaOption = this.getOption(name);
+      if (!Utils.normalizeValue(schemaOption)) {
+        return schemaOption;
+      }
+
+      var parameterMacros = this.getParameterMacros();
+
+      return schemaOption.map(function(value) {
+        // Match with: ${macro}
+        return value.replace(/\${(\w+)}/g, function(match, macro) {
+          return parameterMacros[macro];
+        });
+      });
+    },
+
+    __expandQueryMacros: function(query) {
+      // Matches with -> field:${macro:defaultValue}
+      var queryRegx = new RegExp("(\\w+):\\${(\\w+)(?::[^}]+)?}", "g");
+
+      var parameterMacros = this.getParameterMacros();
+      return query.replace(queryRegx, function(match, field, macro) {
+        var value = parameterMacros[macro];
+
+        if (!Array.isArray(value)) return match;
+
+        var arrLength = value.length;
+        var hasMultipleValues = arrLength > 1;
+
+        // Expand from "field:${macro} AND ..."
+        // to "(field:${macro_0} OR field:${macro_1} OR ...) AND ..."
+        var expandedQuery = "";
+        for (var index = 0; index < arrLength; index++) {
+          if (expandedQuery !== "") {
+            expandedQuery += " OR ";
+          }
+
+          var suffix = hasMultipleValues ? "_" + index : "";
+
+          expandedQuery += field + ":${" + macro + suffix + "}";
+        }
+
+        if (hasMultipleValues) {
+          expandedQuery = "(" + expandedQuery + ")";
+        }
+
+        return expandedQuery;
+      });
+    },
 
     /**
      * Search in a Solr document for the value defined by {@code path}.
@@ -313,9 +438,9 @@ define([
      * @private
      */
     __buildSchema: function() {
-      var columnNames = this.getOption("schemaColumnNames");
-      var columnTypes = this.getOption("schemaColumnTypes");
-      var columnPaths = this.getOption("schemaColumnPaths");
+      var columnNames = this.__replaceSchemaMacros("schemaColumnNames");
+      var columnTypes = this.__replaceSchemaMacros("schemaColumnTypes");
+      var columnPaths = this.__replaceSchemaMacros("schemaColumnPaths");
 
       return {
         columnNames: columnNames,
@@ -333,7 +458,7 @@ define([
      */
     __buildSolrUrl: function() {
       var endpoint = this.getOption("endpoint");
-      if ( endpoint.endsWith('/') ) {
+      if ( endpoint.endsWith("/") ) {
         endpoint = endpoint.slice(0, -1);
       }
 
@@ -341,12 +466,6 @@ define([
       var requestHandler = this.getOption("requestHandler");
 
       return endpoint + "/" + collection + "/" + requestHandler;
-    },
-
-    __getSolrRestApiParam: function(definition) {
-      var param = SOLR_REST_API_PARAMS[definition];
-
-      return param != null ? param : definition;
     },
 
     __getExportMineType: function(options) {
@@ -371,7 +490,6 @@ define([
 
       return exportFilename;
     }
-
     // endregion
   };
 

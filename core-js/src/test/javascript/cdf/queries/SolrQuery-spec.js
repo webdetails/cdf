@@ -101,10 +101,11 @@ define([
           endpoint: "",   // isRequired
           collection: "", // isRequired
 
-          rowsStart: 5,
-          rowsLimit: 50,
-          responseType: "rType",
-          solrQuery: "foo:bar"
+          start: 5,
+          rows: 50,
+          wt: "xml",
+          q: "foo:* AND bar:*",
+          fl: "foo,bar"
         };
 
         solrQuery.init(solrOptions);
@@ -115,18 +116,22 @@ define([
 
         expect(queryDefinition).not.toBeNull();
 
-        expect(queryDefinition.start).toBe(solrOptions.rowsStart);
-        expect(queryDefinition.rows).toBe(solrOptions.rowsLimit);
-        expect(queryDefinition.wt).toBe(solrOptions.responseType);
-        expect(queryDefinition.q).toBe(solrOptions.solrQuery);
+        expect(queryDefinition.start).toBe(solrOptions.start);
+        expect(queryDefinition.rows).toBe(solrOptions.rows);
+        expect(queryDefinition.wt).toBe(solrOptions.wt);
+        expect(queryDefinition.q).toBe(solrOptions.q);
+        expect(queryDefinition.fl).toBe(solrOptions.fl);
+        expect(queryDefinition.fq).toBeUndefined();
+        expect(queryDefinition.df).toBeUndefined();
       });
 
       it("should return a query definition object, which values were overridden by the specified definitions",
         function() {
 
         var overrides = {
-          rowsLimit: 100,
-          solrQuery: "bar:foo",
+          rows: 100,
+          q: "bar:* AND foo:*",
+          df: "bar",
           otherDefinition: "otherValue"
         };
 
@@ -134,11 +139,34 @@ define([
 
         expect(queryDefinition).not.toBeNull();
 
-        expect(queryDefinition.start).toBe(solrOptions.rowsStart);
-        expect(queryDefinition.rows).toBe(overrides.rowsLimit);
-        expect(queryDefinition.wt).toBe(solrOptions.responseType);
-        expect(queryDefinition.q).toBe(overrides.solrQuery);
+        expect(queryDefinition.start).toBe(solrOptions.start);
+        expect(queryDefinition.rows).toBe(overrides.rows);
+        expect(queryDefinition.wt).toBe(solrOptions.wt);
+        expect(queryDefinition.q).toBe(overrides.q);
+        expect(queryDefinition.df).toBe(overrides.df);
         expect(queryDefinition.otherDefinition).toBe(overrides.otherDefinition);
+      });
+
+      it("should return a query definition object, which parameters values sent from a component, " +
+        "were overridden by the specified definitions", function() {
+
+        var parametersFromComponent = {
+          "param1": "value1",
+          "param2": "value2"
+        };
+
+        solrQuery.setParameters(parametersFromComponent);
+
+        var overrides = {
+          "param2": "newValue2"
+        };
+
+        var queryDefinition = solrQuery.buildQueryDefinition(overrides);
+
+        expect(queryDefinition).not.toBeNull();
+
+        expect(queryDefinition.param1).toBe(parametersFromComponent.param1);
+        expect(queryDefinition.param2).toBe(overrides.param2);
       });
     });
 
