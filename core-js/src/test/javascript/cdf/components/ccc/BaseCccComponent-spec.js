@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2017 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,7 +16,7 @@ define([
   'amd!cdf/lib/underscore',
   'cdf/lib/jquery',
   'cdf/lib/CCC/pvc',
-  'cdf/components/ccc/CccBarChartComponent' // using bar chart as example, because the base cant be rendered
+  'cdf/components/ccc/CccBarChartComponent' // using bar chart as example, because the base can't be rendered
 ], function(Dashboard, _, $, pvc, CccBarChartComponent) {
 
   /**
@@ -111,7 +111,7 @@ define([
 
       dashboard.addComponent(cccBarChartComponentQueryless);
 
-      
+
       spyOn(cccBarChartComponentQueryless, 'update').and.callThrough();
       spyOn(cccBarChartComponentQueryless, 'execute').and.callThrough();
       spyOn(cccBarChartComponentQueryless, 'endExec').and.callThrough();
@@ -154,7 +154,7 @@ define([
 
       // listen to cdf:postExecution event
       cccBarChartComponentNoData.once("cdf:postExecution", function() {
-        expect(cccBarChartComponentNoData.update).toHaveBeenCalled();      
+        expect(cccBarChartComponentNoData.update).toHaveBeenCalled();
         expect(cccBarChartComponentNoData.execute).toHaveBeenCalled();
         expect(cccBarChartComponentNoData.render).toHaveBeenCalled();
         expect(cccBarChartComponentNoData.endExec).toHaveBeenCalled();
@@ -188,48 +188,44 @@ define([
       cccBarChartComponent.update();
     });
 
-    it("Gets the correct Ccc Visualization Name", function () {
-      expect(cccBarChartComponent._cccVizName).toBeNull();
-      cccBarChartComponent.getCccVisualizationName();
-      expect(cccBarChartComponent._cccVizName).not.toBeNull();
-    })
-
-    it("Gets the correct default ccc compat version and marks the viz api definitions to be applied", function () {
-      expect(cccBarChartComponent._vizApiStyles).toBeUndefined();
-      cccBarChartComponent._preProcessChartDefinition();
-      expect(cccBarChartComponent._vizApiStyles).toBeTruthy();
-
-      cccBarChartComponent.chartDefinition.compatVersion = 2;
-      cccBarChartComponent._preProcessChartDefinition();
-      expect(cccBarChartComponent._vizApiStyles).toBeTruthy();
+    it("Gets the correct Ccc Visualization View Id", function () {
+      expect(cccBarChartComponent.__cccVizViewId).toBeUndefined();
+      cccBarChartComponent.__getMatchingVizViewId();
+      expect(cccBarChartComponent.__cccVizViewId != null).toBe(true);
     });
 
-    it("Gets the correct ccc compat version and marks the viz api definitions to be applied", function () {
-      expect(cccBarChartComponent._vizApiStyles).toBeUndefined();
+    it("Gets the correct default ccc compat version and marks the viz api styles to be applied", function () {
+      expect(cccBarChartComponent.__applyVizApiStyles).toBeFalsy();
+      cccBarChartComponent._preProcessChartDefinition();
+      expect(cccBarChartComponent.__applyVizApiStyles).toBeTruthy();
+    });
+
+    it("Gets the correct ccc compat version and marks the viz api styles to be applied", function () {
+      expect(cccBarChartComponent.__applyVizApiStyles).toBeFalsy();
       cccBarChartComponent.chartDefinition.compatVersion = 3;
       cccBarChartComponent._preProcessChartDefinition();
-      expect(cccBarChartComponent._vizApiStyles).toBeTruthy();
+      expect(cccBarChartComponent.__applyVizApiStyles).toBeTruthy();
     });
 
-    it("Gets the correct ccc compat version and marks the viz api definitions to be applied", function () {
-      expect(cccBarChartComponent._vizApiStyles).toBeUndefined();
+    it("Gets the correct ccc compat version and marks the viz api styles to be applied", function () {
+      expect(cccBarChartComponent.__applyVizApiStyles).toBeFalsy();
       cccBarChartComponent.chartDefinition.compatVersion = 2;
       cccBarChartComponent._preProcessChartDefinition();
-      expect(cccBarChartComponent._vizApiStyles).toBeUndefined();
+      expect(cccBarChartComponent.__applyVizApiStyles).toBeFalsy();
     });
 
     it("Internal Render Assigns Colors if that is intended", function () {
-      cccBarChartComponent._vizApiStyles = true;
+      cccBarChartComponent.__applyVizApiStyles = true;
       cccBarChartComponent.chartDefinition.colors = ['test'];
       cccBarChartComponent._renderInner({}, {});
       expect(cccBarChartComponent.chartDefinition.colors[0]).toBe('test');
 
-      cccBarChartComponent._vizApiStyles = false;
+      cccBarChartComponent.__applyVizApiStyles = false;
       cccBarChartComponent.chartDefinition.colors = ['test'];
       cccBarChartComponent._renderInner({}, {});
       expect(cccBarChartComponent.chartDefinition.colors[0]).toBe('test');
 
-      cccBarChartComponent._vizApiStyles = false;
+      cccBarChartComponent.__applyVizApiStyles = false;
       cccBarChartComponent.chartDefinition.colors = undefined;
       cccBarChartComponent._renderInner({}, {});
       expect(cccBarChartComponent.chartDefinition.colors).toBeUndefined();

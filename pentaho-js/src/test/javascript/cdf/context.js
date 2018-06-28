@@ -22,7 +22,7 @@ var requireCfg = {
   },
   bundles: {},
   config: {
-    "pentaho/service": {}
+    "pentaho/modules": {}
   },
   packages: []
 };
@@ -32,8 +32,7 @@ var contextObj = {
   "params": {},
   "path": "/test/fake_from_module_configuration.xcdf",
   "queryData": {},
-  "roles": ["Administrator",
-    "Authenticated"],
+  "roles": ["Administrator", "Authenticated"],
   "serverLocalDate": 1412605395782,
   "serverUTCDate": 1412601795782,
   "sessionAttributes": {},

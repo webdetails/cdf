@@ -19,10 +19,16 @@ define([
   '../../lib/modernizr',
   '../../lib/jquery',
   'amd!../../lib/underscore',
-  '../../lib/CCC/protovis-compat!'
-], function(ChartComponent, BaseCccComponentExt, pvc, def, Modernizr, $, _, pv) {
+  '../../lib/CCC/protovis-compat!',
+  'pentaho/shim/es6-promise'
+], function(ChartComponent, BaseCccComponentExt, pvc, def, Modernizr, $, _, pv, Promise) {
+
+  // ATTENTION: A part of this code is synchronized with:
+  // cgg/core/src/main/javascript/pt/webdetails/cgg/resources/cdf/components/ccc/BaseCccComponent.js
 
   pvc.defaultCompatVersion(3);
+
+  var DEFAULT_QUANTITATIVE_PALETTE_ID = "pentaho/visual/color/palettes/quantitativeBlue3";
 
   /**
    * @class cdf.components.ccc.BaseCccComponent
@@ -35,21 +41,39 @@ define([
     chart: null,
 
     /**
-     * The variable to hold the ccc visualization type name
+     * The identifier of the matching visualization view type, if any; `null` if none.
+     *
+     * When uninitialized, the value is `undefined`.
+     *
+     * @type {?string|undefined}
+     * @private
      */
-    _cccVizName: null,
+    __cccVizViewId: undefined,
 
     /**
-     * Gets and assigns the Ccc Visualization name
+     * Gets the identifier of the matching visualization view type, if any.
      *
-     * @returns {String|undefined} The Viz Type name if it is a valid visualization, undefined otherwise
+     * @returns {?string} The visualization type identifier, `null` otherwise.
+     * @private
      */
-    getCccVisualizationName: function () {
-      if (!this._cccVizName && this.cccType) {
-        this._cccVizName = BaseCccComponentExt.getVizDigestedName(def.qualNameOf(this.cccType).name, this.chartDefinition);
+    __getMatchingVizViewId: function () {
+
+      if (this.__cccVizViewId === undefined) {
+
+        var cccClassName = def.qualNameOf(this.cccType).name;
+        this.__cccVizViewId = BaseCccComponentExt.getMatchingVizViewId(cccClassName, this.chartDefinition);
       }
-      return this._cccVizName;
+
+      return this.__cccVizViewId;
     },
+
+    /**
+     * Gets a value that indicates if the Viz. API styles should be applied.
+     *
+     * @type {boolean}
+     * @private
+     */
+    __applyVizApiStyles: false,
 
     /**
      * Handles the chart definition and checks the compat version, and some adjustments to its chart definition
@@ -58,6 +82,9 @@ define([
      * @private
      */
     _preProcessChartDefinition: function () {
+
+      var applyVizApiStyles = false;
+
       var chartDef = this.chartDefinition;
       if (chartDef) {
         // Obtain effective compatVersion
@@ -77,7 +104,7 @@ define([
             delete chartDef.showLegend;
           }
 
-          // Don't presume chartDef props must be own
+          // Don't assume chartDef props must be own.
           for (var p in chartDef) {
             var m = /^barLine(.*)$/.exec(p);
             if (m) {
@@ -86,9 +113,11 @@ define([
             }
           }
         } else if (compatVersion >= 3) {
-          this._vizApiStyles = BaseCccComponentExt.isValidVisualization(this.getCccVisualizationName());
+          applyVizApiStyles = this.__getMatchingVizViewId() !== null;
         }
       }
+
+      this.__applyVizApiStyles = applyVizApiStyles;
     },
 
     /**
@@ -140,9 +169,14 @@ define([
      * @param {Object} data The result set to render
      */
     render: function (data) {
+
       this._preProcessChartDefinition();
 
-      BaseCccComponentExt.getExtensionsPromise(this.getCccVisualizationName(), this._vizApiStyles)
+      var extensionsPromise = this.__applyVizApiStyles
+        ? BaseCccComponentExt.getExtensionsPromise(this.__getMatchingVizViewId())
+        : Promise.resolve(null);
+
+      extensionsPromise
         .then(_.bind(this._renderInner, this, data))
         .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
     },
@@ -163,23 +197,24 @@ define([
 
       var renderMode = this._getEffectiveRenderMode();
 
-      var createCanvas = $("#" + this.htmlObject).children().length === 0;
+      var $placeholder = this.placeholder();
+      var createCanvas = $placeholder.children().length === 0;
       if(createCanvas) {
-        $("#" + this.htmlObject).append('<div id="' + this.htmlObject + 'protovis"></div>');
+        $placeholder.append('<div id="' + this.htmlObject + 'protovis"></div>');
       }
 
       // Always clone the original chartDefinition.
       var cd = $.extend({}, this.chartDefinition);
 
       // Handle cleanups
-      if (this._vizApiStyles) {
+      if (this.__applyVizApiStyles) {
         // special case for this array which $.extend does not smash
-        if (cd.baseAxisLabelDesiredAngles && cd.baseAxisLabelDesiredAngles.length == 0) {
+        if (cd.baseAxisLabelDesiredAngles && cd.baseAxisLabelDesiredAngles.length === 0) {
           cd.baseAxisLabelDesiredAngles = undefined;
         }
 
         // special case for this array which $.extend does not smash
-        if (cd.orthoAxisLabelDesiredAngles && cd.orthoAxisLabelDesiredAngles.length == 0) {
+        if (cd.orthoAxisLabelDesiredAngles && cd.orthoAxisLabelDesiredAngles.length === 0) {
           cd.orthoAxisLabelDesiredAngles = undefined;
         }
       }
@@ -189,14 +224,15 @@ define([
       }
 
       // Handle overrides
-      if (this._vizApiStyles) {
-        // apply colors if that is intended
-        if (!cd.colors || (cd.colors && cd.colors.length == 0)) {
-          if (!cd.continuousColorAxisColors
-            || (cd.continuousColorAxisColors && cd.continuousColorAxisColors.length == 0))  {
-            cd.continuousColorAxisColors =
-              BaseCccComponentExt.getColors("pentaho/visual/color/palettes/quantitativeBlue3");
+      if (this.__applyVizApiStyles) {
+
+        // Apply color scales' defaults.
+        if (isArrayEmpty(cd.colors)) {
+
+          if (isArrayEmpty(cd.continuousColorAxisColors))  {
+            cd.continuousColorAxisColors = BaseCccComponentExt.getColors(DEFAULT_QUANTITATIVE_PALETTE_ID);
           }
+
           cd.discreteColorAxisColors = BaseCccComponentExt.getColors();
         }
       }
@@ -206,7 +242,7 @@ define([
       // Process extension points
       if (cd.extensionPoints) {
         var ep = {};
-        cd.extensionPoints.forEach(function(a){
+        cd.extensionPoints.forEach(function(a) {
           ep[a[0]] = a[1];
         });
         cd.extensionPoints = ep;
@@ -279,4 +315,7 @@ define([
     }
   });
 
+  function isArrayEmpty(values) {
+    return values == null || values.length === 0;
+  }
 });

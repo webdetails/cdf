@@ -22,7 +22,7 @@ var requireCfg = {
   },
   bundles: {},
   config: {
-    "pentaho/service": {}
+    "pentaho/modules": {}
   },
   packages: []
 };

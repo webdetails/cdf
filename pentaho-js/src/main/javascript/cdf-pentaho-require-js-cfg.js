@@ -46,7 +46,7 @@
     }
   }
 
-  var requireInstInfo = requireCfg.config["pentaho/instanceInfo"] || (requireCfg.config["pentaho/instanceInfo"] = {});
-  requireInstInfo["cdf/components/ccc/config/cdf.vizApi.conf"] = {type: "pentaho.config.spec.IRuleSet"};
+  var requireModules = requireCfg.config["pentaho/modules"];
+  requireModules["cdf/components/ccc/config/cdf.vizApi.conf"] = {type: "pentaho/config/spec/IRuleSet"};
 
 })();
