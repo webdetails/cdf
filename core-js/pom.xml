@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.14-149</version>
   </parent>
   <artifactId>cdf-core-js</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.14-149</version>
   <packaging>pom</packaging>
   <properties>
     <js.project.list>ccc</js.project.list>
@@ -23,7 +23,6 @@
       <type>zip</type>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -32,10 +31,10 @@
         <executions>
           <execution>
             <id>javascript-legacy-tests</id>
+            <phase>${javascript-test_karma-phase}</phase>
             <goals>
               <goal>karma</goal>
             </goals>
-            <phase>${javascript-test_karma-phase}</phase>
             <configuration>
               <karmaConfPath>${build.javascriptTestConfigDirectory}/${karma.legacy.file.config}</karmaConfPath>
             </configuration>
@@ -44,4 +43,4 @@
       </plugin>
     </plugins>
   </build>
-  </project>
+</project>
