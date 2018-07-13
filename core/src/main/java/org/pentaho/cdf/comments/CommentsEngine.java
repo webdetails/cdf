@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.owasp.encoder.Encode;
 import org.pentaho.cdf.InvalidCdfOperationException;
 import org.pentaho.cdf.PluginHibernateException;
 import org.pentaho.cdf.environment.CdfEngine;
@@ -187,14 +188,14 @@ public class CommentsEngine {
     return JsonUtil.makeJsonSuccessResponse( commentToJson( comment, user ) );
   }
 
-  private JSONObject commentToJson( CommentEntry comment, String user ) throws JSONException {
+  protected JSONObject commentToJson( CommentEntry comment, String user ) throws JSONException {
     JSONObject commentJson = new JSONObject();
     commentJson.put( "id", comment.getCommentId() );
     commentJson.put( "user", comment.getUser() );
-    commentJson.put( "page", comment.getPage() );
+    commentJson.put( "page", Encode.forJavaScriptSource( Encode.forHtmlUnquotedAttribute( comment.getPage() ) ) );
     commentJson.put( "createdOn", format.format( comment.getCreatedDate() ) );
     commentJson.put( "elapsedMinutes", comment.getMinutesSinceCreation() );
-    commentJson.put( "comment", comment.getComment() );
+    commentJson.put( "comment", Encode.forJavaScriptSource( Encode.forHtmlContent(  comment.getComment() ) ) );
     commentJson.put( "isMe", comment.getUser().equals( user ) );
     commentJson.put( "isDeleted", comment.isDeleted() );
     commentJson.put( "isArchived", comment.isArchived() );
