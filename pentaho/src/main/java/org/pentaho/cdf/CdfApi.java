@@ -405,7 +405,7 @@ public class CdfApi {
     String port =
       ( !secure && serverPort == DEFAULT_HTTP_PORT ) || ( secure && serverPort == DEFAULT_HTTPS_PORT ) ? "" : ":" + serverPort;
 
-    return scheme + "://" + Encode.forJavaScriptBlock( Encode.forHtmlAttribute( serverName ) )
+    return scheme + "://" + Encode.forJavaScriptBlock( Encode.forHtmlUnquotedAttribute( serverName ) )
       + port + PentahoRequestContextHolder.getRequestContext().getContextPath();
   }
 
