@@ -46,6 +46,7 @@
     <dependency.hibernate.revision>3.2.6.ga</dependency.hibernate.revision>
     <dependency.ccc.revision>${project.version}</dependency.ccc.revision>
     <dependency.jxl.revision>2.6.12</dependency.jxl.revision>
+    <owasp-encoder.version>1.2</owasp-encoder.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -53,12 +54,6 @@
         <groupId>pentaho</groupId>
         <artifactId>cpf-core</artifactId>
         <version>${dependency.cpf.revision}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>*</groupId>
-            <artifactId>*</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>pentaho</groupId>
@@ -166,6 +161,11 @@
             <artifactId>*</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.owasp.encoder</groupId>
+        <artifactId>encoder</artifactId>
+        <version>${owasp-encoder.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
