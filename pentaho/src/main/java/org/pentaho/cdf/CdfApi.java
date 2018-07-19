@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.owasp.encoder.Encode;
 import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.embed.EmbeddedHeadersGenerator;
 import org.pentaho.cdf.environment.CdfEngine;
@@ -69,6 +70,8 @@ public class CdfApi {
   private static final Log logger = LogFactory.getLog( CdfApi.class );
   private static final String HTTP = "http";
   private static final String HTTPS = "https";
+  private static final int DEFAULT_HTTP_PORT = 80;
+  private static final int DEFAULT_HTTPS_PORT = 443;
 
   @GET
   @Path( "/ping" )
@@ -386,15 +389,24 @@ public class CdfApi {
     return ContextEngine.getInstance().getConfig( path, parameterMap, inactiveInterval );
   }
 
+  /**
+   * Builds a full URL based in the given parameters
+   * @param protocol The protocol version, which can be HTTP/0.9, HTTP/1.0, HTTP/1.1 or HTTP/2.0
+   * @param serverName The hostname specified by the Host http header
+   * @param serverPort The server port to which the connection was established
+   * @param secure Indicates if the HTTPS scheme was used
+   * @return
+   */
   protected String buildFullServerUrl( String protocol, String serverName, int serverPort, boolean secure ) {
-    String p = HTTP;
-    if ( !StringUtils.isEmpty( protocol ) ) {
-      p = protocol.split( "/" )[ 0 ].toLowerCase();
-    }
-    if ( HTTP.equalsIgnoreCase( p ) && secure ) {
-      p = HTTPS;
-    }
-    return p + "://" + serverName + ":" + serverPort + PentahoRequestContextHolder.getRequestContext().getContextPath();
+    // the http protocol is completely unnecessary here since it has no relation to the scheme used and not used in the construction of the url
+    // the http protocol specifies the protocol version while the scheme specifies if http, https, ftp or another scheme was used
+    // it is up to the http client (web browser or other) to tell the server which version of the protocol is going to be used
+    String scheme = secure ? HTTPS : HTTP;
+    String port =
+      ( !secure && serverPort == DEFAULT_HTTP_PORT ) || ( secure && serverPort == DEFAULT_HTTPS_PORT ) ? "" : ":" + serverPort;
+
+    return scheme + "://" + Encode.forJavaScriptBlock( Encode.forHtmlUnquotedAttribute( serverName ) )
+      + port + PentahoRequestContextHolder.getRequestContext().getContextPath();
   }
 
   protected void writeJSONSolution(
