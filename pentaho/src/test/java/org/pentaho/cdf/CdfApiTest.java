@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Pentaho company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,11 +13,9 @@
 
 package org.pentaho.cdf;
 
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.pentaho.platform.api.engine.IPentahoRequestContext;
 import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;
 import pt.webdetails.cpf.messaging.MockHttpServletRequest;
@@ -30,8 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.mockito.Mockito.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CdfApiTest {
   private static final String SOLUTION = "";
@@ -62,22 +65,36 @@ public class CdfApiTest {
 
   @Test
   public void getJSONSolution() throws Exception {
-    Assert.assertEquals( servletResponse.getContentType(), null );
-    Assert.assertEquals( servletResponse.getCharacterEncoding(), null );
+    assertEquals( servletResponse.getContentType(), null );
+    assertEquals( servletResponse.getCharacterEncoding(), null );
 
     cdfApi.getJSONSolution( SOLUTION, PATH, ACTION, DEPTH, SHOW_HIDDEN_FILES, MODE, servletResponse );
 
-    Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
-    Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
+    assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
+    assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
     verify( cdfApi, times( 1 ) ).writeJSONSolution( PATH, DEPTH, SHOW_HIDDEN_FILES, MODE, servletResponse );
   }
   @Test
   public void testBuildFullServerUrl() throws Exception {
-    CdfApi cdfApi = new CdfApi();
-    IPentahoRequestContext requestContext = Mockito.mock( IPentahoRequestContext.class );
-    Mockito.when( requestContext.getContextPath( ) ).thenReturn( "/rootContext" );
+    IPentahoRequestContext requestContext = mock( IPentahoRequestContext.class );
+    when( requestContext.getContextPath( ) ).thenReturn( "/foobar" );
+
     PentahoRequestContextHolder.setRequestContext( requestContext );
-    Assert.assertTrue( cdfApi.buildFullServerUrl( "HTTP/1.1", "localhost", 8080, true ).startsWith( "https://" ) );
-    Assert.assertTrue( cdfApi.buildFullServerUrl( "HTTP/1.1", "localhost", 8080, false ).startsWith( "http://" ) );
+
+    CdfApi cdf = new CdfApi();
+
+    assertEquals( "http://my.domain.com/foobar",
+      cdf.buildFullServerUrl( "HTTP/1.1", "my.domain.com", 80, false ) );
+    assertEquals( "http://my.domain.com:8080/foobar",
+      cdf.buildFullServerUrl( "HTTP/1.1", "my.domain.com", 8080, false ) );
+    assertEquals( "http://my.domain.com:8088/foobar",
+      cdf.buildFullServerUrl( "HTTP/1.1", "my.domain.com", 8088, false ) );
+
+    assertEquals( "https://my.domain.com/foobar",
+      cdf.buildFullServerUrl( "HTTP/1.1", "my.domain.com", 443, true ) );
+    assertEquals( "https://my.domain.com:8443/foobar",
+      cdf.buildFullServerUrl( "HTTP/1.1", "my.domain.com", 8443, true ) );
+    assertEquals( "https://my.domain.com:8443/foobar",
+      cdf.buildFullServerUrl( "HTTP/1.1", "my.domain.com", 8443, true ) );
   }
 }
