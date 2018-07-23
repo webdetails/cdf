@@ -14,14 +14,19 @@
     {{^isDisabled}}
       {{#showSelectedItems}}
         <span class="filter-root-info-selected-items">
-          {{^noItemsSelected}}
-            <span class="filter-root-info-selected-item"
+          {{#allItemsSelected}}
+            <span class="filter-root-info-selected-item">{{strings.allItems}}</span>
+          {{/allItemsSelected}}
+          {{^allItemsSelected}}
+            {{^noItemsSelected}}
+              <span class="filter-root-info-selected-item"
                   title="{{#selectedItems}}{{{.}}} {{/selectedItems}}">
-              {{#selectedItems}}
-                {{{.}}}
-              {{/selectedItems}}
-            </span>
-          {{/noItemsSelected}}
+                {{#selectedItems}}
+                  {{{.}}}
+                {{/selectedItems}}
+              </span>
+            {{/noItemsSelected}}
+          {{/allItemsSelected}}
           {{#noItemsSelected}}
             <span class="filter-root-info-selected-item">{{strings.noItems}}</span>
           {{/noItemsSelected}}
