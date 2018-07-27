@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -113,6 +113,9 @@ public class EmbeddedHeadersGeneratorTest extends TestCase {
     expected.append( getGlobalEnvVariable( "RESERVED_CHARS", reservedChars ) );
     expected.append( getGlobalEnvVariable( "RESERVED_CHARS_DISPLAY", "a, b" ) );
     expected.append( getGlobalEnvVariable( "RESERVED_CHARS_REGEX_PATTERN", "/.*[ab]+.*/" ) );
+
+    // Including OSGI's require-init
+    expected.append( getDocumentWriteScriptTag( EmbeddedHeadersGenerator.REQUIRE_INIT_PATH ) );
 
     return expected.toString();
   }
