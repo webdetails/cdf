@@ -124,7 +124,7 @@ public class EmbeddedHeadersGenerator {
     return sb.toString();
   }
 
-  private String printEnvironmentConfig() {
+  protected String printEnvironmentConfig() {
     String userID = getSessionName();
     String userHomeFolder = getUserHomeFolderPath();
 
@@ -148,7 +148,7 @@ public class EmbeddedHeadersGenerator {
         "\n};\n";
   }
 
-  private String printUrlContext() {
+  protected String printUrlContext() {
     String contextPath = DEPRECATED_COMMENT + MessageFormat.format( CONTEXT_PATH_BUILDER, this.fullQualifiedURL );
     String fullQualifiedUrl = DEPRECATED_COMMENT +
         MessageFormat.format( FULL_QUALIFIED_URL_BUILDER, this.fullQualifiedURL );
@@ -157,19 +157,19 @@ public class EmbeddedHeadersGenerator {
     return contextPath + fullQualifiedUrl + serverProtocol;
   }
 
-  private String printSessionName() throws IOException {
+  protected String printSessionName() throws IOException {
     return DEPRECATED_COMMENT + MessageFormat.format( SESSION_NAME_BUILDER, getSessionName() );
   }
 
-  private String printLocale() throws IOException {
+  protected String printLocale() throws IOException {
     return DEPRECATED_COMMENT + MessageFormat.format( LOCALE_BUILDER, locale.toString() );
   }
 
-  private String printHomeFolder() throws IOException {
+  protected String printHomeFolder() throws IOException {
     return DEPRECATED_COMMENT + MessageFormat.format( HOME_FOLDER_BUILDER, getUserHomeFolderPath() );
   }
 
-  private String printReservedChars() throws IOException {
+  protected String printReservedChars() throws IOException {
     StringBuilder sb = new StringBuilder();
     for ( char c : getReservedChars() ) {
       sb.append( c );
@@ -179,7 +179,7 @@ public class EmbeddedHeadersGenerator {
     return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_BUILDER, reservedChars );
   }
 
-  private String printReservedCharsDisplay() throws IOException {
+  protected String printReservedCharsDisplay() throws IOException {
     List<Character> reservedCharacters = getReservedChars();
     StringBuffer sb = new StringBuffer();
     for ( int i = 0; i < reservedCharacters.size(); i++ ) {
@@ -197,11 +197,11 @@ public class EmbeddedHeadersGenerator {
     return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_DISPLAY_BUILDER, reservedCharsDisplay );
   }
 
-  private String printReservedRegexPattern() throws IOException {
+  protected String printReservedRegexPattern() throws IOException {
     return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_REGEX_PATTERN_BUILDER, makeReservedCharPattern() );
   }
 
-  private String printRequireJsInit() {
+  protected String printRequireJsInit() {
     return MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + REQUIRE_INIT_PATH );
   }
   // endregion

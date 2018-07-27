@@ -32,12 +32,18 @@ define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
       // original_i18n is synchronous
       $.ajaxSetup({
         type: 'GET',
+        xhrFields: {
+          withCredentials: true
+        },
       });
 
       original_i18n(settings);
 
       $.ajaxSetup({
         type: 'POST',
+        xhrFields: {
+          withCredentials: true
+        },
       });
     }
   };
@@ -51,6 +57,9 @@ define(["../lib/jquery", "amd!./jquery.i18n"], function($) {
       type:       'GET',
       url:        (settings.path != undefined ? settings.path : "") + settings.name + "_supported_languages.properties",
       async:      false,
+      xhrFields: {
+        withCredentials: true
+      },
       cache:      settings.cache,
       contentType:'text/plain;charset='+ settings.encoding,
       dataType:   'text',
