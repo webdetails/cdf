@@ -13,39 +13,13 @@
 
 package org.pentaho.cdf;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static pt.webdetails.cpf.utils.MimeTypes.CSV;
-import static pt.webdetails.cpf.utils.MimeTypes.JAVASCRIPT;
-import static pt.webdetails.cpf.utils.MimeTypes.XLS;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.owasp.encoder.Encode;
 import org.pentaho.cdf.context.ContextEngine;
+import org.pentaho.cdf.embed.EmbeddedHeadersCallbackGenerator;
 import org.pentaho.cdf.embed.EmbeddedHeadersGenerator;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.export.Export;
@@ -63,6 +37,33 @@ import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.utils.CharsetHelper;
 import pt.webdetails.cpf.utils.PluginIOUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static pt.webdetails.cpf.utils.MimeTypes.CSV;
+import static pt.webdetails.cpf.utils.MimeTypes.JAVASCRIPT;
+import static pt.webdetails.cpf.utils.MimeTypes.XLS;
 
 @Path( "/pentaho-cdf/api" )
 public class CdfApi {
@@ -383,6 +384,50 @@ public class CdfApi {
     }
   }
 
+  @GET
+  @Path( "/cdf-embed-callback.js" )
+  @Produces( JAVASCRIPT )
+  public void getCdfEmbeddedCallbackContext( @Context HttpServletRequest servletRequest,
+                                             @Context HttpServletResponse servletResponse ) throws Exception {
+    buildCdfEmbedCallbackContextSecure(
+      servletRequest.getProtocol(),
+      servletRequest.getServerName(),
+      servletRequest.getServerPort(),
+      servletRequest.getSession().getMaxInactiveInterval(),
+      servletRequest.getParameter( "locale" ),
+      servletRequest.isSecure(),
+      servletRequest.getParameter( "callbackFunctionName" ),
+      servletRequest,
+      servletResponse );
+  }
+
+  // CDE will call buildCdfEmbedContext via InterPluginCall
+  public void buildCdfEmbedCallbackContextSecure( @QueryParam( "protocol" ) String protocol,
+                                                  @QueryParam( "name" ) String name,
+                                                  @QueryParam( "port" ) int port,
+                                                  @QueryParam( "inactiveInterval" ) int inactiveInterval,
+                                                  @QueryParam( "locale" ) String locale,
+                                                  @QueryParam( "secure" ) boolean secure,
+                                                  @QueryParam( "callbackFunctionName" ) String callbackFunctionName,
+                                                  @Context HttpServletRequest servletRequest,
+                                                  @Context HttpServletResponse servletResponse ) throws Exception {
+    try {
+      EmbeddedHeadersCallbackGenerator embeddedHeadersCallbackGenerator = new EmbeddedHeadersCallbackGenerator(
+        buildFullServerUrl( protocol, name, port, secure ),
+        getConfiguration( "",  Parameter.asHashMap( servletRequest ), inactiveInterval ) );
+      if ( !StringUtils.isEmpty( locale ) ) {
+        embeddedHeadersCallbackGenerator.setLocale( new Locale( locale ) );
+      }
+      if ( !StringUtils.isEmpty( callbackFunctionName ) ) {
+        embeddedHeadersCallbackGenerator.setCallbackFunctionName( callbackFunctionName );
+      }
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), embeddedHeadersCallbackGenerator.generate() );
+    } catch ( IOException ex ) {
+      logger.error( "buildCdfEmbedCallbackContextSecure: " + ex.getMessage(), ex );
+      throw ex;
+    }
+  }
+
   protected String getConfiguration( String path,
                                      HashMap<String, String> parameterMap,
                                      int inactiveInterval ) throws JSONException {
@@ -398,15 +443,14 @@ public class CdfApi {
    * @return
    */
   protected String buildFullServerUrl( String protocol, String serverName, int serverPort, boolean secure ) {
-    // the http protocol is completely unnecessary here since it has no relation to the scheme used and not used in the construction of the url
-    // the http protocol specifies the protocol version while the scheme specifies if http, https, ftp or another scheme was used
-    // it is up to the http client (web browser or other) to tell the server which version of the protocol is going to be used
-    String scheme = secure ? HTTPS : HTTP;
-    String port =
-      ( !secure && serverPort == DEFAULT_HTTP_PORT ) || ( secure && serverPort == DEFAULT_HTTPS_PORT ) ? "" : ":" + serverPort;
-
-    return scheme + "://" + Encode.forJavaScriptBlock( Encode.forHtmlUnquotedAttribute( serverName ) )
-      + port + PentahoRequestContextHolder.getRequestContext().getContextPath();
+    String p = HTTP;
+    if ( !StringUtils.isEmpty( protocol ) ) {
+      p = protocol.split( "/" )[ 0 ].toLowerCase();
+    }
+    if ( HTTP.equalsIgnoreCase( p ) && secure ) {
+      p = HTTPS;
+    }
+    return p + "://" + serverName + ":" + serverPort + PentahoRequestContextHolder.getRequestContext().getContextPath();
   }
 
   protected void writeJSONSolution(
