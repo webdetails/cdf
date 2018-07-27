@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.owasp.encoder.Encode;
 import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.embed.EmbeddedHeadersCallbackGenerator;
 import org.pentaho.cdf.embed.EmbeddedHeadersGenerator;
@@ -443,14 +444,15 @@ public class CdfApi {
    * @return
    */
   protected String buildFullServerUrl( String protocol, String serverName, int serverPort, boolean secure ) {
-    String p = HTTP;
-    if ( !StringUtils.isEmpty( protocol ) ) {
-      p = protocol.split( "/" )[ 0 ].toLowerCase();
-    }
-    if ( HTTP.equalsIgnoreCase( p ) && secure ) {
-      p = HTTPS;
-    }
-    return p + "://" + serverName + ":" + serverPort + PentahoRequestContextHolder.getRequestContext().getContextPath();
+    // the http protocol is completely unnecessary here since it has no relation to the scheme used and not used in the construction of the url
+    // the http protocol specifies the protocol version while the scheme specifies if http, https, ftp or another scheme was used
+    // it is up to the http client (web browser or other) to tell the server which version of the protocol is going to be used
+    String scheme = secure ? HTTPS : HTTP;
+    String port =
+      ( !secure && serverPort == DEFAULT_HTTP_PORT ) || ( secure && serverPort == DEFAULT_HTTPS_PORT ) ? "" : ":" + serverPort;
+
+    return scheme + "://" + Encode.forJavaScriptBlock( Encode.forHtmlUnquotedAttribute( serverName ) )
+      + port + PentahoRequestContextHolder.getRequestContext().getContextPath();
   }
 
   protected void writeJSONSolution(
