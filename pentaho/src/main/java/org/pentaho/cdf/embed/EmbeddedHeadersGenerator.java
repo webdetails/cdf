@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -35,13 +35,15 @@ public class EmbeddedHeadersGenerator {
   static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n"
       + "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
   static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, "
-      + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {service: {}}, packages: []};\n\n";
+      + "paths: {}, shim: {}, map: {\"*\": {}}, bundles: {}, config: {\"pentaho/modules\": {}}, packages: []};\n\n";
 
   static final String REQUIRE_DASHBOARD_CONTEXT_CONFIGURATION =
       "requireCfg.config[''cdf/dashboard/Dashboard''] = {0};\n";
 
   static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
   static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
+  static final String REQUIRE_INIT_PATH =
+          "osgi/requirejs-manager/js/require-init.js?requirejs=false&useFullyQualifiedUrl=true";
 
   private static final String CONTEXT_PATH_BUILDER = "\nvar CONTEXT_PATH = ''{0}'';\n";
   private static final String FULL_QUALIFIED_URL_BUILDER = "\nvar FULL_QUALIFIED_URL = ''{0}'';\n";
@@ -86,7 +88,8 @@ public class EmbeddedHeadersGenerator {
       .append( printHomeFolder() )
       .append( printReservedChars() )
       .append( printReservedCharsDisplay() )
-      .append( printReservedRegexPattern() );
+      .append( printReservedRegexPattern() )
+      .append( printRequireJsInit() );
 
     return sb.toString();
   }
@@ -196,6 +199,10 @@ public class EmbeddedHeadersGenerator {
 
   private String printReservedRegexPattern() throws IOException {
     return DEPRECATED_COMMENT + MessageFormat.format( RESERVED_CHARS_REGEX_PATTERN_BUILDER, makeReservedCharPattern() );
+  }
+
+  private String printRequireJsInit() {
+    return MessageFormat.format( DOCUMENT_SCRIPT, fullQualifiedURL + REQUIRE_INIT_PATH );
   }
   // endregion
 
