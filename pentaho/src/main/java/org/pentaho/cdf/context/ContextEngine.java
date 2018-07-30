@@ -13,6 +13,7 @@
 
 package org.pentaho.cdf.context;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -242,7 +243,7 @@ public class ContextEngine {
         path = path.replace( FilenameUtils.getName( path ), StringUtils.EMPTY ); // remove and continue on
       }
 
-      path = FilenameUtils.normalizeNoEndSeparator( path );
+      path = FilenameUtils.normalizeNoEndSeparator( path ).replace( File.separatorChar, RepositoryHelper.SEPARATOR );
 
       String[] parsedPath = path.split( String.valueOf( RepositoryHelper.SEPARATOR ) );
 
