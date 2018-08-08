@@ -20,6 +20,7 @@
     <module>pentaho</module>
     <module>pentaho-js</module>
     <module>assemblies</module>
+    <module>pentaho-rca</module>
   </modules>
 
   <scm>
