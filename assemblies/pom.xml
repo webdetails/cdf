@@ -23,6 +23,7 @@
     <module>cdf</module>
     <module>cdf-samples</module>
     <module>cdf-webpackage</module>
+    <module>cdf-rca</module>
   </modules>
 
   <dependencyManagement>
