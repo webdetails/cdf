@@ -110,15 +110,6 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
     // normalize invalid refresh
     if (!(component.refreshPeriod > 0)) {
       component.refreshPeriod = NO_REFRESH;
-
-      //tries to fetch the component refresh rate from the data source definition
-      if(component.datasourceProperties && component.datasourceProperties.componentRefreshPeriod) {
-        if(!isNaN(+component.datasourceProperties.componentRefreshPeriod) &&
-          (+component.datasourceProperties.componentRefreshPeriod) > 0) {
-          component.refreshPeriod = +component.datasourceProperties.componentRefreshPeriod;
-        }
-      }
-
     }
     if (component.refreshPeriod != NO_REFRESH) {
       //get next refresh time for component

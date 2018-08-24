@@ -207,6 +207,15 @@ define([
     isRunning: false,
 
     /**
+     * @summary Indicates if the component lifecycle is being run because of a data push event.
+     * @description Indicates if the component lifecycle is being run because of a data push event..
+     *
+     * @type {boolean}
+     * @default false
+     */
+    isDataPush: false,
+
+    /**
      * @summary Priority of a component in the cdf execution cycle.
      * @description Priority of a component in the cdf execution cycle.
      *
@@ -363,13 +372,18 @@ define([
      *              <p>A component that actually begins execution, by returning `true` from this method, should later complete the
      *              lifecycle by calling either {@link cdf.components.UnmanagedComponent#endExec|endExec} or
      *              {@link cdf.components.UnmanagedComponent#failExec|failExec}.</p>
-     *
+     * @param {boolean} isDataPush If the lifecycle event is being triggered by a push data event.
      * @return {boolean} `false` if component execution should be canceled, `true` otherwise.
      */
-    beginExec: function() {
+    beginExec: function(isDataPush) {
+      if(isDataPush){
+        this.isDataPush = true;
+      }
       var exec = this.preExec();
       if(exec) {
         this._maybeBlock();
+      } else {
+        this.isDataPush = false;
       }
       return exec;
     },
@@ -393,6 +407,7 @@ define([
         // As a catch(ex) error handler.
         this.error(null, /*cause:*/arg);
       }
+      this.isDataPush = false;
     },
 
     /**
@@ -410,6 +425,8 @@ define([
         this.showTooltip();
 
         this._maybeUnblock();
+
+        this.isDataPush = false;
       } catch(ex) {
         // already unblocks
         this.failExec(ex);
@@ -647,6 +664,10 @@ define([
      * @protected
      */
     _setQuery: function(queryDef, queryOptions) {
+      if(this.query) {
+        this.query.dispose();
+      }
+
       var query = this.queryState = this.query = this.dashboard.getQuery(queryDef);
 
       // Ajax Options
@@ -707,7 +728,13 @@ define([
         counter  = this.callCounter();
       }
 
-      function fetchDataSuccessHandler(data) {
+      function fetchDataSuccessHandler(data, isDataPush) {
+        if(isDataPush) {
+          if(!this.beginExec(true)) {
+            return;
+          }
+        }
+
         var dataPost;
         if(counter >= this.runCounter) {
           try {
@@ -737,8 +764,18 @@ define([
      *
      * @return {cdf.components.UnmanagedComponent#failExec} Error handler.
      */
-    getErrorHandler: function() {
-      return _.bind(this.failExec, this);
+    getErrorHandler: function () {
+      function fetchDataErrorHandler(resp, txtStatus, error, isDataPush) {
+        if(isDataPush) {
+          if(!this.beginExec(true)) {
+            return;
+          }
+        }
+
+        this.failExec(resp, txtStatus, error);
+      }
+
+      return _.bind(fetchDataErrorHandler, this);
     },
 
     /**
