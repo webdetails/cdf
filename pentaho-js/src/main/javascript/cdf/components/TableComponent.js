@@ -568,31 +568,28 @@ define([
       var chartDefinition = this.chartDefinition;
       var tablePlaceholder = this.ph;
 
+      if (this.dataTable != null) {
+        this.__removePreviousDataTable();
+      }
 
       tablePlaceholder.trigger('cdfTableComponentProcessResponse');
 
       // Set defaults for headers / types
-      if(typeof chartDefinition.colHeaders === "undefined" || chartDefinition.colHeaders.length === 0) {
-          chartDefinition.colHeaders = json.metadata.map(function(meta) {
+      var hasColumnHeaders = chartDefinition.colHeaders != null && chartDefinition.colHeaders.length > 0;
+      if(!hasColumnHeaders) {
+        chartDefinition.colHeaders = json.metadata.map(function mapColHeaders(meta) {
           return meta.colName;
         });
       }
 
-      if(typeof chartDefinition.colTypes === "undefined" || chartDefinition.colTypes.length === 0) {
-        chartDefinition.colTypes = json.metadata.map(function(meta) {
+      var hasColumnTypes = chartDefinition.colTypes != null && chartDefinition.colTypes.length > 0;
+      if(!hasColumnTypes) {
+        chartDefinition.colTypes = json.metadata.map(function mapColTypes(meta) {
           return meta.colType.toLowerCase();
         });
       }
 
-      var dtData0 = TableComponent.getDataTableOptions(chartDefinition);
-
-      var extraOptions = {};
-      // Build a default config from the standard options
-      $.each(this.extraOptions ? this.extraOptions : {}, function(i, e) {
-        extraOptions[e[0]] = e[1];
-      });
-
-      var dtData = $.extend(chartDefinition.dataTableOptions, dtData0, extraOptions);
+      var dtData = this.__getDataTableData(chartDefinition);
 
       /* Configure the table event handlers */
       dtData.fnDrawCallback = _.bind(this.fnDrawCallback, this);
@@ -638,7 +635,7 @@ define([
       // We'll create an Array to keep track of the open expandable rows.
       this.dataTable.anOpen = [];
 
-      tablePlaceholder.find('table').bind('click', function(event) {
+      tablePlaceholder.find('table').bind('click', function tableClickEvent(event) {
         if(typeof chartDefinition.clickAction === 'function' || myself.expandOnClick) {
           var state = {};
           var target = $(event.target);
@@ -655,9 +652,10 @@ define([
             return;
           }
 
-          var position = myself.dataTable.fnGetPosition(target.get(0));
           state.rawData = myself.rawData;
           state.tableData = myself.dataTable.fnGetData();
+
+          var position = myself.dataTable.fnGetPosition(target.get(0));
           state.colIdx = position[2];
           state.rowIdx = position[0];
           state.series = results.resultset[state.rowIdx][0];
@@ -673,12 +671,39 @@ define([
           }
 
           if(chartDefinition.clickAction) {
-            chartDefinition.clickAction.call(myself,state);
+            chartDefinition.clickAction.call(myself, state);
           }
         }
       });
 
       tablePlaceholder.trigger('cdfTableComponentFinishRendering');
+    },
+
+    __getDataTableData: function(chartDefinition) {
+      var dtData0 = TableComponent.getDataTableOptions(chartDefinition);
+
+      // Build a default config from the standard options
+      var extraOptions = {};
+      $.each(this.extraOptions != null ? this.extraOptions : {}, function(index, option) {
+        extraOptions[option[0]] = option[1];
+      });
+
+      return $.extend(chartDefinition.dataTableOptions, dtData0, extraOptions);
+    },
+
+    __removePreviousDataTable: function() {
+      if (this.dataTable == null) {
+        return;
+      }
+
+      // Unbind table click event, that handles rows expansion.
+      this.ph.find('table').unbind('click');
+
+      // Removes enhancements to DataTables html objects and remove them from the DOM tree.
+      var dataTableApi = this.dataTable.DataTable();
+      dataTableApi.clear().destroy(true);
+
+      this.dataTable = null;
     },
 
     handleExpandOnClick: function(event) {
