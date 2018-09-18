@@ -448,7 +448,7 @@ define([
      */
     fnDrawCallback: function(dataTableSettings) {
       var dataTable = dataTableSettings.oInstance;
-      var cd = this.chartDefinition;
+      var chartDefinition = this.chartDefinition;
           
       var tableRows = this.ph.find("tbody tr");
       for(var k = 0; k < tableRows.length; k++) {
@@ -469,14 +469,15 @@ define([
           if(position && typeof position[0] === "number") {
             var rowIdx = position[0];
             var colIdx = position[2];
+
             var foundAddIn = this.handleAddIns(dataTable, td, $td, rowIdx, colIdx);
 
             /*
              * Process column format for those columns
              * where we didn't find a matching addIn
              */
-            if(!foundAddIn && cd.colFormats) {
-              var format = cd.colFormats[colIdx];
+            if(!foundAddIn && chartDefinition.colFormats) {
+              var format = chartDefinition.colFormats[colIdx];
               var value = this.rawData.resultset[rowIdx][colIdx];
               if(format && value != null) {
                 $td.text(sprintf(format, value));
@@ -487,20 +488,20 @@ define([
       }
 
       /* Old urlTemplate code. This needs to be here for backward compatibility */
-      if(cd.urlTemplate != undefined) {
+      if(chartDefinition.urlTemplate != undefined) {
         var td = $("#" + this.htmlObject + " td:nth-child(1)");
         td.addClass('cdfClickable');
-        td.bind("click", function(e) {
-          var regex = new RegExp("{" + cd.parameterName + "}", "g");
-          var f = cd.urlTemplate.replace(regex, $(this).text());
+        td.bind("click", function(/*event*/) {
+          var regex = new RegExp("{" + chartDefinition.parameterName + "}", "g");
+          var f = chartDefinition.urlTemplate.replace(regex, $(this).text());
 
           eval(f);
         });
       }
 
       /* Handle post-draw callback the user might have provided */
-      if(typeof cd.drawCallback === 'function') {
-        cd.drawCallback.apply(this, arguments);
+      if(typeof chartDefinition.drawCallback === 'function') {
+        chartDefinition.drawCallback.apply(this, arguments);
       }
     },
 
@@ -522,8 +523,8 @@ define([
      * called, or false otherwise.
      */
     handleAddIns: function(dataTable, td, $td, rowIdx, colIdx) {
-      var cd = this.chartDefinition;
-      var colType = cd.colTypes[colIdx];
+      var chartDefinition = this.chartDefinition;
+      var colType = chartDefinition.colTypes[colIdx];
       var state = {};
       var target = $td;
       var results = this.rawData;
@@ -548,8 +549,8 @@ define([
         state.category = results.metadata[state.colIdx].colName;
         state.value = results.resultset[state.rowIdx][state.colIdx];
 
-        if(cd.colFormats) {
-          state.colFormat = cd.colFormats[state.colIdx];
+        if(chartDefinition.colFormats) {
+          state.colFormat = chartDefinition.colFormats[state.colIdx];
         }
 
         state.target = target;
@@ -568,45 +569,45 @@ define([
       var chartDefinition = this.chartDefinition;
       var tablePlaceholder = this.ph;
 
+      tablePlaceholder.trigger('cdfTableComponentProcessResponse');
+
       if (this.dataTable != null) {
         this.__removePreviousDataTable();
       }
 
-      tablePlaceholder.trigger('cdfTableComponentProcessResponse');
-
       // Set defaults for headers / types
-      var hasColumnHeaders = chartDefinition.colHeaders != null && chartDefinition.colHeaders.length > 0;
+      var hasColumnHeaders = chartDefinition.colHeaders !== undefined && chartDefinition.colHeaders.length > 0;
       if(!hasColumnHeaders) {
         chartDefinition.colHeaders = json.metadata.map(function mapColHeaders(meta) {
           return meta.colName;
         });
       }
 
-      var hasColumnTypes = chartDefinition.colTypes != null && chartDefinition.colTypes.length > 0;
+      var hasColumnTypes = chartDefinition.colTypes !== undefined && chartDefinition.colTypes.length > 0;
       if(!hasColumnTypes) {
         chartDefinition.colTypes = json.metadata.map(function mapColTypes(meta) {
           return meta.colType.toLowerCase();
         });
       }
 
-      var dtData = this.__getDataTableData(chartDefinition);
+      var dataTableOptions = this.__getDataTableOptions(chartDefinition);
 
       /* Configure the table event handlers */
-      dtData.fnDrawCallback = _.bind(this.fnDrawCallback, this);
-      dtData.fnInitComplete = _.bind(this.fnInitComplete, this);
+      dataTableOptions.fnDrawCallback = _.bind(this.fnDrawCallback, this);
+      dataTableOptions.fnInitComplete = _.bind(this.fnInitComplete, this);
 
       /* fnServerData is required for server-side pagination */
-      if(dtData.bServerSide) {
+      if(dataTableOptions.bServerSide) {
         var firstRun = true;
-        dtData.fnServerData = function(u, p, c) {
+        dataTableOptions.fnServerData = function(u, p, c) {
           myself.pagingCallback(u, p, c, this, json, firstRun);
           firstRun = false;
         };
 
         // legacy queries do not support server-side pagination
         if(!json.queryInfo) {
-          dtData.iDisplayLength = json.resultset.length;
-          dtData.bLengthChange = false;
+          dataTableOptions.iDisplayLength = json.resultset.length;
+          dataTableOptions.bLengthChange = false;
 
           Logger.warn("Please use CDA queries to enable server-side pagination.");          
         }
@@ -616,11 +617,11 @@ define([
        * depending on whether we're using CDA
        */
       if(json) {
-        dtData.aaData = json.resultset;
+        dataTableOptions.aaData = json.resultset;
       }
 
       var tableId = this.htmlObject + "Table";
-      var tableClassName = dtData.tableStyle === "bootstrap"
+      var tableClassName = dataTableOptions.tableStyle === "bootstrap"
         ? 'table table-striped table-bordered form-inline table-responsive'
         : 'tableComponent compact';
 
@@ -630,7 +631,7 @@ define([
        * We'll first initialize a blank table so that we have a
        * table handle to work with while the table is redrawing
        */
-      this.dataTable = $("#" + tableId).dataTable(dtData);
+      this.dataTable = $("#" + tableId).dataTable(dataTableOptions);
 
       // We'll create an Array to keep track of the open expandable rows.
       this.dataTable.anOpen = [];
@@ -679,8 +680,8 @@ define([
       tablePlaceholder.trigger('cdfTableComponentFinishRendering');
     },
 
-    __getDataTableData: function(chartDefinition) {
-      var dtData0 = TableComponent.getDataTableOptions(chartDefinition);
+    __getDataTableOptions: function(chartDefinition) {
+      var dataTableOptions = TableComponent.getDataTableOptions(chartDefinition);
 
       // Build a default config from the standard options
       var extraOptions = {};
@@ -688,7 +689,7 @@ define([
         extraOptions[option[0]] = option[1];
       });
 
-      return $.extend(chartDefinition.dataTableOptions, dtData0, extraOptions);
+      return $.extend({}, chartDefinition.dataTableOptions, dataTableOptions, extraOptions);
     },
 
     __removePreviousDataTable: function() {
@@ -798,50 +799,50 @@ define([
   },
   {
     getDataTableOptions: function(options) {
-      var dtData = {};
+      var dataTableOptions = {};
 
       if(options.tableStyle === "themeroller") {
-        dtData.bJQueryUI = true;
+        dataTableOptions.bJQueryUI = true;
       }
 
-      dtData.bInfo = options.info;
-      dtData.iDisplayLength = options.displayLength;
-      dtData.bLengthChange = options.lengthChange;
-      dtData.bPaginate = options.paginate;
-      dtData.bSort = options.sort;
-      dtData.bFilter = options.filter;
-      dtData.sPaginationType = options.paginationType;
-      dtData.sDom = options.sDom;
-      dtData.aaSorting = options.sortBy;
-      dtData.tableStyle = options.tableStyle;
+      dataTableOptions.bInfo = options.info;
+      dataTableOptions.iDisplayLength = options.displayLength;
+      dataTableOptions.bLengthChange = options.lengthChange;
+      dataTableOptions.bPaginate = options.paginate;
+      dataTableOptions.bSort = options.sort;
+      dataTableOptions.bFilter = options.filter;
+      dataTableOptions.sPaginationType = options.paginationType;
+      dataTableOptions.sDom = options.sDom;
+      dataTableOptions.aaSorting = options.sortBy;
+      dataTableOptions.tableStyle = options.tableStyle;
 
       if(typeof options.oLanguage === "string") {
-        dtData.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
+        dataTableOptions.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
       } else {
-        dtData.oLanguage = options.oLanguage;
+        dataTableOptions.oLanguage = options.oLanguage;
       }
 
       if(typeof options.language === "string") {
-        dtData.language = eval("(" + options.language + ")");//TODO: er...
+        dataTableOptions.language = eval("(" + options.language + ")");//TODO: er...
       } else {
-        dtData.language = options.language;
+        dataTableOptions.language = options.language;
       }
 
       if(options.colHeaders != undefined) {
-        dtData.aoColumns = new Array(options.colHeaders.length);
+        dataTableOptions.aoColumns = new Array(options.colHeaders.length);
         for(var i = 0; i < options.colHeaders.length; i++) {
-          dtData.aoColumns[i] = {};
-          dtData.aoColumns[i].sClass = "column" + i;
+          dataTableOptions.aoColumns[i] = {};
+          dataTableOptions.aoColumns[i].sClass = "column" + i;
         }
         $.each(options.colHeaders,function(i,val) {
-          dtData.aoColumns[i].sTitle = Utils.escapeHtml(val);
-          if(val === "") { dtData.aoColumns[i].bVisible = false; }
+          dataTableOptions.aoColumns[i].sTitle = Utils.escapeHtml(val);
+          if(val === "") { dataTableOptions.aoColumns[i].bVisible = false; }
         });  // colHeaders
 
-        if((dtData.aoColumns.length !== 0) && (options.colTypes != undefined)) {
+        if((dataTableOptions.aoColumns.length !== 0) && (options.colTypes != undefined)) {
           $.each(options.colTypes,function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
-            var col = dtData.aoColumns[i];
+            if(i >= dataTableOptions.aoColumns.length){return false;}
+            var col = dataTableOptions.aoColumns[i];
             // Specific case: hidden cols
             if(val === "hidden") { col.bVisible = false; }
             col.sClass += " " + val;
@@ -854,37 +855,37 @@ define([
         } // colFormats
 
         var bAutoWidth = true;
-        if((dtData.aoColumns.length !== 0) && (options.colWidths != undefined)) {
+        if((dataTableOptions.aoColumns.length !== 0) && (options.colWidths != undefined)) {
           $.each(options.colWidths,function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
+            if(i >= dataTableOptions.aoColumns.length){return false;}
             if(val != null) {
-              dtData.aoColumns[i].sWidth = val;
+              dataTableOptions.aoColumns[i].sWidth = val;
               bAutoWidth = false;
             }
           })
         } // colWidths
-        dtData.bAutoWidth = bAutoWidth;
+        dataTableOptions.bAutoWidth = bAutoWidth;
 
-        if((dtData.aoColumns.length != 0) && (options.colSortable != undefined)) {
+        if((dataTableOptions.aoColumns.length != 0) && (options.colSortable != undefined)) {
           $.each(options.colSortable, function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
+            if(i >= dataTableOptions.aoColumns.length){return false;}
             if(val != null && (!val || val == "false")) {
-              dtData.aoColumns[i].bSortable = false
+              dataTableOptions.aoColumns[i].bSortable = false
             }
           })
         } // colSortable
 
-        if((dtData.aoColumns.length != 0) && (options.colSearchable != undefined)) {
+        if((dataTableOptions.aoColumns.length != 0) && (options.colSearchable != undefined)) {
           $.each(options.colSearchable, function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
+            if(i >= dataTableOptions.aoColumns.length){return false;}
             if(val != null && (!val || val == "false")) {
-              dtData.aoColumns[i].bSearchable = false
+              dataTableOptions.aoColumns[i].bSearchable = false
             }
           })
         } // colSearchable
       }
 
-      return dtData;
+      return dataTableOptions;
     }
   });
 
