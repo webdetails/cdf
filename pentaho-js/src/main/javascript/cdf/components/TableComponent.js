@@ -12,16 +12,16 @@
  */
 
 define([
+  './UnmanagedComponent',
   '../Logger',
   '../dashboard/Utils',
-  'amd!../lib/underscore',
-  './UnmanagedComponent',
   '../dashboard/Sprintf',
+  'amd!../lib/underscore',
   '../lib/jquery',
   'amd!../lib/datatables',
   '../addIns/colTypes',
   'css!./TableComponent'
-], function(Logger, Utils, _, UnmanagedComponent, sprintf, $) {
+], function(UnmanagedComponent, Logger, Utils, sprintf, _, $) {
 
   // Ensure we load dataTables before this line. If not, just keep going
   if($.fn.dataTableExt != undefined) {
@@ -232,99 +232,120 @@ define([
     ph: undefined,
 
     update: function() {
-      var myself = this;
-      if(!myself.preExec()) {
+      if(!this.preExec()) {
         return;
       }
-      if(!myself.htmlObject) {
-        return myself.error("TableComponent requires an htmlObject");
-      }
-      try {
-        if(!myself.isSilent()) {
-          myself.block();
-        }
-        myself.setup();
-        if(myself.chartDefinition.paginateServerside) {
-          myself.paginatingUpdate();
-        } else {
-          /* The non-paging query handler only needs to concern itself
-           * with handling postFetch and calling the draw function
-           */
-          var success = _.bind(function(data) {
-            myself.rawData = data;
-            myself.processTableComponentResponse(data)
-          }, myself);
-          var handler = myself.getSuccessHandler(success);
 
-          myself.queryState.setAjaxOptions({async: true});
-          // Query doesn't have access to Dashboard object, send parameter values
-          var params;
-          if(myself.parameters != undefined) {
-            // create a copy of the parameters array
-            params = $.extend(true, [], myself.parameters);
-            // replace the dashboard's parameter name with it's value
-            params = _.map(params, function(param) {
-              param[1] = myself.dashboard.getParameterValue(param[1]);
-              return param;
-            });
-          } else {
-            params = [];
-          }
-          myself.queryState.fetchData(params, handler, myself.failureCallback);
+      if(!this.htmlObject) {
+        return this.error("TableComponent requires an htmlObject");
+      }
+
+      try {
+        if(!this.isSilent()) {
+          this.block();
         }
+
+        this.setup();
+
+        if(this.chartDefinition.paginateServerside) {
+          return this.paginatingUpdate();
+        }
+
+        /* The non-paging query handler only needs to concern itself
+         * with handling postFetch and calling the draw function
+         */
+        var success = _.bind(function(data) {
+          this.rawData = data;
+
+          this.processTableComponentResponse(data);
+        }, this);
+
+
+        // Query doesn't have access to Dashboard object, send parameter values
+        var parameters = this.__getParameterValues();
+        var handler = this.getSuccessHandler(success);
+
+        this.queryState.setAjaxOptions({async: true});
+        this.queryState.fetchData(parameters, handler, this.failureCallback);
       } catch(e) {
         /*
          * Something went wrong and we won't have handlers firing in the future
          * that will trigger unblock, meaning we need to trigger unblock manually.
          */
         Logger.exception(e);
-        if(!myself.isSilent()) {
-          myself.unblock();
+        if(!this.isSilent()) {
+          this.unblock();
         }
       }
     },
-    
+
+    __getParameterValues: function() {
+      var parameters = [];
+
+      if(this.parameters != null) {
+        // create a copy of the parameters array
+        parameters = $.extend(true, [], this.parameters);
+
+        // replace the dashboard's parameter name with it's value
+        parameters = _.map(parameters, function(param) {
+          param[1] = this.dashboard.getParameterValue(param[1]);
+
+          return param;
+        }, this);
+      }
+
+      return parameters;
+    },
+
     paginatingUpdate: function() {
-      var cd = this.chartDefinition;
       this.extraOptions = this.extraOptions || [];
+
       this.extraOptions.push(["bServerSide", true]);
       this.extraOptions.push(["bProcessing", true]);
-      this.queryState.setPageSize(parseInt(cd.displayLength || 10));
+
+      var pageSize = parseInt(this.chartDefinition.displayLength || 10);
+      this.queryState.setPageSize(pageSize);
       
       var success = _.bind(function(values) {
-        var changedValues = undefined;
-        if(typeof this.postFetch == 'function') {
+        var changedValues;
+
+        if(typeof this.postFetch === 'function') {
           changedValues = this.postFetch(values);
         }
-        if(changedValues != undefined) {
+
+        if(changedValues != null) {
           values = changedValues;
         }
+
         this.processTableComponentResponse(values);
       }, this);
 
       this.queryState.setCallback(success);
+
       if(this.parameters) {
         this.queryState.setParameters(this.parameters);
       }
+
       this.queryState.setAjaxOptions({async: true});
       this.queryState.fetchData(this.parameters, success, this.failureCallback);
-     },
+    },
 
     /* Initial setup: clearing out the htmlObject and building the query object */
     setup: function() {
-      var cd = this.chartDefinition;
-      if(cd == undefined) {
+      var chartDefinition = this.chartDefinition;
+      if(chartDefinition == null) {
         Logger.log("Fatal - No chart definition passed", "error");
         return;
       }
 
       // Make sure we have a tableStyle in place
-      if(typeof cd.tableStyle === "undefined") {
-        cd.tableStyle = this.dashboard.getWcdfSettings().rendererType === "bootstrap" ?
-        "bootstrap" : "classic";
+      if(typeof chartDefinition.tableStyle === "undefined") {
+        var rendererType = this.dashboard.getWcdfSettings().rendererType;
+
+        chartDefinition.tableStyle = rendererType === "bootstrap" ? "bootstrap" : "classic";
       }
 
-      cd["tableId"] = this.htmlObject + "Table";
+      chartDefinition["tableId"] = this.htmlObject + "Table";
 
       // make sure we have no expand parameters set
       var myself = this;
@@ -333,21 +354,27 @@ define([
       });
 
       // Clear previous table
-      this.ph = this.clearsBeforePreExecution ? $("#" + this.htmlObject).empty() : $("#" + this.htmlObject);
+      var previousTable = $("#" + this.htmlObject);
+      this.ph = this.clearsBeforePreExecution ? previousTable.empty() : previousTable;
+
       // remove drawCallback from the parameters, or
       // it'll be called before we have an actual table...
-      var croppedCd = $.extend({}, cd);
+      var croppedCd = $.extend({}, chartDefinition);
       croppedCd.drawCallback = undefined;
+
       this.queryState = this.dashboard.getQuery(croppedCd);
       this.query = this.queryState; // for analogy with ccc component's name
+
       // make sure to clean sort options
-      var sortBy = this.chartDefinition.sortBy || [],
-        sortOptions = [];
+      var sortBy = chartDefinition.sortBy || [];
+      var sortOptions = [];
       for(var i = 0; i < sortBy.length; i++) {
         var col = sortBy[i][0];
         var dir = sortBy[i][1];
-        sortOptions.push(col + (dir == "asc" ? "A" : "D"));
+
+        sortOptions.push(col + (dir === "asc" ? "A" : "D"));
       }
+
       this.queryState.setSortBy(sortOptions);
     },
 
@@ -358,22 +385,26 @@ define([
             return params[i].value;
           }
         }
+
         return null;
       }
+
       var sortingCols = p("order"), sort = [];
       if(sortingCols && sortingCols.length > 0) {
         for(var i = 0; i < sortingCols.length; i++) {
           var col = sortingCols[i].column;
           var dir = sortingCols[i].dir;
-          sort.push(col + (dir == "asc" ? "A" : "D"));
+          sort.push(col + (dir === "asc" ? "A" : "D"));
         }
       }
-      var query = this.queryState,
-      myself = this;
+
+      var query = this.queryState;
       query.setSortBy(sort.join(","));
       query.setPageSize(parseInt(p("length")));
       query.setPageStartingAt(p("start"));
       query.setSearchPattern(p("search") ? p("search").value : "");
+
+      var myself = this;
       var success = function(d) {
         if(myself.postFetch) {
           var mod = myself.postFetch(d, dataTable);
@@ -381,6 +412,7 @@ define([
             d = mod;
           }
         }
+
         var response;
         if(d.queryInfo) {
           response = {
@@ -393,11 +425,12 @@ define([
             iTotalDisplayRecords: d.resultset.length
           };
         }
+
         response.aaData = d.resultset;
         response.sEcho = p("sEcho");
         myself.rawData = d;
+
         callback(response);
-        
       };
 
       if(firstRun) {
@@ -414,65 +447,63 @@ define([
      * We handle addIns and such things in here.
      */
     fnDrawCallback: function(dataTableSettings) {
-      var dataTable = dataTableSettings.oInstance,
-          cd = this.chartDefinition,
-          myself = this;
+      var dataTable = dataTableSettings.oInstance;
+      var chartDefinition = this.chartDefinition;
           
       var tableRows = this.ph.find("tbody tr");
-          for(var k = 0; k < tableRows.length; k++) {
-        /* 
+      for(var k = 0; k < tableRows.length; k++) {
+        /*
          * Reject rows that are not actually part
          * of the datatable (e.g. nested tables)
          */
         if(dataTable.fnGetPosition(tableRows[k]) == null) {
           return true;
         }
+
         var tableData = $(tableRows[k]).children("td");
         for(var i = 0; i < tableData.length; i++) {
           var td = tableData[i];
           var $td = $(td);
-            var position = dataTable.fnGetPosition(td);
-            if(position && typeof position[0] == "number") {
-              var rowIdx = position[0],
-                  colIdx = position[2];
-              var foundAddIn = myself.handleAddIns(dataTable, td, $td, rowIdx, colIdx);
-              /* 
-               * Process column format for those columns
-               * where we didn't find a matching addIn
-               */
-              if(!foundAddIn && cd.colFormats) {
-                var format = cd.colFormats[colIdx],
-                  value = myself.rawData.resultset[rowIdx][colIdx];
-                if(format && (typeof value != "undefined" && value !== null)) {
-                  $td.text(sprintf(format, value));
-                }
+
+          var position = dataTable.fnGetPosition(td);
+          if(position && typeof position[0] === "number") {
+            var rowIdx = position[0];
+            var colIdx = position[2];
+
+            var foundAddIn = this.handleAddIns(dataTable, td, $td, rowIdx, colIdx);
+
+            /*
+             * Process column format for those columns
+             * where we didn't find a matching addIn
+             */
+            if(!foundAddIn && chartDefinition.colFormats) {
+              var format = chartDefinition.colFormats[colIdx];
+              var value = this.rawData.resultset[rowIdx][colIdx];
+              if(format && value != null) {
+                $td.text(sprintf(format, value));
               }
             }
+          }
         }
       }
 
       /* Old urlTemplate code. This needs to be here for backward compatibility */
-      if(cd.urlTemplate != undefined) {
-        var td = $("#" + myself.htmlObject + " td:nth-child(1)"); 
+      if(chartDefinition.urlTemplate != undefined) {
+        var td = $("#" + this.htmlObject + " td:nth-child(1)");
         td.addClass('cdfClickable');
-        td.bind("click", function(e) {
-          var regex = new RegExp("{" + cd.parameterName + "}", "g");
-          var f = cd.urlTemplate.replace(regex, $(this).text());
+        td.bind("click", function(/*event*/) {
+          var regex = new RegExp("{" + chartDefinition.parameterName + "}", "g");
+          var f = chartDefinition.urlTemplate.replace(regex, $(this).text());
+
           eval(f);
         });
       }
+
       /* Handle post-draw callback the user might have provided */
-      if(typeof cd.drawCallback == 'function') {
-        cd.drawCallback.apply(myself, arguments);
+      if(typeof chartDefinition.drawCallback === 'function') {
+        chartDefinition.drawCallback.apply(this, arguments);
       }
     },
-
-    /**
-     * @summary Callback for failed queries.
-     * @description <p> Callback used when a query fails </p>
-     * @default undefined
-     */
-     //failureCallback : undefined
 
     /* 
      * Handler for when the table finishes initialising. This only happens once,
@@ -492,21 +523,24 @@ define([
      * called, or false otherwise.
      */
     handleAddIns: function(dataTable, td, $td, rowIdx, colIdx) {
-      var cd = this.chartDefinition,
-          colType = cd.colTypes[colIdx],     
-          state = {},
-          target = $td,
-          results = this.rawData,
-          addIn = this.getAddIn("colType", colType);
+      var chartDefinition = this.chartDefinition;
+      var colType = chartDefinition.colTypes[colIdx];
+      var state = {};
+      var target = $td;
+      var results = this.rawData;
+
+      var addIn = this.getAddIn("colType", colType);
       if(!addIn) {
         return false;
       }
+
       try {
         if(!(target.parents('tbody').length)) {
           return;
-        } else if(target.get(0).tagName != 'TD') {
+        } else if(target.get(0).tagName !== 'TD') {
           target = target.closest('td');
         }
+
         state.rawData = results;
         state.tableData = dataTable.fnGetData();
         state.colIdx = colIdx;
@@ -514,57 +548,67 @@ define([
         state.series = results.resultset[state.rowIdx][0];
         state.category = results.metadata[state.colIdx].colName;
         state.value = results.resultset[state.rowIdx][state.colIdx];
-        if(cd.colFormats) {
-          state.colFormat = cd.colFormats[state.colIdx];
+
+        if(chartDefinition.colFormats) {
+          state.colFormat = chartDefinition.colFormats[state.colIdx];
         }
+
         state.target = target;
         addIn.call(td, state, this.getAddInOptions("colType", addIn.getName()));
+
         return true;
-      } catch(e) {
-        Logger.exception(e);
+      } catch(ex) {
+        Logger.exception(ex);
+
         return false;
       }
     },
 
     processTableComponentResponse: function(json) {
-      var myself = this,
-          cd = myself.chartDefinition,
-          extraOptions = {};
+      var myself = this;
+      var chartDefinition = this.chartDefinition;
+      var tablePlaceholder = this.ph;
 
-      myself.ph.trigger('cdfTableComponentProcessResponse');
+      tablePlaceholder.trigger('cdfTableComponentProcessResponse');
+
+      if (this.dataTable != null) {
+        this.__removePreviousDataTable();
+      }
 
       // Set defaults for headers / types
-      if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0) {
-        cd.colHeaders = json.metadata.map(function(i) { return i.colName; });
+      var hasColumnHeaders = chartDefinition.colHeaders !== undefined && chartDefinition.colHeaders.length > 0;
+      if(!hasColumnHeaders) {
+        chartDefinition.colHeaders = json.metadata.map(function mapColHeaders(meta) {
+          return meta.colName;
+        });
       }
 
-      if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0) {
-        cd.colTypes = json.metadata.map(function(i) { return i.colType.toLowerCase(); });
+      var hasColumnTypes = chartDefinition.colTypes !== undefined && chartDefinition.colTypes.length > 0;
+      if(!hasColumnTypes) {
+        chartDefinition.colTypes = json.metadata.map(function mapColTypes(meta) {
+          return meta.colType.toLowerCase();
+        });
       }
 
-      var dtData0 = TableComponent.getDataTableOptions(cd);
-
-      // Build a default config from the standard options
-      $.each(myself.extraOptions ? myself.extraOptions : {}, function(i, e) {
-        extraOptions[e[0]] = e[1];
-      });
-      var dtData = $.extend(cd.dataTableOptions, dtData0, extraOptions);
-
+      var dataTableOptions = this.__getDataTableOptions(chartDefinition);
 
       /* Configure the table event handlers */
-      dtData.fnDrawCallback = _.bind(myself.fnDrawCallback, myself);
-      dtData.fnInitComplete = _.bind(myself.fnInitComplete, myself);
+      dataTableOptions.fnDrawCallback = _.bind(this.fnDrawCallback, this);
+      dataTableOptions.fnInitComplete = _.bind(this.fnInitComplete, this);
+
       /* fnServerData is required for server-side pagination */
-      if(dtData.bServerSide) {
+      if(dataTableOptions.bServerSide) {
         var firstRun = true;
-        dtData.fnServerData = function(u, p, c) {
+        dataTableOptions.fnServerData = function(u, p, c) {
           myself.pagingCallback(u, p, c, this, json, firstRun);
           firstRun = false;
         };
+
         // legacy queries do not support server-side pagination
         if(!json.queryInfo) {
-          dtData.iDisplayLength = json.resultset.length;
-          dtData.bLengthChange = false;
+          dataTableOptions.iDisplayLength = json.resultset.length;
+          dataTableOptions.bLengthChange = false;
+
           Logger.warn("Please use CDA queries to enable server-side pagination.");          
         }
       }
@@ -572,101 +616,135 @@ define([
       /* We need to make sure we're getting data from the right place,
        * depending on whether we're using CDA
        */
-      if(json) { dtData.aaData = json.resultset; }
+      if(json) {
+        dataTableOptions.aaData = json.resultset;
+      }
 
-      var tableClassName = dtData.tableStyle == "bootstrap"
+      var tableId = this.htmlObject + "Table";
+      var tableClassName = dataTableOptions.tableStyle === "bootstrap"
         ? 'table table-striped table-bordered form-inline table-responsive'
         : 'tableComponent compact';
-    
-      myself.ph.html("<table id='" + myself.htmlObject + "Table' class='" + tableClassName + "' width='100%'></table>");
+
+      tablePlaceholder.html("<table id='" + tableId + "' class='" + tableClassName + "' width='100%'></table>");
 
       /* 
        * We'll first initialize a blank table so that we have a
        * table handle to work with while the table is redrawing
        */
-      myself.dataTable = $("#" + myself.htmlObject + 'Table').dataTable(dtData);
+      this.dataTable = $("#" + tableId).dataTable(dataTableOptions);
 
       // We'll create an Array to keep track of the open expandable rows.
-      myself.dataTable.anOpen = [];
+      this.dataTable.anOpen = [];
 
-      myself.ph.find ('table').bind('click', function(e) {
-        if(typeof cd.clickAction === 'function' || myself.expandOnClick) { 
-          var state = {},
-            target = $(e.target),
-            results = myself.rawData; 
+      tablePlaceholder.find('table').bind('click', function tableClickEvent(event) {
+        if(typeof chartDefinition.clickAction === 'function' || myself.expandOnClick) {
+          var state = {};
+          var target = $(event.target);
+          var results = myself.rawData;
+
           if(!(target.parents('tbody').length)) {
             return;
-          } else if(target.get(0).tagName != 'TD') {
+          } else if(target.get(0).tagName !== 'TD') {
             target = target.closest('td');
           }
+
           if(!myself.dataTable.api(true).cell(target.get(0)).index()) {
             Logger.warn("Click on invalid data detected.");
             return;
           }
-          var position = myself.dataTable.fnGetPosition(target.get(0));
+
           state.rawData = myself.rawData;
           state.tableData = myself.dataTable.fnGetData();
+
+          var position = myself.dataTable.fnGetPosition(target.get(0));
           state.colIdx = position[2];
           state.rowIdx = position[0];
           state.series = results.resultset[state.rowIdx][0];
           
           state.category = results.metadata[state.colIdx].colName;
           state.value =  results.resultset[state.rowIdx][state.colIdx];
-          state.colFormat = cd.colFormats[state.colIdx];           
+          state.colFormat = chartDefinition.colFormats[state.colIdx];
 
           state.target = target;
 
           if(myself.expandOnClick) {
             myself.handleExpandOnClick(state);
           }
-          if(cd.clickAction) {
-            cd.clickAction.call(myself,state);
+
+          if(chartDefinition.clickAction) {
+            chartDefinition.clickAction.call(myself, state);
           }
         }
       });
-      myself.ph.trigger('cdfTableComponentFinishRendering');
+
+      tablePlaceholder.trigger('cdfTableComponentFinishRendering');
+    },
+
+    __getDataTableOptions: function(chartDefinition) {
+      var dataTableOptions = TableComponent.getDataTableOptions(chartDefinition);
+
+      // Build a default config from the standard options
+      var extraOptions = {};
+      $.each(this.extraOptions != null ? this.extraOptions : {}, function(index, option) {
+        extraOptions[option[0]] = option[1];
+      });
+
+      return $.extend(chartDefinition.dataTableOptions, dataTableOptions, extraOptions);
+    },
+
+    __removePreviousDataTable: function() {
+      if (this.dataTable == null) {
+        return;
+      }
+
+      // Unbind table click event, that handles rows expansion.
+      this.ph.find('table').unbind('click');
+
+      // Removes enhancements to DataTables html objects and remove them from the DOM tree.
+      var dataTableApi = this.dataTable.DataTable();
+      dataTableApi.clear().destroy(true);
+
+      this.dataTable = null;
     },
 
     handleExpandOnClick: function(event) {
-      var myself = this,
-        detailContainerObj = myself.expandContainerObject,
-        activeclass = "expandingClass";
+      var activeClass = "expandingClass";
 
-      if(typeof activeclass === 'undefined') {
-        activeclass = "activeRow";
+      if(typeof activeClass === 'undefined') {
+        activeClass = "activeRow";
       }
 
-      var obj = event.target.closest("tr"),
-        a = event.target.closest("a");
+      var obj = event.target.closest("tr");
+      var a = event.target.closest("a");
 
       if(a.hasClass('info')) {
         return;
       } else {
-        var row = obj.get(0),
-          anOpen = myself.dataTable.anOpen,
-          i = $.inArray(row, anOpen);
+        var myself = this;
+        var row = obj.get(0);
+        var anOpen = this.dataTable.anOpen;
+        var i = $.inArray(row, anOpen);
         
-        if(obj.hasClass(activeclass)) {
-          myself.detachFromRow(row, i, activeclass);
+        if(obj.hasClass(activeClass)) {
+          this.detachFromRow(row, i, activeClass);
 
-          $(myself.expandParameters).each(function(i, elt) {
+          $(this.expandParameters).each(function(i, elt) {
             myself.dashboard.setParameter(elt[1], "");
           });
-
         } else {
           // Closes all open expandable rows .
           for(var j = 0; j < anOpen.length; j++) {
-            myself.detachFromRow(anOpen[j], j, activeclass);
+            this.detachFromRow(anOpen[j], j, activeClass);
           }
-          obj.addClass(activeclass);
+          obj.addClass(activeClass);
 
-          myself.attachToRow(row, activeclass);
+          this.attachToRow(row, activeClass);
 
           //Read parameters and fire changes
-          var results = myself.queryState.lastResults();
+          var results = this.queryState.lastResults();
           var firstChange = null;
 
-          $(myself.expandParameters).each(function(i, elt) {
+          $(this.expandParameters).each(function(i, elt) {
             //skips the first expandParameter that was updated and calls myself.dashboard.setParameter for the all others
             if(!firstChange && myself.dashboard.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0], 10)]) {
               firstChange = elt;
@@ -674,18 +752,17 @@ define([
               myself.dashboard.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0], 10)]);
             }
           });
+
           if(firstChange !== null) {
-            myself.dashboard.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0], 10)]);
+            this.dashboard.fireChange(firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0], 10)]);
           }
         }
       }
-      $("td.expandingClass").click(
-        function(event) {
-          //Does nothing but it prevents problems on expandingClass clicks!
-          event.stopPropagation();
-          return;
-        }
-      );
+
+      $("td.expandingClass").click(function(event) {
+        //Does nothing but it prevents problems on expandingClass clicks!
+        event.stopPropagation();
+      });
     },
 
     attachToRow: function(row, activeClass) {
@@ -708,7 +785,6 @@ define([
     },
 
     detachFromRow: function(row, index, activeClass) {
-
       //remove html from expanded table row
       $(row).next().find("td." + activeClass + " > *").remove();
       
@@ -723,93 +799,93 @@ define([
   },
   {
     getDataTableOptions: function(options) {
-      var dtData = {};
+      var dataTableOptions = {};
 
-      if(options.tableStyle == "themeroller") {
-        dtData.bJQueryUI = true;
-      }
-      dtData.bInfo = options.info;
-      dtData.iDisplayLength = options.displayLength;
-      dtData.bLengthChange = options.lengthChange;
-      dtData.bPaginate = options.paginate;
-      dtData.bSort = options.sort;
-      dtData.bFilter = options.filter;
-      dtData.sPaginationType = options.paginationType;
-      dtData.sDom = options.sDom;
-      dtData.aaSorting = options.sortBy;
-      dtData.tableStyle = options.tableStyle;
-
-      if(typeof options.oLanguage == "string") {
-        dtData.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
-      } else {
-        dtData.oLanguage = options.oLanguage;
+      if(options.tableStyle === "themeroller") {
+        dataTableOptions.bJQueryUI = true;
       }
 
-      if(typeof options.language == "string") {
-        dtData.language = eval("(" + options.language + ")");//TODO: er...
+      dataTableOptions.bInfo = options.info;
+      dataTableOptions.iDisplayLength = options.displayLength;
+      dataTableOptions.bLengthChange = options.lengthChange;
+      dataTableOptions.bPaginate = options.paginate;
+      dataTableOptions.bSort = options.sort;
+      dataTableOptions.bFilter = options.filter;
+      dataTableOptions.sPaginationType = options.paginationType;
+      dataTableOptions.sDom = options.sDom;
+      dataTableOptions.aaSorting = options.sortBy;
+      dataTableOptions.tableStyle = options.tableStyle;
+
+      if(typeof options.oLanguage === "string") {
+        dataTableOptions.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
       } else {
-        dtData.language = options.language;
+        dataTableOptions.oLanguage = options.oLanguage;
+      }
+
+      if(typeof options.language === "string") {
+        dataTableOptions.language = eval("(" + options.language + ")");//TODO: er...
+      } else {
+        dataTableOptions.language = options.language;
       }
 
       if(options.colHeaders != undefined) {
-        dtData.aoColumns = new Array(options.colHeaders.length);
+        dataTableOptions.aoColumns = new Array(options.colHeaders.length);
         for(var i = 0; i < options.colHeaders.length; i++) {
-          dtData.aoColumns[i] = {}
-          dtData.aoColumns[i].sClass = "column" + i;
-        };
+          dataTableOptions.aoColumns[i] = {};
+          dataTableOptions.aoColumns[i].sClass = "column" + i;
+        }
         $.each(options.colHeaders,function(i,val) {
-          dtData.aoColumns[i].sTitle = Utils.escapeHtml(val);
-          if(val == "") { dtData.aoColumns[i].bVisible = false; }
+          dataTableOptions.aoColumns[i].sTitle = Utils.escapeHtml(val);
+          if(val === "") { dataTableOptions.aoColumns[i].bVisible = false; }
         });  // colHeaders
 
-        if((dtData.aoColumns.length != 0) && (options.colTypes != undefined)) {
+        if((dataTableOptions.aoColumns.length !== 0) && (options.colTypes != undefined)) {
           $.each(options.colTypes,function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
-            var col = dtData.aoColumns[i];
+            if(i >= dataTableOptions.aoColumns.length){return false;}
+            var col = dataTableOptions.aoColumns[i];
             // Specific case: hidden cols
-            if(val == "hidden") { col.bVisible = false; }
+            if(val === "hidden") { col.bVisible = false; }
             col.sClass += " " + val;
             col.sType = val;
           });
-        };  // colTypes
+        }  // colTypes
 
         if(options.colFormats != undefined) {
           // Changes are made directly to the json
-        }; // colFormats
+        } // colFormats
 
         var bAutoWidth = true;
-        if((dtData.aoColumns.length != 0) && (options.colWidths != undefined)) {
+        if((dataTableOptions.aoColumns.length !== 0) && (options.colWidths != undefined)) {
           $.each(options.colWidths,function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
+            if(i >= dataTableOptions.aoColumns.length){return false;}
             if(val != null) {
-              dtData.aoColumns[i].sWidth = val;
+              dataTableOptions.aoColumns[i].sWidth = val;
               bAutoWidth = false;
             }
           })
-        }; // colWidths
-        dtData.bAutoWidth = bAutoWidth;
+        } // colWidths
+        dataTableOptions.bAutoWidth = bAutoWidth;
 
-        if((dtData.aoColumns.length != 0) && (options.colSortable != undefined)) {
+        if((dataTableOptions.aoColumns.length != 0) && (options.colSortable != undefined)) {
           $.each(options.colSortable, function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
+            if(i >= dataTableOptions.aoColumns.length){return false;}
             if(val != null && (!val || val == "false")) {
-              dtData.aoColumns[i].bSortable = false
+              dataTableOptions.aoColumns[i].bSortable = false
             }
           })
-        }; // colSortable
+        } // colSortable
 
-        if((dtData.aoColumns.length != 0) && (options.colSearchable != undefined)) {
+        if((dataTableOptions.aoColumns.length != 0) && (options.colSearchable != undefined)) {
           $.each(options.colSearchable, function(i, val) {
-            if(i >= dtData.aoColumns.length){return false;}
+            if(i >= dataTableOptions.aoColumns.length){return false;}
             if(val != null && (!val || val == "false")) {
-              dtData.aoColumns[i].bSearchable = false
+              dataTableOptions.aoColumns[i].bSearchable = false
             }
           })
-        }; // colSearchable
-
+        } // colSearchable
       }
 
-      return dtData;
+      return dataTableOptions;
     }
   });
 
