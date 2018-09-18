@@ -689,7 +689,7 @@ define([
         extraOptions[option[0]] = option[1];
       });
 
-      return $.extend({}, chartDefinition.dataTableOptions, dataTableOptions, extraOptions);
+      return $.extend(chartDefinition.dataTableOptions, dataTableOptions, extraOptions);
     },
 
     __removePreviousDataTable: function() {
