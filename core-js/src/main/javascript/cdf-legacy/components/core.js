@@ -858,6 +858,7 @@ var ManagedFreeformComponent = BaseComponent.extend({
 var UnmanagedComponent = BaseComponent.extend({
   isManaged: false,
   isRunning: false,
+  isDataPush: false,
 
   /*
    * Handle calling preExecution when it exists. All components extending
@@ -867,7 +868,11 @@ var UnmanagedComponent = BaseComponent.extend({
    * value, component execution should be cancelled as close to immediately as
    * possible.
    */
-  preExec: function() {
+  preExec: function(isDataPush) {
+    if(isDataPush){
+      this.isDataPush = true;
+    }
+
     /*
      * runCounter gets incremented every time we run a query, allowing us to
      * determine whether the query has been called again after us.
@@ -889,6 +894,11 @@ var UnmanagedComponent = BaseComponent.extend({
       ret = true;
     }
     this.trigger('cdf cdf:preExecution', this, ret);
+
+    if(!ret) {
+      this.isDataPush = false;
+    }
+
     return ret;
   },
 
@@ -903,6 +913,7 @@ var UnmanagedComponent = BaseComponent.extend({
       this.postExecution();
     }
     this.trigger('cdf cdf:postExecution', this);
+    this.isDataPush = false;
   },
 
   drawTooltip: function() {
@@ -1122,6 +1133,7 @@ var UnmanagedComponent = BaseComponent.extend({
       msg: msg
     });
     this.trigger("cdf cdf:error", this, msg , cause || null);
+    this.isDataPush = false;
   },
   /*
    * Build a generic response handler that runs the success callback when being
@@ -1149,35 +1161,48 @@ var UnmanagedComponent = BaseComponent.extend({
       success = counter;
       counter = this.callCounter();
     }
-    return _.bind(function(data) {
-        var newData;
-        if(counter >= this.runCounter) {
-          try {
-            if(typeof this.postFetch == "function") {
-              newData = this.postFetch(data);
-              this.trigger('cdf cdf:postFetch',this,data);
-              data = typeof newData == "undefined" ? data : newData;
-            }
-            success(data);
-          } catch(e) {
-            this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
-            this.dashboard.log(e,"error");
+    return _.bind(function(data, isDataPush) {
+      if(isDataPush) {
+        if(!this.preExec(true)) {
+          return;
+        }
+      }
+
+      var newData;
+      if(counter >= this.runCounter) {
+        try {
+          if(typeof this.postFetch == "function") {
+            newData = this.postFetch(data);
+            this.trigger('cdf cdf:postFetch',this,data);
+            data = typeof newData == "undefined" ? data : newData;
           }
+          success(data);
+        } catch(e) {
+          this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
+          this.dashboard.log(e,"error");
         }
-        if(typeof always == "function") {
-          always();
-        }
-        return data;
+      }
+      if(typeof always == "function") {
+        always();
+      }
+      return data;
     },
     this);
   },
 
   getErrorHandler: function() {
-    return  _.bind(function() {
-      var err = Dashboards.parseServerError.apply(this, arguments );
+    function fetchDataErrorHandler(resp, txtStatus, error, isDataPush) {
+      if(isDataPush) {
+        if(!this.preExec(true)) {
+          return;
+        }
+      }
+
+      var err = Dashboards.parseServerError.call(this, resp, txtStatus, error);
       this.error( err.msg, err.error );
-    },
-    this);
+    }
+
+    return _.bind(fetchDataErrorHandler, this);
   },
   errorNotification: function (err, ph) {
     ph = ph || (this.htmlObject ? this.placeholder() : undefined);

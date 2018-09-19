@@ -53,6 +53,7 @@
       page: 0,
       pageSize: 0,
       params: {},
+      pushEnabled: false,
       ajaxOptions: {
         async: false,
         type:'POST'
@@ -114,25 +115,55 @@
       if(typeof this.getOption('successCallback') != 'function') {
         throw 'QueryNotInitialized';
       }
-      var url = this.getOption('url'),
-          callback = (successCallback ? successCallback : this.getOption('successCallback')),
-          errorCallback = (errorCallback ? errorCallback : this.getOption('errorCallback')),
-          queryDefinition = this.buildQueryDefinition();
 
-      var settings = _.extend({}, this.getOption('ajaxOptions'), {
+      var successHandler = successCallback ? successCallback : this.getOption('successCallback');
+      var errorHandler = errorCallback ? errorCallback : _.bind(this.getOption('errorCallback'), this);
+      var queryDefinition = this.buildQueryDefinition();
+
+      var isFirstTime = true;
+
+      if(this.getOption('pushEnabled')) {
+        var myself = this;
+
+        this.websocket = new WebSocket(this.getOption('websocketUrl'), 'JSON-CDA-query');
+
+        this.websocket.onopen = function (event) {
+          myself.websocket.send(JSON.stringify(queryDefinition));
+        };
+
+        this.websocket.onmessage = function (event) {
+          var isDataPush = !isFirstTime;
+          isFirstTime = false;
+
+          myself.getSuccessHandler(function (data) {
+            return successHandler(data, isDataPush);
+          })(JSON.parse(event.data));
+        };
+
+        this.websocket.onerror = function (event) {
+          var isDataPush = !isFirstTime;
+          isFirstTime = false;
+
+          myself.getErrorHandler(function (resp, txtStatus, error) {
+            errorHandler(resp, txtStatus, error, isDataPush);
+          })(event.data);
+        };
+      } else {
+        var settings = _.extend({}, this.getOption('ajaxOptions'), {
           data: queryDefinition,
-          url: url,
-          success: this.getSuccessHandler(callback),
-          error: this.getErrorHandler(errorCallback)
-      });
+          url: this.getOption('url'),
+          success: this.getSuccessHandler(successHandler),
+          error: this.getErrorHandler(errorHandler)
+        });
 
-      var async = settings.async == null ?  $.ajaxSettings.async : settings.async;
-      if(!async && settings.xhrFields && settings.xhrFields.withCredentials) {
-        Dashboards.log("Cross-domain requests are deprecated for synchronous operations.");
-        delete settings.xhrFields.withCredentials;
+        var async = settings.async == null ? $.ajaxSettings.async : settings.async;
+        if (!async && settings.xhrFields && settings.xhrFields.withCredentials) {
+          Dashboards.log("Cross-domain requests are deprecated for synchronous operations.");
+          delete settings.xhrFields.withCredentials;
+        }
+
+        $.ajax(settings);
       }
-
-      $.ajax(settings);
     },
 
     exportData: function() {
@@ -346,6 +377,15 @@
       } else {
         throw "InvalidPageSize";
       }
+    },
+
+    //Dispose the query object
+    dispose: function() {
+      if(this.websocket) {
+        //1000 - normal close by the spec
+        this.websocket.close(1000);
+        this.websocket = null;
+      }
     }
   });
   // Sets the query class that can extended to create new ones.
@@ -467,10 +507,12 @@
     label: 'CDA Query',
     defaults: {
       url: wd.cdf.endpoints.getDoQuery(),
+      websocketUrl: wd.cdf.endpoints.getWebsocketQuery(),
       file: '',
       id: '',
       outputIdx: '1',
       sortBy: '',
+      pushEnabled: false,
       ajaxOptions: {
         async: true,
         xhrFields: {withCredentials: true}
@@ -491,6 +533,9 @@
         }
         if(opts.outputIndexId != null) {
           this.setOption('outputIdx', opts.outputIndexId);
+        }
+        if(opts.pushEnabled != null) {
+          this.setOption('pushEnabled', opts.pushEnabled);
         }
       } else {
         throw 'InvalidQuery';
@@ -671,7 +716,14 @@
       } else if(this.getOption('successCallback') !== null) {
         return this.doQuery(outsideCallback);
       }
-    }
+    },
+
+    /**
+     * @summary Dispose the query object.
+     * @description Dispose the query object.
+     */
+    dispose: function() {
+    },
   };
   // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.

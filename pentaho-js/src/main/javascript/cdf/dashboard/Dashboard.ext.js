@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -27,6 +27,16 @@ define([
      */
     getPluginBase: function(plugin) {
       return environment.server.root + "plugin/" + plugin + "/api";
+    },
+
+    /**
+     * Gets the base websocket path of the provided plugin.
+     *
+     * @param {string} plugin the plugin
+     * @return {string} the base websocket path of the plugin
+     */
+    getPluginWebsocketBase: function(plugin) {
+      return this.httpUrlToWebSocketUrl(""+environment.server.root) + plugin + "/websocket";
     },
 
     /**
@@ -200,6 +210,15 @@ define([
      */
     getRenderHTML: function() {
       return this.getCdfBase() + "/RenderHtml";
+    },
+
+    /**
+     * Converts a http:// or https:// url into a ws:// or wss:// url.
+     * @param (string) the URL to convert
+     * @returns {string} the converted URL
+     */
+    httpUrlToWebSocketUrl: function( url ) {
+      return url.replace(/(http)(s)?\:\/\//i, "ws$2://");
     }
   };
 

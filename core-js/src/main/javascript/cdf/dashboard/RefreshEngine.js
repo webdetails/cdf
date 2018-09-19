@@ -285,19 +285,6 @@ define([
       // normalize invalid refresh
       if(!(component.refreshPeriod > 0)) {
         component.refreshPeriod = NO_REFRESH;
-
-        //tries to fetch the component refresh rate from the data source definition
-        var dataSourceId = component.chartDefinition && component.chartDefinition.dataSource ? dataSourceId = component.chartDefinition.dataSource :
-            (component.queryDefinition && component.queryDefinition.dataSource ? component.queryDefinition.dataSource : null);
-        if(dataSourceId !== null) {
-          if(dashboard.dataSources && dashboard.dataSources[dataSourceId]) {
-            if(!isNaN(+dashboard.dataSources[dataSourceId].componentRefreshPeriod) &&
-              (+dashboard.dataSources[dataSourceId].componentRefreshPeriod) > 0) {
-              component.refreshPeriod = +dashboard.dataSources[dataSourceId].componentRefreshPeriod;
-            }
-          }
-        }
-
       }
       if(component.refreshPeriod != NO_REFRESH) {
         //get next refresh time for component
@@ -450,7 +437,11 @@ define([
        */
       getQueue: function() {
         return refreshQueue;
-      }
+      },
+
+      stopTimer: stopTimer,
+
+      clearQueue: clearQueue
     };
   };
 });

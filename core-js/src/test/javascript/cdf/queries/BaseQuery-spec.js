@@ -221,5 +221,15 @@ define([
         expect(baseQuery._optionsManager._options.errorCallback.value).toEqual(errorCallback);
       });
     });
+
+    /**
+     * ## Base query # dispose
+     */
+    describe("dispose", function () {
+      it("base query has a dispose method", function() {
+        expect(baseQuery.dispose).toBeDefined();
+      });
+    });
+
   });
 });

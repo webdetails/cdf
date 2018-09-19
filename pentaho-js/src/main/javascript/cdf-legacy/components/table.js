@@ -225,6 +225,8 @@ var TableComponent = UnmanagedComponent.extend({
   
 
   update: function() {
+    var myself = this;
+
     if(!this.preExec()){
       return;
     }
@@ -249,7 +251,13 @@ var TableComponent = UnmanagedComponent.extend({
         var handler = this.getSuccessHandler(success);
 
         this.queryState.setAjaxOptions({async:true});
-        this.queryState.fetchData(this.parameters == undefined ? [] : this.parameters, handler, this.failureCallback);
+        var params = this.parameters == undefined ? [] : this.parameters;
+        this.queryState.fetchData(params, handler, function() {
+          if(myself.failureCallback) {
+            myself.failureCallback();
+          }
+          myself.isDataPush = false;
+        } );
       }
     } catch (e) {
       /*
@@ -286,7 +294,13 @@ var TableComponent = UnmanagedComponent.extend({
       this.queryState.setParameters(this.parameters);
     }
     this.queryState.setAjaxOptions({async:true});
-    this.queryState.fetchData(this.parameters, success, this.failureCallback);
+    var myself = this;
+    this.queryState.fetchData(this.parameters, success, function() {
+      if(myself.failureCallback) {
+        myself.failureCallback();
+      }
+      myself.isDataPush = false;
+    } );
    },
 
   /* Initial setup: clearing out the htmlObject and building the query object */
@@ -317,6 +331,9 @@ var TableComponent = UnmanagedComponent.extend({
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
     this.queryState = Dashboards.getQuery(croppedCd);
+    if(this.query) {
+      this.query.dispose();
+    }
     this.query = this.queryState; // for analogy with ccc component's name
     // make sure to clean sort options
     var sortBy = this.chartDefinition.sortBy || [],
@@ -381,7 +398,12 @@ var TableComponent = UnmanagedComponent.extend({
        query.setCallback(success);
        success(json);
     } else {
-       query.fetchData(success, this.failureCallback);
+       query.fetchData(success, function() {
+         if(myself.failureCallback) {
+           myself.failureCallback();
+         }
+         myself.isDataPush = false;
+       } );
     }
 
   },
@@ -462,6 +484,7 @@ var TableComponent = UnmanagedComponent.extend({
     if(!this.isSilent()) {
       this.unblock();
     }
+    this.isDataPush = false;
   },
 
   /* 

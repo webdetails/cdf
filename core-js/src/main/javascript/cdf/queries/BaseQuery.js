@@ -109,6 +109,7 @@ define([
       page: 0,
       pageSize: 0,
       params: {},
+      pushEnabled: false,
       ajaxOptions: {
         async: false,
         type: "POST"
@@ -658,6 +659,13 @@ define([
       } else {
         throw "InvalidPageSize";
       }
+    },
+
+    /**
+     * @summary Dispose the query object.
+     * @description Dispose the query object.
+     */
+    dispose: function() {
     },
     // endregion
 

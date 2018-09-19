@@ -232,6 +232,8 @@ define([
     ph: undefined,
 
     update: function() {
+      this.isDataPush = false;
+
       if(!this.preExec()) {
         return;
       }
@@ -266,7 +268,13 @@ define([
         var handler = this.getSuccessHandler(success);
 
         this.queryState.setAjaxOptions({async: true});
-        this.queryState.fetchData(parameters, handler, this.failureCallback);
+        var myself = this;
+        this.queryState.fetchData(parameters, handler, function() {
+          if(myself.failureCallback) {
+            myself.failureCallback();
+          }
+          myself.isDataPush = false;
+        } );
       } catch(e) {
         /*
          * Something went wrong and we won't have handlers firing in the future
@@ -327,7 +335,13 @@ define([
       }
 
       this.queryState.setAjaxOptions({async: true});
-      this.queryState.fetchData(this.parameters, success, this.failureCallback);
+      var myself = this;
+      this.queryState.fetchData(this.parameters, success, function() {
+        if(myself.failureCallback) {
+          myself.failureCallback();
+        }
+        myself.isDataPush = false;
+      } );
     },
 
     /* Initial setup: clearing out the htmlObject and building the query object */
@@ -363,6 +377,9 @@ define([
       croppedCd.drawCallback = undefined;
 
       this.queryState = this.dashboard.getQuery(croppedCd);
+      if(this.query) {
+        this.query.dispose();
+      }
       this.query = this.queryState; // for analogy with ccc component's name
 
       // make sure to clean sort options
@@ -437,7 +454,12 @@ define([
         query.setCallback(success);
         success(json);
       } else {
-        query.fetchData(success, this.failureCallback);
+        query.fetchData(success, function() {
+          if(myself.failureCallback) {
+            myself.failureCallback();
+          }
+          myself.isDataPush = false;
+        } );
       }
     },
     

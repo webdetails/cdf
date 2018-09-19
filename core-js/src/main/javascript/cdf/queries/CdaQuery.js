@@ -92,10 +92,12 @@ define([
      */
     defaults: {
       url: CdaQueryExt.getDoQuery(),
+      websocketUrl: CdaQueryExt.getWebsocketQuery(),
       file: "",
       id: "",
       outputIdx: "1",
       sortBy: "",
+      pushEnabled: false,
       ajaxOptions: {
         async: true,
         xhrFields: {
@@ -115,6 +117,7 @@ define([
      * @param {string} [opts.sortBy]        The sorting order.
      * @param {number} [opts.pageSize]      The page size.
      * @param {number} [opts.outputIndexId] The output index identifier.
+     * @param {boolean} [opts.pushEnabled]  If the query should run in push mode.
      *
      * @throws {InvalidQuery} If the `opts` parameter does not contain a path
      *                        nor a data access identifier.
@@ -135,6 +138,10 @@ define([
 
         if(opts.outputIndexId != null) {
           this.setOption('outputIdx', opts.outputIndexId);
+        }
+
+        if(opts.pushEnabled != null) {
+          this.setOption('pushEnabled', opts.pushEnabled);
         }
       } else {
         throw 'InvalidQuery';
@@ -347,6 +354,73 @@ define([
         return false;
       } else if(this.getOption('successCallback') !== null) {
         return this.doQuery(outsideCallback);
+      }
+    },
+
+    /**
+     * @summary Executes a server-side query.
+     * @description Executes a server-side query.
+     *
+     * @param {function} [successCallback] Success callback.
+     * @param {function} [errorCallback]   Error callback.
+     */
+    doQuery: function(successCallback, errorCallback) {
+      if(!Utils.isFunction(this.getOption('successCallback'))) {
+        throw 'QueryNotInitialized';
+      }
+
+      var successHandler = successCallback ? successCallback : this.getOption('successCallback');
+      var errorHandler = errorCallback ? errorCallback : _.bind(this.getOption('errorCallback'), this);
+      var queryDefinition = this.buildQueryDefinition();
+
+      var isFirstTime = true;
+
+      if(this.getOption('pushEnabled')) {
+        var myself = this;
+
+        this.websocket = new WebSocket(this.getOption('websocketUrl'), 'JSON-CDA-query');
+
+        this.websocket.onopen = function (event) {
+          myself.websocket.send(JSON.stringify(queryDefinition));
+        };
+
+        this.websocket.onmessage = function (event) {
+          var isDataPush = !isFirstTime;
+          isFirstTime = false;
+
+          myself.getSuccessHandler(function (data) {
+            return successHandler(data, isDataPush);
+          })(JSON.parse(event.data));
+        };
+
+        this.websocket.onerror = function (event) {
+          var isDataPush = !isFirstTime;
+          isFirstTime = false;
+
+          myself.getErrorHandler(function (resp, txtStatus, error) {
+            errorHandler(resp, txtStatus, error, isDataPush);
+          })(event.data);
+        };
+      } else {
+        var settings = _.extend({}, this.getAjaxOptions(), {
+          data: queryDefinition,
+          url: this.getOption('url'),
+          success: this.getSuccessHandler(successHandler),
+          error: this.getErrorHandler(errorHandler)
+        });
+        $.ajax(settings);
+      }
+    },
+
+    /**
+     * @summary Dispose the query object.
+     * @description Dispose the query object.
+     */
+    dispose: function() {
+      if(this.websocket) {
+        //1000 - normal close by the spec
+        this.websocket.close(1000);
+        this.websocket = null;
       }
     }
   };
