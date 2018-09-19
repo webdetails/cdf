@@ -18,6 +18,10 @@ define('cdf/queries/CdaQuery.ext', [], function(e) {
       return "";
     },
 
+    getWebsocketQuery: function() {
+      return "";
+    },
+
     getUnwrapQuery: function(parameters) {
       return "";
     }
