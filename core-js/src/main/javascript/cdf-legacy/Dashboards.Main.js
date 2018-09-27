@@ -69,7 +69,9 @@ var dash, Dashboards = dash = {
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
    */
   i18nCurrentLanguageCode : null,
-  i18nSupport : null  // Reference to i18n objects
+  i18nSupport : null,  // Reference to i18n objects
+
+  isDisposed: false
 };
 
 
@@ -356,6 +358,8 @@ Dashboards.blockUIwithDrag = function() {
 };
 
 Dashboards.updateLifecycle = function(object) {
+    this._throwIfDisposed();
+
     var silent = object.lifecycle ? !!object.lifecycle.silent : false;
 
     if( object.disabled ){
@@ -454,6 +458,8 @@ Dashboards.update = function(component) {
 };
 
 Dashboards.updateComponent = function(object) {
+  this._throwIfDisposed();
+
   if((Date.now ? Date.now() : new Date().getTime()) - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
     //too long in between ajax communications
     if(!Dashboards.checkServer()) {
@@ -1064,6 +1070,8 @@ Dashboards.othersAwaitExecution = function( tiers , current ) {
  * we can use it as a sparse array of sorts)
  */
 Dashboards.updateAll = function(components) {
+  this._throwIfDisposed();
+
   if(!this.updating) {
     this.updating = {
       tiers: {},
@@ -1284,6 +1292,69 @@ Dashboards.getUnboundParameters = function(){
       ret.push(p);
     }
     return ret;
+  }
+};
+
+/**
+ * Clears resources associated with the dashboard instance.
+ */
+Dashboards.dispose = function() {
+  if(this.isDisposed) {
+    return;
+  }
+
+  this.isDisposed = true;
+
+  this.updateQueue = [];
+
+  if (this.refreshEngine) {
+    this.refreshEngine.dispose();
+  }
+
+  if(this.events) {
+    this.events = {};
+  }
+
+  this._disposeComponents();
+
+  this.args = [];
+  this.storage = {};
+  this.chains = [];
+  this.syncedParameters = {};
+  this.context = {};
+}
+
+/**
+ * Throws an error if the Dashboard is already disposed.
+ * @protected
+ */
+Dashboards._throwIfDisposed = function() {
+  if(this.isDisposed) {
+    throw new Error("Invalid operation. The dashboard has been disposed.");
+  }
+};
+
+/**
+ * Disposes of the dashboard components.
+ * @protected
+ */
+Dashboards._disposeComponents = function() {
+  if (this.components) {
+    var self = this;
+    if (this.components && this.components.forEach) {
+      var componentsToRemove = [];
+      this.components.forEach(function (component) {
+        if(component.query && component.query.dispose) {
+          component.query.dispose();
+        }
+        componentsToRemove.push(component);
+      });
+
+      // the Dashboards.prototype.removeComponent splices the components array
+      componentsToRemove.forEach(function (component) {
+        self.removeComponent(component);
+      });
+    }
   }
 };
 

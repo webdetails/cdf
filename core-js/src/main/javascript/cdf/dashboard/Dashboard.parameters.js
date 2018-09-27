@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -250,6 +250,19 @@ define([
         store: parameterStore,
         name: parameterName
       };
+    },
+
+    /**
+     * @summary Clears resources associated with the dashboard instance parameters.
+     * @description  Dispose resources that the dashboard parameters may have, and that are no longer needed.
+     *
+     * @protected
+     */
+    _disposeParameters: function() {
+      this.parameters = [];
+      this.parameterModel = undefined;
+      this.chains = [];
+      this.syncedParameters = {};
     },
 
     /**

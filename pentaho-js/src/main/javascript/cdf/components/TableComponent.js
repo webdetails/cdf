@@ -234,6 +234,8 @@ define([
     update: function() {
       this.isDataPush = false;
 
+      this._throwIfDisposed();
+
       if(!this.preExec()) {
         return;
       }

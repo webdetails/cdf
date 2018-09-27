@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -118,6 +118,16 @@ define([
     logColor: undefined,
 
     /**
+     * @summary The component is in a disposed state.
+     * @description The component is in a disposed state.
+     *
+     * @type {boolean}
+     * @default false
+     * @protected
+     */
+    isDisposed: false,
+
+    /**
      * @summary The Dashboard instance to which the component belongs.
      * @description The Dashboard instance to which the component belongs.
      *
@@ -233,6 +243,7 @@ define([
      * @return {cdf.components.BaseComponent} The cloned component.
      */
     clone: function(parameterRemap, componentRemap, htmlRemap) {
+      this._throwIfDisposed();
       var that, dashboard, callbacks;
       /*
        * `dashboard` points back to this component, so we need to remove it from
@@ -511,6 +522,67 @@ define([
       }
       /* opts is falsy if null or undefined */
       return opts || {};
+    },
+
+    /**
+     * @summary Disposes this component, if it wasn't already disposed.
+     * @description Disposes this component, if it wasn't already disposed.
+     */
+    dispose: function() {
+      if(this.isDisposed) {
+        return;
+      }
+
+      this.isDisposed = true;
+
+      if(this.dashboard != null) {
+        this.dashboard.removeComponent(this);
+      } else {
+        // Usually, the whole dashboard is being disposed of.
+        this._unlink();
+      }
+
+      this._disposeCore();
+    },
+
+    /**
+     * @summary Prepares the component for removal.
+     * @description Prepares the component for removal.
+     */
+    onWillRemove: function() {
+      this._unlink();
+    },
+
+    /**
+     * @summary Un-links the component without releasing the resources.
+     * @description Un-links the component without releasing the resources.
+     * @protected
+     */
+    _unlink: function () {
+      if(this.query != null) {
+        this.query.dispose();
+        this.query = null;
+      }
+      this.placeholder().off();
+    },
+
+    /**
+     * Override this to (irreversibly) dispose of any resources
+     * which are not disposed of when simply removed.
+     * @protected
+     */
+    _disposeCore: function() {
+      // NOOP
+    },
+
+    /**
+     * Throws an error if the Dashboard is already disposed.
+     * @protected
+     */
+    _throwIfDisposed: function() {
+      if(this.isDisposed) {
+        throw new Error("Invalid operation. The component has been disposed.");
+      }
     },
 
     /**

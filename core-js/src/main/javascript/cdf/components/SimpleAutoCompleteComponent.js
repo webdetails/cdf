@@ -73,6 +73,12 @@ define(['./BaseComponent', '../lib/jquery'], function(BaseComponent, $) {
 
     getValue: function() {
       return this.input.val();
+    },
+
+    /** @inheritDoc */
+    _unlink: function () {
+      this.base();
+      this.ph = this.input = null;
     }
 
   });

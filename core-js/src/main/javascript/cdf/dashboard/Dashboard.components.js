@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -137,6 +137,9 @@ define([
         throw new Error("addComponent: invalid component");
       }
 
+      // check the component wasn't disposed
+      component._throwIfDisposed();
+
       // check if a component with the same name exists
       var existing = this.getComponentByName(component.name);
       if(existing) {
@@ -219,16 +222,38 @@ define([
         return;
       }
 
-      var comp = this.components[index];
+      var component = this.components[index];
+
+      if (this.refreshEngine) {
+        this.refreshEngine.unregisterComponent(this);
+      }
+
+      component.onWillRemove();
+      component.clear();
+
       this.components.splice(index, 1);
-      comp.dashboard = null;
+      component.dashboard = null;
 
-      comp.off('cdf:postExecution');
-      comp.off('cdf:preExecution');
-      comp.off('cdf:error');
-      comp.off('all');
+      component.off('cdf:postExecution');
+      component.off('cdf:preExecution');
+      component.off('cdf:error');
+      component.off('all');
 
-      return comp;
+      return component;
+    },
+
+    /**
+     * @summary Clears resources associated with the dashboard components.
+     * @description  Dispose resources that the dashboard components may have, and that are no longer needed.
+     *
+     * @protected
+     */
+    _disposeComponents: function() {
+      this.components.forEach(function (component) {
+        component.dashboard = null;
+        component.dispose();
+      });
+      this.components = [];
     },
 
     /**

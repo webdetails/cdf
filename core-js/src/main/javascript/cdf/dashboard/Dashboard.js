@@ -101,6 +101,7 @@ define([
       _callIfAvailable(this._initDataSources, "DataSources");
       _callIfAvailable(this._initQuery, "Query");
       _callIfAvailable(this._initAddIns, "AddIns");
+      _callIfAvailable(this._throwIfDisposed, "Lifecycle");
 
       this.refreshEngine = new RefreshEngine(this);
 
@@ -328,6 +329,16 @@ define([
     debug: 1,
 
     /**
+     * @summary The dashboard is in a disposed state.
+     * @description The dashboard is in a disposed state.
+     *
+     * @type {boolean}
+     * @default false
+     * @protected
+     */
+    isDisposed: false,
+
+    /**
      * @summary Sets the {@link cdf.dashboard.Dashboard#debug|debug} level.
      * @description Sets the {@link cdf.dashboard.Dashboard#debug|debug} level. If the URL parameter `debug` 
      *              has value of `true` and the value of the URL parameter `debugLevel` is a valid numeric value,  
@@ -399,6 +410,33 @@ define([
      */
     normalizeId: function(id) {
       return id;
+    },
+
+    /**
+     * @summary Clears resources associated with the dashboard instance, if it wasn't already disposed.
+     * @description  Dispose resources that the dashboard may have and
+     * that are no longer needed, if it wasn't already disposed.
+     *
+     */
+    dispose: function() {
+      if(this.isDisposed) {
+        return;
+      }
+
+      this.isDisposed = true;
+
+      if (this.refreshEngine) {
+        this.refreshEngine.dispose();
+      }
+
+      if(this.events) {
+        this.events = {};
+      }
+
+      this._disposeComponents();
+      this._disposeStorage();
+      this._disposeParameters();
+      this._disposeViews();
     }
   });
 

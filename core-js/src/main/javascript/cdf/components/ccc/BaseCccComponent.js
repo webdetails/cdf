@@ -124,6 +124,8 @@ define([
      * The main update method of the component
      */
     update: function () {
+      this._throwIfDisposed();
+
       if (this.parameters == null) {
         this.parameters = [];
       }
@@ -179,6 +181,16 @@ define([
       extensionsPromise
         .then(_.bind(this._renderInner, this, data))
         .then(_.bind(this.endExec, this), _.bind(this.failExec, this));
+    },
+
+    /** @inheritDoc */
+    _unlink: function () {
+      this.base();
+      if(this.chart && this.chart.dispose) {
+        this.chart.dispose();
+      }
+      // Dispose of the existing chart to not leak memory.
+      this.chart = null;
     },
 
     _getEffectiveRenderMode: function() {

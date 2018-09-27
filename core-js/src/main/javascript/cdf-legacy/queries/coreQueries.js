@@ -716,14 +716,7 @@
       } else if(this.getOption('successCallback') !== null) {
         return this.doQuery(outsideCallback);
       }
-    },
-
-    /**
-     * @summary Dispose the query object.
-     * @description Dispose the query object.
-     */
-    dispose: function() {
-    },
+    }
   };
   // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.

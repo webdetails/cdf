@@ -40,6 +40,14 @@ define([
 
     processdata: function(values) {
       this.render(values);
+    },
+
+    /** @inheritDoc */
+    _unlink: function () {
+      this.base();
+      if(this.vis) {
+        this.vis.dispose();
+      }
     }
   });
 
