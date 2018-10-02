@@ -205,7 +205,18 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
     getQueue : function(){
       return refreshQueue;
-    }
+    },
+
+    dispose: function(){
+      if(activeTimer != null) {
+        clearTimeout(activeTimer);
+        activeTimer = null;
+      }
+      this.setGlobalRefresh(0);
+      if(refreshQueue.length > 0) {
+        refreshQueue.splice(0, refreshQueue.length);
+      }
+    },
   };
 };
 

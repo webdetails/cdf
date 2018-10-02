@@ -75,6 +75,17 @@ define([
     },
 
     /**
+     * @summary Clears resources associated with the dashboard storage.
+     * @description  Dispose resources that the dashboard storage may have, and that are no longer needed.
+     *
+     * @protected
+     */
+    _disposeStorage: function() {
+      this.storage = {};
+      this.initialStorage = {};
+    },
+
+    /**
      * @description Retrieves the {@link cdf.dashboard.Dashboard#storage|storage} value from the server using a
      *              {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} request and saves
      *              it in the dashboard {@link cdf.dashboard.Dashboard#storage|storage} property.

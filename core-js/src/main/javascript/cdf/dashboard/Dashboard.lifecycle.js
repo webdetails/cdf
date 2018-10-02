@@ -98,6 +98,16 @@ define([
     },
 
     /**
+     * Throws an error if the Dashboard is already disposed.
+     * @protected
+     */
+    _throwIfDisposed: function() {
+      if(this.isDisposed) {
+        throw new Error("Invalid operation. The dashboard has been disposed.");
+      }
+    },
+
+    /**
      * @summary Resets the running calls counter and hides the progress indicator.
      * @description Resets the running calls counter and hides the progress indicator.
      */
@@ -151,6 +161,8 @@ define([
      */
     init: function(components) {
       var myself = this;
+
+      myself._throwIfDisposed();
 
       // We're now adding support for multiple inits. This part is only relevant for
       // the first execution.

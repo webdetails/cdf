@@ -330,6 +330,17 @@ define([
       },
 
       /**
+       * Removes the component registration from the refresh engine queue.
+       * @param component the component to unregister.
+       */
+      unregisterComponent: function(component) {
+        if(!component) {
+          return;
+        }
+        clearFromQueue(component);
+      },
+
+      /**
        * @summary Gets the refresh period for a component.
        * @description Gets the refresh period for a component.
        *
@@ -441,7 +452,18 @@ define([
 
       stopTimer: stopTimer,
 
-      clearQueue: clearQueue
+      clearQueue: clearQueue,
+
+      /**
+       * @summary Clears resources associated with the refresh engine.
+       * @description  Clears resources associated with the refresh engine.
+       *
+       */
+      dispose: function() {
+        this.stopTimer();
+        this.setGlobalRefresh(0);
+        this.clearQueue();
+      }
     };
   };
 });

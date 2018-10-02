@@ -218,6 +218,12 @@ define([
       return this.value;
     },
 
+    /** @inheritDoc */
+    _unlink: function () {
+      this.base();
+      this.ph = null;
+    },
+
     /**
      * Gets the values of the component options.
      *
