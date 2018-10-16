@@ -75,24 +75,24 @@ define([
      * @private
      */
     _initI18n: function() {
-      this.i18nCurrentLanguageCode = undefined;
-      this.i18nSupport = {
-        prop: function(text) { //when correctly initiated, prop will be replaced
+      this.setI18nSupport(undefined, {
+        prop: function(text) { // when correctly initiated, prop will be replaced
           Logger.warn(I18N_INIT_WARNING);
           return text;
         }
-      };
+      });
 
       var normalizedLocale = this.__normalizeLocale();
 
-      //gets localization from templates
-      $.i18n.properties({
+      var cdfI18nSettings = {
         name: 'messages',
         mode: 'map',
         language: normalizedLocale,
         path: DashboardExt.getStaticResource("resources/languages/"),
         callback: this.__initI18nCallback.bind(this, normalizedLocale)
-      });
+      };
+
+      $.i18n.properties(cdfI18nSettings);
 
       var formProvider = cdo.format.language(normalizedLocale);
       cdo.format.language(formProvider);
@@ -100,19 +100,16 @@ define([
     },
 
     __initI18nCallback: function(locale) {
-      var finalCallback = function() {
-        this.i18nCurrentLanguageCode = locale;
-        this.i18nSupport = $.i18n;
-      };
-
-      $.i18n.properties({
+      var dashboardI18nSettings = {
         name: 'messages',
         mode: 'map',
         type: 'GET',
         language: locale,
         path: this.getMessagesPath(),
-        callback: finalCallback.bind(this)
-      });
+        callback: this.setI18nSupport.bind(this, locale, $.i18n)
+      };
+
+      $.i18n.properties(dashboardI18nSettings);
     },
 
     __normalizeLocale: function() {
@@ -146,6 +143,5 @@ define([
     getMessagesPath: function() {
       // meant to be overridden, or return undefined
     }
-
   });
 });
