@@ -401,6 +401,18 @@ define([
             errorHandler(resp, txtStatus, error, isDataPush);
           })(event.data);
         };
+
+        this.websocket.onclose = function (event) {
+          //the code 1011 (Internal Error) should be treated as an error on the server
+          if( event.code === 1011 ) {
+            var isDataPush = !isFirstTime;
+            isFirstTime = false;
+
+            myself.getErrorHandler(function (resp, txtStatus, error) {
+              errorHandler(resp, txtStatus, error, isDataPush);
+            })(event.reason);
+          }
+        };
       } else {
         var settings = _.extend({}, this.getAjaxOptions(), {
           data: queryDefinition,
