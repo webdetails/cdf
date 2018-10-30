@@ -389,17 +389,20 @@ define([
     },
 
     /**
-     * @summary Fails execution of the component, given an error object or the arguments of a
+     * @summary Fails execution of the component, given a string, an error object or the arguments of a
      *          {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
-     * @description <p>Fails execution of the component, given an error object or the arguments of a
+     * @description <p>Fails execution of the component, given a String an error object or the arguments of a
      *              {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
      *              This method handles parsing, signaling and logging of the error and unblocking the UI, if necessary.</p>
      *
-     * @param {object} arg An error object or the arguments of a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
+     * @param {object} arg A string an error object or the arguments of a {@link http://api.jquery.com/jquery.ajax/|jQuery.ajax} error callback.
      */
     failExec: function(arg) {
       // NOTE: #error() already unblocks
-      if(arg && ('responseText' in arg)) {
+      if(typeof arg === 'string') {
+        //simple error handling as string message
+        this.error(null, /*cause:*/arg);
+      }else if(arg && ('responseText' in arg)) {
         // Used as a $.ajax({error:}) callback. 
         var err = this.dashboard.parseServerError.apply(this.dashboard, arguments);
         this.error(err.msg, err.error);

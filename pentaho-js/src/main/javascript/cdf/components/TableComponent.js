@@ -276,6 +276,8 @@ define([
             myself.failureCallback();
           }
           myself.isDataPush = false;
+          myself._maybeUnblock();
+          myself.trigger("cdf cdf:error", myself, "", null);
         } );
       } catch(e) {
         /*
