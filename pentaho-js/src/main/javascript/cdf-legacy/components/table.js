@@ -257,6 +257,10 @@ var TableComponent = UnmanagedComponent.extend({
             myself.failureCallback();
           }
           myself.isDataPush = false;
+          if(!myself.isSilent()) {
+            myself.unblock();
+          }
+          myself.trigger("cdf cdf:error", myself, "", null);
         } );
       }
     } catch (e) {
