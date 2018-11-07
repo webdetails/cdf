@@ -388,9 +388,23 @@ define([
           var isDataPush = !isFirstTime;
           isFirstTime = false;
 
-          myself.getSuccessHandler(function (data) {
-            return successHandler(data, isDataPush);
-          })(JSON.parse(event.data));
+          // If instruction introduced to safeguard against IE 11 and Edge 24 not closing
+          // the websocket after the CDE preview (iframe) is closed, resulting
+          // in a strange window state where some should-exist objects are undefined
+          if(JSON) {
+            myself.getSuccessHandler(function (data) {
+              return successHandler(data, isDataPush);
+            })(JSON.parse(event.data));
+          } else {
+            // when in the strange situation where the JSON object is not defined/null
+            // we give our best shot in trying to close the websocket
+            try {
+              //1001 - Going Away
+              myself.websocket.close(1001);
+            } catch(err) {
+              //empty on purpose
+            }
+          }
         };
 
         this.websocket.onerror = function (event) {
