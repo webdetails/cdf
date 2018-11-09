@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -29,6 +29,15 @@ public class CdfEngine {
   private static CdfEngine instance;
   private ICdfEnvironment environment;
 
+  static {
+    instance = new CdfEngine();
+    try {
+      initialize();
+    } catch ( Exception ex ) {
+      logger.fatal( "Error initializing CdeEngine: " + Util.getExceptionDescription( ex ) );
+    }
+  }
+
   private CdfEngine() {
     logger.debug( "Starting ElementEngine" );
   }
@@ -39,17 +48,6 @@ public class CdfEngine {
   }
 
   public static CdfEngine getInstance() {
-
-    if ( instance == null ) {
-      instance = new CdfEngine();
-    }
-
-    try {
-      initialize();
-    } catch ( Exception ex ) {
-      logger.fatal( "Error initializing CdeEngine: " + Util.getExceptionDescription( ex ) );
-    }
-
     return instance;
   }
 
