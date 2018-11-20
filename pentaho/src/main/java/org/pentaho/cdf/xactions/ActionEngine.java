@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,10 +75,10 @@ public class ActionEngine {
 
       CdfHttpServletRequestWrapper request = new CdfHttpServletRequestWrapper( httpServletRequest );
       if ( params != null ) {
-        Iterator<String> it = params.keySet().iterator();
+        Iterator<Map.Entry<String, String>> it = params.entrySet().iterator();
         while ( it.hasNext() ) {
-          String key = it.next();
-          request.addParameter( key, params.get( key ) );
+          Map.Entry<String, String> entry = it.next();
+          request.addParameter( entry.getKey(), entry.getValue() );
         }
       }
 
