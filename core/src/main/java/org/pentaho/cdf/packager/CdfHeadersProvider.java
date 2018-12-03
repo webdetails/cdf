@@ -205,7 +205,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     return deps.toString();
   }
 
-  private class CdfDependencyInclusionFilter implements DependenciesPackage.IDependencyInclusionFilter {
+  private static class CdfDependencyInclusionFilter implements DependenciesPackage.IDependencyInclusionFilter {
     private List<String> filePaths;
     public CdfDependencyInclusionFilter( List<String> filePaths ) {
       this.filePaths = filePaths;
