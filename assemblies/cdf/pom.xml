@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin-assemblies</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.19-174</version>
   </parent>
   <artifactId>pentaho-cdf</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.19-174</version>
   <packaging>pom</packaging>
   <properties>
     <js.project.list>pentaho-cdf-js</js.project.list>
@@ -27,8 +27,8 @@
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -38,8 +38,8 @@
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -50,8 +50,8 @@
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -62,8 +62,8 @@
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
