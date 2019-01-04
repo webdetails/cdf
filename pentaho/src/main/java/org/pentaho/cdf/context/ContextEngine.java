@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,16 +12,6 @@
  */
 
 package org.pentaho.cdf.context;
-
-import java.io.File;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -39,7 +29,6 @@ import org.pentaho.cdf.util.Parameter;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
-
 import pt.webdetails.cpf.InterPluginCall;
 import pt.webdetails.cpf.localization.MessageBundlesHelper;
 import pt.webdetails.cpf.repository.api.IBasicFile;
@@ -51,6 +40,16 @@ import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.PluginIOUtils;
 import pt.webdetails.cpf.utils.XmlDom4JUtils;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 public class ContextEngine {
 
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
@@ -59,7 +58,7 @@ public class ContextEngine {
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
   private static boolean legacyDashboardContext;
-  private static ContextEngine instance;
+  private static final ContextEngine instance = new ContextEngine();
   private static String CONFIG_FILE = "dashboardContext.xml";
 
   private static List<AutoInclude> autoIncludes;
@@ -75,10 +74,7 @@ public class ContextEngine {
     legacyDashboardContext = legacy;
   }
 
-  public static synchronized ContextEngine getInstance() {
-    if ( instance == null ) {
-      instance = new ContextEngine();
-    }
+  public static ContextEngine getInstance() {
     return instance;
   }
 

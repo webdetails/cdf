@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,15 +12,6 @@
  */
 
 package org.pentaho.cdf.xactions;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -37,15 +28,20 @@ import org.pentaho.platform.engine.services.solution.SolutionHelper;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.web.http.api.resources.XactionUtil;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 public class ActionEngine {
 
   private static final Log logger = LogFactory.getLog( ActionEngine.class );
-  private static ActionEngine instance;
+  private static final ActionEngine instance = new ActionEngine();
 
-  public static synchronized ActionEngine getInstance() {
-    if ( instance == null ) {
-      instance = new ActionEngine();
-    }
+  public static ActionEngine getInstance() {
     return instance;
   }
 

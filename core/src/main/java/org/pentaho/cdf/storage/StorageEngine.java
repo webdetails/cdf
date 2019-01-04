@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,8 +13,6 @@
 
 package org.pentaho.cdf.storage;
 
-import java.util.Calendar;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,14 +25,20 @@ import org.pentaho.cdf.PluginHibernateException;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.cdf.utils.PluginHibernateUtil;
-
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
+
+import java.util.Calendar;
 
 public class StorageEngine implements StorageEngineInterface {
 
   private static final Log logger = LogFactory.getLog( StorageEngine.class );
-  private static StorageEngineInterface instance;
+  private static final StorageEngineInterface instance;
+
+  static {
+    PluginHibernateUtil.initialize();
+    instance = new StorageEngine();
+  }
 
   public static enum Operation {
     READ( "READ" ), STORE( "STORE" ), DELETE( "DELETE" ), UNKNOWN( "UNKNOWN" );
@@ -56,11 +60,7 @@ public class StorageEngine implements StorageEngineInterface {
     }
   }
 
-  public static synchronized StorageEngineInterface getInstance() {
-    if ( instance == null ) {
-      PluginHibernateUtil.initialize();
-      instance = new StorageEngine();
-    }
+  public static StorageEngineInterface getInstance() {
     return instance;
   }
 
