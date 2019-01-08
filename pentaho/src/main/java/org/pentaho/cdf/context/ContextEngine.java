@@ -417,7 +417,7 @@ public class ContextEngine {
   }
 
   protected boolean cdaExists() {
-    return ( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists();
+    return ( new InterPluginCall( InterPluginCall.CDA, "listQueries" ) ).pluginExists();
   }
 
   protected IUserContentAccess getUserContentAccess( String path ) {
