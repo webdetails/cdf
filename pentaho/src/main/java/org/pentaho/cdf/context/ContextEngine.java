@@ -58,7 +58,7 @@ public class ContextEngine {
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
   private static boolean legacyDashboardContext;
-  private static final ContextEngine instance = new ContextEngine();
+  private static ContextEngine instance;
   private static String CONFIG_FILE = "dashboardContext.xml";
 
   private static List<AutoInclude> autoIncludes;
@@ -74,7 +74,10 @@ public class ContextEngine {
     legacyDashboardContext = legacy;
   }
 
-  public static ContextEngine getInstance() {
+  public static synchronized ContextEngine getInstance() {
+    if ( instance == null ) {
+      instance = new ContextEngine();
+    }
     return instance;
   }
 
