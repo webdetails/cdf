@@ -1,5 +1,5 @@
 /*!
- * Copyright 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2018 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,19 +11,18 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["pentaho/visual/base/View"], function (ViewMock) {
+define(function() {
 
   function BarViewMock(viewSpec) {
-    ViewMock.call(this, viewSpec);
+    this.__model = viewSpec && viewSpec.model;
+    this.__domContainer = viewSpec && viewSpec.domContainer;
+
+    this.dispose = function () {
+    };
   }
 
-  BarViewMock.prototype = Object.create(ViewMock.prototype);
-  BarViewMock.prototype.constructor = BarViewMock;
-
-  BarViewMock.type = {
-    extensionEffective: {
-      definition: 'dummy'
-    }
+  BarViewMock.prototype.extensionEffective = {
+    definition: 'dummy'
   };
 
   return BarViewMock;

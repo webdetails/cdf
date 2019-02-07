@@ -155,7 +155,7 @@ define([
 
       localRequire([vizViewId], function(View) {
 
-        var extension = $.extend({}, View.type.extensionEffective);
+        var extension = $.extend({}, View.prototype.extensionEffective);
         resolve(extension);
 
       }, reject);
