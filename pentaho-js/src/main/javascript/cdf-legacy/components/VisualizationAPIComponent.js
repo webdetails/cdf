@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -19,21 +19,21 @@ var VisualizationAPIComponent = (function() {
   // cdf/pentaho-js/src/main/javascript/cdf/components/VisualizationAPIComponent.js
 
   var Table = null;
-  var BaseView = null;
+  var visualUtil = null;
 
   return UnmanagedComponent.extend({
 
     // Unit tests support.
     __reset: function () {
       Table = null;
-      BaseView = null;
+      visualUtil = null;
     },
 
     update: function () {
-      if (BaseView === null)
+      if(visualUtil === null)
         this.__requireFilesAndUpdate();
       else
-        this._updateCore();
+        this.__updateCore();
     },
 
     __requireFilesAndUpdate: function () {
@@ -42,19 +42,23 @@ var VisualizationAPIComponent = (function() {
 
       require([
         "pentaho/data/Table",
-        "pentaho/visual/base/View",
+        "pentaho/visual/util",
         "pentaho/shim/es6-promise"
-      ], function(_Table, _BaseView) {
+      ], function(_Table, _visualUtil) {
 
         Table = _Table;
-        BaseView = _BaseView;
+        visualUtil = _visualUtil;
 
-        me._updateCore();
+        me.__updateCore();
       });
     },
 
-    _updateCore: function() {
-      this.triggerQuery(this.queryDefinition, _.bind(this.render, this));
+    __updateCore: function() {
+
+      // Start fetching immediately, if possible.
+      this.__checkVizType();
+
+      this.triggerQuery(this.queryDefinition, _.bind(this.__render, this));
     },
 
     /**
@@ -63,104 +67,225 @@ var VisualizationAPIComponent = (function() {
      * This method ends the component execution when the update has finished.
      *
      * @param {object} dataSpec - The data specification.
+     * @private
      */
-    render: function(dataSpec) {
-      var promiseView = !this.vizView
-          ? this.__createVizViewAsync(dataSpec)
-          : this.__syncVizViewAsync(dataSpec);
+    __render: function(dataSpec) {
+
+      // Make sure to reset the viz, if its type changed.
+      this.__checkVizType();
+
+      var promise = !this.viz
+          ? this.__createVizAsync(dataSpec)
+          : this.__syncVizAsync(dataSpec);
 
       var me = this;
 
-      promiseView
-          .then(function(vizView) {
-            return vizView.update();
-          })
+      promise
+          .then(_.bind(this.__updateViz, this))
           ["catch"](function(reason) {
             var domElem = me.placeholder()[0];
-            Dashboards.error("Unable to update view for visualization component: " + reason);
+            Dashboards.error("Unable to update the visualization component: " + reason);
             Dashboards.errorNotification({msg: "Error processing component: render_" + me.name}, domElem);
           });
     },
 
     // region copy & paste code from CDF require component version
+
     /**
-     * Gets the visualization view instance.
+     * Gets or sets the type of visualization.
      *
-     * @type {?pentaho.type.visual.base.View}
+     * @name vizId
+     * @type {string}
+     */
+
+    /**
+     * Gets the visualization.
+     *
+     * @type {?pentaho.visual.Model}
      * @readOnly
      */
-    vizView: null,
+    viz: null,
+
+    /**
+     * The visualization's view.
+     *
+     * @type {?pentaho.visual.IView}
+     * @private
+     */
+    __vizView: null,
+
+    /**
+     * A promise for the visualization classes.
+     *
+     * @type {Promise.<({
+     *     Model: Class.<pentaho.visual.Model>,
+     *     View:  Class.<pentaho.visual.IView>,
+     *     viewTypeId: string
+     *  })>}
+     * @private
+     */
+    __vizClassesPromise: null,
+
+    /**
+     * The visualization type identifier corresponding to `__vizClassesPromise`, `viz`, etc..
+     *
+     * @type {string}
+     * @private
+     */
+    __vizClassesId: null,
+
+    /**
+     * The style classes applied to the visualization's HTML container.
+     *
+     * @type {?string}
+     * @private
+     */
+    __vizStyleClass: null,
 
     // region protected members
     /**
-     * Called to complete the synchronization specification of the visualization view and model
-     * from the component's state.
+     * Called to complete building of the visualization specification from the component's state.
      *
      * When this method is called, the given specification has already been updated
      * according to the base class' rules. Override to perform additional updates.
      *
-     * On the first component update, this method is called before `_onVizViewCreated` and
-     * before the view and model haven been created.
-     * This special situation can be tested by checking that `this.vizView` is `null`.
+     * On the first component update, this method is called before the visualization
+     * has been created (and before `_onDidCreateViz`).
+     * This special situation can be tested for by checking that `this.viz` is `null`.
      *
      * The default implementation does nothing.
      *
-     * @param {!pentaho.type.visual.base.spec.IView} vizViewSpec - The visualization view specification.
+     * @param {pentaho.visual.spec.IModel} vizSpec - The visualization specification.
      *
      * @protected
      */
-    _onVizViewSyncSpec: function(vizView) {
+    _onGetVizSpec: function(vizSpec) {
       // NOOP
     },
 
     /**
-     * Called when the visualization view has been created, but the before its initial update.
+     * Called when the visualization has been created, but before its initial update.
      *
-     * This method can be used to, for example, attach event listeners to the visualization view.
+     * This method can be used to, for example, attach event listeners to the visualization.
      *
      * The default implementation does nothing.
      *
-     * @param {!pentaho.type.visual.base.View} vizView - The visualization view.
+     * @protected
+     */
+    _onDidCreateViz: function() {
+      // NOOP
+    },
+
+    /**
+     * Called before disposing of the visualization.
+     *
+     * This method can be used to, for example, detach event listeners from the visualization.
+     *
+     * The default implementation does nothing.
      *
      * @protected
      */
-    _onVizViewCreated: function(vizView) {
+    _onWillDisposeViz: function() {
       // NOOP
     },
     // endregion
 
     //region private members
     /**
-     * Gets an updated view specification from several component properties.
+     * Updates the visualization.
      *
-     * The `width` and `height` properties are read from the corresponding component properties.
-     *
-     * The `model.data` property is set from the given `dataSpec` argument, when specified and defined.
-     *
-     * Arbitrary visualization model properties are set from the contents of
-     * the `vizOptions` component property and the current values of referenced dashboard parameters.
-     *
-     * Lastly, the `_onVizViewSyncSpec` method is called so that subclasses may further update the view and the model.
-     *
-     * @param {object} [dataSpec] - The data specification.
-     *
-     * @return {pentaho.visual.base.spec.IView} The visualization view specification.
+     * @return {Promise} A promise for the completion of the update operation.
+     * @private
+     */
+    __updateViz: function() {
+      return this.viz.update();
+    },
+
+    /**
+     * Disposes of the visualization.
      *
      * @private
      */
-    __getVizViewSyncSpec: function(dataSpec) {
+    __disposeViz: function() {
+      if(this.viz) {
+
+        this._onWillDisposeViz();
+
+        if(this.__vizView) {
+          this.__vizView.dispose();
+          this.__vizView = null;
+        }
+
+        this.viz = null;
+      }
+    },
+
+    /**
+     * Starts fetching the visualization classes, if the visualization id is defined.
+     * Checks if the visualization id changed, in which case it disposes of the current visualization, if any.
+     *
+     * @private
+     */
+    __checkVizType: function() {
+      this.__getVizClassesAsync()
+        ["catch"](function() { /* Swallow for now. Will look at the error later. */ });
+    },
+
+    /**
+     * Obtains a promise for the visualization's classes.
+     *
+     * @return {Promise.<({
+     *     Model: Class.<pentaho.visual.Model>,
+     *     View:  Class.<pentaho.visual.IView>,
+     *     viewTypeId: string
+     *  })>} A promise.
+     * @private
+     */
+    __getVizClassesAsync: function() {
+      var vizId = this.vizId;
+      if(!vizId) {
+        return Promise.reject(new Error("Visualization ID is not specified."));
+      }
+
+      var vizClassesId = this.__vizClassesId;
+      if(!vizClassesId || vizClassesId !== vizId) {
+
+        this.__disposeViz();
+
+        this.__vizClassesId = vizId;
+        this.__vizClassesPromise = visualUtil.getModelAndDefaultViewClassesAsync(vizId);
+      }
+
+      return this.__vizClassesPromise;
+    },
+
+    /**
+     * Gets the current visualization specification according to the component's state.
+     *
+     * The `width` and `height` properties are read from the corresponding component properties.
+     *
+     * The `data` property is set from the given `dataSpec` argument, when specified and defined.
+     *
+     * Arbitrary visualization properties are set from the contents of
+     * the `vizOptions` component property and the current values of referenced dashboard parameters.
+     *
+     * Lastly, the `_onGetVizSpec` method is called so that subclasses may further update the specification.
+     *
+     * @param {object} [dataSpec] - The data specification.
+     * @return {pentaho.visual.spec.IModel} The visualization specification.
+     * @private
+     */
+    __getVizSpec: function(dataSpec) {
 
       // 1. Specially handled properties
 
-      var viewSpec = {
+      var vizSpec = {
         width: this.width,
-        height: this.height,
-        model: {}
+        height: this.height
       };
 
-      var modelSpec = viewSpec.model;
       if(dataSpec !== undefined) {
-        modelSpec.data = new Table(dataSpec);
+        vizSpec.data = new Table(dataSpec);
       }
 
       // 2. Bound using `vizOptions`.
@@ -176,110 +301,115 @@ var VisualizationAPIComponent = (function() {
         var paramName = v[1];
         var value = this.getParameterValue(paramName);
 
-        modelSpec[propName] = value;
+        vizSpec[propName] = value;
       }, this.dashboard);
 
       // 3. Protected method.
-      this._onVizViewSyncSpec(viewSpec);
+      this._onGetVizSpec(vizSpec);
 
-      return viewSpec;
+      vizSpec.isAutoUpdate = false;
+
+      return vizSpec;
     },
 
     /**
-     * Creates a visualization view for a given a data specification.
+     * Creates a visualization of the current type and a given a data specification.
      *
      * @param {object} dataSpec - The data specification.
-     *
-     * @return {Promise.<pentaho.type.visual.base.View>} A promise for the created visualization view.
-     *
+     * @return {Promise} A promise for the completion of the visualization creation.
      * @private
      */
-    __createVizViewAsync: function(dataSpec) {
-
-      var viewSpec = this.__getVizViewSyncSpec(dataSpec);
-      viewSpec.domContainer = this.placeholder()[0];
-
-      // Disable, by default.
-      if(viewSpec.isAutoUpdate == null) {
-        viewSpec.isAutoUpdate = false;
-      }
-
-      viewSpec.model._ = this.vizId;
-
-      var me = this;
-
-      return BaseView.createAsync(viewSpec)
-        .then(function(vizView) {
-
-          me.vizView = vizView;
-
-          me._onVizViewCreated(vizView);
-
-          return vizView;
-        });
+    __createVizAsync: function(dataSpec) {
+      return this.__getVizClassesAsync().then(_.bind(this.__onGotVizClasses, this, dataSpec));
     },
 
     /**
-     * Synchronizes the current visualization view using several of the component properties.
+     * Called to continue creation of the visualization.
      *
-     * This method obtains the new view specification by calling `__getVizViewSyncSpec`
-     * and then applies it, in a single transaction scope, to the current view and model objects.
+     * @param {object} dataSpec - The data specification.
+     * @param {({
+     *     Model: Class.<pentaho.visual.Model>,
+     *     View:  Class.<pentaho.visual.IView>,
+     *     viewTypeId: string
+     *  })} classes - The visualization classes.
+     * @private
+     */
+    __onGotVizClasses: function(dataSpec, classes) {
+      // J.I.C. Someone else got here first.
+      this.__disposeViz();
+
+      var vizSpec = this.__getVizSpec(dataSpec);
+
+      var viz = new classes.Model(vizSpec);
+
+      var domContainer = this.__setupDomContainer(classes.Model);
+
+      this.__vizView = new classes.View({model: viz, domContainer: domContainer});
+
+      this.viz = viz;
+
+      this._onDidCreateViz();
+    },
+
+    /**
+     * Sets up the HTML container for a visualization, given the model class.
      *
-     * The view update operation is not performed.
+     * @param {Class.<pentaho.visual.Model>} Model - The model class.
+     * @return {HTMLElement} The HTML container.
+     * @private
+     */
+    __setupDomContainer: function(Model) {
+      // Empty, in case viz type changed.
+      var $domContainer = this.placeholder().empty();
+
+      // Remove previous viz's CSS classes.
+      if(this.__vizStyleClass != null) {
+        $domContainer.removeClass(this.__vizStyleClass);
+      }
+
+      var styleClasses = this.__vizStyleClass = Model.type.inheritedStyleClasses.join(" ");
+
+      $domContainer.addClass(styleClasses);
+
+      return $domContainer[0];
+    },
+
+    /**
+     * Synchronizes the current visualization from the component's state.
      *
-     * @param {!pentaho.type.visual.base.View} vizView - The visualization view.
+     * This method obtains the new visualization specification by calling `__getVizSpec`
+     * and then applies it to the current visualization.
+     *
+     * The visualization update operation is not performed.
+     *
      * @param {object} [dataSpec] - The data specification.
-     *
      * @private
      */
-    __syncVizView: function(dataSpec) {
+    __syncViz: function(dataSpec) {
 
-      var vizView = this.vizView;
+      var vizSpec = this.__getVizSpec(dataSpec);
 
-      // Disable while setting values, to not trigger an update.
-      var isAutoUpdate = vizView.isAutoUpdate;
-      if (isAutoUpdate) {
-        vizView.isAutoUpdate = false;
-      }
-
-      var viewSpec = this.__getVizViewSyncSpec(dataSpec);
-
-      // The transaction can throw, when proposed changes are canceled by an event handler.
-      try {
-        vizView.configure(viewSpec);
-      } finally {
-        // Restore auto update.
-        if (isAutoUpdate) {
-          vizView.isAutoUpdate = true;
-        }
-      }
+      // The transaction throws if proposed changes are canceled by an event handler.
+      this.viz.configure(vizSpec);
     },
 
     /**
-     * Synchronizes the given visualization view instance using several of the component properties,
-     * asynchronously, and returns the visualization view.
-     *
-     * This method obtains the new view specification by calling `__getVizViewSyncSpec`
-     * and then applies it, in a single transaction scope, to the current view and model objects.
-     *
-     * The view update operation is not performed.
+     * Synchronizes the current visualization from the component's state, asynchronously.
      *
      * @param {object} dataSpec - The data specification.
-     *
-     * @return {Promise.<pentaho.type.visual.base.View>} A promise for the existing visualization view.
-     *
+     * @return {Promise} A promise for the completion of the operation.
      * @private
+     *
+     * @see #__syncViz
      */
-    __syncVizViewAsync: function(dataSpec) {
+    __syncVizAsync: function(dataSpec) {
 
-      var me = this;
+      return new Promise(_.bind(function(resolve) {
 
-      return new Promise(function(resolve) {
+        this.__syncViz(dataSpec);
 
-        me.__syncVizView(dataSpec);
-
-        resolve(me.vizView);
-      });
+        resolve();
+      }, this));
     }
     // endregion
 

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -90,12 +90,12 @@ describe("The VisualizationAPI Component #", function() {
     spyOn(jQuery, "ajax").and.callFake(function(options) {
       options.success({resultset: "queryResults"});
     });
-    spyOn(visualizationAPIComponent, 'render');
+    spyOn(visualizationAPIComponent, '__render');
     visualizationAPIComponent.update();
     setTimeout(function() {
       expect(visualizationAPIComponent.update).toHaveBeenCalled();
       expect(visualizationAPIComponent.triggerQuery).toHaveBeenCalled();
-      expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
+      expect(visualizationAPIComponent.__render).toHaveBeenCalledWith({resultset: 'queryResults'});
       done();
     }, 100);
   });
@@ -109,13 +109,13 @@ describe("The VisualizationAPI Component #", function() {
     spyOn(jQuery, "ajax").and.callFake(function(options) {
       options.success({resultset: "queryResults"});
     });
-    spyOn(visualizationAPIComponent, 'render').and.callThrough();
+    spyOn(visualizationAPIComponent, '__render').and.callThrough();
 
     visualizationAPIComponent.update();
     setTimeout(function() {
       expect(visualizationAPIComponent.update).toHaveBeenCalled();
       expect(visualizationAPIComponent.triggerQuery).toHaveBeenCalled();
-      expect(visualizationAPIComponent.render).toHaveBeenCalledWith({ resultset : 'queryResults' });
+      expect(visualizationAPIComponent.__render).toHaveBeenCalledWith({ resultset : 'queryResults' });
 
       done();
     }, 100);

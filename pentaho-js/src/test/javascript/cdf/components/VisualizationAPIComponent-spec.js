@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -80,13 +80,13 @@ define([
       spyOn($, "ajax").and.callFake(function(params) {
         params.success({resultset: "queryResults"});
       });
-      spyOn(visualizationAPIComponent, 'render').and.callThrough();
+      spyOn(visualizationAPIComponent, '__render').and.callThrough();
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
         expect(visualizationAPIComponent.update).toHaveBeenCalled();
         expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.__render).toHaveBeenCalledWith({resultset: 'queryResults'});
         expect(visualizationAPIComponent.endExec).toHaveBeenCalled();
         done();
       });
@@ -103,14 +103,14 @@ define([
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
-      spyOn(visualizationAPIComponent, 'render').and.callThrough();
+      spyOn(visualizationAPIComponent, '__render').and.callThrough();
 
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
         expect(visualizationAPIComponent.update).toHaveBeenCalled();
         expect(visualizationAPIComponent.beginQuery).toHaveBeenCalled();
-        expect(visualizationAPIComponent.render).toHaveBeenCalledWith({resultset: 'queryResults'});
+        expect(visualizationAPIComponent.__render).toHaveBeenCalledWith({resultset: 'queryResults'});
 
         done();
       });
@@ -119,41 +119,42 @@ define([
     });
 
     /**
-     * ## The VisualizationAPI Component # creates a visualization View on the first update.
+     * ## The VisualizationAPI Component # creates a visualization on the first update.
      */
-    it("should create a visualization View on the first update", function(done) {
+    it("should create a visualization on the first update", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        expect(visualizationAPIComponent.vizView instanceof Object).toBe(true);
+        expect(visualizationAPIComponent.viz instanceof Object).toBe(true);
+        expect(visualizationAPIComponent.__vizView instanceof Object).toBe(true);
 
         done();
       });
 
-      expect(visualizationAPIComponent.vizView).toBe(null);
+      expect(visualizationAPIComponent.viz).toBe(null);
 
       visualizationAPIComponent.update();
     });
 
     /**
-     * ## The VisualizationAPI Component # reuses the View
+     * ## The VisualizationAPI Component # reuses the visualization
      */
-    it("should reuse the same View on subsequent updates", function(done) {
+    it("should reuse the same viz on subsequent updates", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        var view = visualizationAPIComponent.vizView;
+        var viz = visualizationAPIComponent.viz;
 
         setTimeout(function() {
           visualizationAPIComponent.once("cdf:postExecution", function() {
 
-            expect(visualizationAPIComponent.vizView).toBe(view);
+            expect(visualizationAPIComponent.viz).toBe(viz);
             done();
           });
 
@@ -165,22 +166,22 @@ define([
     });
 
     /**
-     * ## The VisualizationAPI Component # updates the model with the values of parameters in vizOptions
+     * ## The VisualizationAPI Component # updates the viz with the values of parameters in vizOptions
      */
-    it("should update the model with the values of parameters in vizOptions", function(done) {
+    it("should update the viz with the values of parameters in vizOptions", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        var view = visualizationAPIComponent.vizView;
-        spyOn(view, "configure").and.callThrough();
+        var viz = visualizationAPIComponent.viz;
+        spyOn(viz, "configure").and.callThrough();
 
         setTimeout(function() {
           visualizationAPIComponent.once("cdf:postExecution", function () {
-            expect(view.configure).toHaveBeenCalledWith(jasmine.objectContaining({
-              model: jasmine.objectContaining({"param1": "value"})
+            expect(viz.configure).toHaveBeenCalledWith(jasmine.objectContaining({
+              "param1": "value"
             }));
 
             done();
@@ -194,19 +195,19 @@ define([
     });
 
     /**
-     * ## The VisualizationAPI Component # updates the view with the width and height property
+     * ## The VisualizationAPI Component # updates the viz with the width and height property
      */
-    it("should update the view with the width and height property", function(done) {
+    it("should update the viz with the width and height property", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
         options.success({resultset: "queryResults"});
       });
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        var view = visualizationAPIComponent.vizView;
+        var viz = visualizationAPIComponent.viz;
 
-        expect(view.width).toBe(200);
-        expect(view.height).toBe(300);
+        expect(viz.width).toBe(200);
+        expect(viz.height).toBe(300);
         done();
       });
 
@@ -217,7 +218,7 @@ define([
     });
 
     /**
-     * ## The VisualizationAPI Component # updates the view when the component updates
+     * ## The VisualizationAPI Component # updates the viz when the component updates
      */
     it("should update the view when the component updates", function(done) {
       spyOn($, "ajax").and.callFake(function(options) {
@@ -226,13 +227,13 @@ define([
 
       // listen to cdf:postExecution event
       visualizationAPIComponent.once("cdf:postExecution", function() {
-        var view = visualizationAPIComponent.vizView;
+        var viz = visualizationAPIComponent.viz;
 
         setTimeout(function() {
-          spyOn(view, "update").and.callThrough();
+          spyOn(viz, "update").and.callThrough();
 
           visualizationAPIComponent.once("cdf:postExecution", function() {
-            expect(view.update).toHaveBeenCalled();
+            expect(viz.update).toHaveBeenCalled();
 
             done();
           });
