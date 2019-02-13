@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -21,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -30,8 +31,6 @@ import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
-import pt.webdetails.cpf.utils.PluginIOUtils;
-
 @Path( "/pentaho-cdf/api/settings" )
 public class SettingsApi {
 
@@ -39,15 +38,12 @@ public class SettingsApi {
 
   private static final Log logger = LogFactory.getLog( SettingsApi.class );
 
-  public SettingsApi() {
-  }
-
   @POST
   @Path( "/set" )
   public void set( @FormParam( Parameter.KEY ) String key, @FormParam( Parameter.VALUE ) String value ) {
 
     if ( StringUtils.isEmpty( key ) || StringUtils.isEmpty( value ) ) {
-      logger.equals( "empty values not allowed -> key:" + key + " | value:" + value );
+      logger.error( "empty values not allowed -> key:" + key + " | value:" + value );
       return;
     }
 
@@ -57,21 +53,20 @@ public class SettingsApi {
 
   @GET
   @Path( "/get" )
-  public void get( @QueryParam( Parameter.KEY ) String key, @Context HttpServletRequest servletRequest,
-                   @Context HttpServletResponse servletResponse ) {
+  public Response get( @QueryParam( Parameter.KEY ) String key, @Context HttpServletRequest servletRequest,
+                       @Context HttpServletResponse servletResponse ) {
+
+    CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
 
     if ( StringUtils.isEmpty( key ) ) {
-      logger.equals( "empty key value not allowed" );
-      return;
+      logger.error( "empty key value not allowed" );
+      return Response.status( Response.Status.BAD_REQUEST ).build();
     }
 
     final Object value = SettingsEngine.getInstance().getValue( key, PentahoSessionHolder.getSession() );
-
-    try {
-      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), value.toString() );
-      CorsUtil.getInstance().setCorsHeaders( servletRequest, servletResponse );
-    } catch ( Exception e ) {
-      logger.error( e );
+    if ( value != null )  {
+      return Response.ok( value.toString() ).build();
     }
+    return Response.status( Response.Status.NOT_FOUND ).build();
   }
 }
