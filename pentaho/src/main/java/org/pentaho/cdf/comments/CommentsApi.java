@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -26,6 +26,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -34,11 +36,8 @@ import org.pentaho.cdf.PluginHibernateException;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.security.SecurityHelper;
+import org.pentaho.platform.web.http.api.resources.utils.SystemUtils;
 import pt.webdetails.cpf.utils.CharsetHelper;
-import pt.webdetails.cpf.utils.PluginIOUtils;
-
-import java.io.IOException;
 
 @Path( "/pentaho-cdf/api/comments" )
 public class CommentsApi {
@@ -49,19 +48,20 @@ public class CommentsApi {
   @Path( "/add" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   @Produces( APPLICATION_JSON )
-  public void add( @DefaultValue( "" ) @QueryParam( Parameter.PAGE ) String page,
-                   @DefaultValue( "" ) @QueryParam( Parameter.COMMENT ) String comment,
-                   @Context HttpServletResponse servletResponse,
-                   @Context HttpServletRequest servletRequest ) {
+  public Response add( @DefaultValue( "" ) @QueryParam( Parameter.PAGE ) String page,
+                       @DefaultValue( "" ) @QueryParam( Parameter.COMMENT ) String comment,
+                       @Context HttpServletResponse servletResponse,
+                       @Context HttpServletRequest servletRequest ) {
 
     servletResponse.setContentType( APPLICATION_JSON );
     servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
     setCorsHeaders( servletRequest, servletResponse );
 
     try {
-      addComment( page, comment, servletResponse );
+      return Response.ok( addComment( page, comment ) ).build();
     } catch ( Exception e ) {
       logger.error( "Error adding comment", e );
+      return Response.serverError().build();
     }
   }
 
@@ -69,7 +69,7 @@ public class CommentsApi {
   @Path( "/list" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   @Produces( APPLICATION_JSON )
-  public void list( @DefaultValue( "" ) @QueryParam( Parameter.PAGE ) String page,
+  public Response list( @DefaultValue( "" ) @QueryParam( Parameter.PAGE ) String page,
                     @DefaultValue( "0" ) @QueryParam( Parameter.FIRST_RESULT ) int firstResult,
                     @DefaultValue( "20" ) @QueryParam( Parameter.MAX_RESULTS ) int maxResults,
                     @DefaultValue( "false" ) @QueryParam( Parameter.DELETED ) boolean deleted,
@@ -94,9 +94,10 @@ public class CommentsApi {
     }
 
     try {
-      listComments( page, firstResult, maxResults, deleted, archived, servletResponse );
+      return Response.ok( listComments( page, firstResult, maxResults, deleted, archived ) ).build();
     } catch ( Exception e ) {
       logger.error( "Error listing comments", e );
+      return Response.serverError().build();
     }
   }
 
@@ -104,7 +105,7 @@ public class CommentsApi {
   @Path( "/archive" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   @Produces( APPLICATION_JSON )
-  public void archive( @DefaultValue( "0" ) @QueryParam( Parameter.COMMENT_ID ) int commentId,
+  public Response archive( @DefaultValue( "0" ) @QueryParam( Parameter.COMMENT_ID ) int commentId,
                        @DefaultValue( "true" ) @QueryParam( Parameter.VALUE ) boolean value,
                        @Context HttpServletResponse servletResponse,
                        @Context HttpServletRequest servletRequest ) {
@@ -115,13 +116,14 @@ public class CommentsApi {
 
     if ( !isAuthenticated() ) {
       logger.error( "Operation not authorized: requires authentication" );
-      return;
+      return Response.status( Response.Status.UNAUTHORIZED ).build();
     }
 
     try {
-      archiveComment( commentId, value, servletResponse );
+      return Response.ok( archiveComment( commentId, value ) ).build();
     } catch ( Exception e ) {
       logger.error( "Error archiving comment", e );
+      return Response.serverError().build();
     }
   }
 
@@ -129,10 +131,10 @@ public class CommentsApi {
   @Path( "/delete" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   @Produces( APPLICATION_JSON )
-  public void delete( @DefaultValue( "0" ) @QueryParam( "commentId" ) int commentId,
+  public Response delete( @DefaultValue( "0" ) @QueryParam( "commentId" ) int commentId,
                       @DefaultValue( "true" ) @QueryParam( Parameter.VALUE ) boolean value,
                       @Context HttpServletResponse servletResponse,
-                      @Context HttpServletRequest servletRequest ) throws Exception {
+                      @Context HttpServletRequest servletRequest ) {
 
     servletResponse.setContentType( APPLICATION_JSON );
     servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
@@ -140,13 +142,14 @@ public class CommentsApi {
 
     if ( !isAuthenticated() ) {
       logger.error( "Operation not authorized: requires authentication" );
-      return;
+      return Response.status( Response.Status.UNAUTHORIZED ).build();
     }
 
     try {
-      deleteComment( commentId, value, servletResponse );
+      return Response.ok( deleteComment( commentId, value ) ).build();
     } catch ( Exception ex ) {
       logger.error( "Error deleting comment", ex );
+      return Response.serverError().build();
     }
   }
 
@@ -159,57 +162,44 @@ public class CommentsApi {
   }
 
   protected boolean isAdministrator() {
-    return SecurityHelper.getInstance().isPentahoAdministrator( PentahoSessionHolder.getSession() );
+    return SystemUtils.canAdminister();
   }
 
   protected boolean isAuthenticated() {
     return PentahoSessionHolder.getSession().isAuthenticated();
   }
 
-  protected void addComment( String page, String comment, HttpServletResponse servletResponse )
-    throws PluginHibernateException, JSONException, InvalidCdfOperationException, IOException {
+  protected String addComment( String page, String comment )
+    throws PluginHibernateException, JSONException, InvalidCdfOperationException {
 
-    PluginIOUtils.writeOutAndFlush(
-        servletResponse.getOutputStream(),
-        CommentsEngine.getInstance().add( page, comment, getUserName() ).toString( 2 )
-    );
+    return CommentsEngine.getInstance().add( page, comment, getUserName() ).toString( 2 );
   }
 
-  protected void listComments( String page,
+  protected String listComments( String page,
                                int firstResult,
                                int maxResults,
                                boolean deleted,
-                               boolean archived,
-                               HttpServletResponse servletResponse )
-    throws PluginHibernateException, JSONException, InvalidCdfOperationException, IOException {
+                               boolean archived )
+    throws PluginHibernateException, JSONException, InvalidCdfOperationException {
 
-    PluginIOUtils.writeOutAndFlush(
-        servletResponse.getOutputStream(),
-        CommentsEngine.getInstance().list(
+    return CommentsEngine.getInstance().list(
           page,
           firstResult,
           maxResults,
           deleted,
           archived,
-          getUserName() ).toString( 2 )
-    );
+          getUserName() ).toString( 2 );
   }
 
-  protected void archiveComment( int commentId, boolean value, HttpServletResponse servletResponse )
-    throws IOException, JSONException, PluginHibernateException {
+  protected String archiveComment( int commentId, boolean value )
+    throws JSONException, PluginHibernateException {
 
-    PluginIOUtils.writeOutAndFlush(
-        servletResponse.getOutputStream(),
-        CommentsEngine.getInstance().archive( commentId, value, getUserName(), isAdministrator() ).toString( 2 )
-    );
-  };
+    return CommentsEngine.getInstance().archive( commentId, value, getUserName(), isAdministrator() ).toString( 2 );
+  }
 
-  protected void deleteComment( int commentId, boolean value, HttpServletResponse servletResponse )
-    throws IOException, JSONException, PluginHibernateException {
+  protected String deleteComment( int commentId, boolean value )
+    throws JSONException, PluginHibernateException {
 
-    PluginIOUtils.writeOutAndFlush(
-        servletResponse.getOutputStream(),
-        CommentsEngine.getInstance().delete( commentId, value, getUserName(), isAdministrator() ).toString( 2 )
-    );
+    return CommentsEngine.getInstance().delete( commentId, value, getUserName(), isAdministrator() ).toString( 2 );
   }
 }
