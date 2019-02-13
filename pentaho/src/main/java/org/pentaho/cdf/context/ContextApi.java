@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,7 +13,6 @@
 
 package org.pentaho.cdf.context;
 
-import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -32,7 +31,6 @@ import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.cdf.utils.JsonUtil;
 import pt.webdetails.cpf.utils.CharsetHelper;
-import pt.webdetails.cpf.utils.PluginIOUtils;
 
 @Path( "/pentaho-cdf/api/context" )
 public class ContextApi {
@@ -59,16 +57,16 @@ public class ContextApi {
   @Path( "/getConfig" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
   @Produces( APPLICATION_JSON )
-  public void getConfig( @QueryParam( Parameter.PATH ) String path,
+  public Response getConfig( @QueryParam( Parameter.PATH ) String path,
                          @QueryParam( Parameter.VIEW ) String view,
                          @Context HttpServletRequest servletRequest,
-                         @Context HttpServletResponse servletResponse ) throws IOException {
+                         @Context HttpServletResponse servletResponse ) {
 
     servletResponse.setContentType( APPLICATION_JSON );
     servletResponse.setCharacterEncoding( CharsetHelper.getEncoding() );
     setCorsHeaders( servletRequest, servletResponse );
 
-    writeConfig( path, servletRequest, servletResponse );
+    return Response.ok( writeConfig( path, servletRequest ) ).build();
   }
 
   protected void setCorsHeaders( HttpServletRequest servletRequest, HttpServletResponse servletResponse ) {
@@ -90,26 +88,19 @@ public class ContextApi {
     }
   }
 
-  protected void writeConfig(
+  protected String writeConfig(
       String path,
-      HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse ) throws IOException {
+      HttpServletRequest servletRequest ) {
 
     try {
-      PluginIOUtils.writeOutAndFlush(
-          servletResponse.getOutputStream(),
-          ContextEngine.getInstance().getConfig(
-            path,
-            Parameter.asHashMap( servletRequest ),
-            servletRequest.getSession().getMaxInactiveInterval()
-          )
+      return ContextEngine.getInstance().getConfig(
+        path,
+        Parameter.asHashMap( servletRequest ),
+        servletRequest.getSession().getMaxInactiveInterval()
       );
     } catch ( JSONException e ) {
       logger.error( "Error getting config", e );
-      PluginIOUtils.writeOutAndFlush(
-          servletResponse.getOutputStream(),
-          JsonUtil.makeJsonErrorResponse( "Error getting config: " + e.getMessage(), false ).toString()
-      );
+      return JsonUtil.makeJsonErrorResponse( "Error getting config: " + e.getMessage(), false ).toString();
     }
   }
 }
