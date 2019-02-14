@@ -49,6 +49,9 @@
     <pentaho-json.version>8.3.0.0-SNAPSHOT</pentaho-json.version>
     <servlet-api.version>2.4</servlet-api.version>
     <owasp-encoder.version>1.2</owasp-encoder.version>
+    <powermock.version>1.6.3</powermock.version>
+    <mockito-core.version>1.10.19</mockito-core.version>
+    <mockito-all.version>1.10.19</mockito-all.version>
 
     <global.require.file></global.require.file>
     <requirejs.config.files.pattern></requirejs.config.files.pattern>
