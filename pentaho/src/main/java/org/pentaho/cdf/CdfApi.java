@@ -199,6 +199,9 @@ public class CdfApi {
       @Context HttpServletRequest request,
       @Context HttpServletResponse response ) throws IOException {
 
+    // set default response status
+    response.setStatus( HttpServletResponse.SC_OK );
+
     String value = determineCorrectPath( solution, action, path );
 
     if ( ActionEngine.getInstance().executeAction(
@@ -237,6 +240,9 @@ public class CdfApi {
                           @Context HttpServletRequest servletRequest,
                           @Context HttpServletResponse servletResponse )
     throws IOException {
+
+    // set default response status
+    servletResponse.setStatus( HttpServletResponse.SC_OK );
 
     String value = determineCorrectPath( solution, action, path );
 
@@ -303,6 +309,9 @@ public class CdfApi {
       @FormParam( Parameter.JNDI ) String jndi,
       @Context HttpServletRequest servletRequest,
       @Context HttpServletResponse servletResponse ) throws IOException {
+
+    // set default response status
+    servletResponse.setStatus( HttpServletResponse.SC_OK );
 
     String value = determineCorrectPath( solution, action, path );
 
