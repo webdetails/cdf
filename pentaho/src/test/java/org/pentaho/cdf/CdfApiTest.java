@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -22,14 +22,16 @@ import pt.webdetails.cpf.messaging.MockHttpServletRequest;
 import pt.webdetails.cpf.messaging.MockHttpServletResponse;
 import pt.webdetails.cpf.utils.CharsetHelper;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -64,16 +66,23 @@ public class CdfApiTest {
     servletResponse = null;
   }
 
+  private MediaType getResponseContentType( Response response ) {
+    return (MediaType) response.getMetadata().getFirst( HttpHeaders.CONTENT_TYPE );
+  }
+
   @Test
   public void getJSONSolution() throws Exception {
-    assertEquals( servletResponse.getContentType(), null );
-    assertEquals( servletResponse.getCharacterEncoding(), null );
+    Map<String, String> mtParameters = new HashMap<>();
+    mtParameters.put( "charset", CharsetHelper.getEncoding() );
 
-    cdfApi.getJSONSolution( SOLUTION, PATH, ACTION, DEPTH, SHOW_HIDDEN_FILES, MODE, servletResponse );
+    MediaType expectedMediaType = new MediaType( APPLICATION_JSON_TYPE.getType(), APPLICATION_JSON_TYPE.getSubtype(), mtParameters );
 
-    assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
-    assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( cdfApi, times( 1 ) ).writeJSONSolution( PATH, DEPTH, SHOW_HIDDEN_FILES, MODE, servletResponse );
+    Response response = cdfApi.getJSONSolution( SOLUTION, PATH, ACTION, DEPTH, SHOW_HIDDEN_FILES, MODE );
+
+    MediaType actualMediaType = getResponseContentType( response );
+    assertEquals( expectedMediaType, actualMediaType );
+
+    verify( cdfApi, times( 1 ) ).writeJSONSolution( PATH, DEPTH, SHOW_HIDDEN_FILES, MODE );
   }
 
   @Test

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -62,7 +62,7 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times( 1 ) ).addComment( PAGE, COMMENT, servletResponse );
+    verify( commentsApi, times( 1 ) ).addComment( PAGE, COMMENT );
   }
 
   @Test
@@ -74,7 +74,7 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times( 1 ) ).listComments( PAGE, 0, 100, false/*deleted*/, false/*archived*/, servletResponse );
+    verify( commentsApi, times( 1 ) ).listComments( PAGE, 0, 100, false/*deleted*/, false/*archived*/ );
   }
 
   @Test
@@ -86,7 +86,7 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times( 1 ) ).archiveComment( 1, false/*value*/, servletResponse );
+    verify( commentsApi, times( 1 ) ).archiveComment( 1, false/*value*/ );
   }
 
   @Test
@@ -98,6 +98,6 @@ public class CommentsApiTest {
 
     Assert.assertTrue( servletResponse.getContentType().equals( APPLICATION_JSON ) );
     Assert.assertTrue( servletResponse.getCharacterEncoding().equals( CharsetHelper.getEncoding() ) );
-    verify( commentsApi, times( 1 ) ).deleteComment( 1, false/*value*/, servletResponse );
+    verify( commentsApi, times( 1 ) ).deleteComment( 1, false/*value*/ );
   }
 }

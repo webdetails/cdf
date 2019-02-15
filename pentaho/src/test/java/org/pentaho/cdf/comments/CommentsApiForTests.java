@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -31,19 +31,18 @@ public class CommentsApiForTests extends CommentsApi {
   }
 
   @Override
-  protected void addComment( String page, String comment, HttpServletResponse servletResponse ) { }
+  protected String addComment( String page, String comment ) { return ""; }
 
   @Override
-  protected void listComments( String page,
+  protected String listComments( String page,
                                int firstResult,
                                int maxResults,
                                boolean deleted,
-                               boolean archived,
-                               HttpServletResponse servletResponse ) { }
+                               boolean archived ) { return ""; }
 
   @Override
-  protected void archiveComment( int commentId, boolean value, HttpServletResponse servletResponse ) { }
+  protected String archiveComment( int commentId, boolean value ) { return ""; }
 
   @Override
-  protected void deleteComment( int commentId, boolean value, HttpServletResponse servletResponse ) { }
+  protected String deleteComment( int commentId, boolean value ) { return ""; }
 }
