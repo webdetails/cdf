@@ -5,19 +5,19 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.21-185</version>
   </parent>
   <artifactId>cdf-pentaho</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.21-185</version>
   <properties>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
-    <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
-    <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
+    <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
     <dependency.spring-core.revision>4.3.2.RELEASE</dependency.spring-core.revision>
+    <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <dependency.spring-security-core.revision>4.1.3.RELEASE</dependency.spring-security-core.revision>
-    <dependency.pentaho-platform.revision>7.1-SNAPSHOT</dependency.pentaho-platform.revision>
+    <dependency.pentaho-platform.revision>7.1.0.21-185</dependency.pentaho-platform.revision>
   </properties>
   <dependencies>
     <dependency>
@@ -63,8 +63,8 @@
       <version>${dependency.javax.ws.rs-api.revision}</version>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -74,8 +74,8 @@
       <version>${dependency.pentaho-platform.revision}</version>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -85,8 +85,8 @@
       <version>${dependency.pentaho-platform.revision}</version>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -96,8 +96,8 @@
       <version>${dependency.pentaho-platform.revision}</version>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -107,8 +107,8 @@
       <version>${dependency.pentaho-platform.revision}</version>
       <exclusions>
         <exclusion>
-          <groupId>*</groupId>
           <artifactId>*</artifactId>
+          <groupId>*</groupId>
         </exclusion>
       </exclusions>
     </dependency>
