@@ -143,7 +143,8 @@
     deps: {
       "cdf/lib/jquery": "jQuery",
       "amd!cdf/lib/jquery.ui": ""
-    }
+    },
+    prescript: "var setTimeout = window.setTimeout.bind(window);\n" // Prevent setTimeout from throwing an 'Invalid calling object' exception on IE11 and Edge
   };
 
   //jquery-impromptu 5.2.4
