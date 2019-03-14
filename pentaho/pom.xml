@@ -14,9 +14,7 @@
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
     <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
-    <dependency.spring-core.revision>4.3.2.RELEASE</dependency.spring-core.revision>
     <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
-    <dependency.spring-security-core.revision>4.1.3.RELEASE</dependency.spring-security-core.revision>
     <platform.version>8.3.0.0-SNAPSHOT</platform.version>
   </properties>
   <dependencies>
@@ -144,18 +142,6 @@
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
       <version>${dependency.google-collections.revision}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>${dependency.spring-core.revision}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-core</artifactId>
-      <version>${dependency.spring-security-core.revision}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
