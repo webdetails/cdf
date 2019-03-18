@@ -90,7 +90,7 @@ public class EmbeddedHeadersGeneratorTest extends TestCase {
 
     // Hitachi Vantara Environment configuration
     expected.append( "\nrequireCfg.config[\"pentaho/environment\"] = {" );
-    expected.append( "\n  application: \"pentaho-cdf\"," );
+    expected.append( "\n  application: \"pentaho/cdf\"," );
     expected.append( "\n  theme: null," );
     expected.append( "\n  locale: \"" ).append( locale ).append( "\"," );
     expected.append( "\n  user: {" );

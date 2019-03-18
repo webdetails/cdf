@@ -46,7 +46,4 @@
     }
   }
 
-  var requireModules = requireCfg.config["pentaho/modules"];
-  requireModules["cdf/components/ccc/config/cdf.vizApi.conf"] = {type: "pentaho/config/spec/IRuleSet"};
-
 })();
