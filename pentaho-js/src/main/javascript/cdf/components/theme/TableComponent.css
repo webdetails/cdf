@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -74,25 +74,25 @@
 }
 
 .paginate_disabled_previous {
-  background: url('../lib/dataTables/images/back_disabled.png') no-repeat top left;
+  background: url('../../lib/dataTables/images/back_disabled.png') no-repeat top left;
 }
 
 .paginate_enabled_previous {
-  background: url('../lib/dataTables/images/back_enabled.png') no-repeat top left;
+  background: url('../../lib/dataTables/images/back_enabled.png') no-repeat top left;
 }
 .paginate_enabled_previous:hover {
-  background: url('../lib/dataTables/images/back_enabled_hover.png') no-repeat top left;
+  background: url('../../lib/dataTables/images/back_enabled_hover.png') no-repeat top left;
 }
 
 .paginate_disabled_next {
-  background: url('../lib/dataTables/images/forward_disabled.png') no-repeat top right;
+  background: url('../../lib/dataTables/images/forward_disabled.png') no-repeat top right;
 }
 
 .paginate_enabled_next {
-  background: url('../lib/dataTables/images/forward_enabled.png') no-repeat top right;
+  background: url('../../lib/dataTables/images/forward_enabled.png') no-repeat top right;
 }
 .paginate_enabled_next:hover {
-  background: url('../lib/dataTables/images/forward_enabled_hover.png') no-repeat top right;
+  background: url('../../lib/dataTables/images/forward_enabled_hover.png') no-repeat top right;
 }
 
 .cdfClickable{

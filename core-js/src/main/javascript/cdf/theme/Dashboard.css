@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -50,10 +50,10 @@ body.draggable-popup-fix {
 
 @font-face {
   font-family: 'OpenSansRegular';
-  src: url('lib/fonts/opensans/opensans-regular.eot');
-  src: url('lib/fonts/opensans/opensans-regular.eot') format('embedded-opentype'),
-  url('lib/fonts/opensans/opensans-regular.woff') format('woff'),
-  url('lib/fonts/opensans/opensans-regular.ttf') format('truetype'),
-  url('lib/fonts/opensans/opensans-regular.svg#OpenSansRegular') format('svg');
+  src: url('../lib/fonts/opensans/opensans-regular.eot');
+  src: url('../lib/fonts/opensans/opensans-regular.eot') format('embedded-opentype'),
+  url('../lib/fonts/opensans/opensans-regular.woff') format('woff'),
+  url('../lib/fonts/opensans/opensans-regular.ttf') format('truetype'),
+  url('../lib/fonts/opensans/opensans-regular.svg#OpenSansRegular') format('svg');
 }
 
