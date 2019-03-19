@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -133,25 +133,25 @@ public class EmbeddedHeadersGenerator {
       reservedChars.append( reserved );
     }
 
-    return "\nrequireCfg.config[\"pentaho/environment\"] = {" +
-        "\n  application: \"pentaho/cdf\"," +
-        "\n  theme: null," +
-        "\n  locale: \"" + this.locale + "\"," +
-        "\n  user: {" +
-        "\n    id: \"" + userID + "\"," +
-        "\n    home: \"" + userHomeFolder + "\"" +
-        "\n  }," +
-        "\n  server: {" +
-        "\n    root: \"" + this.fullQualifiedURL + "\"" +
-        "\n  }," +
-        "\n  reservedChars: \"" + escapeEnvironmentVariable( reservedChars.toString() ) + "\"" +
-        "\n};\n";
+    return "\nrequireCfg.config[\"pentaho/environment\"] = {"
+      + "\n  application: \"pentaho/cdf\","
+      + "\n  theme: null,"
+      + "\n  locale: \"" + this.locale + "\","
+      + "\n  user: {"
+      + "\n    id: \"" + userID + "\","
+      + "\n    home: \"" + userHomeFolder + "\""
+      + "\n  },"
+      + "\n  server: {"
+      + "\n    root: \"" + this.fullQualifiedURL + "\""
+      + "\n  },"
+      + "\n  reservedChars: \"" + escapeEnvironmentVariable( reservedChars.toString() ) + "\""
+      + "\n};\n";
   }
 
   protected String printUrlContext() {
     String contextPath = DEPRECATED_COMMENT + MessageFormat.format( CONTEXT_PATH_BUILDER, this.fullQualifiedURL );
-    String fullQualifiedUrl = DEPRECATED_COMMENT +
-        MessageFormat.format( FULL_QUALIFIED_URL_BUILDER, this.fullQualifiedURL );
+    String fullQualifiedUrl = DEPRECATED_COMMENT
+      + MessageFormat.format( FULL_QUALIFIED_URL_BUILDER, this.fullQualifiedURL );
     String serverProtocol = DEPRECATED_COMMENT + MessageFormat.format( SERVER_PROTOCOL_BUILDER, this.serverProtocol );
 
     return contextPath + fullQualifiedUrl + serverProtocol;
@@ -257,7 +257,7 @@ public class EmbeddedHeadersGenerator {
   }
 
   private String escapeEnvironmentVariable( String value ) {
-    if ( value == null) {
+    if ( value == null ) {
       return "null";
     }
 
