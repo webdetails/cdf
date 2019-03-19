@@ -307,7 +307,8 @@ var VisualizationAPIComponent = (function() {
       // 3. Protected method.
       this._onGetVizSpec(vizSpec);
 
-      vizSpec.isAutoUpdate = false;
+      // Otherwise, selection would not work by default.
+      vizSpec.isAutoUpdate = true;
 
       return vizSpec;
     },
