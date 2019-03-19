@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,7 +16,7 @@ define([
   './UnmanagedComponent',
   'amd!../lib/underscore',
   '../lib/jquery',
-  'css!./AutocompleteBoxComponent'
+  'css!./theme/AutocompleteBoxComponent'
 ], function(Logger, UnmanagedComponent, _, $) {
 
   return UnmanagedComponent.extend(/** @lends cdf.components.AutocompleteBoxComponent# */{
