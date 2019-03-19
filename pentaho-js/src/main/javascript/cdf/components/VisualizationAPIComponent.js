@@ -276,7 +276,8 @@ define([
       // 3. Protected method.
       this._onGetVizSpec(vizSpec);
 
-      vizSpec.isAutoUpdate = false;
+      // Otherwise, selection would not work by default.
+      vizSpec.isAutoUpdate = true;
 
       return vizSpec;
     },
@@ -311,7 +312,7 @@ define([
 
       var viz = new classes.Model(vizSpec);
 
-      var domContainer = this.__setupDomContainer(classes.Model);
+      var domContainer = this.__setupDomContainer(classes.Model.type.id, classes.viewTypeId);
 
       this.__vizView = new classes.View({model: viz, domContainer: domContainer});
 
@@ -321,13 +322,14 @@ define([
     },
 
     /**
-     * Sets up the HTML container for a visualization, given the model class.
+     * Sets up the HTML container for a visualization, given the model and view class identifiers.
      *
-     * @param {Class.<pentaho.visual.Model>} Model - The model class.
+     * @param {string} vizTypeId - The visualization identifier.
+     * @param {string} viewTypeId - The view identifier.
      * @return {HTMLElement} The HTML container.
      * @private
      */
-    __setupDomContainer: function(Model) {
+    __setupDomContainer: function(vizTypeId, viewTypeId) {
       // Empty, in case viz type changed.
       var $domContainer = this.placeholder().empty();
 
@@ -336,7 +338,7 @@ define([
         $domContainer.removeClass(this.__vizStyleClass);
       }
 
-      var styleClasses = this.__vizStyleClass = Model.type.inheritedStyleClasses.join(" ");
+      var styleClasses = this.__vizStyleClass = visualUtil.getCssClasses(vizTypeId, viewTypeId);
 
       $domContainer.addClass(styleClasses);
 

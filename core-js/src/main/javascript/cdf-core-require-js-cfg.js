@@ -48,6 +48,13 @@
     }
   }
 
+  // Just reserving CDF's application identifier. Not to be used as a real AMD id right now.
+  // Ideally, would be unified with "cdf", by mapping "cdf" to "pentaho/cdf", but there's no time to do this now.
+  // The other way round, mapping "pentaho/cdf" to "cdf", is not viable,
+  // as "cdf" would need to be passed directly to webcontext.js,
+  // revealing the internal temporary implementation detail.
+  requireCfg.paths['pentaho/cdf'] = "/";
+
   /**
    * Because some components are in subfolders, we need to map their module ids
    * so we are able to use the format {plugin}/components/{component_name}

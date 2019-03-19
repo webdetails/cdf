@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -199,7 +199,7 @@ public class CdfHtmlRenderer {
 
   protected void getWebContextHeader( OutputStream out, boolean loadTheme ) throws Exception {
     String webcontext = "<script language=\"javascript\" type=\"text/javascript\" src=\"webcontext"
-        + ".js?context=cdf&application=pentaho-cdf" + ( loadTheme ? "" : "&amp;requireJsOnly=true" ) + "\"></script>";
+        + ".js?context=cdf&application=pentaho/cdf" + ( loadTheme ? "" : "&amp;requireJsOnly=true" ) + "\"></script>";
     out.write( webcontext.getBytes( CharsetHelper.getEncoding() ) );
   }
 

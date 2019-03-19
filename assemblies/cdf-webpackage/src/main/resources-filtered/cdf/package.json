@@ -92,11 +92,6 @@
   },
 
   "config": {
-    "pentaho/modules": {
-      "cdf/components/ccc/config/cdf.vizApi.conf": {
-        "type": "pentaho/config/spec/IRuleSet"
-      }
-    },
     "amd": {
       "shim": {
         "cdf/lib/jquery.ui": {

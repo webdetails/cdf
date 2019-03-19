@@ -29,8 +29,7 @@ define(function () {
       }
 
       ModelMock.type = {
-        id: vizTypeId,
-        inheritedStyleClasses: ["style-a", "style-b"]
+        id: vizTypeId
       };
 
       function ViewMock(viewSpec) {
@@ -46,6 +45,10 @@ define(function () {
         View: ViewMock,
         viewTypeId: vizTypeId + "View"
       });
+    },
+
+    getCssClasses: function() {
+      return "style-a style-b";
     }
   }
 });
