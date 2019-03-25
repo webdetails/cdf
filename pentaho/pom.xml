@@ -13,7 +13,6 @@
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
-    <dependency.slf4j-api.revision>1.7.5</dependency.slf4j-api.revision>
     <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <platform.version>8.3.0.0-SNAPSHOT</platform.version>
   </properties>
@@ -125,12 +124,6 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${dependency.slf4j-api.revision}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
