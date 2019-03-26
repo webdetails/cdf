@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -49,13 +49,13 @@
         myself.dateFormats = myself.dateFormats == undefined ? {} : myself.dateFormats;
         // process params and update options
         $.map(myself.parameters, function(k) {
-            options[k[0]] = Dashboards.getParameterValue(k[1]);           
+            options[k[0]] = Dashboards.getParameterValue(k[1]);
             if(myself.dateFormats[k[0]]) {
                 var formatedDate = moment(options[k[0]]).format(myself.dateFormats[k[0]]);
                 if(formatedDate !== 'Invalid date') {
                     options[k[0]] = formatedDate;
-                }			    
-            }							
+                }
+            }
         });
         return options;
     },
@@ -67,39 +67,39 @@
             return this.editMode;
         }
     },
-    
+
     generateIframe: function(url) {
-        var height = this.height ? this.height : "480px";
-        var width = this.width ? this.width : "100%";
-
-        var iFrameHTML = "<iframe id ='iframe_" + this.htmlObject + "' "
-                + "style='height:100%;width:100%;border:0px' "
-                + "frameborder='0' src='" + url + "'/>"
-
-        return iFrameHTML;
+        return "<iframe id ='iframe_" + this.htmlObject + "' "
+                + "style='height:100%;width:100%;border:0' "
+                + "frameborder='0' src='" + url + "'/>";
     }
 
-});//AnalyzerComponent
+}); // AnalyzerComponent
 
 var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
-    
+
     update: function() {
         // 2 modes of working; if it's a div, create a button inside it
-        var myself = this;
-        var o = $("#" + this.htmlObject);
-        if ($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
+        var $html = $("#" + this.htmlObject);
+        if ($.inArray($html[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
             // create a button
-            o = $("<button/>").appendTo(o.empty());
-            if (o[0].tagName == "DIV"){
-                o.wrap("<span/>");
+            $html = $("<button/>").appendTo($html.empty());
+
+            if ($html[0].tagName === "DIV") {
+                $html.wrap("<span/>");
             }
-            if (this.label != undefined){
-                o.text(this.label);
+
+            if (this.label != null) {
+                $html.text(this.label);
             }
-            o.button();
+
+            $html.button();
         }
-        o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-        o.bind("click", function() {
+
+        $html.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+
+        var myself = this;
+        $html.bind("click", function() {
             var success = typeof myself.preChange === 'function' ? myself.preChange() : true ;
             if (success) {
                 myself.executeAnalyzerComponent();
@@ -109,29 +109,24 @@ var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
             }
         });
     },
+
     executeAnalyzerComponent: function() {
         var callVar = this.isEditMode() ? "editor" : "viewer";
         var parameters = this.getOptions();
-        var path = {};
-        if ( parameters.solution ) {
-            $.extend( path, {solution: parameters.solution});
-        }
-        if ( parameters.path ) {
-            $.extend( path, {path: parameters.path});
-        }
-        if ( parameters.action ) {
-            $.extend( path, {action: parameters.action});
-        }
-        delete parameters.solution;
-        delete parameters.path;
-        delete parameters.action;
-        $.extend( parameters, {ts: new Date().getTime()});
+
+        parameters.ts = new Date().getTime();
+
+        var pathOptions = {
+           solution: this.solution,
+           path: this.path,
+           action: this.action
+        };
 
         $.fancybox({
             type: "iframe",
-            href: wd.cdf.endpoints.getAnalyzer( path, callVar, parameters ),
+            href: wd.cdf.endpoints.getAnalyzer( pathOptions, callVar, parameters ),
             width: $(window).width(),
             height: $(window).height() - 50
         });
     }
-});//ExecuteAnalyzerComponent
+}); // ExecuteAnalyzerComponent

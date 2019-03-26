@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,74 +12,120 @@
  */
 
 define([
+  './BaseComponent',
   './AnalyzerComponent.ext',
-  '../lib/jquery',
+  '../Logger',
   '../lib/moment',
-  './BaseComponent'
-], function(AnalyzerComponentExt, $, moment, BaseComponent) {
+  '../lib/jquery',
+  'amd!../lib/underscore'
+], function(BaseComponent, AnalyzerComponentExt, Logger, moment, $, _) {
+
+  var EDIT_MODE = "editor";
+  var VIEW_MODE = "viewer";
 
   return BaseComponent.extend({
     update: function() {
       this.clear();
-      var options = this.getOptions();
 
-      var callVar = this.isEditMode() ? "editor" : "viewer";
-
-      $.extend(options, {ts: new Date().getTime()});
-
-      var url = AnalyzerComponentExt.getAnalyzer({
-        solution: this.solution,
-        path: this.path,
-        action: this.action
-      }, callVar, options);
+      var url = this._getApiUrl();
 
       var iframe = this.generateIframe(url);
       $("#" + this.htmlObject).html(iframe);
-
     },
 
     getOptions: function() {
-      var myself = this;
       var options = {
-        command: myself.command == undefined ? "open" : myself.command,
-        showFieldList: myself.showFieldList == undefined ? false : myself.showFieldList,
-        showRepositoryButtons: myself.showRepositoryButtons == undefined ? false : myself.showRepositoryButtons,
-        frameless: myself.frameless == undefined ? false : myself.frameless
+        command: this.command != null ? this.command : "open",
+        frameless: this.frameless != null ? this.frameless : false
       };
-      myself.dateFormats = myself.dateFormats == undefined ? {} : myself.dateFormats;
+
+      if (this.isEditMode()) {
+        options.showFieldList = this.showFieldList != null ? this.showFieldList : false;
+        options.showRepositoryButtons = this.showRepositoryButtons != null ? this.showRepositoryButtons : false;
+      }
+
+      this.dateFormats = this.dateFormats || {};
+
       // process params and update options
-      var d = myself.dashboard;
-      $.map(myself.parameters, function(k) {
-        options[k[0]] = d.getParameterValue(k[1]);    
-        if(myself.dateFormats[k[0]]) {
-          var formatedDate = moment(options[k[0]]).format(myself.dateFormats[k[0]]);
-          if(formatedDate !== 'Invalid date') {
-            options[k[0]] = formatedDate;
-          }			    
-        }							
-      });
+      this.parameters.map(function(param) {
+        return this._extractParameter(param);
+      }, this).forEach(function(param) {
+        var name = param.name;
+        var value = param.value;
+
+        var dateFormat = this.dateFormats[name];
+        if (dateFormat != null) {
+          var formattedDate = moment(value).format(dateFormat);
+          if (formattedDate !== 'Invalid date') {
+            value = formattedDate;
+          }
+        }
+
+        options[name] = value;
+      }, this);
+
+      options.ts = new Date().getTime();
+
       return options;
     },
 
     isEditMode: function() {
-      if(this.viewOnly != undefined) {
+      if (this.viewOnly != null) {
         return !this.viewOnly || this.editMode;
       } else {
         return this.editMode;
       }
     },
-      
+
     generateIframe: function(url) {
-      var height = this.height ? this.height : "480px";
-      var width = this.width ? this.width : "100%";
+      var iFrameId = "iframe_" + this.htmlObject;
+      var iFrameStyle = "height:100%;width:100%;border:0";
 
-      var iFrameHTML = "<iframe id ='iframe_" + this.htmlObject + "' "
-        + "style='height:100%;width:100%;border:0px' "
-        + "frameborder='0' src='" + url + "'/>";
+      return "<iframe id ='" + iFrameId + "' src='" + url + "'"
+        + " style='" + iFrameStyle + "' frameborder='0'/>";
+    },
 
-      return iFrameHTML;
+    _getApiUrl: function() {
+      var mode = this.isEditMode() ? EDIT_MODE : VIEW_MODE;
+
+      var options = this.getOptions();
+
+      var pathSegments = {
+        solution: this.solution,
+        path: this.path,
+        action: this.action
+      };
+
+      return AnalyzerComponentExt.getAnalyzer(pathSegments, mode, options);
+    },
+
+    _extractParameter: function(param) {
+      var name = param[0];
+      var value = param[1];
+
+      var paramValue;
+      try {
+        paramValue = this.dashboard.getParameterValue(value);
+      } catch( e ) {
+        var canLogValue = !_.isObject(value) || _.isFunction(value);
+
+        var warning = "extractParameter detected static parameter " + name
+          + "=" + (canLogValue ? value : JSON.stringify(value)) + ". "
+          + "The parameter will be used as value instead its value obtained from getParameterValue";
+
+        Logger.log(warning);
+
+        paramValue = value;
+      }
+
+      if (paramValue === undefined) {
+        paramValue = value;
+      }
+
+      if(_.isFunction(paramValue)) {
+        paramValue = paramValue();
+      }
+      return {name: name, value: paramValue};
     }
-
   });
-
 });

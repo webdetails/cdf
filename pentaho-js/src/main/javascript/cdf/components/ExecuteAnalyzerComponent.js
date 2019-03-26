@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,64 +12,70 @@
  */
 
 define([
-  './AnalyzerComponent.ext',
-  '../lib/jquery',
   './AnalyzerComponent',
+  '../lib/jquery',
   'amd!../lib/jquery.fancybox'
-], function(AnalyzerComponentExt, $, AnalyzerComponent) {
+], function(AnalyzerComponent, $) {
 
   return AnalyzerComponent.extend({
-    
+
     update: function() {
-      // 2 modes of working; if it's a div, create a button inside it
-      var myself = this;
-      var o = $("#" + this.htmlObject);
-      if($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
-        // create a button
-        o = $("<button/>").appendTo(o.empty());
-        if(o[0].tagName == "DIV") {
-          o.wrap("<span/>");
-        }
-        if(this.label != undefined) {
-          o.text(this.label);
-        }
-        o.button();
-      }
-      o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-      o.bind("click", function() {
-        var success = typeof myself.preChange === 'function' ? myself.preChange() : true;
-        if(success) {
-          myself.executeAnalyzerComponent();
-        }
-        if(typeof myself.postChange === 'function') {
-          myself.postChange();
-        }
-      });
+      this.clear();
+
+      this._createExecuteButton();
     },
 
     executeAnalyzerComponent: function() {
-      var callVar = this.isEditMode() ? "editor" : "viewer";
-      var parameters = this.getOptions();
-      var path = {};
-      if(parameters.solution) {
-        $.extend(path, {solution: parameters.solution});
-      }
-      if(parameters.path) {
-        $.extend(path, {path: parameters.path});
-      }
-      if(parameters.action) {
-        $.extend(path, {action: parameters.action});
-      }
-      delete parameters.solution;
-      delete parameters.path;
-      delete parameters.action;
-      $.extend(parameters, {ts: new Date().getTime()});
+      var $window = $(window);
 
       $.fancybox({
         type: "iframe",
-        href: AnalyzerComponentExt.getAnalyzer(path, callVar, parameters),
-        width: $(window).width(),
-        height: $(window).height() - 50
+        href: this._getApiUrl(),
+        width: $window.width(),
+        height: $window.height() - 50
+      });
+    },
+
+    _createExecuteButton: function() {
+      // 2 modes of working; if it's a div, create a button inside it
+      var $html = $("#" + this.htmlObject);
+
+      if ($html == null || !$html.length) return;
+
+      var tag = $html[0].tagName.toUpperCase();
+      if (["SPAN", "DIV"].indexOf(tag) !== -1) {
+        // create a button
+        $html = $("<button/>").appendTo($html.empty());
+
+        if (tag === "DIV") {
+          $html.wrap("<span/>");
+        }
+
+        var label = this.label;
+        if (label != null) {
+          $html.text(label);
+        }
+
+        $html.button();
+      }
+
+      $html.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+
+      var component = this;
+      $html.bind("click", function() {
+        var preChangeSuccess = true;
+
+        if (typeof component.preChange === 'function') {
+          preChangeSuccess = component.preChange();
+        }
+
+        if (preChangeSuccess) {
+          component.executeAnalyzerComponent();
+        }
+
+        if (typeof component.postChange === 'function') {
+          component.postChange();
+        }
       });
     }
   });
