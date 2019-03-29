@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -19,7 +19,7 @@ define([
   './BaseComponent',
   '../Logger',
   '../lib/jquery',
-  'css!./CommentsComponent'
+  'css!./theme/CommentsComponent'
 ], function(CommentsComponentExt, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
   return BaseComponent.extend({

@@ -197,16 +197,16 @@
       //efficient if you define that module optimization entry before using it
       exclude: [
         // CSSs
-        'css!cdf/Dashboard',
-        "css!cdf/OlapUtils",
+        'css!cdf/theme/Dashboard',
+        "css!cdf/theme/OlapUtils",
         'css!cdf/lib/blueprint/screen',
         "css!cdf/lib/impromptu/jquery-impromptu",
         "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
-        "css!cdf/components/TableComponent",
-        "css!cdf/components/MultiButtonComponent",
-        "css!cdf/dashboard/Dashboard.legacy",
-        "css!cdf/dashboard/Dashboard.notifications",
-        "css!cdf/dashboard/Popups",
+        "css!cdf/components/theme/TableComponent",
+        "css!cdf/components/theme/MultiButtonComponent",
+        "css!cdf/dashboard/theme/Dashboard.legacy",
+        "css!cdf/dashboard/theme/Dashboard.notifications",
+        "css!cdf/dashboard/theme/Popups",
 
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         'cdf/lib/jquery',
@@ -283,17 +283,17 @@
       //efficient if you define that module optimization entry before using it
       exclude: [
         // CSSs
-        "css!cdf/Dashboard",
-        "css!cdf/OlapUtils",
+        "css!cdf/theme/Dashboard",
+        "css!cdf/theme/OlapUtils",
         "css!cdf/lib/Bootstrap/css/bootstrap",
         "css!cdf/lib/font-awesome/css/font-awesome",
         "css!cdf/lib/impromptu/jquery-impromptu",
         "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
-        "css!cdf/components/MultiButtonComponent",
-        "css!cdf/components/TableComponent",
-        "css!cdf/dashboard/Dashboard.legacy",
-        "css!cdf/dashboard/Dashboard.notifications",
-        "css!cdf/dashboard/Popups",
+        "css!cdf/components/theme/MultiButtonComponent",
+        "css!cdf/components/theme/TableComponent",
+        "css!cdf/dashboard/theme/Dashboard.legacy",
+        "css!cdf/dashboard/theme/Dashboard.notifications",
+        "css!cdf/dashboard/theme/Popups",
 
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         "cdf/lib/jquery",
@@ -380,14 +380,14 @@
       //efficient if you define that module optimization entry before using it
       exclude: [
         // CSSs
-        'css!cdf/Dashboard',
-        "css!cdf/OlapUtils",
+        'css!cdf/theme/Dashboard',
+        "css!cdf/theme/OlapUtils",
         "css!cdf/lib/impromptu/jquery-impromptu",
-        "css!cdf/components/MultiButtonComponent",
-        "css!cdf/components/TableComponent",
-        "css!cdf/dashboard/Dashboard.legacy",
-        "css!cdf/dashboard/Dashboard.notifications",
-        "css!cdf/dashboard/Popups",
+        "css!cdf/components/theme/MultiButtonComponent",
+        "css!cdf/components/theme/TableComponent",
+        "css!cdf/dashboard/theme/Dashboard.legacy",
+        "css!cdf/dashboard/theme/Dashboard.notifications",
+        "css!cdf/dashboard/theme/Popups",
 
         //exclude core included jquery libs otherwise we will not be able to use them without load issues
         'cdf/lib/jquery',
@@ -431,10 +431,10 @@
         // CSSs, otherwise paths (e.g. background images) are rewritten relative to the page and not the CSS file path
         "css!cdf/lib/impromptu/jquery-impromptu",
         "css!cdf/lib/theme/cupertino/jquery-ui-1.10.4.custom",
-        "css!cdf/Dashboard",
-        "css!cdf/dashboard/Dashboard.legacy",
-        "css!cdf/dashboard/Popups",
-        "css!cdf/dashboard/Dashboard.notifications",
+        "css!cdf/theme/Dashboard",
+        "css!cdf/dashboard/theme/Dashboard.legacy",
+        "css!cdf/dashboard/theme/Popups",
+        "css!cdf/dashboard/theme/Dashboard.notifications",
         "css!cdf/components/filter/styles/filter",
         // CDF dependencies (overhead, these might already have been loaded)
         "cdf/Logger",
