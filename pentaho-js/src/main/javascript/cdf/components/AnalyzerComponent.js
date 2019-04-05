@@ -47,13 +47,12 @@ define([
       this.dateFormats = this.dateFormats || {};
 
       // process params and update options
-      this.parameters.map(function(param) {
-        return this._extractParameter(param);
-      }, this).forEach(function(param) {
-        var name = param.name;
-        var value = param.value;
+      this.parameters.forEach(function(param) {
+        var extractedParameter = this._extractParameter(param);
 
-        var dateFormat = this.dateFormats[name];
+        var value = extractedParameter.value;
+
+        var dateFormat = this.dateFormats[extractedParameter.name];
         if (dateFormat != null) {
           var formattedDate = moment(value).format(dateFormat);
           if (formattedDate !== 'Invalid date') {
@@ -61,7 +60,7 @@ define([
           }
         }
 
-        options[name] = value;
+        options[extractedParameter.name] = value;
       }, this);
 
       options.ts = new Date().getTime();

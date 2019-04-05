@@ -40,7 +40,7 @@ define([
       // 2 modes of working; if it's a div, create a button inside it
       var $html = $("#" + this.htmlObject);
 
-      if ($html == null || !$html.length) return;
+      if (!$html.length) return;
 
       var tag = $html[0].tagName.toUpperCase();
       if (["SPAN", "DIV"].indexOf(tag) !== -1) {
