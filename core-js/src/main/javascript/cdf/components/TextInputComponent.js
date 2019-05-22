@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -23,14 +23,30 @@ define([
 
       myself._addHtmlToPlaceholder();
 
+      // Format param value to be displayed.
       var el = $("#" + myself.name);
-      el.val(myself.dashboard.getParameterValue(myself.parameter));
+      var paramValue = myself.dashboard.getParameterValue(myself.parameter);
+      var uiValue = myself._formatValue(paramValue);
+      el.val(uiValue);
+
       el.change(function() {
-        if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+        var newParamValue = myself.getValue();
+        if(myself.dashboard.getParameterValue(myself.parameter) !== newParamValue) {
+          // User can introduced non-formatted data,
+          // thus we need to ensure that data is formatted.
+          var uiValue = myself._formatValue(newParamValue);
+          el.val(uiValue);
+
           myself.dashboard.processChange(myself.name);
         }
       }).keyup(function(ev) {
-        if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+        var newParamValue = myself.getValue();
+        if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== newParamValue) {
+          // User can introduced non-formatted data,
+          // thus we need to ensure that data is formatted.
+          var uiValue = myself._formatValue(newParamValue);
+          el.val(uiValue);
+
           myself.dashboard.processChange(myself.name);
         }
       });
@@ -39,7 +55,34 @@ define([
     },
 
     getValue: function() {
-      return $("#" + this.name).val();
+      var value = $("#" + this.name).val();
+      // If value is formatted, remove mask.
+      return this._parseValue(value);
+    },
+
+    /**
+     * Formats a given value for user presentation.
+     *
+     * @param {*} value - The value to format.
+     * @return {string} The formatted value.
+     * @protected
+     */
+    _formatValue: function(value) {
+      return value;
+    },
+
+    /**
+     * Parses a given formatted value.
+     *
+     * The parser should be lenient in case a
+     * non-formatted value is given.
+     *
+     * @param {string} uiValue - The value to parse.
+     * @return {*} The parsed value.
+     * @protected
+     */
+    _parseValue: function(value) {
+      return value;
     },
 
     _addHtmlToPlaceholder: function() {
