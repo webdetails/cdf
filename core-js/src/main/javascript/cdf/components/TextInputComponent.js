@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2015 Webdetails, a Pentaho company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -20,30 +20,34 @@ define([
   return BaseComponent.extend({
     update: function() {
       var myself = this;
-      var name = myself.name;
 
-      var selectHTML = "<input type='text' id='" + name + "' name='"  + name +
-        "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
-        (myself.size ? ("' size='" + myself.size) : (myself.charWidth ? ("' size='" + myself.charWidth) : "")) +
-        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : (myself.maxChars ? ("' maxlength='" + myself.maxChars) : "")) + "'>";
-      if(myself.size) {
-        Logger.warn("Attribute 'size' is deprecated");
-      }
-      if(myself.maxLength) {
-        Logger.warn("Attribute 'maxLength' is deprecated");
-      }
+      myself._addHtmlToPlaceholder();
 
-      myself.placeholder().html(selectHTML);
-
-      var el = $("#" + name);
+      // Format param value to be displayed.
+      var el = $("#" + myself.name);
+      var paramValue = myself.dashboard.getParameterValue(myself.parameter);
+      var uiValue = myself._formatValue(paramValue);
+      el.val(uiValue);
 
       el.change(function() {
-        if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-          myself.dashboard.processChange(name);
+        var newParamValue = myself.getValue();
+        if(myself.dashboard.getParameterValue(myself.parameter) !== newParamValue) {
+          // User can introduced non-formatted data,
+          // thus we need to ensure that data is formatted.
+          var uiValue = myself._formatValue(newParamValue);
+          el.val(uiValue);
+
+          myself.dashboard.processChange(myself.name);
         }
       }).keyup(function(ev) {
-        if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
-          myself.dashboard.processChange(name);
+        var newParamValue = myself.getValue();
+        if(ev.keyCode == 13 && myself.dashboard.getParameterValue(myself.parameter) !== newParamValue) {
+          // User can introduced non-formatted data,
+          // thus we need to ensure that data is formatted.
+          var uiValue = myself._formatValue(newParamValue);
+          el.val(uiValue);
+
+          myself.dashboard.processChange(myself.name);
         }
       });
 
@@ -51,7 +55,61 @@ define([
     },
 
     getValue: function() {
-      return $("#" + this.name).val();
+      var value = $("#" + this.name).val();
+      // If value is formatted, remove mask.
+      return this._parseValue(value);
+    },
+
+    /**
+     * Formats a given value for user presentation.
+     *
+     * @param {*} value - The value to format.
+     * @return {string} The formatted value.
+     * @protected
+     */
+    _formatValue: function(value) {
+      return value;
+    },
+
+    /**
+     * Parses a given formatted value.
+     *
+     * The parser should be lenient in case a
+     * non-formatted value is given.
+     *
+     * @param {string} uiValue - The value to parse.
+     * @return {*} The parsed value.
+     * @protected
+     */
+    _parseValue: function(value) {
+      return value;
+    },
+
+    _addHtmlToPlaceholder: function() {
+      var attrs = {
+        type: "text",
+        id: this.name,
+        name: this.name,
+        size: this.size || this.charWidth || undefined,
+        maxlength: this.maxLength || this.maxChars || undefined
+      };
+
+      var componentHTML = '<input ' + processAttrs(attrs) + '>';
+
+      if(this.size) Logger.warn("Attribute 'size' is deprecated");
+      if(this.maxLength) Logger.warn("Attribute 'maxLength' is deprecated");
+
+      this.placeholder().html(componentHTML);
+
+      function processAttrs(conf) {
+        var list = [];
+        for(prop in conf) {
+          if(conf.hasOwnProperty(prop) && conf[prop] != null) {
+            list.push(prop + '="' + conf[prop] + '"');
+          }
+        }
+        return list.join(" ");
+      }
     }
   });
 
