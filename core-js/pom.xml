@@ -14,7 +14,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <js.project.list>ccc</js.project.list>
+    <webjars.target.directory>${build.dependenciesDirectory}/META-INF/resources/webjars</webjars.target.directory>
+    <js.project.list>ccc,jquery</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
 
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
@@ -28,10 +29,38 @@
       <artifactId>ccc</artifactId>
       <type>zip</type>
     </dependency>
+    <dependency>
+      <groupId>org.webjars.npm</groupId>
+      <artifactId>jquery</artifactId>
+      <version>${jquery.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <!-- copy jquery for tests and lib-->
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>copy-jquery</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <fileSets>
+                <set>
+                  <sourceFile>${webjars.target.directory}/jquery/${jquery.version}/dist/jquery.js</sourceFile>
+                  <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.js</destinationFile>
+                </set>
+              </fileSets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>

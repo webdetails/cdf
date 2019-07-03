@@ -80,7 +80,7 @@ var XactionComponent = BaseComponent.extend({
           myself.loading = true;
           Dashboards.incrementRunningCalls();
         }
-        iframe.load(function() {
+        iframe.on('load', function() {
           if(this.contentWindow.document.body.innerHTML) {
             myself.loading = false;
             Dashboards.decrementRunningCalls();

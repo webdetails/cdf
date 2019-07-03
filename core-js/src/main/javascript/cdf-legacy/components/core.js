@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -185,7 +185,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
       return []; //we got an error...
     }
 
-    if($(jData).find("CdaExport").size() > 0){
+    if($(jData).find("CdaExport").length > 0){
       return this.parseArrayCda(jData, includeHeader);
     }
 

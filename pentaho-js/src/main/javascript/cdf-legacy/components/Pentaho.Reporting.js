@@ -136,11 +136,11 @@ var PrptComponent = BaseComponent.extend({
         }
         this.startLoading();
         var myself = this;
-        iframe.load(function() {
+        iframe.on('load', function() {
           if(options.showParameters) {
             var jqBody = $(this.contentWindow.document.body);
             var reportContentFrame = jqBody.find('#reportContent');
-            reportContentFrame.load(function() {
+            reportContentFrame.on('load', function() {
               if(myself.autoResize) {
                 myself._resizeToReportFrame(reportContentFrame[0], htmlObj, options);
               }
@@ -263,7 +263,7 @@ var PrptComponent = BaseComponent.extend({
     var form = this._getParamsAsForm(document, path, params, this.getIframeName());
     htmlObj[0].appendChild(form);
     var self = this;
-    iframe.load(function() {
+    iframe.on('load', function() {
       if(self.autoResize) {
         self._resizeToReportFrame(iframe[0], htmlObj, params);
       }
