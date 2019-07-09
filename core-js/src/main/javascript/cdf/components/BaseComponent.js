@@ -459,7 +459,7 @@ define([
       var myArray = new Array();
 
       var jHeaders = $(jData).find("ColumnMetaData");
-      if(jHeaders.size() > 0) {
+      if(jHeaders.length > 0) {
         if(includeHeader) {//get column names
           var _a = new Array();
           jHeaders.each(function() {

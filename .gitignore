@@ -19,4 +19,5 @@ package-lock.json
 **/node
 **/node_modules
 
-
+# Resolved through webjars on every build
+core-js/src/main/javascript/lib/jQuery/jquery.js
