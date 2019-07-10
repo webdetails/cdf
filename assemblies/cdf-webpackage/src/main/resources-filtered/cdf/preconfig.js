@@ -57,7 +57,7 @@ if(isDebug) {
   requirePaths[getVersionedModuleId('cdf/lib/sanitizer/lib/uri')] = prefix + '/sanitizer/lib/uri';
   requirePaths[getVersionedModuleId('cdf/lib/sanitizer')] = prefix + '/sanitizer/sanitizer';
 
-  //jquery 1.12.4, without globally scoped variables
+  //jquery without globally scoped variables
   requirePaths[getVersionedModuleId('cdf/lib/jquery')] = prefix + '/jQuery/jquery';
 
   //jquery.ui 1.10.4

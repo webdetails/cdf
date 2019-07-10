@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -22,37 +22,60 @@ define([
    */
   describe("The Date Range Input Component #", function() {
 
-    var dashboard = new Dashboard();
+    var dashboard;
+    var dateRangeInputComponent;
 
-    dashboard.addParameter("startDate", "2009-01-01");
-    dashboard.addParameter("endDate", "2009-03-01");
+    beforeEach(function () {
 
-    dashboard.init();
+      dashboard = new Dashboard();
 
-    var dateRangeInputComponent = new DateRangeInputComponent({
-      name: "dateRangeInputComponent",
-      type: "dateRangeInputComponent",
-      htmlObject: "sampleObjectDateRangeInput",
-      parameter: ["startDate", "endDate"],
-      singleInput: false,
-      inputSeparator: "<br />",
-      executeAtStart: true,
-      tooltip: "Click me to select a date",
-      postChange: function(date1, date2) {
-        return "You chose from " + date1 + " to " + date2;
-      }
+      dashboard.addParameter("startDate", "2009-01-01");
+      dashboard.addParameter("endDate", "2009-03-01");
+
+      dashboard.init();
+
+      dateRangeInputComponent = new DateRangeInputComponent({
+        name: "dateRangeInputComponent",
+        type: "dateRangeInputComponent",
+        htmlObject: "sampleObjectDateRangeInput",
+        parameter: ["startDate", "endDate"],
+        singleInput: false,
+        inputSeparator: "<br />",
+        executeAtStart: true,
+        tooltip: "Click me to select a date",
+        postChange: function(date1, date2) {
+          return "You chose from " + date1 + " to " + date2;
+        }
+      });
+
+      elem = document.createElement("div");
+      elem.id = "sampleObjectDateRangeInput";
+      document.body.appendChild(elem);
+
+      dashboard.addComponent(dateRangeInputComponent);
     });
 
-    dashboard.addComponent(dateRangeInputComponent);
+    afterEach(function() {
+      document.body.removeChild(elem);
+      elem = null;
+    });
+
+
 
     /**
      * ## The Date Range Input Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
       spyOn(dateRangeInputComponent, 'update').and.callThrough();
-      var doc = $('<input/>');
-      spyOn(doc, 'offset').and.returnValue({});
-      spyOn(dateRangeInputComponent, 'placeholder').and.returnValue(doc);
+
+      dateRangeInputComponent.placeholder = function() {
+        return {
+          addClass: function() { return this; },
+          html: function() { return this; },
+          daterangepicker: function() { return this; },
+          focus: function() {}
+        };
+      };
 
       // listen to cdf:postExecution event
       dateRangeInputComponent.once("cdf:postExecution", function() {

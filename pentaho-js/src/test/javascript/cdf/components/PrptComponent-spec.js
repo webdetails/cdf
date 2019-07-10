@@ -20,45 +20,52 @@ define([
    * ## The Pentaho Reporting Component
    */
   describe("The Pentaho Reporting Component #", function() {
-    var dashboard = new Dashboard();
 
-    var optionData = {
-      funcValue: 2,
-      value: 'one',
-      funcArray: [1, 'two'],
-      array: [1, 'two'],
-      path: "fakePath/report.prpt",
-      paginate: true,
-      usePost: false,
-      showParameters: true,
-      iframe: true,
-      executeAtStart: true,
-      staticValue: "staticValue"
-    };
+    var dashboard;
+    var optionData;
+    var prptComponent;
 
-    dashboard.addParameter('funcValue', function() { return optionData.funcValue; });
-    dashboard.addParameter('value', optionData.value);
-    dashboard.addParameter('funcArray', function() { return optionData.funcArray; });
-    dashboard.addParameter('array', optionData.array);
+    beforeEach(function() {
+      dashboard = new Dashboard();
 
-    var prptComponent = new PrptComponent({
-      name: "prptComponent",
-      type: "prptComponent",
-      htmlObject: "sampleObjectPrpt",
-      path: optionData.path,
-      parameters: [['funcValue', 'funcValue'],
-                   ['value', 'value'],
-                   ['funcArray', 'funcArray'],
-                   ['array', 'array'],
-                   ['staticValue', 'staticValue']],
-      paginate: optionData.paginate,
-      usePost:optionData.usePost,
-      showParameters: optionData.showParameters,
-      iframe: optionData.iframe,
-      executeAtStart: optionData.executeAtStart
+      optionData = {
+        funcValue: 2,
+        value: 'one',
+        funcArray: [1, 'two'],
+        array: [1, 'two'],
+        path: "fakePath/report.prpt",
+        paginate: true,
+        usePost: false,
+        showParameters: true,
+        iframe: true,
+        executeAtStart: true,
+        staticValue: "staticValue"
+      };
+
+      dashboard.addParameter('funcValue', function() { return optionData.funcValue; });
+      dashboard.addParameter('value', optionData.value);
+      dashboard.addParameter('funcArray', function() { return optionData.funcArray; });
+      dashboard.addParameter('array', optionData.array);
+
+      prptComponent = new PrptComponent({
+        name: "prptComponent",
+        type: "prptComponent",
+        htmlObject: "sampleObjectPrpt",
+        path: optionData.path,
+        parameters: [['funcValue', 'funcValue'],
+          ['value', 'value'],
+          ['funcArray', 'funcArray'],
+          ['array', 'array'],
+          ['staticValue', 'staticValue']],
+        paginate: optionData.paginate,
+        usePost:optionData.usePost,
+        showParameters: optionData.showParameters,
+        iframe: optionData.iframe,
+        executeAtStart: optionData.executeAtStart
+      });
+
+      dashboard.addComponent(prptComponent);
     });
-
-    dashboard.addComponent(prptComponent);
 
     /**
      * ## The Pentaho Reporting Component # allows a dashboard to execute update

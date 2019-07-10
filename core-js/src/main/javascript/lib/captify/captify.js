@@ -20,7 +20,7 @@ $.fn.extend({
 		}, o);
 		$(this).each(function() {
 			var img = this;
-			$(this).load(function() {
+			$(this).on('load', function() {
 				$this = img;
 				if (this.hasInit) {
 					return false;
