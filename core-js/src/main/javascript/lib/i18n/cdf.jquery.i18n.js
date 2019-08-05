@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -84,14 +84,16 @@ define([
   };
 
   var parseSupportedLanguagesFile = function(data, language) {
-    var locale;
+    var locale, localeLower;
     if (language.length >= 2) {
       locale = language.substring(0, 2);
+      localeLower = locale.toLowerCase();
     }
 
-    var country;
+    var country, countryLower;
     if (language.length >= 5) {
       country = language.substring(0, 5);
+      countryLower = country.toLowerCase();
     }
 
     if (data != null) {  // added if due to tests
@@ -102,12 +104,14 @@ define([
         var supportedLocale = lines[i];
 
         var lang = supportedLocale.substr(0, supportedLocale.indexOf("="));
-        if (lang === locale && result == null) {
-          result = locale;
+        var langLower = lang.toLowerCase();
+
+        if (langLower === localeLower && result == null) {
+          result = lang;
         }
 
-        if (lang === country) {
-          result = country;
+        if (langLower === countryLower) {
+          result = lang;
         }
       }
 
