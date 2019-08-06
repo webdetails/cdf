@@ -119,7 +119,8 @@
           "exports": "jQuery",
           "deps": {
             "cdf/lib/jquery": "jQuery",
-            "css!cdf/lib/fancybox/jquery.fancybox": ""
+            "css!cdf/lib/fancybox/jquery.fancybox": "",
+            "css!cdf/lib/cdf-fancybox": ""
           }
         },
         "cdf/lib/daterangepicker.jQuery": {
