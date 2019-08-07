@@ -122,11 +122,27 @@ var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
            action: this.action
         };
 
-        $.fancybox({
-            type: "iframe",
-            href: wd.cdf.endpoints.getAnalyzer( pathOptions, callVar, parameters ),
-            width: $(window).width(),
-            height: $(window).height() - 50
-        });
+        $.fancybox.open({
+                src: wd.cdf.endpoints.getAnalyzer( pathOptions, callVar, parameters ),
+                type: "iframe",
+                baseClass: "cdf-fancybox cdf-fancybox-iframe",
+                btnTpl: {
+                    smallBtn:
+                        '<button type="button" data-fancybox-close class="fancybox-button fancybox-close-small" title="close"></button>'
+                }
+            },
+            {
+                toolbar  : false,
+                smallBtn : true,
+                iframe:{
+                    preload: false,
+                    css: {
+                        width: $(window).width(),
+                        height: $(window).height() - 50,
+                        "max-width": "100%",
+                        "max-height": "100%"
+                    }
+                }
+            });
     }
 }); // ExecuteAnalyzerComponent

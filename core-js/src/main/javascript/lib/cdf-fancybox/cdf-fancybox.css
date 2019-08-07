@@ -1,0 +1,70 @@
+/*!
+ * Copyright 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+.cdf-fancybox.cdf-fancybox-iframe .fancybox-bg,
+.cdf-fancybox.cdf-fancybox-html .fancybox-bg {
+    opacity: 0.5
+}
+
+.cdf-fancybox.cdf-fancybox-iframe .fancybox-content,
+.cdf-fancybox.cdf-fancybox-html .fancybox-content {
+    border: white;
+    border-width: 10px;
+    border-style: solid;
+    -webkit-box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.75);
+}
+
+.cdf-fancybox.cdf-fancybox-html .fancybox-content {
+    padding: 0px;
+    overflow: visible;
+}
+
+.cdf-fancybox.cdf-fancybox-ajax .fancybox-content {
+    overflow: visible;
+    padding: 0px;
+    margin: 0px;
+    border: #F3F4F4;
+    border-width: 10px;
+    border-style: solid;
+}
+
+.cdf-fancybox.cdf-fancybox-ajax .wrapper{
+    overflow: auto !important;
+    width: 950px;
+    height: 600px;
+    background-color:#F3F4F4;
+}
+
+.cdf-fancybox.cdf-fancybox-iframe .fancybox-close-small,
+.cdf-fancybox.cdf-fancybox-html .fancybox-close-small {
+    right: -26px;
+    top: -26px;
+}
+
+.exportChartImageDiv {
+    height: auto;
+}
+
+.cdf-fancybox .fancybox-close-small {
+    background-image: url(fancy_close.png);
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: 0px 0px;
+    border: none;
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+    outline: none;
+}

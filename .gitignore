@@ -22,3 +22,5 @@ package-lock.json
 # Resolved through webjars on every build
 core-js/src/main/javascript/lib/jQuery/jquery.js
 core-js/src/main/javascript/lib/jQuery/jquery.ui.js
+core-js/src/main/javascript/lib/fancybox/jquery.fancybox.js
+core-js/src/main/javascript/lib/fancybox/jquery.fancybox.css

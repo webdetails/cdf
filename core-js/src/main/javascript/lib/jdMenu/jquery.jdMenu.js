@@ -13,7 +13,7 @@
 
 (function($){
 	function addEvents(ul) {
-		var settings = $.data( $(ul).parents().andSelf().filter('ul.jd_menu')[0], 'jdMenuSettings' );
+		var settings = $.data( $(ul).parents().addBack().filter('ul.jd_menu')[0], 'jdMenuSettings' );
 		$('> li', ul)
 			.bind('mouseenter.jdmenu mouseleave.jdmenu', function(evt) {
 				$(this).toggleClass('jdm_hover');
