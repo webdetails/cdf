@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -49,10 +49,22 @@
 
 .cdf-fancybox.cdf-fancybox-iframe .fancybox-close-small,
 .cdf-fancybox.cdf-fancybox-html .fancybox-close-small {
-    right: -33px;
-    top: -33px;
+    right: -26px;
+    top: -26px;
 }
 
 .exportChartImageDiv {
     height: auto;
+}
+
+.cdf-fancybox .fancybox-close-small {
+    background-image: url(fancy_close.png);
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: 0px 0px;
+    border: none;
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+    outline: none;
 }

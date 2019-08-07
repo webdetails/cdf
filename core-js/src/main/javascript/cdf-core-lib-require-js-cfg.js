@@ -165,7 +165,7 @@
     deps: {
       "cdf/lib/jquery": "jQuery",
       "css!cdf/lib/fancybox/jquery.fancybox": "",
-      "css!cdf/lib/cdf-fancybox": ""
+      "css!cdf/lib/cdf-fancybox/cdf-fancybox": ""
     }
   };
 
