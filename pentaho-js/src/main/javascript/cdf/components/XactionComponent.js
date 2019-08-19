@@ -69,7 +69,7 @@ define([
             this.loading = true;
             this.dashboard.incrementRunningCalls();
           }
-          iframe.load(function() {
+          iframe.on('load', function() {
             if(this.contentWindow.document.body.innerHTML) {
               myself.loading = false;
               myself.dashboard.decrementRunningCalls();

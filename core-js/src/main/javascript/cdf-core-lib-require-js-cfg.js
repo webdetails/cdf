@@ -115,7 +115,7 @@
     deps: ['cdf/lib/sanitizer/lib/html4', 'cdf/lib/sanitizer/lib/uri']
   };
 
-  //jquery 1.12.4, without globally scoped variables
+  //jquery without globally scoped variables
   requirePaths['cdf/lib/jquery'] = prefix + '/jQuery/jquery';
   requireShims['cdf/lib/jquery'] = {
     exports: '$',
@@ -158,13 +158,14 @@
     }
   };
 
-  //jquery.fancybox 2.1.5
+  //jquery.fancybox
   requirePaths['cdf/lib/jquery.fancybox'] = prefix + "/fancybox/jquery.fancybox";
   amdShim["cdf/lib/jquery.fancybox"] = {
     exports: "jQuery",
     deps: {
       "cdf/lib/jquery": "jQuery",
-      "css!cdf/lib/fancybox/jquery.fancybox": ""
+      "css!cdf/lib/fancybox/jquery.fancybox": "",
+      "css!cdf/lib/cdf-fancybox/cdf-fancybox": ""
     }
   };
 

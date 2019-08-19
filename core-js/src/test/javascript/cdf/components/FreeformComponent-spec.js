@@ -23,6 +23,10 @@ define([
    */
   describe("Freeform Component #", function() {
     var dashboard;
+    var componentForTestValidation;
+    var basic;
+    var freeformQuery;
+    var freeformAjax;
     
     /**
      * ## Global settings for all suites.
@@ -31,76 +35,76 @@ define([
      */
     beforeEach(function() {
       dashboard = new Dashboard();
-    });
-    //#end
 
-    /**
-     * ## Setting test data
-     * #begin
-     */
-    // this component is used to validate if preExecution returning false cancels updates
-    // should have the lowest priority allowing it to be executed last
-    var componentForTestValidation = new FreeformComponent({
-      name: "componentForTestValidation",
-      type: "freeform",
-      testFlag: 0,
-      executeAtStart: true,
-      priority: 999,
-      preExecution: function() {},
-      customfunction: function() {},
-      postExecution: function() {}
-    });
+      /**
+       * ## Setting test data
+       * #begin
+       */
+          // this component is used to validate if preExecution returning false cancels updates
+          // should have the lowest priority allowing it to be executed last
+      componentForTestValidation = new FreeformComponent({
+            name: "componentForTestValidation",
+            type: "freeform",
+            testFlag: 0,
+            executeAtStart: true,
+            priority: 999,
+            preExecution: function() {},
+            customfunction: function() {},
+            postExecution: function() {}
+          });
 
-    var basic = new FreeformComponent({
-      name: "basic",
-      type: "freeform",
-      testFlag: 0,
-      executeAtStart: true,
-      preExecution: function() {},
-      customfunction: function() { this.testFlag = 0x1; },
-      postExecution: function() {}
-    });
+      basic = new FreeformComponent({
+        name: "basic",
+        type: "freeform",
+        testFlag: 0,
+        executeAtStart: true,
+        preExecution: function() {},
+        customfunction: function() { this.testFlag = 0x1; },
+        postExecution: function() {}
+      });
 
-    var freeformQuery = new FreeformComponent({
-      name: "freeformQuery",
-      type: "freeform",
-      testFlag: 0,
-      executeAtStart: true,
-      manageCallee: false,
-      preExecution: function() {},
-      customfunction: function() {
-        var redraw = _.bind(this.redraw, this);
-        this.triggerQuery({
-          dataAccessId: "foo",
-          path: "bar" 
-        }, redraw);
-      },
-      postFetch: function(d) { return d; },
-      redraw: function() { this.testFlag = 0x2; },
-      postExecution: function() {}
-    });
+      freeformQuery = new FreeformComponent({
+        name: "freeformQuery",
+        type: "freeform",
+        testFlag: 0,
+        executeAtStart: true,
+        manageCallee: false,
+        preExecution: function() {},
+        customfunction: function() {
+          var redraw = _.bind(this.redraw, this);
+          this.triggerQuery({
+            dataAccessId: "foo",
+            path: "bar"
+          }, redraw);
+        },
+        postFetch: function(d) { return d; },
+        redraw: function() { this.testFlag = 0x2; },
+        postExecution: function() {}
+      });
 
-    var freeformAjax = new FreeformComponent({
-      name: "freeformAjax",
-      type: "freeform",
-      testFlag: 0,
-      executeAtStart: true,
-      manageCallee: false,
-      preExecution: function() {},
-      customfunction: function() {
-        var redraw = _.bind(this.redraw, this);
-        this.triggerAjax({
-          url: "foo",
-          type: "json",
-          method: "get",
-          path: "bar" 
-        }, redraw);
-      },
-      postFetch: function(d) { return d; },
-      redraw: function() { this.testFlag = 0x4; },
-      postExecution: function() {}
-    });
+      freeformAjax = new FreeformComponent({
+        name: "freeformAjax",
+        type: "freeform",
+        testFlag: 0,
+        executeAtStart: true,
+        manageCallee: false,
+        preExecution: function() {},
+        customfunction: function() {
+          var redraw = _.bind(this.redraw, this);
+          this.triggerAjax({
+            url: "foo",
+            type: "json",
+            method: "get",
+            path: "bar"
+          }, redraw);
+        },
+        postFetch: function(d) { return d; },
+        redraw: function() { this.testFlag = 0x4; },
+        postExecution: function() {}
+      });
 
+      //#end
+    });
     //#end
 
     /**

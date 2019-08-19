@@ -14,7 +14,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <js.project.list>ccc</js.project.list>
+    <webjars.target.directory>${build.dependenciesDirectory}/META-INF/resources/webjars</webjars.target.directory>
+    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
 
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
@@ -28,10 +29,57 @@
       <artifactId>ccc</artifactId>
       <type>zip</type>
     </dependency>
+    <dependency>
+      <groupId>org.webjars.npm</groupId>
+      <artifactId>jquery</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bower</groupId><!-- here we are using bower and not npm because the npm version only has source code -->
+      <artifactId>jquery-ui</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.npm</groupId>
+      <artifactId>fancyapps__fancybox</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <!-- copy jquery for tests and lib-->
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>copy-jquery</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <fileSets>
+                <set>
+                  <sourceFile>${webjars.target.directory}/jquery/${jquery.version}/dist/jquery.js</sourceFile>
+                  <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.js</destinationFile>
+                </set>
+                <set>
+                  <sourceFile>${webjars.target.directory}/jquery-ui/${jquery-ui.version}/jquery-ui.js</sourceFile>
+                  <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.ui.js</destinationFile>
+                </set>
+                <set>
+                  <sourceFile>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist/jquery.fancybox.js</sourceFile>
+                  <destinationFile>${project.basedir}/src/main/javascript/lib/fancybox/jquery.fancybox.js</destinationFile>
+                </set>
+                <set>
+                  <sourceFile>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist/jquery.fancybox.css</sourceFile>
+                  <destinationFile>${project.basedir}/src/main/javascript/lib/fancybox/jquery.fancybox.css</destinationFile>
+                </set>
+              </fileSets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>

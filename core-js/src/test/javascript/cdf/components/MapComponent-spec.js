@@ -21,44 +21,48 @@ define([
    * ## The Map Component
    */
   describe("The Map Component #", function() {
+    var dashboard;
+    var mapComponent;
 
-    var dashboard = new Dashboard();
+    beforeEach(function() {
+      dashboard = new Dashboard();
 
-    dashboard.addParameter("bottomThreshold", 1000000);
-    dashboard.addParameter("topThreshold", 2000000);
+      dashboard.addParameter("bottomThreshold", 1000000);
+      dashboard.addParameter("topThreshold", 2000000);
 
-    dashboard.init();
+      dashboard.init();
 
-    var mapComponent = new MapComponent({
-      name: "mapComponent",
-      type: "mapComponent",
-      path: "/fake/GetPoints.xaction",
-      parameters: [],
-      listeners: [],
-      messageElementId: "messages",
-      htmlObject: "sampleObjectMap",
-      executeAtStart: true,
-      initPosLon: -7.5,
-      initPosLat: 39.8,
-      initZoom: 1,
-      mapDiv: "myMap",
-      expression: function() {
-        return "var icon = '';" +
-               "if (value < this.dashboard.getParameterValue('bottomThreshold')) {" +
-               "  icon = markers[2];" +
-               "} else if(value >= this.dashboard.getParameterValue('topThreshold')) {" +
-               "  icon = markers[0];" +
-               "} else {" +
-               "  icon = markers[1]; " +
-               "}; icon"; },
-      preExecution: function() {},
-      postExecution: function() {},
-      markers: [["js/lib/OpenMap/OpenLayers/img/marker-green.png", 42, 50],
-                 "js/lib/OpenMap/OpenLayers/img/marker-gold.png",
-                 "js/lib/OpenMap/OpenLayers/img/marker.png"]
+      mapComponent = new MapComponent({
+        name: "mapComponent",
+        type: "mapComponent",
+        path: "/fake/GetPoints.xaction",
+        parameters: [],
+        listeners: [],
+        messageElementId: "messages",
+        htmlObject: "sampleObjectMap",
+        executeAtStart: true,
+        initPosLon: -7.5,
+        initPosLat: 39.8,
+        initZoom: 1,
+        mapDiv: "myMap",
+        expression: function() {
+          return "var icon = '';" +
+              "if (value < this.dashboard.getParameterValue('bottomThreshold')) {" +
+              "  icon = markers[2];" +
+              "} else if(value >= this.dashboard.getParameterValue('topThreshold')) {" +
+              "  icon = markers[0];" +
+              "} else {" +
+              "  icon = markers[1]; " +
+              "}; icon"; },
+        preExecution: function() {},
+        postExecution: function() {},
+        markers: [["js/lib/OpenMap/OpenLayers/img/marker-green.png", 42, 50],
+          "js/lib/OpenMap/OpenLayers/img/marker-gold.png",
+          "js/lib/OpenMap/OpenLayers/img/marker.png"]
+      });
+
+      dashboard.addComponent(mapComponent);
     });
-
-    dashboard.addComponent(mapComponent);
 
     /**
      * ## The Map Component # allows a dashboard to execute update

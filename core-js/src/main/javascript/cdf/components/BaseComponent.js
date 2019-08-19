@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -417,14 +417,14 @@ define([
         return []; //we got an error...
       }
 
-      if($(jData).find("CdaExport").size() > 0) {
+      if($(jData).find("CdaExport").length > 0) {
         return this.parseArrayCda(jData, includeHeader);
       }
 
       var myArray = new Array();
 
       var jHeaders = $(jData).find("COLUMN-HDR-ITEM");
-      if(includeHeader && jHeaders.size() > 0) {
+      if(includeHeader && jHeaders.length > 0) {
         var _a = new Array();
         jHeaders.each(function() {
           _a.push($(this).text());
@@ -459,7 +459,7 @@ define([
       var myArray = new Array();
 
       var jHeaders = $(jData).find("ColumnMetaData");
-      if(jHeaders.size() > 0) {
+      if(jHeaders.length > 0) {
         if(includeHeader) {//get column names
           var _a = new Array();
           jHeaders.each(function() {

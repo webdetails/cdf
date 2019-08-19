@@ -28,11 +28,27 @@ define([
     executeAnalyzerComponent: function() {
       var $window = $(window);
 
-      $.fancybox({
+      $.fancybox.open({
+        src: this._getApiUrl(),
         type: "iframe",
-        href: this._getApiUrl(),
-        width: $window.width(),
-        height: $window.height() - 50
+        baseClass: "cdf-fancybox cdf-fancybox-iframe",
+        btnTpl: {
+          smallBtn:
+              '<button type="button" data-fancybox-close class="fancybox-button fancybox-close-small" title="close"></button>'
+        }
+      },
+      {
+        toolbar  : false,
+        smallBtn : true,
+        iframe:{
+          preload: false,
+          css: {
+            width: $window.width(),
+            height: $window.height() - 50,
+            "max-width": "100%",
+            "max-height": "100%"
+          }
+        }
       });
     },
 

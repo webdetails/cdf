@@ -36,5 +36,6 @@
   console.warn = function() {};
 
   // Ask Require.js to load all test files and start test run
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   require(tests, karma.start);
 })();
