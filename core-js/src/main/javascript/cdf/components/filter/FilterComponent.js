@@ -136,7 +136,9 @@ define([
           target: this.placeholder()
         })
       };
+
       $.extend(true, configuration, _.result(this, 'defaults'));
+
       var _getPage = function (page, searchPattern) {
         var deferred = $.Deferred();
         var isPaginated = !!this.query && this.query.getOption('pageSize') > 0;
@@ -149,20 +151,25 @@ define([
           deferred.resolve({});
           return deferred;
         }
+
         var successCallback = _.bind(function (data) {
           this.inputDataHandler.updateModel(data);
           this.model.setBusy(false);
           deferred.resolve(data);
           return data;
         }, this);
+
         var errorCallback = _.bind(function () {
           this.model.setBusy(false);
           deferred.reject();
         }, this);
+
         this.model.setBusy(true);
         try {
           var pattern = _.isEmpty(searchPattern) ? '' : searchPattern;
+
           this.query.setSearchPattern(pattern);
+
           switch (page) {
             case 'previous':
               if (this.query.getOption('page') !== 0) {
@@ -399,14 +406,34 @@ define([
      */
     outputDataHandler: void 0,
     update: function () {
-      this.getData()
-        .then(_.bind(function(data) {
-          this.initialize();
-          return data;
-        }, this), _.bind(this.onDataFail, this))
-        .then(_.bind(this.onDataReady, this));
-      return this;
+      if (!_.isEmpty(this.dashboard.detectQueryType(this.queryDefinition))) {
+
+        this.triggerQuery(this.queryDefinition, _.bind(this._render, this));
+
+      } else if (this.componentInput.inputParameter && !_.isEmpty(this.componentInput.inputParameter)) {
+
+        var paramDataCallback = _.bind(function () {
+          var data = this.dashboard.getParameterValue(this.componentInput.inputParameter);
+          this._render(data);
+        }, this);
+
+        this.synchronous(paramDataCallback, null);
+
+      } else {
+
+        var staticDataCallback = _.bind(function () {
+          this._render(this.componentInput.valuesArray);
+        }, this);
+
+        this.synchronous(staticDataCallback, null);
+      }
     },
+
+    _render: function(data) {
+      this.initialize();
+      this.onDataReady(data);
+    },
+
     close: function () {
       if (this.manager != null) {
         this.manager.empty();
@@ -463,44 +490,6 @@ define([
       return configuration;
     },
 
-    /**
-     * Abstract the origin of the data used to populate the component.
-     * Precedence order for importing data: query -> parameter -> valuesArray
-     *
-     * @return {Promise} Returns promise that is fulfilled when the data is available.
-     */
-    getData: function () {
-      var deferred = new $.Deferred();
-      if (!_.isEmpty(this.dashboard.detectQueryType(this.queryDefinition))) {
-        var queryOptions = {
-          ajax: {
-            error: function () {
-              deferred.reject({});
-              return Logger.log("Query failed", 'debug');
-            }
-          }
-        };
-        var queryDataCallback = _.bind(function (data) {
-          deferred.resolve(data);
-        }, this);
-        this.triggerQuery(this.queryDefinition, queryDataCallback, queryOptions);
-      } else {
-        if (this.componentInput.inputParameter && !_.isEmpty(this.componentInput.inputParameter)) {
-          var paramDataCallback = _.bind(function () {
-            var data = this.dashboard.getParameterValue(this.componentInput.inputParameter);
-            deferred.resolve(data);
-          }, this);
-          this.synchronous(paramDataCallback, null);
-        } else {
-          var staticDataCallback = _.bind(function () {
-            deferred.resolve(this.componentInput.valuesArray);
-          }, this);
-          this.synchronous(staticDataCallback, null);
-        }
-      }
-      return deferred.promise();
-    },
-
     /*
      * Launch an event equivalent to postExecution
      */
@@ -513,12 +502,6 @@ define([
       }
 
       this.trigger('getData:success');
-      return this;
-    },
-
-    onDataFail: function (reason) {
-      Logger.log('Component failed to retrieve data: ' + reason, 'debug');
-      this.trigger('getData:failed');
       return this;
     }
   }, {

@@ -23,56 +23,55 @@ define([
    */
   describe("The Filter Component #", function() {
 
-    var dashboard, filterComponent, $htmlObject, testFilterDefaults;
+    var dashboard, filterComponent, $htmlObject;
 
-    testFilterDefaults = {
-      type: "FilterComponent",
-      name: "render_singleFilter_simple",
-      priority: 5,
-      executeAtStart: true,
-      htmlObject: "sampleObjectFilter",
-      listeners: [],
-      parameter: "singleSelectionParam_simple",
-      parameters: [],
-      options: function() {
-        return {};
-      },
-      queryDefinition: {},
-      componentInput: {
-        valueAsId: false,
-        valuesArray: [[1.1, "One", "Ones"], [1.2, "Two", "Ones"], [1.3, "Three", "Ones"], [1.4, "Four", "Ones"],
-          [2.1, "One", "Twos"], [2.2, "Two", "Twos"], [2.3, "Three", "Twos"], [2.4, "Four", "Twos"]]
-      },
-      componentOutput: {
-        outputFormat: "lowestID"
-      },
-      componentDefinition: {
-        title: "Single Selection: multiSelect = False",
-        alwaysExpanded: false,
-        multiselect: false,
-        showIcons: true,
-        showButtonOnlyThis: true,
-        useOverlay: false,
-        showFilter: true
-      },
-      addIns: {
-        postUpdate: [],
-        renderRootHeader: [],
-        renderRootSelection: [],
-        renderRootFooter: [],
-        renderGroupSelection: [],
-        renderItemSelection: [],
-        sortGroup: [],
-        sortItem: []
-      }
+    var getTestFilterdefaults = function() {
+      return {
+        type: "FilterComponent",
+        name: "render_singleFilter_simple",
+        priority: 5,
+        executeAtStart: true,
+        htmlObject: "sampleObjectFilter",
+        listeners: [],
+        parameter: "singleSelectionParam_simple",
+        parameters: [],
+        options: function() {
+          return {};
+        },
+        queryDefinition: {},
+        componentInput: {
+          valueAsId: false,
+          valuesArray: [[1.1, "One", "Ones"], [1.2, "Two", "Ones"], [1.3, "Three", "Ones"], [1.4, "Four", "Ones"],
+            [2.1, "One", "Twos"], [2.2, "Two", "Twos"], [2.3, "Three", "Twos"], [2.4, "Four", "Twos"]]
+        },
+        componentOutput: {
+          outputFormat: "lowestID"
+        },
+        componentDefinition: {
+          title: "Single Selection: multiSelect = False",
+          alwaysExpanded: false,
+          multiselect: false,
+          showIcons: true,
+          showButtonOnlyThis: true,
+          useOverlay: false,
+          showFilter: true
+        },
+        addIns: {
+          postUpdate: [],
+          renderRootHeader: [],
+          renderRootSelection: [],
+          renderRootFooter: [],
+          renderGroupSelection: [],
+          renderItemSelection: [],
+          sortGroup: [],
+          sortItem: []
+        }
+      };
     };
+
     var getNewFilterComponent = function(options) {
-      return new FilterComponent($.extend(true, {}, testFilterDefaults, options));
+      return new FilterComponent($.extend(true, {}, getTestFilterdefaults(), options));
     };
-
-    filterComponent = getNewFilterComponent();
-
-    $htmlObject = $('<div />').attr('id', filterComponent.htmlObject);
 
     var getNewDashboard = function() {
       var dashboard = new Dashboard();
@@ -83,23 +82,25 @@ define([
       return dashboard;
     };
 
-    var testMetadata = [
-      {
-        colIndex: 0,
-        colType: "Numeric",
-        colName: "group"
-      },
-      {
-        colIndex: 1,
-        colType: "String",
-        colName: "type"
-      },
-      {
-        colIndex: 2,
-        colType: "String",
-        colName: "empty"
-      }
-    ];
+    var getTestMetadata = function() {
+      return [
+        {
+          colIndex: 0,
+          colType: "Numeric",
+          colName: "group"
+        },
+        {
+          colIndex: 1,
+          colType: "String",
+          colName: "type"
+        },
+        {
+          colIndex: 2,
+          colType: "String",
+          colName: "empty"
+        }
+      ];
+    };
 
     var getCdaJson = function(resultset, metadata) {
       return {
@@ -111,6 +112,11 @@ define([
 
     beforeEach(function() {
       dashboard = getNewDashboard();
+
+      filterComponent = getNewFilterComponent();
+
+      $htmlObject = $('<div />').attr('id', filterComponent.htmlObject);
+
       $('body').append($htmlObject);
     });
 
@@ -122,6 +128,7 @@ define([
      * ## The Filter Component # allows a dashboard to execute update
      */
     it("allows a dashboard to execute update", function(done) {
+
       dashboard.addComponent(filterComponent);
 
       spyOn(filterComponent, 'update').and.callThrough();
@@ -136,6 +143,9 @@ define([
     });
 
     it('disables the "only" button when using the SingleSelect strategy', function() {
+
+      dashboard.addComponent(filterComponent);
+
       expect(filterComponent.getConfiguration().component.selectionStrategy.type).toEqual("SingleSelect");
       expect(filterComponent.getConfiguration().component.Root.options.showButtonOnlyThis).toEqual(false);
       expect(filterComponent.getConfiguration().component.Group.options.showButtonOnlyThis).toEqual(false);
@@ -421,9 +431,14 @@ define([
 
     describe("Get Page Mechanism #", function() {
 
-      var defaultCdaJson = getCdaJson([[1.1, "Default1", ""], [1.2, "Default2", ""]], testMetadata);
-      var onFilterChangeCdaJson = getCdaJson([[1.3, "ServerSide", ""], [1.4, "PageSize", ""]], testMetadata);
+      var defaultCdaJson;
+      var onFilterChangeCdaJson;
       var testPageSize = 10;
+
+      beforeEach(function() {
+        defaultCdaJson = getCdaJson([[1.1, "Default1", ""], [1.2, "Default2", ""]], getTestMetadata());
+        onFilterChangeCdaJson = getCdaJson([[1.3, "ServerSide", ""], [1.4, "PageSize", ""]], getTestMetadata());
+      });
 
       it("works with searchServerSide = true and pageSize > 0", function(done) {
         runGetPageMechanismTest(true, testPageSize, done);
@@ -444,7 +459,8 @@ define([
       var count = 0;
 
       function runGetPageMechanismTest(serverSide, pageSize, done) {
-        var dashboard = getNewDashboard();
+
+        //var dashboard = getNewDashboard();
         dashboard.addDataSource("testFilterComponentDataSource", {
           dataAccessId: "testId",
           path: "/test.cda"
@@ -500,27 +516,37 @@ define([
       function makeAjaxSpy() {
         var firstCallToServer = true;
         spyOn($, 'ajax').and.callFake(function(params) {
-          if (firstCallToServer) {
-            params.success(defaultCdaJson);
-            firstCallToServer = false;
-          } else {
-            params.success(onFilterChangeCdaJson);
-          }
+          setTimeout(function() {
+            if (firstCallToServer) {
+              firstCallToServer = false;
+              params.success(defaultCdaJson);
+            } else {
+              params.success(onFilterChangeCdaJson);
+            }
+          }, 0);
         });
       }
 
       function addEvaluateExpectationsAfterGetPage(component, serverSide, pageSize, done) {
-        component.manager.get('configuration').pagination.getPage =
-          (function(originalGetPage) {
-            return function() {
-              return originalGetPage.apply(component, arguments).then(function(json) {
-                evaluateExpectations(serverSide, pageSize, component.model.children().models,
-                  component.manager.get('configuration'));
-                done();
-                return json;
-              });
-            };
-          })(component.manager.get('configuration').pagination.getPage);
+
+        var configuration = component.manager.get('configuration');
+        var originalGetPage = configuration.pagination.getPage;
+
+        configuration.pagination.getPage = function() {
+
+          return originalGetPage.apply(component, arguments).then(function(json) {
+
+            evaluateExpectations(
+                serverSide,
+                pageSize,
+                component.model.children().models,
+                configuration);
+
+            done();
+
+            return json;
+          });
+        };
       }
 
       function addEvaluateExpectationsInsteadOfFilter(component, serverSide, pageSize, done) {
@@ -754,7 +780,7 @@ define([
         });
 
         spyOn($, 'ajax').and.callFake(function(params) {
-          params.success(getCdaJson(testFilterDefaults.componentInput.valuesArray, testMetadata));
+          params.success(getCdaJson(getTestFilterdefaults().componentInput.valuesArray, getTestMetadata()));
         });
 
         filterComponent.once('getData:success', function() {

@@ -403,13 +403,32 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
      */
     outputDataHandler: void 0,
     update: function () {
-      this.getData()
-        .then(_.bind(function(data) {
-          this.initialize();
-          return data;
-        }, this), _.bind(this.onDataFail, this))
-        .then(_.bind(this.onDataReady, this));
-      return this;
+      if (!_.isEmpty(this.dashboard.detectQueryType(this.queryDefinition))) {
+
+        this.triggerQuery(this.queryDefinition, _.bind(this._render, this));
+
+      } else if (this.componentInput.inputParameter && !_.isEmpty(this.componentInput.inputParameter)) {
+
+        var paramDataCallback = _.bind(function () {
+          var data = this.dashboard.getParameterValue(this.componentInput.inputParameter);
+          this._render(data);
+        }, this);
+
+        this.synchronous(paramDataCallback, null);
+
+      } else {
+
+        var staticDataCallback = _.bind(function () {
+          this._render(this.componentInput.valuesArray);
+        }, this);
+
+        this.synchronous(staticDataCallback, null);
+      }
+    },
+
+    _render: function(data) {
+      this.initialize();
+      this.onDataReady(data);
     },
     close: function() {
       if (this.manager != null) {
@@ -467,40 +486,6 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
     },
 
     /**
-     * Abstract the origin of the data used to populate the component.
-     * Precedence order for importing data: query -> parameter -> valuesArray
-     * @method getData
-     * @return {Promise} Returns promise that is fulfilled when the data is available
-     */
-    getData: function() {
-      var dataCallback, deferred, inputParameterValue, queryOptions, that;
-      deferred = new $.Deferred();
-      dataCallback = _.bind(function(data) {
-        deferred.resolve(data);
-      }, this);
-      that = this;
-      if (!_.isEmpty(this.dashboard.detectQueryType(this.queryDefinition))) {
-        queryOptions = {
-          ajax: {
-            error: function() {
-              deferred.reject({});
-              return Logger.log("Query failed", 'debug');
-            }
-          }
-        };
-        this.triggerQuery(this.queryDefinition, dataCallback, queryOptions);
-      } else {
-        if (this.componentInput.inputParameter && !_.isEmpty(this.componentInput.inputParameter)) {
-          inputParameterValue = this.dashboard.getParameterValue(this.componentInput.inputParameter);
-          this.synchronous(dataCallback, inputParameterValue);
-        } else {
-          this.synchronous(dataCallback, this.componentInput.valuesArray);
-        }
-      }
-      return deferred.promise();
-    },
-
-    /**
      * Launch an event equivalent to postExecution
      */
 
@@ -521,17 +506,6 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
        * @event getData:success
        */
       this.trigger('getData:success');
-      return this;
-    },
-
-    /**
-     * @method onDataFail
-     * @public
-     * @chainable
-     */
-    onDataFail: function(reason) {
-      Logger.log('Component failed to retrieve data: #{reason}', 'debug');
-      this.trigger('getData:failed');
       return this;
     }
   }, {

@@ -15,19 +15,23 @@ define(["cdf/Dashboard.Clean", "amd!cdf/lib/jquery.blockUI"], function(Dashboard
 
   describe("The CDF framework #", function() {
     var dashboard;
-    var blockUiOptions = {
-      message: "Test message",
-      css: {
-        color: 'red'
-      },
-      overlayCSS: {
-        backgroundColor: 'blue',
-      }
-    };
-    var expectedOptions = $.extend({}, $.blockUI.defaults, blockUiOptions);
+    var blockUiOptions;
+    var expectedOptions;
 
     beforeEach(function() {
       dashboard = new Dashboard();
+
+      blockUiOptions = {
+        message: "Test message",
+        css: {
+          color: 'red'
+        },
+        overlayCSS: {
+          backgroundColor: 'blue'
+        }
+      };
+
+      expectedOptions = $.extend({}, $.blockUI.defaults, blockUiOptions);
     });
 
     it("_setBlockUiOptions", function() {

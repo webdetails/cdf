@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -136,11 +136,11 @@ var PrptComponent = BaseComponent.extend({
         }
         this.startLoading();
         var myself = this;
-        iframe.load(function() {
+        iframe.on('load', function() {
           if(options.showParameters) {
             var jqBody = $(this.contentWindow.document.body);
             var reportContentFrame = jqBody.find('#reportContent');
-            reportContentFrame.load(function() {
+            reportContentFrame.on('load', function() {
               if(myself.autoResize) {
                 myself._resizeToReportFrame(reportContentFrame[0], htmlObj, options);
               }
@@ -263,7 +263,7 @@ var PrptComponent = BaseComponent.extend({
     var form = this._getParamsAsForm(document, path, params, this.getIframeName());
     htmlObj[0].appendChild(form);
     var self = this;
-    iframe.load(function() {
+    iframe.on('load', function() {
       if(self.autoResize) {
         self._resizeToReportFrame(iframe[0], htmlObj, params);
       }
@@ -1063,11 +1063,27 @@ var ExecutePrptComponent = PrptComponent.extend({
     delete parameters.path;
     delete parameters.action;
     $.extend( parameters, {ts: new Date().getTime()});
-    $.fancybox({
+    $.fancybox.open({
+      src: wd.cdf.endpoints.getReport( path, "viewer", parameters),
       type: "iframe",
-      href: wd.cdf.endpoints.getReport( path, "viewer", parameters),
-      width: $(window).width(),
-      height: $(window).height() - 50
+      baseClass: "cdf-fancybox cdf-fancybox-iframe",
+      btnTpl: {
+        smallBtn:
+            '<button type="button" data-fancybox-close class="fancybox-button fancybox-close-small" title="close"></button>'
+      }
+    },
+    {
+      toolbar  : false,
+      smallBtn : true,
+      iframe:{
+        preload: false,
+        css: {
+          width: $(window).width(),
+          height: $(window).height() - 50,
+          "max-width": "100%",
+          "max-height": "100%"
+        }
+      }
     });
   }
 });//ExecutePrptComponent
