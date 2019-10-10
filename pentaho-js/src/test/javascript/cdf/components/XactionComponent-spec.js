@@ -14,8 +14,9 @@
 define([
   "cdf/Dashboard.Clean",
   "cdf/components/XactionComponent",
+  "cdf/components/XactionComponent.ext",
   "cdf/lib/jquery"
-], function(Dashboard, XactionComponent, $) {
+], function(Dashboard, XactionComponent, XactionComponentExt, $) {
 
   /**
    * ## The Xaction Component
@@ -34,7 +35,10 @@ define([
       parameters: [["productLine", "productLineParam"], ["territory", "territoryParam"]],
       htmlObject: "sampleObjectXaction",
       executeAtStart: true,
-      tooltip: "My first dashboard"
+      tooltip: "My first dashboard",
+      action: "topTenCustomers.xaction",
+      solution: "",
+      iframe: "mock_iframe"
     });
 
     dashboard.addComponent(xactionComponent);
@@ -56,5 +60,22 @@ define([
 
       dashboard.update(xactionComponent);
     });
+
+    it("Check if update calls getCdfXaction method with correct parameters", function(done) {
+
+      spyOn(xactionComponent, 'update').and.callThrough();
+      spyOn(XactionComponentExt, 'getCdfXaction').and.callThrough();
+
+      // listen to cdf:postExecution event
+      xactionComponent.once("cdf:postExecution", function() {
+        expect(xactionComponent.update).toHaveBeenCalled();
+        expect(XactionComponentExt.getCdfXaction)
+            .toHaveBeenCalledWith(xactionComponent.path, "", xactionComponent.solution);
+        done();
+      });
+
+      dashboard.update(xactionComponent);
+    });
+
   });
 });
