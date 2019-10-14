@@ -734,6 +734,52 @@ define([
     return "rgb(" + rgb.join(",") + ")";
   };
 
+  /**
+   * Determines if `path` ends with `action`,
+   * immediately preceded by a `\` or `/` separator character.
+   *
+   * Pattern to test: `<path> === <basepath>[\/]<action>`.
+   *
+   * This implementation, in particular, strives to not allocate memory.
+   *
+   * @param {*} path - The path.
+   * @param {*} action - The action.
+   * @return {boolean} `true` if yes; `false`, otherwise.
+   */
+  Utils.pathIncludesAction = function (path, action) {
+
+    if(typeof path !== "string" || typeof action !== "string") {
+      return false;
+    }
+
+    if(action.length >= path.length) {
+      return false;
+    }
+
+    if( "\\/".indexOf(path.substr(-1, 1)) >= 0) {
+      return false;
+    }
+
+    if(!Utils.endsWith(path, action)) {
+      return false;
+    }
+
+    var separator = path.substr(-(action.length + 1), 1);
+
+    return "\\/".indexOf(separator) >= 0;
+  };
+
+  /**
+   * Determines if one string ends with another.
+   *
+   * @param {string} test - The string being tested to end with `suffix`.
+   * @param {string} suffix - The suffix string.
+   * @return {boolean} `true` if `test` ends with `suffix`; `false`, otherwise.
+   */
+  Utils.endsWith = function(test, suffix) {
+    return test === suffix || test.slice(-suffix.length) === suffix;
+  };
+
   return Utils;
 
 });

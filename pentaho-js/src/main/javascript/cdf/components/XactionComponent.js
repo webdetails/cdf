@@ -14,8 +14,9 @@
 define([
   './XactionComponent.ext',
   '../lib/jquery',
-  './BaseComponent'
-], function(XactionComponentExt, $, BaseComponent) {
+  './BaseComponent',
+  '../dashboard/Utils'
+], function(XactionComponentExt, $, BaseComponent, Utils) {
 
   return BaseComponent.extend({
     update: function() {
@@ -49,19 +50,9 @@ define([
                                   " height=\"100%\"" +
                                   " width=\"100%\" />";
           var iframe = $(xactionIFrameHTML);
-          var actionIncluded = function(path, action) {
-            //check if path ends with action prefixed with '\' or '/'
-            return (typeof path == "string") && (typeof action == "string")
-                && (path.length > action.length)
-                && (path.lastIndexOf(action) == (path.length - action.length))
-                && ("\\/".indexOf(path.substr(-action.length-1, 1))>=0);
-          };
-          var url;
-          if (actionIncluded(myself.path, myself.action)) {
-            url = XactionComponentExt.getCdfXaction(myself.path, "", myself.solution) + "&wrapper=false";
-          } else {
-            url = XactionComponentExt.getCdfXaction(myself.path, myself.action, myself.solution) + "&wrapper=false";
-          }
+          var url = XactionComponentExt.getCdfXaction(myself.path,
+              Utils.pathIncludesAction(this.path, this.action) ? "" : this.action || "",
+              myself.solution) + "&wrapper=false";
 
           // Add args
           var p = new Array(this.parameters.length);

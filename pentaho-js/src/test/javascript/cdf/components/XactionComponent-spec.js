@@ -18,6 +18,23 @@ define([
   "cdf/lib/jquery"
 ], function(Dashboard, XactionComponent, XactionComponentExt, $) {
 
+  function createDashboard( xActionComponent ) {
+    var dashboard = new Dashboard();
+    dashboard.init();
+    dashboard.addComponent(xActionComponent);
+    return dashboard;
+  }
+
+  function createXActionComponent( action, path, solution) {
+    return new XactionComponent({
+      name: "xActionComponent",
+      action: action,
+      path: path,
+      solution: solution,
+      iframe: "mock_iframe"
+    });
+  }
+
   /**
    * ## The Xaction Component
    */
@@ -35,10 +52,7 @@ define([
       parameters: [["productLine", "productLineParam"], ["territory", "territoryParam"]],
       htmlObject: "sampleObjectXaction",
       executeAtStart: true,
-      tooltip: "My first dashboard",
-      action: "topTenCustomers.xaction",
-      solution: "",
-      iframe: "mock_iframe"
+      tooltip: "My first dashboard"
     });
 
     dashboard.addComponent(xactionComponent);
@@ -61,21 +75,73 @@ define([
       dashboard.update(xactionComponent);
     });
 
-    it("Check if update calls getCdfXaction method with correct parameters", function(done) {
+  });
 
-      spyOn(xactionComponent, 'update').and.callThrough();
-      spyOn(XactionComponentExt, 'getCdfXaction').and.callThrough();
+  describe( "should call getCdfXAction method with correct parameters", function () {
+
+    it("should call getCdfXAction method with action null", function(done) {
+      var action = null;
+      var path = "/public/mock/";
+      var solution = "";
+      var xActionComponent = createXActionComponent( action, path, solution );
+      var dashboard = createDashboard( xActionComponent );
+
+      spyOn(xActionComponent, "update").and.callThrough();
+      spyOn(XactionComponentExt, "getCdfXaction").and.callThrough();
 
       // listen to cdf:postExecution event
-      xactionComponent.once("cdf:postExecution", function() {
-        expect(xactionComponent.update).toHaveBeenCalled();
+      xActionComponent.once("cdf:postExecution", function() {
+        expect(xActionComponent.update).toHaveBeenCalled();
         expect(XactionComponentExt.getCdfXaction)
-            .toHaveBeenCalledWith(xactionComponent.path, "", xactionComponent.solution);
+            .toHaveBeenCalledWith(path, "", solution);
         done();
       });
 
-      dashboard.update(xactionComponent);
+      dashboard.update(xActionComponent);
+    });
+
+    it("should call getCdfXAction method with action in path", function(done) {
+      var action = "action.xaction";
+      var path = "/public/mock/action.xaction";
+      var solution = "";
+      var xActionComponent = createXActionComponent( action, path, solution );
+      var dashboard = createDashboard( xActionComponent );
+
+      spyOn(xActionComponent, "update").and.callThrough();
+      spyOn(XactionComponentExt, "getCdfXaction").and.callThrough();
+
+      // listen to cdf:postExecution event
+      xActionComponent.once("cdf:postExecution", function() {
+        expect(xActionComponent.update).toHaveBeenCalled();
+        expect(XactionComponentExt.getCdfXaction)
+            .toHaveBeenCalledWith(path, "", solution);
+        done();
+      });
+
+      dashboard.update(xActionComponent);
+    });
+
+    it("should call getCdfXAction method without action in path", function(done) {
+      var action = "action.xaction";
+      var path = "/public/mock/";
+      var solution = "";
+      var xActionComponent = createXActionComponent( action, path, solution );
+      var dashboard = createDashboard( xActionComponent );
+
+      spyOn(xActionComponent, "update").and.callThrough();
+      spyOn(XactionComponentExt, "getCdfXaction").and.callThrough();
+
+      // listen to cdf:postExecution event
+      xActionComponent.once("cdf:postExecution", function() {
+        expect(xActionComponent.update).toHaveBeenCalled();
+        expect(XactionComponentExt.getCdfXaction)
+            .toHaveBeenCalledWith(path, action, solution);
+        done();
+      });
+
+      dashboard.update(xActionComponent);
     });
 
   });
+
 });
