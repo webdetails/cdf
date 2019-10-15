@@ -752,6 +752,8 @@ define([
       return false;
     }
 
+    // Validate if path ends with '/' or '\'
+    // Example: Utils.pathIncludesAction( "/a.ext/", "a.ext/" ) should be false
     if( "\\/".indexOf(path.substr(-1, 1)) >= 0) {
       return false;
     }
