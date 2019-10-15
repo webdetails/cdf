@@ -752,10 +752,6 @@ define([
       return false;
     }
 
-    if(action.length >= path.length) {
-      return false;
-    }
-
     if( "\\/".indexOf(path.substr(-1, 1)) >= 0) {
       return false;
     }

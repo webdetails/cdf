@@ -50,9 +50,8 @@ define([
                                   " height=\"100%\"" +
                                   " width=\"100%\" />";
           var iframe = $(xactionIFrameHTML);
-          var url = XactionComponentExt.getCdfXaction(myself.path,
-              Utils.pathIncludesAction(this.path, this.action) ? "" : this.action || "",
-              myself.solution) + "&wrapper=false";
+          var action = Utils.pathIncludesAction(this.path, this.action) ? "" : (this.action || "");
+          var url = XactionComponentExt.getCdfXaction(this.path, action, this.solution) + "&wrapper=false";
 
           // Add args
           var p = new Array(this.parameters.length);
