@@ -183,7 +183,8 @@
   //underscore 1.8.3
   requirePaths['cdf/lib/underscore'] = prefix + "/underscore/underscore";
   amdShim['cdf/lib/underscore'] = {
-    postscript: "return _.noConflict();"
+    postscript: "return _.noConflict();",
+    prescript: "var setTimeout = window.setTimeout.bind(window);\n" // Prevent setTimeout from throwing an 'Invalid calling object' exception on IE11 and Edge
   };
 
   //backbone 1.2.3
