@@ -116,5 +116,27 @@ define(["cdf/dashboard/Utils", "cdf/lib/CCC/cdo"], function(Utils, cdo) {
       expect(Utils.ev("1")).toBe("1");
       expect(Utils.ev(function() { return "1"; })).toBe("1");
     });
+
+    /**
+     * ## The Utils class # verify if pathIncludesAction evaluates well
+     */
+    it( "evaluate if path includes action", function () {
+      expect( Utils.pathIncludesAction( "a.ext", "a.ext" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a.ext", "a.ext" ) ).toBe( true );
+      expect( Utils.pathIncludesAction( "/aa.ext", "a.ext" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/aa.ext", null ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a/a.ext", "a.ext") ).toBe( true );
+      expect( Utils.pathIncludesAction( "/a/a.ext/a.ext", "a.ext") ).toBe( true );
+      expect( Utils.pathIncludesAction( null, "a.ext") ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a/a.ext", undefined ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a/a.ext", "" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/short/path/a.ext", "very_long_long_long_long_long_action.ext" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/very/long/long/long/long/long/long/path/a.ext", "short_action.ext" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a.ext/", "a.ext/" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a.ext\\", "a.ext\\" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a/a.ext", "/a.ext" ) ).toBe( false );
+      expect( Utils.pathIncludesAction( "/a\\a.ext", "a\\a.ext" ) ).toBe( true );
+      expect( Utils.pathIncludesAction( "\\a.ext", "a.ext" ) ).toBe( true );
+    });
   });
 });
