@@ -1,19 +1,15 @@
-<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A20-samples%3Acharts%3AMetaLayerCharts.js"></script>
-
 <style type="text/css">
-
   .alt {
     color: #666666;
     font-family: "Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;
     font-style: italic;
     font-weight: normal;
   }
-
 </style>
 
 <div class="container alt">
   <div class="span-24 clearfix prepend-top append-bottom">
-  
+
     <h1>
       Blueprint css framework
     </h1>
@@ -21,8 +17,8 @@
     <hr />
 
     <p>
-      Blueprint is a CSS framework, which aims to cut down on your development time. 
-      It gives you a solid foundation to build your project on top of, with an easy-to-use 
+      Blueprint is a CSS framework, which aims to cut down on your development time.
+      It gives you a solid foundation to build your project on top of, with an easy-to-use
       grid, sensible typography, useful plugins, and even a stylesheet for printing.
     </p>
     <p class="small">
@@ -45,9 +41,9 @@
         <li>Plugins for buttons, tabs and sprites.</li>
         <li>Tools, editors, and templates for every step in your workflow.</li>
       </ul>
-        
+
     </div>
-  
+
     <div class="span-12 clearfix last">
       <b>Why use Blueprint with CDF?</b>
       <ul>
@@ -58,7 +54,7 @@
       </ul>
     </div>
   </div>
-  <div class="container span-24 append-bottom"> 
+  <div class="container span-24 append-bottom">
     <div class="span-8 clearfix">
       <div id="pieChart_object"></div>
     </div>
@@ -66,12 +62,12 @@
     <div class="span-8">
       <div id="barChart_object"></div>
     </div>
-  
+
     <div class="span-8 last">
-      <div id="dialChart_object"></div>
-    </div>  
+      <div id="stackedDotChart_object"></div>
+    </div>
   </div>
-  
+
   <div class="container span-24 append-bottom">
     <div class="span-4">
       <p>
@@ -84,10 +80,10 @@
         <b>Lorem ipsum dolor sit amet</b>
       <p>
       <p>
-        Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo 
-        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
-        nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt 
+        Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+        nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
         mollit anim id est laborum.
       </p>
     </div>
@@ -103,7 +99,7 @@
       </ul>
     </div>
   </div>
-  
+
   <div class="span-24 last">
     <h2>
       Less time worrying with html layout = More time developing dashboard components!
@@ -111,63 +107,201 @@
   </div>
 </div>
 
-
-  
-<script language="javascript" type="text/javascript">
-
-var dashboard;
+<script type="text/javascript">
 
 require([
   'cdf/Dashboard.Blueprint',
-  'cdf/components/TextComponent',
-  'cdf/components/JFreeChartComponent',
-  'cdf/components/DialComponent'
-], function(Dashboard, TextComponent, JFreeChartComponent, DialComponent) {
+  'cdf/components/CccPieChartComponent',
+  'cdf/components/CccAreaChartComponent',
+  'cdf/components/CccStackedDotChartComponent'
+], function(Dashboard, CccPieChartComponent, CccAreaChartComponent, CccStackedDotChartComponent) {
+  var dashboard = new Dashboard();
 
-  dashboard = new Dashboard();
-  dashboard.addParameter("productLine", "null");
-  dashboard.addParameter("territory", "null");
-  
-  dashboard.addDataSource(MetaLayerCharts.pieChartDataSource);
-  dashboard.addDataSource(MetaLayerCharts.barChartDataSource);
-  dashboard.addDataSource(MetaLayerCharts.dialChartDataSource);
+  // Dummy Data for charts
 
-  dashboard.addComponent(new TextComponent({
-    name: "title",
-    type: "textComponent",
-    htmlObject: "title_object",
-    executeAtStart: true,
-    expression: function() { return "Charts examples"; }
-  }));
+  var relational_01 = {
+    "resultset": [
+      ["London", "2011-06-05", 72], ["London", "2011-06-12", 50], ["London", "2011-06-19", 20], ["London", "2011-06-26", 23],
+      ["London", "2011-07-03", 72], ["London", "2011-07-10", 80], ["London", "2011-07-26", 23], ["London", "2011-07-31", 72],
+      ["London", "2011-08-07", 50], ["London", "2011-08-14", 20], ["London", "2011-08-28", 20],
 
-  dashboard.addComponent(new JFreeChartComponent({
-    name: "pieChart",
-    type: "jFreeChartComponent",
-    listeners: ["MetaLayerCharts.regionsMeasure"],
-    chartDefinition: MetaLayerCharts.pieChartDefinition,
+      ["Paris", "2011-06-05", 27], ["Paris", "2011-06-26", 32], ["Paris", "2011-07-03", 24], ["Paris", "2011-07-10", 80],
+      ["Paris", "2011-07-17", 90], ["Paris", "2011-07-24", 53], ["Paris", "2011-07-31", 17], ["Paris", "2011-08-07", 20],
+      ["Paris", "2011-08-21", 43],
+
+      ["Lisbon", "2011-06-12", 30], ["Lisbon", "2011-07-03", 60], ["Lisbon", "2011-07-10", 80], ["Lisbon", "2011-07-17", 15]
+    ],
+    "metadata": [
+      {
+        "colIndex": 0, "colType": "String", "colName": "City"
+      }, {
+        "colIndex": 1, "colType": "String", "colName": "Date"
+      }, {
+        "colIndex": 2, "colType": "Numeric", "colName": "Quantity"
+      }
+    ]
+  };
+
+  var relational_03_b = {
+    "resultset": [
+      ["London", 74], ["Paris", 48], ["New York", 37], ["Prague", 27],
+      ["Stockholm", 22], ["Sydney", 19], ["Madrid", 18], ["Lisbon", 41]
+    ],
+    "metadata": [{
+      "colIndex": 0, "colType": "String", "colName": "City"
+    }, {
+      "colIndex": 1, "colType": "Numeric", "colName": "Value"
+    }]
+  };
+
+  var relational_012 = {
+    "resultset": [
+      ["London", "2011-07-03", 72], ["London", "2011-07-10", 50], ["London", "2011-07-17", 20],
+      ["London", "2011-07-24", 23], ["London", "2011-07-31", 72], ["London", "2011-08-02", 50],
+
+      ["Lisbon", "2011-07-03", 60], ["Lisbon", "2011-07-10", 40],
+      ["Lisbon", "2011-07-17", 15], ["Lisbon", "2011-07-24", 3]
+    ],
+
+    "metadata": [{
+      "colIndex": 0, "colType": "String", "colName": "City"
+    }, {
+      "colIndex": 1, "colType": "String", "colName": "Date"
+    }, {
+      "colIndex": 2, "colType": "Numeric", "colName": "Quantity"
+    }]
+  };
+
+  // Dashboard Components
+
+  var render_pieChart = new CccPieChartComponent({
+    name: "render_pieChart",
+    executeAtStart: false,
     htmlObject: "pieChart_object",
-    executeAtStart: true
-  }));
+    chartDefinition: {
+      width:  350,
+      height: 300,
 
-  dashboard.addComponent(new JFreeChartComponent({
-    name: "barChart",
-    type: "jFreeChartComponent",
-    listeners: ["MetaLayerCharts.selectedRegionMeasure"],
-    chartDefinition: MetaLayerCharts.barChartDefinition,
+      // Data source
+      crosstabMode: false,
+
+      // Main plot
+      valuesVisible: true,
+      valuesFont: 'lighter 11px "Open Sans"',
+      explodedSliceRadius: '2%',
+      slice_innerRadiusEx: '50%',
+
+      // Panels
+      legend: false,
+
+      // Chart/Interaction
+      selectable: true,
+      hoverable:  true,
+      tooltipClassName: 'light',
+
+      // Color axes
+      colors: [
+        '#333333', '#777777', '#FFC20F', '#FFE085',
+        '#005CA7', '#0086F4', '#39A74A', '#63CA73'
+      ]
+    }
+  });
+  dashboard.addComponent(render_pieChart);
+
+  var render_AreaChart = new CccAreaChartComponent({
+    name: "render_AreaChart",
+    executeAtStart: false,
     htmlObject: "barChart_object",
-    width: 470,
-    executeAtStart: true
-  }));
+    chartDefinition: {
+      width:  350,
+      height: 300,
 
-  dashboard.addComponent(new DialComponent({
-    name: "dialChart",
-    type: "dialComponent",
-    listeners: ["MetaLayerCharts.departmentMeasure"],
-    chartDefinition: MetaLayerCharts.dialChartDefinition,
-    htmlObject: "dialChart_object",
-    width: 310,
-    executeAtStart: true
-  }));
+      // Data source
+      crosstabMode: false,
+
+      // Data
+      timeSeries: true,
+
+      // Main plot
+      linesVisible: true,
+      dotsVisible:  true,
+      dot_fillStyle: "white",
+      nullInterpolationMode: 'linear',
+
+      // Cartesian axes
+      axisGrid: true,
+      axisGrid_strokeStyle: '#F7F8F9',
+      axisLabel_font: 'normal 10px "Open Sans"',
+
+      // Panels
+
+      legend: true,
+      legendAlign: 'center',
+      legendFont:  'normal 11px "Open Sans"',
+
+      // Chart/Interaction
+      selectable: true,
+      hoverable:  true,
+
+      // Color axes
+      colors: ['#005CA7', '#FFC20F', '#333333']
+    }
+  });
+  dashboard.addComponent(render_AreaChart);
+
+  var render_stackedDotChart = new CccStackedDotChartComponent({
+    name: "render_stackedDotChart",
+    executeAtStart: false,
+    htmlObject: "stackedDotChart_object",
+    chartDefinition: {
+      width:   350,
+      height:  300,
+      margins: {right: '2%'},
+      orientation: 'vertical',
+
+      // Data source
+      crosstabMode: false,
+      timeSeriesFormat: '%Y-%m-%d',
+
+      // Data
+      timeSeries: true,
+
+      // Main plot
+      valuesVisible: true,
+      valuesFont: 'lighter 11px "Open Sans"',
+      plot_fillStyle: '#F7F8F9',
+      dot_shape: 'cross',
+      dot_shapeRadius: 3,
+
+      // Cartesian plots
+      axisLabel_font: 'normal 9px "Open Sans"',
+      baseAxisLabel_textAngle:    -Math.PI/6,
+      baseAxisLabel_textAlign:    'right',
+      baseAxisLabel_textBaseline: 'top',
+
+      // Panels
+
+      legend: true,
+      legendAlign: 'center',
+      legendFont:  'normal 11px "Open Sans"',
+
+      // Chart/Interaction
+      animate:    false,
+      selectable: true,
+
+      // Color axes
+      colors: ['#005CA7', '#FFC20F']
+    }
+  });
+  dashboard.addComponent(render_stackedDotChart);
+
+  // Init dashboard
+
+  dashboard.postInit = function initDummyData() {
+    render_pieChart.render(relational_03_b);
+    render_AreaChart.render(relational_01);
+    render_stackedDotChart.render(relational_012);
+  };
 
   dashboard.init();
 });
