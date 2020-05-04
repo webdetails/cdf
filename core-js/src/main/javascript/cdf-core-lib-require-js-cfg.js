@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2020 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -166,7 +166,8 @@
       "cdf/lib/jquery": "jQuery",
       "css!cdf/lib/fancybox/jquery.fancybox": "",
       "css!cdf/lib/cdf-fancybox/cdf-fancybox": ""
-    }
+    },
+    prescript: "var setTimeout = window.setTimeout.bind(window);\n" // Prevent setTimeout from throwing an 'Invalid calling object' exception on IE11 and Edge
   };
 
   //daterangepicker.jQuery 01.19.2008
