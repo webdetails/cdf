@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2021 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -114,7 +114,8 @@ define([
           },
           c;
       // if we have SVG, and wtmp is a string, so probably a percentage width, will use percentage calculations
-      if(hasSVG && typeof wtmp === 'string') {
+      // if the val is zero we just want to draw the value
+      if(hasSVG && typeof wtmp === 'string' || hasSVG && val === 0) {
         c = this.drawPaper(min, max, options);
       } else {
         // falling back to the default
