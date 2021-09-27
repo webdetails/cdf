@@ -113,7 +113,7 @@ Dashboards.setBookmarkState = function(state) {
         url;
     query = this.propertiesArrayToObject(query);
     query.bookmarkState = JSON.stringify(state);
-    url = method + '?' + $.param(query);
+    url = method + '?' + $.param(query, /* traditional */true);
     window.history.replaceState({},'',url);
     this.deleteHashValue('bookmark');
   } else {
