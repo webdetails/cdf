@@ -178,7 +178,7 @@ wd.cdf.endpoints = {
 
   getWebsocketQuery: function(){ return wd.cdf.endpoints.getCdaWebsocketBase() + "/query"; },
 
-  getUnwrapQuery: function( parameters ){ return wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( parameters ); },
+  getUnwrapQuery: function( parameters ){ return wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( parameters, /* traditional */true ); },
 
   getEncoder: function() {
     var enc;

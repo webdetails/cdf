@@ -141,7 +141,7 @@ if (typeof Encoder === "undefined") {
     }
     // encode and append parameters to URL
     if (queryObj) {
-      encodedUrl += "?" + $.param(queryObj);
+      encodedUrl += "?" + $.param(queryObj, /* traditional */true);
     }
     return encodedUrl;
   };
