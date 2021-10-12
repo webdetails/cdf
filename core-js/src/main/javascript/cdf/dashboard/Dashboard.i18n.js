@@ -141,7 +141,7 @@ define([
      * @abstract
      */
     getMessagesPath: function() {
-      // meant to be overridden, or return undefined
+      return "resources/messages/"
     }
   });
 });
