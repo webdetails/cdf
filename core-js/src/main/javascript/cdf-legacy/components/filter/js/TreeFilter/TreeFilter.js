@@ -71,6 +71,11 @@ TreeFilter = (function() {
     count: 0,
 
     /**
+     * Function that sanitizes HTML tags.
+     */
+    HtmlSanitizer: function(html) { return html; },
+
+    /**
      * Enumerations
      * @module TreeFilter
      * @submodule Enum

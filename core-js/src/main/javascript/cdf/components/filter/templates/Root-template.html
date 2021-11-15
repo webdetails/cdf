@@ -31,9 +31,9 @@
   {{/showCommitButtons}}
   {{#showFilter}}
     <div class="filter-filter">
-      <input type="text" class="filter-filter-input" value="{{searchPattern}}">
-      <div class="filter-filter-icon" />
-      <div class="filter-filter-clear" />
+      <input type="text" class="filter-filter-input" value="{{searchPattern}}" />
+      <div class="filter-filter-icon"></div>
+      <div class="filter-filter-clear"></div>
     </div>
   {{/showFilter}}
   </div>
@@ -44,7 +44,7 @@
                   {{^isPartiallySelected}}
                   {{#isSelected}} all-selected{{/isSelected}}
                   {{^isSelected}} none-selected{{/isSelected}}
-                  {{/isPartiallySelected}}" />
+                  {{/isPartiallySelected}}"></div>
       <div class="filter-root-selection-label">{{{label}}}</div>
       {{#showValue}}
         <div class="filter-root-selection-value">{{{value}}}</div>
