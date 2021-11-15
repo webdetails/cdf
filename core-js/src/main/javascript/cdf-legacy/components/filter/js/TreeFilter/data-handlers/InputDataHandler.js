@@ -1,4 +1,4 @@
-(function(_, BaseModel, LoggerMixin, DataHandlers) {
+(function(_, BaseModel, LoggerMixin, DataHandlers, sanitizeHtml) {
   'use strict';
 
   /**
@@ -8,8 +8,7 @@
 
   var sanitizeInput = function(input) {
     return _.isString(input) ?
-      input.replace("<script>", "&lt;script&gt;")
-        .replace("</script>", "&lt;/script&gt;") :
+      sanitizeHtml(input) :
       input;
   };
 
@@ -163,4 +162,4 @@
       return this;
     }
   });
-})(_, BaseModel, TreeFilter.Logger, TreeFilter.DataHandlers);
+})(_, BaseModel, TreeFilter.Logger, TreeFilter.DataHandlers, TreeFilter.HtmlSanitizer);
