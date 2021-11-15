@@ -10,7 +10,7 @@
  */
 var FilterComponent;
 
-FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilter) {
+FilterComponent = (function($, _, Backbone, Dashboards, UnmanagedComponent, TreeFilter) {
   'use strict';
 
   /*
@@ -513,5 +513,9 @@ FilterComponent = (function($, _, Backbone, Logger, UnmanagedComponent, TreeFilt
       return "Filter component";
     }
   });
+
+  // Point the HTML sanitizer to that of CDF.
+  TreeFilter.HtmlSanitizer = Dashboards.sanitizeHtml;
+
   return Filter;
 })($, _, Backbone, Dashboards, UnmanagedComponent, TreeFilter);
