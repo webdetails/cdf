@@ -81,6 +81,9 @@ var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
     update: function() {
         // 2 modes of working; if it's a div, create a button inside it
         var $html = $("#" + this.htmlObject);
+
+        if (!$html.length) return;
+
         if ($.inArray($html[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
             // create a button
             $html = $("<button/>").appendTo($html.empty());
