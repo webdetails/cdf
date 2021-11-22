@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>9.2.0.0-290</version>
+    <version>9.2.0.0-C260</version>
   </parent>
   <artifactId>cdf-pentaho</artifactId>
-  <version>9.2.0.0-290</version>
+  <version>9.2.0.0-C260</version>
   <properties>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>

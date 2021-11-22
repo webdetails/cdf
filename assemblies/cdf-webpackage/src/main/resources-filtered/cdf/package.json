@@ -1,9 +1,9 @@
 {
   "name": "@pentaho/cdf",
-  "version": "${project.version}",
+  "version": "9.2.0.0-290",
 
   "dependencies": {
-    "@pentaho/common-ui": "${project.version}"
+    "@pentaho/common-ui": "9.2.0.0-290"
   },
 
   "paths": {
