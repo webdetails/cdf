@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>cdf-plugin-assemblies</artifactId>
-  <version>9.2.0.0-C260</version>
+  <version>9.2.0.0-290</version>
 
   <packaging>pom</packaging>
 
