@@ -20,6 +20,7 @@ import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.Mock;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( { SettingsEngine.class, PentahoSessionHolder.class, CorsUtil.class } )
 public class SettingsApiTest {
   @Mock
