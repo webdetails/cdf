@@ -5,10 +5,10 @@
       <parent>
         <groupId>pentaho</groupId>
         <artifactId>cdf-plugin-assemblies</artifactId>
-        <version>9.3.0.0-SNAPSHOT</version>
+        <version>9.3.0.0-9</version>
       </parent>
       <artifactId>pentaho-cdf-rca</artifactId>
-      <version>9.3.0.0-SNAPSHOT</version>
+      <version>9.3.0.0-9</version>
       <packaging>pom</packaging>
       <dependencies>
           <dependency>
