@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>9.3.0.0-SNAPSHOT</version>
+    <version>9.3.0.0-10</version>
   </parent>
   <artifactId>cdf-core</artifactId>
-  <version>9.3.0.0-SNAPSHOT</version>
+  <version>9.3.0.0-10</version>
   <properties>
     <dependency.log4j.revision>1.2.14</dependency.log4j.revision>
   </properties>

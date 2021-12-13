@@ -5,16 +5,16 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>9.3.0.0-SNAPSHOT</version>
+    <version>9.3.0.0-10</version>
   </parent>
   <artifactId>cdf-pentaho</artifactId>
-  <version>9.3.0.0-SNAPSHOT</version>
+  <version>9.3.0.0-10</version>
   <properties>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
     <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
     <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
-    <platform.version>9.3.0.0-SNAPSHOT</platform.version>
+    <platform.version>9.3.0.0-10</platform.version>
   </properties>
   <dependencies>
     <dependency>
