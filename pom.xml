@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>9.3.0.0-SNAPSHOT</version>
+    <version>9.3.0.0-14</version>
   </parent>
 
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
-  <version>9.3.0.0-SNAPSHOT</version>
+  <version>9.3.0.0-14</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -42,17 +41,17 @@
     <commons-lang.version>2.2</commons-lang.version>
     <hibernate.version>3.2.6.ga</hibernate.version>
     <jxl.version>2.6.12</jxl.version>
-    <pentaho-ccc-plugin.version>9.3.0.0-SNAPSHOT</pentaho-ccc-plugin.version>
-    <pentaho-cpf-plugin.version>9.3.0.0-SNAPSHOT</pentaho-cpf-plugin.version>
-    <pentaho-json.version>9.3.0.0-SNAPSHOT</pentaho-json.version>
+    <pentaho-ccc-plugin.version>9.3.0.0-14</pentaho-ccc-plugin.version>
+    <pentaho-cpf-plugin.version>9.3.0.0-14</pentaho-cpf-plugin.version>
+    <pentaho-json.version>9.3.0.0-14</pentaho-json.version>
     <servlet-api.version>2.4</servlet-api.version>
     <owasp-encoder.version>1.2</owasp-encoder.version>
     <powermock.version>1.6.3</powermock.version>
     <mockito-core.version>1.10.19</mockito-core.version>
     <mockito-all.version>1.10.19</mockito-all.version>
 
-    <global.require.file></global.require.file>
-    <requirejs.config.files.pattern></requirejs.config.files.pattern>
+    <global.require.file/>
+    <requirejs.config.files.pattern/>
     <project.stage>master</project.stage>
     <project.github-name>cdf</project.github-name>
   </properties>
