@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin</artifactId>
-    <version>9.3.0.0-SNAPSHOT</version>
+    <version>9.3.0.0-7</version>
   </parent>
 
   <artifactId>cdf-core-js</artifactId>
-  <version>9.3.0.0-SNAPSHOT</version>
+  <version>9.3.0.0-7</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -34,7 +33,8 @@
       <artifactId>jquery</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.webjars.bower</groupId><!-- here we are using bower and not npm because the npm version only has source code -->
+      <groupId>org.webjars.bower</groupId>
+<!-- here we are using bower and not npm because the npm version only has source code -->
       <artifactId>jquery-ui</artifactId>
     </dependency>
     <dependency>
