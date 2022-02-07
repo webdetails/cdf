@@ -21,10 +21,9 @@ define([
   'amd!../lib/jquery.impromptu',
   'css!./theme/SchedulePrptComponent'
 ], function(environment, csrfClient, SchedulePrptComponentExt, PrptComponent, $, _) {
-
-      function getPentahoBaseUrl() {
-              return environment.server.root.href;
-      }
+    function getPentahoBaseUrl() {
+      return environment.server.root.href;
+    }
 
   return PrptComponent.extend({
     visible: false,
