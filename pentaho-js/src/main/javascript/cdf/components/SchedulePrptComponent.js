@@ -92,7 +92,7 @@ define([
       var csrfToken = csrfClient.getToken(protectedUrl);
       var headers = {};
       if(csrfToken !== null) {
-          headers[csrfToken.header] = csrfToken.token;
+        headers[csrfToken.header] = csrfToken.token;
       }
       $.ajax({
         url: SchedulePrptComponentExt.getScheduledJob(),
