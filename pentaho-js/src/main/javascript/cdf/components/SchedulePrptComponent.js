@@ -12,13 +12,19 @@
  */
 
 define([
+  'pentaho/environment',
+  'pentaho/csrf/service',
   './SchedulePrptComponent.ext',
   './PrptComponent',
   '../lib/jquery',
   'amd!../lib/underscore',
   'amd!../lib/jquery.impromptu',
   'css!./theme/SchedulePrptComponent'
-], function(SchedulePrptComponentExt, PrptComponent, $, _) {
+], function(environment, csrfClient, SchedulePrptComponentExt, PrptComponent, $, _) {
+
+      function getPentahoBaseUrl() {
+              return environment.server.root.href;
+      }
 
   return PrptComponent.extend({
     visible: false,
@@ -82,10 +88,17 @@ define([
       this.scheduleParameters = this.scheduleParameters || {};
       this.scheduleParameters["jobParameters"] = jobParameters;
       var success = false;
+      var protectedUrl = getPentahoBaseUrl() + "api/scheduler/job";
+      var csrfToken = csrfClient.getToken(protectedUrl);
+      var headers = {};
+      if(csrfToken !== null) {
+          headers[csrfToken.header] = csrfToken.token;
+      }
       $.ajax({
         url: SchedulePrptComponentExt.getScheduledJob(),
         async: false,
         type: "POST",
+        headers: headers,
         data: JSON.stringify(this.scheduleParameters),
         contentType: "application/json",
         success: function(response) {

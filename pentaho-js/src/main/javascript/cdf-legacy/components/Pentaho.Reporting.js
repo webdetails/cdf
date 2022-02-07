@@ -918,6 +918,12 @@ var SchedulePrptComponent = PrptComponent.extend({
       }
       parameters["jobParameters"] = jobParameters;
       var success = false;
+      var protectedUrl = getPentahoBaseUrl() + "api/scheduler/job";
+      var csrfToken = pho.csrfUtil.getToken(protectedUrl);
+      var headers = {};
+      if(csrfToken !== null) {
+          headers[csrfToken.header] = csrfToken.token;
+      }
       var x = $.ajaxSettings.async;
       $.ajaxSetup({
           async: false
@@ -925,6 +931,7 @@ var SchedulePrptComponent = PrptComponent.extend({
       $.ajax({
         url: wd.cdf.endpoints.getScheduledJob(),
         type: "POST",
+        headers: headers,
         data: JSON.stringify(parameters),
         contentType: "application/json",
         success: function(response) {
