@@ -21,9 +21,6 @@ define([
   'amd!../lib/jquery.impromptu',
   'css!./theme/SchedulePrptComponent'
 ], function(environment, csrfClient, SchedulePrptComponentExt, PrptComponent, $, _) {
-    function getPentahoBaseUrl() {
-      return environment.server.root.href;
-    }
 
   return PrptComponent.extend({
     visible: false,
@@ -87,7 +84,7 @@ define([
       this.scheduleParameters = this.scheduleParameters || {};
       this.scheduleParameters["jobParameters"] = jobParameters;
       var success = false;
-      var protectedUrl = getPentahoBaseUrl() + "api/scheduler/job";
+      var protectedUrl = SchedulePrptComponentExt.getScheduledJob();
       var csrfToken = csrfClient.getToken(protectedUrl);
       var headers = {};
       if(csrfToken !== null) {

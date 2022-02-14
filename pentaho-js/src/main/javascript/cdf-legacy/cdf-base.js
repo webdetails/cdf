@@ -64,7 +64,9 @@ wd.cdf.endpoints = {
   // Dashboards.Startup.js determines webAppPath
   getWebapp: function () { return webAppPath; },
 
-  getWebsocketWebapp: function () { return document.location.protocol + "//" + document.location.host + wd.cdf.endpoints.getWebapp(); },
+  getWebappFullUrl: function () { return document.location.protocol + "//" + document.location.host + wd.cdf.endpoints.getWebapp(); },
+
+  getWebsocketWebapp: function () { return wd.cdf.endpoints.getWebappFullUrl(); },
 
   getPing: function () { return wd.cdf.endpoints.getCdfBase() + "/ping"; },
 
@@ -193,3 +195,51 @@ wd.cdf.endpoints = {
     return enc;
   }
 };
+pho = typeof pho !== "undefined" ? pho : {};
+pho.csrfUtil = (function() {
+  return {
+    getToken: function(url) {
+      if(!url) {
+        throw new Error("Argument 'url' is required.");
+      }
+      var FULL_QUALIFIED_URL = wd.cdf.endpoints.getWebappFullUrl() + "/";
+
+      // Check if the request will be for the pentaho application.
+      if(url.indexOf(FULL_QUALIFIED_URL) !== 0) {
+        // Do not send Pentaho CSRF tokens to other sites.
+        return null;
+      }
+
+      // Sending the URL as a parameter and not as a header to avoid becoming a pre-flight request.
+      var csrfServiceUrl = FULL_QUALIFIED_URL + "api/csrf/token?url=" + encodeURIComponent(url);
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", csrfServiceUrl, /* async: */false);
+
+      // The session where the token is stored must be the same as that used by the actual request.
+      xhr.withCredentials = true;
+      try {
+        xhr.send();
+      } catch(ex) {
+        // a) CORS is not enabled on the server, or
+        // b) this is the origin of an attacker...
+        return null;
+      }
+
+      if(xhr.status !== 204 && xhr.status !== 200) {
+        return null;
+      }
+
+      // When CSRF protection is disabled, the token is not returned.
+      var token = xhr.getResponseHeader("X-CSRF-TOKEN");
+      if(token == null) {
+        return null;
+      }
+
+      return {
+        header: xhr.getResponseHeader("X-CSRF-HEADER"),
+        parameter: xhr.getResponseHeader("X-CSRF-PARAM"),
+        token: token
+      };
+    }
+  };
+})();

@@ -918,7 +918,7 @@ var SchedulePrptComponent = PrptComponent.extend({
       }
       parameters["jobParameters"] = jobParameters;
       var success = false;
-      var protectedUrl = getPentahoBaseUrl() + "api/scheduler/job";
+      var protectedUrl = wd.cdf.endpoints.getWebsocketWebapp() + "/api/scheduler/job";
       var csrfToken = pho.csrfUtil.getToken(protectedUrl);
       var headers = {};
       if(csrfToken !== null) {
