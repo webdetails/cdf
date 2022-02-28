@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2022 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -64,7 +64,9 @@ wd.cdf.endpoints = {
   // Dashboards.Startup.js determines webAppPath
   getWebapp: function () { return webAppPath; },
 
-  getWebappFullUrl: function () { return document.location.protocol + "//" + document.location.host + wd.cdf.endpoints.getWebapp(); },
+  getHostFullUrl: function () { return document.location.protocol + "//" + document.location.host; },
+
+  getWebappFullUrl: function () { return wd.cdf.endpoints.getHostFullUrl() + wd.cdf.endpoints.getWebapp(); },
 
   getWebsocketWebapp: function () { return wd.cdf.endpoints.getWebappFullUrl(); },
 
@@ -195,13 +197,16 @@ wd.cdf.endpoints = {
     return enc;
   }
 };
+
 pho = typeof pho !== "undefined" ? pho : {};
+
 pho.csrfUtil = (function() {
   return {
     getToken: function(url) {
       if(!url) {
         throw new Error("Argument 'url' is required.");
       }
+
       var FULL_QUALIFIED_URL = wd.cdf.endpoints.getWebappFullUrl() + "/";
 
       // Check if the request will be for the pentaho application.
