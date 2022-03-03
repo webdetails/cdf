@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2022 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -918,13 +918,20 @@ var SchedulePrptComponent = PrptComponent.extend({
       }
       parameters["jobParameters"] = jobParameters;
       var success = false;
+      var protectedUrl = wd.cdf.endpoints.getHostFullUrl() + wd.cdf.endpoints.getScheduledJob();
+      var csrfToken = pho.csrfUtil.getToken(protectedUrl);
+      var headers = {};
+      if(csrfToken !== null) {
+          headers[csrfToken.header] = csrfToken.token;
+      }
       var x = $.ajaxSettings.async;
       $.ajaxSetup({
           async: false
       });
       $.ajax({
-        url: wd.cdf.endpoints.getScheduledJob(),
+        url: protectedUrl,
         type: "POST",
+        headers: headers,
         data: JSON.stringify(parameters),
         contentType: "application/json",
         success: function(response) {

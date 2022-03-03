@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2022 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -12,13 +12,15 @@
  */
 
 define([
+  'pentaho/environment',
+  'pentaho/csrf/service',
   './SchedulePrptComponent.ext',
   './PrptComponent',
   '../lib/jquery',
   'amd!../lib/underscore',
   'amd!../lib/jquery.impromptu',
   'css!./theme/SchedulePrptComponent'
-], function(SchedulePrptComponentExt, PrptComponent, $, _) {
+], function(environment, csrfClient, SchedulePrptComponentExt, PrptComponent, $, _) {
 
   return PrptComponent.extend({
     visible: false,
@@ -82,10 +84,17 @@ define([
       this.scheduleParameters = this.scheduleParameters || {};
       this.scheduleParameters["jobParameters"] = jobParameters;
       var success = false;
+      var protectedUrl = SchedulePrptComponentExt.getScheduledJob();
+      var csrfToken = csrfClient.getToken(protectedUrl);
+      var headers = {};
+      if(csrfToken !== null) {
+        headers[csrfToken.header] = csrfToken.token;
+      }
       $.ajax({
-        url: SchedulePrptComponentExt.getScheduledJob(),
+        url: protectedUrl,
         async: false,
         type: "POST",
+        headers: headers,
         data: JSON.stringify(this.scheduleParameters),
         contentType: "application/json",
         success: function(response) {
