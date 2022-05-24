@@ -26,7 +26,7 @@ define([
     },
 
     getUnwrapQuery: function(parameters) {
-      return DashboardExt.getPluginBase('cda') + "/unwrapQuery?" + $.param(parameters);
+      return DashboardExt.getPluginBase('cda') + "/unwrapQuery?" + $.param(parameters, /* traditional */true);
     }
   };
 
