@@ -63,7 +63,7 @@ require(["cdf-legacy/lib/CCC/protovis","cdf-legacy/lib/CCC/cdo","cdf-legacy/lib/
             var urlParams = buildUrlParameters(overrides);
             urlParams.outputType = outputType || 'png';
 
-            var url = wd.helpers.cggHelper.getCggDrawUrl() + "?" + $.param(urlParams);
+            var url = wd.helpers.cggHelper.getCggDrawUrl() + "?" + $.param(urlParams, /* traditional */true);
 
             var $exportIFrame = $('#cccExportIFrame');
             if(!$exportIFrame.length) {

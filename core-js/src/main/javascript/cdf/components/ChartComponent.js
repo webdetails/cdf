@@ -71,7 +71,7 @@ define([
       var urlParams = buildUrlParameters(overrides);
       urlParams.outputType = outputType || 'png';
 
-      var url = CggComponentExt.getCggDrawUrl() + "?" + $.param(urlParams);
+      var url = CggComponentExt.getCggDrawUrl() + "?" + $.param(urlParams, /* traditional */true);
 
       var $exportIFrame = $('#cccExportIFrame');
       if (!$exportIFrame.length) {
