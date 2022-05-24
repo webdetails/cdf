@@ -4,7 +4,7 @@
  * @module TreeFilter
  * @submodule Views
  */
-(function($, _, BaseView, Mustache, LoggerMixin, Views, ScrollBarFactory) {
+(function($, _, BaseView, Mustache, LoggerMixin, Views, ScrollBarFactory, sanitizeHtml) {
 
   /**
    * Abstract base class for all Views
@@ -64,6 +64,7 @@
         var html;
         if (this.template[slot]) {
           html = Mustache.render(this.template[slot], viewModel);
+          html = sanitizeHtml(html);
           this.$(this.config.view.slots[slot]).replaceWith(html);
         }
         this.injectContent(slot);
@@ -116,7 +117,9 @@
       return this;
     },
     renderSkeleton: function(viewModel) {
-      this.$el.html(Mustache.render(this.template.skeleton, viewModel));
+      var html = Mustache.render(this.template.skeleton, viewModel);
+      html = sanitizeHtml(html);
+      this.$el.html(html);
       TreeFilter.count++;
       return this;
     },
@@ -129,8 +132,8 @@
       return this;
     },
     renderSelection: function(viewModel) {
-      var html;
-      html = Mustache.render(this.template.selection, viewModel);
+      var html = Mustache.render(this.template.selection, viewModel);
+      html = sanitizeHtml(html);
       this.$(this.config.view.slots.selection).replaceWith(html);
       this.injectContent('selection');
       return TreeFilter.count++;
@@ -262,4 +265,4 @@
        */
     }
   });
-})($, _, BaseView, Mustache, TreeFilter.Logger, TreeFilter.Views, ScrollBarFactory);
+})($, _, BaseView, Mustache, TreeFilter.Logger, TreeFilter.Views, ScrollBarFactory, TreeFilter.HtmlSanitizer);
