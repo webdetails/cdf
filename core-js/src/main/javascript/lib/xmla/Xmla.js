@@ -1557,7 +1557,7 @@ Xmla.prototype = {
 *           </dl>
 *       </li>
 *       <li><code>url</code> {string} REQUIRED the URL of XML/A service, or of a XML/A datasource.
-*           Typically, you first use the URL of a XML/A service (like <code>http://your.pentaho.server:8080/pentaho/Xmla?userid=joe&amp;password=password</code>)
+*           Typically, you first use the URL of a XML/A service (like <code>http://your.pentaho.server:8080/pentaho/Xmla</code>)
 *           and use that to retrieve the <code>DISCOVER_DATASOURCES</code> rowset.
 *           Then, you can connect to a XML/A datasource using the value returned by the <code>URL</code> column of the <code>DISCOVER_DATASOURCES</code> rowset
 *           (typically, you also have to set a <code>DataSourceInfo</code> property using the value found in the <code>DataSourceInfo</code> column of the <code>DISCOVER_DATASOURCES</code> rowset).
