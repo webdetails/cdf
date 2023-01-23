@@ -34,7 +34,7 @@
       <artifactId>jquery</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.webjars.bower</groupId><!-- here we are using bower and not npm because the npm version only has source code -->
+      <groupId>org.webjars</groupId><!-- here we are using bower and not npm because the npm version only has source code -->
       <artifactId>jquery-ui</artifactId>
     </dependency>
     <dependency>
