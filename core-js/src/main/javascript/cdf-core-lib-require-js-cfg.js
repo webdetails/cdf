@@ -399,7 +399,7 @@
     exports: 'Base64'
   };
 
-  // Moment 2.24.0
+  // Moment 2.29.4
   requirePaths['cdf/lib/moment'] = prefix + '/moment/moment';
   requireConfig['cdf/lib/moment'] = {
     noGlobal: true
