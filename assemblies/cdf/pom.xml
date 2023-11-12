@@ -5,10 +5,10 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>cdf-plugin-assemblies</artifactId>
-    <version>10.1.0.0-SNAPSHOT</version>
+    <version>10.1.0.0-93</version>
   </parent>
   <artifactId>pentaho-cdf</artifactId>
-  <version>10.1.0.0-SNAPSHOT</version>
+  <version>10.1.0.0-93</version>
   <packaging>pom</packaging>
   <properties>
     <js.project.list>pentaho-cdf-js</js.project.list>
