@@ -176,7 +176,7 @@ define([
      */
     pentahoServiceAction: function(serviceMethod, returntype, solution, path, action, params, func) {
       // execute an Action Sequence on the server
-    
+
       var arr = DashboardExt.getServiceAction(serviceMethod, solution, path, action);
       var url = arr.url;
       delete arr.url;

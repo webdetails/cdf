@@ -391,7 +391,7 @@ define([
               arr[val[0]] = val[1];
             });
             jXML = this.dashboard.parseXActionResult(myself, this.dashboard.urlAction(this.url, arr));
-          } else {
+          } else if(this.path || this.action) {
             jXML = this.dashboard.callPentahoAction(myself, this.solution, this.path, this.action, p, null);
           }
           //transform the result int a javascript array
