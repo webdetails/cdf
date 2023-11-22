@@ -168,7 +168,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
             arr[val[0]]=val[1];
           });
           jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
-        } else {
+        } else if(this.path || this.action) {
           jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
         }
         //transform the result int a javascript array
