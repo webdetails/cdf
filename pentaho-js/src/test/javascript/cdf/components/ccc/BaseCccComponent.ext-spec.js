@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2017 - 2023 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -32,7 +32,6 @@ define([
       expect(BaseCccComponentExt.getMatchingVizViewId('MetricLineChart', {
         stacked: true
       })).toBe(viewId('Scatter'));
-      expect(BaseCccComponentExt.getMatchingVizViewId('NormalizedBarChart', {})).toBe(viewId('BarNormalized'));
       expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {})).toBe(viewId('PointAbstract'));
       expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {
         stacked: true
@@ -41,7 +40,6 @@ define([
       expect(BaseCccComponentExt.getMatchingVizViewId('StackedDotChart', {
         stacked: true
       })).toBe(viewId('PointAbstract'));
-      expect(BaseCccComponentExt.getMatchingVizViewId('StackedLineChart', {})).toBe(viewId('Line'));
       expect(BaseCccComponentExt.getMatchingVizViewId('AreaChart', {})).toBe(viewId('Area'));
       expect(BaseCccComponentExt.getMatchingVizViewId('AreaChart', {stacked: true})).toBe(viewId('AreaStacked'));
       expect(BaseCccComponentExt.getMatchingVizViewId('StackedAreaChart', {})).toBe(viewId('AreaStacked'));
@@ -51,7 +49,8 @@ define([
       expect(BaseCccComponentExt.getMatchingVizViewId('HeatGridChart', {stacked: true})).toBe(viewId('HeatGrid'));
 
       expect(BaseCccComponentExt.getMatchingVizViewId('LineChart', {})).toBe(viewId('Line'));
-      expect(BaseCccComponentExt.getMatchingVizViewId('LineChart', {stacked: true})).toBe(viewId('Line'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('LineChart', {stacked: true})).toBe(viewId('LineStacked'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedLineChart', {})).toBe(viewId('LineStacked'));
 
       expect(BaseCccComponentExt.getMatchingVizViewId('PieChart', {})).toBe(viewId('Pie'));
       expect(BaseCccComponentExt.getMatchingVizViewId('PieChart', {stacked: true})).toBe(viewId('Pie'));
@@ -72,6 +71,7 @@ define([
         stacked: true,
         orientation: 'horizontal'
       })).toBe(viewId('BarStackedHorizontal'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('NormalizedBarChart', {})).toBe(viewId('BarNormalized'));
     });
 
     it("Gets the correct Promise and the Visualization Extension", function (done) {
