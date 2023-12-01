@@ -49,7 +49,8 @@ define([
    * @private
    */
   var __chartFormExceptions = [
-    'Waterfall', 'Treemap', 'Boxplot', 'HeatGrid', 'Scatter', 'Bubble', 'Pie', 'PointAbstract', 'Sunburst'
+    'Waterfall', 'Treemap', 'Boxplot', 'HeatGrid', 'Scatter',
+    'Bubble', 'Pie', 'PointAbstract', 'Sunburst', 'Dot'
   ];
 
   /**
@@ -113,9 +114,8 @@ define([
       case 'NormalizedBar':
         fullName = 'BarNormalized';
         break;
-      case 'Dot':
       case 'StackedDot':
-        fullName = 'PointAbstract';
+        fullName = 'Dot';
         break;
       case 'StackedLine':
         fullName = 'LineStacked';

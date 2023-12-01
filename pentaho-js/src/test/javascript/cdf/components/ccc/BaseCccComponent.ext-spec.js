@@ -32,14 +32,14 @@ define([
       expect(BaseCccComponentExt.getMatchingVizViewId('MetricLineChart', {
         stacked: true
       })).toBe(viewId('Scatter'));
-      expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {})).toBe(viewId('PointAbstract'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {})).toBe(viewId('Dot'));
       expect(BaseCccComponentExt.getMatchingVizViewId('DotChart', {
         stacked: true
-      })).toBe(viewId('PointAbstract'));
-      expect(BaseCccComponentExt.getMatchingVizViewId('StackedDotChart', {})).toBe(viewId('PointAbstract'));
+      })).toBe(viewId('Dot'));
+      expect(BaseCccComponentExt.getMatchingVizViewId('StackedDotChart', {})).toBe(viewId('Dot'));
       expect(BaseCccComponentExt.getMatchingVizViewId('StackedDotChart', {
         stacked: true
-      })).toBe(viewId('PointAbstract'));
+      })).toBe(viewId('Dot'));
       expect(BaseCccComponentExt.getMatchingVizViewId('AreaChart', {})).toBe(viewId('Area'));
       expect(BaseCccComponentExt.getMatchingVizViewId('AreaChart', {stacked: true})).toBe(viewId('AreaStacked'));
       expect(BaseCccComponentExt.getMatchingVizViewId('StackedAreaChart', {})).toBe(viewId('AreaStacked'));
