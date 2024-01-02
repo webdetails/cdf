@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 - 2018 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2017 - 2023 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -49,7 +49,8 @@ define([
    * @private
    */
   var __chartFormExceptions = [
-    'Waterfall', 'Treemap', 'Boxplot', 'HeatGrid', 'Line', 'Scatter', 'Pie', 'PointAbstract', 'Sunburst'
+    'Waterfall', 'Treemap', 'Boxplot', 'HeatGrid', 'Scatter',
+    'Bubble', 'Pie', 'PointAbstract', 'Sunburst', 'Dot'
   ];
 
   /**
@@ -58,7 +59,7 @@ define([
    * @type {string[]}
    * @private
    */
-  var __valuesNormalizedExceptions = ['BarNormalized', 'Area', 'AreaStacked'];
+  var __valuesNormalizedExceptions = ['BarNormalized', 'Area', 'AreaStacked', 'Line', 'LineStacked'];
 
   /**
    * List of chart types for which `Stacked` should not be applied to the viz view identifier.
@@ -66,7 +67,7 @@ define([
    * @type {string[]}
    * @private
    */
-  var __stackedExceptions = ['BarNormalized', 'AreaStacked'];
+  var __stackedExceptions = ['BarNormalized', 'AreaStacked', 'LineStacked'];
 
   /**
    * List of chart types for which the orientation modifier should not be applied to the viz view identifier.
@@ -74,7 +75,7 @@ define([
    * @type {string[]}
    * @private
    */
-  var __orientationException = ['Area', 'AreaStacked'];
+  var __orientationException = ['Area', 'AreaStacked', 'Line', 'LineStacked'];
 
   return {
     getMatchingVizViewId: getMatchingVizViewId,
@@ -113,12 +114,11 @@ define([
       case 'NormalizedBar':
         fullName = 'BarNormalized';
         break;
-      case 'Dot':
       case 'StackedDot':
-        fullName = 'PointAbstract';
+        fullName = 'Dot';
         break;
       case 'StackedLine':
-        fullName = 'Line';
+        fullName = 'LineStacked';
         break;
       case 'StackedArea':
         fullName = 'AreaStacked';
@@ -126,7 +126,7 @@ define([
     }
 
     if (chartDefinition != null && !_.contains(__chartFormExceptions, fullName)) {
-
+      // Line*, Area*, Bar*
       if (chartDefinition.valuesNormalized && !_.contains(__valuesNormalizedExceptions, fullName)) {
         fullName += 'Normalized';
       }

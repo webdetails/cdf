@@ -391,7 +391,8 @@ define([
               arr[val[0]] = val[1];
             });
             jXML = this.dashboard.parseXActionResult(myself, this.dashboard.urlAction(this.url, arr));
-          } else {
+          } else if(this.path || this.action) {
+            //BISERVER-14940 if path and action are both null, the request will fail, as it does not have enough parameters for the request
             jXML = this.dashboard.callPentahoAction(myself, this.solution, this.path, this.action, p, null);
           }
           //transform the result int a javascript array

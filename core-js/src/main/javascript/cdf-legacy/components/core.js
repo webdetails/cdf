@@ -168,7 +168,8 @@ BaseComponent = Base.extend(Backbone.Events).extend({
             arr[val[0]]=val[1];
           });
           jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
-        } else {
+        } else if(this.path || this.action) {
+          //BISERVER-14940 if path and action are both null, the request will fail, as it does not have enough parameters for the request
           jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
         }
         //transform the result int a javascript array
