@@ -40,7 +40,7 @@ define([
    * @type {string[]}
    * @private
    */
-  var __chartTypesBlackList = ['Bullet'];
+  var __chartTypesBlackList = ['Bullet', 'Funnel'];
 
   /**
    * List of chart types to exclude from the form verification.
