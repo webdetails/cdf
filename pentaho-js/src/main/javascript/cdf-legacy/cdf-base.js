@@ -150,7 +150,7 @@ wd.cdf.endpoints = {
   	return wd.cdf.endpoints.getCdfBase() + "/comments/" + endpoint + "?" + wd.cdf.helper.getTimestamp();
   },
 
-  getScheduledJob: function() { return wd.cdf.endpoints.getWebapp() + "/api/scheduler/job"; },
+  getScheduledJob: function() { return window.pho.getSchedulerPluginContextURL() + "/api/scheduler/job"; },
 
   getEmailConfig: function() { return wd.cdf.endpoints.getWebapp() + "/api/emailconfig"; },
 

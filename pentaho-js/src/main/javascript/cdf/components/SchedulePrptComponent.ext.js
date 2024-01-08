@@ -22,7 +22,7 @@ define([
     },
 
     getScheduledJob: function() {
-      return environment.server.root + "api/scheduler/job";
+      return window.pho.getSchedulerPluginContextURL() + "api/scheduler/job";
     }
 
   };
