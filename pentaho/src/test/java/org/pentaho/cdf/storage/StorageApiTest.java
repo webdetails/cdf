@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2024 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,38 +13,36 @@
 
 package org.pentaho.cdf.storage;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-
-import org.junit.Assert;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.ISecurityHelper;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.security.SecurityHelper;
-
 import pt.webdetails.cpf.messaging.MockHttpServletRequest;
 import pt.webdetails.cpf.messaging.MockHttpServletResponse;
 import pt.webdetails.cpf.utils.CharsetHelper;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class StorageApiTest {
   private static final String STORAGE_VALUE = "fake";
@@ -73,7 +71,7 @@ public class StorageApiTest {
     when( se.store( anyString(), anyString() ) ).thenReturn( dummy );
 
     testee = spy( new StorageApi( se ) );
-    doNothing().when( testee ).setCorsHeaders( Matchers.<HttpServletRequest>anyObject(), Matchers.<HttpServletResponse>anyObject() );
+    doNothing().when( testee ).setCorsHeaders( Mockito.<HttpServletRequest>any(), Mockito.<HttpServletResponse>any() );
   }
 
   @After
