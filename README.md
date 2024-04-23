@@ -9,7 +9,7 @@
 * Java JDK 1.8
 * This [settings.xml](https://raw.githubusercontent.com/pentaho/maven-parent-poms/master/maven-support-files/settings.xml) in your <user-home>/.m2 directory
 
-#### Building it
+#### Building CDF
 
 This is a maven project, and to build it use the following command
 ```
