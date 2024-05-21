@@ -1,5 +1,5 @@
 /*!
- * Copyright 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2019 - 2024 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -13,51 +13,57 @@
 
 package org.pentaho.cdf.settings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.Mock;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( { SettingsEngine.class, PentahoSessionHolder.class, CorsUtil.class } )
+
 public class SettingsApiTest {
-  @Mock
-  SettingsEngine fakeSettingsEngineSingleton;
+  private MockedStatic<PentahoSessionHolder> pentahoSessionHolderMockedStatic;
 
-  @Mock
-  CorsUtil fakeCorsUtilSingleton;
+  private static SettingsEngine fakeSettingsEngineSingleton;
 
-  @Mock
-  HttpServletRequest servletRequest;
+  private static CorsUtil fakeCorsUtilSingleton;
 
-  @Mock
-  HttpServletResponse servletResponse;
+  private static HttpServletRequest servletRequest;
+
+  private static HttpServletResponse servletResponse;
 
 
   @Before
   public void prepareMocks() {
-    Whitebox.setInternalState( SettingsEngine.class, "cdfSettings", fakeSettingsEngineSingleton );
-    Whitebox.setInternalState( CorsUtil.class, "instance", fakeCorsUtilSingleton );
-    PowerMockito.mockStatic( PentahoSessionHolder.class );
+    fakeSettingsEngineSingleton = mock( SettingsEngine.class );
+    fakeCorsUtilSingleton = mock( CorsUtil.class );
+    servletRequest = mock( HttpServletRequest.class );
+    servletResponse = mock( HttpServletResponse.class );
+    ReflectionTestUtils.setField( SettingsEngine.class, "cdfSettings", fakeSettingsEngineSingleton );
+    ReflectionTestUtils.setField( CorsUtil.class, "instance", fakeCorsUtilSingleton );
+    pentahoSessionHolderMockedStatic = mockStatic( PentahoSessionHolder.class );
     when( PentahoSessionHolder.getSession() ).thenReturn( null );
+  }
+
+  @After
+  public void afterEach() {
+    pentahoSessionHolderMockedStatic.close();
   }
 
   private void verifyNumberOfCallsToSetValueWithKeyValue( String key, String value, int numberOfTimes ) {
