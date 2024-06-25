@@ -15,7 +15,7 @@
 
   <properties>
     <webjars.target.directory>${build.dependenciesDirectory}/META-INF/resources/webjars</webjars.target.directory>
-    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox</js.project.list>
+    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox,bootstrap</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
 
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
@@ -41,6 +41,10 @@
       <groupId>org.webjars.npm</groupId>
       <artifactId>fancyapps__fancybox</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.webjars.npm</groupId>
+      <artifactId>bootstrap</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -60,22 +64,74 @@
             <configuration>
               <fileSets>
                 <set>
-                  <sourceFile>${webjars.target.directory}/jquery/${jquery.version}/dist/jquery.js</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.js</destinationFile>
-                </set>
-                <set>
                   <sourceFile>${webjars.target.directory}/jquery-ui/${jquery-ui.version}/jquery-ui.js</sourceFile>
                   <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.ui.js</destinationFile>
                 </set>
-                <set>
-                  <sourceFile>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist/jquery.fancybox.js</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/fancybox/jquery.fancybox.js</destinationFile>
-                </set>
-                <set>
-                  <sourceFile>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist/jquery.fancybox.css</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/fancybox/jquery.fancybox.css</destinationFile>
-                </set>
               </fileSets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-bootstrap</id>
+            <phase>${javascript_unpack-dependencies-phase}</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/src/main/javascript/lib/Bootstrap</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${webjars.target.directory}/bootstrap/${bootstrap.version}/dist</directory>
+                  <excludes>
+                    <exclude>**/*.min.js</exclude>
+                    <exclude>**/*.min.map</exclude>
+                    <exclude>**/*.css.map</exclude>
+                    <exclude>**/*.min.css</exclude>
+                    <exclude>**/npm.js</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-jquery</id>
+            <phase>${javascript_unpack-dependencies-phase}</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/src/main/javascript/lib/jQuery</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${webjars.target.directory}/jquery/${jquery.version}/dist</directory>
+                  <includes>
+                    <include>jquery.js</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-jquery-fancybox</id>
+            <phase>${javascript_unpack-dependencies-phase}</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/src/main/javascript/lib/fancybox</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist</directory>
+                  <includes>
+                    <include>jquery.fancybox.js</include>
+                    <include>jquery.fancybox.css</include>
+                  </includes>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>
@@ -95,6 +151,22 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>src/main/javascript/lib/Bootstrap</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/javascript/lib/jQuery</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/javascript/lib/fancybox</directory>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
     </plugins>
   </build>

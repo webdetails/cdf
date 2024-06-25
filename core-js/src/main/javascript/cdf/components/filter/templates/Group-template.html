@@ -21,10 +21,10 @@
     {{#showCommitButtons}}
       <div class="filter-control-buttons clearfix">
         <div class="filter-control-button">
-          <button class="filter-btn-cancel">{{strings.btnCancel}}</button>
+          <button class="filter-btn btn-default-cancel">{{strings.btnCancel}}</button>
         </div>
         <div class="filter-control-button">
-          <button class="filter-btn-apply">{{strings.btnApply}}</button>
+          <button class="filter-btn btn-default-apply">{{strings.btnApply}}</button>
         </div>
       </div>
     {{/showCommitButtons}}
@@ -37,7 +37,7 @@
                     {{#isSelected}} all-selected{{/isSelected}}
                     {{^isSelected}} none-selected{{/isSelected}}
                   {{/isPartiallySelected}}"></div>
-      <div class="filter-group-label">{{strings.groupSelection}}</div>
+      <div class="filter-group-label label-default">{{strings.groupSelection}}</div>
     </div>
   {{/showGroupSelection}}
   {{#showValue}}
