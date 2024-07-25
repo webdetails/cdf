@@ -8,6 +8,13 @@
 
   <includeBaseDirectory>false</includeBaseDirectory>
 
+  <files>
+    <file>
+      <source>${project.build.directory}/dependency/META-INF/resources/webjars/jquery/${jquery.version}/dist/jquery.js</source>
+      <outputDirectory>cdf/lib/jQuery/</outputDirectory>
+    </file>
+  </files>
+
   <fileSets>
     <fileSet>
       <directory>${basedir}/src/main/javascript/</directory>
