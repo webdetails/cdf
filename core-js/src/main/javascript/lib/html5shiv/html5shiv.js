@@ -1,3 +1,14 @@
+/*! ******************************************************************************
+ *
+ * Pentaho
+ *
+ * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+ *
+ * Use of this software is governed by the Business Source License included
+ * in the LICENSE.TXT file.
+ *
+ * Change Date: 2028-08-13
+ ******************************************************************************/
 /**
 * @preserve HTML5 Shiv 3.7.2 | @afarkas @jdalton @jon_neal @rem | MIT/GPL2 Licensed
 */
