@@ -11,9 +11,7 @@
   <version>10.3.0.0-SNAPSHOT</version>
   <properties>
     <dependency.commons-collections.revision>3.2.2</dependency.commons-collections.revision>
-    <dependency.javax.ws.rs-api.revision>2.0</dependency.javax.ws.rs-api.revision>
     <dependency.google-collections.revision>1.0</dependency.google-collections.revision>
-    <dependency.jersey-common.revision>2.22.2</dependency.jersey-common.revision>
     <platform.version>10.3.0.0-SNAPSHOT</platform.version>
   </properties>
   <dependencies>
@@ -51,13 +49,13 @@
       <artifactId>json</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>${dependency.javax.ws.rs-api.revision}</version>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${jakarta.ws.rs-api.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>*</artifactId>
@@ -120,12 +118,12 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>${hibernate.version}</version>
+      <version>${hibernate-core.version}</version>
     </dependency>
     <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>javax.persistence-api</artifactId>
-      <version>${javax.persistence-api.version}</version>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>${jakarta.persistence-api.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -143,7 +141,7 @@
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-common</artifactId>
-      <version>${dependency.jersey-common.revision}</version>
+      <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

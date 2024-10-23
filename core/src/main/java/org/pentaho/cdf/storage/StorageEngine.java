@@ -16,7 +16,7 @@ package org.pentaho.cdf.storage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +90,7 @@ public class StorageEngine implements StorageEngineInterface {
     session.beginTransaction();
 
     Query query =
-        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setString( "user", user );
+        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setParameter( "user", user );
     StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
 
     if ( storageEntry == null ) {
@@ -117,7 +117,7 @@ public class StorageEngine implements StorageEngineInterface {
     Session session = getSession();
 
     Query query =
-        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setString( "user", user );
+        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setParameter( "user", user );
 
     StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
 
@@ -137,7 +137,7 @@ public class StorageEngine implements StorageEngineInterface {
     session.beginTransaction();
 
     Query query =
-        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setString( "user", user );
+        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setParameter( "user", user );
     StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
 
     if ( storageEntry != null ) {
