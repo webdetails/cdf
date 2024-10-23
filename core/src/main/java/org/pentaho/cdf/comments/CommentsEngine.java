@@ -19,7 +19,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -124,11 +124,11 @@ public class CommentsEngine {
     Session session = getSession();
 
     Query query = session.getNamedQuery( "org.pentaho.cdf.comments.CommentEntry." + queryName );
-    query.setString( "page", page );
+    query.setParameter( "page", page );
 
     if ( isDeleted || isArchived ) {
-      query.setBoolean( "deleted", isDeleted );
-      query.setBoolean( "archived", isArchived );
+      query.setParameter( "deleted", isDeleted );
+      query.setParameter( "archived", isArchived );
     }
 
     query.setFirstResult( firstResult < 0 ? 0 : firstResult ); // default 0
