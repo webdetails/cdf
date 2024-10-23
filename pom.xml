@@ -40,8 +40,6 @@
   <properties>
     <commons-io.version>1.3</commons-io.version>
     <commons-lang.version>2.2</commons-lang.version>
-    <hibernate.version>5.4.24.Final</hibernate.version>
-    <javax.persistence-api.version>2.2</javax.persistence-api.version>
     <jxl.version>2.6.12</jxl.version>
     <pentaho-ccc-plugin.version>10.3.0.0-SNAPSHOT</pentaho-ccc-plugin.version>
     <pentaho-cpf-plugin.version>10.3.0.0-SNAPSHOT</pentaho-cpf-plugin.version>
@@ -110,7 +108,7 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
-        <version>${hibernate.version}</version>
+        <version>${hibernate-core.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
@@ -119,9 +117,9 @@
         </exclusions>
       </dependency>
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>${servlet-api.version}</version>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>${jakarta.servlet.version}</version>
         <exclusions>
           <exclusion>
             <artifactId>*</artifactId>
