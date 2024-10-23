@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2019 Webdetails, a Hitachi Vantara company. All rights reserved.
+ * Copyright 2002 - 2024 Webdetails, a Hitachi Vantara company. All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -16,7 +16,7 @@ package org.pentaho.cdf.storage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +90,7 @@ public class StorageEngine implements StorageEngineInterface {
     session.beginTransaction();
 
     Query query =
-        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setString( "user", user );
+        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setParameter( "user", user );
     StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
 
     if ( storageEntry == null ) {
@@ -117,7 +117,7 @@ public class StorageEngine implements StorageEngineInterface {
     Session session = getSession();
 
     Query query =
-        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setString( "user", user );
+        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setParameter( "user", user );
 
     StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
 
@@ -137,7 +137,7 @@ public class StorageEngine implements StorageEngineInterface {
     session.beginTransaction();
 
     Query query =
-        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setString( "user", user );
+        session.getNamedQuery( "org.pentaho.cdf.storage.StorageEntry.getStorageForUser" ).setParameter( "user", user );
     StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
 
     if ( storageEntry != null ) {
