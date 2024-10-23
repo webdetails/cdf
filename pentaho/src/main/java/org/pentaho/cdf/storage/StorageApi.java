@@ -13,7 +13,7 @@
 
 package org.pentaho.cdf.storage;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import java.io.IOException;
 import java.util.HashMap;
