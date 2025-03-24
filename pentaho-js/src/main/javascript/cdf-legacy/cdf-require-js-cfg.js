@@ -114,7 +114,7 @@ requireCfg['shim']['cdf-legacy/lib/jQuery/jquery'] = {
   exports: '$'
 }
 
-// AMD compatible libs already define themselves anonymously, yet depend on 
+// AMD compatible libs already define themselves anonymously, yet depend on
 // module "jquery", which is defined by jQuery.js
 requireCfg.map['cdf-legacy'] = { 'jquery': 'cdf-legacy/lib/jQuery/jquery' };
 requireCfg.map['*']['cdf-legacy/jquery'] = 'cdf-legacy/lib/jQuery/jquery';

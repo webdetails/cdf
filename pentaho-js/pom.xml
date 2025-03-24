@@ -52,12 +52,18 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/test-javascript</outputDirectory>
+              <outputDirectory>${basedir}/target/test-javascript/cdf/</outputDirectory>
               <resources>
                 <resource>
                   <directory>${basedir}/target/dependency/cdf</directory>
                 </resource>
               </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>javascript-test_copy-resources</id>
+            <configuration>
+              <outputDirectory>${project.build.directory}/test-javascript/cdf/</outputDirectory>
             </configuration>
           </execution>
         </executions>

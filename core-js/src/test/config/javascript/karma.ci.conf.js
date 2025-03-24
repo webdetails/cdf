@@ -27,16 +27,16 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'src/test/javascript/cdf/context.js',
-      'target/test-javascript/cdf-core-require-js-cfg.js',
-      'target/test-javascript/cdf-core-lib-require-js-cfg.js',
+      'target/test-javascript/cdf/cdf-core-require-js-cfg.js',
+      'target/test-javascript/cdf/cdf-core-lib-require-js-cfg.js',
 
       'src/test/javascript/cdf/karma.main.js',
 
-      {pattern: 'target/test-javascript/cdf/**/*.css', included: false},
-      {pattern: 'target/test-javascript/cdf/**/*.js', included: false},
-      {pattern: 'target/test-javascript/cdf/**/*.html', included: false},
-      {pattern: 'target/test-javascript/lib/**/*.css', included: false},
-      {pattern: 'target/test-javascript/lib/**/*.js', included: false},
+      {pattern: 'target/test-javascript/cdf/cdf/**/*.css', included: false},
+      {pattern: 'target/test-javascript/cdf/cdf/**/*.js', included: false},
+      {pattern: 'target/test-javascript/cdf/cdf/**/*.html', included: false},
+      {pattern: 'target/test-javascript/cdf/lib/**/*.css', included: false},
+      {pattern: 'target/test-javascript/cdf/lib/**/*.js', included: false},
       {pattern: 'target/dependency/ccc/amd/**/*.js', included: false},
       {pattern: 'target/dependency/ccc/amd/**/*.css', included: false},
       {pattern: 'src/test/javascript/cdf/**/*-spec.js', included: false},
@@ -44,14 +44,14 @@ module.exports = function(config) {
       {pattern: 'src/test/javascript/cdf/mocks/**/*.js', included: false},
       // fix 404 messages
       {pattern: 'src/test/javascript/cdf/dashboard/*.properties', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/**/*.png', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/**/*.gif', watched: false, included: false, served: true},
-      {pattern: 'target/test-javascript/**/*.svg', watched: false, included: false, served: true}
+      {pattern: 'target/test-javascript/cdf/**/*.png', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/cdf/**/*.gif', watched: false, included: false, served: true},
+      {pattern: 'target/test-javascript/cdf/**/*.svg', watched: false, included: false, served: true}
     ],
 
     preprocessors: {
-      'target/test-javascript/cdf/**/*.js': 'coverage',
-      'target/test-javascript/lib/**/*.js': 'coverage',
+      'target/test-javascript/cdf/cdf/**/*.js': 'coverage',
+      'target/test-javascript/cdf/lib/**/*.js': 'coverage',
     },
 
     // test results reporter to use

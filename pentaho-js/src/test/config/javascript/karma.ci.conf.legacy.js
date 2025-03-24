@@ -22,44 +22,44 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'target/test-javascript/lib/shims.js',
+      'target/test-javascript/cdf/lib/shims.js',
 
       'src/test/javascript/cdf-legacy/context.js',
 
-      // -- Load libs without require and defined defined, so that these publish their symbols locally.
-      'target/test-javascript/cdf-legacy/wd.js',
-      'target/test-javascript/cdf-legacy/lib/json.js',
-      'target/test-javascript/lib/jQuery/jquery.js',
-      'target/test-javascript/lib/jQuery/jquery.ui.js',
-      'target/test-javascript/lib/blockUI/jquery.blockUI.js',
-      'target/test-javascript/lib/uriQueryParser/jquery-queryParser.js',
-      'target/test-javascript/lib/underscore/underscore.js',
-      'target/test-javascript/lib/backbone/backbone.js',
-      'target/test-javascript/lib/mustache/mustache.js',
-      'target/test-javascript/lib/base/Base.js',
+      // -- Load libs without require and define defined, so that these publish their symbols locally.
+      'target/test-javascript/cdf/cdf-legacy/wd.js',
+      'target/test-javascript/cdf/cdf-legacy/lib/json.js',
+      'target/test-javascript/cdf/lib/jQuery/jquery.js',
+      'target/test-javascript/cdf/lib/jQuery/jquery.ui.js',
+      'target/test-javascript/cdf/lib/blockUI/jquery.blockUI.js',
+      'target/test-javascript/cdf/lib/uriQueryParser/jquery-queryParser.js',
+      'target/test-javascript/cdf/lib/underscore/underscore.js',
+      'target/test-javascript/cdf/lib/backbone/backbone.js',
+      'target/test-javascript/cdf/lib/mustache/mustache.js',
+      'target/test-javascript/cdf/lib/base/Base.js',
 
       // -- Restore real requirejs
       'src/test/javascript/cdf-legacy/restore-requirejs.js',
-      'target/test-javascript/cdf-legacy/lib/pen-shim.js',
+      'target/test-javascript/cdf/cdf-legacy/lib/pen-shim.js',
 
       // Load using real requirejs
       {pattern: 'src/test/javascript/cdf/mocks/pentaho/**/*.js', included: false},
 
       'src/main/javascript/cdf-legacy/cdf-base.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Main.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Query.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Bookmarks.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Startup.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Utils.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Legacy.js',
-      'target/test-javascript/cdf-legacy/Dashboards.Notifications.js',
-      'target/test-javascript/cdf-legacy/Dashboards.RefreshEngine.js',
-      'target/test-javascript/cdf-legacy/components/core.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Main.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Query.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Bookmarks.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Startup.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Utils.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Legacy.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.Notifications.js',
+      'target/test-javascript/cdf/cdf-legacy/Dashboards.RefreshEngine.js',
+      'target/test-javascript/cdf/cdf-legacy/components/core.js',
       'src/main/javascript/cdf-legacy/components/Pentaho.Reporting.js',
-      'target/test-javascript/cdf-legacy/components/input.js',
-      'target/test-javascript/cdf-legacy/queries/coreQueries.js',
-      'target/test-javascript/cdf-legacy/components/jfreechart.js',
-      'target/test-javascript/cdf-legacy/components/VisualizationAPIComponent.js',
+      'target/test-javascript/cdf/cdf-legacy/components/input.js',
+      'target/test-javascript/cdf/cdf-legacy/queries/coreQueries.js',
+      'target/test-javascript/cdf/cdf-legacy/components/jfreechart.js',
+      'target/test-javascript/cdf/cdf-legacy/components/VisualizationAPIComponent.js',
       'src/test/javascript/cdf-legacy/lib/test-components.js',
 
       'src/test/javascript/cdf-legacy/karma.main.js',
@@ -68,7 +68,7 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      "target/test-javascript/cdf-legacy/*.js" : 'coverage'
+      "target/test-javascript/cdf/cdf-legacy/*.js" : 'coverage'
     },
 
     // test results reporter to use

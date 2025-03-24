@@ -2,7 +2,7 @@
  *
  * Pentaho
  *
- * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+ * Copyright (C) 2025 by Hitachi Vantara, LLC : http://www.pentaho.com
  *
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file.
@@ -21,7 +21,7 @@ describe("The VisualizationAPI Component #", function() {
 
   myDashboard.addParameter('optionParameter', "value");
 
-  var visualizationAPIComponent = window.VisualizationAPIComponent = new VisualizationAPIComponent();
+  var visualizationAPIComponent = new VisualizationAPIComponent();
   $.extend(visualizationAPIComponent, {
     name: "visualizationAPIComponent",
     type: "visualizationAPI",
