@@ -44,7 +44,6 @@ requireCfg['shim']['cdf-legacy/CoreComponents'] = [
   'cdf-legacy/components/core',
   'cdf-legacy/components/ccc',
   'cdf-legacy/components/input',
-  'cdf-legacy/components/jfreechart',    
   'cdf-legacy/components/maps',
   'cdf-legacy/components/navigation',
   'cdf-legacy/components/pentaho',
@@ -93,7 +92,6 @@ requireCfg['shim']['cdf-legacy/components/input']         = [
   'cdf-legacy/components/core',
   'cdf-legacy/inputHelper'
 ];
-requireCfg['shim']['cdf-legacy/components/jfreechart'] = ['cdf-legacy/components/core'];
 requireCfg['shim']['cdf-legacy/components/maps']       = ['cdf-legacy/components/core'];
 requireCfg['shim']['cdf-legacy/components/navigation'] = ['cdf-legacy/components/core'];
 requireCfg['shim']['cdf-legacy/components/pentaho']    = [

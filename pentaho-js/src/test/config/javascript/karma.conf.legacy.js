@@ -2,7 +2,7 @@
  *
  * Pentaho
  *
- * Copyright (C) 2025 by Hitachi Vantara, LLC : http://www.pentaho.com
+ * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
  *
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file.
@@ -64,6 +64,10 @@ module.exports = function(config) {
 
       {pattern: 'src/test/javascript/cdf-legacy/**/*.js', included: false}
     ],
+
+    // test results reporter to use
+    // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
+    reporters: ['progress', 'junit', 'html', 'coverage'],
 
     //reporter: coverage
     coverageReporter: {
