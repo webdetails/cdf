@@ -44,7 +44,6 @@ requireCfg['shim']['cdf-legacy/CoreComponents'] = [
   'cdf-legacy/components/core',
   'cdf-legacy/components/ccc',
   'cdf-legacy/components/input',
-  'cdf-legacy/components/jfreechart',    
   'cdf-legacy/components/maps',
   'cdf-legacy/components/navigation',
   'cdf-legacy/components/pentaho',
@@ -93,7 +92,6 @@ requireCfg['shim']['cdf-legacy/components/input']         = [
   'cdf-legacy/components/core',
   'cdf-legacy/inputHelper'
 ];
-requireCfg['shim']['cdf-legacy/components/jfreechart'] = ['cdf-legacy/components/core'];
 requireCfg['shim']['cdf-legacy/components/maps']       = ['cdf-legacy/components/core'];
 requireCfg['shim']['cdf-legacy/components/navigation'] = ['cdf-legacy/components/core'];
 requireCfg['shim']['cdf-legacy/components/pentaho']    = [
@@ -114,7 +112,7 @@ requireCfg['shim']['cdf-legacy/lib/jQuery/jquery'] = {
   exports: '$'
 }
 
-// AMD compatible libs already define themselves anonymously, yet depend on 
+// AMD compatible libs already define themselves anonymously, yet depend on
 // module "jquery", which is defined by jQuery.js
 requireCfg.map['cdf-legacy'] = { 'jquery': 'cdf-legacy/lib/jQuery/jquery' };
 requireCfg.map['*']['cdf-legacy/jquery'] = 'cdf-legacy/lib/jQuery/jquery';

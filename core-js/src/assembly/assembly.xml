@@ -1,25 +1,61 @@
-<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
   <id>cdf</id>
   <formats>
     <format>zip</format>
+    <format>dir</format>
   </formats>
 
   <includeBaseDirectory>false</includeBaseDirectory>
 
-  <files>
-    <file>
-      <source>${project.build.directory}/dependency/META-INF/resources/webjars/jquery/${jquery.version}/dist/jquery.js</source>
-      <outputDirectory>cdf/lib/jQuery/</outputDirectory>
-    </file>
-  </files>
-
   <fileSets>
+    <!-- region Underscore -->
+    <fileSet>
+      <directory>${webjars.target.directory}/underscore/${underscore.version}</directory>
+      <outputDirectory>cdf/lib/underscore</outputDirectory>
+      <includes>
+        <include>underscore.js</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${webjars.target.directory}/underscore/${underscore.version}</directory>
+      <outputDirectory>cdf/cdf-legacy/lib/underscore</outputDirectory>
+      <includes>
+        <include>underscore.js</include>
+      </includes>
+    </fileSet>
+    <!-- endregion Underscore -->
+
+    <!-- region jQuery et al. -->
+    <fileSet>
+      <directory>${webjars.target.directory}/jquery/${jquery.version}/dist</directory>
+      <includes>
+        <include>jquery.js</include>
+      </includes>
+      <outputDirectory>cdf/lib/jQuery</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist</directory>
+      <includes>
+        <include>jquery.fancybox.js</include>
+        <include>jquery.fancybox.css</include>
+      </includes>
+      <outputDirectory>cdf/lib/fancybox</outputDirectory>
+    </fileSet>
+    <!-- endregion jQuery et al. -->
+
     <fileSet>
       <directory>${basedir}/src/main/javascript/</directory>
       <outputDirectory>cdf/</outputDirectory>
     </fileSet>
   </fileSets>
 
+  <files>
+    <file>
+      <source>${webjars.target.directory}/jquery-ui/${jquery-ui.version}/jquery-ui.js</source>
+      <outputDirectory>cdf/lib/jQuery/</outputDirectory>
+      <destName>jquery.ui.js</destName>
+    </file>
+  </files>
 </assembly>

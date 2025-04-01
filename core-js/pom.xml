@@ -15,7 +15,7 @@
 
   <properties>
     <webjars.target.directory>${build.dependenciesDirectory}/META-INF/resources/webjars</webjars.target.directory>
-    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox</js.project.list>
+    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox,underscore</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
 
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
@@ -41,41 +41,58 @@
       <groupId>org.webjars.npm</groupId>
       <artifactId>fancyapps__fancybox</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.webjars.npm</groupId>
+      <artifactId>underscore</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <!-- copy jquery for tests and lib-->
       <plugin>
-        <groupId>com.coderplus.maven.plugins</groupId>
-        <artifactId>copy-rename-maven-plugin</artifactId>
-        <version>1.0</version>
+        <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy-jquery</id>
-            <phase>process-resources</phase>
+            <!--
+            Prevent plugin execution inherited from parent pom from running.
+            Would copy all code of ${build.javascriptSourceDirectory} to the test directory.
+            Instead, tests receive the exploded assembly (see below).
+            -->
+            <id>javascript-test_copy-resources</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <!-- When generating the default output package only do the zip format. -->
+          <execution>
+            <id>assembly_package</id>
+            <configuration>
+              <formats>
+                <format>zip</format>
+              </formats>
+            </configuration>
+          </execution>
+
+          <!-- Explode assembly to test js dir -->
+          <execution>
+            <phase>${javascript-test_copy-resources-phase}</phase>
             <goals>
-              <goal>copy</goal>
+              <goal>single</goal>
             </goals>
             <configuration>
-              <fileSets>
-                <set>
-                  <sourceFile>${webjars.target.directory}/jquery/${jquery.version}/dist/jquery.js</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.js</destinationFile>
-                </set>
-                <set>
-                  <sourceFile>${webjars.target.directory}/jquery-ui/${jquery-ui.version}/jquery-ui.js</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/jQuery/jquery.ui.js</destinationFile>
-                </set>
-                <set>
-                  <sourceFile>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist/jquery.fancybox.js</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/fancybox/jquery.fancybox.js</destinationFile>
-                </set>
-                <set>
-                  <sourceFile>${webjars.target.directory}/fancyapps__fancybox/${fancyapps__fancybox.version}/dist/jquery.fancybox.css</sourceFile>
-                  <destinationFile>${project.basedir}/src/main/javascript/lib/fancybox/jquery.fancybox.css</destinationFile>
-                </set>
-              </fileSets>
+              <descriptors>
+                <descriptor>${basedir}/src/assembly/assembly.xml</descriptor>
+              </descriptors>
+              <formats>
+                <format>dir</format>
+              </formats>
+              <finalName>test-javascript</finalName>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <appendAssemblyId>false</appendAssemblyId>
+              <attach>false</attach>
             </configuration>
           </execution>
         </executions>

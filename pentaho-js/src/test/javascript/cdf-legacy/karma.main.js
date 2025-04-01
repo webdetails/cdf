@@ -31,7 +31,7 @@
 
   requireCfg.baseUrl = baseUrl;
   requireCfg.paths["pentaho"] = "src/test/javascript/cdf/mocks/pentaho";
-  requireCfg.paths["cdf"] = "target/test-javascript/cdf";
+  requireCfg.paths["cdf"] = "target/test-javascript/cdf/cdf";
 
   requirejs.config(requireCfg);
 

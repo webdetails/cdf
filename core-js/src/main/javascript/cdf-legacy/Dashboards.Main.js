@@ -273,7 +273,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
         case "error":         eventStr = "!Error"; break;
         default:              eventStr = "      "; break;
       }
-      
+
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
       Dashboards.log("          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]" + " (P: "
         + this.priority + " ): " + eventName + " " + timeInfo + " (Running: " + this.dashboard.runningCalls  + ")",
@@ -536,7 +536,7 @@ Dashboards.getComponentByName = function(name) {
  * @return {object|undefined} the Dashboards object or <tt>undefined</tt>
  */
 Dashboards.addComponents = function(components) {
-  if(!$.isArray(components)) { 
+  if(!$.isArray(components)) {
     this.log('Dashboards.addComponents: components in a structure other than an array will not be added!','warn');
     return;
   }
@@ -636,7 +636,7 @@ Dashboards.removeComponent = function(compOrNameOrIndex) {
     comp = cs[index];
     cs.splice(index, 1);
     comp.dashboard = null;
-    
+
     comp.off('cdf:postExecution');
     comp.off('cdf:preExecution');
     comp.off('cdf:error');
@@ -671,8 +671,8 @@ Dashboards.init = function(components){
   var myself = this;
 
 
-  // We're now adding support for multiple inits. This part is only relevant for 
-  // the first execution. 
+  // We're now adding support for multiple inits. This part is only relevant for
+  // the first execution.
 
   var initInstance = Dashboards.initCounter++;
   Dashboards.log("InitInstance " + initInstance);
@@ -697,15 +697,15 @@ Dashboards.init = function(components){
     this.syncParametersInit();
 
   }
-  
+
   if($.isArray(components)) { this.addComponents(components); }
 
   // Now we need to go through all components we have and attach this
-  // initInstance to all 
+  // initInstance to all
   _.chain(Dashboards.components)
-  .where({initInstance:undefined})
+  .filter(function(c) { return c.initInstance === undefined; })
   .each(function(c){ c.initInstance = initInstance});
-  
+
   $(function() { myself.initEngine(initInstance); });
 };
 
@@ -821,7 +821,7 @@ Dashboards.initEngine = function(initInstance) {
   }
 
   var myself = this;
-  var components = initInstance != null 
+  var components = initInstance != null
     ? _.where(this.components, {initInstance: initInstance})
     : this.components;
 
@@ -1018,7 +1018,7 @@ Dashboards.fireChange = function(parameter, value) {
 };
 
 /*
- * Checks if there are any other components of equal or higher 
+ * Checks if there are any other components of equal or higher
  * priority than the one that is currently being executed
  */
 Dashboards.othersAwaitExecution = function( tiers , current ) {
@@ -1027,13 +1027,13 @@ Dashboards.othersAwaitExecution = function( tiers , current ) {
     return false;
   }
 
-  // first thing is to discard 'current.components' from the calculations, as we are only 
+  // first thing is to discard 'current.components' from the calculations, as we are only
   // interested in checking if there are *other components* that await execution
   tiers[current.priority] = _.difference( tiers[current.priority], current.components );
 
   var componentsToUpdate = this.getFirstTier( tiers );
-  
-  if( !componentsToUpdate || !componentsToUpdate.components || componentsToUpdate.components.length == 0  ){ 
+
+  if( !componentsToUpdate || !componentsToUpdate.components || componentsToUpdate.components.length == 0  ){
 
     return false; // no other components await execution
 
@@ -1042,9 +1042,9 @@ Dashboards.othersAwaitExecution = function( tiers , current ) {
     // recall: 1 - utmost priority , 999999 - lowest priority
     // those who await execution are lower in priority that the current component
     return false;
-  } 
+  }
 
-  // compToUpdate has components with equal or higher priority than the component 
+  // compToUpdate has components with equal or higher priority than the component
   // that is currently being executed, that await execution themselves
   return true;
 }
@@ -1101,7 +1101,7 @@ Dashboards.updateAll = function(components) {
     var toUpdate = this.getFirstTier(this.updating.tiers);
     if(!toUpdate) return;
 
-    if( othersAwaitExecution ){ 
+    if( othersAwaitExecution ){
       var tiers = this.updating.tiers;
       tiers[updating.priority] = _.difference( tiers[updating.priority], updating.components );
       toUpdate.components = _.union( tiers[updating.priority] , this.getFirstTier( tiers ).components );
@@ -1657,4 +1657,3 @@ Dashboards.cleanStorage = function(){
   });
 
 };
-

@@ -21,7 +21,7 @@ describe("The VisualizationAPI Component #", function() {
 
   myDashboard.addParameter('optionParameter', "value");
 
-  var visualizationAPIComponent = window.VisualizationAPIComponent = new VisualizationAPIComponent();
+  var visualizationAPIComponent = new VisualizationAPIComponent();
   $.extend(visualizationAPIComponent, {
     name: "visualizationAPIComponent",
     type: "visualizationAPI",
