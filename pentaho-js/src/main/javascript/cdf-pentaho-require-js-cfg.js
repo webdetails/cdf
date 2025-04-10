@@ -27,7 +27,7 @@
     requireCfg.paths['cdf'] = ENVIRONMENT_CONFIG.paths["cdf"];
 
   } else if (typeof KARMA_RUN !== "undefined") { // unit tests
-    requireCfg.paths['cdf'] = 'target/test-javascript/cdf';
+    requireCfg.paths['cdf'] = 'target/test-javascript/cdf/cdf';
 
   } else {
     var cdfResourcesPath = 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '' : '/compressed');

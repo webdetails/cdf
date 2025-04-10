@@ -132,7 +132,8 @@
           "prescript": "define = function(arr, setup) { setup(jQuery) };"
         },
         "cdf/lib/underscore": {
-          "postscript": "return _.noConflict();"
+          "prescript": "var exports = {};\nvar module = {exports: exports};\n(function() {\n",
+          "postscript": "}.call(this));\nreturn module.exports;"
         },
         "cdf/lib/backbone": {
           "deps": {

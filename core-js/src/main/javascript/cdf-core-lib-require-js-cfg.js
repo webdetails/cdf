@@ -58,7 +58,7 @@
     prefix = requirePaths['cdf/lib'] = ENVIRONMENT_CONFIG.paths["cdf"] + "/lib";
 
   } else if (typeof KARMA_RUN !== "undefined") { // unit tests
-    prefix = requirePaths['cdf/lib'] = 'target/test-javascript/lib';
+    prefix = requirePaths['cdf/lib'] = 'target/test-javascript/cdf/lib';
 
   } else {
     var cdfResourcesPath = 'plugin/pentaho-cdf/api/resources/js' + (isDebug ? '/lib' : '/compressed/lib');
@@ -181,11 +181,16 @@
     prescript: "define = function(arr, setup) { setup(jQuery) };"
   };
 
-  //underscore 1.8.3
+  //underscore 1.13.7
   requirePaths['cdf/lib/underscore'] = prefix + "/underscore/underscore";
   amdShim['cdf/lib/underscore'] = {
-    postscript: "return _.noConflict();",
-    prescript: "var setTimeout = window.setTimeout.bind(window);\n" // Prevent setTimeout from throwing an 'Invalid calling object' exception on IE11 and Edge
+    // Prevent setTimeout from throwing an 'Invalid calling object' exception on IE11 and Edge
+    prescript: "var setTimeout = window.setTimeout.bind(window);\n" +
+               "var exports = {};\n" +
+               "var module = {exports: exports};\n" +
+               "(function() {\n",
+    postscript: "}.call(this));\n" +
+                "return module.exports;"
   };
 
   //backbone 1.2.3
