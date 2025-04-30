@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
   <properties>
     <js.project.list>pentaho-cdf-js</js.project.list>
-    <maven-filtering.version>3.3.1</maven-filtering.version>
   </properties>
   <dependencies>
     <dependency>
