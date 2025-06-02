@@ -13,25 +13,22 @@
 
 package org.pentaho.cdf;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.platform.web.servlet.ServletBase;
-
 import pt.webdetails.cpf.MimeTypeHandler;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.utils.MimeTypes;
 import pt.webdetails.cpf.utils.PluginIOUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class GetCDFResource extends ServletBase {
 
@@ -41,14 +38,11 @@ public class GetCDFResource extends ServletBase {
 
   /**
    * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-   * 
-   * @param request
-   *          servlet request
-   * @param response
-   *          servlet response
+   *
+   * @param request  servlet request
+   * @param response servlet response
    */
-  protected void processRequest( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
-    IOException {
+  protected void processRequest( HttpServletRequest request, HttpServletResponse response ) throws IOException {
 
     IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
     String resource = request.getParameter( Parameter.RESOURCE ); //$NON-NLS-1$
@@ -97,34 +91,48 @@ public class GetCDFResource extends ServletBase {
 
   // <editor-fold defaultstate="collapsed"
   // desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
   /**
    * Handles the HTTP <code>GET</code> method.
-   * 
-   * @param request
-   *          servlet request
-   * @param response
-   *          servlet response
+   *
+   * @param request  servlet request
+   * @param response servlet response
    */
-  protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException {
-    processRequest( request, response );
+  @Override
+  protected void doGet( HttpServletRequest request, HttpServletResponse response ) {
+    handleRequest( request, response, "GET" );
   }
 
   /**
    * Handles the HTTP <code>POST</code> method.
-   * 
-   * @param request
-   *          servlet request
-   * @param response
-   *          servlet response
+   *
+   * @param request  servlet request
+   * @param response servlet response
    */
-  protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
-    IOException {
-    processRequest( request, response );
+  @Override
+  protected void doPost( HttpServletRequest request, HttpServletResponse response ) {
+    handleRequest( request, response, "POST" );
+  }
+
+  private void handleRequest( HttpServletRequest request, HttpServletResponse response, String method ) {
+    try {
+      processRequest( request, response );
+    } catch ( IOException e ) {
+      logger.error( "Error processing " + method + " request: ", e );
+      response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+      response.setContentType( "text/plain; charset=UTF-8" );
+      try {
+        response.getWriter().write( Messages.getErrorString( "GenericServlet.ERROR_0006_ERROR_PROCESSING_REQUEST" ) );
+      } catch ( IOException ioException ) {
+        logger.error( "Error writing error response", ioException );
+      }
+    }
   }
 
   /**
    * Returns a short description of the servlet.
    */
+  @Override
   public String getServletInfo() {
     return "Short description";
   } // </editor-fold>
