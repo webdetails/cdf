@@ -13,22 +13,25 @@
 
 package org.pentaho.cdf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.platform.web.servlet.ServletBase;
+
 import pt.webdetails.cpf.MimeTypeHandler;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.utils.MimeTypes;
 import pt.webdetails.cpf.utils.PluginIOUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class GetCDFResource extends ServletBase {
 

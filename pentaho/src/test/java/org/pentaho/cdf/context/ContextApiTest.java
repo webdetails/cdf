@@ -13,7 +13,7 @@
 
 package org.pentaho.cdf.context;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.mockito.Mockito.*;
 
 import junit.framework.Assert;
