@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
   <properties>
     <js.project.list>pentaho-cdf-js</js.project.list>
-    <maven-filtering.version>3.1.1</maven-filtering.version>
   </properties>
   <dependencies>
     <dependency>
@@ -78,6 +77,12 @@
       <resource>
         <filtering>true</filtering>
         <directory>${basedir}/src/main/resources</directory>
+        <excludes>
+          <exclude>**/*.icns</exclude>
+          <exclude>**/*.png</exclude>
+          <exclude>**/*.jpg</exclude>
+          <exclude>**/*.gif</exclude>
+        </excludes>
       </resource>
     </resources>
     <filters>
