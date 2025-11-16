@@ -28,7 +28,7 @@
     "karma-junit-reporter": "^0.3.8",
     "karma-html-reporter": "0.2.x",
     "karma-jasmine-html-reporter": "^0.2.0",
-    "karma-coverage": "^0.5.3",
+    "karma-coverage": "^2.2.1",
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-chrome-launcher": "^0.2.2",
     "karma-mocha-reporter": "^1.1.6",
