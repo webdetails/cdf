@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>11.1.0.0-SNAPSHOT</version>
+    <version>11.1.0.0-68</version>
   </parent>
 
   <groupId>pentaho</groupId>
   <artifactId>cdf-plugin</artifactId>
-  <version>11.1.0.0-SNAPSHOT</version>
+  <version>11.1.0.0-68</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -41,9 +41,9 @@
     <commons-io.version>1.3</commons-io.version>
     <commons-lang.version>2.2</commons-lang.version>
     <jxl.version>2.6.12</jxl.version>
-    <pentaho-ccc-plugin.version>11.1.0.0-SNAPSHOT</pentaho-ccc-plugin.version>
-    <pentaho-cpf-plugin.version>11.1.0.0-SNAPSHOT</pentaho-cpf-plugin.version>
-    <pentaho-json.version>11.1.0.0-SNAPSHOT</pentaho-json.version>
+    <pentaho-ccc-plugin.version>11.1.0.0-68</pentaho-ccc-plugin.version>
+    <pentaho-cpf-plugin.version>11.1.0.0-68</pentaho-cpf-plugin.version>
+    <pentaho-json.version>11.1.0.0-68</pentaho-json.version>
     <servlet-api.version>2.4</servlet-api.version>
     <owasp-encoder.version>1.2</owasp-encoder.version>
     <mockito-core.version>5.10.0</mockito-core.version>
