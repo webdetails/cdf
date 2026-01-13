@@ -237,7 +237,6 @@
   requirePaths['cdf/lib/Tree'] = prefix + "/baseSelectionTree/Tree";
 
 
-  //datatables 1.10.1
   requirePaths['cdf/lib/datatables'] = prefix + "/dataTables/js/jquery.dataTables";
   amdShim["cdf/lib/datatables"] = {
     exports: "jQuery",
