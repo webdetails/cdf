@@ -15,7 +15,7 @@
 
   <properties>
     <webjars.target.directory>${build.dependenciesDirectory}/META-INF/resources/webjars</webjars.target.directory>
-    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox,underscore</js.project.list>
+    <js.project.list>ccc,jquery,jquery-ui,fancyapps__fancybox,underscore,datatables</js.project.list>
     <karma.legacy.file.config>karma.ci.conf.legacy.js</karma.legacy.file.config>
 
     <docjs.config.file>jsdoc-cdf.json</docjs.config.file>
@@ -44,6 +44,10 @@
     <dependency>
       <groupId>org.webjars.npm</groupId>
       <artifactId>underscore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>datatables</artifactId>
     </dependency>
   </dependencies>
 
