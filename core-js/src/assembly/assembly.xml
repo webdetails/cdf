@@ -27,6 +27,35 @@
     </fileSet>
     <!-- endregion Underscore -->
 
+    <!-- region DataTables -->
+    <fileSet>
+      <directory>${webjars.target.directory}/datatables/${datatables.version}/js</directory>
+      <outputDirectory>cdf/lib/dataTables/js</outputDirectory>
+      <includes>
+        <include>jquery.dataTables.js</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${webjars.target.directory}/datatables/${datatables.version}/images</directory>
+      <outputDirectory>cdf/lib/dataTables/images</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${webjars.target.directory}/datatables/${datatables.version}/css</directory>
+      <outputDirectory>cdf/lib/dataTables/css</outputDirectory>
+      <includes>
+        <include>jquery.dataTables_themeroller.css</include>
+        <include>jquery.dataTables.css</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${webjars.target.directory}/datatables/1.13.5</directory>
+      <outputDirectory>cdf/lib/dataTables</outputDirectory>
+      <includes>
+        <include>license.txt</include>
+      </includes>
+    </fileSet>
+    <!-- endregion DataTables -->
+
     <!-- region jQuery et al. -->
     <fileSet>
       <directory>${webjars.target.directory}/jquery/${jquery.version}/dist</directory>
