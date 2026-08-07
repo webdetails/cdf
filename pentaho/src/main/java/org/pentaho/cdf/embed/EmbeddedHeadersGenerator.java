@@ -14,7 +14,7 @@
 
 package org.pentaho.cdf.embed;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginManager;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -262,7 +262,7 @@ public class EmbeddedHeadersGenerator {
       return "null";
     }
 
-    return StringEscapeUtils.escapeJavaScript( value );
+    return StringEscapeUtils.escapeEcmaScript( value );
   }
 
   private IPentahoSession getPentahoSession() {
