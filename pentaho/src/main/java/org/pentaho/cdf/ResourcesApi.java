@@ -26,7 +26,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.utils.CorsUtil;
 import org.pentaho.platform.api.engine.IPluginManager;
